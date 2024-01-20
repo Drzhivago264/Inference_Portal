@@ -1,0 +1,10 @@
+{% block title %} Cancel {% endblock title%} 
+{% block content %}
+<div class="alert alert-info" role="alert">
+  Forgot to add something to your cart?
+  <a
+      href="{% url 'apikey:product-list' %}"
+      >Go to Products</a
+    >
+</div>
+{% endblock content %}
