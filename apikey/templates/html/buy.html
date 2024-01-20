@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <title>Buy </title>
+  <meta name="description" content="website description" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
+</head>
+
+<body>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <!-- class="logo_colour", allows you to change the colour of the text -->
+          <h1><a href="/">Inference</span></a></h1>
+  
+        </div>
+      </div>
+      <div id="menubar">
+        <ul id="menu">
+          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
+          <li ><a href="/">Quick Intro</a></li>
+          <li><a href="/model_infor.html">Models</a></li>
+          <li class="selected" ><a href="/buy.html">Buy or Top Up</a></li>
+          <li><a href="/prompt.html">Let's promtps</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div id="site_content">
+
+      <div id="content">
+
+        <h2> Create a Key </h2>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="createform">
+          <label for="name">Key Name: </label>
+          <input type="text" name="name" />
+          <input type="submit" value="Create" />
+        </form>
+        {% if key %}
+
+            <p> Your key is: {{ key }} </p>
+
+        {% endif %}
+        <h2> Top up </h2>
+         {% block content %} {% for product in products %}
+        <div class="card" >
+          <div >
+            <p>{{product.name}}: {{product.desc}} 
+              <details>
+                <summary>Click here to buy</summary>
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="topupform">
+                <input type="hidden" name="product_id" value={{ product.id }}>
+                <label for="name">Key Name: </label>
+                <input type="text" name="name" />
+                <label for="ket">Key: </label>
+                <input type="text" name="key" />
+                <input type="submit" value="Take my money" />
+              </form>
+            </details>
+              {% if key_error == "error" %}
+              <p> Your Key or Key Name is wrong !!!</p>
+              {% endif %}
+              <br>
+          </div>
+        </div>
+        {% endfor %} {% endblock content %}
+        <h2>Or Check Credit</h2>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="checkform">
+          <label for="name">Key Name: </label>
+          <input type="text" name="name" />
+          <label for="ket">Key: </label>
+          <input type="text" name="key" />
+          <input type="submit" value="Check" />
+        </form>
+        {% if credit != "not found" and credit %}
+          <p> Your credit is: {{ credit }} AUD</p>
+        {% elif credit == "not found" %}
+        <p> Your Key or Key Name is wrong !!!</p>
+        {% endif %}
+      </div>
+
+  </div>
+</body>
+</html>
