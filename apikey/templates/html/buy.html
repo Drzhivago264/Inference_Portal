@@ -1,5 +1,11 @@
 <!DOCTYPE HTML>
 <html>
+  <style>
+    #id_captcha_1{
+      font-size: 14px;
+      width: 30px;
+      }
+  </style> 
 
 <head>
   <title>Buy </title>
@@ -14,78 +20,93 @@
     <div id="header">
       <div id="logo">
         <div id="logo_text">
-          <!-- class="logo_colour", allows you to change the colour of the text -->
           <h1><a href="/">Inference</span></a></h1>
   
         </div>
       </div>
       <div id="menubar">
         <ul id="menu">
-          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
-          <li ><a href="/">Quick Intro</a></li>
+          <li ><a href="/"> Intro</a></li>
           <li><a href="/model_infor.html">Models</a></li>
-          <li class="selected" ><a href="/buy.html">Buy or Top Up</a></li>
-          <li><a href="/prompt.html">Let's promtps</a></li>
+          <li class="selected" ><a href="/buy.html"> Top Up</a></li>
+          <li><a href="/prompt.html">Submit promtps</a></li>
+          <li ><a href="/chat.html">Chat Bot Mode</a></li>
           <li><a href="contact.html">Contact Us</a></li>
         </ul>
       </div>
     </div>
     <div id="site_content">
 
-      <div id="content">
+      <div id="content" style="width:100%;">
 
         <h2> Create a Key </h2>
         <form method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="createform">
           <label for="name">Key Name: </label>
-          <input type="text" name="name" />
+          <input type="text" name="name" /> ||
+          {{form.title}} {{ form.captcha }}
           <input type="submit" value="Create" />
         </form>
-        {% if key %}
-
-            <p> Your key is: {{ key }} </p>
-
+        {% if key and name %}
+        <ul>
+          <li> Please remember your Key and Key Name to inference the model  </li>
+          <li> If I was you, I would copy and paste my Key and Key Name in to a Word and Text document </li>
+          <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly </li>
+          <li> If you face any problem, please contact us </li>
+        </ul>
+        <textarea style="width:100%;" name="keyresponse">Your key name is: {{ name }}&#13;&#10;Your key is: {{ key }}
+        </textarea>
+        {% endif %}
+        {% if c_error %}
+          <h4>Captcha is wrong. {{c_error}}</h4>
         {% endif %}
         <h2> Top up </h2>
          {% block content %} {% for product in products %}
         <div class="card" >
           <div >
-            <p>{{product.name}}: {{product.desc}} 
+            <p> 
               <details>
-                <summary>Click here to buy</summary>
+                <summary>Click here to top up {{product.name}} AUD </summary>
               <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="topupform">
                 <input type="hidden" name="product_id" value={{ product.id }}>
                 <label for="name">Key Name: </label>
-                <input type="text" name="name" />
+                <input type="text" name="name" /> ||
                 <label for="ket">Key: </label>
                 <input type="text" name="key" />
                 <input type="submit" value="Take my money" />
               </form>
             </details>
-              {% if key_error == "error" %}
-              <p> Your Key or Key Name is wrong !!!</p>
-              {% endif %}
+
               <br>
+             
           </div>
         </div>
         {% endfor %} {% endblock content %}
+        {% if key_error == "error" %}
+        <p> Your Key or Key Name is wrong !!!</p>
+        {% endif %}
         <h2>Or Check Credit</h2>
         <form method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="checkform">
           <label for="name">Key Name: </label>
-          <input type="text" name="name" />
+          <input type="text" name="name" /> ||
+          
           <label for="ket">Key: </label>
-          <input type="text" name="key" />
+          <input type="text" name="key" /> ||
+          {{form.title}} {{ form.captcha }}
           <input type="submit" value="Check" />
         </form>
         {% if credit != "not found" and credit %}
           <p> Your credit is: {{ credit }} AUD</p>
         {% elif credit == "not found" %}
         <p> Your Key or Key Name is wrong !!!</p>
+        {% endif %}
+        {% if c_error_2 %}
+        <h4>Captcha is wrong. {{c_error_2}}</h4>
         {% endif %}
       </div>
 
