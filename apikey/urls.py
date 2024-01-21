@@ -20,5 +20,7 @@ urlpatterns = [
     path("cancel/", CancelView.as_view(), name="cancel"),
     path("buy.html", ProductListView.as_view(), name="product-list"),
     path("<int:pk>/<str:key>/<str:name>/", ProductDetailView.as_view(), name="product-detail"),
+    
+    path("chat/<str:name>/<str:key>/", views.room, name="room"),
 
 ]

@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,9 +41,17 @@ INSTALLED_APPS = [
     'apikey',
     'django_bleach',
     'captcha',
+    
 
 ]
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6380)],
+        },
+    },
+}
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,8 +80,8 @@ TEMPLATES = [
         },
     },
 ]
+ASGI_APPLICATION = "inferenceportal.asgi.application"
 
-WSGI_APPLICATION = 'inferenceportal.wsgi.application'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Database
