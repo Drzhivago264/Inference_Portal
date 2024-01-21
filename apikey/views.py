@@ -116,6 +116,8 @@ def contact(request):
 def prompt(request):
     return render(request, "html/prompt.html")
 
+def room(request, name, key):
+    return render(request, "html/chatroom.html", {"name": name, "key": key})
 
 class SuccessView(TemplateView):
     template_name = "html/success.html"
