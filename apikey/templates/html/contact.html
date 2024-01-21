@@ -1,8 +1,16 @@
 <!DOCTYPE HTML>
 <html>
-
+<style>
+  #id_captcha_1{
+    font-size: 14px;
+    width: 35%;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    }
+</style> 
 <head>
-  <title>black_white - contact us</title>
+  <title>Contact</title>
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -14,18 +22,19 @@
     <div id="header">
       <div id="logo">
         <div id="logo_text">
-          <!-- class="logo_colour", allows you to change the colour of the text -->
-          <h1><a href="index.html">black<span class="logo_colour">_white</span></a></h1>
-          <h2>Simple. Contemporary. Website Template.</h2>
+
+          <h1><a href="index.html">Inference </span></a></h1>
+
         </div>
       </div>
       <div id="menubar">
         <ul id="menu">
-          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
-          <li ><a href="/">Quick Intro</a></li>
+
+          <li ><a href="/"> Intro</a></li>
           <li><a href="/model_infor.html">Models</a></li>
-          <li><a href="/buy.html">Buy or Top Up</a></li>
-          <li><a href="/prompt.html">Let's promtps</a></li>
+          <li><a href="/buy.html"> Top Up</a></li>
+          <li><a href="/prompt.html">Submit promtps</a></li>
+          <li ><a href="/chat.html">Chat Bot Mode</a></li>
           <li class="selected"><a href="contact.html">Contact Us</a></li>
         </ul>
       </div>
@@ -34,46 +43,34 @@
       <div class="sidebar">
         <!-- insert your sidebar items here -->
         <h3>Latest News</h3>
-        <h4>New Website Launched</h4>
-        <h5>July 1st, 2014</h5>
-        <p>2014 sees the redesign of our website. Take a look around and let us know what you think.<br /><a href="#">Read more</a></p>
+        <h4>A mysterious man gives people free fishes and turns water into wine by his feet</h4>
+        <h5>July 1st, 24 </h5>
+        <p><br /><a href="#">Please dont read more</a></p>
         <p></p>
-        <h4>New Website Launched</h4>
-        <h5>July 1st, 2014</h5>
-        <p>2014 sees the redesign of our website. Take a look around and let us know what you think.<br /><a href="#">Read more</a></p>
-        <h3>Useful Links</h3>
-        <ul>
-          <li><a href="#">link 1</a></li>
-          <li><a href="#">link 2</a></li>
-          <li><a href="#">link 3</a></li>
-          <li><a href="#">link 4</a></li>
-        </ul>
-        <h3>Search</h3>
-        <form method="post" action="#" id="search_form">
-          <p>
-            <input class="search" type="text" name="search_field" value="Enter keywords....." />
-            <input name="search" type="image" style="border: 0; margin: 0 0 -9px 5px;" src="style/search.png" alt="Search" title="Search" />
-          </p>
-        </form>
+        <h4>A mysterious man is executed by his goverment </h4>
+        <h5>April 3th, 33</h5>
+        <p><br /><a href="#">Please dont read more </a></p>
+
       </div>
       <div id="content">
         <!-- insert the page content here -->
         <h1>Contact Us</h1>
         <p>Below is an example of how a contact form might look with this template:</p>
-        <form action="#" method="post">
+        <form  method="post">
+     
           <div class="form_settings">
-            <p><span>Name</span><input class="contact" type="text" name="your_name" value="" /></p>
-            <p><span>Email Address</span><input class="contact" type="text" name="your_email" value="" /></p>
-            <p><span>Message</span><textarea class="contact textarea" rows="8" cols="50" name="your_enquiry"></textarea></p>
+            {% csrf_token %} 
+            <p><span>Name</span><input class="contact" type="text" name="name" value="" /></p>
+            <p><span>Email Address</span><input class="contact" type="text" name="sender_email" value="" /></p>
+            <p><span>Message</span><textarea class="contact textarea" rows="8" cols="50" name="message"></textarea></p>
+            <p> <span>{{form.title}} </span> {{ form.captcha }} </p>
             <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" name="contact_submitted" value="submit" /></p>
           </div>
         </form>
-        <p><br /><br />NOTE: A contact form such as this would require some way of emailing the input to an email address.</p>
+        <p><br /><br />NOTE: This may not work yet, we are using consumers' Gmail to foward your message, the maximum number of email can sent is 500</p>
       </div>
     </div>
-    <div id="footer">
-      Copyright &copy; black_white | <a href="http://validator.w3.org/check?uri=referer">HTML5</a> | <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> | <a href="http://www.html5webtemplates.co.uk">Free CSS Templates</a>
-    </div>
+
   </div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 
-from .models import Price, Product, ProductTag, Key
+from .models import Price, Product, ProductTag, Key, LLM
 
 class PriceAdmin(admin.StackedInline):
     model = Price
@@ -16,3 +16,4 @@ class ProductAdmin(admin.ModelAdmin):
 admin.site.register(ProductTag)
 admin.site.register(Price)
 admin.site.register(Key)
+admin.site.register(LLM)

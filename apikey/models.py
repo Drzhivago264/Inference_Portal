@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
-
+from django_bleach.models import BleachField
 User = settings.AUTH_USER_MODEL
 
 def get_image_filename(instance, filename):
@@ -10,6 +10,14 @@ def get_image_filename(instance, filename):
     slug = slugify(name)
     return f"products/{slug}-{filename}"
 
+class LLM(models.Model):
+    name = models.CharField(max_length=200)
+    size =  models.IntegerField(default=1)
+    desc = models.TextField()
+    price = models.FloatField(default=0.0)
+    def __str__(self) -> str:
+        return self.name
+    
 class ProductTag(models.Model):
     name = models.CharField(
         max_length=100, help_text=_("Designates the name of the tag.")
@@ -21,7 +29,7 @@ class ProductTag(models.Model):
         return self.name
     
 class Key(models.Model):
-    owner = models.CharField(max_length=400)
+    owner = BleachField(max_length=400)
     key =  models.CharField(max_length=400)
     credit = models.FloatField(default=0.0) 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -9,6 +9,7 @@ urlpatterns = [
     path("model_infor.html", views.model_infor, name="model_infor"),    
      path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
     path("contact.html", views.contact, name="contact"), 
+    path("chat.html", views.chat, name="chat"),
     path("prompt.html", views.prompt, name="prompt"), 
     path(
         "create-checkout-session/<int:pk>/<str:name>/<str:key>",
