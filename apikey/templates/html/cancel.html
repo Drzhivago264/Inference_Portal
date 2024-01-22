@@ -1,10 +1,43 @@
-{% block title %} Cancel {% endblock title%} 
-{% block content %}
-<div class="alert alert-info" role="alert">
-  Forgot to add something to your cart?
-  <a
-      href="{% url 'apikey:product-list' %}"
-      >Go to Products</a
-    >
-</div>
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Buy </title>
+    <meta name="description" content="website description" />
+    <meta name="keywords" content="website keywords, website keywords" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" title="style" />
+</head>
+<body>
+    <div id="main">
+      <div id="header">
+        <div id="logo">
+          <div id="logo_text">
+            <!-- class="logo_colour", allows you to change the colour of the text -->
+            <h1><a href="index.html">Inference <span class="logo_colour"></span></a></h1>
+          </div>
+        </div>
+        <div id="menubar">
+          <ul id="menu">
+            <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
+            <li ><a href="/"> Intro</a></li>
+            <li><a href="/model_infor.html">Models</a></li>
+            <li class="selected"><a href="/buy.html"> Top Up</a></li>
+            <li><a href="/prompt.html">Submit promtps</a></li>
+            <li ><a href="/chat.html">Chat Bot Mode</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div id="site_content">
+        {% block title %} Cancel {% endblock title%} 
+        {% block content %}
+        <div class="alert alert-info" role="alert">
+          <a
+              href="{% url 'apikey:product-list' %}"
+              >Go Back</a
+            >
+        </div>
 {% endblock content %}
+</div>
+</body>
+</html>
