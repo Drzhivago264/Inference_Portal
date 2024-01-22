@@ -1,16 +1,69 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
+<style>
+    #chat-log {
+        width: 70% !important;
+        resize: vertical;
+        background-color: rgb(37, 37, 37);
+        color: white;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        height: 30vh;
+        overflow: auto;
+    }
+    .message_log_container {
+        margin:  10px ;
+    }
+</style>
 <head>
-    <meta charset="utf-8"/>
-    <title>Chat Room</title>
+    <title>Buy </title>
+    <meta name="description" content="website description" />
+    <meta name="keywords" content="website keywords, website keywords" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" title="style" />
+    
 </head>
 <body>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
-    {{ name|json_script:"name" }}
-    {{ key|json_script:"key" }}
+    <div id="main">
+      <div id="header">
+        <div id="logo">
+          <div id="logo_text">
+            <!-- class="logo_colour", allows you to change the colour of the text -->
+            <h1><a href="index.html">Inference <span class="logo_colour"></span></a></h1>
+          </div>
+        </div>
+        <div id="menubar">
+          <ul id="menu">
+            <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
+            <li ><a href="/"> Intro</a></li>
+            <li><a href="/model_infor.html">Models</a></li>
+            <li ><a href="/buy.html"> Top Up</a></li>
+            <li><a href="/prompt.html">Submit promtps</a></li>
+            <li class="selected" ><a href="/chat.html">Chat Bot Mode</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div id="site_content">
+        <div class="sidebar">
+            <br>
+            {% for llm in llms %}
+                <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}"> {{llm.name}}<br>
+            {% endfor %}
+            
+        </div>
+        <br>
+        <div id="chat-log">
+
+        </div><br>
+        <input id="chat-message-input" type="text" size="65">
+        <input id="chat-message-submit" type="button" value="Send">
+        {{ name|json_script:"name" }}
+        {{ key|json_script:"key" }}
+    </div>
+
     <script>
+
         const name = JSON.parse(document.getElementById('name').textContent);
         const key = JSON.parse(document.getElementById('key').textContent);
 
@@ -26,7 +79,12 @@
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
+            if (data.role == 'Human') {
+                document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: right;">  <span>' + " (" + data.role +"-"+ data.time + ") " + data.message +'</span></div> ');
+                }
+            else {
+                document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: left;">  <span>' +  data.message + " (" + data.role +"-"+ data.time + ") " +'</span></div> ');
+            }
         };
 
         chatSocket.onclose = function(e) {
@@ -39,12 +97,23 @@
                 document.querySelector('#chat-message-submit').click();
             }
         };
-
+ 
+       
         document.querySelector('#chat-message-submit').onclick = function(e) {
+            var choosen_models = [];
+            Array.from(document.getElementsByClassName('checkbox')).forEach(e => function(){
+                var $this = e;
+                if ($this.is(':checked')) {
+                  choosen_models.push($this.val());
+                }
+              })
+     
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
-                'message': message
+                'message': message,
+                'choosen_models': choosen_models,
+                'role': 'Human'
             }));
             messageInputDom.value = '';
         };

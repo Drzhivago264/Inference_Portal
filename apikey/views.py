@@ -117,7 +117,9 @@ def prompt(request):
     return render(request, "html/prompt.html")
 
 def room(request, name, key):
-    return render(request, "html/chatroom.html", {"name": name, "key": key})
+    llm = LLM.objects.all()
+    context = {'llms':llm, "name": name, "key": key}
+    return render(request, "html/chatroom.html", context)
 
 class SuccessView(TemplateView):
     template_name = "html/success.html"
@@ -148,7 +150,7 @@ class CreateStripeCheckoutSessionView(View):
                     "quantity": price.product.quantity,
                 }
             ],
-            metadata={"product_id": price.product.id, "name": k.owner, "key":k.key, "price":price.price},
+            metadata={"product_id": price.product.id, "name": k.owner, "key":k.key, "price":price.price, "quantity":price.product.quantity},
             mode="payment",
             success_url=settings.PAYMENT_SUCCESS_URL,
             cancel_url=settings.PAYMENT_CANCEL_URL,
@@ -182,9 +184,10 @@ class StripeWebhookView(View):
             product_id = session["metadata"]["product_id"]
             name = session["metadata"]["name"]
             key = session["metadata"]["key"]
-            price = session["metadata"]["price"]
+            print(session["metadata"]["price"], session["metadata"]["price"])
+            c = float(session["metadata"]["price"])*float(session["metadata"]["quantity"])
             k = Key.objects.get(owner=name, key=key)
-            k.credit = price 
+            k.credit += c 
             k.save() 
         # Can handle other events here.
 
