@@ -16,7 +16,7 @@ Installation
 
 First of all for start using django-static-webserver you must download it using git
 
-    git clone git://github.com/vstoykov/django-static-webserver.git
+    git clone https://github.com/Drzhivago264/Inference_Portal.git
 
 Next you must install dependencies:
 

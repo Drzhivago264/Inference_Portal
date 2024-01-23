@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'apikey',
     'django_bleach',
     'captcha',
-    
+    'rest_framework',
 
 ]
 CHANNEL_LAYERS = {
@@ -150,5 +150,5 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "hoangnv.yec15@gmail.com"
+EMAIL_HOST_USER = config("EMAIL_ADDRESS")
 EMAIL_HOST_PASSWORD = config("MAIL")

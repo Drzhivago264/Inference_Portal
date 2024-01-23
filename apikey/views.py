@@ -14,11 +14,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from django.template import loader
 from django.urls import reverse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from django.views.generic import TemplateView
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def index(request):
     return render(request, "html/index.html")
+
 def chat(request):
     return render(request, "html/chat.html")
 
@@ -108,13 +112,15 @@ def contact(request):
         subject = name + " from Inference said: " 
         message =  bleach.clean(str(request.POST.get('message'))) +" "+ sender_email
         email_from = settings.EMAIL_HOST_USER
-        recipient_list = ['hoangnv.yec15@gmail.com',]
+        recipient_list = [settings.EMAIL_HOST_USER,]
         send_mail( subject, message, email_from, recipient_list )
         
     return render(request, "html/contact.html", {'form': form})
 
 def prompt(request):
-    return render(request, "html/prompt.html")
+    llm = LLM.objects.all()
+    context = {'llms':llm,}
+    return render(request, "html/prompt.html", context)
 
 def room(request, name, key):
     llm = LLM.objects.all()
@@ -192,3 +198,59 @@ class StripeWebhookView(View):
         # Can handle other events here.
 
         return HttpResponse(status=200)
+    
+
+  
+class ApiView(APIView):
+    # add permission to check if user is authenticated
+
+    def get_object(self, name, key):
+        '''
+        Helper method to get the object with given todo_id, and user_id
+        '''
+        try:
+            return Key.objects.get(owner=name, key = key)
+        except Key.DoesNotExist:
+            return None
+    def get_object_model(self, model):
+        '''
+        Helper method to get the object with given todo_id, and user_id
+        '''
+        try:
+            return LLM.objects.get(name=model)
+        except LLM.DoesNotExist:
+            return None
+    # 3. Retrieve
+    
+    def get(self, request, *args, **kwargs):
+
+        return Response({'Intro':"API"}, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        '''
+        Retrieves the Todo with given todo_id
+        '''
+        print(request.data)
+        instance = self.get_object(request.data['name'], request.data['key'])
+        model_instance = self.get_object_model(request.data['model'])
+        prompt = request.data['prompt']
+        if not instance:
+            return Response(
+                {"Error": "Key does not exists"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if not model_instance:
+            return Response(
+                {"Error": "Model does not exists"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": "test"}, status=status.HTTP_200_OK)
+
+
+  
+{
+ "prompt": "hola",
+  "name": "11111",
+  "key": "tQ6MXKAFj3bw7OoJ20Gh92ldaNmA3aYAma6cAWohe2sYpbBnTyAc3R_kP2DRcUUsZjzB1MjB8FSZLH8L9pYZkw",
+  "model" :  "Mixtral 7B"
+
+}

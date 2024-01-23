@@ -3,7 +3,7 @@
 
 
 <head>
-  <title>black_white - examples</title>
+  <title>Static Prompt</title>
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -25,7 +25,7 @@
           <li ><a href="/"> Intro</a></li>
           <li><a href="/model_infor.html">Models</a></li>
           <li><a href="/buy.html"> Top Up</a></li>
-          <li class="selected"><a href="/prompt.html">Submit promtps</a></li>
+          <li class="selected"><a href="/prompt.html">Promtps</a></li>
           <li ><a href="/chat.html">Chat Bot Mode</a></li>
           <li><a href="contact.html">Contact Us</a></li>
         </ul>
@@ -39,9 +39,9 @@
           <div class="form_settings">
             <p><span>Key Name</span><input type="text" name="name" value="" /></p>
             <p><span>Key Name</span><input type="text" name="key" value="" /></p>
-
-            <p><span>4Chan /pol 2.7B </span><input class="checkbox" type="checkbox" name="name" value="" /></p>
-            <p><span>Reddit Hepler 2.7B</span><input class="checkbox" type="checkbox" name="name" value="" /></p>
+            {% for llm in llms %}
+            <p><span>{{llm.name}}</span><input class="checkbox" type="checkbox" name="{{llm.name}}" value="{{llm.name}}" /></p>
+            {% endfor %}
             <p><span>Prompt</span><textarea rows="8" cols="50" name="name"></textarea></p>
             <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" name="name" value="Submit" /></p>
           </div>
