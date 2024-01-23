@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-from .views import CreateStripeCheckoutSessionView, SuccessView, CancelView, ProductDetailView, ProductListView, StripeWebhookView
+from .views import CreateStripeCheckoutSessionView, SuccessView, CancelView, ProductDetailView, ProductListView, StripeWebhookView, ApiView
 app_name = "apikey"
 
 urlpatterns = [
@@ -22,5 +22,6 @@ urlpatterns = [
     path("<int:pk>/<str:key>/<str:name>/", ProductDetailView.as_view(), name="product-detail"),
     
     path("chat/<str:name>/<str:key>/", views.room, name="room"),
+    path('api/', ApiView.as_view()),
 
 ]
