@@ -70,6 +70,16 @@ In production environment, you may want to configure the server to be served by 
 
 Contents in `static` directory are served as `/static/`. In production environment this folder need to be removed from root and serve by NGINX or APACHE
 
+About the GPU intances, you need to set up a vLLM server to serve the models listed in Model.model:
+
+    # Install vLLM with CUDA 12.1.
+    pip install vllm
+    python -m vllm.entrypoints.openai.api_server --model {model name}
+
+If you expose this instance to the internet you may need Nginx or Appache server in front of it. If you route it through your subnet then you are good to go.
+
+In addition, as we need to automatically boot and shutdown your GPU intances, you may consider using systemd or equivalent to setup the vLLM on startup.
+
 Final words
 -----------
 
