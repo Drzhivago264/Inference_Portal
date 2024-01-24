@@ -6,13 +6,10 @@ json_  = {
   "key": "tQ6MXKAFj3bw7OoJ20Gh92ldaNmA3aYAma6cAWohe2sYpbBnTyAc3R_kP2DRcUUsZjzB1MjB8FSZLH8L9pYZkw",
   "model" :  "Mixtral 7B"
 }
-
-response = requests.post("[HOST_NAME]/api/",  {"prompt": "hola",
-                                               "name": "[put your key name]", 
-                                               "key": "[put your key]", 
-                                               "model" :  "[A list of models]"}) 
-print(response.json())
-""" prompts = [
+for i in range(100):
+    response = requests.post("http://127.0.0.1:8080/generate",   '{ "prompt": "San Francisco is a",  "temperature": 0 }' ) 
+    print(response.json())
+"""prompts = [
     "Hello, my name is",
     "The president of the United States is",
     "The capital of France is",

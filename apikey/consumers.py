@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import requests
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from .models import Price, Product, Key, LLM
@@ -11,6 +12,21 @@ class ChatConsumer(WebsocketConsumer):
             return key
         except:
             return False
+
+    def inference(self, model, prompt):
+        context = {
+            "prompt": prompt,
+            "n": 1,
+            'presence_penalty': 1.1,
+            "use_beam_search": False,
+            "temperature": 0.72,
+            "max_tokens": 128,
+            "stream": False,
+            "top_k": -1,
+            "top_p": 0.73
+        }
+        response = requests.post("http://127.0.0.1:8080/generate",   json=context ) 
+        return response.json()['text']
         
     def connect(self):
         self.name = self.scope["url_route"]["kwargs"]["name"]
@@ -46,13 +62,16 @@ class ChatConsumer(WebsocketConsumer):
         role = text_data_json["role"]
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "chat_message", "role":role  ,"message": message}
+            self.room_group_name, {"type": "chat_message", "role":role  ,"message": message, "model":choosen_models}
         )
 
     # Receive message from room group
     def chat_message(self, event):
         message = event["message"]
         role = event["role"]
+        model = event['model']
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time}))
+        response = self.inference(model, message)
+        self.send(text_data=json.dumps({"message": response, "role": model,  "time":self.time}))
