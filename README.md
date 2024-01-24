@@ -3,18 +3,28 @@ django-inference-portal
 
 This is a simple dynamic django server that use django channels to interact with GPU servers for language model inference.
 
-
 Purpose
 -------
 
-The purpose of this project is to offers users with simple interfaces to interact with GPU servers.
-This website processses API and HTTP requests from users, forward them to the GPU servers and forward the responses back in a dynamic manner.
+The purpose of this project is to offers users simple interfaces to interact with GPU servers.
+This website processses API and HTTP requests from users, forwards them to the GPU servers and forward the responses back in a dynamic manner.
 This website also use STRIPE to process users' payment
+
+Design
+-------
+![Alt text](design.drawio.png)
+Explain:
+- Redis server fowards the message for the websockets that are used for real time chat.
+- SQL stores API key and model metadata using the default SQLlite shipped with Django. 
+- API Rest Framework open endpoints for the webportal, the webportal then forward the user requests to GPU servers.
+- GPU servers do inference, each GPU server holds one model and uses vLLM to open endpoints. 
+- Nginx is used as a proxy for the Django server and serve static files.
+- Django server runing Daphne or Gurnicorn + Daphne.
 
 Installation
 --------------
 
-First of all for start using django-static-webserver you must download it using git
+First of all for start using django-inference-poratal you must download it using git
 
     git clone https://github.com/Drzhivago264/Inference_Portal.git
 
@@ -28,6 +38,7 @@ Next you must install Redis and start Redis Server at port 6380:
     curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
     echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
     sudo apt-get update
+    sudo apt-get install redis
     redis-server --port 6380
 
 Next you must setup STRIPE CLI and start a webhook:
@@ -47,8 +58,8 @@ Next you need to set up .env file and setup the following key:
     PAYMENT_SUCCESS_URL=""
     PAYMENT_CANCEL_URL=""
     STRIPE_WEBHOOK_SECRET="" 
-
-    MAIL = "" (The password for your email that foward contact form)
+    EMAIL_ADDRESS = "" (The EMAIL_ADDRESS that fowards contact form)
+    MAIL = "" (The password for EMAIL_ADDRESS that fowards contact form)
 
 Finally you can test the server with:
 

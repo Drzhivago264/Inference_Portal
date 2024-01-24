@@ -32,7 +32,37 @@
       </div>
     </div>
     <div id="site_content">
-      
+      <div class="sidebar">
+        <!-- insert your sidebar items here -->
+        <h2>API endpoint</h2>
+        <h4>Python example:</h4>
+        <pre style="font-size: 12px">
+r = requests.post("[HOST]/api/",  
+  {"prompt": "hola",
+    "name": "[put your key name]", 
+    "key": "[put your key]", 
+    "model" : "[put the model name]"
+  }) 
+
+print(r.json())
+        </pre>
+        <h4>CURL example:</h4>
+        <pre style="font-size: 12px">
+curl "[HOST]/api/" --header 
+  'Content-Type: application/json' 
+  --request POST
+  --data-binary
+  '{"prompt": "hola",
+  "name": "[put your key name]", 
+  "key": "[put your key]", 
+  "model" :  "[put the model name]"
+  }'
+        <pre>
+        <p><a href="/api">Test API</a></p>
+        <p></p>
+
+
+      </div>
       <div id="content">
    
         <form method="post">

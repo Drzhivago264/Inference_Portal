@@ -2,7 +2,7 @@
 <html>
 <style>
     #chat-log {
-        width: 70% !important;
+        width: 66% !important;
         resize: vertical;
         background-color: rgb(37, 37, 37);
         color: white;
@@ -56,8 +56,10 @@
         <div id="chat-log">
 
         </div><br>
-        <input id="chat-message-input" type="text" size="65">
+      
+        <textarea id="chat-message-input" rows="5" cols="77" name="message"></textarea>
         <input id="chat-message-submit" type="button" value="Send">
+        
         {{ name|json_script:"name" }}
         {{ key|json_script:"key" }}
     </div>
