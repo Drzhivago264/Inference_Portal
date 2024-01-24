@@ -13,6 +13,7 @@ This website also use STRIPE to process users' payment
 Design
 -------
 ![Alt text](design.drawio.png)
+
 Explain:
 - Redis server fowards the message for the websockets that are used for real time chat.
 - SQL stores API key and model metadata using the default SQLlite shipped with Django. 
