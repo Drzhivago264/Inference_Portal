@@ -220,16 +220,14 @@ class ApiView(APIView):
             return LLM.objects.get(name=model)
         except LLM.DoesNotExist:
             return None
-    # 3. Retrieve
-    
-    def get(self, request, *args, **kwargs):
 
+    def get(self, request, *args, **kwargs):
         return Response({'Intro':"API"}, status=status.HTTP_200_OK)
+    
     def post(self, request, *args, **kwargs):
         '''
         Retrieves the Todo with given todo_id
         '''
-        print(request.data)
         instance = self.get_object(request.data['name'], request.data['key'])
         model_instance = self.get_object_model(request.data['model'])
         prompt = request.data['prompt']
