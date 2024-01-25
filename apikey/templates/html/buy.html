@@ -47,8 +47,16 @@
           <input type="text" name="name" /> ||
           {{form.title}} {{ form.captcha }}
           <input type="submit" value="Create" />
+          <br>
+          <br>
+          {%for message in messages %}
+          {%if "key" in message.tags %}
+               <h4> {{message}} </h4>   
+          {%endif%}
+          {%endfor%}
         </form>
         {% if key and name %}
+        <br>
         <ul>
           <li> Please remember your Key and Key Name to inference the model  </li>
           <li> If I was you, I would copy and paste my Key and Key Name in to a Word and Text document </li>
@@ -58,9 +66,8 @@
         <textarea style="width:100%;" name="keyresponse">Your key name is: {{ name }}&#13;&#10;Your key is: {{ key }}
         </textarea>
         {% endif %}
-        {% if c_error %}
-          <h4>Captcha is wrong. {{c_error}}</h4>
-        {% endif %}
+      
+  
         <br>
         <hr>
         <h2> Top up </h2>
@@ -112,15 +119,16 @@
           <input type="text" name="key" /> ||
           {{form.title}} {{ form.captcha }}
           <input type="submit" value="Check" />
+          <br>
+          <br>
+          {%for message in messages %}
+          {%if "credit" in message.tags %}
+               <h4> {{message}} </h4>   
+          {%endif%}
+          {%endfor%}
         </form>
-        {% if credit != "not found" and credit %}
-          <p> Your credit is: {{ credit }} AUD</p>
-        {% elif credit == "not found" %}
-        <p> Your Key or Key Name is wrong !!!</p>
-        {% endif %}
-        {% if c_error_2 %}
-        <h4>Captcha is wrong. {{c_error_2}}</h4>
-        {% endif %}
+       
+
         <br>
       </div>
       <hr>
