@@ -14,9 +14,13 @@
     .message_log_container {
         margin:  10px ;
     }
+    input {
+        width: 7ch;
+    }
+    
 </style>
 <head>
-    <title>Buy </title>
+    <title>Chat Mode</title>
     <meta name="description" content="website description" />
     <meta name="keywords" content="website keywords, website keywords" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -47,17 +51,38 @@
       <div id="site_content">
         <div class="sidebar">
             <br>
+            <h3> Available Models </h3>
             {% for llm in llms %}
-                <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}"> {{llm.name}}<br>
+                <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this)"> {{llm.name}}<br>
             {% endfor %}
-            
+            <h3> Parameters </h3>
+                <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
+                <h5>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </h5>  
+                
+                <input type="number" step="0.1" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73)
+                <input type="number" step="0.1" name="best_of" min="0" max="4" value="1"> Best of (default = 1) <br>
+                <input type="number" step="0.1" name="top_k" min="0.01" max="1" value="-1"> Top_k (default = -1) 
+                <input type="number" step="0.1" name="max_tokens" min="1" max="2048" value="128"> Token Num (default = 128)<br>
+                <input type="number" step="0.1" name="temperature" min="0" max="1" value="0.72"> Temperature (default= 0.72) <br>
+                <input type="number" step="0.1" name="repetition_penalty" min="-2" max="2" value="0"> Repetition Penalty (default=0)<br>
+                <input type="number" step="0.1" name="frequency_penalty" min="-2" max="2" value="0"> Frequency Penalty (defaul=0)<br>
+                <input type="number" step="0.1" name="presense_penalty" min="-2" max="2" value="0"> Presense Penalty (defaul=0)<br><br>
+                <hr>
+                <br>
+                <h5>NOTE: These parameters go along with each others, please know what you are doing.</h5>
+                <h5>NOTE: Return to default value and refresh the page if you messed up</h5>
+                <input type="checkbox" class= "checkbox_beam" name="beam" id = "beam" > Beam Search (default = False) <br>
+                <input type="checkbox" class= "checkbox_early_stopping" name="early_stopping" id ="early_stopping" > Early Stop (default = False) <br>
+                <input type="number" step="0.1" name="length_penalty" min="-2" max="2" value="0"> Length Penalty (default = 0)<br>
+                <input type="number" step="0.1" name="best_of" min="1" max="5" value="2"> Best of (default = 2 for beam search, 1 for sampling) <br>
+                
         </div>
         <br>
         <div id="chat-log">
 
         </div><br>
       
-        <textarea id="chat-message-input" rows="5" cols="77" name="message"></textarea>
+        <textarea id="chat-message-input" rows="5" cols="70" name="message"></textarea>
         <input id="chat-message-submit" type="button" value="Send">
         
         {{ name|json_script:"name" }}
@@ -65,7 +90,12 @@
     </div>
 
     <script>
-
+        function onlyOne(checkbox) {
+            var checkboxes = document.getElementsByName('model')
+            checkboxes.forEach((item) => {
+                if (item !== checkbox) item.checked = false
+            })
+        }
         const name = JSON.parse(document.getElementById('name').textContent);
         const key = JSON.parse(document.getElementById('key').textContent);
 
@@ -87,6 +117,10 @@
             else {
                 document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: left;">  <span>' +  data.message + " (" + data.role +"-"+ data.time + ") " +'</span></div> ');
             }
+   
+            logTa = document.getElementById("chat-log")
+            logTa.scrollTop = logTa.scrollHeight;
+
         };
 
         chatSocket.onclose = function(e) {
@@ -109,13 +143,43 @@
                   choosen_models.push($this.val());
                 }
               })
-     
+            
+            const top_p = document.getElementsByName("top_p")[0].value
+            const top_k = document.getElementsByName("top_k")[0].value
+            const best_of = document.getElementsByName("best_of")[0].value
+            const max_tokens = document.getElementsByName("max_tokens")[0].value
+            const temperature = document.getElementsByName("temperature")[0].value
+            const frequency_penalty = document.getElementsByName("frequency_penalty")[0].value
+            const presense_penalty = document.getElementsByName("presense_penalty")[0].value
+            if (document.getElementById('beam').checked) {
+                beam_ = "true"
+            } else {
+                 beam_ = "false"
+            }
+            if (document.getElementById('early_stopping').checked) {
+                early_stopping = "true"
+            } else {
+                early_stopping = "false"
+            }
+            const length_penalty= document.getElementsByName("length_penalty")[0].value
+
+          
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
                 'message': message,
                 'choosen_models': choosen_models,
-                'role': 'Human'
+                'role': 'Human',
+                'top_k': top_k,
+                'top_p': top_p,
+                'best_of': best_of,
+                'max_tokens': max_tokens,
+                'frequency_penalty': frequency_penalty,
+                'presense_penalty': presense_penalty,
+                'temperature': temperature,
+                'beam': beam_,
+                'early_stopping': early_stopping,
+                'length_penalty': length_penalty
             }));
             messageInputDom.value = '';
         };
