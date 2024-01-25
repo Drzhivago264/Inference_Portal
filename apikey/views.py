@@ -19,7 +19,43 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
 stripe.api_key = settings.STRIPE_SECRET_KEY
+import requests
+def inference(model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
 
+    if beam == False:
+        length_penalty = 1
+        early_stopping = False
+        best_of = int(1)
+    else:
+        best_of = int(best_of)
+        length_penalty = float(length_penalty)
+        if early_stopping == "true":
+            early_stopping = True
+        else:
+            early_stopping = True       
+        
+    context = {
+        "prompt": prompt,
+        "n": 1,
+        'best_of': best_of,
+        'presence_penalty': float(presense_penalty),
+        "use_beam_search": beam,
+        "temperature": float(temperature),
+        "max_tokens": int(max_tokens),
+        "stream": False,
+        "top_k": float(top_k),
+        "top_p": float(top_p),
+        "length_penalty": float(length_penalty),
+        "frequency_penalty": float(frequency_penalty),
+        "early_stopping": early_stopping,
+        
+    }
+    try:
+        response = requests.post("http://127.0.0.1:8080/generate",   json=context ) 
+        return response.json()['text']
+    except:
+        return "You messed up the parameters, please return to default parameters"
+        
 def index(request):
     return render(request, "html/index.html")
 
@@ -119,11 +155,53 @@ def contact(request):
 
 def prompt(request):
     llm = LLM.objects.all()
-    context = {'llms':llm,}
+    if request.method == 'POST':    
+        top_p= float(request.POST.get("top_p")) if "top_p" in request.POST else 0.73
+        best_of = float(request.POST.get("best_of")) if "best_of" in request.POST else 1
+        top_k = float(request.POST.get("top_k")) if "top_k" in request.POST else -1
+        max_tokens = int(request.POST.get("max_tokens")) if "max_tokens" in request.POST else 128
+        frequency_penalty = float(request.POST.get("frequency_penalty")) if "frequency_penalty" in request.POST else 0
+        presense_penalty = float(request.POST.get("presense_penalty")) if "presense_penalty" in request.POST else 0
+        temperature = float(request.POST.get("temperature")) if "temperature" in request.POST else 0.73
+        beam = request.POST.get("beam") if "beam" in request.POST  else False
+        early_stopping = request.POST.get("early_stopping") if "early_stopping" in request.POST else False
+        length_penalty = float(request.POST.get("length_penalty")) if "length_penalty" in request.POST  else 0
+
+        beam = True if beam =="True" else False
+        early_stopping = True if early_stopping == "True" else False 
+        
+        def get_object(name, key):
+            try:
+                return Key.objects.get(owner=name, key = key)
+            except Key.DoesNotExist:
+                return None
+        def get_object_model(model):
+            try:
+                return LLM.objects.get(name=model)
+            except LLM.DoesNotExist:
+                return None
+        instance = get_object(str(request.POST.get('name')), str(request.POST.get('key')))
+        m = request.POST.get('model') if  "model" in request.POST else "Llama 2 7B"
+        model = get_object_model(m)
+        prompt = bleach.clean((request.POST.get('prompt'))) if len(request.POST.get('prompt')) > 1 else " "
+        if not instance:
+            response = "Error: key or key name is not correct"
+        elif not model:
+            response = "Error: model name is not correct"
+        else:
+            try:
+                response = inference(model=model.name, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+            except:
+                response = "Error: you messed up the parameters"
+        context = {'llms':llm, "model_response": response}
+    else:
+        context = {'llms':llm, "model_response": ""}
+    
     return render(request, "html/prompt.html", context)
 
 def room(request, name, key):
     llm = LLM.objects.all()
+
     context = {'llms':llm, "name": name, "key": key}
     return render(request, "html/chatroom.html", context)
 
@@ -205,17 +283,11 @@ class ApiView(APIView):
     # add permission to check if user is authenticated
 
     def get_object(self, name, key):
-        '''
-        Helper method to get the object with given todo_id, and user_id
-        '''
         try:
             return Key.objects.get(owner=name, key = key)
         except Key.DoesNotExist:
             return None
     def get_object_model(self, model):
-        '''
-        Helper method to get the object with given todo_id, and user_id
-        '''
         try:
             return LLM.objects.get(name=model)
         except LLM.DoesNotExist:
@@ -225,23 +297,39 @@ class ApiView(APIView):
         return Response({'Intro':"API"}, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
-        '''
-        Retrieves the Todo with given todo_id
-        '''
+
         instance = self.get_object(request.data['name'], request.data['key'])
-        model_instance = self.get_object_model(request.data['model'])
-        prompt = request.data['prompt']
+        model = self.get_object_model(request.data['model'])
+        prompt = request.data['prompt'] if len(request.data['prompt']) > 1 else " "
+        top_p= float(request.data["top_p"]) if "top_p" in request.POST else 0.73
+        best_of = float(request.data["best_of"]) if "best_of" in request.POST else 1
+        top_k = float(request.data["top_k"]) if "top_k" in request.POST else -1
+        max_tokens = int(request.data["max_tokens"]) if "max_tokens" in request.POST else 128
+        frequency_penalty = float(request.data["frequency_penalty"]) if "frequency_penalty" in request.POST else 0
+        presense_penalty = float(request.data["presense_penalty"]) if "presense_penalty" in request.POST else 0
+        temperature = float(request.data["temperature"]) if "temperature" in request.POST else 0.73
+        beam = request.data["beam"] if "beam" in request.POST  else False
+        early_stopping = True if "early_stopping" in request.POST else False
+        length_penalty = float(request.data["length_penalty"]) if "length_penalty" in request.POST  else 0
+
+        beam = True if beam =="True" else False
+        early_stopping = True if early_stopping == "True" else False            
         if not instance:
             return Response(
                 {"Error": "Key does not exists"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        if not model_instance:
+        elif not model:
             return Response(
                 {"Error": "Model does not exists"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": "test"}, status=status.HTTP_200_OK)
+        else:
+            try:
+                response = inference(model=model.name, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+            except:
+                response = "error: you messed up the parameters"
+        return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
 
 
   
@@ -249,6 +337,6 @@ class ApiView(APIView):
  "prompt": "hola",
   "name": "11111",
   "key": "tQ6MXKAFj3bw7OoJ20Gh92ldaNmA3aYAma6cAWohe2sYpbBnTyAc3R_kP2DRcUUsZjzB1MjB8FSZLH8L9pYZkw",
-  "model" :  "Mixtral 7B"
-
+  "model" :  "Mixtral 7B",
+  "beam": True
 }
