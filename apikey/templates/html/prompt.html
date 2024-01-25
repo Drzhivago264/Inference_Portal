@@ -102,9 +102,8 @@ curl "[HOST]/api/" --header
             <h3> Parameters </h3>
             <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
             <h5>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </h5>                  
-            <input style="width: 7ch;" type="number" step="any" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73)
-            <input style="width: 7ch;" type="number" step="any" name="best_of" min="0" max="4" value="1"> Best of (default = 1) <br>
-            <input style="width: 7ch;" type="number" step="any" name="top_k"  max="1" value="-1"> Top_k (default = -1) 
+            <input style="width: 7ch;" type="number" step="any" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73) <br>
+            <input style="width: 7ch;" type="number" step="any" name="top_k"  max="1" value="-1"> Top_k (default = -1) <br>
             <input style="width: 7ch;" type="number" step="any" name="max_tokens" min="1" max="2048" value="128"> Token Num (default = 128)<br>
             <input style="width: 7ch;" type="number" step="any" name="temperature" min="0" max="1" value="0.72"> Temperature (default= 0.72) <br>
             <input style="width: 7ch;" type="number" step="any" name="frequency_penalty" min="-2" max="2" value="0"> Frequency Penalty (default=0)<br>

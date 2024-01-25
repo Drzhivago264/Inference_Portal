@@ -67,6 +67,11 @@
             <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" name="contact_submitted" value="submit" /></p>
           </div>
         </form>
+        {%for message in messages %}
+        {%if "email" in message.tags %}
+             <h4> {{message}} </h4>   
+        {%endif%}
+        {%endfor%}
         <h5><br /><br />NOTE: This may not work yet, we are using consumers' Gmail to foward your message, the maximum number of email can be sent is 500 per day</h5>
       </div>
     </div>

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponseRedirect
 from django.core.mail import send_mail
 import stripe
 import secrets
@@ -11,6 +11,7 @@ from django.conf import settings
 import bleach
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 from django.views import View
 from django.template import loader
 from django.urls import reverse
@@ -77,6 +78,7 @@ class ProductListView(ListView):
         context['form'] = CaptchaForm()
         
         return context
+
     def post(self,request):
         form = CaptchaForm()
         products = Product.objects.all()
@@ -92,8 +94,8 @@ class ProductListView(ListView):
                 return render(request, "html/buy.html", context)
             else:
                 form = CaptchaForm()
-                c_error = "Stop right there Mr. Robot!!!"
-                return render(request, 'html/buy.html', {'products': products, 'form': form, 'c_error':c_error})
+                messages.error(request,"Error: Captcha Failed.",  extra_tags='key')
+                return HttpResponseRedirect("/buy.html") 
             
         ###Deal with check credit requests###    
         elif bleach.clean(request.POST.get("form_type")) == 'checkform':
@@ -103,14 +105,16 @@ class ProductListView(ListView):
                 try:
                     key = Key.objects.get(owner=name, key = str(k))
                     credit = str(key.credit)
+                    messages.error(request,f"Your credit is {credit} AUD.",  extra_tags='credit')
+                    return HttpResponseRedirect("/buy.html")
                 except Key.DoesNotExist:
-                    credit = "not found"
-                context = {'products': products, 'credit': credit, 'form': form}    
-                return render(request, "html/buy.html", context)
+                    messages.error(request,"Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
+                    return HttpResponseRedirect("/buy.html")
+                
             else:
                 form = CaptchaForm()
-                c_error = "Stop right there Mr. Robot!!!"
-                return render(request, 'html/buy.html', {'products': products, 'form': form, 'c_error_2':c_error})
+                messages.error(request,"Error: Captcha Failed.",  extra_tags='credit')
+                return HttpResponseRedirect("/buy.html") 
         
         ###Deal with check topup requests###   
         elif bleach.clean(request.POST.get("form_type")) == 'topupform':
@@ -121,8 +125,8 @@ class ProductListView(ListView):
                 key = Key.objects.get(owner=name, key = k)
                 return redirect(reverse('apikey:product-detail', kwargs={'pk':product_id, 'key':key.key, 'name':key.owner}))
             except:
-                context = {"key_error": "error",'products': products,'form': form}
-                return render(request, "html/buy.html", context)
+                messages.error(request,"Key or Key Name is incorrect",  extra_tags='credit')
+                return HttpResponseRedirect("/buy.html") 
         
     
 
@@ -142,16 +146,26 @@ class ProductDetailView(DetailView):
 
 def contact(request):
     form = CaptchaForm(request.POST)
-    if form.is_valid():
-        name = bleach.clean(str(request.POST.get('name')))
-        sender_email = bleach.clean(str(request.POST.get('sender_email')))
-        subject = name + " from Inference said: " 
-        message =  bleach.clean(str(request.POST.get('message'))) +" "+ sender_email
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = [settings.EMAIL_HOST_USER,]
-        send_mail( subject, message, email_from, recipient_list )
-        
-    return render(request, "html/contact.html", {'form': form})
+    if request.method == 'POST':
+        if form.is_valid():
+            name = bleach.clean(str(request.POST.get('name')))
+            sender_email = bleach.clean(str(request.POST.get('sender_email')))
+            subject = name + " from Inference said: " 
+            message =  bleach.clean(str(request.POST.get('message'))) +" "+ sender_email
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [settings.EMAIL_HOST_USER,]
+            try:
+                send_mail( subject, message, email_from, recipient_list )
+                messages.error(request,"Sent!",  extra_tags='email')
+                return HttpResponseRedirect("/contact.html")
+            except:
+                messages.error(request,"Failed due to unknown reasons!",  extra_tags='email')
+                return HttpResponseRedirect("/contact.html")
+        else:
+            messages.error(request,"Captcha Failed.",  extra_tags='email')
+            return HttpResponseRedirect("/contact.html")
+    elif request.method == 'GET':
+        return render(request, "html/contact.html", {'form': form})
 
 def prompt(request):
     llm = LLM.objects.all()
