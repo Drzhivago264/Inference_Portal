@@ -9,15 +9,24 @@ def get_image_filename(instance, filename):
     name = instance.name
     slug = slugify(name)
     return f"products/{slug}-{filename}"
-
+    
 class LLM(models.Model):
     name = models.CharField(max_length=200)
     size =  models.IntegerField(default=1)
     desc = models.TextField()
     price = models.FloatField(default=0.0)
+    
     def __str__(self) -> str:
         return self.name
     
+class InferenceServer(models.Model):
+    name = models.CharField(max_length=200)
+    instance_type = models.CharField(max_length=200)
+    url = models.URLField(max_length = 200) 
+    hosted_model = models.ForeignKey(LLM, on_delete=models.CASCADE)
+    def __str__(self) -> str:
+        return self.name
+        
 class ProductTag(models.Model):
     name = models.CharField(
         max_length=100, help_text=_("Designates the name of the tag.")
