@@ -1,14 +1,14 @@
 django-inference-portal
 =======================
 
-This is a simple dynamic django server that use django channels to interact with GPU servers for language model inference.
+This is a simple dynamic django server that uses django channels to interact with GPU servers for language model inference.
 
 Purpose
 -------
 
-The purpose of this project is to offers users simple interfaces to interact with GPU servers.
-This website processses API and HTTP requests from users, forwards them to the GPU servers and forward the responses back in a dynamic manner.
-This website also use STRIPE to process users' payment
+The purpose of this project is to offer users simple interfaces to interact with GPU servers.
+This website processses API and HTTP requests from users, forwards them to the GPU servers and forwards the responses back in a dynamic manner.
+This website also uses STRIPE to process users' payment.
 
 Design
 -------
@@ -17,15 +17,15 @@ Design
 Explain:
 - Redis server fowards the message for the websockets that are used for real time chat.
 - SQL stores API key and model metadata using the default SQLlite shipped with Django. 
-- API Rest Framework open endpoints for the webportal, the webportal then forward the user requests to GPU servers.
+- API Rest Framework opens endpoints for the webportal, the webportal then forward the user requests to GPU servers.
 - GPU servers do inference, each GPU server holds one model and uses vLLM to open endpoints. 
 - Nginx is used as a proxy for the Django server and serve static files.
-- Django server runing Daphne or Gurnicorn + Daphne.
+- Django server are used to connect all components.
 
 Installation
 --------------
 
-First of all for start using django-inference-poratal you must download it using git
+First of all, for start using django-inference-poratal, you must download it using git
 
     git clone https://github.com/Drzhivago264/Inference_Portal.git
 
@@ -70,16 +70,33 @@ In production environment, you may want to configure the server to be served by 
 
 Contents in `static` directory are served as `/static/`. In production environment this folder need to be removed from root and serve by NGINX or APACHE
 
-About the GPU intances, you need to set up a vLLM server to serve the models listed in Model.model:
+About the GPU intances, you need to set up a vLLM server to serve the models listed in LLM.model:
 
     # Install vLLM with CUDA 12.1.
     pip install vllm
     python -m vllm.entrypoints.openai.api_server --model {model name}
 
-If you expose this instance to the internet you may need Nginx or Appache server in front of it. If you route it through your subnet then you are good to go.
+If you expose this instance to the internet you may need Nginx or Apache server in front of it. If you route it through your subnet then you are good to go.
 
 In addition, as we need to automatically boot and shutdown your GPU intances, you may consider using systemd or equivalent to setup the vLLM on startup.
 
+Development environment setup
+-----------------------------
+After finishing the steps above, you need to set up a vLLM server to serve the models listed in LLM.model:
+
+    pip install vllm
+    python -m vllm.entrypoints.openai.api_server --model {model name}
+
+You need to run a vLLM server to serve the a model (remember to avoid 8000 and 6380 port that Django is running):
+
+    python" -m vllm.entrypoints.api_server --model gpt2 --port 8080
+
+If you have more than 1 GPU, you can serve multiple model at multiple ports (remember of use unique port):
+
+    CUDA_VISIBLE_DEVICES= 1 python -m vllm.entrypoints.api_server --model gpt2 --port 8080
+    CUDA_VISIBLE_DEVICES= 2 python -m vllm.entrypoints.api_server --model gpt2-large --port 8888  
+
+If you have issue, you may need to seperate vLLM into multiple local environments.
 Final words
 -----------
 

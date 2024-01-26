@@ -114,7 +114,7 @@ curl "[HOST]/api/" --header
       {% for llm in llms %}
       <button class="collapsible">{{llm.name}}</button>
       <div class="content">
-        <p>{{llm.desc|linebreaks }} </p>
+        <p>{{llm.desc | linebreaks | safe }} </p>
       </div>
       {% endfor %}
     </div>

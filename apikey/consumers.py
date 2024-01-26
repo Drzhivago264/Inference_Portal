@@ -2,8 +2,9 @@ import json
 from datetime import datetime
 import requests
 from asgiref.sync import async_to_sync
+import random
 from channels.generic.websocket import WebsocketConsumer
-from .models import Price, Product, Key, LLM
+from .models import Price, Product, Key, LLM, InferenceServer
 from channels.db import database_sync_to_async
 class ChatConsumer(WebsocketConsumer):
     def check_key(self):
@@ -45,8 +46,13 @@ class ChatConsumer(WebsocketConsumer):
             "early_stopping": early_stopping,
             
         }
+        model = "Llama 2 7B"
+        ''' Query a list of inference servers for a given model, pick a random one '''
+        url = list(InferenceServer.objects.filter(hosted_model__name=model))
+        random_url = random.choice(url)
+
         try:
-            response = requests.post("http://127.0.0.1:8080/generate",   json=context ) 
+            response = requests.post(random_url.url, json=context ) 
             return response.json()['text']
         except:
             return "You messed up the parameters, please return to default parameters"
