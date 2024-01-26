@@ -7,8 +7,34 @@
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
+  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
 </head>
-
+<style>
+  .collapsible {
+    background-color: #777;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 570px;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+  }
+  
+  .active, .collapsible:hover {
+    background-color: #555;
+  }
+  
+  .content {
+    padding: 0 18px;
+    max-height: 0;
+    overflow: hidden;
+    width: 534px;
+    transition: max-height 0.2s ease-out;
+    background-color: #f1f1f1;
+  }
+  </style>
 <body>
   <div id="main">
     <div id="header">
@@ -32,36 +58,84 @@
       </div>
     </div>
     <div id="site_content">
-      <div class="sidebar">
-        <!-- insert your sidebar items here -->
-        <h3>Latest News</h3>
-        <h4>Just an another politician claims to have a simple solution for problems that they know nothing about</h4>
-        <h5>Feb 2st, 2024</h5>
-        <p><a href="#">Please dont read more</a></p>
-        <p></p>
-        <h4>The politician successfuly worsens the situation, and create new problems for the next one </h4>
-        <h5>July 1st, 2024</h5>
-        <p><a href="#">Please dont read more</a></p>
+      <div id="site_content">
+        <div class="sidebar">
+          <!-- insert your sidebar items here -->
+          <h2>API endpoint</h2>
+          <h4>Python example:</h4>
+          <pre style="font-size: 12px">
+r = requests.post("[HOST]/api/",  
+json={"prompt": "hola",
+"name": "[key name]", 
+"key": "[key]", 
+"model" : "[model name]",
+'top_k': [top_k],
+'top_p': [top_p],
+'best_of': [best_of],
+'max_tokens': [max_tokens],
+'frequency_penalty': [fre_penalty],
+'presense_penalty': [pre_penalty],
+'temperature': [temperature],
+'beam': ["True"/"False"],
+'early_stopping': ["True"/"False"],
+'length_penalty': [length_penalty]
+}) 
 
-
-        <form method="post" action="#" id="search_form">
-          <p>
-            <input class="search" type="text" name="search_field" value="Enter keywords....." />
-            <input name="search" type="image" style="border: 0; margin: 0 0 -9px 5px;" src="style/search.png" alt="Search" title="Search" />
-          </p>
-        </form>
+print(r.json())
+  </pre>
+  <h4>CURL example:</h4>
+  <pre style="font-size: 12px">
+curl "[HOST]/api/" --header 
+'Content-Type: application/json' 
+--request POST
+--data-binary
+'{"prompt": "hola",
+"name": "[key name]", 
+"key": "[key]", 
+"model" :  "[model name]"
+'top_k': [top_k],
+'top_p': [top_p],
+'best_of': [best_of],
+'max_tokens': [max_tokens],
+'frequency_penalty': [freq_penalty],
+'presense_penalty': [pre_penalty],
+'temperature': [temperature],
+'beam': ["True"/"False"],
+'early_stopping': ["True"/"False"],
+'length_penalty': [length_penalty]
+}'
+          <pre>
+          <p><a href="/api">Test API</a></p>
+          <p></p>
+  
+  
+        </div>
+      <h2>Available Models:</h2>
+      {% for llm in llms %}
+      <button class="collapsible">{{llm.name}}</button>
+      <div class="content">
+        <p>{{llm.desc|linebreaks }} </p>
       </div>
-      <div id="content">
-        {% for llm in llms %}
-        <h1>{{llm.name}}</h1>
-        <p> {{llm.desc|linebreaks }} </p>  
-        {% endfor %}
-
-       
-
-      </div>
+      {% endfor %}
     </div>
 
   </div>
+
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+    
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        } 
+      });
+    }
+    </script>
 </body>
 </html>
