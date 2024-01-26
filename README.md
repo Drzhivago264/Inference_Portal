@@ -91,12 +91,13 @@ You need to run a vLLM server to serve the a model (remember to avoid 8000 and 6
 
     python" -m vllm.entrypoints.api_server --model gpt2 --port 8080
 
-If you have more than 1 GPU, you can serve multiple model at multiple ports (remember of use unique port):
+If you have more than 1 GPU, you can serve multiple models at multiple ports (remember of use unique ports):
 
     CUDA_VISIBLE_DEVICES= 1 python -m vllm.entrypoints.api_server --model gpt2 --port 8080
     CUDA_VISIBLE_DEVICES= 2 python -m vllm.entrypoints.api_server --model gpt2-large --port 8888  
 
 If you have issue, you may need to seperate vLLM into multiple local environments.
+
 Final words
 -----------
 
