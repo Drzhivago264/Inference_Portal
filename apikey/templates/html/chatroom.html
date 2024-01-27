@@ -97,9 +97,10 @@
         }
         const name = JSON.parse(document.getElementById('name').textContent);
         const key = JSON.parse(document.getElementById('key').textContent);
-
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
         const chatSocket = new WebSocket(
-            'ws://'
+            ws_scheme 
+            + '://'
             + window.location.host
             + '/ws/chat/'
             + name
