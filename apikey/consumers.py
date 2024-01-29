@@ -6,16 +6,25 @@ import random
 from channels.generic.websocket import WebsocketConsumer
 from .models import Price, Product, Key, LLM, InferenceServer
 from channels.db import database_sync_to_async
-class ChatConsumer(WebsocketConsumer):
+from channels.generic.websocket import AsyncWebsocketConsumer
+class ChatConsumer(AsyncWebsocketConsumer):
+    @database_sync_to_async
     def check_key(self):
         try:
             key = Key.objects.get(key=self.key, owner =self.name)
             return key
         except:
             return False
+        
+    @database_sync_to_async
+    def get_model_url(self, model):
+        try:
+            model_list = list(InferenceServer.objects.filter(hosted_model__name=model))
+            return model_list
+        except:
+            return False
 
-    def inference(self, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
-    
+    async def inference(self, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
         if beam == "false":
             beam = False
             length_penalty = 1
@@ -48,42 +57,50 @@ class ChatConsumer(WebsocketConsumer):
         }
         model = "Llama 2 7B"
         ''' Query a list of inference servers for a given model, pick a random one '''
-        url = list(InferenceServer.objects.filter(hosted_model__name=model))
-        random_url = random.choice(url)
+        url_list = await self.get_model_url(model) 
 
+        random_url = random.choice(url_list)
+        url = random_url.url
+        #test url for local dev
+        #url = "http://127.0.0.1:8080/generate"
         try:
-            response = requests.post(random_url.url, json=context ) 
-            return response.json()['text']
-        except:
-            return "You messed up the parameters, please return to default parameters"
+            response = requests.post( url, json=context, timeout=15 )
+            if str(response) == "<Response [500]>":
+                return "You messed up the parameters, please return to default parameters"
+            else:
+                return response.json()['text']
+        except ConnectionError as e:
+            return "Connection Error. Cannot communicate with the model"
+        except requests.Timeout: 
+            return "Request Time Out. Cannot communicate with the model"
         
-    def connect(self):
+    async def connect(self):
         self.name = self.scope["url_route"]["kwargs"]["name"]
         self.key = self.scope["url_route"]["kwargs"]["key"]
+        print(self.key)
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        key_object = self.check_key()
+        key_object = await self.check_key()
         self.room_group_name = "chat_%s" % self.name + self.key
 
         # Join room group
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name, self.channel_name
-        )
-        self.accept()
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        
+        await self.accept()
         
         if  key_object == False:
-            self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected!", "role": "Server", "time":self.time}))
-            self.disconnect(self) 
+            await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected!", "role": "Server", "time":self.time}))
+            await self.disconnect(self) 
         else:
-            self.send(text_data=json.dumps({"message": f"Your credit is {key_object.credit}","role": "Server", "time":self.time}))
+            await self.send(text_data=json.dumps({"message": f"Your credit is {key_object.credit}","role": "Server", "time":self.time}))
+            await self.send(text_data=json.dumps({"message": "Default to Llama Chat 7B or choose model on the left","role": "Server", "time":self.time}))
             
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         # Leave room group
-        async_to_sync(self.channel_layer.group_discard)(
-            self.room_group_name, self.channel_name
-        )
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+
         
     # Receive message from WebSocket
-    def receive(self, text_data):
+    async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         
@@ -100,31 +117,30 @@ class ChatConsumer(WebsocketConsumer):
         
         choosen_models = text_data_json["choosen_models"]
         if len(choosen_models) < 2:
-            self.send(text_data=json.dumps({"message": "Default to Llama Chat 7B or choose model on the left","role": "Server", "time":self.time}))
             choosen_models = "Llama 2 7B Chat"
         else:
             choosen_models = text_data_json["choosen_models"]
         role = text_data_json["role"]
         # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "chat_message", 
-                "role":role  ,
-                "message": message, 
-                "model":choosen_models, 
-                'top_k': top_k,
-                'top_p': top_p,
-                'best_of': best_of,
-                'max_tokens': max_tokens,
-                'frequency_penalty': frequency_penalty,
-                'presense_penalty': presense_penalty,
-                'temperature': temperature,
-                'beam': beam,
-                'early_stopping': early_stopping,
-                'length_penalty': length_penalty }
-        )
+        await self.channel_layer.group_send(
+                self.room_group_name, {"type": "chat_message", 
+                    "role":role  ,
+                    "message": message, 
+                    "model":choosen_models, 
+                    'top_k': top_k,
+                    'top_p': top_p,
+                    'best_of': best_of,
+                    'max_tokens': max_tokens,
+                    'frequency_penalty': frequency_penalty,
+                    'presense_penalty': presense_penalty,
+                    'temperature': temperature,
+                    'beam': beam,
+                    'early_stopping': early_stopping,
+                    'length_penalty': length_penalty }
+            )
 
     # Receive message from room group
-    def chat_message(self, event):
+    async def chat_message(self, event):
         message = event["message"]
         role = event["role"]
         model = event['model']
@@ -140,6 +156,6 @@ class ChatConsumer(WebsocketConsumer):
         length_penalty = event["length_penalty"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
-        self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time}))
-        response = self.inference(model=model, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=message)
-        self.send(text_data=json.dumps({"message": response, "role": model,  "time":self.time}))
+        await self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time}))
+        response = await self.inference(model=model, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=message)
+        await self.send(text_data=json.dumps({"message": response, "role": model,  "time":self.time}))
