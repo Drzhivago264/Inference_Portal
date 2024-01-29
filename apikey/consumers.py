@@ -7,6 +7,8 @@ from channels.generic.websocket import WebsocketConsumer
 from .models import Price, Product, Key, LLM, InferenceServer
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+import aiohttp
+import asyncio
 class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def check_key(self):
@@ -57,6 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }
         model = "Llama 2 7B"
         ''' Query a list of inference servers for a given model, pick a random one '''
+
         url_list = await self.get_model_url(model) 
 
         random_url = random.choice(url_list)
@@ -64,15 +67,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         #test url for local dev
         #url = "http://127.0.0.1:8080/generate"
         try:
-            response = requests.post( url, json=context, timeout=15 )
-            if str(response) == "<Response [500]>":
-                return "You messed up the parameters, please return to default parameters"
-            else:
-                return response.json()['text']
-        except ConnectionError as e:
-            return "Connection Error. Cannot communicate with the model"
-        except requests.Timeout: 
-            return "Request Time Out. Cannot communicate with the model"
+            async with aiohttp.ClientSession() as session:
+                timeout = aiohttp.ClientTimeout(total=15)
+                r = await session.post(url=url, timeout = timeout,
+                                            json=context,
+                                            headers={"Content-Type": "application/json"})
+                try:
+                    response = (await r.json())['text'][0]
+                    return response
+                except:
+                    return "You messed up the parameters. Return them to default."
+     
+        except aiohttp.ClientConnectorError:
+            return "Connection Error. Cannot communicate with the model."
+        except asyncio.TimeoutError: 
+            return "Request Time Out. Cannot communicate with the model."
+        
         
     async def connect(self):
         self.name = self.scope["url_route"]["kwargs"]["name"]
