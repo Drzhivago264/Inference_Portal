@@ -55,7 +55,7 @@ def inference(inference_url, top_k, top_p, best_of, temperature, max_tokens, pre
     }
 
     try:
-        response = requests.post(inference_url,   json=context,  timeout=10 ) 
+        response = requests.post(inference_url,   json=context,  timeout=15 ) 
         return response.json()['text']
     except requests.exceptions.Timeout:
         return "Request Timeout, Cannot connect to the model"
