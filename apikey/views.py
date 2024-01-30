@@ -70,6 +70,17 @@ def check_server_status(model_name):
         return False
     else:
         return available_list    
+
+def get_object(name, key):
+    try:
+        return Key.objects.get(owner=name, key = key)
+    except Key.DoesNotExist:
+        return None
+def get_object_model(model):
+    try:
+        return LLM.objects.get(name=model)
+    except LLM.DoesNotExist:
+        return None   
     
 """ VIEWS """           
 def index(request):
@@ -197,20 +208,8 @@ def prompt(request):
         beam = request.POST.get("beam") if "beam" in request.POST  else False
         early_stopping = request.POST.get("early_stopping") if "early_stopping" in request.POST else False
         length_penalty = float(request.POST.get("length_penalty")) if "length_penalty" in request.POST  else 0
-
         beam = True if beam =="True" else False
         early_stopping = True if early_stopping == "True" else False 
-        
-        def get_object(name, key):
-            try:
-                return Key.objects.get(owner=name, key = key)
-            except Key.DoesNotExist:
-                return None
-        def get_object_model(model):
-            try:
-                return LLM.objects.get(name=model)
-            except LLM.DoesNotExist:
-                return None
         instance = get_object(str(request.POST.get('name')), str(request.POST.get('key')))
         m = request.POST.get('model') if  "model" in request.POST else "Llama 2 7B"
         model = get_object_model(m)
@@ -238,7 +237,6 @@ def prompt(request):
 
 def room(request, name, key):
     llm = LLM.objects.all()
-
     context = {'llms':llm, "name": name, "key": key}
     return render(request, "html/chatroom.html", context)
 
@@ -317,26 +315,12 @@ class StripeWebhookView(View):
 
   
 class ApiView(APIView):
-    # add permission to check if user is authenticated
-
-    def get_object(self, name, key):
-        try:
-            return Key.objects.get(owner=name, key = key)
-        except Key.DoesNotExist:
-            return None
-    def get_object_model(self, model):
-        try:
-            return LLM.objects.get(name=model)
-        except LLM.DoesNotExist:
-            return None
-
     def get(self, request, *args, **kwargs):
         return Response({'Intro':"API"}, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
-        print(request)
-        instance = self.get_object(request.data['name'], request.data['key'])
-        model = self.get_object_model(request.data['model'])
+        instance = get_object(request.data['name'], request.data['key'])
+        model = get_object_model(request.data['model'])
         prompt = request.data['prompt'] if len(request.data['prompt']) > 1 else " "
         top_p= float(request.data["top_p"]) if "top_p" in request.POST else 0.73
         best_of = float(request.data["best_of"]) if "best_of" in request.POST else 1
@@ -348,7 +332,6 @@ class ApiView(APIView):
         beam = request.data["beam"] if "beam" in request.POST  else False
         early_stopping = True if "early_stopping" in request.POST else False
         length_penalty = float(request.data["length_penalty"]) if "length_penalty" in request.POST  else 0
-
         beam = True if beam =="True" else False
         early_stopping = True if early_stopping == "True" else False   
                  
