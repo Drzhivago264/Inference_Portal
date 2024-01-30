@@ -20,9 +20,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
     @database_sync_to_async
     def get_model_url(self, model):
+        avaiable_model_list = []
+
         try:
             model_list = list(InferenceServer.objects.filter(hosted_model__name=model))
-            return model_list
+            for m in model_list:
+                if m.status == "on":
+                    avaiable_model_list.append(m)
+            return avaiable_model_list
         except:
             return False
 
@@ -57,37 +62,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "early_stopping": early_stopping,
             
         }
-        model = "Llama 2 7B"
         ''' Query a list of inference servers for a given model, pick a random one '''
 
         url_list = await self.get_model_url(model) 
-
-        random_url = random.choice(url_list)
-        url = random_url.url
-        #test url for local dev
-        #url = "http://127.0.0.1:8080/generate"
-        try:
-            async with aiohttp.ClientSession() as session:
-                timeout = aiohttp.ClientTimeout(total=15)
-                r = await session.post(url=url, timeout = timeout,
-                                            json=context,
-                                            headers={"Content-Type": "application/json"})
-                try:
-                    response = (await r.json())['text'][0]
-                    return response
-                except:
-                    return "You messed up the parameters. Return them to default."
-     
-        except aiohttp.ClientConnectorError:
-            return "Connection Error. Cannot communicate with the model."
-        except asyncio.TimeoutError: 
-            return "Request Time Out. Cannot communicate with the model."
+        if url_list:
+            random_url = random.choice(url_list)
+            url = random_url.url
+            #test url for local dev
+            #url = "http://127.0.0.1:8080/generate"
+            try:
+                async with aiohttp.ClientSession() as session:
+                    timeout = aiohttp.ClientTimeout(total=15)
+                    r = await session.post(url=url, timeout = timeout,
+                                                json=context,
+                                                headers={"Content-Type": "application/json"})
+                    try:
+                        response = (await r.json())['text'][0]
+                        return response
+                    except:
+                        return "You messed up the parameters. Return them to default."
+        
+            except aiohttp.ClientConnectorError:
+                return "Connection Error. Cannot communicate with the model."
+            except asyncio.TimeoutError: 
+                return "Request Time Out. Cannot communicate with the model."
+        else:
+            return "Model is currentl offline"
         
         
     async def connect(self):
         self.name = self.scope["url_route"]["kwargs"]["name"]
         self.key = self.scope["url_route"]["kwargs"]["key"]
-        print(self.key)
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         key_object = await self.check_key()
         self.room_group_name = "chat_%s" % self.name + self.key
@@ -124,12 +129,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         beam = text_data_json["beam"]
         early_stopping = text_data_json["early_stopping"]
         length_penalty = text_data_json["length_penalty"]
-        
         choosen_models = text_data_json["choosen_models"]
-        if len(choosen_models) < 2:
-            choosen_models = "Llama 2 7B Chat"
-        else:
-            choosen_models = text_data_json["choosen_models"]
+        print(choosen_models)
         role = text_data_json["role"]
         # Send message to room group
         await self.channel_layer.group_send(

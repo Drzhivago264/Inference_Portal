@@ -54,7 +54,11 @@
             <br>
             <h3> Available Models </h3>
             {% for llm in llms %}
-                <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this)"> {{llm.name}}<br>
+                {% if llm.name == 'Llama 2 7B' %}
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this)"> {{llm.name}}<br>
+                {% else %}
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this)"> {{llm.name}}<br>
+                {% endif %}
             {% endfor %}
             <h3> Parameters </h3>
                 <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
@@ -136,13 +140,14 @@
  
        
         document.querySelector('#chat-message-submit').onclick = function(e) {
-            var choosen_models = [];
-            Array.from(document.getElementsByClassName('checkbox')).forEach(e => function(){
-                var $this = e;
-                if ($this.is(':checked')) {
-                  choosen_models.push($this.val());
-                }
-              })
+            var choosen_models = null; 
+            var inputElements = document.getElementsByClassName('checkbox');
+            for(var i=0; inputElements[i]; ++i){
+                  if(inputElements[i].checked){
+                        choosen_models = inputElements[i].value;
+                       break;
+                  }
+            }
             
             const top_p = document.getElementsByName("top_p")[0].value
             const top_k = document.getElementsByName("top_k")[0].value
