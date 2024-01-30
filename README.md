@@ -1,18 +1,17 @@
 django-inference-portal
 =======================
 
-This is a simple dynamic django server that uses django channels to interact with GPU servers for language model inference.
+This is a simple dynamic django server that uses django channels, celery and Redis to interact with GPU servers for language model inference.
 
 Purpose
 -------
 
 The purpose of this project is to offer users simple interfaces to interact with GPU servers.
-This website processses API and HTTP requests from users, forwards them to the GPU servers and forwards the responses back in a dynamic manner.
-This website also uses STRIPE to process users' payment.
+This website processses API and HTTP requests from users, forwards them to the GPU servers and forwards the responses back in a dynamic manner, this includes real-time chat rooms. This website also uses STRIPE to process users' payment.
 
 Design
 -------
-![Alt text](design.drawio.png)
+![Alt text](design.png)
 
 Explain:
 - Redis server fowards the message for the websockets that are used for real time chat.
@@ -20,6 +19,8 @@ Explain:
 - API Rest Framework opens endpoints for the webportal, the webportal then forward the user requests to GPU servers.
 - GPU servers do inference, each GPU server holds one model and uses vLLM to open endpoints. 
 - Nginx is used as a proxy for the Django server and serve static files.
+- Celery is used to run multiple background tasks including spin up, stop, create and terminate EC GPU instances. Celery is also used to queue 
+ API requests to GPU servers.
 - Django server are used to connect all components.
 
 Installation
@@ -41,6 +42,11 @@ Next you must install Redis and start Redis Server at port 6380:
     sudo apt-get update
     sudo apt-get install redis
     redis-server --port 6380
+
+Next you must install celery with redis support and launch Redis Worker 6380:
+
+    pip install celery['redis']
+    celery -A inferenceportal worker --loglevel=info
 
 Next you must setup STRIPE CLI and start a webhook:
 
