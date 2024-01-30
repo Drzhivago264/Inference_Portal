@@ -24,6 +24,7 @@ class InferenceServer(models.Model):
     instance_type = models.CharField(max_length=200)
     url = models.URLField(max_length = 200) 
     hosted_model = models.ForeignKey(LLM, on_delete=models.CASCADE)
+    status = models.CharField(max_length = 200, default="off")
     def __str__(self) -> str:
         return self.name
         

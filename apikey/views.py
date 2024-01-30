@@ -1,8 +1,8 @@
 from django.shortcuts import render, HttpResponseRedirect
-from django.core.mail import send_mail
+import random
 import stripe
 import secrets
-from .models import Price, Product, Key, LLM
+from .models import Price, Product, Key, LLM, InferenceServer
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
@@ -19,10 +19,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
+from .celery_tasks import boot_EC2, sleep_EC2, send_email_
 stripe.api_key = settings.STRIPE_SECRET_KEY
 import requests
-def inference(model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
 
+"""U"""
+def inference(inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
     if beam == False:
         length_penalty = 1
         early_stopping = False
@@ -51,12 +53,25 @@ def inference(model, top_k, top_p, best_of, temperature, max_tokens, presense_pe
         "early_stopping": early_stopping,
         
     }
+
     try:
-        response = requests.post("http://127.0.0.1:8080/generate",   json=context ) 
+        response = requests.post(inference_url,   json=context,  timeout=10 ) 
         return response.json()['text']
-    except:
-        return "You messed up the parameters, please return to default parameters"
-        
+    except requests.exceptions.Timeout:
+        return "Request Timeout, Cannot connect to the model"
+
+def check_server_status(model_name):
+    server_list = list(InferenceServer.objects.filter(hosted_model__name=model_name))
+    available_list = []
+    for server in server_list:
+        if server.status == "on":
+            available_list.append(server.url)
+    if len(available_list) == 0:
+        return False
+    else:
+        return available_list    
+    
+""" VIEWS """           
 def index(request):
     return render(request, "html/index.html")
 
@@ -155,7 +170,7 @@ def contact(request):
             email_from = settings.EMAIL_HOST_USER
             recipient_list = [settings.EMAIL_HOST_USER,]
             try:
-                send_mail( subject, message, email_from, recipient_list )
+                send_email_.delay( subject, message, email_from, recipient_list )
                 messages.error(request,"Sent!",  extra_tags='email')
                 return HttpResponseRedirect("/contact.html")
             except:
@@ -167,6 +182,8 @@ def contact(request):
     elif request.method == 'GET':
         return render(request, "html/contact.html", {'form': form})
 
+    
+    
 def prompt(request):
     llm = LLM.objects.all()
     if request.method == 'POST':    
@@ -198,18 +215,24 @@ def prompt(request):
         m = request.POST.get('model') if  "model" in request.POST else "Llama 2 7B"
         model = get_object_model(m)
         prompt = bleach.clean((request.POST.get('prompt'))) if len(request.POST.get('prompt')) > 1 else " "
+       
         if not instance:
             response = "Error: key or key name is not correct"
         elif not model:
             response = "Error: model name is not correct"
-        else:
-            try:
-                response = inference(model=model.name, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
-            except:
-                response = "Error: you messed up the parameters"
+        elif model: 
+            available_server_list = check_server_status(m)
+            if not available_server_list:
+                response = "Server is currently offline"
+            else:
+                inference_url = random.choice(available_server_list)
+                try:
+                    response = inference(inference_url=inference_url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                except:
+                    response = "Error: you messed up the parameters"
         context = {'llms':llm, "model_response": response}
     else:
-        context = {'llms':llm, "model_response": ""}
+        context = {'llms':llm, "model_response": "You need to use POST requests"}
     
     return render(request, "html/prompt.html", context)
 
@@ -311,7 +334,7 @@ class ApiView(APIView):
         return Response({'Intro':"API"}, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
-
+        print(request)
         instance = self.get_object(request.data['name'], request.data['key'])
         model = self.get_object_model(request.data['model'])
         prompt = request.data['prompt'] if len(request.data['prompt']) > 1 else " "
@@ -327,7 +350,8 @@ class ApiView(APIView):
         length_penalty = float(request.data["length_penalty"]) if "length_penalty" in request.POST  else 0
 
         beam = True if beam =="True" else False
-        early_stopping = True if early_stopping == "True" else False            
+        early_stopping = True if early_stopping == "True" else False   
+                 
         if not instance:
             return Response(
                 {"Error": "Key does not exists"},
@@ -338,19 +362,23 @@ class ApiView(APIView):
                 {"Error": "Model does not exists"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        else:
-            try:
-                response = inference(model=model.name, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
-            except:
-                response = "error: you messed up the parameters"
-        return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
-
+        elif model:
+            available_server_list = check_server_status(model.name)
+            if not available_server_list:
+                return Response(
+                    {"Error": "Server is currently offline"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                inference_url = random.choice(available_server_list)
+                try:
+                    response = inference(inference_url=inference_url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                    return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
+                except:
+                    return Response(
+                    {"Error": "You messed up parameters"},
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
+        
 
   
-{
- "prompt": "hola",
-  "name": "11111",
-  "key": "tQ6MXKAFj3bw7OoJ20Gh92ldaNmA3aYAma6cAWohe2sYpbBnTyAc3R_kP2DRcUUsZjzB1MjB8FSZLH8L9pYZkw",
-  "model" :  "Mixtral 7B",
-  "beam": True
-}
