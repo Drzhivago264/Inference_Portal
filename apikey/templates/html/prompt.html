@@ -10,7 +10,21 @@
   <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
 </head>
-
+<style>
+  #chat-log {
+    width: 100% !important;
+    resize: vertical;
+    background-color: rgb(37, 37, 37);
+    color: white;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    height: 25vh;
+    overflow: auto;
+}
+.message_log_container {
+    margin:  10px ;
+}
+</style>
 <body>
   <div id="main">
     <div id="header">
@@ -35,7 +49,15 @@
     <div id="site_content">
       <div class="sidebar">
         <!-- insert your sidebar items here -->
-        <h2>API endpoint</h2>
+        <h2>Model Response</h2>
+        <div id="chat-log">
+          <p> 
+            {% if model_response %}
+            <div class="message_log_container" style="text-align: left;">  <span> {{ model_response }} ({{ role }} {{ time }})</span></div>
+            {% endif %}
+          </p>
+        </div><br>
+        <h2>API Endpoint</h2>
         <h4>Python example:</h4>
         <pre style="font-size: 12px">
 r = requests.post("[HOST]/api/",  
@@ -85,21 +107,23 @@ curl "[HOST]/api/" --header
 
       </div>
       <div id="content">
-        
-        <p> 
-          {% if model_response %}
-          {{ model_response }}
-          {% endif %}
-        </p>
+
+
         <form method="post">
           {% csrf_token %}
           <div class="form_settings">
-            <p><span>Key Name</span><input type="text" name="name" /></p>
+            <p><span>Key Name</span><input  type="password" name="name" /></p>
             <p><span>Key</span><input type="text" name="key" /></p>
-            {% for llm in llms %}
-            <p><span>{{llm.name}}</span><input class="checkbox" type="checkbox" name="model" value="{{llm.name}}" /></p>
-            {% endfor %}
+ 
             <p><span>Prompt</span><textarea rows="8" cols="50" name="prompt"></textarea></p>
+            <h3> Available Models </h3>
+            {% for llm in llms %}
+                {% if llm.name == 'Llama 2 7B' %}
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this)"> {{llm.name}}<br>
+                {% else %}
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this)"> {{llm.name}}<br>
+                {% endif %}
+            {% endfor %}
             <h3> Parameters </h3>
             <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
             <h5>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </h5>                  

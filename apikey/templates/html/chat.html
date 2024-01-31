@@ -31,21 +31,18 @@
       </div>
 
       <div id="site_content">
-        <h2>Enter your key and key name</h2>
-        <label for="name">Key Name: </label>
-        <input id="name" type="text" >
+        <h2>Enter your key </h2>
         <label for="key">Key: </label>
         <input id="key" type="text" >
         <input id="room-name-submit" type="button" value="Enter">
       </div>
     <script>
-        document.querySelector('#name').focus();
+        document.querySelector('#key').focus();
 
 
         document.querySelector('#room-name-submit').onclick = function(e) {
-            var name = document.querySelector('#name').value;
             var key = document.querySelector('#key').value;
-            window.location.pathname = '/chat/' + name + '/' + key + "/";
+            window.location.pathname = '/chat/' + key + "/";
         };
     </script>
 </body>

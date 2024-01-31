@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponseRedirect
 import random
 import stripe
+from datetime import datetime
 import secrets
 from .models import Price, Product, Key, LLM, InferenceServer
 from .forms import CaptchaForm
@@ -229,15 +230,15 @@ def prompt(request):
                     response = inference(inference_url=inference_url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
                 except:
                     response = "Error: you messed up the parameters"
-        context = {'llms':llm, "model_response": response}
+        context = {'llms':llm, "model_response": response, "role": model.name, "time": datetime.today().strftime('%Y-%m-%d %H:%M:%S') }
     else:
-        context = {'llms':llm, "model_response": "You need to use POST requests"}
+        context = {'llms':llm, "model_response": "Default model is Llama 2 7B. Choose model below. ",  "role": "Llama 2 7B", "time": datetime.today().strftime('%Y-%m-%d %H:%M:%S') }
     
     return render(request, "html/prompt.html", context)
 
-def room(request, name, key):
+def room(request,  key):
     llm = LLM.objects.all()
-    context = {'llms':llm, "name": name, "key": key}
+    context = {'llms':llm,  "key": key}
     return render(request, "html/chatroom.html", context)
 
 class SuccessView(TemplateView):
