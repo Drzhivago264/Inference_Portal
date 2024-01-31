@@ -81,6 +81,14 @@ TEMPLATES = [
         },
     },
 ]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6380",
+    }
+}
+
 ASGI_APPLICATION = "inferenceportal.asgi.application"
 
 STATICFILES_DIRS = [BASE_DIR / "static"]

@@ -4,33 +4,98 @@ from django.core.mail import send_mail
 import random
 import requests
 from .models import  InferenceServer
+from decouple import config
+import boto3
+from botocore.exceptions import ClientError
+aws = config("aws_access_key_id")
+aws_secret = config("aws_secret_access_key")
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-@shared_task
-def boot_EC2():
+
+"""EC status can be: stopped, stopping, pending, running"""
+
+def get_EC2_status(instance_id, region):
+    ec2_resource = boto3.resource('ec2', region_name=region, aws_access_key_id=aws, aws_secret_access_key= aws_secret)
+    try:
+        instance = ec2_resource.Instance(instance_id)
+        return instance.state['Name']
+    except Exception as e:
+        return e
+
+def command_EC2(instance_id, region, action):
+    aws = config("aws_access_key_id")
+    aws_secret = config("aws_secret_access_key")
+    ec2 = boto3.client('ec2', region_name = region, aws_access_key_id=aws, aws_secret_access_key= aws_secret)
+    if action == "on":
+        try:
+            ec2.start_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.start_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+    elif action == "off":
+        try:
+            ec2.stop_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.stop_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+    elif action == "reboot":
+        try:
+            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+        return 
+
+def get_model_url(model):
+    avaiable_model_list = []
+    try:
+        model_list = list(InferenceServer.objects.filter(hosted_model__name=model))
+        for m in model_list:
+            avaiable_model_list.append(m)
+        return avaiable_model_list
+    
+    except:
+        return False
+ 
+def update_server_status_in_db(instance_id, region):
+    new_status = get_EC2_status(instance_id, region=region)
+    ser_obj = InferenceServer.objects.get(name=instance_id)
+    ser_obj.status = new_status
+    ser_obj.save()
     return
 
-@shared_task
-def sleep_EC2():
-    return
+def send_request(url, instance_id,context):
+    try:
+        response = requests.post(url,   json=context,  timeout=10 ) 
+        response = response.json()['text']
+    except requests.exceptions.Timeout:
+        response = "Request Timeout, Cannot connect to the model. "
+        ser_obj = InferenceServer.objects.get(name=instance_id)
+        ser_obj.status = "stopped"
+        ser_obj.save()
+    except requests.exceptions.InvalidJSONError:
+        response = "You messed up the parameters. Return them to default."
+    return response
 
 @shared_task
 def send_email_( subject, message, email_from, recipient_list):
     send_mail(subject, message, email_from, recipient_list)
     return
 
-def get_model_url(model):
-    avaiable_model_list = []
 
-    try:
-        model_list = list(InferenceServer.objects.filter(hosted_model__name=model))
-        for m in model_list:
-            if m.status == "on":
-                avaiable_model_list.append(m)
-        return avaiable_model_list
-    except:
-        return False
     
 @shared_task
 def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
@@ -71,17 +136,19 @@ def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, tempe
         if url_list:
             random_url = random.choice(url_list)
             url = random_url.url
-            #test url for local dev
-            #url = "http://127.0.0.1:8080/generate"
-            try:
-                response = requests.post(url,   json=context,  timeout=10 ) 
-                response = response.json()['text']
-
-        
-            except requests.exceptions.Timeout:
-                response = "Request Timeout, Cannot connect to the model"
-            except:
-                response = "You messed up the parameters. Return them to default."
+            instance_id = random_url.name
+            server_status = random_url.status
+            if server_status == "running":
+                response = send_request(url=url, instance_id=instance_id,context=context)
+            elif server_status == "stopped" or "stopping":
+                command_EC2(instance_id, region = "us-east-1", action = "on")
+                response = "Server is starting up, try again in 400 seconds"
+                update_server_status_in_db(instance_id=instance_id, region="us-east-1")
+            elif server_status == "pending":
+                response = "Server is setting up, try again in 30 seconds"
+                update_server_status_in_db(instance_id=instance_id, region="us-east-1")
+            else:
+                response = send_request(url, context)
         else:
             response = "Model is currentl offline"
         channel_layer = get_channel_layer()

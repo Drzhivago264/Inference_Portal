@@ -43,9 +43,9 @@ Next you must install Redis and start Redis Server at port 6380:
     sudo apt-get install redis
     redis-server --port 6380
 
-Next you must install celery with redis support and launch Redis Worker 6380:
+Next you must install celery with redis support and launch a Celery Worker:
 
-    pip install celery['redis']
+    pip install celery[redis]
     celery -A inferenceportal worker --loglevel=info
 
 Next you must setup STRIPE CLI and start a webhook:
@@ -67,6 +67,9 @@ Next you need to set up .env file and setup the following key:
     STRIPE_WEBHOOK_SECRET="" 
     EMAIL_ADDRESS = "" (The EMAIL_ADDRESS that fowards contact form)
     MAIL = "" (The password for EMAIL_ADDRESS that fowards contact form)
+    DJANGO_SETTINGS_MODULE="inferenceportal.settings"
+    aws_access_key_id="" (The AWS key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
+    aws_secret_access_key="" (The AWS secret key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
 
 Finally you can test the server with:
 
@@ -74,7 +77,7 @@ Finally you can test the server with:
 
 In production environment, you may want to configure the server to be served by Daphne or both Daphne and Gurnicorn (refer to https://channels.readthedocs.io/en/1.x/deploying.html?highlight=django).
 
-Contents in `static` directory are served as `/static/`. In production environment this folder need to be removed from root and serve by NGINX or APACHE
+Contents in `staticfiles` directory are served as `/static/`. In production environment this folder need to be removed from root and served by NGINX or APACHE
 
 About the GPU intances, you need to set up a vLLM server to serve the models listed in LLM.model:
 
@@ -82,9 +85,9 @@ About the GPU intances, you need to set up a vLLM server to serve the models lis
     pip install vllm
     python -m vllm.entrypoints.openai.api_server --model {model name}
 
-If you expose this instance to the internet you may need Nginx or Apache server in front of it. If you route it through your subnet then you are good to go.
+If you expose this instance to the internet you may need Nginx or Apache server in front of it. If you route it through your subnet or have a security policy that only accept requests from your Django server then you are good to go.
 
-In addition, as we need to automatically boot and shutdown your GPU intances, you may consider using systemd or equivalent to setup the vLLM on startup.
+In addition, as we need to automatically boot and shutdown your GPU intances, you may consider using Supervisor or equivalent to setup the vLLM on startup.
 
 Development environment setup
 -----------------------------
