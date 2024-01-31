@@ -84,8 +84,10 @@
         <div id="chat-log">
 
         </div><br>
-      
+        <label for="key_name">Key Name: </label>
+        <input id="key_name" type="password" > <br> <br>
         <textarea id="chat-message-input" rows="5" cols="70" name="message"></textarea>
+       
         <input id="chat-message-submit" type="button" value="Send">
         
         {{ name|json_script:"name" }}
@@ -99,7 +101,6 @@
                 if (item !== checkbox) item.checked = false
             })
         }
-        const name = JSON.parse(document.getElementById('name').textContent);
         const key = JSON.parse(document.getElementById('key').textContent);
         var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
         const chatSocket = new WebSocket(
@@ -107,8 +108,6 @@
             + '://'
             + window.location.host
             + '/ws/chat/'
-            + name
-            + '/'
             + key
             + '/'
         );
@@ -148,7 +147,7 @@
                        break;
                   }
             }
-            
+            const key_name = document.getElementById('key_name').value
             const top_p = document.getElementsByName("top_p")[0].value
             const top_k = document.getElementsByName("top_k")[0].value
             const best_of = document.getElementsByName("best_of")[0].value
@@ -173,6 +172,7 @@
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
                 'message': message,
+                'name': key_name,
                 'choosen_models': choosen_models,
                 'role': 'Human',
                 'top_k': top_k,
