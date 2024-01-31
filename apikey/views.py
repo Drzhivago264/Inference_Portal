@@ -7,6 +7,7 @@ from .models import Price, Product, Key, LLM, InferenceServer
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
+from django.views.decorators.cache import cache_page
 from django.shortcuts import redirect
 from django.conf import settings
 import bleach
@@ -20,7 +21,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
-from .celery_tasks import boot_EC2, sleep_EC2, send_email_
+from .celery_tasks import send_email_
 stripe.api_key = settings.STRIPE_SECRET_KEY
 import requests
 
@@ -65,7 +66,7 @@ def check_server_status(model_name):
     server_list = list(InferenceServer.objects.filter(hosted_model__name=model_name))
     available_list = []
     for server in server_list:
-        if server.status == "on":
+        if server.status == "running":
             available_list.append(server.url)
     if len(available_list) == 0:
         return False
@@ -83,13 +84,15 @@ def get_object_model(model):
     except LLM.DoesNotExist:
         return None   
     
-""" VIEWS """           
+""" VIEWS """      
+@cache_page(60 * 60)     
 def index(request):
     return render(request, "html/index.html")
 
 def chat(request):
     return render(request, "html/chat.html")
 
+@cache_page(60 * 60)
 def model_infor(request):
     llm = LLM.objects.all()
     context = {'llms':llm}

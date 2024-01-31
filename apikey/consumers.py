@@ -9,7 +9,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 import aiohttp
 import asyncio
-from .celery_tasks import boot_EC2, sleep_EC2, send_email_, chat_inference
+from .celery_tasks import send_email_, chat_inference
 class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def check_key(self):
@@ -66,6 +66,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             length_penalty = text_data_json["length_penalty"]
             choosen_models = text_data_json["choosen_models"]
             role = text_data_json["role"]
+
             chat_inference.delay(credit = key_object.credit, room_group_name = self.room_group_name, model = choosen_models, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=message)
             # Send message to room group
             await self.channel_layer.group_send(
