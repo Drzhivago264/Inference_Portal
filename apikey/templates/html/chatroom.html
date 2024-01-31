@@ -114,11 +114,15 @@
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            if (data.role == 'Human') {
+            if (data.role == 'Human' ) {
                 document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: right;">  <span>' + " (" + data.role +"-"+ data.time + ") " + data.message +'</span></div> ');
                 }
+            else if (data.credit  ) {
+                document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: left;">  <span>' +  data.message + " (" + data.role +"-"+ data.time + " Remaining Credit: " + data.credit +  ") " +'</span></div> ');
+            }
             else {
                 document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: left;">  <span>' +  data.message + " (" + data.role +"-"+ data.time + ") " +'</span></div> ');
+ 
             }
    
             logTa = document.getElementById("chat-log")

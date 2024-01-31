@@ -33,7 +33,7 @@ def get_model_url(model):
         return False
     
 @shared_task
-def chat_inference( room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
+def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
 
         if beam == "false":
             beam = False
@@ -91,6 +91,7 @@ def chat_inference( room_group_name, model, top_k, top_p, best_of, temperature, 
                     "type": "chat_message", 
                     "role": model,
                     "message": response, 
+                    'credit': credit
             }
         )
   

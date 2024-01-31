@@ -29,6 +29,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         
         await self.accept()
+
+        await self.send(text_data=json.dumps({"message": "Default to Llama Chat 7B or choose model on the left","role": "Server", "time":self.time}))
         await self.send(text_data=json.dumps({"message": "Input your Key name in the box.", "role": "Server", "time":self.time}))
         
 
@@ -49,10 +51,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected!", "role": "Server", "time":self.time}))
             await self.disconnect(self) 
         else:
-            await self.send(text_data=json.dumps({"message": f"Your credit is {key_object.credit}","role": "Server", "time":self.time}))
-            await self.send(text_data=json.dumps({"message": "Default to Llama Chat 7B or choose model on the left","role": "Server", "time":self.time}))
-            
-        
+
             message = text_data_json["message"]
             
             top_p= text_data_json["top_p"]
@@ -67,12 +66,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             length_penalty = text_data_json["length_penalty"]
             choosen_models = text_data_json["choosen_models"]
             role = text_data_json["role"]
-            chat_inference.delay(room_group_name = self.room_group_name, model = choosen_models, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=message)
+            chat_inference.delay(credit = key_object.credit, room_group_name = self.room_group_name, model = choosen_models, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=message)
             # Send message to room group
             await self.channel_layer.group_send(
                     self.room_group_name, {"type": "chat_message", 
                         "role":role  ,
                         "message": message, 
+                        "credit": ""
                     }
                 ) 
 
@@ -80,8 +80,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event["message"]
         role = event["role"]
+        credit = event["credit"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
-        await self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time}))
+        if role == "Human" or role =="Server":
+            await self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time}))
+        else:
+            await self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time, "credit":credit}))
         #response = await self.inference(model=model, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=message)
         #await self.send(text_data=json.dumps({"message": response, "role": model,  "time":self.time}))
