@@ -78,11 +78,12 @@ def get_object(name, key):
         return Key.objects.get(owner=name, key = key)
     except Key.DoesNotExist:
         return None
+    
 def get_object_model(model):
     try:
         return LLM.objects.get(name=model)
-    except LLM.DoesNotExist:
-        return None   
+    except LLM.DoesNotExist as e:
+        return e   
     
 """ VIEWS """      
 @cache_page(60 * 60)     
@@ -233,11 +234,9 @@ def prompt(request):
                     response = inference(inference_url=inference_url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
                 except:
                     response = "Error: you messed up the parameters"
-        context = {'llms':llm, "model_response": response, "role": model.name, "time": datetime.today().strftime('%Y-%m-%d %H:%M:%S') }
-    else:
-        context = {'llms':llm, "model_response": "Default model is Llama 2 7B. Choose model below. ",  "role": "Llama 2 7B", "time": datetime.today().strftime('%Y-%m-%d %H:%M:%S') }
-    
-    return render(request, "html/prompt.html", context)
+        messages.info(request,f"{response} ({model.name} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}))")
+        return HttpResponseRedirect("/prompt.html")    
+    return render(request, "html/prompt.html")
 
 def room(request,  key):
     llm = LLM.objects.all()

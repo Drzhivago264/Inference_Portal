@@ -1,6 +1,7 @@
 
 from celery import shared_task
 from django.core.mail import send_mail
+
 import random
 import requests
 from .models import  InferenceServer
@@ -9,6 +10,7 @@ import boto3
 from botocore.exceptions import ClientError
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
+region = "us-east-1"
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -70,10 +72,9 @@ def get_model_url(model):
     except:
         return False
  
-def update_server_status_in_db(instance_id, region):
-    new_status = get_EC2_status(instance_id, region=region)
+def update_server_status_in_db(instance_id):
     ser_obj = InferenceServer.objects.get(name=instance_id)
-    ser_obj.status = new_status
+    ser_obj.status = "pending"
     ser_obj.save()
     return
 
@@ -87,7 +88,7 @@ def send_request(url, instance_id,context):
         ser_obj.status = "stopped"
         ser_obj.save()
     except requests.exceptions.InvalidJSONError:
-        response = "You messed up the parameters. Return them to default."
+        response = "You messed up the parameters. Return them to the defaults."
     return response
 
 @shared_task
@@ -95,7 +96,18 @@ def send_email_( subject, message, email_from, recipient_list):
     send_mail(subject, message, email_from, recipient_list)
     return
 
-
+@shared_task()
+def periodically_monitor_EC2_instance():
+    available_server = InferenceServer.objects.all()
+    for server in available_server:
+        ec2_resource = boto3.resource('ec2', region_name=region, aws_access_key_id=aws, aws_secret_access_key= aws_secret)
+        try:
+            instance = ec2_resource.Instance(server.name)
+            server.status = instance.state['Name']
+            server.save()
+            return instance.state['Name']
+        except Exception as e:
+            return e
     
 @shared_task
 def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
@@ -141,16 +153,15 @@ def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, tempe
             if server_status == "running":
                 response = send_request(url=url, instance_id=instance_id,context=context)
             elif server_status == "stopped" or "stopping":
-                command_EC2(instance_id, region = "us-east-1", action = "on")
+                command_EC2(instance_id, region = region, action = "on")
                 response = "Server is starting up, try again in 400 seconds"
-                update_server_status_in_db(instance_id=instance_id, region="us-east-1")
+                update_server_status_in_db(instance_id=instance_id)
             elif server_status == "pending":
                 response = "Server is setting up, try again in 30 seconds"
-                update_server_status_in_db(instance_id=instance_id, region="us-east-1")
             else:
                 response = send_request(url, context)
         else:
-            response = "Model is currentl offline"
+            response = "Model is currently offline"
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             room_group_name,
