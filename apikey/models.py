@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.timezone import now
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
@@ -25,6 +26,7 @@ class InferenceServer(models.Model):
     url = models.URLField(max_length = 200) 
     hosted_model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     status = models.CharField(max_length = 200, default="off")
+    last_message_time = models.DateTimeField(default=now)
     def __str__(self) -> str:
         return self.name
         

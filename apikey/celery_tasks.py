@@ -1,7 +1,7 @@
 
 from celery import shared_task
 from django.core.mail import send_mail
-
+from django.utils import timezone
 import random
 import requests
 from .models import  InferenceServer
@@ -72,10 +72,15 @@ def get_model_url(model):
     except:
         return False
  
-def update_server_status_in_db(instance_id):
+def update_server_status_in_db(instance_id, update_type):
     ser_obj = InferenceServer.objects.get(name=instance_id)
-    ser_obj.status = "pending"
-    ser_obj.save()
+    if update_type == "status":
+       
+        ser_obj.status = "pending"
+        ser_obj.save()
+    elif update_type == "time":
+        ser_obj.last_message_time = timezone.now()
+        ser_obj.save()
     return
 
 def send_request(url, instance_id,context):
@@ -108,7 +113,20 @@ def periodically_monitor_EC2_instance():
             return instance.state['Name']
         except Exception as e:
             return e
-    
+
+@shared_task()
+def periodically_shutdown_EC2_instance():
+    available_server = InferenceServer.objects.all()
+    for server in available_server:
+        un_used_time = timezone.now() - server.last_message_time
+        if un_used_time.total_seconds() > 300 and (server.status != "stopped" or server.status != "stopping"):
+            command_EC2(server.name, region = region, action = "off")
+            server.status = "stopping"
+            server.save()
+        else:
+            pass
+        
+        
 @shared_task
 def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
 
@@ -152,10 +170,11 @@ def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, tempe
             server_status = random_url.status
             if server_status == "running":
                 response = send_request(url=url, instance_id=instance_id,context=context)
+                update_server_status_in_db(instance_id=instance_id, update_type="time")
             elif server_status == "stopped" or "stopping":
                 command_EC2(instance_id, region = region, action = "on")
                 response = "Server is starting up, try again in 400 seconds"
-                update_server_status_in_db(instance_id=instance_id)
+                update_server_status_in_db(instance_id=instance_id, update_type="status")
             elif server_status == "pending":
                 response = "Server is setting up, try again in 30 seconds"
             else:

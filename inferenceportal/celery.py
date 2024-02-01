@@ -17,6 +17,11 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.beat_schedule = {
     'periodically_monitor_EC2_instance': {
         'task': 'apikey.celery_tasks.periodically_monitor_EC2_instance',      
+        'schedule': 60,
+
+    },
+    'periodically_shutdown_EC2_instance': {
+        'task': 'apikey.celery_tasks.periodically_shutdown_EC2_instance',      
         'schedule': 120,
 
     },
