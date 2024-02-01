@@ -51,10 +51,11 @@
         <!-- insert your sidebar items here -->
         <h2>Model Response</h2>
         <div id="chat-log">
+          
           <p> 
-            {% if model_response %}
-            <div class="message_log_container" style="text-align: left;">  <span> {{ model_response }} ({{ role }} {{ time }})</span></div>
-            {% endif %}
+            {%for message in messages %}
+            <div class="message_log_container" style="text-align: left; word-wrap: break-word; overflow-wrap: break-word;"><span> {{ message }}</span></div>
+            {% endfor %}
           </p>
         </div><br>
         <h2>API Endpoint</h2>
@@ -149,5 +150,14 @@ curl "[HOST]/api/" --header
     </div>
 
   </div>
+
+  <script>
+    function onlyOne(checkbox) {
+      var checkboxes = document.getElementsByName('model')
+      checkboxes.forEach((item) => {
+          if (item !== checkbox) item.checked = false
+      })
+  }
+  </script>
 </body>
 </html>
