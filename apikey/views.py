@@ -22,78 +22,19 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
 from .celery_tasks import send_email_
+from .util.commond_func import update_server_status_in_db, get_model_url, get_key, get_model, static_view_inference
 stripe.api_key = settings.STRIPE_SECRET_KEY
-import requests
-
-"""U"""
-def inference(inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
-    if beam == False:
-        length_penalty = 1
-        early_stopping = False
-        best_of = int(1)
-    else:
-        best_of = int(best_of)
-        length_penalty = float(length_penalty)
-        if early_stopping == "true":
-            early_stopping = True
-        else:
-            early_stopping = True       
-        
-    context = {
-        "prompt": prompt,
-        "n": 1,
-        'best_of': best_of,
-        'presence_penalty': float(presense_penalty),
-        "use_beam_search": beam,
-        "temperature": float(temperature),
-        "max_tokens": int(max_tokens),
-        "stream": False,
-        "top_k": float(top_k),
-        "top_p": float(top_p),
-        "length_penalty": float(length_penalty),
-        "frequency_penalty": float(frequency_penalty),
-        "early_stopping": early_stopping,
-        
-    }
-
-    try:
-        response = requests.post(inference_url,   json=context,  timeout=15 ) 
-        return response.json()['text']
-    except requests.exceptions.Timeout:
-        return "Request Timeout, Cannot connect to the model"
-
-def check_server_status(model_name):
-    server_list = list(InferenceServer.objects.filter(hosted_model__name=model_name))
-    available_list = []
-    for server in server_list:
-        if server.status == "running":
-            available_list.append(server.url)
-    if len(available_list) == 0:
-        return False
-    else:
-        return available_list    
-
-def get_object(name, key):
-    try:
-        return Key.objects.get(owner=name, key = key)
-    except Key.DoesNotExist:
-        return None
-    
-def get_object_model(model):
-    try:
-        return LLM.objects.get(name=model)
-    except LLM.DoesNotExist as e:
-        return e   
-    
-""" VIEWS """      
-@cache_page(60 * 60)     
+  
 def index(request):
     return render(request, "html/index.html")
+
+def manual(request):
+    return render(request, "html/manual.html")
 
 def chat(request):
     return render(request, "html/chat.html")
 
-@cache_page(60 * 60)
+
 def model_infor(request):
     llm = LLM.objects.all()
     context = {'llms':llm}
@@ -215,9 +156,9 @@ def prompt(request):
         length_penalty = float(request.POST.get("length_penalty")) if "length_penalty" in request.POST  else 0
         beam = True if beam =="True" else False
         early_stopping = True if early_stopping == "True" else False 
-        instance = get_object(str(request.POST.get('name')), str(request.POST.get('key')))
+        instance = get_key(str(request.POST.get('name')), str(request.POST.get('key')))
         m = request.POST.get('model') if  "model" in request.POST else "Llama 2 7B"
-        model = get_object_model(m)
+        model = get_model(m)
         prompt = bleach.clean((request.POST.get('prompt'))) if len(request.POST.get('prompt')) > 1 else " "
        
         if not instance:
@@ -225,18 +166,20 @@ def prompt(request):
         elif not model:
             response = "Error: model name is not correct"
         elif model: 
-            available_server_list = check_server_status(m)
+            available_server_list = get_model_url(m)
             if not available_server_list:
                 response = "Server is currently offline"
             else:
-                inference_url = random.choice(available_server_list)
+                inference = random.choice(available_server_list)
+                
                 try:
-                    response = inference(inference_url=inference_url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                    response = static_view_inference(server_status=inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                
                 except:
                     response = "Error: you messed up the parameters"
         messages.info(request,f"{response} ({model.name} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}))")
         return HttpResponseRedirect("/prompt.html")    
-    return render(request, "html/prompt.html")
+    return render(request, "html/prompt.html", context = {"llm":llm})
 
 def room(request,  key):
     llm = LLM.objects.all()
@@ -322,8 +265,8 @@ class ApiView(APIView):
         return Response({'Intro':"API"}, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
-        instance = get_object(request.data['name'], request.data['key'])
-        model = get_object_model(request.data['model'])
+        instance = get_key(request.data['name'], request.data['key'])
+        model = get_model(request.data['model'])
         prompt = request.data['prompt'] if len(request.data['prompt']) > 1 else " "
         top_p= float(request.data["top_p"]) if "top_p" in request.POST else 0.73
         best_of = float(request.data["best_of"]) if "best_of" in request.POST else 1
@@ -349,16 +292,16 @@ class ApiView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         elif model:
-            available_server_list = check_server_status(model.name)
+            available_server_list = get_model_url(model.name)
             if not available_server_list:
                 return Response(
                     {"Error": "Server is currently offline"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             else:
-                inference_url = random.choice(available_server_list)
+                inference = random.choice(available_server_list)
                 try:
-                    response = inference(inference_url=inference_url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                    response = static_view_inference(server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
                     return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
                 except:
                     return Response(

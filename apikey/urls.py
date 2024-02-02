@@ -6,11 +6,12 @@ app_name = "apikey"
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("model_infor.html", views.model_infor, name="model_infor"),    
-     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
-    path("contact.html", views.contact, name="contact"), 
-    path("chat.html", views.chat, name="chat"),
-    path("prompt.html", views.prompt, name="prompt"), 
+    path("model_infor", views.model_infor, name="model_infor"),    
+    path("manual", views.manual, name="manual"),
+    path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
+    path("contact", views.contact, name="contact"), 
+    path("chat", views.chat, name="chat"),
+    path("prompt", views.prompt, name="prompt"), 
     path(
         "create-checkout-session/<int:pk>/<str:name>/<str:key>",
         CreateStripeCheckoutSessionView.as_view(),
@@ -18,7 +19,7 @@ urlpatterns = [
     ),
     path("success/", SuccessView.as_view(), name="success"),
     path("cancel/", CancelView.as_view(), name="cancel"),
-    path("buy.html", ProductListView.as_view(), name="product-list"),
+    path("buy", ProductListView.as_view(), name="product-list"),
     path("<int:pk>/<str:key>/<str:name>/", ProductDetailView.as_view(), name="product-detail"),
     
     path("chat/<str:key>/", views.room, name="room"),

@@ -1,0 +1,144 @@
+from django.utils import timezone
+import requests
+from apikey.models import  InferenceServer, LLM, Key
+from . import constant
+from decouple import config
+import boto3
+from botocore.exceptions import ClientError
+aws = config("aws_access_key_id")
+aws_secret = config("aws_secret_access_key")
+region = constant.REGION
+
+def get_EC2_status(instance_id, region):
+    ec2_resource = boto3.resource('ec2', region_name=region, aws_access_key_id=aws, aws_secret_access_key= aws_secret)
+    try:
+        instance = ec2_resource.Instance(instance_id)
+        return instance.state['Name']
+    except Exception as e:
+        return e
+
+def command_EC2(instance_id, region, action):
+    aws = config("aws_access_key_id")
+    aws_secret = config("aws_secret_access_key")
+    ec2 = boto3.client('ec2', region_name = region, aws_access_key_id=aws, aws_secret_access_key= aws_secret)
+    if action == "on":
+        try:
+            ec2.start_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.start_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+    elif action == "off":
+        try:
+            ec2.stop_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.stop_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+    elif action == "reboot":
+        try:
+            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+        return 
+
+def get_model_url(model):
+    avaiable_model_list = []
+    try:
+        model_list = list(InferenceServer.objects.filter(hosted_model__name=model))
+        for m in model_list:
+            avaiable_model_list.append(m)
+        return avaiable_model_list
+    except:
+        return False
+ 
+def update_server_status_in_db(instance_id, update_type):
+    ser_obj = InferenceServer.objects.get(name=instance_id)
+    if update_type == "status":
+       
+        ser_obj.status = "pending"
+        ser_obj.save()
+    elif update_type == "time":
+        ser_obj.last_message_time = timezone.now()
+        ser_obj.save()
+    return
+
+def send_request(url, instance_id,context):
+    try:
+        response = requests.post(url,   json=context,  timeout=10 ) 
+        response = response.json()['text']
+    except requests.exceptions.Timeout:
+        response = "Request Timeout, Cannot connect to the model. "
+        ser_obj = InferenceServer.objects.get(name=instance_id)
+        ser_obj.status = "stopped"
+        ser_obj.save()
+    except requests.exceptions.InvalidJSONError:
+        response = "You messed up the parameters. Return them to the defaults."
+    except requests.exceptions.ConnectionError:
+        ser_obj = InferenceServer.objects.get(name=instance_id)
+        ser_obj.status = "pending"
+        ser_obj.save()
+    return response
+
+def get_key(name, key):
+    try:
+        return Key.objects.get(owner=name, key = key)
+    except Key.DoesNotExist:
+        return None
+    
+def get_model(model):
+    try:
+        return LLM.objects.get(name=model)
+    except LLM.DoesNotExist as e:
+        return e   
+    
+def static_view_inference(server_status,instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
+    if beam == False:
+        length_penalty = 1
+        early_stopping = False
+        best_of = int(1)
+    else:
+        best_of = int(best_of)
+        length_penalty = float(length_penalty)
+        if early_stopping == "true":
+            early_stopping = True
+        else:
+            early_stopping = True         
+    context = {
+        "prompt": prompt,
+        "n": 1,
+        'best_of': best_of,
+        'presence_penalty': float(presense_penalty),
+        "use_beam_search": beam,
+        "temperature": float(temperature),
+        "max_tokens": int(max_tokens),
+        "stream": False,
+        "top_k": float(top_k),
+        "top_p": float(top_p),
+        "length_penalty": float(length_penalty),
+        "frequency_penalty": float(frequency_penalty),
+        "early_stopping": early_stopping,    
+    }
+    update_server_status_in_db(instance_id=instance_id, update_type="time")
+    if server_status == "running":
+        response = send_request(url=inference_url, instance_id=instance_id,context=context)
+    elif server_status == "stopped" or "stopping":
+        command_EC2(instance_id, region = region, action = "on")
+        response = "Server is starting up, try again in 400 seconds"
+        update_server_status_in_db(instance_id=instance_id, update_type="status")
+    elif server_status == "pending":
+        response = "Server is setting up, try again in 300 seconds"
+    else:
+        response = send_request(url=inference_url, instance_id=instance_id, context=context)
+    return response
