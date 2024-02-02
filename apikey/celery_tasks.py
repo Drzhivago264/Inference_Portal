@@ -7,7 +7,7 @@ import requests
 from .models import  InferenceServer, PromptResponse, Key, LLM
 from decouple import config
 import boto3
-from .util.commond_func import get_EC2_status, get_model_url, command_EC2, update_server_status_in_db, send_request
+from .util.commond_func import get_EC2_status, get_model_url, command_EC2, update_server_status_in_db, send_request, log_prompt_response
 from .util.constant import * 
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
@@ -48,7 +48,6 @@ def periodically_shutdown_EC2_instance():
         
 @shared_task
 def Inference( type_, key, key_name, credit, room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
-
         if beam == "false" or beam == False:
             beam = False
             length_penalty = 1
@@ -115,8 +114,6 @@ def Inference( type_, key, key_name, credit, room_group_name, model, top_k, top_
                 }
             )
         elif type_ == "prompt":
-            key_ = Key.objects.get(key=key, owner=key_name)
-            llm = LLM.objects.get(name = model)
-            pair_save = PromptResponse(prompt=prompt, response=response, key=key_, model = llm)
-            pair_save.save()
+            log_prompt_response(key, key_name, model, prompt, response)
+
   
