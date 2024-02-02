@@ -3,6 +3,7 @@ import os
 from celery import Celery
 from django.conf import settings
 import apikey
+from apikey.util.constant import *
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inferenceportal.settings')
 
@@ -17,12 +18,12 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.beat_schedule = {
     'periodically_monitor_EC2_instance': {
         'task': 'apikey.celery_tasks.periodically_monitor_EC2_instance',      
-        'schedule': 60,
+        'schedule': MONITOR_ITERVAL,
 
     },
     'periodically_shutdown_EC2_instance': {
         'task': 'apikey.celery_tasks.periodically_shutdown_EC2_instance',      
-        'schedule': 120,
+        'schedule': SHUTDOWN_INTERVAL,
 
     },
 }
