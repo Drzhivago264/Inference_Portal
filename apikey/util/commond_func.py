@@ -1,6 +1,6 @@
 from django.utils import timezone
 import requests
-from apikey.models import  InferenceServer, LLM, Key
+from apikey.models import  InferenceServer, LLM, Key, PromptResponse
 from . import constant
 from decouple import config
 import boto3
@@ -16,7 +16,13 @@ def get_EC2_status(instance_id, region):
         return instance.state['Name']
     except Exception as e:
         return e
-
+    
+def log_prompt_response(key, key_name, model, prompt, response):
+    key_ = Key.objects.get(key=key, owner=key_name)
+    llm = LLM.objects.get(name = model)
+    pair_save = PromptResponse(prompt=prompt, response=response, key=key_, model = llm)
+    pair_save.save()
+    
 def command_EC2(instance_id, region, action):
     aws = config("aws_access_key_id")
     aws_secret = config("aws_secret_access_key")

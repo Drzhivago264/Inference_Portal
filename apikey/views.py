@@ -1,9 +1,10 @@
 from django.shortcuts import render, HttpResponseRedirect
 import random
 import stripe
+from django.core.paginator import Paginator
 from datetime import datetime
 import secrets
-from .models import Price, Product, Key, LLM, InferenceServer
+from .models import Price, Product, Key, LLM, InferenceServer, PromptResponse
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
@@ -22,7 +23,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
 from .celery_tasks import send_email_, Inference
-from .util.commond_func import update_server_status_in_db, get_model_url, get_key, get_model, static_view_inference
+from .util.commond_func import update_server_status_in_db, get_model_url, get_key, get_model, static_view_inference, log_prompt_response
 stripe.api_key = settings.STRIPE_SECRET_KEY
   
 def index(request):
@@ -183,8 +184,11 @@ def room(request,  key):
 
 
 def room_prompt(request,  key):
-    llm = LLM.objects.all()
-    context = {'llms':llm,  "key": key}
+    response_log = PromptResponse.objects.filter(key__key=key).order_by('-id')
+    paginator = Paginator(response_log, 30)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'response_log':page_obj,  "key": key}
     return render(request, "html/prompt_log.html", context)
 
 class SuccessView(TemplateView):
@@ -301,6 +305,7 @@ class ApiView(APIView):
                 inference = random.choice(available_server_list)
                 try:
                     response = static_view_inference(server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                    log_prompt_response(key = instance.key, key_name = instance.owner, model = request.data['model'], prompt = prompt, response = response)
                     return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
                 except:
                     return Response(

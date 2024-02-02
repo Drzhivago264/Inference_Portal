@@ -33,13 +33,41 @@
       </div>
     </div>
     <div id="site_content">
-
-      <div id="content">
-        {{key}}
-
+        <h1>Your previous API calls and prompts are displayed here</h1>
+        <h5>NOTE: Your chat-log is not recorded</h5>
+        <table style = "  margin-left: auto;
+        margin-right: auto; ">
+            <tr>
+            <th>No.</th>
+              <th>Prompts</th>
+              <th>Responses</th>
+              <th>Models</th>
+              <th>Created Time</th>
+              <th>Cost</th>
+            </tr>
+            {% for log in response_log %}
+            <tr>
+              <td>{{ log.id }}</td>
+              <td>{{ log.prompt }}</td>
+              <td>{{ log.response }}</td>
+              <td>{{ log.model }}</td>
+              <td>{{ log.created_at }}</td>
+              <td>{{ log.model.price }}</td>
+            </tr>
+            {% endfor %}
+          </table> 
+          <div  style = "text-align: center;" >
+          {% if response_log.has_previous %}
+            <a href="?page={{ response_log.previous_page_number }}"><< Previous</a>
+          {% endif %}
+        
+            <span class="current-page">{{ response_log.number }}</span>
+        
+         {% if response_log.has_next %}
+            <a href="?page={{ response_log.next_page_number }}">Next >></a>
+         {% endif %}
       </div>
     </div>
-
   </div>
 </body>
 </html>
