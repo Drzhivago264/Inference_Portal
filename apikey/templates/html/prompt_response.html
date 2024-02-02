@@ -1,0 +1,213 @@
+<!DOCTYPE HTML>
+<html>
+
+
+<head>
+  <title>Static Prompt</title>
+  <meta name="description" content="website description" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
+  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
+</head>
+<style>
+  #chat-log {
+    width: 100% !important;
+    resize: vertical;
+    background-color: rgb(37, 37, 37);
+    color: white;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    height: 25vh;
+    overflow: auto;
+}
+.message_log_container {
+    margin:  10px ;
+}
+</style>
+<body>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <!-- class="logo_colour", allows you to change the colour of the text -->
+          <h1><a href="index">Inference</span></a></h1>
+        </div>
+      </div>
+      <div id="menubar">
+        <ul id="menu">
+          <li  ><a href="/"> Intro</a></li>
+          <li><a href="/model_infor">Models</a></li>
+          <li><a href="/buy">Top Up</a></li>
+          <li class="selected"><a href="/prompt">Promtp</a></li>
+          <li ><a href="/chat">Chat Bot</a></li>
+          <li ><a href="/manual">Manual</a></li>
+          <li ><a href="contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div id="site_content">
+      <div class="sidebar">
+        <!-- insert your sidebar items here -->
+        <h2>Model Response</h2>
+        <div id="chat-log">
+          
+          <p> 
+            {%for message in messages %}
+            <div class="message_log_container" style="text-align: left; word-wrap: break-word; overflow-wrap: break-word;"><span> {{ message }}</span></div>
+            {% endfor %}
+          </p>
+        </div><br>
+        <h2>API Endpoint</h2>
+        <h4>Python example:</h4>
+        <pre style="font-size: 12px">
+r = requests.post("[HOST]/api/",  
+json={"prompt": "hola",
+  "name": "[key name]", 
+  "key": "[key]", 
+  "model" : "[model name]",
+  'top_k': [top_k],
+  'top_p': [top_p],
+  'best_of': [best_of],
+  'max_tokens': [max_tokens],
+  'frequency_penalty': [fre_penalty],
+  'presense_penalty': [pre_penalty],
+  'temperature': [temperature],
+  'beam': ["True"/"False"],
+  'early_stopping': ["True"/"False"],
+  'length_penalty': [length_penalty]
+}) 
+
+print(r.json())
+        </pre>
+        <h4>CURL example:</h4>
+        <pre style="font-size: 12px">
+curl "[HOST]/api/" --header 
+'Content-Type: application/json' 
+--request POST
+--data-binary
+'{"prompt": "hola",
+"name": "[key name]", 
+"key": "[key]", 
+"model" :  "[model name]"
+'top_k': [top_k],
+'top_p': [top_p],
+'best_of': [best_of],
+'max_tokens': [max_tokens],
+'frequency_penalty': [freq_penalty],
+'presense_penalty': [pre_penalty],
+'temperature': [temperature],
+'beam': ["True"/"False"],
+'early_stopping': ["True"/"False"],
+'length_penalty': [length_penalty]
+}'
+        <pre>
+        <p><a href="/api">Test API</a></p>
+        <p></p>
+
+
+      </div>
+      <div id="content">
+
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form_settings">
+            <p><span>Key Name</span><input  type="password" name="name" /></p>
+            <p><span>Key</span><input type="text" name="key" /></p>
+ 
+            <p><span>Prompt</span><textarea rows="8" cols="50" name="prompt"></textarea></p>
+            <h3> Available Models </h3>
+            {% for llm in llms %}
+                {% if llm.name == 'Llama 2 7B' %}
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this)"> {{llm.name}}<br>
+                {% else %}
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this)"> {{llm.name}}<br>
+                {% endif %}
+            {% endfor %}
+            <h3> Parameters </h3>
+            <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
+            <h5>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </h5>                  
+            <input style="width: 7ch;" type="number" step="any" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73) <br>
+            <input style="width: 7ch;" type="number" step="any" name="top_k"  max="1" value="-1"> Top_k (default = -1) <br>
+            <input style="width: 7ch;" type="number" step="any" name="max_tokens" min="1" max="2048" value="128"> Token Num (default = 128)<br>
+            <input style="width: 7ch;" type="number" step="any" name="temperature" min="0" max="1" value="0.72"> Temperature (default= 0.72) <br>
+            <input style="width: 7ch;" type="number" step="any" name="frequency_penalty" min="-2" max="2" value="0"> Frequency Penalty (default=0)<br>
+            <input style="width: 7ch;" type="number" step="any" name="presense_penalty" min="-2" max="2" value="0"> Presense Penalty (default=0)<br><br>
+            <hr>
+            <br>
+            <h5>NOTE: These parameters go along with each others, please know what you are doing.</h5>
+            <h5>NOTE: Return to default value if you messed up the parameters</h5>
+            <input style="width: 7ch;" type="checkbox" class= "checkbox_beam" name="beam" id = "beam" > Beam Search (default = False) <br>
+            <input style="width: 7ch;" type="checkbox" class= "checkbox_early_stopping" name="early_stopping" id ="early_stopping" > Early Stop (default = False) <br>
+            <input style="width: 7ch;" type="number" step="any" name="length_penalty" min="-2" max="2" value="0"> Length Penalty (default = 0)<br>
+            <input style="width: 7ch;" type="number" step="any" name="best_of" min="1" max="5" value="1"> Best of (default = 2 for beam search, 1 for sampling) <br>
+            <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" value="Submit" /></p>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function onlyOne(checkbox) {
+      var checkboxes = document.getElementsByName('model')
+      checkboxes.forEach((item) => {
+          if (item !== checkbox) item.checked = false
+      })
+  }
+  document.querySelector('#chat-message-submit').onclick = function(e) {
+    var choosen_models = null; 
+    var inputElements = document.getElementsByClassName('checkbox');
+    for(var i=0; inputElements[i]; ++i){
+          if(inputElements[i].checked){
+                choosen_models = inputElements[i].value;
+               break;
+          }
+    }
+    const key_name = document.getElementById('key_name').value
+    const top_p = document.getElementsByName("top_p")[0].value
+    const top_k = document.getElementsByName("top_k")[0].value
+    const best_of = document.getElementsByName("best_of")[0].value
+    const max_tokens = document.getElementsByName("max_tokens")[0].value
+    const temperature = document.getElementsByName("temperature")[0].value
+    const frequency_penalty = document.getElementsByName("frequency_penalty")[0].value
+    const presense_penalty = document.getElementsByName("presense_penalty")[0].value
+    if (document.getElementById('beam').checked) {
+        beam = "true"
+    } else {
+         beam = "false"
+    }
+    if (document.getElementById('early_stopping').checked) {
+        early_stopping = "true"
+    } else {
+        early_stopping = "false"
+    }
+    const length_penalty= document.getElementsByName("length_penalty")[0].value
+
+  
+    const messageInputDom = document.querySelector('#chat-message-input');
+    const message = messageInputDom.value;
+    chatSocket.send(JSON.stringify({
+        'message': message,
+        'name': key_name,
+        'choosen_models': choosen_models,
+        'role': 'Human',
+        'top_k': top_k,
+        'top_p': top_p,
+        'best_of': best_of,
+        'max_tokens': max_tokens,
+        'frequency_penalty': frequency_penalty,
+        'presense_penalty': presense_penalty,
+        'temperature': temperature,
+        'beam': beam,
+        'early_stopping': early_stopping,
+        'length_penalty': length_penalty
+    }));
+    messageInputDom.value = '';
+};
+  </script>
+</body>
+</html>

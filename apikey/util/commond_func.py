@@ -89,6 +89,7 @@ def send_request(url, instance_id,context):
         ser_obj = InferenceServer.objects.get(name=instance_id)
         ser_obj.status = "pending"
         ser_obj.save()
+        response = "Server is setting up, wait."
     return response
 
 def get_key(name, key):

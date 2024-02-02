@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 import random
 import requests
-from .models import  InferenceServer
+from .models import  InferenceServer, PromptResponse, Key, LLM
 from decouple import config
 import boto3
 from .util.commond_func import get_EC2_status, get_model_url, command_EC2, update_server_status_in_db, send_request
@@ -47,9 +47,9 @@ def periodically_shutdown_EC2_instance():
             pass
         
 @shared_task
-def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
+def Inference( type_, key, key_name, credit, room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
 
-        if beam == "false":
+        if beam == "false" or beam == False:
             beam = False
             length_penalty = 1
             early_stopping = False
@@ -57,6 +57,8 @@ def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, tempe
         else:
             beam = True
             best_of = int(best_of)
+            if best_of == 1:
+                best_of += 1
             length_penalty = float(length_penalty)
             if early_stopping == "true":
                 early_stopping = True
@@ -100,14 +102,21 @@ def chat_inference( credit, room_group_name, model, top_k, top_p, best_of, tempe
                 response = send_request(url=url, instance_id=instance_id, context=context)
         else:
             response = "Model is currently offline"
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            room_group_name,
-            {
-                    "type": "chat_message", 
-                    "role": model,
-                    "message": response, 
-                    'credit': credit
-            }
-        )
+            
+        if type_ == "chatroom":
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                room_group_name,
+                {
+                        "type": "chat_message", 
+                        "role": model,
+                        "message": response, 
+                        'credit': credit
+                }
+            )
+        elif type_ == "prompt":
+            key_ = Key.objects.get(key=key, owner=key_name)
+            llm = LLM.objects.get(name = model)
+            pair_save = PromptResponse(prompt=prompt, response=response, key=key_, model = llm)
+            pair_save.save()
   

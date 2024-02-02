@@ -39,7 +39,9 @@ class ProductTag(models.Model):
 
     def __str__(self) -> str:
         return self.name
-    
+
+
+        
 class Key(models.Model):
     owner = BleachField(max_length=400)
     key =  models.CharField(max_length=400)
@@ -51,6 +53,19 @@ class Key(models.Model):
     def __str__(self) -> str:
         return self.owner
     
+class PromptResponse(models.Model):
+    prompt = models.CharField(max_length=4048)
+    response = models.CharField(max_length=4048)
+    model = models.ForeignKey(LLM, on_delete=models.CASCADE)
+    key = models.ForeignKey(Key, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        
+    def __str__(self) -> str:
+        return self.prompt
+        
 class Product(models.Model):
     name = models.CharField(max_length=200)
     tags = models.ManyToManyField(ProductTag, blank=True)
