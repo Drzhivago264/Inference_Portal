@@ -39,7 +39,7 @@
           <li  ><a href="/"> Intro</a></li>
           <li><a href="/model_infor">Models</a></li>
           <li><a href="/buy">Top Up</a></li>
-          <li class="selected"><a href="/prompt">Promtp</a></li>
+          <li class="selected"><a href="/prompt">Prompt</a></li>
           <li ><a href="/chat">Chat Bot</a></li>
           <li ><a href="/manual">Manual</a></li>
           <li ><a href="contact">Contact Us</a></li>
@@ -49,7 +49,7 @@
     <div id="site_content">
       <div class="sidebar">
         <!-- insert your sidebar items here -->
-        <h2>Model Response</h2>
+        <h2>Status</h2>
         <div id="chat-log">
           
           <p> 
@@ -58,6 +58,13 @@
             {% endfor %}
           </p>
         </div><br>
+        <h2>Response Log</h2>
+        <h4>You can check your response log here:</h4>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="checklog">
+            <p><span>Key: </span><input type="text"  size="20" name="key" /> <input class="submit" type="submit" value=" Check " /></p>
+          </form>
         <h2>API Endpoint</h2>
         <h4>Python example:</h4>
         <pre style="font-size: 12px">
@@ -113,9 +120,10 @@ curl "[HOST]/api/" --header
         <form method="post">
           {% csrf_token %}
           <div class="form_settings">
+            <input type="hidden" name="form_type" value="prompt">
             <p><span>Key Name</span><input  type="password" name="name" /></p>
             <p><span>Key</span><input type="text" name="key" /></p>
- 
+          
             <p><span>Prompt</span><textarea rows="8" cols="50" name="prompt"></textarea></p>
             <h3> Available Models </h3>
             {% for llm in llms %}

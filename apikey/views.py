@@ -21,7 +21,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
-from .celery_tasks import send_email_
+from .celery_tasks import send_email_, Inference
 from .util.commond_func import update_server_status_in_db, get_model_url, get_key, get_model, static_view_inference
 stripe.api_key = settings.STRIPE_SECRET_KEY
   
@@ -143,7 +143,7 @@ def contact(request):
     
 def prompt(request):
     llm = LLM.objects.all()
-    if request.method == 'POST':    
+    if request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'prompt':  
         top_p= float(request.POST.get("top_p")) if "top_p" in request.POST else 0.73
         best_of = float(request.POST.get("best_of")) if "best_of" in request.POST else 1
         top_k = float(request.POST.get("top_k")) if "top_k" in request.POST else -1
@@ -158,33 +158,34 @@ def prompt(request):
         early_stopping = True if early_stopping == "True" else False 
         instance = get_key(str(request.POST.get('name')), str(request.POST.get('key')))
         m = request.POST.get('model') if  "model" in request.POST else "Llama 2 7B"
-        model = get_model(m)
         prompt = bleach.clean((request.POST.get('prompt'))) if len(request.POST.get('prompt')) > 1 else " "
        
         if not instance:
             response = "Error: key or key name is not correct"
-        elif not model:
-            response = "Error: model name is not correct"
-        elif model: 
-            available_server_list = get_model_url(m)
-            if not available_server_list:
-                response = "Server is currently offline"
-            else:
-                inference = random.choice(available_server_list)
-                
-                try:
-                    response = static_view_inference(server_status=inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
-                
-                except:
-                    response = "Error: you messed up the parameters"
-        messages.info(request,f"{response} ({model.name} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}))")
-        return HttpResponseRedirect("/prompt.html")    
-    return render(request, "html/prompt.html", context = {"llm":llm})
+        else:
+        
+            Inference.delay(type_ = "prompt", key=str(request.POST.get('key')), key_name = str(request.POST.get('name')), credit = instance.credit, room_group_name = None, model = m, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=prompt)
+            response = "Your Prompt is queued, refer to Prompt-Response Log for detail"
+        messages.info(request,f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}))")
+        return HttpResponseRedirect("/prompt") 
+    elif  request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'checklog':  
+        key =  str(request.POST.get('key'))
+        return HttpResponseRedirect(f"/prompt/{key}") 
+    else:
+        response = f"Default to Llama 2 7B "
+        messages.info(request,f"{response} (Server {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
+    return render(request, "html/prompt.html", context = {"llms":llm})
 
 def room(request,  key):
     llm = LLM.objects.all()
     context = {'llms':llm,  "key": key}
     return render(request, "html/chatroom.html", context)
+
+
+def room_prompt(request,  key):
+    llm = LLM.objects.all()
+    context = {'llms':llm,  "key": key}
+    return render(request, "html/prompt_log.html", context)
 
 class SuccessView(TemplateView):
     template_name = "html/success.html"
@@ -193,9 +194,7 @@ class CancelView(TemplateView):
     template_name = "html/cancel.html"
     
 class CreateStripeCheckoutSessionView(View):
-    """
-    Create a checkout session and redirect the user to Stripe's checkout page
-    """
+
 
     def post(self, request, *args, **kwargs):
         price = Price.objects.get(id=self.kwargs["pk"])
@@ -308,6 +307,3 @@ class ApiView(APIView):
                     {"Error": "You messed up parameters"},
                     status=status.HTTP_400_BAD_REQUEST
                     )
-        
-
-  

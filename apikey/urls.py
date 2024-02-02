@@ -21,7 +21,7 @@ urlpatterns = [
     path("cancel/", CancelView.as_view(), name="cancel"),
     path("buy", ProductListView.as_view(), name="product-list"),
     path("<int:pk>/<str:key>/<str:name>/", ProductDetailView.as_view(), name="product-detail"),
-    
+     path("prompt/<str:key>/", views.room_prompt, name="room_prompt"),
     path("chat/<str:key>/", views.room, name="room"),
     path('api/', ApiView.as_view()),
 
