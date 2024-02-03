@@ -39,8 +39,6 @@ class ProductTag(models.Model):
 
     def __str__(self) -> str:
         return self.name
-
-
         
 class Key(models.Model):
     owner = BleachField(max_length=400)
