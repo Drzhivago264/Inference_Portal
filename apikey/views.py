@@ -8,6 +8,7 @@ from .models import Price, Product, Key, LLM, InferenceServer, PromptResponse
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
+from django_ratelimit.decorators import ratelimit
 from django.views.decorators.cache import cache_page
 from django.shortcuts import redirect
 from django.conf import settings
@@ -24,22 +25,33 @@ from rest_framework import status
 from django.views.generic import TemplateView
 from .celery_tasks import send_email_, Inference
 from .util.commond_func import update_server_status_in_db, get_model_url, get_key, get_model, static_view_inference, log_prompt_response
+from django_ratelimit.exceptions import Ratelimited
 stripe.api_key = settings.STRIPE_SECRET_KEY
-  
+
+
+
+@ratelimit(key='ip', method=ratelimit.ALL, rate='1/s')
+@cache_page(60*15)  
 def index(request):
     return render(request, "html/index.html")
 
+@ratelimit(key='ip', method=ratelimit.ALL, rate='1/s')
+@cache_page(60*15)
 def manual(request):
     return render(request, "html/manual.html")
 
+@ratelimit(key='ip',method=ratelimit.ALL, rate='10/s')
+@cache_page(60*15)
 def chat(request):
     return render(request, "html/chat.html")
 
-
+@ratelimit(key='ip', method=ratelimit.ALL, rate='1/s')
+@cache_page(60*60)
 def model_infor(request):
     llm = LLM.objects.all()
     context = {'llms':llm}
     return render(request, "html/model_infor.html", context)
+
 
 class ProductListView(ListView):
     model = Product
@@ -51,7 +63,8 @@ class ProductListView(ListView):
         context['form'] = CaptchaForm()
         
         return context
-
+    
+    @method_decorator(ratelimit(key='ip', rate='1/s'))
     def post(self,request):
         form = CaptchaForm()
         products = Product.objects.all()
@@ -68,7 +81,7 @@ class ProductListView(ListView):
             else:
                 form = CaptchaForm()
                 messages.error(request,"Error: Captcha Failed.",  extra_tags='key')
-                return HttpResponseRedirect("/buy.html") 
+                return HttpResponseRedirect("/buy") 
             
         ###Deal with check credit requests###    
         elif bleach.clean(request.POST.get("form_type")) == 'checkform':
@@ -79,15 +92,15 @@ class ProductListView(ListView):
                     key = Key.objects.get(owner=name, key = str(k))
                     credit = str(key.credit)
                     messages.error(request,f"Your credit is {credit} AUD.",  extra_tags='credit')
-                    return HttpResponseRedirect("/buy.html")
+                    return HttpResponseRedirect("/buy")
                 except Key.DoesNotExist:
                     messages.error(request,"Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
-                    return HttpResponseRedirect("/buy.html")
+                    return HttpResponseRedirect("/buy")
                 
             else:
                 form = CaptchaForm()
                 messages.error(request,"Error: Captcha Failed.",  extra_tags='credit')
-                return HttpResponseRedirect("/buy.html") 
+                return HttpResponseRedirect("/buy") 
         
         ###Deal with check topup requests###   
         elif bleach.clean(request.POST.get("form_type")) == 'topupform':
@@ -99,7 +112,7 @@ class ProductListView(ListView):
                 return redirect(reverse('apikey:product-detail', kwargs={'pk':product_id, 'key':key.key, 'name':key.owner}))
             except:
                 messages.error(request,"Key or Key Name is incorrect",  extra_tags='credit')
-                return HttpResponseRedirect("/buy.html") 
+                return HttpResponseRedirect("/buy") 
         
     
 
@@ -116,7 +129,7 @@ class ProductDetailView(DetailView):
         context["key"] = bleach.clean(self.kwargs["key"])
         return context
 
-
+@ratelimit(key='ip', method=ratelimit.ALL, rate='5/s')
 def contact(request):
     form = CaptchaForm(request.POST)
     if request.method == 'POST':
@@ -130,18 +143,18 @@ def contact(request):
             try:
                 send_email_.delay( subject, message, email_from, recipient_list )
                 messages.error(request,"Sent!",  extra_tags='email')
-                return HttpResponseRedirect("/contact.html")
+                return HttpResponseRedirect("/contact")
             except:
                 messages.error(request,"Failed due to unknown reasons!",  extra_tags='email')
-                return HttpResponseRedirect("/contact.html")
+                return HttpResponseRedirect("/contact")
         else:
             messages.error(request,"Captcha Failed.",  extra_tags='email')
-            return HttpResponseRedirect("/contact.html")
+            return HttpResponseRedirect("/contact")
     elif request.method == 'GET':
         return render(request, "html/contact.html", {'form': form})
 
     
-    
+@ratelimit(key='ip', method=ratelimit.ALL, rate='10/s')    
 def prompt(request):
     llm = LLM.objects.all()
     if request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'prompt':  
@@ -178,12 +191,13 @@ def prompt(request):
         messages.info(request,f"{response} (Server {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
     return render(request, "html/prompt.html", context = {"llms":llm})
 
+@ratelimit(key='ip', method=ratelimit.ALL, rate='5/s')
 def room(request,  key):
     llm = LLM.objects.all()
     context = {'llms':llm,  "key": key}
     return render(request, "html/chatroom.html", context)
 
-
+@ratelimit(key='ip', method=ratelimit.ALL, rate='1/s')
 def room_prompt(request,  key):
     response_log = PromptResponse.objects.filter(key__key=key).order_by('-id')
     paginator = Paginator(response_log, 30)
@@ -195,11 +209,11 @@ def room_prompt(request,  key):
 class SuccessView(TemplateView):
     template_name = "html/success.html"
 
+
 class CancelView(TemplateView):
     template_name = "html/cancel.html"
     
 class CreateStripeCheckoutSessionView(View):
-
 
     def post(self, request, *args, **kwargs):
         price = Price.objects.get(id=self.kwargs["pk"])
@@ -262,12 +276,12 @@ class StripeWebhookView(View):
 
         return HttpResponse(status=200)
     
-
   
 class ApiView(APIView):
+
     def get(self, request, *args, **kwargs):
         return Response({'Intro':"API"}, status=status.HTTP_200_OK)
-    
+
     def post(self, request, *args, **kwargs):
         instance = get_key(request.data['name'], request.data['key'])
         model = get_model(request.data['model'])
@@ -314,3 +328,15 @@ class ApiView(APIView):
                     {"Error": "You messed up parameters"},
                     status=status.HTTP_400_BAD_REQUEST
                     )
+                    
+def handler_403(request, exception=None):
+    return render(request, 'error_html/403.html', status=403)
+
+
+def handler_404(request, exception):
+    return render(request, 'error_html/404.html', status=404)
+
+
+def handler_500(request, exception):
+    return render(request, 'error_html/500.html', status=500)
+
