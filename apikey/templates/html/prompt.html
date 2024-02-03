@@ -70,6 +70,7 @@
         <pre style="font-size: 12px">
 r = requests.post("[HOST]/api/",  
 json={"prompt": "hola",
+"mode": ["chat"/'generate'],
   "name": "[key name]", 
   "key": "[key]", 
   "model" : "[model name]",
@@ -94,6 +95,7 @@ curl "[HOST]/api/" --header
 --request POST
 --data-binary
 '{"prompt": "hola",
+"mode": ["chat"/'generate'],
 "name": "[key name]", 
 "key": "[key]", 
 "model" :  "[model name]"
@@ -128,12 +130,14 @@ curl "[HOST]/api/" --header
             <h3> Available Models </h3>
             {% for llm in llms %}
                 {% if llm.name == 'Llama 2 7B' %}
-                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this)"> {{llm.name}}<br>
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
                 {% else %}
-                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this)"> {{llm.name}}<br>
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
                 {% endif %}
             {% endfor %}
             <h3> Parameters </h3>
+            <input type="checkbox" class= "checkbox" name="mode"  value= "chat" onclick="onlyOne(this, 'mode')"> Chat Bot Mode<br>
+            <input type="checkbox" class= "checkbox" name="mode"  value= "generate"   checked  onclick="onlyOne(this, 'mode')"> Sentence Completion<br><br>
             <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
             <h5>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </h5>                  
             <input style="width: 7ch;" type="number" step="any" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73) <br>
@@ -160,12 +164,19 @@ curl "[HOST]/api/" --header
   </div>
 
   <script>
-    function onlyOne(checkbox) {
-      var checkboxes = document.getElementsByName('model')
-      checkboxes.forEach((item) => {
-          if (item !== checkbox) item.checked = false
-      })
-  }
+        function onlyOne(checkbox, type_) {
+            if (type_ == "model"){
+                var checkboxes = document.getElementsByName('model')
+                checkboxes.forEach((item) => {
+                    if (item !== checkbox) item.checked = false
+                }) }
+            else if (type_ == "mode"){
+            var checkbox_mode = document.getElementsByName('mode')
+            checkbox_mode.forEach((item) => {
+                if (item !== checkbox) item.checked = false
+            })
+        }
+        }
   </script>
 </body>
 </html>

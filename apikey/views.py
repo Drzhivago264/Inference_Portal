@@ -159,13 +159,14 @@ def prompt(request):
         early_stopping = True if early_stopping == "True" else False 
         instance = get_key(str(request.POST.get('name')), str(request.POST.get('key')))
         m = request.POST.get('model') if  "model" in request.POST else "Llama 2 7B"
+        mode = request.POST.get('mode') if  "mode" in request.POST else "generate"
         prompt = bleach.clean((request.POST.get('prompt'))) if len(request.POST.get('prompt')) > 1 else " "
        
         if not instance:
             response = "Error: key or key name is not correct"
         else:
         
-            Inference.delay(type_ = "prompt", key=str(request.POST.get('key')), key_name = str(request.POST.get('name')), credit = instance.credit, room_group_name = None, model = m, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=prompt)
+            Inference.delay(mode = mode, type_ = "prompt", key=str(request.POST.get('key')), key_name = str(request.POST.get('name')), credit = instance.credit, room_group_name = None, model = m, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=prompt)
             response = "Your Prompt is queued, refer to Prompt-Response Log for detail"
         messages.info(request,f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}))")
         return HttpResponseRedirect("/prompt") 
@@ -270,6 +271,7 @@ class ApiView(APIView):
     def post(self, request, *args, **kwargs):
         instance = get_key(request.data['name'], request.data['key'])
         model = get_model(request.data['model'])
+        mode = request.POST.get(request.data['mode']) 
         prompt = request.data['prompt'] if len(request.data['prompt']) > 1 else " "
         top_p= float(request.data["top_p"]) if "top_p" in request.POST else 0.73
         best_of = float(request.data["best_of"]) if "best_of" in request.POST else 1
@@ -304,7 +306,7 @@ class ApiView(APIView):
             else:
                 inference = random.choice(available_server_list)
                 try:
-                    response = static_view_inference(server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                    response = static_view_inference(mode= mode, server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
                     log_prompt_response(key = instance.key, key_name = instance.owner, model = request.data['model'], prompt = prompt, response = response)
                     return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
                 except:
