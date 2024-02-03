@@ -55,16 +55,17 @@
             <h3> Available Models </h3>
             {% for llm in llms %}
                 {% if llm.name == 'Llama 2 7B' %}
-                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this)"> {{llm.name}}<br>
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
                 {% else %}
-                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this)"> {{llm.name}}<br>
+                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
                 {% endif %}
             {% endfor %}
             <h3> Parameters </h3>
+                <input type="checkbox" class= "checkbox_mode" name="mode"  value= "chat" checked onclick="onlyOne(this, 'mode')"> Chat Bot Mode<br>
+                <input type="checkbox" class= "checkbox_mode" name="mode"  value= "generate" onclick="onlyOne(this, 'mode')"> Sentence Completion<br><br>
                 <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
                 <h5>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </h5>                  
                 <input type="number" step="0.1" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73) <br>
-
                 <input type="number" step="0.1" name="top_k" min="0.01" max="1" value="-1"> Top_k (default = -1) <br>
                 <input type="number" step="0.1" name="max_tokens" min="1" max="2048" value="128"> Token Num (default = 128)<br>
                 <input type="number" step="0.1" name="temperature" min="0" max="1" value="0.72"> Temperature (default= 0.72) <br>
@@ -95,11 +96,18 @@
     </div>
 
     <script>
-        function onlyOne(checkbox) {
-            var checkboxes = document.getElementsByName('model')
-            checkboxes.forEach((item) => {
+        function onlyOne(checkbox, type_) {
+            if (type_ == "model"){
+                var checkboxes = document.getElementsByName('model')
+                checkboxes.forEach((item) => {
+                    if (item !== checkbox) item.checked = false
+                }) }
+            else if (type_ == "mode"){
+            var checkbox_mode = document.getElementsByName('mode')
+            checkbox_mode.forEach((item) => {
                 if (item !== checkbox) item.checked = false
             })
+        }
         }
         const key = JSON.parse(document.getElementById('key').textContent);
         var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -151,6 +159,14 @@
                        break;
                   }
             }
+            var mode = null; 
+            var modeElements = document.getElementsByClassName('checkbox_mode');
+            for(var i=0; modeElements[i]; ++i){
+                  if(modeElements[i].checked){
+                        mode = modeElements[i].value;
+                       break;
+                  }
+            }
             const key_name = document.getElementById('key_name').value
             const top_p = document.getElementsByName("top_p")[0].value
             const top_k = document.getElementsByName("top_k")[0].value
@@ -175,6 +191,7 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
+                'mode': mode,
                 'message': message,
                 'name': key_name,
                 'choosen_models': choosen_models,
