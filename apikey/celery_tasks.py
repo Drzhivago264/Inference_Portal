@@ -132,10 +132,8 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                 response_stream = False
                 response = "Server is setting up, try again in 30 seconds"
             else:
-                response_stream = False
-                response = send_request(url=url, instance_id=instance_id, context=context)
-                response = response_mode(response=response, mode=mode, prompt=prompt)
-        else:
+                response = "Unknown Server state, wait 5 seconds"
+                
             response_stream = False
             response = "Model is currently offline"
 
