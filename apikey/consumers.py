@@ -62,8 +62,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     self.room_group_name, {"type": "chat_message", 
                         "role":role  ,
                         "message": message, 
-                        "credit": "",
-                        "unique": unique_response_id
+                        "credit": key_object.credit,
+                        "unique": unique_response_id,
+                        "choosen_model": choosen_models
           
                     }
                 ) 
@@ -83,7 +84,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if role == "Human":
          
                 unique_response_id = event['unique']
-                await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "message": "  "}))
+                await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id,"role":event['choosen_model'], "time":self.time, "credit":credit }))
             else:
                 pass
         else:

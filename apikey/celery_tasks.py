@@ -94,11 +94,8 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                 
                 if not stream:
                     response = send_request(stream=False, url=url, instance_id=instance_id,context=context)
-                    response_stream = False
                     response = response_mode(response=response, mode=mode, prompt=prompt)
                 else:
-                    
-                    response_stream = True
                     response =  send_request(stream=True, url=url, instance_id=instance_id,context=context)
                     if not isinstance(response, str):
                         previous_output = str()
@@ -124,20 +121,17 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                                 )
                             
             elif server_status == "stopped" or "stopping":
-                response_stream = False
                 command_EC2(instance_id, region = region, action = "on")
                 response = "Server is starting up, try again in 400 seconds"
                 update_server_status_in_db(instance_id=instance_id, update_type="status")
             elif server_status == "pending":
-                response_stream = False
                 response = "Server is setting up, try again in 30 seconds"
             else:
                 response = "Unknown Server state, wait 5 seconds"
-                
-            response_stream = False
+        else:
             response = "Model is currently offline"
 
-        if type_ == "chatroom" and not response_stream:
+        if type_ == "chatroom" and isinstance(response, str):
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 room_group_name,
