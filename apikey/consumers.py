@@ -1,4 +1,5 @@
 import json
+import uuid
 from datetime import datetime
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
@@ -55,17 +56,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             length_penalty = text_data_json["length_penalty"]
             choosen_models = text_data_json["choosen_models"]
             role = text_data_json["role"]
-         
-            Inference.delay(mode = mode, type_ = "chatroom", key=None, key_name = None, credit = key_object.credit, room_group_name = self.room_group_name, model = choosen_models, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=message)
+            unique_response_id = str(uuid.uuid4())
             # Send message to room group
             await self.channel_layer.group_send(
                     self.room_group_name, {"type": "chat_message", 
                         "role":role  ,
                         "message": message, 
-                        "credit": ""
+                        "credit": "",
+                        "unique": unique_response_id
+          
                     }
                 ) 
-
+           
+            
+            Inference.delay(unique=unique_response_id,mode = mode, type_ = "chatroom", stream = True, key=None, key_name = None, credit = key_object.credit, room_group_name = self.room_group_name, model = choosen_models, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=message)
+            
     # Receive message from room group
     async def chat_message(self, event):
         message = event["message"]
@@ -75,5 +80,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send message to WebSocket
         if role == "Human" or role =="Server":
             await self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time}))
+            if role == "Human":
+         
+                unique_response_id = event['unique']
+                await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "message": "  "}))
+            else:
+                pass
         else:
-            await self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time, "credit":credit}))
+            unique_response_id = event['unique']
+           
+            await self.send(text_data=json.dumps({"message": message, "stream_id":  unique_response_id, "credit":credit}))
