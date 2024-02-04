@@ -96,10 +96,13 @@ def update_server_status_in_db(instance_id, update_type):
         ser_obj.save()
     return
 
-def send_request(url, instance_id,context):
+def send_request(stream, url, instance_id,context):
     try:
-        response = requests.post(url,   json=context,  timeout=10 ) 
-        response = response.json()['text'][0]
+        if not stream:
+            response = requests.post(url,   json=context,  timeout=10 ) 
+            response = response.json()['text'][0]
+        elif stream:
+            response = requests.post(url,   json=context,  timeout=10 ) 
     except requests.exceptions.Timeout:
         response = "Request Timeout, Cannot connect to the model. "
         ser_obj = InferenceServer.objects.get(name=instance_id)
@@ -156,7 +159,7 @@ def static_view_inference(mode, server_status,instance_id, inference_url, top_k,
     }
     update_server_status_in_db(instance_id=instance_id, update_type="time")
     if server_status == "running":
-        response = send_request(url=inference_url, instance_id=instance_id,context=context)
+        response = send_request(stream=False, url=inference_url, instance_id=instance_id,context=context)
         response = response_mode(response=response, mode=mode, prompt=prompt)
     elif server_status == "stopped" or "stopping":
         command_EC2(instance_id, region = region, action = "on")
@@ -165,6 +168,6 @@ def static_view_inference(mode, server_status,instance_id, inference_url, top_k,
     elif server_status == "pending":
         response = "Server is setting up, try again in 300 seconds"
     else:
-        response = send_request(url=inference_url, instance_id=instance_id, context=context)
+        response = send_request(stream=False, url=inference_url, instance_id=instance_id, context=context)
         response = response_mode(response=response, mode=mode, prompt=prompt)
     return response

@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 import random
 import requests
+import json
 from .models import  InferenceServer, PromptResponse, Key, LLM
 from decouple import config
 import boto3
@@ -47,7 +48,7 @@ def periodically_shutdown_EC2_instance():
             pass
         
 @shared_task
-def Inference( mode, type_, key, key_name, credit, room_group_name, model, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
+def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model, stream ,top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
         if beam == "false" or beam == False:
             beam = False
             length_penalty = 1
@@ -72,7 +73,7 @@ def Inference( mode, type_, key, key_name, credit, room_group_name, model, top_k
             "use_beam_search": beam,
             "temperature": float(temperature),
             "max_tokens": int(max_tokens),
-            "stream": False,
+            "stream": stream,
             "top_k": float(top_k),
             "top_p": float(top_p),
             "length_penalty": float(length_penalty),
@@ -90,22 +91,55 @@ def Inference( mode, type_, key, key_name, credit, room_group_name, model, top_k
             server_status = random_url.status
             update_server_status_in_db(instance_id=instance_id, update_type="time")
             if server_status == "running":
-                response = send_request(url=url, instance_id=instance_id,context=context)
-                response = response_mode(response=response, mode=mode, prompt=prompt)
+                
+                if not stream:
+                    response = send_request(stream=False, url=url, instance_id=instance_id,context=context)
+                    response_stream = False
+                    response = response_mode(response=response, mode=mode, prompt=prompt)
+                else:
+                    
+                    response_stream = True
+                    response =  send_request(stream=True, url=url, instance_id=instance_id,context=context)
+                    if not isinstance(response, str):
+                        previous_output = str()
+                        for chunk in response.iter_lines(chunk_size=8192,
+                                                            decode_unicode=False,
+                                                            delimiter=b"\0"):
+                            if chunk:
+                                data = json.loads(chunk.decode("utf-8"))
+                                output = data["text"][0]
+                                output = response_mode(response=output, mode=mode, prompt=prompt)
+                                re = output.replace(previous_output, "")
+                                previous_output = output
+                                channel_layer = get_channel_layer()
+                                async_to_sync(channel_layer.group_send)(
+                                    room_group_name,
+                                    {
+                                            "type": "chat_message", 
+                                            "role": model,
+                                            "message": re, 
+                                            'credit': credit,
+                                            'unique': unique
+                                    }
+                                )
+                            
             elif server_status == "stopped" or "stopping":
+                response_stream = False
                 command_EC2(instance_id, region = region, action = "on")
                 response = "Server is starting up, try again in 400 seconds"
                 update_server_status_in_db(instance_id=instance_id, update_type="status")
             elif server_status == "pending":
+                response_stream = False
                 response = "Server is setting up, try again in 30 seconds"
             else:
+                response_stream = False
                 response = send_request(url=url, instance_id=instance_id, context=context)
                 response = response_mode(response=response, mode=mode, prompt=prompt)
         else:
+            response_stream = False
             response = "Model is currently offline"
 
-            
-        if type_ == "chatroom":
+        if type_ == "chatroom" and not response_stream:
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 room_group_name,
@@ -113,10 +147,11 @@ def Inference( mode, type_, key, key_name, credit, room_group_name, model, top_k
                         "type": "chat_message", 
                         "role": model,
                         "message": response, 
-                        'credit': credit
+                        'credit': credit,
+                        'unique': unique
                 }
             )
-        elif type_ == "prompt":
+        if type_ == "prompt":
             log_prompt_response(key, key_name, model, prompt, response)
 
   

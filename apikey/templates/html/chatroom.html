@@ -125,8 +125,12 @@
             if (data.role == 'Human' ) {
                 document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role +"-"+ data.time + ") " + data.message +'</span></div> ');
                 }
-            else if (data.credit  ) {
-                document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' +  data.message + " (" + data.role +"-"+ data.time + " Remaining Credit: " + data.credit +  ") " +'</span></div> ');
+            else if (data.holder){
+                console.log(data.holderid)
+                document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>'+ data.message +'</span></div> ');
+            }
+            else if (data.stream_id) {
+                document.getElementById(data.stream_id).innerHTML +=  data.message 
             }
             else {
                 document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' +  data.message + " (" + data.role +"-"+ data.time + ") " +'</span></div> ');
