@@ -17,26 +17,27 @@ def get_EC2_status(instance_id, region):
     except Exception as e:
         return e
     
-def inference_mode(mode, prompt):
+def inference_mode(model, mode, prompt):
+    template = constant.MODEL_TEMPLATE_TABLE[model]
     if mode == "chat":
-        prompt_ = f"A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the users questions. USER: {prompt} ASSISTANT:"
+        prompt_ =  template.format(prompt)
         return prompt_
     elif mode == "generate":
         return prompt
 
-def response_mode(mode, response, prompt):
+def response_mode(model, mode, response, prompt):
+    template = constant.MODEL_TEMPLATE_TABLE[model]
     if mode == "chat":
-        prompt_ = f"A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the users questions. USER: {prompt} ASSISTANT:"
+        prompt_ = template.format(prompt)
         response_ = response.replace(prompt_, "")
         return response_
     elif mode == "generate":
         return response
-    
-    
-def log_prompt_response(key, key_name, model, prompt, response):
+        
+def log_prompt_response(key, key_name, model, prompt, response, type_):
     key_ = Key.objects.get(key=key, owner=key_name)
     llm = LLM.objects.get(name = model)
-    pair_save = PromptResponse(prompt=prompt, response=response, key=key_, model = llm)
+    pair_save = PromptResponse(prompt=prompt, response=response, key=key_, model = llm, p_type= type_)
     pair_save.save()
     
 def command_EC2(instance_id, region, action):
@@ -129,7 +130,7 @@ def get_model(model):
     except LLM.DoesNotExist as e:
         return e   
     
-def static_view_inference(mode, server_status,instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
+def static_view_inference(model, mode, server_status,instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
     if beam == False:
         length_penalty = 1
         early_stopping = False
@@ -141,7 +142,7 @@ def static_view_inference(mode, server_status,instance_id, inference_url, top_k,
             early_stopping = True
         else:
             early_stopping = True 
-    processed_prompt = inference_mode(mode, prompt)        
+    processed_prompt = inference_mode(model=model, mode=mode, prompt=prompt)        
     context = {
         "prompt": processed_prompt,
         "n": 1,
@@ -160,7 +161,7 @@ def static_view_inference(mode, server_status,instance_id, inference_url, top_k,
     update_server_status_in_db(instance_id=instance_id, update_type="time")
     if server_status == "running":
         response = send_request(stream=False, url=inference_url, instance_id=instance_id,context=context)
-        response = response_mode(response=response, mode=mode, prompt=prompt)
+        response = response_mode(model=model, response=response, mode=mode, prompt=prompt)
     elif server_status == "stopped" or "stopping":
         command_EC2(instance_id, region = region, action = "on")
         response = "Server is starting up, try again in 400 seconds"
@@ -169,5 +170,5 @@ def static_view_inference(mode, server_status,instance_id, inference_url, top_k,
         response = "Server is setting up, try again in 300 seconds"
     else:
         response = send_request(stream=False, url=inference_url, instance_id=instance_id, context=context)
-        response = response_mode(response=response, mode=mode, prompt=prompt)
+        response = response_mode(model=model, response=response, mode=mode, prompt=prompt)
     return response

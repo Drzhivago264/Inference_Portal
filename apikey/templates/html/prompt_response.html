@@ -119,7 +119,7 @@ curl "[HOST]/api/" --header
             <p><span>Prompt</span><textarea rows="8" cols="50" name="prompt"></textarea></p>
             <h3> Available Models </h3>
             {% for llm in llms %}
-                {% if llm.name == 'Llama 2 7B' %}
+                {% if llm.name == 'Mistral Chat 13B' %}
                     <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this)"> {{llm.name}}<br>
                 {% else %}
                     <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this)"> {{llm.name}}<br>

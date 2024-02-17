@@ -54,7 +54,7 @@
             <br>
             <h3> Available Models </h3>
             {% for llm in llms %}
-                {% if llm.name == 'Llama 2 7B' %}
+                {% if llm.name == 'Mistral Chat 13B' %}
                     <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
                 {% else %}
                     <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
@@ -126,7 +126,6 @@
                 document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role +"-"+ data.time + ") " + data.message +'</span></div> ');
                 }
             else if (data.holder){
-                console.log(data.holderid)
                 document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.role +"-"+ data.time + ": "+ '</span></div> ');
             }
             else if (data.stream_id) {

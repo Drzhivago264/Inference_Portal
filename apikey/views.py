@@ -24,7 +24,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
 from .celery_tasks import send_email_, Inference
-from .util.commond_func import update_server_status_in_db, get_model_url, get_key, get_model, static_view_inference, log_prompt_response
+from .util.commond_func import get_model_url, get_key, get_model, static_view_inference, log_prompt_response
 from django_ratelimit.exceptions import Ratelimited
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -158,7 +158,7 @@ def prompt(request):
         beam = True if beam =="True" else False
         early_stopping = True if early_stopping == "True" else False 
         instance = get_key(str(request.POST.get('name')), str(request.POST.get('key')))
-        m = request.POST.get('model') if  "model" in request.POST else "Llama 2 7B"
+        m = request.POST.get('model') if  "model" in request.POST else "Mistral Chat 13B"
         mode = request.POST.get('mode') if  "mode" in request.POST else "generate"
         prompt = bleach.clean((request.POST.get('prompt'))) if len(request.POST.get('prompt')) > 1 else " "
        
@@ -174,7 +174,7 @@ def prompt(request):
         key =  str(request.POST.get('key'))
         return HttpResponseRedirect(f"/prompt/{key}") 
     else:
-        response = f"Default to Llama 2 7B "
+        response = f"Default to Mistral Chat 13B"
         messages.info(request,f"{response} (Server {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
     return render(request, "html/prompt.html", context = {"llms":llm})
 
@@ -300,8 +300,8 @@ class ApiView(APIView):
             else:
                 inference = random.choice(available_server_list)
                 try:
-                    response = static_view_inference(mode= mode, server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
-                    log_prompt_response(key = instance.key, key_name = instance.owner, model = request.data['model'], prompt = prompt, response = response)
+                    response = static_view_inference(model=model.name, mode= mode, server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                    log_prompt_response(key = instance.key, key_name = instance.owner, model = request.data['model'], prompt = prompt, response = response, type_="prompt")
                     return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
                 except:
                     return Response(

@@ -15,10 +15,18 @@ class LLM(models.Model):
     name = models.CharField(max_length=200)
     size =  models.IntegerField(default=1)
     desc = models.TextField()
+    chat_template = models.TextField(default="")
     price = models.FloatField(default=0.0)
     
     def __str__(self) -> str:
         return self.name
+    
+class CustomTemplate(models.Model):
+    template_name = models.CharField(max_length=300)
+    model = models.ManyToManyField(LLM)
+    template = models.TextField(default="")
+    def __str__(self) -> str:
+        return self.template_name
     
 class InferenceServer(models.Model):
     name = models.CharField(max_length=200)
@@ -57,7 +65,7 @@ class PromptResponse(models.Model):
     model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     key = models.ForeignKey(Key, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    p_type = models.TextField(default="prompt")
     class Meta:
         ordering = ("-created_at",)
         

@@ -43,6 +43,7 @@
               <th>Responses</th>
               <th>Models</th>
               <th>Created Time</th>
+              <th>Type</th>
               <th>Cost</th>
             </tr>
             {% for log in response_log %}
@@ -52,6 +53,7 @@
               <td>{{ log.response }}</td>
               <td>{{ log.model }}</td>
               <td>{{ log.created_at }}</td>
+              <td>{{ log.p_type }}</td>
               <td>{{ log.model.price }}</td>
             </tr>
             {% endfor %}
