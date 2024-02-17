@@ -8,7 +8,7 @@ import json
 from .models import  InferenceServer, PromptResponse, Key, LLM
 from decouple import config
 import boto3
-from .util.commond_func import get_EC2_status, get_model_url, command_EC2, update_server_status_in_db, send_request, log_prompt_response, inference_mode, response_mode
+from .util.commond_func import get_model_url, command_EC2, update_server_status_in_db, send_request, log_prompt_response, inference_mode, response_mode
 from .util.constant import * 
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
@@ -64,7 +64,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                 early_stopping = True
             else:
                 early_stopping = True       
-        processed_prompt = inference_mode(mode, prompt)
+        processed_prompt = inference_mode(model=model, mode=mode, prompt=prompt)
         context = {
             "prompt": processed_prompt,
             "n": 1,
@@ -94,19 +94,22 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                 
                 if not stream:
                     response = send_request(stream=False, url=url, instance_id=instance_id,context=context)
-                    response = response_mode(response=response, mode=mode, prompt=prompt)
+                    response = response_mode(model=model, response=response, mode=mode, prompt=prompt)
                 else:
                     response =  send_request(stream=True, url=url, instance_id=instance_id,context=context)
+           
                     if not isinstance(response, str):
                         previous_output = str()
+                        full_response = str()
                         for chunk in response.iter_lines(chunk_size=8192,
                                                             decode_unicode=False,
                                                             delimiter=b"\0"):
                             if chunk:
                                 data = json.loads(chunk.decode("utf-8"))
                                 output = data["text"][0]
-                                output = response_mode(response=output, mode=mode, prompt=prompt)
+                                output = response_mode(model=model, response=output, mode=mode, prompt=prompt)
                                 re = output.replace(previous_output, "")
+                                full_response += re
                                 previous_output = output
                                 channel_layer = get_channel_layer()
                                 async_to_sync(channel_layer.group_send)(
@@ -119,6 +122,8 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                                             'unique': unique
                                     }
                                 )
+                        log_prompt_response(key, key_name, model, prompt, full_response, type_=type_)
+                        
                             
             elif server_status == "stopped" or "stopping":
                 command_EC2(instance_id, region = region, action = "on")
@@ -143,7 +148,10 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                         'unique': unique
                 }
             )
-        if type_ == "prompt":
-            log_prompt_response(key, key_name, model, prompt, response)
+
+            
+        elif type_ == "prompt":
+            log_prompt_response(key, key_name, model, prompt, response, type_=type_)
+
 
   
