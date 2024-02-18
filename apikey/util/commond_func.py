@@ -89,7 +89,6 @@ def get_model_url(model):
 def update_server_status_in_db(instance_id, update_type):
     ser_obj = InferenceServer.objects.get(name=instance_id)
     if update_type == "status":
-       
         ser_obj.status = "pending"
         ser_obj.save()
     elif update_type == "time":
@@ -105,7 +104,7 @@ def send_request(stream, url, instance_id,context):
         elif stream:
             response = requests.post(url,   json=context,  timeout=10 ) 
     except requests.exceptions.Timeout:
-        response = "Request Timeout, Cannot connect to the model. "
+        response = "Request Timeout. Cannot connect to the model. If you just booted the GPU server, wait for 400 seconds, and try again"
         ser_obj = InferenceServer.objects.get(name=instance_id)
         ser_obj.status = "stopped"
         ser_obj.save()
@@ -122,7 +121,7 @@ def get_key(name, key):
     try:
         return Key.objects.get(owner=name, key = key)
     except Key.DoesNotExist:
-        return None
+        return False
     
 def get_model(model):
     try:

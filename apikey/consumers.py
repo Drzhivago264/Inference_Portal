@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
+from django.core.cache import cache
 from .models import Price, Product, Key, LLM, InferenceServer
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -37,11 +38,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         self.name = text_data_json["name"]
-        key_object = await self.check_key()
+        key_object = cache.get(f"{self.key}:{self.name}")
+        
+        if key_object == None:
+            key_object = await self.check_key()
+        
         if  key_object == False:
-            await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected!", "role": "Server", "time":self.time}))
+            await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time":self.time}))
             await self.disconnect(self) 
         else:
+            cache.set(f"{self.key}:{self.name}", key_object, 10)
             mode = text_data_json["mode"]
             message = text_data_json["message"]            
             top_p= text_data_json["top_p"]
@@ -81,8 +87,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send message to WebSocket
         if role == "Human" or role =="Server":
             await self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time}))
-            if role == "Human":
-         
+            if role == "Human": 
                 unique_response_id = event['unique']
                 await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id,"role":event['choosen_model'], "time":self.time, "credit":credit }))
             else:
