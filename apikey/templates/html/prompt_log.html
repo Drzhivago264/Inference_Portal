@@ -48,11 +48,11 @@
             </tr>
             {% for log in response_log %}
             <tr>
-              <td>{{ log.id }}</td>
-              <td>{{ log.prompt }}</td>
-              <td>{{ log.response }}</td>
-              <td>{{ log.model }}</td>
-              <td>{{ log.created_at }}</td>
+              <td><p>{{ log.id }}</p></td>
+              <td><p style="width: 200px; word-wrap: break-word; overflow-wrap: break-word;">{{ log.prompt }}</p></td>
+              <td> <p style="width: 300px; word-wrap: break-word; overflow-wrap: break-word;">{{ log.response }} </p></td>
+              <td >{{ log.model }}</td>
+              <td >{{ log.created_at }}</td>
               <td>{{ log.p_type }}</td>
               <td>{{ log.model.price }}</td>
             </tr>

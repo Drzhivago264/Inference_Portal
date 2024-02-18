@@ -26,6 +26,7 @@ from django.views.generic import TemplateView
 from .celery_tasks import send_email_, Inference
 from .util.commond_func import get_model_url, get_key, get_model, static_view_inference, log_prompt_response
 from django_ratelimit.exceptions import Ratelimited
+from django.core.cache import cache
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @cache_page(60*15)  
@@ -157,18 +158,22 @@ def prompt(request):
         length_penalty = float(request.POST.get("length_penalty")) if "length_penalty" in request.POST  else 0
         beam = True if beam =="True" else False
         early_stopping = True if early_stopping == "True" else False 
-        instance = get_key(str(request.POST.get('name')), str(request.POST.get('key')))
         m = request.POST.get('model') if  "model" in request.POST else "Mistral Chat 13B"
         mode = request.POST.get('mode') if  "mode" in request.POST else "generate"
         prompt = bleach.clean((request.POST.get('prompt'))) if len(request.POST.get('prompt')) > 1 else " "
-       
-        if not instance:
+        k = request.POST.get('key')
+        n = request.POST.get('name')
+        instance = cache.get(f"{k}:{n}")
+        if instance == None:
+            instance = get_key(n, k)
+        
+        if instance == False:
             response = "Error: key or key name is not correct"
         else:
-        
+            cache.set(f"{k}:{n}", instance, 10)
             Inference.delay(unique=None, mode = mode, stream = False ,type_ = "prompt", key=str(request.POST.get('key')), key_name = str(request.POST.get('name')), credit = instance.credit, room_group_name = None, model = m, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=prompt)
-            response = "Your Prompt is queued, refer to Prompt-Response Log for detail"
-        messages.info(request,f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}))")
+            response = "Your prompt is queued, refer to Prompt-Response Log for detail"
+        messages.info(request,f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
         return HttpResponseRedirect("/prompt") 
     elif  request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'checklog':  
         key =  str(request.POST.get('key'))
@@ -263,9 +268,11 @@ class ApiView(APIView):
         return Response({'Intro':"API"}, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
-        instance = get_key(request.data['name'], request.data['key'])
-        model = get_model(request.data['model'])
-        mode = request.POST.get(request.data['mode']) 
+        n = request.data['name']
+        k = request.data['key']
+        m = request.POST.get('model') if  "model" in request.data else "Mistral Chat 13B"
+        model = get_model(m) 
+        mode = request.data.get('mode') if  "mode" in request.data else "generate"
         prompt = request.data['prompt'] if len(request.data['prompt']) > 1 else " "
         top_p= float(request.data["top_p"]) if "top_p" in request.POST else 0.73
         best_of = float(request.data["best_of"]) if "best_of" in request.POST else 1
@@ -278,9 +285,14 @@ class ApiView(APIView):
         early_stopping = True if "early_stopping" in request.POST else False
         length_penalty = float(request.data["length_penalty"]) if "length_penalty" in request.POST  else 0
         beam = True if beam =="True" else False
-        early_stopping = True if early_stopping == "True" else False   
-                 
-        if not instance:
+        early_stopping = True if early_stopping == "True" else False  
+
+        instance = cache.get(f"{k}:{n}")
+        if instance == None:
+            instance = get_key(n, k)
+ 
+            
+        if instance == False:
             return Response(
                 {"Error": "Key does not exists"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -291,6 +303,7 @@ class ApiView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         elif model:
+            cache.set(f"{k}:{n}", instance, 10)
             available_server_list = get_model_url(model.name)
             if not available_server_list:
                 return Response(
@@ -301,9 +314,10 @@ class ApiView(APIView):
                 inference = random.choice(available_server_list)
                 try:
                     response = static_view_inference(model=model.name, mode= mode, server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
-                    log_prompt_response(key = instance.key, key_name = instance.owner, model = request.data['model'], prompt = prompt, response = response, type_="prompt")
-                    return Response({"key": instance.key, "key_name":instance.owner, "credit": instance.credit, "model": request.data['model'], "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
-                except:
+                    log_prompt_response(key = instance.key, key_name = instance.owner, model = m, prompt = prompt, response = response, type_="prompt")
+                    return Response({"key": instance.key, "credit": instance.credit, "model": m, "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
+                except Exception as e:
+                    print(e)
                     return Response(
                     {"Error": "You messed up parameters"},
                     status=status.HTTP_400_BAD_REQUEST
