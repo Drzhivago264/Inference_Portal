@@ -24,7 +24,7 @@ def send_email_( subject, message, email_from, recipient_list):
 
 @shared_task()
 def periodically_monitor_EC2_instance():
-    available_server = InferenceServer.objects.all()
+    available_server = InferenceServer.objects.filter(availability = "Available")
     for server in available_server:
         ec2_resource = boto3.resource('ec2', region_name=region, aws_access_key_id=aws, aws_secret_access_key= aws_secret)
         try:
@@ -37,7 +37,7 @@ def periodically_monitor_EC2_instance():
 
 @shared_task()
 def periodically_shutdown_EC2_instance():
-    available_server = InferenceServer.objects.all()
+    available_server = InferenceServer.objects.filter(availability = "Available")
     for server in available_server:
         un_used_time = timezone.now() - server.last_message_time
         if un_used_time.total_seconds() > SERVER_TTL and (server.status != "stopped" or server.status != "stopping"):
