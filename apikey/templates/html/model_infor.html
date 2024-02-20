@@ -60,54 +60,28 @@
     <div id="site_content">
       <div id="site_content">
         <div class="sidebar">
-          <!-- insert your sidebar items here -->
-          <h2>API endpoint</h2>
-          <h4>Python example:</h4>
-          <pre style="font-size: 12px">
-r = requests.post("[HOST]/api/",  
-json={"prompt": "hola",
-"name": "[key name]", 
-"key": "[key]", 
-"model" : "[model name]",
-'top_k': [top_k],
-'top_p': [top_p],
-'best_of': [best_of],
-'max_tokens': [max_tokens],
-'frequency_penalty': [fre_penalty],
-'presense_penalty': [pre_penalty],
-'temperature': [temperature],
-'beam': ["True"/"False"],
-'early_stopping': ["True"/"False"],
-'length_penalty': [length_penalty]
-}) 
 
-print(r.json())
-  </pre>
-  <h4>CURL example:</h4>
-  <pre style="font-size: 12px">
-curl "[HOST]/api/" --header 
-'Content-Type: application/json' 
---request POST
---data-binary
-'{"prompt": "hola",
-"name": "[key name]", 
-"key": "[key]", 
-"model" :  "[model name]"
-'top_k': [top_k],
-'top_p': [top_p],
-'best_of': [best_of],
-'max_tokens': [max_tokens],
-'frequency_penalty': [freq_penalty],
-'presense_penalty': [pre_penalty],
-'temperature': [temperature],
-'beam': ["True"/"False"],
-'early_stopping': ["True"/"False"],
-'length_penalty': [length_penalty]
-}'
-          <pre>
-          <p><a href="/api">Test API</a></p>
-          <p></p>
-  
+          <h2>Servers Status</h2>
+
+          <table style = "  margin-left: auto; margin-right: auto; ">
+            <tr>
+            <th>Servers</th>
+            <th>Models</th>
+            <th>Status</th>
+            <th>Availability</th>
+            </tr>
+            {% for server in servers %}
+            <tr>
+            <td>Server-{{ server.id }}</td>
+            <td> {{server.hosted_model.name }}</td>
+            <td>{{server.status}}</td>
+            <td>{{server.availability}}</td>
+          </tr>
+            {% endfor %}
+          </table>
+          <h5>NOTE: Status can be "pending", "running", "stopping" and "stopped" which refers to the current stage of GPU servers</h5>
+          <h5>NOTE: Availability can be "availabe" and "not availabe" which refers to the ability of users to boot the instance by themselves</h5>
+          <h5>NOTE: Highly demanded models are load-balanced across multiple servers</h5>
   
         </div>
       <h2>Available Models:</h2>

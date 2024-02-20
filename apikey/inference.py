@@ -1,8 +1,18 @@
 from vllm import LLM, SamplingParams
 import json
 import requests
+from django.utils import timezone
+
+import requests
+from models import  InferenceServer, LLM, Key, PromptResponse
+from decouple import config
+import boto3
+from botocore.exceptions import ClientError
 from util import constant
-ami = "ami-0810c2d824776b340"
+
+
+
+""" ami = "ami-0810c2d824776b340"
 
 promtp= "hehe"
 context = {
@@ -17,7 +27,7 @@ print(template.format(promtp))
 for i in range(10000):
     response = requests.post("http://127.0.0.1:8000/api/",   json=context ) 
     print(response.json())
-
+ """
 
 """ response = requests.post("http://127.0.0.1:8080/generate",   json={ "prompt": str(template.format(promtp)), "max_tokens": 512,  "temperature": 0, "stream": True} ) 
 previous_output = str()

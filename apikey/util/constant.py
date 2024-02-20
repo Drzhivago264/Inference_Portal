@@ -3,6 +3,32 @@ MONITOR_ITERVAL = 5
 SHUTDOWN_INTERVAL = 60
 REGION =  "us-east-1"
 MODEL_TEMPLATE_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{}\n\n### Response:\n", 
-                        "Llama 2 Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>{}[/INST]", 
+                        "Llama 2 Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>{}[/INST]", 
                         "4Chan /Pol 2.7B": "<post> {} <comment> ", 
                         "Reddit Helper 2.7B": "<post> {} <comment> "}
+
+SHORTEN_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n{}", 
+                        "Llama 2 Chat 13B": "[INST] {}[/INST] {}</s>", 
+                        "4Chan /Pol 2.7B": "<post> {} <comment> {}", 
+                        "Reddit Helper 2.7B": "<post> {} <comment> {}"}
+
+SHORTEN_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n", 
+                        "Llama 2 Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. \n<</SYS>> [/INST]", 
+                        "4Chan /Pol 2.7B": "", 
+                        "Reddit Helper 2.7B": ""}
+
+DEFAULT_TOP_P =  0.73
+DEFAULT_BEST_OF =  1
+DEFAULT_TOP_K =  -1
+DEFAULT_MAX_TOKENS =  128
+DEFAULT_FREQUENCY_PENALTY =  0
+DEFAULT_PRESENCE_PENALTY =  0
+DEFAULT_TEMPERATURE =  0.73
+DEFAULT_BEAM =  False
+DEFAULT_EARLY_STOPPING =  False
+DEFAULT_LENGTH_PENALTY =  0
+DEFAULT_MODEL = "Mistral Chat 13B"
+DEFAULT_MODE = "generate"
+
+CACHE_AUTHENTICATION = 10
+CACHE_SERVER_LINK_RETRIVAL = 60

@@ -35,6 +35,7 @@ class InferenceServer(models.Model):
     hosted_model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     status = models.CharField(max_length = 200, default="off")
     last_message_time = models.DateTimeField(default=now)
+    availability = models.CharField(max_length = 200, default="Not Available")
     def __str__(self) -> str:
         return self.name
         
