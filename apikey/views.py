@@ -24,16 +24,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
 from .celery_tasks import send_email_, Inference
-from .util.commond_func import get_model_url, get_key, get_model, static_view_inference, log_prompt_response
+from .util.commond_func import get_model_url, get_key, get_model, static_view_inference, log_prompt_response, get_chat_context
 from django_ratelimit.exceptions import Ratelimited
 from django.core.cache import cache
+from apikey.util import constant
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-@cache_page(60*15)  
+#@cache_page(60*15)  
 def index(request):
     return render(request, "html/index.html")
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def manual(request):
     return render(request, "html/manual.html")
 
@@ -41,10 +42,11 @@ def manual(request):
 def chat(request):
     return render(request, "html/chat.html")
 
-@cache_page(60*60)
+#@cache_page(60)
 def model_infor(request):
     llm = LLM.objects.all()
-    context = {'llms':llm}
+    servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
+    context = {'llms':llm, 'servers':servers}
     return render(request, "html/model_infor.html", context)
 
 class ProductListView(ListView):
@@ -146,20 +148,20 @@ def contact(request):
 def prompt(request):
     llm = LLM.objects.all()
     if request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'prompt':  
-        top_p= float(request.POST.get("top_p")) if "top_p" in request.POST else 0.73
-        best_of = float(request.POST.get("best_of")) if "best_of" in request.POST else 1
-        top_k = float(request.POST.get("top_k")) if "top_k" in request.POST else -1
-        max_tokens = int(request.POST.get("max_tokens")) if "max_tokens" in request.POST else 128
-        frequency_penalty = float(request.POST.get("frequency_penalty")) if "frequency_penalty" in request.POST else 0
-        presense_penalty = float(request.POST.get("presense_penalty")) if "presense_penalty" in request.POST else 0
-        temperature = float(request.POST.get("temperature")) if "temperature" in request.POST else 0.73
-        beam = request.POST.get("beam") if "beam" in request.POST  else False
-        early_stopping = request.POST.get("early_stopping") if "early_stopping" in request.POST else False
-        length_penalty = float(request.POST.get("length_penalty")) if "length_penalty" in request.POST  else 0
+        top_p= float(request.POST.get("top_p")) if "top_p" in request.POST else constant.DEFAULT_TOP_P
+        best_of = float(request.POST.get("best_of")) if "best_of" in request.POST else constant.DEFAULT_BEST_OF
+        top_k = float(request.POST.get("top_k")) if "top_k" in request.POST else constant.DEFAULT_TOP_K
+        max_tokens = int(request.POST.get("max_tokens")) if "max_tokens" in request.POST else constant.DEFAULT_MAX_TOKENS
+        frequency_penalty = float(request.POST.get("frequency_penalty")) if "frequency_penalty" in request.POST else constant.DEFAULT_FREQUENCY_PENALTY
+        presense_penalty = float(request.POST.get("presense_penalty")) if "presense_penalty" in request.POST else constant.DEFAULT_PRESENCE_PENALTY
+        temperature = float(request.POST.get("temperature")) if "temperature" in request.POST else constant.DEFAULT_TEMPERATURE
+        beam = request.POST.get("beam") if "beam" in request.POST  else constant.DEFAULT_BEAM
+        early_stopping = request.POST.get("early_stopping") if "early_stopping" in request.POST else constant.DEFAULT_EARLY_STOPPING
+        length_penalty = float(request.POST.get("length_penalty")) if "length_penalty" in request.POST  else constant.DEFAULT_LENGTH_PENALTY
         beam = True if beam =="True" else False
         early_stopping = True if early_stopping == "True" else False 
-        m = request.POST.get('model') if  "model" in request.POST else "Mistral Chat 13B"
-        mode = request.POST.get('mode') if  "mode" in request.POST else "generate"
+        m = request.POST.get('model') if  "model" in request.POST else constant.DEFAULT_MODEL
+        mode = request.POST.get('mode') if  "mode" in request.POST else constant.DEFAULT_MODE
         prompt = bleach.clean((request.POST.get('prompt'))) if len(request.POST.get('prompt')) > 1 else " "
         k = request.POST.get('key')
         n = request.POST.get('name')
@@ -170,7 +172,7 @@ def prompt(request):
         if instance == False:
             response = "Error: key or key name is not correct"
         else:
-            cache.set(f"{k}:{n}", instance, 10)
+            cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
             Inference.delay(unique=None, mode = mode, stream = False ,type_ = "prompt", key=str(request.POST.get('key')), key_name = str(request.POST.get('name')), credit = instance.credit, room_group_name = None, model = m, top_k=top_k, top_p =top_p, best_of =best_of, temperature =temperature, max_tokens = max_tokens, presense_penalty =presense_penalty, frequency_penalty = frequency_penalty, length_penalty = length_penalty, early_stopping = early_stopping,beam = beam, prompt=prompt)
             response = "Your prompt is queued, refer to Prompt-Response Log for detail"
         messages.info(request,f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
@@ -270,20 +272,20 @@ class ApiView(APIView):
     def post(self, request, *args, **kwargs):
         n = request.data['name']
         k = request.data['key']
-        m = request.POST.get('model') if  "model" in request.data else "Mistral Chat 13B"
+        m = request.POST.get('model') if  "model" in request.data else constant.DEFAULT_MODEL
         model = get_model(m) 
-        mode = request.data.get('mode') if  "mode" in request.data else "generate"
+        mode = request.data.get('mode') if  "mode" in request.data else constant.DEFAULT_MODE
         prompt = request.data['prompt'] if len(request.data['prompt']) > 1 else " "
-        top_p= float(request.data["top_p"]) if "top_p" in request.POST else 0.73
-        best_of = float(request.data["best_of"]) if "best_of" in request.POST else 1
-        top_k = float(request.data["top_k"]) if "top_k" in request.POST else -1
-        max_tokens = int(request.data["max_tokens"]) if "max_tokens" in request.POST else 128
-        frequency_penalty = float(request.data["frequency_penalty"]) if "frequency_penalty" in request.POST else 0
-        presense_penalty = float(request.data["presense_penalty"]) if "presense_penalty" in request.POST else 0
-        temperature = float(request.data["temperature"]) if "temperature" in request.POST else 0.73
-        beam = request.data["beam"] if "beam" in request.POST  else False
-        early_stopping = True if "early_stopping" in request.POST else False
-        length_penalty = float(request.data["length_penalty"]) if "length_penalty" in request.POST  else 0
+        top_p= float(request.data["top_p"]) if "top_p" in request.POST else constant.DEFAULT_TOP_P
+        best_of = float(request.data["best_of"]) if "best_of" in request.POST else constant.DEFAULT_BEST_OF
+        top_k = float(request.data["top_k"]) if "top_k" in request.POST else constant.DEFAULT_TOP_K
+        max_tokens = int(request.data["max_tokens"]) if "max_tokens" in request.POST else constant.DEFAULT_MAX_TOKENS
+        frequency_penalty = float(request.data["frequency_penalty"]) if "frequency_penalty" in request.POST else constant.DEFAULT_FREQUENCY_PENALTY
+        presense_penalty = float(request.data["presense_penalty"]) if "presense_penalty" in request.POST else constant.DEFAULT_PRESENCE_PENALTY
+        temperature = float(request.data["temperature"]) if "temperature" in request.POST else constant.DEFAULT_TEMPERATURE
+        beam = request.data["beam"] if "beam" in request.POST  else constant.DEFAULT_BEAM
+        early_stopping = True if "early_stopping" in request.POST else constant.DEFAULT_EARLY_STOPPING
+        length_penalty = float(request.data["length_penalty"]) if "length_penalty" in request.POST  else constant.DEFAULT_LENGTH_PENALTY
         beam = True if beam =="True" else False
         early_stopping = True if early_stopping == "True" else False  
 
@@ -303,7 +305,7 @@ class ApiView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         elif model:
-            cache.set(f"{k}:{n}", instance, 10)
+            cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
             available_server_list = get_model_url(model.name)
             if not available_server_list:
                 return Response(

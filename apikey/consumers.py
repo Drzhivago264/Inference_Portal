@@ -9,6 +9,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import send_email_, Inference
 from .util.commond_func import inference_mode
+from .util import constant
 class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def check_key(self):
@@ -47,7 +48,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time":self.time}))
             await self.disconnect(self) 
         else:
-            cache.set(f"{self.key}:{self.name}", key_object, 10)
+            cache.set(f"{self.key}:{self.name}", key_object, constant.CACHE_AUTHENTICATION)
             mode = text_data_json["mode"]
             message = text_data_json["message"]            
             top_p= text_data_json["top_p"]

@@ -5,6 +5,7 @@ from . import constant
 from decouple import config
 import boto3
 from botocore.exceptions import ClientError
+from django.core.cache import cache
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
@@ -77,12 +78,12 @@ def command_EC2(instance_id, region, action):
         return 
 
 def get_model_url(model):
-    avaiable_model_list = []
     try:
-        model_list = list(InferenceServer.objects.filter(hosted_model__name=model))
-        for m in model_list:
-            avaiable_model_list.append(m)
-        return avaiable_model_list
+        model_list = cache.get(f"{model}_link_list")
+        if model_list == None:
+            model_list = list(InferenceServer.objects.filter(hosted_model__name=model, availability = "Available"))
+            cache.set(f"{model}_link_list", model_list, constant.CACHE_SERVER_LINK_RETRIVAL)
+        return model_list
     except:
         return False
  
@@ -105,9 +106,6 @@ def send_request(stream, url, instance_id,context):
             response = requests.post(url,   json=context,  timeout=10 ) 
     except requests.exceptions.Timeout:
         response = "Request Timeout. Cannot connect to the model. If you just booted the GPU server, wait for 400 seconds, and try again"
-        ser_obj = InferenceServer.objects.get(name=instance_id)
-        ser_obj.status = "stopped"
-        ser_obj.save()
     except requests.exceptions.InvalidJSONError:
         response = "You messed up the parameters. Return them to the defaults."
     except requests.exceptions.ConnectionError:
@@ -127,7 +125,7 @@ def get_model(model):
     try:
         return LLM.objects.get(name=model)
     except LLM.DoesNotExist as e:
-        return e   
+        return False   
     
 def static_view_inference(model, mode, server_status,instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
     if beam == False:
@@ -171,3 +169,13 @@ def static_view_inference(model, mode, server_status,instance_id, inference_url,
         response = send_request(stream=False, url=inference_url, instance_id=instance_id, context=context)
         response = response_mode(model=model, response=response, mode=mode, prompt=prompt)
     return response
+
+def get_chat_context(model, key):
+    message_list = PromptResponse.objects.filter(model__name=model, key__key = key, p_type= "chatroom").order_by("-id")[:10]
+    shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
+    full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model]
+   
+    for mess in message_list:
+        full_instruct += shorten_template.format(mess.prompt, mess.response)
+
+    return full_instruct
