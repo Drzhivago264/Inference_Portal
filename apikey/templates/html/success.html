@@ -19,13 +19,33 @@
         </div>
         <div id="menubar">
           <ul id="menu">
-            <li  ><a href="/"> Intro</a></li>
-            <li><a href="/model_infor">Models</a></li>
-            <li class="selected"><a href="/buy">Top Up</a></li>
-            <li><a href="/prompt">Prompt</a></li>
-            <li ><a href="/chat">Chat Bot</a></li>
-            <li ><a href="/manual">Manual</a></li>
-            <li><a href="contact">Contact Us</a></li>
+            <div  class="dropdown">
+              <a  href="/"> 
+              <button class="dropbtn">Introduction</button>
+              </a>
+              <div class="dropdown-content">
+                <a href="/">Introduction</a>
+                <a href="/model_infor">Model</a>
+                <a href="/manual">User Manual</a>
+                <a href="/contact">Contact Us</a>
+              </div>
+            </div> 
+  
+            <div class="dropdown">
+              <a  href="/chat"> 
+              <button class="dropbtn-selected">Inference Modes</button>
+              </a>
+              <div class="dropdown-content">
+                <a href="/prompt">Prompt and API</a>
+                <a href="/chat">Chat Bot and Agent</a> 
+              </div>
+            </div> 
+            <a  href="/buy"> 
+              <button class="dropbtn-selected">Get Key</button>
+            </a>
+            <a  href="/prompt-response"> 
+              <button class="dropbtn">Response Log</button>
+            </a>
           </ul>
         </div>
       </div>

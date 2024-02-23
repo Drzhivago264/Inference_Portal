@@ -34,20 +34,35 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 def index(request):
     return render(request, "html/index.html")
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def manual(request):
     return render(request, "html/manual.html")
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def chat(request):
     return render(request, "html/chat.html")
 
-#@cache_page(60)
+
+@cache_page(60)
 def model_infor(request):
     llm = LLM.objects.all()
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
     context = {'llms':llm, 'servers':servers}
     return render(request, "html/model_infor.html", context)
+
+def response_prompt_redirect(request):
+    if request.method == 'POST':
+        key = bleach.clean(request.POST.get('key'))
+        name = bleach.clean(request.POST.get('name'))
+        check = get_key(key=key,name=name)
+        if check:
+            return HttpResponseRedirect(f"/prompt/{key}") 
+        else:
+            messages.error(request,"Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
+            return HttpResponseRedirect("/prompt-response")
+    return render(request, "html/prompt_log_redirect.html")
+        
+
 
 class ProductListView(ListView):
     model = Product
@@ -178,8 +193,15 @@ def prompt(request):
         messages.info(request,f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
         return HttpResponseRedirect("/prompt") 
     elif  request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'checklog':  
+        
         key =  str(request.POST.get('key'))
-        return HttpResponseRedirect(f"/prompt/{key}") 
+        name = str(request.POST.get('name'))
+        check = get_key(key=key, name=name)
+        if check:
+            return HttpResponseRedirect(f"/prompt/{key}") 
+        else:
+            messages.error(request,"Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
+            return HttpResponseRedirect("/prompt-response") 
     else:
         response = f"Default to Mistral Chat 13B"
         messages.info(request,f"{response} (Server {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
@@ -189,6 +211,11 @@ def room(request,  key):
     llm = LLM.objects.all()
     context = {'llms':llm,  "key": key}
     return render(request, "html/chatroom.html", context)
+
+def agentroom(request,  key):
+    llm = LLM.objects.all()
+    context = {'llms':llm,  "key": key}
+    return render(request, "html/lagent.html", context)
 
 def room_prompt(request,  key):
     response_log = PromptResponse.objects.filter(key__key=key).order_by('-id')
@@ -315,7 +342,7 @@ class ApiView(APIView):
             else:
                 inference = random.choice(available_server_list)
                 try:
-                    response = static_view_inference(model=model.name, mode= mode, server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                    response = static_view_inference(model=model.name, key= instance.key, mode= mode, server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
                     log_prompt_response(key = instance.key, key_name = instance.owner, model = m, prompt = prompt, response = response, type_="prompt")
                     return Response({"key": instance.key, "credit": instance.credit, "model": m, "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
                 except Exception as e:

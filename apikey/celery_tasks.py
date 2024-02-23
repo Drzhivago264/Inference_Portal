@@ -64,7 +64,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                 early_stopping = True
             else:
                 early_stopping = True       
-        processed_prompt = inference_mode(model=model, mode=mode, prompt=prompt)
+        processed_prompt = inference_mode(model=model, key = key, mode=mode, prompt=prompt)
         context = {
             "prompt": processed_prompt,
             "n": 1,
@@ -94,7 +94,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                 
                 if not stream:
                     response = send_request(stream=False, url=url, instance_id=instance_id,context=context)
-                    response = response_mode(model=model, response=response, mode=mode, prompt=prompt)
+                    response = response_mode(model=model, response=response, mode=mode, prompt=processed_prompt)
                 else:
                     response =  send_request(stream=True, url=url, instance_id=instance_id,context=context)
            
@@ -107,7 +107,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                             if chunk:
                                 data = json.loads(chunk.decode("utf-8"))
                                 output = data["text"][0]
-                                output = response_mode(model=model, response=output, mode=mode, prompt=prompt)
+                                output = response_mode(model=model, response=output, mode=mode, prompt=processed_prompt)
                                 re = output.replace(previous_output, "")
                                 full_response += re
                                 previous_output = output

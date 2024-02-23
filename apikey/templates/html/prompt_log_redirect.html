@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Cancel Order</title>
+    <title>Prompt-Response Log</title>
     <meta name="description" content="website description" />
     <meta name="keywords" content="website keywords, website keywords" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -32,7 +32,7 @@
             </div> 
   
             <div class="dropdown">
-              <a  href="/chat"> 
+              <a  href="/"> 
               <button class="dropbtn">Inference Modes</button>
               </a>
               <div class="dropdown-content">
@@ -41,24 +41,27 @@
               </div>
             </div> 
             <a  href="/buy"> 
-              <button class="dropbtn-selected">Get Key</button>
+              <button class="dropbtn">Get Key</button>
             </a>
             <a  href="/prompt-response"> 
-              <button class="dropbtn">Response Log</button>
+              <button class="dropbtn-selected">Response Log</button>
             </a>
           </ul>
         </div>
       </div>
+
       <div id="site_content">
-        {% block title %} Cancel {% endblock title%} 
-        {% block content %}
-        <div class="alert alert-info" role="alert">
-          <a
-              href="{% url 'apikey:product-list' %}"
-              >Go Back</a
-            >
-        </div>
-{% endblock content %}
-</div>
+        <h2>Enter your key </h2>
+        <form method="post">
+            {% csrf_token %}
+              <span>Key Name: </span>
+              <input type="password" name="name" /> 
+              <span>Key: </span>
+              <input type="text" name="key" /> 
+              <input class="submit" type="submit" value=" Check " />
+        </form>
+        {%for message in messages %}
+             <h4> {{message}} </h4>   
+        {%endfor%}
 </body>
 </html>
