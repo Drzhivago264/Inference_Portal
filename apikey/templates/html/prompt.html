@@ -18,7 +18,7 @@
     color: white;
     border: 1px solid #ccc;
     box-sizing: border-box;
-    height: 25vh;
+    height: 15vh;
     overflow: auto;
 }
 .message_log_container {
@@ -36,13 +36,33 @@
       </div>
       <div id="menubar">
         <ul id="menu">
-          <li  ><a href="/"> Intro</a></li>
-          <li><a href="/model_infor">Models</a></li>
-          <li><a href="/buy">Top Up</a></li>
-          <li class="selected"><a href="/prompt">Prompt</a></li>
-          <li ><a href="/chat">Chat Bot</a></li>
-          <li ><a href="/manual">Manual</a></li>
-          <li ><a href="contact">Contact Us</a></li>
+          <div  class="dropdown">
+            <a  href="/"> 
+            <button class="dropbtn">Introduction</button>
+            </a>
+            <div class="dropdown-content">
+              <a href="/">Introduction</a>
+              <a href="/model_infor">Model</a>
+              <a href="/manual">User Manual</a>
+              <a href="/contact">Contact Us</a>
+            </div>
+          </div> 
+
+          <div class="dropdown">
+            <a  href="#"> 
+            <button class="dropbtn-selected">Inference Modes</button>
+            </a>
+            <div class="dropdown-content">
+              <a href="/prompt">Prompt and API</a>
+              <a href="/chat">Chat Bot and Agent</a>
+            </div>
+          </div> 
+          <a  href="/buy"> 
+            <button class="dropbtn">Get Key</button>
+          </a>
+          <a  href="/prompt-response"> 
+            <button class="dropbtn">Response Log</button>
+          </a>
         </ul>
       </div>
     </div>
@@ -63,8 +83,10 @@
         <form method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="checklog">
-            <p><span>Key: </span><input type="text"  size="20" name="key" /> <input class="submit" type="submit" value=" Check " /></p>
-          </form>
+            <p><span>Key: </span><input type="text" style="float: right;"  size="20" name="key" /> <br>
+              <span>Key Name: </span><input type="password" style="float: right;"  size="20" name="name" />
+              <input class="submit" style="float: right;" type="submit" value=" Check " /></p>
+        </form>
         <h2>API Endpoint</h2>
         <h4>Python example:</h4>
         <pre style="font-size: 12px">

@@ -19,30 +19,76 @@
         </div>
         <div id="menubar">
           <ul id="menu">
-            <li  ><a href="/"> Intro</a></li>
-            <li><a href="/model_infor">Models</a></li>
-            <li><a href="/buy">Top Up</a></li>
-            <li><a href="/prompt">Prompt</a></li>
-            <li class="selected"><a href="/chat">Chat Bot</a></li>
-            <li ><a href="/manual">Manual</a></li>
-            <li ><a href="contact">Contact Us</a></li>
+            <div  class="dropdown">
+              <a  href="/"> 
+              <button class="dropbtn">Introduction</button>
+              </a>
+              <div class="dropdown-content">
+                <a href="/">Introduction</a>
+                <a href="/model_infor">Model</a>
+                <a href="/manual">User Manual</a>
+                <a href="/contact">Contact Us</a>
+              </div>
+            </div> 
+  
+            <div class="dropdown">
+              <a  href="/"> 
+              <button class="dropbtn-selected">Inference Modes</button>
+              </a>
+              <div class="dropdown-content">
+                <a href="/prompt">Prompt and API</a>
+                <a href="/chat">Chat Bot and Agent</a>
+              </div>
+            </div> 
+            <a  href="/buy"> 
+              <button class="dropbtn">Get Key</button>
+            </a>
+            <a  href="/prompt-response"> 
+              <button class="dropbtn">Response Log</button>
+            </a>
           </ul>
         </div>
       </div>
 
       <div id="site_content">
+        <h2>Bring me to:</h2>
+        <input type="checkbox" class= "checkbox_mode" name="mode"  value= "chat" checked onclick="onlyOne(this)"> Chat Bot Mode<br>
+        <input type="checkbox" class= "checkbox_mode" name="mode"  value= "engineering" onclick="onlyOne(this)"> Agent Mode<br><br>
         <h2>Enter your key </h2>
         <label for="key">Key: </label>
         <input id="key" type="text" >
         <input id="room-name-submit" type="button" value="Enter">
       </div>
     <script>
+
+        function onlyOne(checkbox, type_) {
+   
+                var checkboxes = document.getElementsByName('mode')
+                checkboxes.forEach((item) => {
+                    if (item !== checkbox) item.checked = false
+                }) 
+              }
         document.querySelector('#key').focus();
 
 
         document.querySelector('#room-name-submit').onclick = function(e) {
             var key = document.querySelector('#key').value;
-            window.location.pathname = '/chat/' + key + "/";
+            var destination = null; 
+            var inputElements = document.getElementsByClassName('checkbox_mode');
+            for(var i=0; inputElements[i]; ++i){
+                  if(inputElements[i].checked){
+                      destination = inputElements[i].value;
+                      break;
+                  }
+            }
+
+            
+            if (destination == "chat") {
+              window.location.pathname = '/chat/' + key + "/";
+            }
+            else if (destination == "engineering") {
+              window.location.pathname = '/engineer/' + key + "/";
+            }
         };
     </script>
 </body>

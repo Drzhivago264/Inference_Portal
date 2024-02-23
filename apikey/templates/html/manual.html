@@ -21,14 +21,33 @@
       </div>
       <div id="menubar">
         <ul id="menu">
-          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
-          <li><a href="/"> Intro</a></li>
-          <li><a href="/model_infor">Models</a></li>
-          <li><a href="/buy">Top Up</a></li>
-          <li><a href="/prompt">Prompt</a></li>
-          <li ><a href="/chat">Chat Bot</a></li>
-          <li  class="selected"><a href="/manual">Manual</a></li>
-          <li><a href="contact">Contact Us</a></li>
+          <div  class="dropdown">
+            <a  href="/"> 
+            <button class="dropbtn-selected">Introduction</button>
+            </a>
+            <div class="dropdown-content">
+              <a href="/">Introduction</a>
+              <a href="/model_infor">Model</a>
+              <a href="/manual">User Manual</a>
+              <a href="/contact">Contact Us</a>
+            </div>
+          </div> 
+
+          <div class="dropdown">
+            <a  href="/chat"> 
+            <button class="dropbtn">Inference Modes</button>
+            </a>
+            <div class="dropdown-content">
+              <a href="/prompt">Prompt and API</a>
+              <a href="/chat">Chat Bot and Agent</a>
+            </div>
+          </div> 
+          <a  href="/buy"> 
+            <button class="dropbtn">Get Key</button>
+          </a>
+          <a  href="/prompt-response"> 
+            <button class="dropbtn">Response Log</button>
+          </a>
         </ul>
       </div>
     </div>
@@ -48,17 +67,17 @@
       <div id="content">
         <!-- insert the page content here -->
         <h1>What can this website do?</h1>
-        <p> This website is trying to sell you the access to several language models:  </p>
-        <h2>API endpoints</h2>
+        <p> This website is trying to sell you the access to several language models. The users can access the language models via three modes below:  </p>
+        <h3>API endpoints</h3>
         <p> This website fowards your request to the GPU servers and return the results. </p>
         <h5>NOTE: If the server is currently offline, you should send a warm up request to boot it up, otherwise you will get a lot a status reponses for your prompts</h5>
-        <h2>Chat Bot Mode</h2>
+        <h3>Chat Bot Mode</h3>
         <p>We offer standard chatbot mode with custom chat template. The memory of the models are 10 previous prompt-response pairs associated with your Key or until the context reach 3000 tokens (so we have at least 1000 tokens left to answer your lastest prompt). 
         </p>
         <p>
         We are working on a vectorised database to better generate prompts from your chat history. We also offer an option to not storing your chatlog on our server. 
         Therefore, please do not input a 10000-page book into the chatroom, the model will give you nothing. You can contribute or chew gum. </p>
-        <h2>Hard Core Prompt Engineering Mode</h2>
+        <h3>Hard Core Prompt Engineering Mode</h3>
         <p>We are working on a feature that use Lagent to split our model into multiple smart workers for complicated tasks that require multiple reasoning steps.
         User can participate into the creation of such prompts for their own tasks.
         You can contribute or chew gum. </p>

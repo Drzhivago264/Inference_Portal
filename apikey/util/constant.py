@@ -7,16 +7,22 @@ MODEL_TEMPLATE_TABLE = {"Mistral Chat 13B": "Below is an instruction that descri
                         "4Chan /Pol 2.7B": "<post> {} <comment> ", 
                         "Reddit Helper 2.7B": "<post> {} <comment> "}
 
-SHORTEN_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n{}", 
-                        "Llama 2 Chat 13B": "[INST] {}[/INST] {}</s>", 
+SHORTEN_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n{}\n", 
+                        "Llama 2 Chat 13B": "{}[/INST] {}</s>", 
                         "4Chan /Pol 2.7B": "<post> {} <comment> {}", 
                         "Reddit Helper 2.7B": "<post> {} <comment> {}"}
 
 SHORTEN_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n", 
-                        "Llama 2 Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. \n<</SYS>> [/INST]", 
+                        "Llama 2 Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. \n<</SYS>>", 
                         "4Chan /Pol 2.7B": "", 
                         "Reddit Helper 2.7B": ""}
 
+MAX_HISTORY_LENGTH = {
+    "Mistral Chat 13B": 2500,
+    "Llama 2 Chat 13B": 2500,
+    "4Chan /Pol 2.7B": 100,
+    "Reddit Helper 2.7B": 100
+}
 DEFAULT_TOP_P =  0.73
 DEFAULT_BEST_OF =  1
 DEFAULT_TOP_K =  -1

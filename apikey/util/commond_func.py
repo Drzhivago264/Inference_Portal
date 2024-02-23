@@ -18,19 +18,19 @@ def get_EC2_status(instance_id, region):
     except Exception as e:
         return e
     
-def inference_mode(model, mode, prompt):
-    template = constant.MODEL_TEMPLATE_TABLE[model]
+def inference_mode(model, key,  mode, prompt):
+    template = constant.SHORTEN_TEMPLATE_TABLE[model]
     if mode == "chat":
-        prompt_ =  template.format(prompt)
+        prompt_ =  template.format(prompt, "")
+        chat_history = get_chat_context(model=model, key = key)
+        prompt_ = chat_history + "\n" + prompt_
         return prompt_
     elif mode == "generate":
         return prompt
 
 def response_mode(model, mode, response, prompt):
-    template = constant.MODEL_TEMPLATE_TABLE[model]
     if mode == "chat":
-        prompt_ = template.format(prompt)
-        response_ = response.replace(prompt_, "")
+        response_ = response.replace(prompt, "")
         return response_
     elif mode == "generate":
         return response
@@ -100,10 +100,10 @@ def update_server_status_in_db(instance_id, update_type):
 def send_request(stream, url, instance_id,context):
     try:
         if not stream:
-            response = requests.post(url,   json=context,  timeout=10 ) 
+            response = requests.post(url,  json=context,  stream = stream, timeout=10 ) 
             response = response.json()['text'][0]
         elif stream:
-            response = requests.post(url,   json=context,  timeout=10 ) 
+            response = requests.post(url,  json=context,  stream = stream, timeout=10 ) 
     except requests.exceptions.Timeout:
         response = "Request Timeout. Cannot connect to the model. If you just booted the GPU server, wait for 400 seconds, and try again"
     except requests.exceptions.InvalidJSONError:
@@ -127,7 +127,7 @@ def get_model(model):
     except LLM.DoesNotExist as e:
         return False   
     
-def static_view_inference(model, mode, server_status,instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
+def static_view_inference(model, mode, key, server_status,instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
     if beam == False:
         length_penalty = 1
         early_stopping = False
@@ -139,7 +139,7 @@ def static_view_inference(model, mode, server_status,instance_id, inference_url,
             early_stopping = True
         else:
             early_stopping = True 
-    processed_prompt = inference_mode(model=model, mode=mode, prompt=prompt)        
+    processed_prompt = inference_mode(model=model, key=key,mode=mode, prompt=prompt)        
     context = {
         "prompt": processed_prompt,
         "n": 1,
@@ -158,7 +158,7 @@ def static_view_inference(model, mode, server_status,instance_id, inference_url,
     update_server_status_in_db(instance_id=instance_id, update_type="time")
     if server_status == "running":
         response = send_request(stream=False, url=inference_url, instance_id=instance_id,context=context)
-        response = response_mode(model=model, response=response, mode=mode, prompt=prompt)
+        response = response_mode(model=model, response=response, mode=mode, prompt=processed_prompt)
     elif server_status == "stopped" or "stopping":
         command_EC2(instance_id, region = region, action = "on")
         response = "Server is starting up, try again in 400 seconds"
@@ -167,15 +167,26 @@ def static_view_inference(model, mode, server_status,instance_id, inference_url,
         response = "Server is setting up, try again in 300 seconds"
     else:
         response = send_request(stream=False, url=inference_url, instance_id=instance_id, context=context)
-        response = response_mode(model=model, response=response, mode=mode, prompt=prompt)
+        response = response_mode(model=model, response=response, mode=mode, prompt=processed_prompt)
     return response
 
 def get_chat_context(model, key):
-    message_list = PromptResponse.objects.filter(model__name=model, key__key = key, p_type= "chatroom").order_by("-id")[:10]
+    message_list = list(reversed(PromptResponse.objects.filter(model__name=model, key__key = key, p_type= "chatroom").order_by("-id")[:10]))
     shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
     full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model]
-   
-    for mess in message_list:
-        full_instruct += shorten_template.format(mess.prompt, mess.response)
+    max_history_length = constant.MAX_HISTORY_LENGTH[model]
 
+    for mess in message_list:
+        template = shorten_template.format(mess.prompt, mess.response)
+        
+        full_instruct += template
+        current_history_length = len(full_instruct)
+        if current_history_length > max_history_length:
+            text_to_remove = str()
+            index_ = int(0)
+
+            while len(text_to_remove) < ( current_history_length - max_history_length):
+                text_to_remove += shorten_template.format(message_list[index_].prompt, message_list[index_].response)
+                index_+= 1       
+                full_instruct = full_instruct.replace(shorten_template.format(message_list[index_].prompt, message_list[index_].response), "")
     return full_instruct
