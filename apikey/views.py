@@ -59,8 +59,9 @@ def response_prompt_redirect(request):
             return HttpResponseRedirect(f"/prompt/{key}") 
         else:
             messages.error(request,"Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
-            return HttpResponseRedirect("/prompt-response")
-    return render(request, "html/prompt_log_redirect.html")
+            return HttpResponseRedirect("/promptresponse")
+    elif request.method == 'GET':
+        return render(request, "html/prompt_log_redirect.html")
         
 
 

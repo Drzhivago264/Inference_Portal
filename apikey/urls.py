@@ -25,6 +25,6 @@ urlpatterns = [
     path("chat/<str:key>/", views.room, name="room"),
     path("engineer/<str:key>/", views.agentroom, name="room"),
     path('api/', ApiView.as_view()),
-    path('prompt-response/', views.response_prompt_redirect, name='prompt-response')
+    path('promptresponse', views.response_prompt_redirect, name='promptresponse')
 
 ]
