@@ -5,6 +5,8 @@ from . import constant
 from decouple import config
 import boto3
 from botocore.exceptions import ClientError
+from celery.utils.log import get_task_logger
+logger = get_task_logger(__name__)
 from django.core.cache import cache
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
@@ -24,6 +26,7 @@ def inference_mode(model, key,  mode, prompt):
         prompt_ =  template.format(prompt, "")
         chat_history = get_chat_context(model=model, key = key)
         prompt_ = chat_history + "\n" + prompt_
+        logger.info(prompt_)
         return prompt_
     elif mode == "generate":
         return prompt
@@ -103,7 +106,7 @@ def send_request(stream, url, instance_id,context):
             response = requests.post(url,  json=context,  stream = stream, timeout=10 ) 
             response = response.json()['text'][0]
         elif stream:
-            response = requests.post(url,  json=context,  stream = stream, timeout=10 ) 
+            response = requests.post(url,  json=context,  stream = stream, timeout=10 )    
     except requests.exceptions.Timeout:
         response = "Request Timeout. Cannot connect to the model. If you just booted the GPU server, wait for 400 seconds, and try again"
     except requests.exceptions.InvalidJSONError:
@@ -173,20 +176,19 @@ def static_view_inference(model, mode, key, server_status,instance_id, inference
 def get_chat_context(model, key):
     message_list = list(reversed(PromptResponse.objects.filter(model__name=model, key__key = key, p_type= "chatroom").order_by("-id")[:10]))
     shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
-    full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model]
+    full_instruct = ""
     max_history_length = constant.MAX_HISTORY_LENGTH[model]
-
-    for mess in message_list:
+    logger.info(max_history_length)
+    
+    for i, mess in enumerate(message_list):
         template = shorten_template.format(mess.prompt, mess.response)
-        
+        full_instruct += "\n\n"
         full_instruct += template
         current_history_length = len(full_instruct)
-        if current_history_length > max_history_length:
-            text_to_remove = str()
-            index_ = int(0)
-
-            while len(text_to_remove) < ( current_history_length - max_history_length):
-                text_to_remove += shorten_template.format(message_list[index_].prompt, message_list[index_].response)
-                index_+= 1       
-                full_instruct = full_instruct.replace(shorten_template.format(message_list[index_].prompt, message_list[index_].response), "")
+        
+        if current_history_length > int(max_history_length):
+            full_instruct = full_instruct[(current_history_length-max_history_length):]
+            print(len(full_instruct))
+                #logger.info(current_history_length)
+    full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
     return full_instruct

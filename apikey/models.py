@@ -25,6 +25,7 @@ class CustomTemplate(models.Model):
     template_name = models.CharField(max_length=300)
     model = models.ManyToManyField(LLM)
     template = models.TextField(default="")
+    bot_instruct = models.TextField(default="")
     def __str__(self) -> str:
         return self.template_name
     
