@@ -30,16 +30,15 @@ from django.core.cache import cache
 from apikey.util import constant
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-#@cache_page(60*15)  
+@cache_page(60*15)  
 def index(request):
-    get_chat_context("Mistral Chat 13B", "test")
     return render(request, "html/index.html")
 
 @cache_page(60*15)
 def manual(request):
     return render(request, "html/manual.html")
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def chat(request):
     return render(request, "html/chat.html")
 

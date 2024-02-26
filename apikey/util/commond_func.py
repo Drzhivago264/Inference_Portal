@@ -3,6 +3,7 @@ import requests
 from apikey.models import  InferenceServer, LLM, Key, PromptResponse
 from . import constant
 from decouple import config
+from transformers import AutoTokenizer
 import boto3
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
@@ -26,7 +27,6 @@ def inference_mode(model, key,  mode, prompt):
         prompt_ =  template.format(prompt, "")
         chat_history = get_chat_context(model=model, key = key)
         prompt_ = chat_history + "\n" + prompt_
-        logger.info(prompt_)
         return prompt_
     elif mode == "generate":
         return prompt
@@ -178,17 +178,15 @@ def get_chat_context(model, key):
     shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
     full_instruct = ""
     max_history_length = constant.MAX_HISTORY_LENGTH[model]
-    logger.info(max_history_length)
-    
+    tokeniser = constant.TOKENIZER_TABLE[model] 
     for i, mess in enumerate(message_list):
         template = shorten_template.format(mess.prompt, mess.response)
         full_instruct += "\n\n"
         full_instruct += template
-        current_history_length = len(full_instruct)
-        
+        inputs = tokeniser(full_instruct)
+        current_history_length = len(inputs['input_ids'])
+
         if current_history_length > int(max_history_length):
             full_instruct = full_instruct[(current_history_length-max_history_length):]
-            print(len(full_instruct))
-                #logger.info(current_history_length)
     full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
     return full_instruct
