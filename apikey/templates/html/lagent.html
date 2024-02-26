@@ -3,13 +3,15 @@
 <style>
     #chat-log {
         width: 66% !important;
+        min-width: 450px;
+        min-height: 250px;
         resize: vertical;
         background-color: rgb(37, 37, 37);
         color: white;
         border: 1px solid #ccc;
         box-sizing: border-box;
         height: 30vh;
-        overflow: auto;
+        overflow:hidden;
     }
     .message_log_container {
         margin:  10px ;
@@ -17,7 +19,32 @@
     input {
         width: 7ch;
     }
-    
+    #document-template {
+        width: 75% !important;
+        min-width: 450px;
+        min-height: 250px;
+        float: right;
+        resize: vertical;
+        background-color: rgb(37, 37, 37);
+        color: white;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        height: 100%;
+        overflow:scroll;
+    }
+    #document-instruction {
+        width: 75% !important;
+        min-width: 450px;
+        max-height: 250px;
+        float: right;
+        resize: vertical;
+        background-color: rgb(37, 37, 37);
+        color: white;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        height: 100%;
+        overflow:scroll;
+    }
 </style>
 <head>
     <title>Engineering</title>
@@ -28,6 +55,163 @@
     <link rel="shortcut icon" type="image/png" href="/static/image/favicon.ico"/>
     
 </head>
+<style>
+    html
+{ height: 100%;}
+
+*
+{ margin: 0;
+  padding: 0;}
+
+body
+{ font: normal .80em 'trebuchet ms', arial, sans-serif;
+  background: #000000;
+  color: #000;}
+
+
+.left
+{ float: left;
+  width: auto;
+  margin-right: 10px;}
+
+.right
+{ float: right; 
+  width: auto;
+  margin-left: 10px;}
+
+.center
+{ display: block;
+  text-align: center;
+  margin: 20px auto;}
+
+blockquote
+{ margin: 20px 0; 
+  padding: 10px 20px 0 20px;
+  border: 1px solid #E5E5DB;
+  background: #FFF;}
+
+ul
+{ margin: 2px 0 22px 17px;}
+
+ul li
+{ list-style-type: circle;
+  margin: 0 0 6px 0; 
+  padding: 0 0 4px 5px;}
+
+ol
+{ margin: 8px 0 22px 20px;}
+
+ol li
+{ margin: 0 0 11px 0;}
+
+#main, #logo, #menubar, #footer
+{ margin-left: auto; 
+  margin-right: auto;}
+
+#header
+{ background: transparent;
+  height: 202px;}
+
+#logo
+{ width: 898px;
+  position: relative;
+  height: 148px;
+  border-bottom: 2px solid #FFF;}
+
+#logo #logo_text 
+{ position: absolute; 
+  top: 20px;
+  left: 0;}
+
+#logo h1, #logo h2
+{ font: normal 300% 'century gothic', arial, sans-serif;
+  border-bottom: 0;
+  text-transform: none;
+  margin: 0;}
+
+#logo_text h1, #logo_text h1 a, #logo_text h1 a:hover 
+{ padding: 22px 0 0 0;
+  color: #FFF;
+  letter-spacing: -1px;
+  text-decoration: none;}
+
+#logo_text h1 a .logo_colour
+{ color: #FFF;}
+
+#logo_text h2
+{ font-size: 100%;
+  padding: 4px 0 0 0;
+  color: #FFF;}
+
+#menubar
+{ width: 898px;
+  height: 52px;
+  padding: 0;
+  background: #000;} 
+
+ul#menu, ul#menu li
+{ float: left;
+  margin: 0; 
+  padding: 0;}
+
+ul#menu li
+{ list-style: none;}
+
+ul#menu li a
+{ letter-spacing: 0.1em;
+  font: normal 100% arial, sans-serif;
+  display: block; 
+  float: left; 
+  height: 17px;
+  margin: 10px 0 0 10px;
+  padding: 9px 26px 6px 26px;
+  text-align: center;
+  color: #FFF;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: transparent;} 
+
+ul#menu li a:hover, ul#menu li.selected a, ul#menu li.selected a:hover
+{ color: #FFF;
+  background: transparent url(transparent_light.png) repeat;}
+
+.container {
+  width: 99%;
+  padding-left: 10px;
+  padding-right: 10px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+}
+#site_content_chat
+{ width: 45%; 
+  min-width: 850px;
+  overflow: hidden;
+  background: #FFF;} 
+
+#site_content_document
+{ width: 55%;
+  overflow: scroll;
+  background: #FFF;} 
+
+.child {
+  margin: 0 .5em;
+  padding: .5em;
+  /* optional */
+  min-height: 100%;
+}
+.sidebar
+{ float: right;
+  min-width: 250px;
+  overflow: scroll;
+  padding: 0 15px 20px 15px;}
+.sidebar_left
+{ float: left;
+  min-width: 250px;
+  overflow: scroll;
+  padding: 0 15px 20px 15px;}
+
+</style>
 <body>
     <div id="main">
       <div id="header">
@@ -69,53 +253,97 @@
           </ul>
         </div>
       </div>
-      <div id="site_content">
-        <div class="sidebar">
-            <br>
-            <h3> Available Models </h3>
-            {% for llm in llms %}
-                {% if llm.name == 'Mistral Chat 13B' %}
-                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
+      <div class="container">
+        <h3>Document</h3>
+        <div class="child" id ="site_content_document">
+          
+            <div id="document-instruction">
+                <h3 style="color:white; padding:10px">Agent Instruction</h3>
+                {% for template in templates %}
+                    {% if template.template_name == 'Assignment Agent' %}
+                        <textarea id="agent_instruction" style="padding: 10px; height: 100%; width:96%">{{template.bot_instruct|safe}}</textarea>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            <div id="document-template">
+                <h3 style="color:white; padding:10px">Document template</h3>
+                {% for template in templates %}
+                    {% if template.template_name == 'Assignment Agent' %}
+                        <div style="padding: 10px">
+                            {{template.template|safe}}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div id="sidebar_left">
+                <br>
+                <h3>Templates</h3>
+                {% for template in templates %}
+                {% if template.template_name == 'Assignment Agent' %}
+                    <input type="checkbox" class= "checkbox" name="template"  value= "{{template.template_name}}" checked onclick="onlyOne(this, 'template')"> {{template.template_name}}<br>
                 {% else %}
-                    <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
+                    <input type="checkbox" class= "checkbox" name="template"  value= "{{template.template_name}}" onclick="onlyOne(this, 'template')"> {{template.template_name}}<br>
                 {% endif %}
             {% endfor %}
-            <h3> Parameters </h3>
-                <input type="checkbox" class= "checkbox_mode" name="mode"  value= "chat" checked onclick="onlyOne(this, 'mode')"> Chat Bot Mode<br>
-                <input type="checkbox" class= "checkbox_mode" name="mode"  value= "generate" onclick="onlyOne(this, 'mode')"> Sentence Completion<br><br>
-                <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
-                <h5>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </h5>                  
-                <input type="number" step="0.1" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73) <br>
-                <input type="number" step="0.1" name="top_k" min="0.01" max="1" value="-1"> Top_k (default = -1) <br>
-                <input type="number" step="0.1" name="max_tokens" min="1" max="2048" value="128"> Token Num (default = 128)<br>
-                <input type="number" step="0.1" name="temperature" min="0" max="1" value="0.72"> Temperature (default= 0.72) <br>
-                <input type="number" step="0.1" name="frequency_penalty" min="-2" max="2" value="0"> Frequency Penalty (default=0)<br>
-                <input type="number" step="0.1" name="presense_penalty" min="-2" max="2" value="0"> Presense Penalty (default=0)<br><br>
-                <hr>
-                <br>
-                <h5>NOTE: These parameters go along with each others, please know what you are doing.</h5>
-                <h5>NOTE: Return to default value if you messed up the parameters</h5>
-                <input type="checkbox" class= "checkbox_beam" name="beam" id = "beam" > Beam Search (default = False) <br>
-                <input type="checkbox" class= "checkbox_early_stopping" name="early_stopping" id ="early_stopping" > Early Stop (default = False) <br>
-                <input type="number" step="0.1" name="length_penalty" min="-2" max="2" value="0"> Length Penalty (default = 0)<br>
-                <input type="number" step="0.1" name="best_of" min="1" max="5" value="2"> Best of (default = 2 for beam search, 1 for sampling) <br>
-                
+            </div>
+
         </div>
-        <br>
-        <div id="chat-log">
-
-        </div><br>
-        <label for="key_name">Key Name: </label>
-        <input id="key_name" type="password" > <br> <br>
-        <textarea id="chat-message-input" rows="5" cols="70" name="message"></textarea>
-       
-        <input id="chat-message-submit" type="button" value="Send">
+        <div class="child" id="site_content_chat">
+            <div class="sidebar">
+                <br>
+                <h3> Available Models </h3>
+                {% for llm in llms %}
+                    {% if llm.name == 'Mistral Chat 13B' %}
+                        <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" checked onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
+                    {% else %}
+                        <input type="checkbox" class= "checkbox" name="model"  value= "{{llm.name}}" onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
+                    {% endif %}
+                {% endfor %}
+                <h3> Parameters </h3>
+                    <input type="checkbox" class= "checkbox_mode" name="mode"  value= "chat" checked onclick="onlyOne(this, 'mode')"> Chat Bot Mode<br>
+                    <input type="checkbox" class= "checkbox_mode" name="mode"  value= "generate" onclick="onlyOne(this, 'mode')"> Sentence Completion<br><br>
+                    <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
+                    <h5>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </h5>                  
+                    <input type="number" step="0.1" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73) <br>
+                    <input type="number" step="0.1" name="top_k" min="0.01" max="1" value="-1"> Top_k (default = -1) <br>
+                    <input type="number" step="0.1" name="max_tokens" min="1" max="2048" value="128"> Token Num (default = 128)<br>
+                    <input type="number" step="0.1" name="temperature" min="0" max="1" value="0.72"> Temperature (default= 0.72) <br>
+                    <input type="number" step="0.1" name="frequency_penalty" min="-2" max="2" value="0"> Frequency Penalty (default=0)<br>
+                    <input type="number" step="0.1" name="presense_penalty" min="-2" max="2" value="0"> Presense Penalty (default=0)<br><br>
+                    <hr>
+                    <br>
+                    <h5>NOTE: These parameters go along with each others, please know what you are doing.</h5>
+                    <h5>NOTE: Return to default value if you messed up the parameters</h5>
+                    <input type="checkbox" class= "checkbox_beam" name="beam" id = "beam" > Beam Search (default = False) <br>
+                    <input type="checkbox" class= "checkbox_early_stopping" name="early_stopping" id ="early_stopping" > Early Stop (default = False) <br>
+                    <input type="number" step="0.1" name="length_penalty" min="-2" max="2" value="0"> Length Penalty (default = 0)<br>
+                    <input type="number" step="0.1" name="best_of" min="1" max="5" value="2"> Best of (default = 2 for beam search, 1 for sampling) <br>
+                    
+            </div>
         
-        {{ name|json_script:"name" }}
-        {{ key|json_script:"key" }}
-    </div>
+            <div id="chat-log">
+                <div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+                    <span> Input your Key Name:
+                        <input id="key_name" type="password" > 
+                    </span> 
+                </div>
+                <div id="chat-log_">
+    
+                </div>
+           
+            </div>
 
+            <textarea id="chat-message-input" rows="5" cols="70" name="message"></textarea>
+        
+            <input id="chat-message-submit" type="button" value="Send">
+            
+            {{ name|json_script:"name" }}
+            {{ key|json_script:"key" }}
+        </div>
+    </div>
     <script>
+        var currentParagraph = "introduction";
         function onlyOne(checkbox, type_) {
             if (type_ == "model"){
                 var checkboxes = document.getElementsByName('model')
@@ -124,6 +352,12 @@
                 }) }
             else if (type_ == "mode"){
             var checkbox_mode = document.getElementsByName('mode')
+            checkbox_mode.forEach((item) => {
+                if (item !== checkbox) item.checked = false
+            })
+        }
+        else if (type_ == "template"){
+            var checkbox_mode = document.getElementsByName('template')
             checkbox_mode.forEach((item) => {
                 if (item !== checkbox) item.checked = false
             })
@@ -143,17 +377,19 @@
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             if (data.role == 'Human' ) {
-                document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role +"-"+ data.time + ") " + data.message +'</span></div> ');
+                document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role +"-"+ data.time + ") " + data.message +'</span></div> ');
                 }
             else if (data.holder){
-                document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.role +"-"+ data.time + ": "+ '</span></div> ');
+                document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.role +"-"+ data.time + ": "+ '</span></div> ');
             }
             else if (data.stream_id) {
                 document.getElementById(data.stream_id).innerHTML +=  data.message 
             }
+            else if (data.paragraph){
+                currentParagraph = data.paragraph
+            }
             else {
-                document.querySelector('#chat-log').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' +  data.message + " (" + data.role +"-"+ data.time + ") " +'</span></div> ');
- 
+                document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' +  data.message + " (" + data.role +"-"+ data.time + ") " +'</span></div> ');
             }
    
             logTa = document.getElementById("chat-log")
@@ -172,7 +408,11 @@
             }
         };
  
-       
+        function reply_click(clicked_id){
+            chatSocket.send(JSON.stringify({
+                'paragraph': clicked_id,
+            }));
+        }
         document.querySelector('#chat-message-submit').onclick = function(e) {
             var choosen_models = null; 
             var inputElements = document.getElementsByClassName('checkbox');
@@ -190,6 +430,7 @@
                        break;
                   }
             }
+            const agent_instruction = document.getElementById('agent_instruction').value
             const key_name = document.getElementById('key_name').value
             const top_p = document.getElementsByName("top_p")[0].value
             const top_k = document.getElementsByName("top_k")[0].value
@@ -215,6 +456,7 @@
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
                 'mode': mode,
+                'currentParagraph': currentParagraph,
                 'message': message,
                 'name': key_name,
                 'choosen_models': choosen_models,
@@ -228,7 +470,8 @@
                 'temperature': temperature,
                 'beam': beam,
                 'early_stopping': early_stopping,
-                'length_penalty': length_penalty
+                'length_penalty': length_penalty,
+                'agent_instruction': agent_instruction
             }));
             messageInputDom.value = '';
         };

@@ -4,7 +4,7 @@ import stripe
 from django.core.paginator import Paginator
 from datetime import datetime
 import secrets
-from .models import Price, Product, Key, LLM, InferenceServer, PromptResponse
+from .models import Price, Product, Key, LLM, InferenceServer, PromptResponse, CustomTemplate
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
@@ -32,6 +32,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 #@cache_page(60*15)  
 def index(request):
+    get_chat_context("Mistral Chat 13B", "test")
     return render(request, "html/index.html")
 
 @cache_page(60*15)
@@ -215,7 +216,8 @@ def room(request,  key):
 
 def agentroom(request,  key):
     llm = LLM.objects.all()
-    context = {'llms':llm,  "key": key}
+    template = CustomTemplate.objects.all()
+    context = {'llms':llm, "templates": template, "key": key}
     return render(request, "html/lagent.html", context)
 
 def room_prompt(request,  key):

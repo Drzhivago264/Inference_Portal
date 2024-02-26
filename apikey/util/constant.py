@@ -18,8 +18,8 @@ SHORTEN_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that desc
                         "Reddit Helper 2.7B": ""}
 
 MAX_HISTORY_LENGTH = {
-    "Mistral Chat 13B": 2500,
-    "Llama 2 Chat 13B": 2500,
+    "Mistral Chat 13B": 3000,
+    "Llama 2 Chat 13B": 1000,
     "4Chan /Pol 2.7B": 100,
     "Reddit Helper 2.7B": 100
 }
