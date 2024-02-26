@@ -1,3 +1,4 @@
+from transformers import AutoTokenizer
 SERVER_TTL = 1200
 MONITOR_ITERVAL = 5
 SHUTDOWN_INTERVAL = 60
@@ -17,8 +18,16 @@ SHORTEN_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that desc
                         "4Chan /Pol 2.7B": "", 
                         "Reddit Helper 2.7B": ""}
 
+TOKENIZER_TABLE = {
+    "Mistral Chat 13B": AutoTokenizer.from_pretrained("TheBloke/Amethyst-13B-Mistral-AWQ"),
+    "Mistral Chat 13B": AutoTokenizer.from_pretrained("TheBloke/Llama-2-13B-chat-AWQ"),
+    "4Chan /Pol 2.7B": AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B"),
+    "Reddit Helper 2.7B": AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
+}
+
+
 MAX_HISTORY_LENGTH = {
-    "Mistral Chat 13B": 650,
+    "Mistral Chat 13B": 3000,
     "Llama 2 Chat 13B": 1000,
     "4Chan /Pol 2.7B": 100,
     "Reddit Helper 2.7B": 100
@@ -38,3 +47,5 @@ DEFAULT_MODE = "generate"
 
 CACHE_AUTHENTICATION = 10
 CACHE_SERVER_LINK_RETRIVAL = 60
+
+

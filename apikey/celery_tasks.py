@@ -147,9 +147,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                         'credit': credit,
                         'unique': unique
                 }
-            )
-
-            
+            )            
         elif type_ == "prompt":
             log_prompt_response(key, key_name, model, prompt, response, type_=type_)
 
