@@ -1,67 +1,70 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
-    <title>Prompt-response Log</title>
-    <meta name="description" content="website description" />
-    <meta name="keywords" content="website keywords, website keywords" />
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
-    <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
+  <title>Prompt-response Log</title>
+  <meta name="description" content="website description" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
+  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
 </head>
+
 <body>
-    <div id="main">
-      <div id="header">
-        <div id="logo">
-          <div id="logo_text">
-            <!-- class="logo_colour", allows you to change the colour of the text -->
-            <h1><a href="index">Inference <span class="logo_colour"></span></a></h1>
-          </div>
-        </div>
-        <div id="menubar">
-          <ul id="menu">
-            <div  class="dropdown">
-              <a  href="/"> 
-              <button class="dropbtn">Introduction</button>
-              </a>
-              <div class="dropdown-content">
-                <a href="/">Introduction</a>
-                <a href="/model_infor">Model</a>
-                <a href="/manual">User Manual</a>
-                <a href="/contact">Contact Us</a>
-              </div>
-            </div> 
-  
-            <div class="dropdown">
-              <a  href="/"> 
-              <button class="dropbtn">Inference Modes</button>
-              </a>
-              <div class="dropdown-content">
-                <a href="/prompt">Prompt and API</a>
-                <a href="/chat">Chat Bot and Agent</a>
-              </div>
-            </div> 
-            <a  href="/buy"> 
-              <button class="dropbtn">Get Key</button>
-            </a>
-            <a  href="/promptresponse"> 
-              <button class="dropbtn-selected">Response Log</button>
-            </a>
-          </ul>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <!-- class="logo_colour", allows you to change the colour of the text -->
+          <h1><a href="index">Inference <span class="logo_colour"></span></a></h1>
         </div>
       </div>
+      <div id="menubar">
+        <ul id="menu">
+          <div class="dropdown">
+            <a href="/">
+              <button class="dropbtn">Introduction</button>
+            </a>
+            <div class="dropdown-content">
+              <a href="/">Introduction</a>
+              <a href="/model_infor">Model</a>
+              <a href="/manual">User Manual</a>
+              <a href="/contact">Contact Us</a>
+            </div>
+          </div>
 
-      <div id="site_content">
-        <h2>Enter your key </h2>
-        <form method="post">
-            {% csrf_token %}
-              <span>Key Name: </span>
-              <input type="password" name="name" /> 
-              <span>Key: </span>
-              <input type="text" name="key" /> 
-              <input class="submit" type="submit" value=" Check " />
-        </form>
-        {%for message in messages %}
-             <h4> {{message}} </h4>   
-        {%endfor%}
+          <div class="dropdown">
+            <a href="/">
+              <button class="dropbtn">Inference Modes</button>
+            </a>
+            <div class="dropdown-content">
+              <a href="/prompt">Prompt and API</a>
+              <a href="/chat">Chat Bot and Agent</a>
+            </div>
+          </div>
+          <a href="/buy">
+            <button class="dropbtn">Get Key</button>
+          </a>
+          <a href="/promptresponse">
+            <button class="dropbtn-selected">Response Log</button>
+          </a>
+        </ul>
+      </div>
+    </div>
+
+    <div id="site_content">
+      <h2>Enter your key </h2>
+      <form method="post">
+        {% csrf_token %}
+        <span>Key Name: </span>
+        <input type="password" name="name" />
+        <span>Key: </span>
+        <input type="text" name="key" />
+        <input class="submit" type="submit" value=" Check " />
+      </form>
+      {%for message in messages %}
+      <h4> {{message}} </h4>
+      {%endfor%}
 </body>
+
 </html>

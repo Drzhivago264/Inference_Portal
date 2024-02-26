@@ -1,84 +1,76 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Order detail</title>
-    <meta name="description" content="website description" />
-    <meta name="keywords" content="website keywords, website keywords" />
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css" title="style" />
-    <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
+  <title>Order detail</title>
+  <meta name="description" content="website description" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <link rel="stylesheet" type="text/css" href="/static/css/style.css" title="style" />
+  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
 </head>
 <body>
-    <div id="main">
-      <div id="header">
-        <div id="logo">
-          <div id="logo_text">
-            <!-- class="logo_colour", allows you to change the colour of the text -->
-            <h1><a href="index">Inference <span class="logo_colour"></span></a></h1>
-          </div>
-        </div>
-        <div id="menubar">
-          <ul id="menu">
-            <div  class="dropdown">
-              <a  href="/"> 
-              <button class="dropbtn">Introduction</button>
-              </a>
-              <div class="dropdown-content">
-                <a href="/">Introduction</a>
-                <a href="/model_infor">Model</a>
-                <a href="/manual">User Manual</a>
-                <a href="/contact">Contact Us</a>
-              </div>
-            </div> 
-  
-            <div class="dropdown">
-              <a  href="/chat"> 
-              <button class="dropbtn">Inference Modes</button>
-              </a>
-              <div class="dropdown-content">
-                <a href="/prompt">Prompt and API</a>
-                <a href="/chat">Chat Bot and Agent</a>
-              </div>
-            </div> 
-            <a  href="/buy"> 
-              <button class="dropbtn-selected">Get Key</button>
-            </a>
-            <a  href="/promptresponse"> 
-              <button class="dropbtn">Response Log</button>
-            </a>
-          </ul>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <!-- class="logo_colour", allows you to change the colour of the text -->
+          <h1><a href="index">Inference <span class="logo_colour"></span></a></h1>
         </div>
       </div>
-      <div id="site_content">
-
-
-
-            {% block script %} <script src="https://js.stripe.com/v3/"></script> {% endblock script%} 
-            {% block content %}
-            <div class="card-deck">
-            {% for price in prices %}
-            <div class="card">
-                <div class="card-body">
-                <h3 class="card-text"> Top up {{ price.price }} AUD for:  </h3>
-                <h4> Key name: {{ name}} </h4>
-                <h4> Key: {{ key}}  </h4>
-                <div class="card-text">
-                    <form
-                    action="{% url 'apikey:create-checkout-session' price.id name key%}"
-                    method="POST"
-                    >
-                    {% csrf_token %}
-
-                    <button type="submit" class="btn btn-primary">Confirm</button>
-                    </form>
-                </div>
-                </div>
+      <div id="menubar">
+        <ul id="menu">
+          <div class="dropdown">
+            <a href="/">
+              <button class="dropbtn">Introduction</button>
+            </a>
+            <div class="dropdown-content">
+              <a href="/">Introduction</a>
+              <a href="/model_infor">Model</a>
+              <a href="/manual">User Manual</a>
+              <a href="/contact">Contact Us</a>
             </div>
-            {% endfor %}
+          </div>
+          <div class="dropdown">
+            <a href="/chat">
+              <button class="dropbtn">Inference Modes</button>
+            </a>
+            <div class="dropdown-content">
+              <a href="/prompt">Prompt and API</a>
+              <a href="/chat">Chat Bot and Agent</a>
             </div>
-            {% endblock content %} 
-
-      
+          </div>
+          <a href="/buy">
+            <button class="dropbtn-selected">Get Key</button>
+          </a>
+          <a href="/promptresponse">
+            <button class="dropbtn">Response Log</button>
+          </a>
+        </ul>
+      </div>
     </div>
-    </body>
-    </html>
+    <div id="site_content">
+      {% block script %}
+      <script src="https://js.stripe.com/v3/"></script> {% endblock script%}
+      {% block content %}
+      <div class="card-deck">
+        {% for price in prices %}
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-text"> Top up {{ price.price }} AUD for: </h3>
+            <h4> Key name: {{ name}} </h4>
+            <h4> Key: {{ key}} </h4>
+            <div class="card-text">
+              <form action="{% url 'apikey:create-checkout-session' price.id name key%}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Confirm</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endblock content %}
+    </div>
+</body>
+
+</html>
