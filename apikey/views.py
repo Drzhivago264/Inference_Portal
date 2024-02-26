@@ -300,7 +300,7 @@ class ApiView(APIView):
     
     def post(self, request, *args, **kwargs):
         n = request.data['name']
-        k = request.data['key']
+        k = request.META['HTTP_AUTHORIZATION']
         m = request.POST.get('model') if  "model" in request.data else constant.DEFAULT_MODEL
         model = get_model(m) 
         mode = request.data.get('mode') if  "mode" in request.data else constant.DEFAULT_MODE

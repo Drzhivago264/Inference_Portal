@@ -8,7 +8,7 @@
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
-  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
+  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
 </head>
 <style>
   #chat-log {
@@ -20,11 +20,13 @@
     box-sizing: border-box;
     height: 15vh;
     overflow: auto;
-}
-.message_log_container {
-    margin:  10px ;
-}
+  }
+
+  .message_log_container {
+    margin: 10px;
+  }
 </style>
+
 <body>
   <div id="main">
     <div id="header">
@@ -36,9 +38,9 @@
       </div>
       <div id="menubar">
         <ul id="menu">
-          <div  class="dropdown">
-            <a  href="/"> 
-            <button class="dropbtn">Introduction</button>
+          <div class="dropdown">
+            <a href="/">
+              <button class="dropbtn">Introduction</button>
             </a>
             <div class="dropdown-content">
               <a href="/">Introduction</a>
@@ -46,21 +48,21 @@
               <a href="/manual">User Manual</a>
               <a href="/contact">Contact Us</a>
             </div>
-          </div> 
+          </div>
 
           <div class="dropdown">
-            <a  href="#"> 
-            <button class="dropbtn-selected">Inference Modes</button>
+            <a href="#">
+              <button class="dropbtn-selected">Inference Modes</button>
             </a>
             <div class="dropdown-content">
               <a href="/prompt">Prompt and API</a>
               <a href="/chat">Chat Bot and Agent</a>
             </div>
-          </div> 
-          <a  href="/buy"> 
+          </div>
+          <a href="/buy">
             <button class="dropbtn">Get Key</button>
           </a>
-          <a  href="/promptresponse"> 
+          <a href="/promptresponse">
             <button class="dropbtn">Response Log</button>
           </a>
         </ul>
@@ -71,11 +73,13 @@
         <!-- insert your sidebar items here -->
         <h2>Status</h2>
         <div id="chat-log">
-          
-          <p> 
+
+          <p>
             {%for message in messages %}
-            <div class="message_log_container" style="text-align: left; word-wrap: break-word; overflow-wrap: break-word;"><span> {{ message }}</span></div>
-            {% endfor %}
+          <div class="message_log_container"
+            style="text-align: left; word-wrap: break-word; overflow-wrap: break-word;"><span> {{ message }}</span>
+          </div>
+          {% endfor %}
           </p>
         </div><br>
         <h2>Response Log</h2>
@@ -83,29 +87,30 @@
         <form method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="checklog">
-            <p><span>Key: </span><input type="text" style="float: right;"  size="20" name="key" /> <br>
-              <span>Key Name: </span><input type="password" style="float: right;"  size="20" name="name" />
-              <input class="submit" style="float: right;" type="submit" value=" Check " /></p>
+          <p><span>Key: </span><input type="text" style="float: right;" size="20" name="key" /> <br>
+            <span>Key Name: </span><input type="password" style="float: right;" size="20" name="name" />
+            <input class="submit" style="float: right;" type="submit" value=" Check " />
+          </p>
         </form>
         <h2>API Endpoint</h2>
         <h4>Python example:</h4>
         <pre style="font-size: 12px">
-r = requests.post("[HOST]/api/",  
+r = requests.post("[HOST]/api/", 
+headers = {"Authorization": "key"}, 
 json={"prompt": "hola",
-"mode": ["chat"/'generate'],
-  "name": "[key name]", 
-  "key": "[key]", 
-  "model" : "[model name]",
-  'top_k': [top_k],
-  'top_p': [top_p],
-  'best_of': [best_of],
-  'max_tokens': [max_tokens],
-  'frequency_penalty': [fre_penalty],
-  'presense_penalty': [pre_penalty],
-  'temperature': [temperature],
-  'beam': ["True"/"False"],
-  'early_stopping': ["True"/"False"],
-  'length_penalty': [length_penalty]
+"mode": "chat"/"generate",
+  "name": "key name",  
+  "model" : "model name",
+  'top_k': "top_k",
+  'top_p': "top_p",
+  'best_of': "best_of",
+  'max_tokens': "max_tokens",
+  'frequency_penalty': "fre_penalty",
+  'presense_penalty': "pre_penalty",
+  'temperature': "temperature",
+  'beam': "True"/"False",
+  'early_stopping': "True"/"False",
+  'length_penalty': "length_penalty"
 }) 
 
 print(r.json())
@@ -115,22 +120,22 @@ print(r.json())
 curl "[HOST]/api/" --header 
 'Content-Type: application/json' 
 --request POST
+-H "Authorization: key" 
 --data-binary
 '{"prompt": "hola",
-"mode": ["chat"/'generate'],
-"name": "[key name]", 
-"key": "[key]", 
-"model" :  "[model name]"
-'top_k': [top_k],
-'top_p': [top_p],
-'best_of': [best_of],
-'max_tokens': [max_tokens],
-'frequency_penalty': [freq_penalty],
-'presense_penalty': [pre_penalty],
-'temperature': [temperature],
-'beam': ["True"/"False"],
-'early_stopping': ["True"/"False"],
-'length_penalty': [length_penalty]
+"mode": "chat"/"generate",
+"name": "key name",  
+"model" :  "model name"
+'top_k': "top_k,
+'top_p': "top_p",
+'best_of': "best_of",
+'max_tokens': "max_tokens",
+'frequency_penalty': "freq_penalty",
+'presense_penalty': "pre_penalty",
+'temperature': "temperature",
+'beam': "True"/"False",
+'early_stopping': "True"/"False",
+'length_penalty': "length_penalty"
 }'
         <pre>
         <p><a href="/api">Test API</a></p>
@@ -186,19 +191,20 @@ curl "[HOST]/api/" --header
   </div>
 
   <script>
-        function onlyOne(checkbox, type_) {
-            if (type_ == "model"){
-                var checkboxes = document.getElementsByName('model')
-                checkboxes.forEach((item) => {
-                    if (item !== checkbox) item.checked = false
-                }) }
-            else if (type_ == "mode"){
-            var checkbox_mode = document.getElementsByName('mode')
-            checkbox_mode.forEach((item) => {
-                if (item !== checkbox) item.checked = false
-            })
-        }
-        }
+    function onlyOne(checkbox, type_) {
+      if (type_ == "model") {
+        var checkboxes = document.getElementsByName('model')
+        checkboxes.forEach((item) => {
+          if (item !== checkbox) item.checked = false
+        })
+      }
+      else if (type_ == "mode") {
+        var checkbox_mode = document.getElementsByName('mode')
+        checkbox_mode.forEach((item) => {
+          if (item !== checkbox) item.checked = false
+        })
+      }
+    }
   </script>
 </body>
 </html>

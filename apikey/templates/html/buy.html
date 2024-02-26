@@ -1,11 +1,11 @@
 <!DOCTYPE HTML>
 <html>
-  <style>
-    #id_captcha_1{
-      font-size: 14px;
-      width: 30px;
-      }
-  </style> 
+<style>
+  #id_captcha_1 {
+    font-size: 14px;
+    width: 30px;
+  }
+</style>
 
 <head>
   <title>Buy </title>
@@ -13,23 +13,21 @@
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
-  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
+  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
 </head>
-
 <body>
   <div id="main">
     <div id="header">
       <div id="logo">
         <div id="logo_text">
           <h1><a href="/">Inference</span></a></h1>
-  
         </div>
       </div>
       <div id="menubar">
         <ul id="menu">
-          <div  class="dropdown">
-            <a  href="/"> 
-            <button class="dropbtn">Introduction</button>
+          <div class="dropdown">
+            <a href="/">
+              <button class="dropbtn">Introduction</button>
             </a>
             <div class="dropdown-content">
               <a href="/">Introduction</a>
@@ -37,106 +35,95 @@
               <a href="/manual">User Manual</a>
               <a href="/contact">Contact Us</a>
             </div>
-          </div> 
-
+          </div>
           <div class="dropdown">
-            <a  href="/chat"> 
-            <button class="dropbtn">Inference Modes</button>
+            <a href="/chat">
+              <button class="dropbtn">Inference Modes</button>
             </a>
             <div class="dropdown-content">
               <a href="/prompt">Prompt and API</a>
               <a href="/chat">Chat Bot and Agent</a>
             </div>
-          </div> 
-          <a  href="/buy"> 
+          </div>
+          <a href="/buy">
             <button class="dropbtn-selected">Get Key</button>
           </a>
-          <a  href="/promptresponse"> 
+          <a href="/promptresponse">
             <button class="dropbtn">Response Log</button>
           </a>
         </ul>
       </div>
     </div>
     <div id="site_content">
-
       <div id="content" style="width:100%;">
-
         <h2> Create a Key </h2>
-        <form style = "text-align: center;" method="post">
+        <form style="text-align: center;" method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="createform">
           <label for="name">Key Name: </label>
-          <input  type="password" name="name" /> ||
+          <input type="password" name="name" /> ||
           {{form.title}} {{ form.captcha }}
           <input type="submit" value="Create" />
           <br>
           <br>
           {%for message in messages %}
           {%if "key" in message.tags %}
-               <h4> {{message}} </h4>   
+          <h4> {{message}} </h4>
           {%endif%}
           {%endfor%}
         </form>
         {% if key and name %}
         <br>
         <ul>
-          <li> Please remember your Key and Key Name to inference the model  </li>
+          <li> Please remember your Key and Key Name to inference the model </li>
           <li> If I was you, I would copy and paste my Key and Key Name in to a Word and Text document </li>
-          <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly </li>
+          <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly
+          </li>
           <li> If you face any problem, please contact us </li>
         </ul>
         <textarea style="width:100%;" name="keyresponse">Your key name is: {{ name }}&#13;&#10;Your key is: {{ key }}
         </textarea>
         {% endif %}
-      
-  
         <br>
         <hr>
         <h2> Top up </h2>
-        <h5> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do not even confirm your email).
-             If you are concerned please use throw away credit/debit cards</h5>
-        <div style="display: flex; justify-content: space-between;"class="card" >
-         {% block content %} {% for product in products %}
-        
-        
-            
-              <details>
-                <summary> <a> Top up {{product.name}} </a> </summary>
-              <form method="post">
-                {% csrf_token %}
-                <br>
-                <input type="hidden" name="form_type" value="topupform">
-                <input type="hidden" name="product_id" value={{ product.id }}>
-            
-                <label for="name">Key Name: </label>
-                <input style = "width:60%;  float: right;"  type="password" name="name" /> 
-                <br>
-                <br>
-                <label for="key">Key: </label>
-                <input  style = " width:60%;  float: right;" type="text" name="key" />
-                <br>
-                <br>
-                <input type="submit" value="Take my money" />
-              </form>
-            </details>
-
-            
-     
-        
-        {% endfor %} {% endblock content %}
-      </div>
+        <h5> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do not
+          even confirm your email).
+          If you are concerned please use throw away credit/debit cards</h5>
+        <div style="display: flex; justify-content: space-between;" class="card">
+          {% block content %} {% for product in products %}
+          <details>
+            <summary> <a> Top up {{product.name}} </a> </summary>
+            <form method="post">
+              {% csrf_token %}
+              <br>
+              <input type="hidden" name="form_type" value="topupform">
+              <input type="hidden" name="product_id" value={{ product.id }}>
+              <label for="name">Key Name: </label>
+              <input style="width:60%;  float: right;" type="password" name="name" />
+              <br>
+              <br>
+              <label for="key">Key: </label>
+              <input style=" width:60%;  float: right;" type="text" name="key" />
+              <br>
+              <br>
+              <input type="submit" value="Take my money" />
+            </form>
+          </details>
+          {% endfor %} {% endblock content %}
+        </div>
         {% if key_error == "error" %}
         <p> Your Key or Key Name is wrong !!!</p>
         {% endif %}
         <br>
         <hr>
         <h2>Or Check Credit</h2>
-        <form style = "text-align: center;" method="post">
+        <form style="text-align: center;" method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="checkform">
           <label for="name">Key Name: </label>
           <input type="password" name="name" /> ||
-          
+
           <label for="ket">Key: </label>
           <input type="text" name="key" /> ||
           {{form.title}} {{ form.captcha }}
@@ -145,27 +132,27 @@
           <br>
           {%for message in messages %}
           {%if "credit" in message.tags %}
-               <h4> {{message}} </h4>   
+          <h4> {{message}} </h4>
           {%endif%}
           {%endfor%}
         </form>
-       
-
         <br>
       </div>
       <hr>
-        <h2> Crypto Options</h2>
-        <h5> NOTE: We did not plan to periodically query the following networks to confirm payments. Doing so is quite a risk for everyone, this is certainly not a job for individuals.
-          Please contact us if you want to pay in crypto, we will manually create key for you.
-          For now, the following address can be used for donation.
-        </h5>
-        <ul>
-          <li>USDT (TRC20): TNxSARdRz8g1K7tqHXcihhGtcACqQE2ATT </li>
-          <li>XMR: 84ZR5nsGeKQPn3rj5C9AFzWC5HuhGggMKMrtvsvgy6Sy5qQAfeAfzZGC2MCnKxt88WTyxQjpoWsrsNXV97VMbaFzFQnYjme </li>
-          <li>CFX (CFX network): cfx:aamcex1dudewysu92cdpahuravbswkmsr2peed2ew9 </li>
-          <li>DOGE (doge network): DB3Ut1ajNzqkPdFHyQsyh7ZrqDFjqBPPgE </li>
-        </ul>
-   
-  </div>
+      <h2> Crypto Options</h2>
+      <h5> NOTE: We did not plan to periodically query the following networks to confirm payments. Doing so is quite a
+        risk for everyone, this is certainly not a job for individuals.
+        Please contact us if you want to pay in crypto, we will manually create key for you.
+        For now, the following address can be used for donation.
+      </h5>
+      <ul>
+        <li>USDT (TRC20): TNxSARdRz8g1K7tqHXcihhGtcACqQE2ATT </li>
+        <li>XMR: 84ZR5nsGeKQPn3rj5C9AFzWC5HuhGggMKMrtvsvgy6Sy5qQAfeAfzZGC2MCnKxt88WTyxQjpoWsrsNXV97VMbaFzFQnYjme </li>
+        <li>CFX (CFX network): cfx:aamcex1dudewysu92cdpahuravbswkmsr2peed2ew9 </li>
+        <li>DOGE (doge network): DB3Ut1ajNzqkPdFHyQsyh7ZrqDFjqBPPgE </li>
+      </ul>
+
+    </div>
 </body>
+
 </html>
