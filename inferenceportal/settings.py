@@ -156,19 +156,13 @@ CELERY_BROKER_URL = 'redis://127.0.0.1:6380'
 REST_FRAMEWORK = {
 
     'DEFAULT_THROTTLE_CLASSES': [
-
         'rest_framework.throttling.AnonRateThrottle',
-
         'rest_framework.throttling.UserRateThrottle'
-
     ],
 
     'DEFAULT_THROTTLE_RATES': {
-
         'anon': '5/s',
-
         'user': '5/s'
-
     }
 
 }

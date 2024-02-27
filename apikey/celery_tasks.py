@@ -8,8 +8,11 @@ import json
 from .models import  InferenceServer, PromptResponse, Key, LLM
 from decouple import config
 import boto3
-from .util.commond_func import get_model_url, command_EC2, update_server_status_in_db, send_request, log_prompt_response, inference_mode, response_mode
+from openai import OpenAI
+from .util.commond_func import get_model_url, command_EC2, update_server_status_in_db, send_request, log_prompt_response, inference_mode, response_mode, send_request_openai
 from .util.constant import * 
+from celery.utils.log import get_task_logger
+logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = REGION
@@ -150,6 +153,70 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
             )            
         elif type_ == "prompt":
             log_prompt_response(key, key_name, model, prompt, response, type_=type_)
+
+
+@shared_task
+def Agent_Inference(current_turn_inner, stream, model, unique,credit ,room_group_name,agent_instruction, message, session_history, model_type, max_turns):
+    client = OpenAI(api_key=config("GPT_KEY"))
+    clean_response = ""
+    if current_turn_inner == 0:
+        prompt = [
+            {'role': 'system', 'content': f"{agent_instruction}"}, {'role': 'user', 'content': f'{message}'}
+        ]
+        session_history.extend(prompt)
+        send_request_openai(client=client, 
+                        session_history=session_history, 
+                        model=model, 
+                        model_type=model_type, 
+                        credit=credit, 
+                        unique=unique,
+                        current_turn_inner=current_turn_inner,
+                        stream=stream,
+                        room_group_name=room_group_name,
+                        clean_response=clean_response)
+
+    elif current_turn_inner > 0 and current_turn_inner < (max_turns-1):
+        prompt = [
+            {'role': 'system', 'content': f'Response:{message}\n'}
+        ]
+        session_history.extend(prompt)
+        send_request_openai(client=client, 
+                        session_history=session_history, 
+                        model=model, 
+                        model_type=model_type, 
+                        credit=credit, 
+                        unique=unique,
+                        current_turn_inner=current_turn_inner,
+                        stream=stream,
+                        room_group_name=room_group_name,
+                        clean_response=clean_response)
+        
+    elif  current_turn_inner == (max_turns-1):
+        force_stop = "You should directly give results based on history information."
+        prompt = [
+            {'role': 'system', 'content': f'Response:{force_stop}\n'}
+        ]
+        session_history.extend(prompt)
+        send_request_openai(client=client, 
+                        session_history=session_history, 
+                        model=model, 
+                        model_type=model_type, 
+                        credit=credit, 
+                        unique=unique,
+                        current_turn_inner=current_turn_inner,
+                        stream=stream,
+                        room_group_name=room_group_name,
+                        clean_response=clean_response)
+    else:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                    "type": "chat_message", 
+                    "max_turn_reached": True,
+            }
+        ) 
+
 
 
   

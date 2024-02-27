@@ -5,7 +5,7 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from django_bleach.models import BleachField
 User = settings.AUTH_USER_MODEL
-
+    
 def get_image_filename(instance, filename):
     name = instance.name
     slug = slugify(name)
