@@ -169,16 +169,17 @@
             chatSocket.onmessage = function (e) {
                 const data = JSON.parse(e.data);
                 if (data.role == 'Human') {
-                    document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role + "-" + data.time + ") " + data.message + '</span></div> ');
+                 
+                    document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role + "-" + data.time + ") " + data.message.replace(/\n/g, "<br>") + '</span></div> ');
                 }
                 else if (data.holder) {
                     document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.role + "-" + data.time + ": " + '</span></div> ');
                 }
                 else if (data.stream_id) {
-                    document.getElementById(data.stream_id).innerHTML += data.message
+                    document.getElementById(data.stream_id).innerHTML += data.message.replace(/\n/g, "<br>") 
                 }
                 else {
-                    document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
+                    document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message.replace(/\n/g, "<br>") + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
 
                 }
 

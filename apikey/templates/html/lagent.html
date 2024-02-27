@@ -21,9 +21,8 @@
         border: 1px solid #ccc;
         box-sizing: border-box;
         height: 30vh;
-        overflow: hidden;
+        overflow: auto;
     }
-
     .message_log_container {
         margin: 10px;
     }
@@ -252,6 +251,7 @@
         </div>
         <script>
             var currentParagraph = "introduction";
+            var current_turn = 0;
             function onlyOne(checkbox, type_) {
                 if (type_ == "model") {
                     var checkboxes = document.getElementsByName('model')
@@ -286,19 +286,24 @@
             chatSocket.onmessage = function (e) {
                 const data = JSON.parse(e.data);
                 if (data.role == 'Human') {
-                    document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role + "-" + data.time + ") " + data.message + '</span></div> ');
+                    current_turn = data.current_turn
+                    document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role + "-" + data.time + ") " + data.message.replace(/\n/g, "<br>")  + '</span></div> ');
                 }
                 else if (data.holder) {
+                    current_turn = data.current_turn
                     document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.role + "-" + data.time + ": " + '</span></div> ');
                 }
                 else if (data.stream_id) {
-                    document.getElementById(data.stream_id).innerHTML += data.message
+                    current_turn = data.current_turn
+                    document.getElementById(data.stream_id).innerHTML += data.message.replace(/\n/g, "<br>") 
                 }
                 else if (data.paragraph) {
                     currentParagraph = data.paragraph
+                    current_turn = 0
+      
                 }
                 else {
-                    document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
+                    document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message.replace(/\n/g, "<br>")  + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
                 }
 
                 logTa = document.getElementById("chat-log")
@@ -379,7 +384,8 @@
                     'beam': beam,
                     'early_stopping': early_stopping,
                     'length_penalty': length_penalty,
-                    'agent_instruction': agent_instruction
+                    'agent_instruction': agent_instruction,
+                    'current_turn': current_turn
                 }));
                 messageInputDom.value = '';
             };

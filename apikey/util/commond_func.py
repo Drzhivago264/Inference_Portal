@@ -7,6 +7,10 @@ from transformers import AutoTokenizer
 import boto3
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
+from openai import OpenAI
+import openai
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 logger = get_task_logger(__name__)
 from django.core.cache import cache
 aws = config("aws_access_key_id")
@@ -117,6 +121,87 @@ def send_request(stream, url, instance_id,context):
         ser_obj.save()
         response = "Server is setting up, wait."
     return response
+
+def send_request_openai(stream, session_history, model_type, current_turn_inner, model, unique, credit, room_group_name, client, clean_response):
+    try:
+        raw_response = client.chat.completions.create(model=model_type,
+                                                    messages=session_history,
+                                                    stream= stream  
+                                                    )
+        current_turn_inner += 1
+        for chunk in raw_response:
+            if chunk:
+                data = chunk.choices[0].delta.content
+                logger.info(data)
+                if data != None:
+                    clean_response += data
+
+                    response_json = [
+                            {'role': 'assistant', 'content': f'{clean_response}'}
+                    ]
+                    session_history.pop()
+                    session_history.extend(response_json)
+                    channel_layer = get_channel_layer()
+                    async_to_sync(channel_layer.group_send)(
+                        room_group_name,
+                        {
+                                "type": "chat_message", 
+                                "role": model,
+                                "message": data, 
+                                'credit': credit,
+                                'unique': unique,
+                                "session_history": session_history,
+                                "current_turn":current_turn_inner
+                        }
+                    ) 
+
+    except openai.APIConnectionError as e:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                    "type": "chat_message", 
+                    "role": model,
+                    "message": f"Failed to connect to OpenAI API: {e}", 
+                    'credit': credit,
+                    'unique': unique,
+                    "session_history": session_history,
+                    "current_turn":current_turn_inner
+            }
+        ) 
+    except openai.RateLimitError as e:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                    "type": "chat_message", 
+                    "role": model,
+                    "message": f"OpenAI API request exceeded rate limit: {e}", 
+                    'credit': credit,
+                    'unique': unique,
+                    "session_history": session_history,
+                    "current_turn":current_turn_inner
+            }
+        ) 
+
+    except openai.APIError as e:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                    "type": "chat_message", 
+                    "role": model,
+                    "message": f"OpenAI API returned an API Error: {e}", 
+                    'credit': credit,
+                    'unique': unique,
+                    "session_history": session_history,
+                    "current_turn":current_turn_inner
+            }
+        ) 
+
+
+
+  
 
 def get_key(name, key):
     try:

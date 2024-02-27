@@ -7,8 +7,7 @@ Purpose
 -------
 
 The purpose of this project is to offer users simple interfaces to interact with GPU servers.
-This website processses API and HTTP requests from users, forwards them to the GPU servers and forwards the responses back in a dynamic manner, this includes real-time chat rooms. This website also uses STRIPE to process users' payment.
-
+This website processses API and HTTP requests from users, forwards them to the GPU servers and forwards the responses back in a dynamic manner, this includes real-time chat rooms. In addition, this website also provides an implementation of REACT agent (refer to [Yao et al., 2022](https://arxiv.org/abs/2210.03629)).
 Design
 -------
 ![Alt text](design.png)
@@ -75,7 +74,7 @@ Finally you can test the server with:
 
     python manage.py runserver
 
-In production environment, you may want to configure the server to be served by Daphne or both Daphne and Gurnicorn (refer to https://channels.readthedocs.io/en/1.x/deploying.html?highlight=django).
+In production environment, you may want to configure the server to be served by Daphne or both Daphne and Gurnicorn (refer to [Channels Docs](https://channels.readthedocs.io/en/1.x/deploying.html?highlight=django).
 
 Contents in `staticfiles` directory are served as `/static/`. In production environment this folder need to be removed from root and served by NGINX or APACHE
 

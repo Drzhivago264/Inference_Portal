@@ -13,7 +13,7 @@ from util import constant
 
 promtp= "hehe"
 context = {
- "prompt": "hola",
+ "prompt": "hola, how are you?",
   "name": "test",
   "key": "test",
   "stream" : True
@@ -27,8 +27,8 @@ ami = "ami-0810c2d824776b340"
 
 
 print(template.format(promtp))
-for i in range(2):
-    response = requests.post("http://127.0.0.1:8000/api/", headers = {"Authorization": "test"},   json=context ) 
+for i in range(100):
+    response = requests.post("https://professorparakeet.com/api/", headers = {"Authorization": "test"},   json=context ) 
     print(response.json())
 
 p = """Below is an instruction that describes a task. Write a response that appropriately completes the request.
