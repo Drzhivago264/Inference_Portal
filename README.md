@@ -8,6 +8,7 @@ Purpose
 
 The purpose of this project is to offer users simple interfaces to interact with GPU servers.
 This website processses API and HTTP requests from users, forwards them to the GPU servers and forwards the responses back in a dynamic manner, this includes real-time chat rooms. In addition, this website also provides an implementation of REACT agent (refer to [Yao et al., 2022](https://arxiv.org/abs/2210.03629)).
+
 Design
 -------
 ![Alt text](design.png)
