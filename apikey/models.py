@@ -17,7 +17,7 @@ class LLM(models.Model):
     desc = models.TextField()
     chat_template = models.TextField(default="")
     price = models.FloatField(default=0.0)
-    
+    agent_availability = models.BooleanField(default=False)
     def __str__(self) -> str:
         return self.name
     

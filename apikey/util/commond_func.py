@@ -5,6 +5,7 @@ from . import constant
 from decouple import config
 from transformers import AutoTokenizer
 import boto3
+import re
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
 from openai import OpenAI
@@ -122,7 +123,16 @@ def send_request(stream, url, instance_id,context):
         response = "Server is setting up, wait."
     return response
 
+def action_parse(context):
+    action_regex = f"/ACTION: (.*?)/"
+    action_match = re.findall(action_regex, context)
+    if not action_match:
+        return False
+    else:
+        return action_match
+    
 def send_request_openai(stream, session_history, model_type, current_turn_inner, model, unique, credit, room_group_name, client, clean_response):
+    channel_layer = get_channel_layer()
     try:
         raw_response = client.chat.completions.create(model=model_type,
                                                     messages=session_history,
@@ -132,16 +142,13 @@ def send_request_openai(stream, session_history, model_type, current_turn_inner,
         for chunk in raw_response:
             if chunk:
                 data = chunk.choices[0].delta.content
-                logger.info(data)
                 if data != None:
                     clean_response += data
-
                     response_json = [
                             {'role': 'assistant', 'content': f'{clean_response}'}
                     ]
                     session_history.pop()
-                    session_history.extend(response_json)
-                    channel_layer = get_channel_layer()
+                    session_history.extend(response_json)    
                     async_to_sync(channel_layer.group_send)(
                         room_group_name,
                         {
@@ -154,9 +161,20 @@ def send_request_openai(stream, session_history, model_type, current_turn_inner,
                                 "current_turn":current_turn_inner
                         }
                     ) 
+         
+        action_list = action_parse(session_history[-1]['content'])
+        logger.info(action_list)
+        if action_list:
+            if "STOP" in action_list:
+                async_to_sync(channel_layer.group_send)(
+                    room_group_name,
+                    {
+                            "type": "chat_message", 
+                            "agent_action": "STOP"
+                    }
+                ) 
 
     except openai.APIConnectionError as e:
-        channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             room_group_name,
             {
@@ -170,7 +188,6 @@ def send_request_openai(stream, session_history, model_type, current_turn_inner,
             }
         ) 
     except openai.RateLimitError as e:
-        channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             room_group_name,
             {
@@ -185,7 +202,6 @@ def send_request_openai(stream, session_history, model_type, current_turn_inner,
         ) 
 
     except openai.APIError as e:
-        channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             room_group_name,
             {

@@ -11,6 +11,7 @@ from .celery_tasks import send_email_, Inference, Agent_Inference
 from decouple import config
 from .util import constant
 import requests
+import re
 
 class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
@@ -89,7 +90,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             early_stopping = early_stopping,
                             beam = beam,
                             prompt=message)
-            
     # Receive message from room group
     async def chat_message(self, event):
         message = event["message"]
@@ -120,23 +120,17 @@ class AgentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.key = self.scope["url_route"]["kwargs"]["key"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-
         self.max_turns = 4
         self.current_turn = 0
         self.session_history = []
         self.working_paragraph = str()
-
         self.model_type = "gpt-4"
         self.room_group_name = "agent_%s" %  self.key
-
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         await self.send(text_data=json.dumps({"message": "Default to GPT4 or choose model on the left","role": "Server", "time":self.time}))    
-        await self.send(text_data=json.dumps({"message": "Instruction to the user: Click on the paragraph that you want to work on, then give the agent instructions to write your paragraph","role": "Server", "time":self.time}))         
-        
-
-
+        await self.send(text_data=json.dumps({"message": "Instruction to the user: \n 1. Click on the paragraph that you want to work on, then give the agent instructions to write \n 2. If you face any bug, refresh and retry. \n 3. You can export all paragraphs by clicking on [Export Document] button on the right.","role": "Server", "time":self.time}))         
     async def disconnect(self, close_code):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)        
@@ -154,9 +148,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 "current_turn": self.current_turn  
             }
         ) 
-                 
         elif 'message' in text_data_json:
-
             self.name = text_data_json["name"]
             key_object = cache.get(f"{self.key}:{self.name}")
             if key_object == None:
@@ -168,8 +160,9 @@ class AgentConsumer(AsyncWebsocketConsumer):
             else:
                 cache.set(f"{self.key}:{self.name}", key_object, constant.CACHE_AUTHENTICATION)
                 agent_instruction = text_data_json['agent_instruction']
-                current_turn_inner = text_data_json['current_turn']
+                current_turn_inner = self.current_turn
                 currentParagraph = text_data_json['currentParagraph']
+                self.working_paragraph = currentParagraph
                 message = text_data_json["message"] 
                  
                 choosen_models = text_data_json["choosen_models"]
@@ -199,11 +192,10 @@ class AgentConsumer(AsyncWebsocketConsumer):
             
                         }
                     ) 
-                
             
     # Receive message from room group      
     async def chat_message(self, event):
-        if "max_turn_reach" in event:
+        if "max_turn_reached" in event:
             await self.send(text_data=json.dumps({"message": f"Max Turns reached, click on the paragraphs on the left to write again","role": "Server", "time":self.time})) 
         if "session_history" in event:
             self.session_history = event['session_history']
@@ -216,18 +208,35 @@ class AgentConsumer(AsyncWebsocketConsumer):
             self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
             # Send message to WebSocket
             if role == "Human" or role =="Server":
-                await self.send(text_data=json.dumps({"message": message, "role":role, "current_turn": self.current_turn, "time":self.time}))
+                await self.send(text_data=json.dumps({"message": message, "role":role,  "time":self.time}))
                 if role == "Human": 
                     unique_response_id = event['unique']
-                    await self.send(text_data=json.dumps({"holder": "place_holder", "current_turn": self.current_turn, "holderid":  unique_response_id,"role":event['choosen_model'], "time":self.time, "credit":credit }))
+                    await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id,"role":event['choosen_model'], "time":self.time, "credit":credit }))
                 else:
                     pass
             else:
                 unique_response_id = event['unique']        
-                await self.send(text_data=json.dumps({"message": message, "current_turn": self.current_turn, "stream_id":  unique_response_id, "credit":credit}))
+                await self.send(text_data=json.dumps({"message": message,  "stream_id":  unique_response_id, "credit":credit}))
+
         elif "paragraph" in event:
             paragraph = event['paragraph']
-            current_turn = event['current_turn']
+            self.current_turn = event['current_turn']
+            self.session_history = []
             displayed_paragraph = paragraph.replace("_choosen","")
             await self.send(text_data=json.dumps({"message": f"Working on {displayed_paragraph}, what do you want me to write?","role": "Server", "time":self.time}))  
-            await self.send(text_data=json.dumps({"paragraph":paragraph, 'current_turn': current_turn}))
+            await self.send(text_data=json.dumps({"paragraph":paragraph}))
+
+        if "agent_action" in event:
+            agent_action = event['agent_action']
+
+            if agent_action == "STOP":
+                full_result = self.session_history[-1]['content']
+                full_result = full_result.replace("/ACTION: STOP/", "")
+                full_result = full_result.replace("Final Answer:", "")
+                thought_match = re.findall("Thought: (.*)\n", full_result)
+                full_result = full_result.replace(thought_match[0],"")
+                full_result = full_result.replace("Thought:","")
+                await self.send(text_data=json.dumps({"message": f"Your request is finished, the result is moved to the textbox on the left","role": "Server", "time":self.time})) 
+                await self.send(text_data=json.dumps({"agent_action": agent_action, "result_id": self.working_paragraph + "_text"  ,"full_result": full_result}))
+                self.session_history = []
+                self.current_turn = 0

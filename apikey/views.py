@@ -45,7 +45,7 @@ def chat(request):
 
 @cache_page(60)
 def model_infor(request):
-    llm = LLM.objects.all()
+    llm = LLM.objects.filter(agent_availability=False)
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
     context = {'llms':llm, 'servers':servers}
     return render(request, "html/model_infor.html", context)
@@ -162,7 +162,7 @@ def contact(request):
         return render(request, "html/contact.html", {'form': form})
     
 def prompt(request):
-    llm = LLM.objects.all()
+    llm = LLM.objects.filter(agent_availability=False)
     if request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'prompt':  
         top_p= float(request.POST.get("top_p")) if "top_p" in request.POST else constant.DEFAULT_TOP_P
         best_of = float(request.POST.get("best_of")) if "best_of" in request.POST else constant.DEFAULT_BEST_OF
@@ -209,12 +209,12 @@ def prompt(request):
     return render(request, "html/prompt.html", context = {"llms":llm})
 
 def room(request,  key):
-    llm = LLM.objects.all()
+    llm = LLM.objects.filter(agent_availability=False)
     context = {'llms':llm,  "key": key}
     return render(request, "html/chatroom.html", context)
 
 def agentroom(request,  key):
-    llm = LLM.objects.all()
+    llm = LLM.objects.filter(agent_availability =True)
     template = CustomTemplate.objects.all()
     context = {'llms':llm, "templates": template, "key": key}
     return render(request, "html/lagent.html", context)
