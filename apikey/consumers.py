@@ -4,7 +4,7 @@ from datetime import datetime
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
-from .models import Price, Product, Key, LLM, InferenceServer
+from .models import Price, Product, Key, LLM, InferenceServer, CustomTemplate
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import send_email_, Inference, Agent_Inference
@@ -117,6 +117,15 @@ class AgentConsumer(AsyncWebsocketConsumer):
             return key
         except:
             return False
+        
+    @database_sync_to_async
+    def get_tempalte(self, name):
+        try:
+            template = CustomTemplate.objects.get(template_name=name)
+            return template
+        except:
+            return False
+        
     async def connect(self):
         self.key = self.scope["url_route"]["kwargs"]["key"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -142,12 +151,24 @@ class AgentConsumer(AsyncWebsocketConsumer):
             self.working_paragraph = paragraph
             self.current_turn = 0
             await self.channel_layer.group_send(
+                self.room_group_name, {
+                    "type": "chat_message", 
+                    "paragraph":paragraph,
+                    "current_turn": self.current_turn  
+                }
+        ) 
+        elif 'swap_template' in text_data_json:
+            swap_template = await self.get_tempalte(text_data_json['swap_template'])
+            swap_instruction = swap_template.bot_instruct
+            swap_template_ = swap_template.template
+            await self.channel_layer.group_send(
             self.room_group_name, {
                 "type": "chat_message", 
-                "paragraph":paragraph,
-                "current_turn": self.current_turn  
+                "swap_name": text_data_json['swap_template'],
+                "swap_instruction":swap_instruction,
+                "swap_template": swap_template_  
             }
-        ) 
+        )
         elif 'message' in text_data_json:
             self.name = text_data_json["name"]
             key_object = cache.get(f"{self.key}:{self.name}")
@@ -163,8 +184,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 current_turn_inner = self.current_turn
                 currentParagraph = text_data_json['currentParagraph']
                 self.working_paragraph = currentParagraph
-                message = text_data_json["message"] 
-                 
+                message = text_data_json["message"]                  
                 choosen_models = text_data_json["choosen_models"]
                 role = text_data_json["role"]
                 unique_response_id = str(uuid.uuid4())
@@ -180,7 +200,6 @@ class AgentConsumer(AsyncWebsocketConsumer):
                                       session_history = self.session_history,
                                       model_type = self.model_type)
          
-                          
                 await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message", 
                             "role":role  ,
@@ -188,11 +207,9 @@ class AgentConsumer(AsyncWebsocketConsumer):
                             "credit": key_object.credit,
                             "unique": unique_response_id,
                             "choosen_model": choosen_models,
-                            "current_turn": current_turn_inner
-            
+                            "current_turn": current_turn_inner            
                         }
-                    ) 
-            
+                    )         
     # Receive message from room group      
     async def chat_message(self, event):
         if "max_turn_reached" in event:
@@ -240,3 +257,11 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"agent_action": agent_action, "result_id": self.working_paragraph + "_text"  ,"full_result": full_result}))
                 self.session_history = []
                 self.current_turn = 0
+
+        if "swap_template" in event:
+            swap_template_name = event['swap_name']
+            swap_instruction = event['swap_instruction']
+            swap_template = event['swap_template']
+            await self.send(text_data=json.dumps({"message": f"Swap to {swap_template_name}, what do you want me to write?","role": "Server", "time":self.time}))  
+            await self.send(text_data=json.dumps({"swap_instruction":swap_instruction,
+                                                  "swap_template": swap_template}))
