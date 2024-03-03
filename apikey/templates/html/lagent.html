@@ -180,6 +180,8 @@
                     {% endif %}
                     {% endfor %}
                     <br>
+                    <hr>
+                    <br>
                     <button  style="display: block; margin: 0 auto;" onclick="download('text/plain', 'Written_By_Professor_Parakeet.txt')">
                          Export Document 
                     </button>
@@ -266,26 +268,7 @@
                 a.setAttribute('download', filename)
                 a.click()
             }
-            function onlyOne(checkbox, type_) {
-                if (type_ == "model") {
-                    var checkboxes = document.getElementsByName('model')
-                    checkboxes.forEach((item) => {
-                        if (item !== checkbox) item.checked = false
-                    })
-                }
-                else if (type_ == "mode") {
-                    var checkbox_mode = document.getElementsByName('mode')
-                    checkbox_mode.forEach((item) => {
-                        if (item !== checkbox) item.checked = false
-                    })
-                }
-                else if (type_ == "template") {
-                    var checkbox_mode = document.getElementsByName('template')
-                    checkbox_mode.forEach((item) => {
-                        if (item !== checkbox) item.checked = false
-                    })
-                }
-            }
+
             const key = JSON.parse(document.getElementById('key').textContent);
             var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
             const chatSocket = new WebSocket(
@@ -310,6 +293,10 @@
                 }
                 else if (data.paragraph) {
                     currentParagraph = data.paragraph    
+                }
+                else if (data.swap_instruction) {
+                    document.getElementById("agent_instruction").value = data.swap_instruction; 
+                    document.getElementById("document-template-holder").innerHTML = data.swap_template;
                 }
                 else if (data.agent_action == "STOP"){
                     document.getElementById(data.result_id).value = data.full_result;
@@ -400,6 +387,24 @@
                 }));
                 messageInputDom.value = '';
             };
+            function onlyOne(checkbox, type_) {
+                if (type_ == "model") {
+                    var checkboxes = document.getElementsByName('model')
+                    checkboxes.forEach((item) => {
+                        if (item !== checkbox) item.checked = false
+                    })
+                }
+                else if (type_ == "template") {
+                    var checkbox_mode = document.getElementsByName('template')
+                    checkbox_mode.forEach((item) => {
+                        if (item !== checkbox) item.checked = false
+  
+                    })
+                    chatSocket.send(JSON.stringify({
+                            'swap_template': checkbox.value,
+                    }));
+                }
+            }
         </script>
 </body>
 </html>

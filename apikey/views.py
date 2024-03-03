@@ -42,7 +42,6 @@ def manual(request):
 def chat(request):
     return render(request, "html/chat.html")
 
-
 @cache_page(60)
 def model_infor(request):
     llm = LLM.objects.filter(agent_availability=False)
@@ -62,9 +61,7 @@ def response_prompt_redirect(request):
             return HttpResponseRedirect("/promptresponse")
     elif request.method == 'GET':
         return render(request, "html/prompt_log_redirect.html")
-        
-
-
+    
 class ProductListView(ListView):
     model = Product
     context_object_name = "products"
@@ -77,7 +74,6 @@ class ProductListView(ListView):
         form = CaptchaForm()
         products = Product.objects.all()
         name = bleach.clean(str(request.POST.get('name')))
-        
         ###Deal with create key requests###
         if bleach.clean(request.POST.get("form_type")) == 'createform':
             form = CaptchaForm(request.POST)
@@ -104,7 +100,6 @@ class ProductListView(ListView):
                 except Key.DoesNotExist:
                     messages.error(request,"Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
                     return HttpResponseRedirect("/buy")
-                
             else:
                 form = CaptchaForm()
                 messages.error(request,"Error: Captcha Failed.",  extra_tags='credit')
@@ -112,7 +107,6 @@ class ProductListView(ListView):
         
         ###Deal with check topup requests###   
         elif bleach.clean(request.POST.get("form_type")) == 'topupform':
-            
             k = bleach.clean(request.POST.get('key'))
             product_id = bleach.clean(request.POST.get('product_id'))
             try:
@@ -122,21 +116,16 @@ class ProductListView(ListView):
                 messages.error(request,"Key or Key Name is incorrect",  extra_tags='credit')
                 return HttpResponseRedirect("/buy") 
         
-    
-
 class ProductDetailView(DetailView):
     model = Product
     context_object_name = "product"
     template_name = "html/api_detail.html"
-
-
     def get_context_data(self, **kwargs):
         context = super(ProductDetailView, self).get_context_data()
         context["prices"] = Price.objects.filter(product=self.get_object())
         context["name"] = bleach.clean(self.kwargs["name"])
         context["key"] = bleach.clean(self.kwargs["key"])
         return context
-
 
 def contact(request):
     form = CaptchaForm(request.POST)
@@ -183,8 +172,7 @@ def prompt(request):
         n = request.POST.get('name')
         instance = cache.get(f"{k}:{n}")
         if instance == None:
-            instance = get_key(n, k)
-        
+            instance = get_key(n, k)        
         if instance == False:
             response = "Error: key or key name is not correct"
         else:
@@ -193,8 +181,7 @@ def prompt(request):
             response = "Your prompt is queued, refer to Prompt-Response Log for detail"
         messages.info(request,f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
         return HttpResponseRedirect("/prompt") 
-    elif  request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'checklog':  
-        
+    elif  request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'checklog':          
         key =  str(request.POST.get('key'))
         name = str(request.POST.get('name'))
         check = get_key(key=key, name=name)
