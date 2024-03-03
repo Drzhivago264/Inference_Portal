@@ -78,18 +78,14 @@
                 <h3> Available Models </h3>
                 {% for llm in llms %}
                 {% if llm.name == 'Mistral Chat 13B' %}
-                <input type="checkbox" class="checkbox" name="model" value="{{llm.name}}" checked
-                    onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
+                <input type="radio" class="checkbox" name="model" value="{{llm.name}}" checked="checked"> {{llm.name}}<br>
                 {% else %}
-                <input type="checkbox" class="checkbox" name="model" value="{{llm.name}}"
-                    onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
+                <input type="radio" class="checkbox" name="model" value="{{llm.name}}"> {{llm.name}}<br>
                 {% endif %}
                 {% endfor %}
                 <h3> Parameters </h3>
-                <input type="checkbox" class="checkbox_mode" name="mode" value="chat" checked
-                    onclick="onlyOne(this, 'mode')"> Chat Bot Mode<br>
-                <input type="checkbox" class="checkbox_mode" name="mode" value="generate"
-                    onclick="onlyOne(this, 'mode')"> Sentence Completion<br><br>
+                <input type="radio" class="checkbox_mode" name="mode" value="chat" checked="checked"> Chat Bot Mode<br>
+                <input type="radio" class="checkbox_mode" name="mode" value="generate"> Sentence Completion<br><br>
                 <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
                 <h5>NOTE: In order to better understand these parameters, refer to <a
                         href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a
@@ -141,20 +137,6 @@
         </div>
 
         <script>
-            function onlyOne(checkbox, type_) {
-                if (type_ == "model") {
-                    var checkboxes = document.getElementsByName('model')
-                    checkboxes.forEach((item) => {
-                        if (item !== checkbox) item.checked = false
-                    })
-                }
-                else if (type_ == "mode") {
-                    var checkbox_mode = document.getElementsByName('mode')
-                    checkbox_mode.forEach((item) => {
-                        if (item !== checkbox) item.checked = false
-                    })
-                }
-            }
             const key = JSON.parse(document.getElementById('key').textContent);
             var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
             const chatSocket = new WebSocket(
