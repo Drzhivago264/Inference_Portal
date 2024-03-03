@@ -82,7 +82,7 @@
         </ul>
         <textarea style="width:100%;" id = "keyresponse" name="keyresponse">Your key name is: {{ name }}&#13;&#10;Your key is: {{ key }}
         </textarea>
-        <button  style="display: block; margin: 0 auto;" onclick="download('text/plain', 'User_Key_For_Professor_Parakeet_KEEP_IT_SECURE.txt')">
+        <button  style="display: block; margin: 0 auto;" id="key-export">
           Export Key
          </button>
         {% endif %}
@@ -168,6 +168,9 @@
           a.setAttribute('download', filename)
           a.click()
       }
+      document.getElementById("key-export").addEventListener("click", function() {
+        download('text/plain', 'User_Key_For_Professor_Parakeet_KEEP_IT_SECURE.txt')
+      });
     </script>
 </body>
 

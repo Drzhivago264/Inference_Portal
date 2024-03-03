@@ -4,23 +4,23 @@ MONITOR_ITERVAL = 5
 SHUTDOWN_INTERVAL = 60
 REGION =  "us-east-1"
 MODEL_TEMPLATE_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{}\n\n### Response:\n", 
-                        "Llama 2 Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>{}[/INST]", 
+                        "Llama 2  Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>{}[/INST]", 
                         "4Chan /Pol 2.7B": "<post> {} <comment> ", 
                         "Reddit Helper 2.7B": "<post> {} <comment> "}
 
 SHORTEN_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n{}\n", 
-                        "Llama 2 Chat 13B": "{}[/INST] {}</s>", 
+                        "Llama 2  Chat 13B": "{}[/INST] {}</s>", 
                         "4Chan /Pol 2.7B": "<post> {} <comment> {}", 
                         "Reddit Helper 2.7B": "<post> {} <comment> {}"}
 
 SHORTEN_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n", 
-                        "Llama 2 Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. \n<</SYS>>", 
+                        "Llama 2  Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. \n<</SYS>>", 
                         "4Chan /Pol 2.7B": "", 
                         "Reddit Helper 2.7B": ""}
 
 TOKENIZER_TABLE = {
     "Mistral Chat 13B": AutoTokenizer.from_pretrained("TheBloke/Amethyst-13B-Mistral-AWQ"),
-    "Mistral Chat 13B": AutoTokenizer.from_pretrained("TheBloke/Llama-2-13B-chat-AWQ"),
+    "Llama 2  Chat 13B": AutoTokenizer.from_pretrained("TheBloke/Llama-2-13B-chat-AWQ"),
     "4Chan /Pol 2.7B": AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B"),
     "Reddit Helper 2.7B": AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
 }
@@ -28,7 +28,7 @@ TOKENIZER_TABLE = {
 
 MAX_HISTORY_LENGTH = {
     "Mistral Chat 13B": 3000,
-    "Llama 2 Chat 13B": 1000,
+    "Llama 2  Chat 13B": 1000,
     "4Chan /Pol 2.7B": 100,
     "Reddit Helper 2.7B": 100
 }

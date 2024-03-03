@@ -54,27 +54,20 @@
 
     <div id="site_content">
       <h2>Bring me to:</h2>
-      <input type="checkbox" class="checkbox_mode" name="mode" value="chat" checked onclick="onlyOne(this)"> Chat Bot
-      Mode<br>
-      <input type="checkbox" class="checkbox_mode" name="mode" value="engineering" onclick="onlyOne(this)"> Agent
-      Mode<br><br>
+      <form>
+      <input type="radio" id="mode1" name="mode" class="checkbox_mode" value="chat" checked="checked">
+      <label for="mode1">Chat Bot Mode</label><br>
+      <input type="radio" id="mode2" name="mode" class="checkbox_mode" value="engineering">
+      <label for="mode2">Agent Mode</label>
+      </form>
+    <br><br>
       <h2>Enter your key </h2>
       <label for="key">Key: </label>
       <input id="key" type="text">
       <input id="room-name-submit" type="button" value="Enter">
     </div>
     <script>
-
-      function onlyOne(checkbox, type_) {
-
-        var checkboxes = document.getElementsByName('mode')
-        checkboxes.forEach((item) => {
-          if (item !== checkbox) item.checked = false
-        })
-      }
       document.querySelector('#key').focus();
-
-
       document.querySelector('#room-name-submit').onclick = function (e) {
         var key = document.querySelector('#key').value;
         var destination = null;
@@ -85,7 +78,6 @@
             break;
           }
         }
-
 
         if (destination == "chat") {
           window.location.pathname = '/chat/' + key + "/";

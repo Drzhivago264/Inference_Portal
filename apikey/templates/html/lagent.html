@@ -36,7 +36,6 @@
         min-width: 350px;
         min-height: 250px;
         float: right;
-        resize: vertical;
         background-color: rgb(37, 37, 37);
         color: white;
         border: 1px solid #ccc;
@@ -49,7 +48,6 @@
         min-width: 350px;
         max-height: 250px;
         float: right;
-        resize: vertical;
         background-color: rgb(37, 37, 37);
         color: white;
         border: 1px solid #ccc;
@@ -96,11 +94,13 @@
         padding: 0 15px 20px 15px;
     }
 
-    .sidebar_left {
-        float: left;
-        min-width: 150px;
+    #sidebar_left {
+        float: left top;
+        width: 210px;
+
         overflow: scroll;
-        padding: 0 15px 20px 15px;
+        padding: 0 10px 10px 10px;
+     
     }
 </style>
 
@@ -150,7 +150,7 @@
                     {% for template in templates %}
                     {% if template.template_name == 'Assignment Agent' %}
                     <textarea id="agent_instruction"
-                        style="padding: 10px; height: 100%; width:96%">{{template.bot_instruct|safe}}</textarea>
+                        style="padding: 10px; height: 100%; width:100%;" >{{template.bot_instruct|safe}}</textarea>
                     {% endif %}
                     {% endfor %}
                     
@@ -172,17 +172,15 @@
                     <h3>Templates</h3>
                     {% for template in templates %}
                     {% if template.template_name == 'Assignment Agent' %}
-                    <input type="checkbox" class="checkbox" name="template" value="{{template.template_name}}" checked
-                        onclick="onlyOne(this, 'template')"> {{template.template_name}}<br>
+                    <input type="radio" class="checkbox" name="template" value="{{template.template_name}}" checked="checked"> {{template.template_name}}<br>
                     {% else %}
-                    <input type="checkbox" class="checkbox" name="template" value="{{template.template_name}}"
-                        onclick="onlyOne(this, 'template')"> {{template.template_name}}<br>
+                    <input type="radio" class="checkbox" name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
                     {% endif %}
                     {% endfor %}
                     <br>
                     <hr>
                     <br>
-                    <button  style="display: block; margin: 0 auto;" onclick="download('text/plain', 'Written_By_Professor_Parakeet.txt')">
+                    <button  style="display: block; margin: 0 auto;" id="doc-export">
                          Export Document 
                     </button>
                 </div>
@@ -194,11 +192,9 @@
                     <h3> Available Models </h3>
                     {% for llm in llms %}
                     {% if llm.name == 'GPT 4' %}
-                    <input type="checkbox" class="checkbox" name="model" value="{{llm.name}}" checked
-                        onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
+                    <input type="radio" class="checkbox" name="model" value="{{llm.name}}" checked="checked"> {{llm.name}}<br>
                     {% else %}
-                    <input type="checkbox" class="checkbox" name="model" value="{{llm.name}}"
-                        onclick="onlyOne(this, 'model')"> {{llm.name}}<br>
+                    <input type="radio" class="checkbox" name="model" value="{{llm.name}}"> {{llm.name}}<br>
                     {% endif %}
                     {% endfor %}
                     <h3> Parameters </h3>
@@ -242,7 +238,6 @@
                         </span>
                     </div>
                     <div id="chat-log_">
-
                     </div>
 
                 </div>
@@ -254,6 +249,7 @@
         </div>
         <script>
             var currentParagraph = "Introduction";
+
             function download(mimeType, filename){
                 var download_content = ""
                 var a = document.createElement('a')
@@ -268,7 +264,9 @@
                 a.setAttribute('download', filename)
                 a.click()
             }
-
+            document.getElementById("doc-export").addEventListener("click", function() {
+                download('text/plain', 'Written_By_Professor_Parakeet.txt')
+            });
             const key = JSON.parse(document.getElementById('key').textContent);
             var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
             const chatSocket = new WebSocket(
@@ -387,24 +385,14 @@
                 }));
                 messageInputDom.value = '';
             };
-            function onlyOne(checkbox, type_) {
-                if (type_ == "model") {
-                    var checkboxes = document.getElementsByName('model')
-                    checkboxes.forEach((item) => {
-                        if (item !== checkbox) item.checked = false
-                    })
-                }
-                else if (type_ == "template") {
-                    var checkbox_mode = document.getElementsByName('template')
-                    checkbox_mode.forEach((item) => {
-                        if (item !== checkbox) item.checked = false
-  
-                    })
-                    chatSocket.send(JSON.stringify({
-                            'swap_template': checkbox.value,
+            function swaptemplate(event) {
+                chatSocket.send(JSON.stringify({
+                            'swap_template': event.target.value,
                     }));
-                }
             }
+            document.querySelectorAll("input[name='template']").forEach((input) => {
+                input.addEventListener('change', swaptemplate);
+            });
         </script>
 </body>
 </html>
