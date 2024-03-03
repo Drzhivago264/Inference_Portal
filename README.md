@@ -58,7 +58,6 @@ Next you must setup STRIPE CLI and start a webhook:
 
 Next you need to set up .env file and setup the following key:
 
-
     STRIPE_PUBLISHABLE_KEY=""
     STRIPE_SECRET_KEY=""
     BACKEND_DOMAIN=""
@@ -70,12 +69,15 @@ Next you need to set up .env file and setup the following key:
     DJANGO_SETTINGS_MODULE="inferenceportal.settings"
     aws_access_key_id="" (The AWS key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
     aws_secret_access_key="" (The AWS secret key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
+    ADMIN_PATH = "" (your admin path, keep it hard to guess)
+    DJANGO_SECRET_KEY = "" 
+    GPT_KEY = "" (OPENAI key for the agent function)
 
 Finally you can test the server with:
 
     python manage.py runserver
 
-In production environment, you may want to configure the server to be served by Daphne or both Daphne and Gurnicorn (refer to [Channels Docs](https://channels.readthedocs.io/en/1.x/deploying.html?highlight=django).
+In production environment, you may want to configure the server to be served by Daphne or both Daphne and Gurnicorn (refer to [Channels Docs](https://channels.readthedocs.io/en/1.x/deploying.html?highlight=django)).
 
 Contents in `staticfiles` directory are served as `/static/`. In production environment this folder need to be removed from root and served by NGINX or APACHE
 
