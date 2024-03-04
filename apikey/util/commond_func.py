@@ -1,6 +1,6 @@
 from django.utils import timezone
 import requests
-from apikey.models import  InferenceServer, LLM, Key, PromptResponse
+from apikey.models import  InferenceServer, LLM, PromptResponse, APIKEY
 from . import constant
 from decouple import config
 from transformers import AutoTokenizer
@@ -44,7 +44,7 @@ def response_mode(model, mode, response, prompt):
         return response
         
 def log_prompt_response(key, key_name, model, prompt, response, type_):
-    key_ = Key.objects.get(key=key, owner=key_name)
+    key_ = APIKEY.objects.get_from_key(key)
     llm = LLM.objects.get(name = model)
     pair_save = PromptResponse(prompt=prompt, response=response, key=key_, model = llm, p_type= type_)
     pair_save.save()
@@ -221,8 +221,12 @@ def send_request_openai(stream, session_history, model_type, current_turn_inner,
 
 def get_key(name, key):
     try:
-        return Key.objects.get(owner=name, key = key)
-    except Key.DoesNotExist:
+        key_ = APIKEY.objects.get_from_key(key)
+        if key_.name == name:
+            return key_
+        else:
+            return False
+    except:
         return False
     
 def get_model(model):
@@ -275,7 +279,8 @@ def static_view_inference(model, mode, key, server_status,instance_id, inference
     return response
 
 def get_chat_context(model, key):
-    message_list = list(reversed(PromptResponse.objects.filter(model__name=model, key__key = key, p_type= "chatroom").order_by("-id")[:10]))
+    key_ = APIKEY.objects.get_from_key(key)
+    message_list = list(reversed(PromptResponse.objects.filter(model__name=model, key = key_, p_type= "chatroom").order_by("-id")[:10]))
     shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
     full_instruct = ""
     max_history_length = constant.MAX_HISTORY_LENGTH[model]
