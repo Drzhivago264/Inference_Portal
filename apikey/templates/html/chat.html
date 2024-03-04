@@ -8,6 +8,7 @@
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="/static/css/style.css" title="style" />
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
+  <script type="text/javascript" src="static/js/crypto-js/rollups/sha256.js"></script>
 </head>
 
 <body>
@@ -67,6 +68,7 @@
       <input id="room-name-submit" type="button" value="Enter">
     </div>
     <script>
+
       document.querySelector('#key').focus();
       document.querySelector('#room-name-submit').onclick = function (e) {
         var key = document.querySelector('#key').value;
@@ -80,12 +82,15 @@
         }
 
         if (destination == "chat") {
-          window.location.pathname = '/chat/' + key + "/";
+          window.location.pathname = '/chat/' + CryptoJS.SHA256(key) + "/";
         }
         else if (destination == "engineering") {
-          window.location.pathname = '/engineer/' + key + "/";
+          window.location.pathname = '/engineer/' + CryptoJS.SHA256(key) + "/";
         }
       };
+
+
+
     </script>
 </body>
 

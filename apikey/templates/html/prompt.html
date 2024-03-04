@@ -49,7 +49,6 @@
               <a href="/contact">Contact Us</a>
             </div>
           </div>
-
           <div class="dropdown">
             <a href="#">
               <button class="dropbtn-selected">Inference Modes</button>
@@ -73,7 +72,6 @@
         <!-- insert your sidebar items here -->
         <h2>Status</h2>
         <div id="chat-log">
-
           <p>
             {%for message in messages %}
           <div class="message_log_container"
@@ -96,7 +94,7 @@
         <h4>Python example:</h4>
         <pre style="font-size: 12px">
 r = requests.post("[HOST]/api/", 
-headers = {"Authorization": "key"}, 
+headers = {"Authorization": "Api-Key [your key]"}, 
 json={"prompt": "hola",
 "mode": "chat"/"generate",
   "name": "key name",  
@@ -120,7 +118,7 @@ print(r.json())
 curl "[HOST]/api/" --header 
 'Content-Type: application/json' 
 --request POST
--H "Authorization: key" 
+-H "Authorization: Api-Key [your key]" 
 --data-binary
 '{"prompt": "hola",
 "mode": "chat"/"generate",

@@ -18,16 +18,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def check_key(self):
         try:
             key = APIKEY.objects.get_from_key(self.key) 
-            if key.name == self.name:
-                return key
-            else:
-                return False
+            return key
         except:
             return False
     async def connect(self):
-        self.key = self.scope["url_route"]["kwargs"]["key"]
+        self.url = self.scope["url_route"]["kwargs"]["key"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.room_group_name = "chat_%s" %  self.key
+        self.room_group_name = "chat_%s" %  self.url
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -38,8 +35,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        self.name = text_data_json["name"]
-        key_object = cache.get(f"{self.key}:{self.name}")
+        self.key = text_data_json["key"]
+        key_object = cache.get(f"{self.key}")
         if key_object == None:
             key_object = await self.check_key()
         
@@ -47,7 +44,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time":self.time}))
             await self.disconnect(self) 
         else:
-            cache.set(f"{self.key}:{self.name}", key_object, constant.CACHE_AUTHENTICATION)
+            cache.set(f"{self.key}", key_object, constant.CACHE_AUTHENTICATION)
             mode = text_data_json["mode"]
             message = text_data_json["message"]            
             top_p= text_data_json["top_p"]
@@ -78,7 +75,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             type_ = "chatroom", 
                             stream = True, 
                             key=self.key,
-                            key_name = self.name, 
+                            key_name = key_object.name, 
                             credit = key_object.credit, 
                             room_group_name = self.room_group_name, 
                             model = choosen_models, 
@@ -117,10 +114,9 @@ class AgentConsumer(AsyncWebsocketConsumer):
     def check_key(self):
             try:
                 key = APIKEY.objects.get_from_key(self.key) 
-                if key.name == self.name:
-                    return key
-                else:
-                    return False
+
+                return key
+
             except:
                 return False
         
@@ -133,14 +129,14 @@ class AgentConsumer(AsyncWebsocketConsumer):
             return False
         
     async def connect(self):
-        self.key = self.scope["url_route"]["kwargs"]["key"]
+        self.url = self.scope["url_route"]["kwargs"]["key"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         self.max_turns = 4
         self.current_turn = 0
         self.session_history = []
         self.working_paragraph = str()
         self.model_type = "gpt-4"
-        self.room_group_name = "agent_%s" %  self.key
+        self.room_group_name = "agent_%s" %  self.url
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -176,8 +172,8 @@ class AgentConsumer(AsyncWebsocketConsumer):
             }
         )
         elif 'message' in text_data_json:
-            self.name = text_data_json["name"]
-            key_object = cache.get(f"{self.key}:{self.name}")
+            self.key = text_data_json["key"]
+            key_object = cache.get(f"{self.key}")
             if key_object == None:
                 key_object = await self.check_key()
             
@@ -185,7 +181,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time":self.time}))
                 await self.disconnect(self) 
             else:
-                cache.set(f"{self.key}:{self.name}", key_object, constant.CACHE_AUTHENTICATION)
+                cache.set(f"{self.key}", key_object, constant.CACHE_AUTHENTICATION)
                 agent_instruction = text_data_json['agent_instruction']
                 current_turn_inner = self.current_turn
                 currentParagraph = text_data_json['currentParagraph']

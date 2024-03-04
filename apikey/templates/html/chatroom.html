@@ -119,8 +119,8 @@
             <div id="chat-log">
                 <div class="message_log_container"
                     style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
-                    <span> Input your Key Name:
-                        <input id="key_name" type="password">
+                    <span> Input your API Key:
+                        <input id="api_key">
                     </span>
                 </div>
                 <div id="chat-log_">
@@ -199,7 +199,7 @@
                         break;
                     }
                 }
-                const key_name = document.getElementById('key_name').value
+                const api_key = document.getElementById('api_key').value
                 const top_p = document.getElementsByName("top_p")[0].value
                 const top_k = document.getElementsByName("top_k")[0].value
                 const best_of = document.getElementsByName("best_of")[0].value
@@ -225,7 +225,7 @@
                 chatSocket.send(JSON.stringify({
                     'mode': mode,
                     'message': message,
-                    'name': key_name,
+                    'key': api_key,
                     'choosen_models': choosen_models,
                     'role': 'Human',
                     'top_k': top_k,
