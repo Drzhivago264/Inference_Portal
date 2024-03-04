@@ -5,7 +5,7 @@ from django.utils import timezone
 import random
 import requests
 import json
-from .models import  InferenceServer, PromptResponse, Key, LLM
+from .models import  InferenceServer, PromptResponse, LLM
 from decouple import config
 import boto3
 from openai import OpenAI

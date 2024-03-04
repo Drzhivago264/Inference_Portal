@@ -4,7 +4,7 @@ from datetime import datetime
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
-from .models import Price, Product, Key, LLM, InferenceServer, CustomTemplate
+from .models import Price, Product,  LLM, InferenceServer, CustomTemplate, APIKEY
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import send_email_, Inference, Agent_Inference
@@ -17,8 +17,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def check_key(self):
         try:
-            key = Key.objects.get(key=self.key, owner =self.name)
-            return key
+            key = APIKEY.objects.get_from_key(self.key) 
+            if key.name == self.name:
+                return key
+            else:
+                return False
         except:
             return False
     async def connect(self):
@@ -112,11 +115,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 class AgentConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def check_key(self):
-        try:
-            key = Key.objects.get(key=self.key, owner =self.name)
-            return key
-        except:
-            return False
+            try:
+                key = APIKEY.objects.get_from_key(self.key) 
+                if key.name == self.name:
+                    return key
+                else:
+                    return False
+            except:
+                return False
         
     @database_sync_to_async
     def get_tempalte(self, name):

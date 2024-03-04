@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 
-from .models import Price, Product, ProductTag, Key, LLM, InferenceServer, PromptResponse, CustomTemplate
+from .models import Price, Product, ProductTag, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY
 
 class PriceAdmin(admin.StackedInline):
     model = Price
@@ -13,9 +13,15 @@ class ProductAdmin(admin.ModelAdmin):
     class Meta:
         model = Product
 
+from rest_framework_api_key.admin import APIKeyModelAdmin
+from .models import APIKEY
+
+@admin.register(APIKEY)
+class APIKEYModelAdmin(APIKeyModelAdmin):
+    pass
+
 admin.site.register(ProductTag)
 admin.site.register(Price)
-admin.site.register(Key)
 admin.site.register(LLM)
 admin.site.register(CustomTemplate)
 admin.site.register(InferenceServer)

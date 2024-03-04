@@ -4,7 +4,7 @@ import stripe
 from django.core.paginator import Paginator
 from datetime import datetime
 import secrets
-from .models import Price, Product, Key, LLM, InferenceServer, PromptResponse, CustomTemplate
+from .models import Price, Product, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
@@ -28,6 +28,7 @@ from .util.commond_func import get_model_url, get_key, get_model, static_view_in
 from django_ratelimit.exceptions import Ratelimited
 from django.core.cache import cache
 from apikey.util import constant
+from .permissions import HasCustomAPIKey
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @cache_page(60*15)  
@@ -78,9 +79,8 @@ class ProductListView(ListView):
         if bleach.clean(request.POST.get("form_type")) == 'createform':
             form = CaptchaForm(request.POST)
             if form.is_valid():
-                k = secrets.token_urlsafe(64)
-                Key.objects.create(owner=name, key=str(k))
-                context = {'products': products,'name':str(name) ,'key': str(k), 'form': form }
+                api_key, key = APIKEY.objects.create_key(name=name)
+                context = {'products': products,'name':api_key ,'key': key, 'form': form }
                 return render(request, "html/buy.html", context)
             else:
                 form = CaptchaForm()
@@ -93,12 +93,15 @@ class ProductListView(ListView):
             k = bleach.clean(request.POST.get('key'))
             if form.is_valid():
                 try:
-                    key = Key.objects.get(owner=name, key = str(k))
+                    key = APIKEY.objects.get_from_key(k)
                     credit = str(key.credit)
-                    messages.error(request,f"Your credit is {credit} AUD.",  extra_tags='credit')
+                    if key.name == name:
+                        messages.error(request,f"Your credit is {credit} AUD.",  extra_tags='credit')
+                    else:
+                        messages.error(request,"Error: Key Name is incorrent.",  extra_tags='credit')
                     return HttpResponseRedirect("/buy")
-                except Key.DoesNotExist:
-                    messages.error(request,"Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
+                except Exception as e:
+                    messages.error(request,"Error: Key is incorrent.",  extra_tags='credit')
                     return HttpResponseRedirect("/buy")
             else:
                 form = CaptchaForm()
@@ -110,10 +113,14 @@ class ProductListView(ListView):
             k = bleach.clean(request.POST.get('key'))
             product_id = bleach.clean(request.POST.get('product_id'))
             try:
-                key = Key.objects.get(owner=name, key = k)
-                return redirect(reverse('apikey:product-detail', kwargs={'pk':product_id, 'key':key.key, 'name':key.owner}))
+                key = APIKEY.objects.get_from_key(k)
+                if key.name == name:
+                    return redirect(reverse('apikey:product-detail', kwargs={'pk':product_id, 'key':k, 'name':name}))
+                else:
+                    messages.error(request,"Key Name is incorrect",  extra_tags='credit')
+                    return HttpResponseRedirect("/buy") 
             except:
-                messages.error(request,"Key or Key Name is incorrect",  extra_tags='credit')
+                messages.error(request,"Key is incorrect",  extra_tags='credit')
                 return HttpResponseRedirect("/buy") 
         
 class ProductDetailView(DetailView):
@@ -207,7 +214,8 @@ def agentroom(request,  key):
     return render(request, "html/lagent.html", context)
 
 def room_prompt(request,  key):
-    response_log = PromptResponse.objects.filter(key__key=key).order_by('-id')
+    key_ = APIKEY.objects.get_from_key(key)
+    response_log = PromptResponse.objects.filter(key=key_).order_by('-id')
     paginator = Paginator(response_log, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -224,7 +232,7 @@ class CreateStripeCheckoutSessionView(View):
 
     def post(self, request, *args, **kwargs):
         price = Price.objects.get(id=self.kwargs["pk"])
-        k = Key.objects.get(owner= bleach.clean(self.kwargs["name"]), key= bleach.clean(self.kwargs["key"]))
+        k = APIKEY.objects.get_from_key(bleach.clean(self.kwargs["key"]))
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[
@@ -240,7 +248,7 @@ class CreateStripeCheckoutSessionView(View):
                     "quantity": price.product.quantity,
                 }
             ],
-            metadata={"product_id": price.product.id, "name": k.owner, "key":k.key, "price":price.price, "quantity":price.product.quantity},
+            metadata={"product_id": price.product.id, "name": k.name, "key":bleach.clean(self.kwargs["key"]), "price":price.price, "quantity":price.product.quantity},
             mode="payment",
             success_url=settings.PAYMENT_SUCCESS_URL,
             cancel_url=settings.PAYMENT_CANCEL_URL,
@@ -275,19 +283,20 @@ class StripeWebhookView(View):
             key = session["metadata"]["key"]
             print(session["metadata"]["price"], session["metadata"]["price"])
             c = float(session["metadata"]["price"])*float(session["metadata"]["quantity"])
-            k = Key.objects.get(owner=name, key=key)
+            k = APIKEY.objects.get_from_key(key)
             k.credit += c 
             k.save() 
         # Can handle other events here.
         return HttpResponse(status=200)
      
 class ApiView(APIView):
+    permission_classes = [HasCustomAPIKey]
     def get(self, request, *args, **kwargs):
         return Response({'Intro':"API"}, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
         n = request.data['name']
-        k = request.META['HTTP_AUTHORIZATION']
+        k = request.META["HTTP_AUTHORIZATION"].split()[1]
         m = request.POST.get('model') if  "model" in request.data else constant.DEFAULT_MODEL
         model = get_model(m) 
         mode = request.data.get('mode') if  "mode" in request.data else constant.DEFAULT_MODE
@@ -331,9 +340,9 @@ class ApiView(APIView):
             else:
                 inference = random.choice(available_server_list)
                 try:
-                    response = static_view_inference(model=model.name, key= instance.key, mode= mode, server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
-                    log_prompt_response(key = instance.key, key_name = instance.owner, model = m, prompt = prompt, response = response, type_="prompt")
-                    return Response({"key": instance.key, "credit": instance.credit, "model": m, "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
+                    response = static_view_inference(model=model.name, key= k, mode= mode, server_status= inference.status, instance_id= inference.name, inference_url=inference.url, top_k=top_k, top_p = top_p,best_of = best_of, temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping,prompt=prompt)
+                    log_prompt_response(key = k, key_name = n, model = m, prompt = prompt, response = response, type_="prompt")
+                    return Response({"key": k, "credit": instance.credit, "model": m, "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
                 except Exception as e:
                     print(e)
                     return Response(

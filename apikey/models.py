@@ -4,6 +4,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from django_bleach.models import BleachField
+from rest_framework_api_key.models import AbstractAPIKey
 User = settings.AUTH_USER_MODEL
     
 def get_image_filename(instance, filename):
@@ -50,22 +51,17 @@ class ProductTag(models.Model):
     def __str__(self) -> str:
         return self.name
         
-class Key(models.Model):
-    owner = BleachField(max_length=400)
-    key =  models.CharField(max_length=400)
+    
+class APIKEY(AbstractAPIKey):
     credit = models.FloatField(default=0.0) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    class Meta:
-        ordering = ("-created_at",)
-    def __str__(self) -> str:
-        return self.owner
-    
+
 class PromptResponse(models.Model):
     prompt = models.CharField(max_length=4048)
     response = models.CharField(max_length=4048)
     model = models.ForeignKey(LLM, on_delete=models.CASCADE)
-    key = models.ForeignKey(Key, on_delete=models.CASCADE)
+    key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     p_type = models.TextField(default="prompt")
     class Meta:
