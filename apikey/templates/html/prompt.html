@@ -92,9 +92,9 @@
         </form>
         <h2>API Endpoint</h2>
         <h4>Python example:</h4>
-        <pre style="font-size: 12px">
+        <code style="font-size: 12px">
 r = requests.post("[HOST]/api/", 
-headers = {"Authorization": "Api-Key [your key]"}, 
+headers={"Authorization": "Api-Key [your key]"}, 
 json={"prompt": "hola",
 "mode": "chat"/"generate",
   "name": "key name",  
@@ -112,9 +112,9 @@ json={"prompt": "hola",
 }) 
 
 print(r.json())
-        </pre>
-        <h4>CURL example:</h4>
-        <pre style="font-size: 12px">
+</code>
+        <h4>cURL example:</h4>
+        <code style="font-size: 12px">
 curl "[HOST]/api/" --header 
 'Content-Type: application/json' 
 --request POST
@@ -135,7 +135,7 @@ curl "[HOST]/api/" --header
 'early_stopping': "True"/"False",
 'length_penalty': "length_penalty"
 }'
-        <pre>
+</code>
         <p><a href="/api">Test API</a></p>
         <p></p>
 

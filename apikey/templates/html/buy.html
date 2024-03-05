@@ -85,6 +85,11 @@
         <button  style="display: block; margin: 0 auto;" id="key-export">
           Export Key
          </button>
+         <script>
+                document.getElementById("key-export").addEventListener("click", function() {
+                  download('text/plain', 'User_Key_For_Professor_Parakeet_KEEP_IT_SECURE.txt')
+                });
+         </script>
         {% endif %}
         <br>
         <hr>
@@ -168,9 +173,7 @@
           a.setAttribute('download', filename)
           a.click()
       }
-      document.getElementById("key-export").addEventListener("click", function() {
-        download('text/plain', 'User_Key_For_Professor_Parakeet_KEEP_IT_SECURE.txt')
-      });
+
     </script>
 </body>
 
