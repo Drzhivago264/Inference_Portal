@@ -170,13 +170,15 @@
                 <div id="sidebar_left">
                     <br>
                     <h3>Templates</h3>
-                    {% for template in templates %}
-                    {% if template.template_name == 'Assignment Agent' %}
-                    <input type="radio" class="checkbox" name="template" value="{{template.template_name}}" checked="checked"> {{template.template_name}}<br>
-                    {% else %}
-                    <input type="radio" class="checkbox" name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
-                    {% endif %}
-                    {% endfor %}
+                    <form autocomplete="off">
+                        {% for template in templates %}
+                        {% if template.template_name == 'Assignment Agent' %}
+                        <input type="radio" class="checkbox" name="template" value="{{template.template_name}}" checked="checked"> {{template.template_name}}<br>
+                        {% else %}
+                        <input type="radio" class="checkbox" name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
+                        {% endif %}
+                        {% endfor %}
+                    </form>
                     <br>
                     <hr>
                     <br>
@@ -191,10 +193,10 @@
                     <br>
                     <h3> Available Models </h3>
                     {% for llm in llms %}
-                    {% if llm.name == 'GPT 4' %}
-                    <input type="radio" class="checkbox" name="model" value="{{llm.name}}" checked="checked"> {{llm.name}}<br>
+                    {% if llm.name == 'gpt-4' %}
+                    <input type="radio" class="checkbox_model" name="model" value="{{llm.name}}" checked="checked"> {{llm.name}}<br>
                     {% else %}
-                    <input type="radio" class="checkbox" name="model" value="{{llm.name}}"> {{llm.name}}<br>
+                    <input type="radio" class="checkbox_model" name="model" value="{{llm.name}}"> {{llm.name}}<br>
                     {% endif %}
                     {% endfor %}
                     <h3> Parameters </h3>
@@ -325,14 +327,23 @@
             }
             document.querySelector('#chat-message-submit').onclick = function (e) {
                 var choosen_models = null;
-                var inputElements = document.getElementsByClassName('checkbox');
+                var mode = null;
+                var choosen_template = null
+
+                var inputElements = document.getElementsByClassName('checkbox_model');
                 for (var i = 0; inputElements[i]; ++i) {
                     if (inputElements[i].checked) {
                         choosen_models = inputElements[i].value;
                         break;
                     }
                 }
-                var mode = null;
+                var templateElements = document.getElementsByClassName('checkbox');
+                for (var i = 0; templateElements[i]; ++i) {
+                    if (templateElements[i].checked) {
+                        choosen_template = templateElements[i].value;
+                        break;
+                    }
+                }                
                 var modeElements = document.getElementsByClassName('checkbox_mode');
                 for (var i = 0; modeElements[i]; ++i) {
                     if (modeElements[i].checked) {
@@ -370,6 +381,7 @@
                     'message': message,
                     'key': api_key,
                     'choosen_models': choosen_models,
+                    'choosen_template': choosen_template,
                     'role': 'Human',
                     'top_k': top_k,
                     'top_p': top_p,

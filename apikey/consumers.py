@@ -135,7 +135,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
         self.current_turn = 0
         self.session_history = []
         self.working_paragraph = str()
-        self.model_type = "gpt-4"
+        self.model_type = ""
         self.room_group_name = "agent_%s" %  self.url
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -187,7 +187,8 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 currentParagraph = text_data_json['currentParagraph']
                 self.working_paragraph = currentParagraph
                 message = text_data_json["message"]                  
-                choosen_models = text_data_json["choosen_models"]
+                self.model_type = text_data_json["choosen_models"]
+                choosen_template = text_data_json["choosen_template"]
                 role = text_data_json["role"]
                 unique_response_id = str(uuid.uuid4())
                 Agent_Inference.delay(unique=unique_response_id, 
@@ -195,7 +196,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                                       message= message,
                                       credit = key_object.credit, 
                                       room_group_name = self.room_group_name,
-                                      model = choosen_models,
+                                      model = choosen_template,
                                       max_turns = self.max_turns,
                                       current_turn_inner = current_turn_inner,
                                       agent_instruction=agent_instruction,
@@ -208,7 +209,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                             "message": message, 
                             "credit": key_object.credit,
                             "unique": unique_response_id,
-                            "choosen_model": choosen_models,
+                            "choosen_model":  choosen_template,
                             "current_turn": current_turn_inner            
                         }
                     )         
