@@ -39,7 +39,7 @@ def index(request):
 def manual(request):
     return render(request, "html/manual.html")
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def chat(request):
     return render(request, "html/chat.html")
 

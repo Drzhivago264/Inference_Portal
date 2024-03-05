@@ -70,14 +70,15 @@
         width: 45%;
 
         overflow: hidden;
-        background: #FFF;
+        background: #f2f2f5;
     }
 
     #site_content_document {
         width: 55%;
+        min-height: 550px;
         min-width: 450px;
         overflow: scroll;
-        background: #FFF;
+        background: #f2f2f5;
     }
 
     .child {
@@ -205,37 +206,22 @@
                             href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a
                             href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code.
                         </a> </h5>
-                    <input type="number" step="0.1" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73)
+                    <input type="number" step="0.1" name="top_p" min="0.01" max="1" value="1"> Top_p (default = 0.73)
                     <br>
-                    <input type="number" step="0.1" name="top_k" min="0.01" max="1" value="-1"> Top_k (default = -1)
-                    <br>
-                    <input type="number" step="0.1" name="max_tokens" min="1" max="2048" value="128"> Token Num (default
-                    = 128)<br>
-                    <input type="number" step="0.1" name="temperature" min="0" max="1" value="0.72"> Temperature
-                    (default= 0.72) <br>
+                    <input type="number" step="0.1" name="max_tokens" min="1" max="32048"> Token Num (default
+                    = null)<br>
+                    <input type="number" step="0.1" name="temperature" min="0" max="2" value="1"> Temperature
+                    (default= 1) <br>
                     <input type="number" step="0.1" name="frequency_penalty" min="-2" max="2" value="0"> Frequency
                     Penalty (default=0)<br>
-                    <input type="number" step="0.1" name="presense_penalty" min="-2" max="2" value="0"> Presense Penalty
-                    (default=0)<br><br>
-                    <hr>
-                    <br>
-                    <h5>NOTE: These parameters go along with each others, please know what you are doing.</h5>
-                    <h5>NOTE: Return to default value if you messed up the parameters</h5>
-                    <input type="checkbox" class="checkbox_beam" name="beam" id="beam"> Beam Search (default = False)
-                    <br>
-                    <input type="checkbox" class="checkbox_early_stopping" name="early_stopping" id="early_stopping">
-                    Early Stop (default = False) <br>
-                    <input type="number" step="0.1" name="length_penalty" min="-2" max="2" value="0"> Length Penalty
-                    (default = 0)<br>
-                    <input type="number" step="0.1" name="best_of" min="1" max="5" value="2"> Best of (default = 2 for
-                    beam search, 1 for sampling) <br>
-
+                    <input type="number" step="0.1" name="presence_penalty" min="-2" max="2" value="0"> Presence Penalty
+                    (default=0)<br>
                 </div>
 
                 <div id="chat-log">
                     <div class="message_log_container"
                         style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
-                        <span> Input your Key Name:
+                        <span> Input your Key:
                             <input id="api_key">
                         </span>
                     </div>
@@ -329,7 +315,6 @@
                 var choosen_models = null;
                 var mode = null;
                 var choosen_template = null
-
                 var inputElements = document.getElementsByClassName('checkbox_model');
                 for (var i = 0; inputElements[i]; ++i) {
                     if (inputElements[i].checked) {
@@ -354,23 +339,10 @@
                 const agent_instruction = document.getElementById('agent_instruction').value
                 const api_key = document.getElementById('api_key').value
                 const top_p = document.getElementsByName("top_p")[0].value
-                const top_k = document.getElementsByName("top_k")[0].value
-                const best_of = document.getElementsByName("best_of")[0].value
                 const max_tokens = document.getElementsByName("max_tokens")[0].value
                 const temperature = document.getElementsByName("temperature")[0].value
                 const frequency_penalty = document.getElementsByName("frequency_penalty")[0].value
-                const presense_penalty = document.getElementsByName("presense_penalty")[0].value
-                if (document.getElementById('beam').checked) {
-                    beam = "true"
-                } else {
-                    beam = "false"
-                }
-                if (document.getElementById('early_stopping').checked) {
-                    early_stopping = "true"
-                } else {
-                    early_stopping = "false"
-                }
-                const length_penalty = document.getElementsByName("length_penalty")[0].value
+                const presence_penalty = document.getElementsByName("presence_penalty")[0].value
 
 
                 const messageInputDom = document.querySelector('#chat-message-input');
@@ -383,16 +355,11 @@
                     'choosen_models': choosen_models,
                     'choosen_template': choosen_template,
                     'role': 'Human',
-                    'top_k': top_k,
                     'top_p': top_p,
-                    'best_of': best_of,
                     'max_tokens': max_tokens,
                     'frequency_penalty': frequency_penalty,
-                    'presense_penalty': presense_penalty,
+                    'presence_penalty': presence_penalty,
                     'temperature': temperature,
-                    'beam': beam,
-                    'early_stopping': early_stopping,
-                    'length_penalty': length_penalty,
                     'agent_instruction': agent_instruction
                 }));
                 messageInputDom.value = '';
