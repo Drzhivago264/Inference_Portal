@@ -19,6 +19,9 @@
     input {
         width: 7ch;
     }
+    #site_content{
+       background-color: #f2f2f5 !important
+    }
 </style>
 
 <head>
@@ -94,13 +97,13 @@
                 <input type="number" step="0.1" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73)
                 <br>
                 <input type="number" step="0.1" name="top_k" min="0.01" max="1" value="-1"> Top_k (default = -1) <br>
-                <input type="number" step="0.1" name="max_tokens" min="1" max="2048" value="128"> Token Num (default =
+                <input type="number" step="0.1" name="max_tokens" min="1" max="4048" value="128"> Token Num (default =
                 128)<br>
-                <input type="number" step="0.1" name="temperature" min="0" max="1" value="0.72"> Temperature (default=
+                <input type="number" step="0.1" name="temperature" min="0" max="2" value="0.72"> Temperature (default=
                 0.72) <br>
                 <input type="number" step="0.1" name="frequency_penalty" min="-2" max="2" value="0"> Frequency Penalty
                 (default=0)<br>
-                <input type="number" step="0.1" name="presense_penalty" min="-2" max="2" value="0"> Presense Penalty
+                <input type="number" step="0.1" name="presence_penalty" min="-2" max="2" value="0"> Presence Penalty
                 (default=0)<br><br>
                 <hr>
                 <br>
@@ -206,7 +209,7 @@
                 const max_tokens = document.getElementsByName("max_tokens")[0].value
                 const temperature = document.getElementsByName("temperature")[0].value
                 const frequency_penalty = document.getElementsByName("frequency_penalty")[0].value
-                const presense_penalty = document.getElementsByName("presense_penalty")[0].value
+                const presence_penalty = document.getElementsByName("presence_penalty")[0].value
                 if (document.getElementById('beam').checked) {
                     beam = "true"
                 } else {
@@ -233,7 +236,7 @@
                     'best_of': best_of,
                     'max_tokens': max_tokens,
                     'frequency_penalty': frequency_penalty,
-                    'presense_penalty': presense_penalty,
+                    'presence_penalty': presence_penalty,
                     'temperature': temperature,
                     'beam': beam,
                     'early_stopping': early_stopping,

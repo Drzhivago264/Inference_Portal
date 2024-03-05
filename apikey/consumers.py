@@ -52,7 +52,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             top_k = text_data_json["top_k"]
             max_tokens = text_data_json["max_tokens"]
             frequency_penalty = text_data_json["frequency_penalty"]
-            presense_penalty = text_data_json["presense_penalty"]
+            presence_penalty = text_data_json["presence_penalty"]
             temperature = text_data_json["temperature"]
             beam = text_data_json["beam"]
             early_stopping = text_data_json["early_stopping"]
@@ -84,7 +84,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             best_of =best_of, 
                             temperature =temperature, 
                             max_tokens = max_tokens, 
-                            presense_penalty =presense_penalty, 
+                            presence_penalty =presence_penalty, 
                             frequency_penalty = frequency_penalty, 
                             length_penalty = length_penalty, 
                             early_stopping = early_stopping,
@@ -191,6 +191,13 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 choosen_template = text_data_json["choosen_template"]
                 role = text_data_json["role"]
                 unique_response_id = str(uuid.uuid4())
+
+                top_p= float(text_data_json["top_p"])
+                max_tokens = int(text_data_json["max_tokens"]) if len(text_data_json["max_tokens"]) > 0 else None
+                frequency_penalty = float(text_data_json["frequency_penalty"])
+                presence_penalty = float(text_data_json["presence_penalty"])
+                temperature = float(text_data_json["temperature"])
+
                 Agent_Inference.delay(unique=unique_response_id, 
                                       stream = True,
                                       message= message,
@@ -201,7 +208,15 @@ class AgentConsumer(AsyncWebsocketConsumer):
                                       current_turn_inner = current_turn_inner,
                                       agent_instruction=agent_instruction,
                                       session_history = self.session_history,
-                                      model_type = self.model_type)
+                                      model_type = self.model_type,
+                                      
+                                      frequency_penalty = frequency_penalty,
+                                      top_p=top_p,
+                                      max_tokens=max_tokens,
+                                      temperature=temperature,
+                                      presence_penalty = presence_penalty,
+
+                                      )
          
                 await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message", 

@@ -51,7 +51,7 @@ def periodically_shutdown_EC2_instance():
             pass
         
 @shared_task
-def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model, stream ,top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
+def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model, stream ,top_k, top_p, best_of, temperature, max_tokens, presence_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
         if beam == "false" or beam == False:
             beam = False
             length_penalty = 1
@@ -72,7 +72,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
             "prompt": processed_prompt,
             "n": 1,
             'best_of': best_of,
-            'presence_penalty': float(presense_penalty),
+            'presence_penalty': float(presence_penalty),
             "use_beam_search": beam,
             "temperature": float(temperature),
             "max_tokens": int(max_tokens),
@@ -156,7 +156,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
 
 
 @shared_task
-def Agent_Inference(current_turn_inner, stream, model, unique,credit ,room_group_name,agent_instruction, message, session_history, model_type, max_turns):
+def Agent_Inference(current_turn_inner, stream, model, unique,credit ,room_group_name,agent_instruction, message, session_history, model_type, max_turns, temperature, max_tokens, top_p, frequency_penalty, presence_penalty):
     client = OpenAI(api_key=config("GPT_KEY"))
     clean_response = ""
     if current_turn_inner == 0:
@@ -173,7 +173,12 @@ def Agent_Inference(current_turn_inner, stream, model, unique,credit ,room_group
                         current_turn_inner=current_turn_inner,
                         stream=stream,
                         room_group_name=room_group_name,
-                        clean_response=clean_response)
+                        clean_response=clean_response,
+                        frequency_penalty = frequency_penalty,
+                        top_p=top_p,
+                        max_tokens=max_tokens,
+                        temperature=temperature,
+                        presence_penalty = presence_penalty)
 
     elif current_turn_inner > 0 and current_turn_inner < (max_turns-1):
         prompt = [
@@ -189,7 +194,12 @@ def Agent_Inference(current_turn_inner, stream, model, unique,credit ,room_group
                         current_turn_inner=current_turn_inner,
                         stream=stream,
                         room_group_name=room_group_name,
-                        clean_response=clean_response)
+                        clean_response=clean_response,
+                        frequency_penalty = frequency_penalty,
+                        top_p=top_p,
+                        max_tokens=max_tokens,
+                        temperature=temperature,
+                        presence_penalty = presence_penalty)
         
     elif  current_turn_inner == (max_turns-1):
         force_stop = "You should directly give results based on history information."
@@ -206,7 +216,12 @@ def Agent_Inference(current_turn_inner, stream, model, unique,credit ,room_group
                         current_turn_inner=current_turn_inner,
                         stream=stream,
                         room_group_name=room_group_name,
-                        clean_response=clean_response)
+                        clean_response=clean_response,
+                        frequency_penalty = frequency_penalty,
+                        top_p=top_p,
+                        max_tokens=max_tokens,
+                        temperature=temperature,
+                        presence_penalty = presence_penalty)
     else:
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(

@@ -131,12 +131,17 @@ def action_parse(context):
     else:
         return action_match
     
-def send_request_openai(stream, session_history, model_type, current_turn_inner, model, unique, credit, room_group_name, client, clean_response):
+def send_request_openai(stream, session_history, model_type, current_turn_inner, model, unique, credit, room_group_name, client, clean_response, max_tokens, frequency_penalty, temperature, top_p, presence_penalty):
     channel_layer = get_channel_layer()
     try:
         raw_response = client.chat.completions.create(model=model_type,
                                                     messages=session_history,
-                                                    stream= stream  
+                                                    stream= stream,
+                                                    max_tokens = max_tokens,
+                                                    temperature = temperature,
+                                                    top_p= top_p,
+                                                    frequency_penalty = frequency_penalty,
+                                                    presence_penalty = presence_penalty                                                     
                                                     )
         current_turn_inner += 1
         for chunk in raw_response:
@@ -235,7 +240,7 @@ def get_model(model):
     except LLM.DoesNotExist as e:
         return False   
     
-def static_view_inference(model, mode, key, server_status,instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presense_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
+def static_view_inference(model, mode, key, server_status,instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presence_penalty, frequency_penalty, length_penalty, early_stopping,beam,prompt):
     if beam == False:
         length_penalty = 1
         early_stopping = False
@@ -252,7 +257,7 @@ def static_view_inference(model, mode, key, server_status,instance_id, inference
         "prompt": processed_prompt,
         "n": 1,
         'best_of': best_of,
-        'presence_penalty': float(presense_penalty),
+        'presence_penalty': float(presence_penalty),
         "use_beam_search": beam,
         "temperature": float(temperature),
         "max_tokens": int(max_tokens),

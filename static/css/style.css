@@ -201,7 +201,7 @@ ul#menu li a:hover, ul#menu li.selected a, ul#menu li.selected a:hover
   overflow: hidden;
   margin: 0 auto 0 auto;
   padding: 0 24px 20px 20px;
-  background: #FFF;} 
+  background-color: #f2f2f5 !important;} 
 
 .sidebar
 { float: right;
