@@ -108,6 +108,11 @@
         padding: 0 10px 10px 10px;
      
     }
+    #editorjs{
+        background-color: white;
+        color: black;
+        margin: 10px 10px 10px 10px;
+    }
 </style>
 
 <body>
@@ -153,24 +158,71 @@
             <div class="child" id="site_content_document">
                 <div id="document-instruction">
                     <h3 style="color:white; padding:10px">Agent Instruction</h3>
-                    {% for template in templates %}
-                    {% if template.template_name == 'Assignment Agent' %}
+
                     <textarea id="agent_instruction"
-                        style="padding: 10px; height: 100%; width:100%;" >{{template.bot_instruct|safe}}</textarea>
-                    {% endif %}
-                    {% endfor %}
+                        style="padding: 10px; height: 100%; width:100%; " autocomplete="off">{{template.bot_instruct|safe}}</textarea>
+
                     
                 </div>
 
                 <div id="document-template">
-                    <h3 style="color:white; padding:10px">Document template</h3>
-                    {% for template in templates %}
-                    {% if template.template_name == 'Assignment Agent' %}
-                    <div id="document-template-holder" style="padding: 10px">
-                        {{template.template|safe}}
+                    <h3 style="color:white; padding:10px">Document Editor</h3>
+                    <div id="editorjs">
+                        <script src="/static/js/editor-js/editorjs.umd.js"></script>
+                        <script src="/static/js/editor-js/header.umd.min.js "></script>
+                        <script src="/static/js/editor-js/list.umd.min.js "></script>
+                        <script src="/static/js/editor-js/quote.umd.min.js "></script>
+                        <script src="/static/js/editor-js/paragraph.umd.min.js "></script>
+                        <script src="/static/js/editor-js/drag.min.js "></script>
+                        <script src="/static/js/editor-js/undo.min.js "></script>
+                        <script>
+                            var currentParagraph = 1
+                            var download_content = ""
+                            const editor = new EditorJS({ 
+                            onReady: () => {
+                                    new Undo({ editor });
+                                    new DragDrop(editor);
+                                },
+                            holder: 'editorjs', 
+                            minHeight : 140,
+                            tools: { 
+                                    header: {
+                                        class: Header, 
+                                        inlineToolbar: ['link'] 
+                                        }, 
+                                    list: { 
+                                        class: List, 
+                                        inlineToolbar: true 
+                                        }, 
+                                    quote: {
+                                        class: Quote,
+                                        inlineToolbar: true,
+                                    },
+                                    paragraph: {
+                                        class: Paragraph,
+                                        config: {
+                                            preserveBlank: true
+                                        },
+                                        inlineToolbar: true 
+                                    }, 
+                                },
+                            data: {{template.template|safe}}
+                            })
+                            
+                            document.getElementById("editorjs").onclick = function save_editor() {
+                                editor.save().then((outputData) => {
+                                currentParagraph = editor.blocks.getCurrentBlockIndex();
+                                chatSocket.send(JSON.stringify({
+                                    'paragraph': currentParagraph,
+                                }));
+                                }).catch((error) => {
+                                console.log('Saving failed: ', error)
+                                });
+                            }
+
+                        </script>
+                   
                     </div>
-                    {% endif %}
-                    {% endfor %}
                     
                 </div>
                 <div id="sidebar_left">
@@ -186,7 +238,6 @@
                         {% endfor %}
                     </form>
                     <br>
-                    <hr>
                     <br>
                     <button  style="display: block; margin: 0 auto;" id="doc-export">
                          Export Document 
@@ -241,24 +292,26 @@
             </div>
         </div>
         <script>
-            var currentParagraph = "Introduction";
 
             function download(mimeType, filename){
-                var download_content = ""
+                editor.save().then((outputData) => {
+                download_content = outputData
+                download_content = JSON.stringify(download_content, null, 4)
                 var a = document.createElement('a')
-                var paragraphs = document.getElementsByClassName('place-holder-template');
-                for (var i = 0; paragraphs[i]; ++i) {
-                    download_content += paragraphs[i].value
-                }
                 console.log(download_content)
                 var blob = new Blob([download_content], {type: mimeType})
                 var url = URL.createObjectURL(blob)
                 a.setAttribute('href', url)
                 a.setAttribute('download', filename)
                 a.click()
+                }).catch((error) => {
+                console.log('Saving failed: ', error)
+                });
+
+                
             }
             document.getElementById("doc-export").addEventListener("click", function() {
-                download('text/plain', 'Written_By_Professor_Parakeet.txt')
+                download("application/json", 'Written_By_Professor_Parakeet.json')
             });
             const key = JSON.parse(document.getElementById('key').textContent);
             var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -282,15 +335,22 @@
                 else if (data.stream_id) {
                     document.getElementById(data.stream_id).innerHTML += data.message.replace(/\n/g, "<br>") 
                 }
-                else if (data.paragraph) {
+                else if (data.paragraph || data.paragraph == 0) {
                     currentParagraph = data.paragraph    
                 }
                 else if (data.swap_instruction) {
                     document.getElementById("agent_instruction").value = data.swap_instruction; 
-                    document.getElementById("document-template-holder").innerHTML = data.swap_template;
+                    editor.render(JSON.parse(data.swap_template));
                 }
                 else if (data.agent_action == "STOP"){
-                    document.getElementById(data.result_id).value = data.full_result;
+                    var blockToAdd = {
+                        type: 'paragraph', 
+                        data: {
+                        text: data.full_result.replace(/\n/g, "<br>") 
+                        }
+                    };
+                    editor.blocks.insert(blockToAdd.type, blockToAdd.data, null, data.result_id);
+
                 }
                 else {
                     document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message.replace(/\n/g, "<br>")  + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
@@ -311,11 +371,6 @@
                 }
             };
 
-            function reply_click(clicked_id) {
-                chatSocket.send(JSON.stringify({
-                    'paragraph': clicked_id,
-                }));
-            }
             document.querySelector('#chat-message-submit').onclick = function (e) {
                 var choosen_models = null;
                 var mode = null;

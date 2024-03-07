@@ -163,6 +163,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
             swap_template = await self.get_tempalte(text_data_json['swap_template'])
             swap_instruction = swap_template.bot_instruct
             swap_template_ = swap_template.template
+            print(swap_template_)
             await self.channel_layer.group_send(
             self.room_group_name, {
                 "type": "chat_message", 
@@ -257,8 +258,8 @@ class AgentConsumer(AsyncWebsocketConsumer):
             paragraph = event['paragraph']
             self.current_turn = event['current_turn']
             self.session_history = []
-            displayed_paragraph = paragraph.replace("_choosen","")
-            await self.send(text_data=json.dumps({"message": f"Working on {displayed_paragraph}, what do you want me to write?","role": "Server", "time":self.time}))  
+            displayed_paragraph = paragraph
+            await self.send(text_data=json.dumps({"message": f"Working on block {displayed_paragraph}, what do you want me to write?","role": "Server", "time":self.time}))  
             await self.send(text_data=json.dumps({"paragraph":paragraph}))
 
         if "agent_action" in event:
@@ -272,7 +273,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 full_result = full_result.replace(thought_match[0],"")
                 full_result = full_result.replace("Thought:","")
                 await self.send(text_data=json.dumps({"message": f"Your request is finished, the result is moved to the textbox on the left","role": "Server", "time":self.time})) 
-                await self.send(text_data=json.dumps({"agent_action": agent_action, "result_id": self.working_paragraph + "_text"  ,"full_result": full_result}))
+                await self.send(text_data=json.dumps({"agent_action": agent_action, "result_id": self.working_paragraph,"full_result": full_result}))
                 self.session_history = []
                 self.current_turn = 0
 
