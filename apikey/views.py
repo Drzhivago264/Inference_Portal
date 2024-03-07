@@ -31,7 +31,7 @@ from apikey.util import constant
 from .permissions import HasCustomAPIKey
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-@cache_page(60*15)  
+#@cache_page(60*15)  
 def index(request):
     return render(request, "html/index.html")
 
@@ -209,8 +209,9 @@ def room(request,  key):
 
 def agentroom(request,  key):
     llm = LLM.objects.filter(agent_availability =True)
-    template = CustomTemplate.objects.all()
-    context = {'llms':llm, "templates": template, "key": key}
+    default_template = CustomTemplate.objects.get(template_name = "Assignment Agent")
+    templates = CustomTemplate.objects.all()
+    context = {'llms':llm, "templates": templates,"template": default_template, "key": key}
     return render(request, "html/lagent.html", context)
 
 def room_prompt(request,  key):
