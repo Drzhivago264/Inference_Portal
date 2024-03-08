@@ -14,6 +14,17 @@
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://professorparakeet.com/static/image/android-chrome-192x192.png">
     <meta property="og:image" content="https://professorparakeet.com/static/image/android-chrome-192x192.png"/>
+    <script src="/static/js/editor-js/editorjs.umd.js"></script>
+    <script src="/static/js/editor-js/header.umd.min.js "></script>
+    <script src="/static/js/editor-js/list.umd.min.js "></script>
+    <script src="/static/js/editor-js/quote.umd.min.js "></script>
+    <script src="/static/js/editor-js/editorjs-paragraph-with-alignment@3.0.0.0.js "></script>
+    <script src="/static/js/editor-js/drag.min.js "></script>
+    <script src="/static/js/editor-js/undo.min.js "></script>
+    <script src="/static/js/editor-js/editorjs-codeflask@latest.js "></script>
+    <script src="/static/js/editor-js/inline-code@latest.js"></script>
+    <script src="/static/js/editor-js/underline.min.js"></script>
+    <script src="/static/js/editor-js/table@latest.js"></script>
 </head>
 <style>
     #chat-log {
@@ -161,20 +172,12 @@
 
                     <textarea id="agent_instruction"
                         style="padding: 10px; height: 100%; width:100%; " autocomplete="off">{{template.bot_instruct|safe}}</textarea>
-
-                    
                 </div>
 
                 <div id="document-template">
                     <h3 style="color:white; padding:10px">Document Editor</h3>
                     <div id="editorjs">
-                        <script src="/static/js/editor-js/editorjs.umd.js"></script>
-                        <script src="/static/js/editor-js/header.umd.min.js "></script>
-                        <script src="/static/js/editor-js/list.umd.min.js "></script>
-                        <script src="/static/js/editor-js/quote.umd.min.js "></script>
-                        <script src="/static/js/editor-js/paragraph.umd.min.js "></script>
-                        <script src="/static/js/editor-js/drag.min.js "></script>
-                        <script src="/static/js/editor-js/undo.min.js "></script>
+
                         <script>
                             var currentParagraph = 1
                             var download_content = ""
@@ -185,6 +188,7 @@
                                 },
                             holder: 'editorjs', 
                             minHeight : 140,
+                            
                             tools: { 
                                     header: {
                                         class: Header, 
@@ -205,6 +209,17 @@
                                         },
                                         inlineToolbar: true 
                                     }, 
+                                    underline: Underline,
+                                    code : {
+                                        class: editorjsCodeflask,
+                                        inlineToolbar: true,
+                                    },
+                                    inlineCode: {
+                                        class: InlineCode,
+                                        shortcut: 'CMD+SHIFT+M',
+                                    },
+                                    table: Table,
+       
                                 },
                             data: {{template.template|safe}}
                             })
