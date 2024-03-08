@@ -1,102 +1,142 @@
 <!DOCTYPE HTML>
 <html>
-<style>
-  #id_captcha_1 {
-    font-size: 14px;
-    width: 30px;
-  }
-</style>
+
 
 <head>
   <title>Buy </title>
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-  <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
+  <link rel="stylesheet" href="static/css/pico-main/css/pico.min.css" />
+  <link rel="stylesheet" href="static/css/pico-main/css/pico.colors.min.css" />
 </head>
+<style>
+    #id_captcha_1{
+    font-size: 14px;
+    width: 25%;
+    height: 20px;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    }
+</style>
 <body>
-  <div id="main">
-    <div id="header">
-      <div id="logo">
-        <div id="logo_text">
-          <h1><a href="/">Inference</span></a></h1>
+  <header class="container">
+    <nav>
+      <ul>
+        <hgroup>
+          <h1><b>Inference</b></h1>
+        </hgroup>
+      </ul>
+      <ul>
+        <li>
+          <details  class="dropdown">
+            <summary>
+              About
+            </summary>
+            <ul dir="rtl">
+              <li><a href="/">Introduction</a></li>
+              <li><a href="/model_infor">Model</a></li>
+              <li><a href="/manual">User Manual</a></li>
+              <li><a href="/contact">Contact Us</a></li>
+            </ul>
+          </details> 
+        </li>
+       
+        <li>
+          <details  class="dropdown">
+            <summary>
+              Modes
+            </summary>
+            <ul dir="rtl">
+              <li><a href="/prompt">Prompt and API</a></li>
+              <li><a href="/chat">Chat Bot and Agent</a></li>
+            </ul>
+          </details>
+        </li> 
+        <li><a href="/buy">Get Key</a></li>
+        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
+        
+      </ul>
+      
+    </nav>
+  
+</header>
+<hr>
+    <main id="site_content">
+      <div  class="container">
+        <div class="grid">
+          <div  class="container">
+            <h2> Create a Key </h2>
+            <form style="text-align: center;" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="createform">
+                <input type="password" placeholder="key name" name="name" />
+                <div class="grid">
+                  <p> <span>{{form.title}} </span> {{ form.captcha }} </p>
+                  <input type="submit" value="Create" />
+                </div>
+              
+              <br>
+              <br>
+              {%for message in messages %}
+              {%if "key" in message.tags %}
+              <h4> {{message}} </h4>
+              {%endif%}
+              {%endfor%}
+
+            </form>
+            {% if key and name %}
+            <br>
+            <ul>
+              <li> Please remember your Key and Key Name to inference the model </li>
+              <li> If I was you, I would copy and paste my Key and Key Name in to a Word and Text document </li>
+              <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly</li>
+              <li> If you face any problem, please contact us </li>
+            </ul>
+            <textarea style="width:100%;" id = "keyresponse" name="keyresponse">Your key name is: {{ name }}&#13;&#10;Your key is: {{ key }}
+            </textarea>
+            <button  style="display: block; margin: 0 auto;" id="key-export">
+              Export Key
+            </button>
+            <script>
+                    document.getElementById("key-export").addEventListener("click", function() {
+                      download('text/plain', 'User_Key_For_Professor_Parakeet_KEEP_IT_SECURE.txt')
+                    });
+            </script>
+            {% endif %}
         </div>
-      </div>
-      <div id="menubar">
-        <ul id="menu">
-          <div class="dropdown">
-            <a href="/">
-              <button class="dropbtn">Introduction</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/">Introduction</a>
-              <a href="/model_infor">Model</a>
-              <a href="/manual">User Manual</a>
-              <a href="/contact">Contact Us</a>
-            </div>
-          </div>
-          <div class="dropdown">
-            <a href="/chat">
-              <button class="dropbtn">Inference Modes</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/prompt">Prompt and API</a>
-              <a href="/chat">Chat Bot and Agent</a>
-            </div>
-          </div>
-          <a href="/buy">
-            <button class="dropbtn-selected">Get Key</button>
-          </a>
-          <a href="/promptresponse">
-            <button class="dropbtn">Response Log</button>
-          </a>
-        </ul>
-      </div>
-    </div>
-    <div id="site_content">
-      <div id="content" style="width:100%;">
-        <h2> Create a Key </h2>
+     
+        <div  class="container">
+          <h2>Or Check Credit</h2>
         <form style="text-align: center;" method="post">
           {% csrf_token %}
-          <input type="hidden" name="form_type" value="createform">
-          <label for="name">Key Name: </label>
-          <input type="password" name="name" /> ||
-          {{form.title}} {{ form.captcha }}
-          <input type="submit" value="Create" />
+          <input type="hidden" name="form_type" value="checkform">
+          <div class="grid">
+            <input type="password" placeholder="Key name" name="name" /> 
+            <input type="text" placeholder="Key" name="key" /> 
+          </div>
+          <div class="grid">
+            <p> <span>{{form.title}} </span> {{ form.captcha }} </p>
+            <input type="submit" value="Check" />
+          </div>
+          
           <br>
           <br>
           {%for message in messages %}
-          {%if "key" in message.tags %}
+          {%if "credit" in message.tags %}
           <h4> {{message}} </h4>
           {%endif%}
           {%endfor%}
         </form>
-        {% if key and name %}
-        <br>
-        <ul>
-          <li> Please remember your Key and Key Name to inference the model </li>
-          <li> If I was you, I would copy and paste my Key and Key Name in to a Word and Text document </li>
-          <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly</li>
-          <li> If you face any problem, please contact us </li>
-        </ul>
-        <textarea style="width:100%;" id = "keyresponse" name="keyresponse">Your key name is: {{ name }}&#13;&#10;Your key is: {{ key }}
-        </textarea>
-        <button  style="display: block; margin: 0 auto;" id="key-export">
-          Export Key
-         </button>
-         <script>
-                document.getElementById("key-export").addEventListener("click", function() {
-                  download('text/plain', 'User_Key_For_Professor_Parakeet_KEEP_IT_SECURE.txt')
-                });
-         </script>
-        {% endif %}
-        <br>
+        
+        </div>
+        </div>
         <hr>
         <h2> Top up </h2>
-        <h5> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do not
-          even confirm your email).
-          If you are concerned please use throw away credit/debit cards</h5>
+        <small><i> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do not
+          even confirm your email). If you are concerned please use throw away credit/debit cards</i></small>
         <div style="display: flex; justify-content: space-between;" class="card">
           {% block content %} {% for product in products %}
           <details>
@@ -106,14 +146,8 @@
               <br>
               <input type="hidden" name="form_type" value="topupform">
               <input type="hidden" name="product_id" value={{ product.id }}>
-              <label for="name">Key Name: </label>
-              <input style="width:60%;  float: right;" type="password" name="name" />
-              <br>
-              <br>
-              <label for="key">Key: </label>
-              <input style=" width:60%;  float: right;" type="text" name="key" />
-              <br>
-              <br>
+              <input placeholder="Key name" type="password" name="name" />
+              <input placeholder="Key" type="text" name="key" />
               <input type="submit" value="Take my money" />
             </form>
           </details>
@@ -122,44 +156,21 @@
         {% if key_error == "error" %}
         <p> Your Key or Key Name is wrong !!!</p>
         {% endif %}
-        <br>
-        <hr>
-        <h2>Or Check Credit</h2>
-        <form style="text-align: center;" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="form_type" value="checkform">
-          <label for="name">Key Name: </label>
-          <input type="password" name="name" /> ||
-
-          <label for="ket">Key: </label>
-          <input type="text" name="key" /> ||
-          {{form.title}} {{ form.captcha }}
-          <input type="submit" value="Check" />
-          <br>
-          <br>
-          {%for message in messages %}
-          {%if "credit" in message.tags %}
-          <h4> {{message}} </h4>
-          {%endif%}
-          {%endfor%}
-        </form>
-        <br>
-      </div>
       <hr>
       <h2> Crypto Options</h2>
-      <h5> NOTE: We did not plan to periodically query the following networks to confirm payments. Doing so is quite a
+      <small><i> NOTE: We did not plan to periodically query the following networks to confirm payments. Doing so is quite a
         risk for everyone, this is certainly not a job for individuals.
         Please contact us if you want to pay in crypto, we will manually create key for you.
         For now, the following address can be used for donation.
-      </h5>
+      </i></small><br>
       <ul>
         <li>USDT (TRC20): TNxSARdRz8g1K7tqHXcihhGtcACqQE2ATT </li>
         <li>XMR: 84ZR5nsGeKQPn3rj5C9AFzWC5HuhGggMKMrtvsvgy6Sy5qQAfeAfzZGC2MCnKxt88WTyxQjpoWsrsNXV97VMbaFzFQnYjme </li>
         <li>CFX (CFX network): cfx:aamcex1dudewysu92cdpahuravbswkmsr2peed2ew9 </li>
         <li>DOGE (doge network): DB3Ut1ajNzqkPdFHyQsyh7ZrqDFjqBPPgE </li>
       </ul>
-
     </div>
+    </main>
     <script>
         function download(mimeType, filename){
           var download_content = ""

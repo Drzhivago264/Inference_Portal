@@ -6,93 +6,66 @@
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-  <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
   <meta property="og:title" content="Inference Portal for multiple Large Language Models">
   <meta property="og:description" content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://professorparakeet.com/static/image/android-chrome-192x192.png">
   <meta property="og:image" content="https://professorparakeet.com/static/image/android-chrome-192x192.png"/>
+  <link rel="stylesheet" href="static/css/pico-main/css/pico.min.css" />
+  <link rel="stylesheet" href="static/css/pico-main/css/pico.colors.min.css" />
 </head>
 
 <body>
-  <div id="main">
-    <div id="header">
-      <div id="logo">
-        <div id="logo_text">
-          <!-- class="logo_colour", allows you to change the colour of the text -->
-          <h1><a href="index">Inference <span class="logo_colour"></span></a></h1>
-        </div>
-      </div>
-      <div id="menubar">
-        <ul id="menu">
 
-          <div  class="dropdown">
-            <a  href="/"> 
-            <button class="dropbtn-selected">Introduction</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/">Introduction</a>
-              <a href="/model_infor">Model</a>
-              <a href="/manual">User Manual</a>
-              <a href="/contact">Contact Us</a>
-            </div>
-          </div> 
-
-          <div class="dropdown">
-            <a  href="/chat"> 
-            <button class="dropbtn">Inference Modes</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/prompt">Prompt and API</a>
-              <a href="/chat">Chat Bot and Agent</a>
-            </div>
-          </div> 
-          <a  href="/buy"> 
-            <button class="dropbtn">Get Key</button>
-          </a>
-          <a  href="/promptresponse"> 
-            <button class="dropbtn">Response Log</button>
-          </a>
-
+    <header class="container">
+      <nav>
+        <ul>
+          <hgroup>
+            <h1><b>Inference</b></h1>
+          </hgroup>
         </ul>
-      </div>
-    </div>
-    <div id="site_content">
-      <div class="sidebar">
-        <!-- insert your sidebar items here -->
-        <h3>Usefull links:</h3>
-        <h4>First, you need to generate for yourself an API key</h4>
-        <p><a href="/buy">Indeed, I do need a key.</a></p>
-        <hr>
-        <h4>Second, you may want to check out our chat bots and agents</h4>
-        <p><a href="/chat">Show me your bots and agents.</a></p>
-        <hr>
-        <h4>Third, you may want to programmtically infer the bots and agents</h4>
-        <p><a href="/prompt">That would be conveninent, indeed.</a></p>
-        <hr>
-        <h4>How about <b>paying </b>for your shenanigans?</h4>
-        <p><a href="/buy">Just generate a key and play with it, the cost is 0 during our test.</a></p>
-        <hr>
-        <h4><cite>"I want to know more about what I am doing"</cite></h4>
-        <p><a href="/manual">Here is your user manual.</a></p>
-        <hr>
-        <h4><cite>"I have an <b>idea</b> of something big, I'm willing to pay for it"</cite></h4>
-        <p><a href="/contact">Contact us right now.</a></p>
-        <hr>
-        <h4><cite>"I am a policeman, we need to talk"</cite></h4>
-        <p><a href="#">There is nothing illegal here yet, stay tuned</a></p>
-        <hr>
-        <h4><cite>"I am a <b>respectable</b> scientist, we need to talk"</cite></h4>
-        <p><a href="/contact">Want to publish quick and become an emeritus professor before losing all of your hair? Contact us now</a></p>
-        <hr>
-        <h4><cite>"I am a politician, we need to talk"</cite></h4>
-        <p><a href="/model">From neo-liberal to socialist utopia, my bots can be your passionate supporters but you must pay first</a></p>
+        <ul>
+          <li>
+            <details  class="dropdown">
+              <summary role="button" class="outline">
+                About
+              </summary>
+              <ul dir="rtl">
+                <li><a  aria-current="page" href="/">Introduction</a></li>
+                <li><a href="/model_infor">Model</a></li>
+                <li><a href="/manual">User Manual</a></li>
+                <li><a href="/contact">Contact Us</a></li>
+              </ul>
+            </details> 
+          </li>
+         
+          <li>
+            <details  class="dropdown">
+              <summary>
+                Modes
+              </summary>
+              <ul dir="rtl">
+                <li><a href="/prompt">Prompt and API</a></li>
+                <li><a href="/chat">Chat Bot and Agent</a></li>
+              </ul>
+            </details>
+          </li> 
+          <li><a class="contrast" href="/buy">Get Key</a></li>
+          <li><a class="contrast" href="/promptresponse">Response Log</a></li>
+          
+        </ul>
         
-      </div>
-      <div id="content">
+      </nav>
+    
+  </header>
+  <hr>
+  <main class="container">
+    <div id="site_content" style="grid-template-columns: 70% 30%;"class="grid">
+      
+      <div class="container"   id="content">
         <!-- insert the page content here -->
-        <h1>Hello Internet People!!!</h1>
+        <h1>About</h1>
         <p> This website is trying to sell you the access to several finetuned language models. 
          These language models aim to support: </p>
          <ul>
@@ -109,6 +82,7 @@
           This website is kept as simple as possible, partly because we do not have the resources to be fancy. 
           This is a privacy feature rather than a drawback actually. In fact, we do not ask you to register an account with us.
         </p>
+        <hr>
         <p> In addition to finetuned lanaguage models, we also host several popular base language models. 
           These language models aim to support: </p>
           <ul>
@@ -125,10 +99,37 @@
           <li><strong> If you have data generated by a specific group of people, we can colaborate. </strong>  </li>
           <li> <strong> If you have an idea of training a new model and willing to pay for it, please let's us know. </strong>  </li>
         </ul>
-
       </div>
+
+      <div class="container" style=" margin-right: 0;" >
+        <!-- insert your sidebar items here -->
+        <h1>Useful Links</h1>
+        <h6>First, you need to generate for yourself an API key</h6>
+        <p><a href="/buy">Indeed, I do need a key.</a></p>
+        <hr>
+        <h6>Second, you may want to check out our chat bots and agents</h6>
+        <p><a href="/chat">Show me your bots and agents.</a></p>
+        <hr>
+        <h6>Third, you may want to programmtically infer the bots and agents</h6>
+        <p><a href="/prompt">That would be conveninent, indeed.</a></p>
+        <hr>
+        <h6>How about <b>paying </b>for your shenanigans?</h6>
+        <p><a href="/buy">Just generate a key and play with it, the cost is 0 during our test.</a></p>
+        <hr>
+        <h6><cite>"I want to know more about what I am doing"</cite></h6>
+        <p><a href="/manual">Here is your user manual.</a></p>
+        <hr>
+        <h6><cite>"I have an <b>idea</b> of something big, I'm willing to pay for it"</cite></h6>
+        <p><a href="/contact">Contact us right now.</a></p>
+        <hr>
+        <h6><cite>"I am a policeman, we need to talk"</cite></h6>
+        <p><a href="#">There is nothing illegal here yet, stay tuned</a></p>
+
+        <hr>
+      </div>
+
     </div>
 
-  </div>
+  </main>
 </body>
 </html>

@@ -83,10 +83,10 @@ def log_prompt_response(key, model, prompt, response, type_):
     """_summary_
 
     Args:
-        key (_type_): _description_
-        model (_type_): _description_
-        prompt (_type_): _description_
-        response (_type_): _description_
+        key (string): _description_
+        model (string): the name of the model
+        prompt (string): the user's prompt
+        response (string): the response from GPU
         type_ (_type_): _description_
     """
     key_ = APIKEY.objects.get_from_key(key)
@@ -97,15 +97,15 @@ def log_prompt_response(key, model, prompt, response, type_):
 
 
 def command_EC2(instance_id, region, action):
-    """_summary_
+    """This func is used to turn on, off, or reboot ec2 instances
 
     Args:
-        instance_id (_type_): _description_
-        region (_type_): _description_
-        action (_type_): _description_
+        instance_id (string): the id of EC2 instance
+        region (string): the region of EC2 instances
+        action (string): either turn on, off or reboot instance
 
     Returns:
-        _type_: _description_
+        string or None: either return error or nothing
     """
     aws = config("aws_access_key_id")
     aws_secret = config("aws_secret_access_key")
@@ -145,13 +145,13 @@ def command_EC2(instance_id, region, action):
 
 
 def get_model_url(model):
-    """_summary_
+    """Get a list of EC2 instance enpoints that serve a given model
 
     Args:
-        model (_type_): _description_
+        model (string): the name of the model.
 
     Returns:
-        _type_: _description_
+        list: the list of available enpoints
     """
     try:
         model_list = cache.get(f"{model}_link_list")
@@ -382,6 +382,30 @@ def get_model(model):
 
 
 def static_view_inference(model, mode, key, server_status, instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presence_penalty, frequency_penalty, length_penalty, early_stopping, beam, prompt):
+    """_summary_
+
+    Args:
+        model (_type_): _description_
+        mode (_type_): _description_
+        key (_type_): _description_
+        server_status (_type_): _description_
+        instance_id (_type_): _description_
+        inference_url (_type_): _description_
+        top_k (_type_): _description_
+        top_p (_type_): _description_
+        best_of (_type_): _description_
+        temperature (_type_): _description_
+        max_tokens (_type_): _description_
+        presence_penalty (_type_): _description_
+        frequency_penalty (_type_): _description_
+        length_penalty (_type_): _description_
+        early_stopping (_type_): _description_
+        beam (_type_): _description_
+        prompt (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     if beam == False:
         length_penalty = 1
         early_stopping = False
