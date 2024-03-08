@@ -7,7 +7,8 @@
     <meta name="keywords" content="website keywords, website keywords" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css" title="style" />
+    <link rel="stylesheet" href="/static/css/pico-main/css/pico.min.css" />
+    <link rel="stylesheet" href="/static/css/pico-main/css/pico.colors.min.css" />
     <link rel="shortcut icon" type="image/png" href="/static/image/favicon.ico" />
     <meta property="og:title" content="Inference Portal for multiple Large Language Models">
     <meta property="og:description" content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
@@ -28,16 +29,18 @@
 </head>
 <style>
     #chat-log {
-        width: 60% !important;
+        width: 100% !important;
         min-width: 250px;
         min-height: 150px;
         resize: vertical;
-        background-color: rgb(37, 37, 37);
+        background-color: black;
         color: white;
-        border: 1px solid #ccc;
         box-sizing: border-box;
-        height: 30vh;
+        height: 50vh;
         overflow: auto;
+        border-radius: 5px;
+        font-size: 14px;
+        
     }
     .message_log_container {
         margin: 10px;
@@ -47,135 +50,114 @@
         width: 7ch;
     }
 
-    #document-template {
-        width: 75% !important;
-        min-width: 350px;
-        min-height: 250px;
-        float: right;
-        background-color: rgb(37, 37, 37);
-        color: white;
-        border: 1px solid #ccc;
-        box-sizing: border-box;
-        overflow: scroll;
-    }
-
-    #document-instruction {
-        width: 75% !important;
-        min-width: 350px;
-        max-height: 250px;
-        float: right;
-        background-color: rgb(37, 37, 37);
-        color: white;
-        border: 1px solid #ccc;
-        box-sizing: border-box;
-        height: 100%;
-        overflow: scroll;
-    }
-
-    .container {
-        width: 95%;
-        min-width: 1654px;
-        display: flex;
-        margin-left: auto;
-        margin-right: auto;
-        align-items: stretch;
-        justify-content: space-around;
-    }
-
-    #site_content_chat {
-        width: 45%;
-
-        overflow: hidden;
-        background: #f2f2f5;
-    }
-
-    #site_content_document {
-        width: 55%;
-        min-height: 550px;
-        min-width: 450px;
-        overflow: scroll;
-        background: #f2f2f5;
-    }
-
-    .child {
-        margin: 0 .5em;
-        padding: .5em;
-        /* optional */
-        min-height: 100%;
-    }
-
-    .sidebar {
-        float: right;
-        min-width: 150px;
-        overflow: scroll;
-        padding: 0 15px 20px 15px;
-    }
-
-    #sidebar_left {
-        float: left top;
-        width: 190px;
-
-        overflow: scroll;
-        padding: 0 10px 10px 10px;
-     
-    }
     #editorjs{
         background-color: white;
         color: black;
-        margin: 10px 10px 10px 10px;
+        border-radius: 5px;
+        padding: 25px;
+        font-size: 16px;
+    }
+
+    #editorjs h1{
+        font-size: 32px;
+        color: black;
+    }
+    #editorjs h2{
+        font-size: 28px;
+        color: black;
+    }
+    #editorjs h3{
+        font-size: 24px;
+        color: black;
+    }
+    #editorjs h4{
+        font-size: 20px;
+        color: black;
+    }
+    #editorjs h5{
+        font-size: 18px;
+        color: black;
+    }
+    #editorjs h6{
+        font-size: 16px;
+        color: black;
+    }
+    #editorjs small{
+        font-size: 14px;
+        color: black;
     }
 </style>
 
 <body>
-    <div id="main">
-        <div id="header">
-            <div id="logo">
-                <div id="logo_text">
-                    <h1><a href="index">Inference <span class="logo_colour"></span></a></h1>
-                </div>
-            </div>
-            <div id="menubar">
-                <ul id="menu">
-                    <div class="dropdown">
-                        <a href="/">
-                            <button class="dropbtn">Introduction</button>
-                        </a>
-                        <div class="dropdown-content">
-                            <a href="/">Introduction</a>
-                            <a href="/model_infor">Model</a>
-                            <a href="/manual">User Manual</a>
-                            <a href="/contact">Contact Us</a>
-                        </div>
-                    </div>
-                    <div class="dropdown">
-                        <a href="#">
-                            <button class="dropbtn-selected">Inference Modes</button>
-                        </a>
-                        <div class="dropdown-content">
-                            <a href="/prompt">Prompt and API</a>
-                            <a href="/chat">Chat Bot and Agent</a>
-                        </div>
-                    </div>
-                    <a href="/buy">
-                        <button class="dropbtn">Get Key</button>
-                    </a>
-                    <a href="/promptresponse">
-                        <button class="dropbtn">Response Log</button>
-                    </a>
+    <header class="container">
+        <nav>
+          <ul>
+            <hgroup>
+              <h1><b>Inference</b></h1>
+            </hgroup>
+          </ul>
+          <ul>
+            <li>
+              <details  class="dropdown">
+                <summary>
+                  About
+                </summary>
+                <ul dir="rtl">
+                  <li><a href="/">Introduction</a></li>
+                  <li><a href="/model_infor">Model</a></li>
+                  <li><a href="/manual">User Manual</a></li>
+                  <li><a href="/contact">Contact Us</a></li>
                 </ul>
+              </details> 
+            </li>
+           
+            <li>
+              <details  class="dropdown">
+                <summary  role="button" class="outline">
+                  Modes
+                </summary>
+                <ul dir="rtl">
+                  <li><a href="/prompt">Prompt and API</a></li>
+                  <li><a  aria-current="page"  href="/chat">Chat Bot and Agent</a></li>
+                </ul>
+              </details>
+            </li> 
+            <li><a class="contrast" href="/buy">Get Key</a></li>
+            <li><a class="contrast" href="/promptresponse">Response Log</a></li>
+            
+          </ul>
+          
+        </nav>
+      
+    </header>
+    <hr>
+    <main class="grid">
+        <div class="container grid" style="grid-template-columns: 28% 70%;">
+            <div id="container" style="padding-left: 10px;">
+                <h3>Templates</h3>
+                <form autocomplete="off">
+                    {% for template in templates %}
+                    {% if template.template_name == 'Assignment Agent' %}
+                    <input type="radio" class="checkbox" name="template" value="{{template.template_name}}" checked="checked"> {{template.template_name}}<br>
+                    {% else %}
+                    <input type="radio" class="checkbox" name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
+                    {% endif %}
+                    {% endfor %}
+                </form>
+                <hr>
+                <button  style="display: block; margin: 0 auto;" id="doc-export">
+                     Export Document 
+                </button>
             </div>
-        </div>
-        <div class="container">
-            <div class="child" id="site_content_document">
+            <div class="container" id="site_content_document">
                 <div id="document-instruction">
-                    <h3 style="color:white; padding:10px">Agent Instruction</h3>
+                    <h3>Agent Instruction</h3>
 
-                    <textarea id="agent_instruction"
-                        style="padding: 10px; height: 100%; width:100%; " autocomplete="off">{{template.bot_instruct|safe}}</textarea>
+                    <textarea id="agent_instruction" rows="20" style="font-size: 12px;" autocomplete="off">{{template.bot_instruct|safe}}</textarea>
                 </div>
-
+                <hr>
                 <div id="document-template">
-                    <h3 style="color:white; padding:10px">Document Editor</h3>
+                    <h3 >Document Editor</h3>
                     <div id="editorjs">
 
                         <script>
@@ -240,29 +222,32 @@
                     </div>
                     
                 </div>
-                <div id="sidebar_left">
-                    <br>
-                    <h3>Templates</h3>
-                    <form autocomplete="off">
-                        {% for template in templates %}
-                        {% if template.template_name == 'Assignment Agent' %}
-                        <input type="radio" class="checkbox" name="template" value="{{template.template_name}}" checked="checked"> {{template.template_name}}<br>
-                        {% else %}
-                        <input type="radio" class="checkbox" name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
-                        {% endif %}
-                        {% endfor %}
-                    </form>
-                    <br>
-                    <br>
-                    <button  style="display: block; margin: 0 auto;" id="doc-export">
-                         Export Document 
-                    </button>
-                </div>
+            </div>
 
             </div>
-            <div class="child" id="site_content_chat">
-                <div class="sidebar">
-                    <br>
+            <div class="container grid" style="grid-template-columns: 55% 45%;" id="site_content_chat">
+                <div clas="container">
+                    <h3> Chat </h3>
+                    <div id="chat-log">
+                        <div class="message_log_container"
+                            style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+                            <span> Input your Key:
+                                <input style="height: 20px; width: 20ch;" id="api_key">
+                            </span>
+                        </div>
+                        <div id="chat-log_">
+                        </div>
+
+                        </div>
+                        <hr>
+                        <div class="grid" style="grid-template-columns: 80% 17%;">
+                            <textarea id="chat-message-input"  name="message"></textarea>
+                            <input id="chat-message-submit" type="button" value="Send">
+                        </div>
+                        {{ name|json_script:"name" }}
+                        {{ key|json_script:"key" }}
+                    </div>
+                <div style="max-width: 380px; margin-left: 0;" class="container">
                     <h3> Available Models </h3>
                     {% for llm in llms %}
                     {% if llm.name == 'gpt-4' %}
@@ -272,40 +257,25 @@
                     {% endif %}
                     {% endfor %}
                     <h3> Parameters </h3>
-                    <h5>NOTE: If the default parameters does not work for you, you can adjust them here.</h5>
-                    <h5>NOTE: In order to better understand these parameters, refer to <a
+                    <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small><br>
+                    <small><i>NOTE: In order to better understand these parameters, refer to <a
                             href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a
                             href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code.
-                        </a> </h5>
-                    <input type="number" step="0.1" name="top_p" min="0.01" max="1" value="1"> Top_p (default = 0.73)
+                        </a> </i></small>
+                    <hr>
+                    <input style="width: 10ch;" type="number" step="0.1" name="top_p" min="0.01" max="1" value="1"> Top_p (0.73)
                     <br>
-                    <input type="number" step="0.1" name="max_tokens" min="1" max="32048"> Token Num (default
-                    = null)<br>
-                    <input type="number" step="0.1" name="temperature" min="0" max="2" value="1"> Temperature
-                    (default= 1) <br>
-                    <input type="number" step="0.1" name="frequency_penalty" min="-2" max="2" value="0"> Frequency
-                    Penalty (default=0)<br>
-                    <input type="number" step="0.1" name="presence_penalty" min="-2" max="2" value="0"> Presence Penalty
-                    (default=0)<br>
+                    <input style="width: 10ch;" type="number" step="0.1" name="max_tokens" min="1" max="32048"> Token Num (null)<br>
+                    <input style="width: 10ch;" type="number" step="0.1" name="temperature" min="0" max="2" value="1"> Temperature
+                    (1) <br>
+                    <input style="width: 10ch;" type="number" step="0.1" name="frequency_penalty" min="-2" max="2" value="0"> Freq_Pen (0)<br>
+                    <input style="width: 10ch;" type="number" step="0.1" name="presence_penalty" min="-2" max="2" value="0"> Pre_Pen
+                    (0)<br>
                 </div>
-
-                <div id="chat-log">
-                    <div class="message_log_container"
-                        style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
-                        <span> Input your Key:
-                            <input id="api_key">
-                        </span>
-                    </div>
-                    <div id="chat-log_">
-                    </div>
-
+  
                 </div>
-                <textarea id="chat-message-input" rows="5" style="width: 50%;" name="message"></textarea>
-                <input id="chat-message-submit" type="button" value="Send">
-                {{ name|json_script:"name" }}
-                {{ key|json_script:"key" }}
             </div>
-        </div>
+        </main>
         <script>
 
             function download(mimeType, filename){

@@ -6,80 +6,119 @@
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-  <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
   <meta property="og:title" content="Inference Portal for multiple Large Language Models">
   <meta property="og:description" content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://professorparakeet.com/static/image/android-chrome-192x192.png">
   <meta property="og:image" content="https://professorparakeet.com/static/image/android-chrome-192x192.png"/>
+  <link rel="stylesheet" href="static/css/pico-main/css/pico.min.css" />
+  <link rel="stylesheet" href="static/css/pico-main/css/pico.colors.min.css" />
 </head>
 
 <body>
-  <div id="main">
-    <div id="header">
-      <div id="logo">
-        <div id="logo_text">
-          <!-- class="logo_colour", allows you to change the colour of the text -->
-          <h1><a href="index">Inference <span class="logo_colour"></span></a></h1>
-        </div>
-      </div>
-      <div id="menubar">
-        <ul id="menu">
-          <div class="dropdown">
-            <a href="/">
-              <button class="dropbtn-selected">Introduction</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/">Introduction</a>
-              <a href="/model_infor">Model</a>
-              <a href="/manual">User Manual</a>
-              <a href="/contact">Contact Us</a>
-            </div>
-          </div>
+  <header class="container">
+    <nav>
+      <ul>
+        <hgroup>
+          <h1><b>Inference</b></h1>
+        </hgroup>
+      </ul>
+      <ul>
+        <li>
+          <details  class="dropdown">
+            <summary role="button" class="outline">
+              About
+            </summary>
+            <ul dir="rtl">
+              <li><a  href="/">Introduction</a></li>
+              <li><a  href="/model_infor">Model</a></li>
+              <li><a aria-current="page" href="/manual">User Manual</a></li>
+              <li><a href="/contact">Contact Us</a></li>
+            </ul>
+          </details> 
+        </li>
+       
+        <li>
+          <details  class="dropdown">
+            <summary>
+              Modes
+            </summary>
+            <ul dir="rtl">
+              <li><a href="/prompt">Prompt and API</a></li>
+              <li><a href="/chat">Chat Bot and Agent</a></li>
+            </ul>
+          </details>
+        </li> 
+        <li><a class="contrast" href="/buy">Get Key</a></li>
+        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
+        
+      </ul>
+      
+    </nav>
+  
+  </header>
+  <hr>
+  <main class="container">
 
-          <div class="dropdown">
-            <a href="/chat">
-              <button class="dropbtn">Inference Modes</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/prompt">Prompt and API</a>
-              <a href="/chat">Chat Bot and Agent</a>
-            </div>
-          </div>
-          <a href="/buy">
-            <button class="dropbtn">Get Key</button>
-          </a>
-          <a href="/promptresponse">
-            <button class="dropbtn">Response Log</button>
-          </a>
-        </ul>
-      </div>
-    </div>
-    <div id="site_content">
-      <div class="sidebar">
-        <!-- insert your sidebar items here -->
-        <h3>Latest News</h3>
-        <h4>Internet people pretend to get offened by an another trivial matter so that they can destroy the life of an
-          another fellow</h4>
-        <h5>Jan 21, 2024</h5>
-        <p><a href="#">Please dont read more</a></p>
-        <p></p>
-        <h4>Internet people get bored and are actively waiting for the next trivial things to get offened by</h4>
-        <h5>Jan 22, 2024</h5>
-        <p><a href="#">Please dont read more</a></p>
-
-      </div>
-      <div id="content">
+      
+      <div id="content" class="container">
         <!-- insert the page content here -->
         <h1>What can this website do?</h1>
         <p> This website is trying to sell you the access to several language models. The users can access the language
           models via three modes below: </p>
-        <h3>API endpoints</h3>
+        <h1>API endpoints</h1>
         <p> This website fowards your request to the GPU servers and return the results. </p>
-        <h5>NOTE: If the server is currently offline, you should send a warm up request to boot it up, otherwise you
-          will get a lot a status reponses for your prompts</h5>
-        <h3>Chat Bot Mode</h3>
+        <h4>Python request example:</h4>
+        <code >
+          
+          r = requests.post("[HOST]/api/", 
+          headers={"Authorization": "Api-Key [your key]"}, 
+          json={"prompt": "hola",
+          "mode": "chat"/"generate",
+            "name": "key name",  
+            "model" : "model name",
+            'top_k': "top_k",
+            'top_p': "top_p",
+            'best_of': "best_of",
+            'max_tokens': "max_tokens",
+            'frequency_penalty': "fre_penalty",
+            'presense_penalty': "pre_penalty",
+            'temperature': "temperature",
+            'beam': "True"/"False",
+            'early_stopping': "True"/"False",
+            'length_penalty': "length_penalty"
+          }) 
+          <br>
+          <br>
+          print(r.json())
+          </code>
+                  <h4>cURL example:</h4>
+                  <code>
+          curl "[HOST]/api/" --header 
+          'Content-Type: application/json' 
+          --request POST
+          -H "Authorization: Api-Key [your key]" 
+          --data-binary
+          '{"prompt": "hola",
+          "mode": "chat"/"generate",
+          "name": "key name",  
+          "model" :  "model name"
+          'top_k': "top_k,
+          'top_p': "top_p",
+          'best_of': "best_of",
+          'max_tokens': "max_tokens",
+          'frequency_penalty': "freq_penalty",
+          'presense_penalty': "pre_penalty",
+          'temperature': "temperature",
+          'beam': "True"/"False",
+          'early_stopping': "True"/"False",
+          'length_penalty': "length_penalty"
+          }'
+          </code>
+        <small><i>NOTE: If the server is currently offline, you should send a warm up request to boot it up, otherwise you
+          will get a lot a status reponses for your prompts.</i></small>
+        <h1>Chat Bot Mode</h1>
         <p>We offer standard chatbot mode with custom chat template. The memory of the models are 10 previous
           promptresponse pairs associated with your Key or until the context reach 3000 tokens (so we have at least 1000
           tokens left to answer your lastest prompt).
@@ -89,7 +128,7 @@
           option to not storing your chatlog on our server.
           Therefore, please do not input a 10000-page book into the chatroom, the model will give you nothing. You can
           contribute or chew gum. </p>
-        <h3>Hard Core Prompt Engineering Mode</h3>
+        <h1>Hard Core Prompt Engineering Mode</h1>
         <p>We are working on a feature that use Lagent to split our model into multiple smart workers for complicated
           tasks that require multiple reasoning steps.
           User can participate into the creation of such prompts for their own tasks.
@@ -100,15 +139,14 @@
           <li>1200 seconds from the last resonpses, GPU servers are automatically shut down. </li>
           <li>GPU servers are kept running if there is a constant demand. </li>
           <li>Global Rate Limit is 3 requests/second. API Rate Limit is 5 requests/second </li>
-          <li>You can check and collect your promptresponse log in Prompt Tab or by accessing
-            <a>https://professorparakeet.com/prompt/[YOUR KEY]</a>.
+          <li>You can check and collect your promptresponse log in <a href="/promptresponse">Response Log</a>.
           </li>
         </ul>
         </ul>
       </div>
-    </div>
+ 
 
-  </div>
+  </main>
 </body>
 
 </html>

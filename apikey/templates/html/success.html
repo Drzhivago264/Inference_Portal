@@ -6,8 +6,9 @@
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-  <link rel="stylesheet" type="text/css" href="/static/css/style.css" title="style" />
-  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
+  <link rel="stylesheet" href="/static/css/pico-main/css/pico.min.css" />
+  <link rel="stylesheet" href="/static/css/pico-main/css/pico.colors.min.css" />
+  <link rel="shortcut icon" type="image/png" href="/static/image/favicon.ico" />
   <meta property="og:title" content="Inference Portal for multiple Large Language Models">
   <meta property="og:description" content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
   <meta property="og:type" content="article">
@@ -15,54 +16,59 @@
   <meta property="og:image" content="https://professorparakeet.com/static/image/android-chrome-192x192.png"/>
 </head>
 <body>
-  <div id="main">
-    <div id="header">
-      <div id="logo">
-        <div id="logo_text">
-          <!-- class="logo_colour", allows you to change the colour of the text -->
-          <h1><a href="index">Inference <span class="logo_colour"></span></a></h1>
-        </div>
-      </div>
-      <div id="menubar">
-        <ul id="menu">
-          <div class="dropdown">
-            <a href="/">
-              <button class="dropbtn">Introduction</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/">Introduction</a>
-              <a href="/model_infor">Model</a>
-              <a href="/manual">User Manual</a>
-              <a href="/contact">Contact Us</a>
-            </div>
-          </div>
-          <div class="dropdown">
-            <a href="/chat">
-              <button class="dropbtn-selected">Inference Modes</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/prompt">Prompt and API</a>
-              <a href="/chat">Chat Bot and Agent</a>
-            </div>
-          </div>
-          <a href="/buy">
-            <button class="dropbtn-selected">Get Key</button>
-          </a>
-          <a href="/promptresponse">
-            <button class="dropbtn">Response Log</button>
-          </a>
-        </ul>
-      </div>
-    </div>
-    <div id="site_content">
+  <header class="container">
+    <nav>
+      <ul>
+        <hgroup>
+          <h1><b>Inference</b></h1>
+        </hgroup>
+      </ul>
+      <ul>
+        <li>
+          <details  class="dropdown">
+            <summary>
+              About
+            </summary>
+            <ul dir="rtl">
+              <li><a href="/">Introduction</a></li>
+              <li><a href="/model_infor">Model</a></li>
+              <li><a href="/manual">User Manual</a></li>
+              <li><a href="/contact">Contact Us</a></li>
+            </ul>
+          </details> 
+        </li>
+       
+        <li>
+          <details  class="dropdown">
+            <summary>
+              Modes
+            </summary>
+            <ul dir="rtl">
+              <li><a href="/prompt">Prompt and API</a></li>
+              <li><a href="/chat">Chat Bot and Agent</a></li>
+            </ul>
+          </details>
+        </li> 
+        <li><a  href="/buy">Get Key</a></li>
+        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
+        
+      </ul>
+      
+    </nav>
+  
+</header>
+<hr>
+    <main id="site_content container">
+      <div class="container">
       {% block content %}
-      <div class="alert alert-success" role="alert">
-        <h1 style="text-align: center;"> Thanks for purchasing
-          <a href="{% url 'apikey:product-list' %}">Go Back</a>
-          <h1>
-      </div>
+        <div class="alert alert-success" role="alert">
+          <h1 style="text-align: center;"> Thanks for purchasing
+            <a href="{% url 'apikey:product-list' %}">Go Back</a>
+            <h1>
+        </div>
       {% endblock content %}
     </div>
+  </main>
 </body>
 
 </html>

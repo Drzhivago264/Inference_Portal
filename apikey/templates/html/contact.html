@@ -4,6 +4,7 @@
   #id_captcha_1{
     font-size: 14px;
     width: 35%;
+    height: 20px;
     color: #555;
     background-color: #fff;
     background-image: none;
@@ -14,83 +15,74 @@
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-  <link rel="stylesheet" type="text/css" href="static/css/style.css" title="style" />
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico"/>
   <meta property="og:title" content="Inference Portal for multiple Large Language Models">
   <meta property="og:description" content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://professorparakeet.com/static/image/android-chrome-192x192.png">
   <meta property="og:image" content="https://professorparakeet.com/static/image/android-chrome-192x192.png"/>
+  <link rel="stylesheet" href="static/css/pico-main/css/pico.min.css" />
+  <link rel="stylesheet" href="static/css/pico-main/css/pico.colors.min.css" />
 </head>
 
 <body>
-  <div id="main">
-    <div id="header">
-      <div id="logo">
-        <div id="logo_text">
-
-          <h1><a href="index">Inference </span></a></h1>
-
-        </div>
-      </div>
-      <div id="menubar">
-        <ul id="menu">
-          <div  class="dropdown">
-            <a  href="/"> 
-            <button class="dropbtn-selected">Introduction</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/">Introduction</a>
-              <a href="/model_infor">Model</a>
-              <a href="/manual">User Manual</a>
-              <a href="/contact">Contact Us</a>
-            </div>
-          </div> 
-
-          <div class="dropdown">
-            <a  href="/chat"> 
-            <button class="dropbtn">Inference Modes</button>
-            </a>
-            <div class="dropdown-content">
-              <a href="/prompt">Prompt and API</a>
-              <a href="/chat">Chat Bot and Agent</a>
-            </div>
-          </div> 
-          <a  href="/buy"> 
-            <button class="dropbtn">Get Key</button>
-          </a>
-          <a  href="/promptresponse"> 
-            <button class="dropbtn">Response Log</button>
-          </a>
-        </ul>
-      </div>
-    </div>
-    <div id="site_content">
-      <div class="sidebar">
-        <!-- insert your sidebar items here -->
-        <h3>Latest News</h3>
-        <h4>A mysterious man gives people free fishes and turns water into wine by his feet</h4>
-        <h5>July 1st, 24 </h5>
-        <p><br /><a href="#">Please dont read more</a></p>
-        <p></p>
-        <h4>A mysterious man who can turn water into wine by his feet was executed by his goverment </h4>
-        <h5>April 3th, 33</h5>
-        <p><br /><a href="#">Please dont read more </a></p> 
-
-      </div>
-      <div id="content">
+  <header class="container">
+    <nav>
+      <ul>
+        <hgroup>
+          <h1><b>Inference</b></h1>
+        </hgroup>
+      </ul>
+      <ul>
+        <li>
+          <details  class="dropdown">
+            <summary role="button" class="outline">
+              About
+            </summary>
+            <ul dir="rtl">
+              <li><a href="/">Introduction</a></li>
+              <li><a href="/model_infor">Model</a></li>
+              <li><a href="/manual">User Manual</a></li>
+              <li><a aria-current="page" href="/contact">Contact Us</a></li>
+            </ul>
+          </details> 
+        </li>
+       
+        <li>
+          <details  class="dropdown">
+            <summary>
+              Modes
+            </summary>
+            <ul dir="rtl">
+              <li><a href="/prompt">Prompt and API</a></li>
+              <li><a href="/chat">Chat Bot and Agent</a></li>
+            </ul>
+          </details>
+        </li> 
+        <li><a class="contrast" href="/buy">Get Key</a></li>
+        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
+        
+      </ul>
+      
+    </nav>
+  
+</header>
+<hr>
+    <main>
+      <div id="content" class="container">
         <!-- insert the page content here -->
         <h1>Contact Us</h1>
-        <p>Below is an example of how a contact form might look with this template:</p>
         <form  method="post">
      
-          <div class="form_settings">
+          <div class="grid">
             {% csrf_token %} 
-            <p><span>Name</span><input class="contact" type="text" name="name" value="" /></p>
-            <p><span>Email Address</span><input class="contact" type="text" name="sender_email" value="" /></p>
-            <p><span>Message</span><textarea class="contact textarea" rows="8" cols="50" name="message"></textarea></p>
+            <input placeholder="Name" class="contact" type="text" name="name" value="" />
+            <input placeholder="Mail" class="contact" type="text" name="sender_email" value="" />
+          </div>
+            <textarea placeholder="Message" class="contact textarea" rows="8" cols="50" name="message"></textarea>
+          <div class="grid">
             <p> <span>{{form.title}} </span> {{ form.captcha }} </p>
-            <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" name="contact_submitted" value="submit" /></p>
+            <input class="submit" type="submit" name="contact_submitted" value="submit" />
           </div>
         </form>
         {%for message in messages %}
@@ -102,6 +94,6 @@
       </div>
     </div>
 
-  </div>
+  </main>
 </body>
 </html>
