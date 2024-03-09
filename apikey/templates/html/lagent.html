@@ -36,7 +36,7 @@
         background-color: black;
         color: white;
         box-sizing: border-box;
-        height: 50vh;
+        height: 393px;
         overflow: auto;
         border-radius: 5px;
         font-size: 14px;
@@ -92,9 +92,9 @@
     <header class="container">
         <nav>
           <ul>
-            <hgroup>
-              <h1><b>Inference</b></h1>
-            </hgroup>
+            <hgroup  onclick="window.location.href = '/';">
+                <h1><b>Inference</b></h1>
+              </hgroup>
           </ul>
           <ul>
             <li>
@@ -240,14 +240,14 @@
 
                         </div>
                         <hr>
-                        <div class="grid" style="grid-template-columns: 80% 17%;">
-                            <textarea id="chat-message-input"  name="message"></textarea>
-                            <input id="chat-message-submit" type="button" value="Send">
+                        <div role="group">
+                            <input id="chat-message-input"  name="message">
+                            <input type="image" style=" width: 15%; background-color: rgb(1, 114, 173);" id="chat-message-submit" src="/static/image/5208419_arrow_forward_navigation_send_share_icon.svg" >
                         </div>
                         {{ name|json_script:"name" }}
                         {{ key|json_script:"key" }}
                     </div>
-                <div style="max-width: 380px; margin-left: 0;" class="container">
+                <div style="max-width: 380px; " class="container">
                     <h3> Available Models </h3>
                     {% for llm in llms %}
                     {% if llm.name == 'gpt-4' %}
@@ -263,7 +263,7 @@
                             href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code.
                         </a> </i></small>
                     <hr>
-                    <input style="width: 10ch;" type="number" step="0.1" name="top_p" min="0.01" max="1" value="1"> Top_p (0.73)
+                    <input style="width: 10ch;" type="number" step="0.1" name="top_p" min="0.01" max="1" value="1"> Top_p (1)
                     <br>
                     <input style="width: 10ch;" type="number" step="0.1" name="max_tokens" min="1" max="32048"> Token Num (null)<br>
                     <input style="width: 10ch;" type="number" step="0.1" name="temperature" min="0" max="2" value="1"> Temperature
