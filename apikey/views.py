@@ -192,8 +192,8 @@ def prompt(request):
             "max_tokens")) if "max_tokens" in request.POST else constant.DEFAULT_MAX_TOKENS
         frequency_penalty = float(request.POST.get(
             "frequency_penalty")) if "frequency_penalty" in request.POST else constant.DEFAULT_FREQUENCY_PENALTY
-        presense_penalty = float(request.POST.get(
-            "presense_penalty")) if "presense_penalty" in request.POST else constant.DEFAULT_PRESENCE_PENALTY
+        presence_penalty = float(request.POST.get(
+            "presence_penalty")) if "presence_penalty" in request.POST else constant.DEFAULT_PRESENCE_PENALTY
         temperature = float(request.POST.get(
             "temperature")) if "temperature" in request.POST else constant.DEFAULT_TEMPERATURE
         beam = request.POST.get(
@@ -220,7 +220,7 @@ def prompt(request):
         else:
             cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
             Inference.delay(unique=None, mode=mode, stream=False, type_="prompt", key=str(request.POST.get('key')), key_name=str(request.POST.get('name')), credit=instance.credit, room_group_name=None, model=m, top_k=top_k, top_p=top_p,
-                            best_of=best_of, temperature=temperature, max_tokens=max_tokens, presense_penalty=presense_penalty, frequency_penalty=frequency_penalty, length_penalty=length_penalty, early_stopping=early_stopping, beam=beam, prompt=prompt)
+                            best_of=best_of, temperature=temperature, max_tokens=max_tokens, presence_penalty=presence_penalty, frequency_penalty=frequency_penalty, length_penalty=length_penalty, early_stopping=early_stopping, beam=beam, prompt=prompt)
             response = "Your prompt is queued, refer to Prompt-Response Log for detail"
         messages.info(
             request, f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
@@ -370,8 +370,8 @@ class ApiView(APIView):
             request.data["max_tokens"]) if "max_tokens" in request.POST else constant.DEFAULT_MAX_TOKENS
         frequency_penalty = float(
             request.data["frequency_penalty"]) if "frequency_penalty" in request.POST else constant.DEFAULT_FREQUENCY_PENALTY
-        presense_penalty = float(
-            request.data["presense_penalty"]) if "presense_penalty" in request.POST else constant.DEFAULT_PRESENCE_PENALTY
+        presence_penalty = float(
+            request.data["presence_penalty"]) if "presence_penalty" in request.POST else constant.DEFAULT_PRESENCE_PENALTY
         temperature = float(
             request.data["temperature"]) if "temperature" in request.POST else constant.DEFAULT_TEMPERATURE
         beam = request.data["beam"] if "beam" in request.POST else constant.DEFAULT_BEAM
@@ -407,7 +407,7 @@ class ApiView(APIView):
                 inference = random.choice(available_server_list)
                 try:
                     response = static_view_inference(model=model.name, key=k, mode=mode, server_status=inference.status, instance_id=inference.name, inference_url=inference.url, top_k=top_k, top_p=top_p, best_of=best_of,
-                                                     temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presense_penalty=presense_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping, prompt=prompt)
+                                                     temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping, prompt=prompt)
                     log_prompt_response(
                         key=k, model=m, prompt=prompt, response=response, type_="prompt")
                     return Response({"key": k, "credit": instance.credit, "model": m, "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)

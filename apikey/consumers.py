@@ -156,15 +156,18 @@ class AgentConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         if 'paragraph' in text_data_json:
             paragraph = text_data_json['paragraph']
-            self.working_paragraph = paragraph
-            self.current_turn = 0
-            await self.channel_layer.group_send(
-                self.room_group_name, {
-                    "type": "chat_message",
-                    "paragraph": paragraph,
-                    "current_turn": self.current_turn
-                }
-            )
+            if self.working_paragraph != paragraph:
+                self.working_paragraph = paragraph
+                self.current_turn = 0
+                await self.channel_layer.group_send(
+                    self.room_group_name, {
+                        "type": "chat_message",
+                        "paragraph": paragraph,
+                        "current_turn": self.current_turn
+                    }
+                )
+            else:
+                pass
         elif 'swap_template' in text_data_json:
             swap_template = await self.get_tempalte(text_data_json['swap_template'])
             swap_instruction = swap_template.bot_instruct
