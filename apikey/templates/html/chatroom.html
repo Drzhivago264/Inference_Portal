@@ -44,7 +44,7 @@
     <header class="container">
         <nav>
           <ul>
-            <hgroup>
+            <hgroup  onclick="window.location.href = '/';">
               <h1><b>Inference</b></h1>
             </hgroup>
           </ul>
@@ -99,9 +99,9 @@
 
                 </div>
                 <hr>
-                <div class="grid" style="grid-template-columns: 86% 10%;">
-                    <textarea id="chat-message-input" name="message"></textarea>
-                    <input id="chat-message-submit" type="button" value="Send">
+                <div role="group">
+                    <input id="chat-message-input"  name="message">
+                    <input type="image" style=" width: 15%; background-color: rgb(1, 114, 173);" id="chat-message-submit" src="/static/image/5208419_arrow_forward_navigation_send_share_icon.svg" >
                 </div>
                 {{ name|json_script:"name" }}
                 {{ key|json_script:"key" }}
