@@ -69,53 +69,47 @@
           models via three modes below: </p>
         <h1>API endpoints</h1>
         <p> This website fowards your request to the GPU servers and return the results. </p>
-        <h4>Python request example:</h4>
-        <code >
-          
-          r = requests.post("[HOST]/api/", 
-          headers={"Authorization": "Api-Key [your key]"}, 
-          json={"prompt": "hola",
-          "mode": "chat"/"generate",
-            "name": "key name",  
-            "model" : "model name",
-            'top_k': "top_k",
-            'top_p': "top_p",
-            'best_of': "best_of",
-            'max_tokens': "max_tokens",
-            'frequency_penalty': "fre_penalty",
-            'presense_penalty': "pre_penalty",
-            'temperature': "temperature",
-            'beam': "True"/"False",
-            'early_stopping': "True"/"False",
-            'length_penalty': "length_penalty"
-          }) 
-          <br>
-          <br>
-          print(r.json())
-          </code>
-                  <h4>cURL example:</h4>
-                  <code>
-          curl "[HOST]/api/" --header 
-          'Content-Type: application/json' 
-          --request POST
-          -H "Authorization: Api-Key [your key]" 
-          --data-binary
-          '{"prompt": "hola",
-          "mode": "chat"/"generate",
-          "name": "key name",  
-          "model" :  "model name"
-          'top_k': "top_k,
-          'top_p': "top_p",
-          'best_of': "best_of",
-          'max_tokens': "max_tokens",
-          'frequency_penalty': "freq_penalty",
-          'presense_penalty': "pre_penalty",
-          'temperature': "temperature",
-          'beam': "True"/"False",
-          'early_stopping': "True"/"False",
-          'length_penalty': "length_penalty"
-          }'
-          </code>
+        <h4>Python example for chat endpoint:</h4>
+        <code style="font-size: 12px">
+r = requests.post("https://professorparakeet.com/api/chat", 
+headers={"Authorization": "Bearer xxx"}, 
+json={"prompt": str,
+  "model" : str,
+  'top_k': float,
+  'top_p': float,
+  'best_of': int,
+  'max_tokens': int,
+  'frequency_penalty': float,
+  'presense_penalty': float,
+  'temperature': float,
+  'beam': bool,
+  'early_stopping': bool,
+  'length_penalty': float
+}) 
+<br>
+print(r.json())
+</code>
+        <h4>cURL example for text completion endpoint:</h4>
+        <code style="font-size: 12px">
+curl "https://professorparakeet.com/api/completion" --header 
+'Content-Type: application/json' 
+--request POST
+-H "Authorization: Bearer xxx" 
+--data-binary
+'{"prompt": str,
+"model" : str,
+"top_k": float,
+"top_p": float,
+"best_of": int,
+"max_tokens": int,
+"frequency_penalty": float,
+"presense_penalty": float,
+"temperature": float,
+"beam': bool,
+"early_stopping": bool,
+"length_penalty": float
+}'
+</code>
         <small><i>NOTE: If the server is currently offline, you should send a warm up request to boot it up, otherwise you
           will get a lot a status reponses for your prompts.</i></small>
         <h1>Chat Bot Mode</h1>

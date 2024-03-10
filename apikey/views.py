@@ -24,7 +24,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.generic import TemplateView
 from .celery_tasks import send_email_, Inference
-from .util.commond_func import get_model_url, get_key, get_model, static_view_inference, log_prompt_response, get_chat_context
+from .util.commond_func import get_key 
 from django_ratelimit.exceptions import Ratelimited
 from django.core.cache import cache
 from apikey.util import constant
@@ -342,81 +342,6 @@ class StripeWebhookView(View):
             k.save()
         # Can handle other events here.
         return HttpResponse(status=200)
-
-
-class ApiView(APIView):
-    permission_classes = [HasCustomAPIKey]
-
-    def get(self, request, *args, **kwargs):
-        return Response({'Intro': "API"}, status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        n = request.data['name']
-        k = request.META["HTTP_AUTHORIZATION"].split()[1]
-        m = request.POST.get(
-            'model') if "model" in request.data else constant.DEFAULT_MODEL
-        model = get_model(m)
-        mode = request.data.get(
-            'mode') if "mode" in request.data else constant.DEFAULT_MODE
-        prompt = request.data['prompt'] if len(
-            request.data['prompt']) > 1 else " "
-        top_p = float(
-            request.data["top_p"]) if "top_p" in request.POST else constant.DEFAULT_TOP_P
-        best_of = float(
-            request.data["best_of"]) if "best_of" in request.POST else constant.DEFAULT_BEST_OF
-        top_k = float(
-            request.data["top_k"]) if "top_k" in request.POST else constant.DEFAULT_TOP_K
-        max_tokens = int(
-            request.data["max_tokens"]) if "max_tokens" in request.POST else constant.DEFAULT_MAX_TOKENS
-        frequency_penalty = float(
-            request.data["frequency_penalty"]) if "frequency_penalty" in request.POST else constant.DEFAULT_FREQUENCY_PENALTY
-        presence_penalty = float(
-            request.data["presence_penalty"]) if "presence_penalty" in request.POST else constant.DEFAULT_PRESENCE_PENALTY
-        temperature = float(
-            request.data["temperature"]) if "temperature" in request.POST else constant.DEFAULT_TEMPERATURE
-        beam = request.data["beam"] if "beam" in request.POST else constant.DEFAULT_BEAM
-        early_stopping = True if "early_stopping" in request.POST else constant.DEFAULT_EARLY_STOPPING
-        length_penalty = float(
-            request.data["length_penalty"]) if "length_penalty" in request.POST else constant.DEFAULT_LENGTH_PENALTY
-        beam = True if beam == "True" else False
-        early_stopping = True if early_stopping == "True" else False
-
-        instance = cache.get(f"{k}:{n}")
-        if instance == None:
-            instance = get_key(n, k)
-
-        if instance == False:
-            return Response(
-                {"Error": "Key does not exists"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif not model:
-            return Response(
-                {"Error": "Model does not exists"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif model:
-            cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
-            available_server_list = get_model_url(model.name)
-            if not available_server_list:
-                return Response(
-                    {"Error": "Server is currently offline"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                inference = random.choice(available_server_list)
-                try:
-                    response = static_view_inference(model=model.name, key=k, mode=mode, server_status=inference.status, instance_id=inference.name, inference_url=inference.url, top_k=top_k, top_p=top_p, best_of=best_of,
-                                                     temperature=temperature, max_tokens=max_tokens, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty, beam=beam, length_penalty=length_penalty, early_stopping=early_stopping, prompt=prompt)
-                    log_prompt_response(
-                        key=k, model=m, prompt=prompt, response=response, type_="prompt")
-                    return Response({"key": k, "credit": instance.credit, "model": m, "prompt": prompt, "model_response": response}, status=status.HTTP_200_OK)
-                except Exception as e:
-                    print(e)
-                    return Response(
-                        {"Error": "You messed up parameters"},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
 
 
 def handler_403(request, exception=None):
