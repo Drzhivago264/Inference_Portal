@@ -4,7 +4,6 @@ import requests
 from apikey.models import InferenceServer, LLM, PromptResponse, APIKEY
 from . import constant
 from decouple import config
-from transformers import AutoTokenizer
 import boto3
 import re
 from botocore.exceptions import ClientError
@@ -166,12 +165,7 @@ def get_model_url(model):
 
 
 def update_server_status_in_db(instance_id, update_type):
-    """_summary_
 
-    Args:
-        instance_id (_type_): _description_
-        update_type (_type_): _description_
-    """
     ser_obj = InferenceServer.objects.get(name=instance_id)
     if update_type == "status":
         ser_obj.status = "pending"
@@ -382,30 +376,7 @@ def get_model(model):
 
 
 def static_view_inference(model, mode, key, server_status, instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presence_penalty, frequency_penalty, length_penalty, early_stopping, beam, prompt):
-    """_summary_
 
-    Args:
-        model (_type_): _description_
-        mode (_type_): _description_
-        key (_type_): _description_
-        server_status (_type_): _description_
-        instance_id (_type_): _description_
-        inference_url (_type_): _description_
-        top_k (_type_): _description_
-        top_p (_type_): _description_
-        best_of (_type_): _description_
-        temperature (_type_): _description_
-        max_tokens (_type_): _description_
-        presence_penalty (_type_): _description_
-        frequency_penalty (_type_): _description_
-        length_penalty (_type_): _description_
-        early_stopping (_type_): _description_
-        beam (_type_): _description_
-        prompt (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
     if beam == False:
         length_penalty = 1
         early_stopping = False

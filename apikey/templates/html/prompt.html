@@ -144,53 +144,51 @@
           <input class="submit" style="float: right;" type="submit" value=" Check " />
        
         </form>
-        <h2>API Endpoint</h2>
-        <h4>Python example:</h4>
+        <h2>API Endpoints</h2>
+        <h4>Python example for chat endpoint:</h4>
         <code style="font-size: 12px">
-r = requests.post("[HOST]/api/", 
-headers={"Authorization": "Api-Key [your key]"}, 
-json={"prompt": "hola",
-"mode": "chat"/"generate",
-  "name": "key name",  
-  "model" : "model name",
-  'top_k': "top_k",
-  'top_p': "top_p",
-  'best_of': "best_of",
-  'max_tokens': "max_tokens",
-  'frequency_penalty': "fre_penalty",
-  'presense_penalty': "pre_penalty",
-  'temperature': "temperature",
-  'beam': "True"/"False",
-  'early_stopping': "True"/"False",
-  'length_penalty': "length_penalty"
+r = requests.post("https://professorparakeet.com/api/chat", 
+headers={"Authorization": "Bearer xxx"}, 
+json={'prompt': str,
+  'model' : str,
+  'n': int,
+  'top_k': float,
+  'top_p': float,
+  'best_of': int,
+  'max_tokens': int,
+  'frequency_penalty': float,
+  'presense_penalty': float,
+  'temperature': float,
+  'beam': bool,
+  'early_stopping': bool,
+  'length_penalty': float
 }) 
-
+<br>
 print(r.json())
 </code>
-        <h4>cURL example:</h4>
+        <h4>cURL example for text completion endpoint:</h4>
         <code style="font-size: 12px">
-curl "[HOST]/api/" --header 
+curl "https://professorparakeet.com/api/completion" --header 
 'Content-Type: application/json' 
 --request POST
--H "Authorization: Api-Key [your key]" 
+-H "Authorization: Bearer xxx" 
 --data-binary
-'{"prompt": "hola",
-"mode": "chat"/"generate",
-"name": "key name",  
-"model" :  "model name"
-'top_k': "top_k,
-'top_p': "top_p",
-'best_of': "best_of",
-'max_tokens': "max_tokens",
-'frequency_penalty': "freq_penalty",
-'presense_penalty': "pre_penalty",
-'temperature': "temperature",
-'beam': "True"/"False",
-'early_stopping': "True"/"False",
-'length_penalty': "length_penalty"
+'{"prompt": str,
+"n": int,
+"model" : str,
+"top_k": float,
+"top_p": float,
+"best_of": int,
+"max_tokens": int,
+"frequency_penalty": float,
+"presense_penalty": float,
+"temperature": float,
+"beam': bool,
+"early_stopping": bool,
+"length_penalty": float
 }'
 </code>
-        <p><a href="/api">Test API</a></p>
+        <p><a href="/api/docs">Test API</a></p>
         <p></p>
 
 
