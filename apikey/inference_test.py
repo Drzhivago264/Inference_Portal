@@ -15,7 +15,7 @@ from util import constant
 promtp= "hehe"
 context = {
  "prompt": "hola, how are you?",
-  "name": "hoho",
+
   
 }
 model = "Mistral Chat 13B"
@@ -26,7 +26,7 @@ ami = "ami-0810c2d824776b340"
 
 def send_req(i):
     print("send")
-    response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
+    response = requests.post("https://professorparakeet.com/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
     print(i, response.json())
 with mp.Pool(1) as pool:
   for result in pool.map(send_req, range(10000)):

@@ -270,7 +270,7 @@ async def chatcompletion(request, data: PromptSchema):
                         else:
                             response = response.replace(processed_prompt, "")
                             await log_prompt_response(key=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatroom")
-                            return 200, {'response': data,
+                            return 200, {'response': response,
                                         'context' : context}
                 except httpx.ReadTimeout:
                     raise HttpError(404, "Time Out! Slow down")  
