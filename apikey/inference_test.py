@@ -15,22 +15,30 @@ from util import constant
 promtp= "hehe"
 context = {
  "prompt": "hola, how are you?",
-
+  "stream": True
   
 }
 model = "Mistral Chat 13B"
 template = constant.MODEL_TEMPLATE_TABLE[model]
 ami = "ami-0810c2d824776b340"
 
+import json
 
 
-def send_req(i):
-    print("send")
-    response = requests.post("https://professorparakeet.com/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
-    print(i, response.json())
-with mp.Pool(1) as pool:
+
+response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
+   
+print(response)
+if not isinstance(response, str):
+    previous_output = str()
+    full_response = str()
+    for chunk in response.iter_lines():
+        if chunk:
+            print(chunk)
+
+""" with mp.Pool(1) as pool:
   for result in pool.map(send_req, range(10000)):
-      print(f'Got result: {result}', flush=True)
+      print(f'Got result: {result}', flush=True) """
 p = """Below is an instruction that describes a task. Write a response that appropriately completes the request.
 
 

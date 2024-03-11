@@ -219,8 +219,26 @@ def prompt(request):
             response = "Error: key or key name is not correct"
         else:
             cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
-            Inference.delay(unique=None, mode=mode, stream=False, type_="prompt", key=str(request.POST.get('key')), key_name=str(request.POST.get('name')), credit=instance.credit, room_group_name=None, model=m, top_k=top_k, top_p=top_p,
-                            best_of=best_of, temperature=temperature, max_tokens=max_tokens, presence_penalty=presence_penalty, frequency_penalty=frequency_penalty, length_penalty=length_penalty, early_stopping=early_stopping, beam=beam, prompt=prompt)
+            Inference.delay(unique=None,
+                            mode=mode,
+                            stream=False, 
+                            type_="prompt", 
+                            key=str(request.POST.get('key')), 
+                            key_name=str(request.POST.get('name')), 
+                            credit=instance.credit, 
+                            room_group_name=None, 
+                            model=m, 
+                            top_k=top_k, 
+                            top_p=top_p,
+                            best_of=best_of, 
+                            temperature=temperature, 
+                            max_tokens=max_tokens, 
+                            presence_penalty=presence_penalty, 
+                            frequency_penalty=frequency_penalty,
+                            length_penalty=length_penalty, 
+                            early_stopping=early_stopping, 
+                            beam=beam, 
+                            prompt=prompt)
             response = "Your prompt is queued, refer to Prompt-Response Log for detail"
         messages.info(
             request, f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")

@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="static/css/pico-main/css/pico.min.css" />
   <link rel="stylesheet" href="static/css/pico-main/css/pico.colors.min.css" />
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
+  <link href="static/css/prism.css" rel="stylesheet" />
+  <script src="static/js/prism.js"></script>
 </head>
 <style>
   #chat-log {
@@ -74,7 +76,7 @@
       <div class="container" id="content">
         <h2>Prompt testing/Server warm up</h2>
 
-        <form method="post">
+        <form autocomplete="off" method="post">
           {% csrf_token %}
           <div class="form_settings">
             <input type="hidden" name="form_type" value="prompt">
@@ -103,12 +105,44 @@
             <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small><br>
             <small><i>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </i></small>                  
             <hr>
-            <input style="width: 10ch;" type="number" step="any" name="top_p" min="0.01" max="1" value="0.73"> Top_p (default = 0.73) <br>
-            <input style="width: 10ch;" type="number" step="any" name="top_k"  max="1" value="-1"> Top_k (default = -1) <br>
-            <input style="width: 10ch;" type="number" step="any" name="max_tokens" min="1" max="2048" value="128"> Token Num (default = 128)<br>
-            <input style="width: 10ch;" type="number" step="any" name="temperature" min="0" max="1" value="0.72"> Temperature (default= 0.72) <br>
-            <input style="width: 10ch;" type="number" step="any" name="frequency_penalty" min="-2" max="2" value="0"> Frequency Penalty (default=0)<br>
-            <input style="width: 10ch;" type="number" step="any" name="presense_penalty" min="-2" max="2" value="0"> Presense Penalty (default=0)
+            <div class="grid" >
+              <div class="container">
+                <label for="top_p">Top_p:</label>
+                <div class="grid" style="grid-template-columns: 80% 20%;"> 
+                  <input type="range"  step=".001"  name="top_p" min="0.01" max="1" value="0.73" oninput="this.nextElementSibling.value = this.value">
+                  <output>0.73</output>
+                </div><br>
+                <label for="top_k" >Top_k:</label>
+                <div class="grid" style="grid-template-columns: 80% 20%;"> 
+                  <input type="range"  step=".001"  name="top_k" min="0.01" max="1" value="-1" oninput="this.nextElementSibling.value = this.value">
+                  <output>-1</output>
+                </div><br>
+                <label for="max_tokens">Max_tokens:</label>
+                <div class="grid" style="grid-template-columns: 80% 20%;"> 
+                  <input type="range"  step="1"  name="max_tokens" min="1" max="4096" value="128" oninput="this.nextElementSibling.value = this.value">
+                  <output>128</output>
+                </div>
+              </div>
+              <div class="container">
+                <label for="temperature">Temperature:</label>
+            <div class="grid" style="grid-template-columns: 80% 20%;"> 
+                <input type="range"  step=".001"  name="temperature" min="0" max="1" value="0.72" oninput="this.nextElementSibling.value = this.value">
+                <output>0.72</output>
+              </div><br>
+              <label for="frequency_penalty">Frequency penalty:</label>
+              <div class="grid" style="grid-template-columns: 80% 20%;"> 
+                <input type="range"  step=".001"  name="frequency_penalty" min="-2" max="2" value="0" oninput="this.nextElementSibling.value = this.value">
+                <output>0</output>
+              </div><br>
+              <label for="presence_penalty">Presence penalty:</label>
+              <div class="grid" style="grid-template-columns: 80% 20%;"> 
+                <input type="range"  step=".001"  name="presence_penalty" min="-2" max="2" value="0" oninput="this.nextElementSibling.value = this.value">
+                <output>0</output>
+              </div>
+              </div>
+            </div>
+ 
+            
             <hr>
             <small><i>NOTE: These parameters go along with each others, please know what you are doing.</i></small><br>
             <small><i>NOTE: Return to default value if you messed up the parameters</i></small>
@@ -146,48 +180,41 @@
         </form>
         <h2>API Endpoints</h2>
         <h4>Python example for chat endpoint:</h4>
-        <code style="font-size: 12px">
-r = requests.post("https://professorparakeet.com/api/chat", 
-headers={"Authorization": "Bearer xxx"}, 
-json={'prompt': str,
-  'model' : str,
-  'n': int,
+
+        <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >response = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
+json={"prompt": str,
+  "model" : str,
   'top_k': float,
   'top_p': float,
   'best_of': int,
   'max_tokens': int,
   'frequency_penalty': float,
-  'presense_penalty': float,
+  'presence_penalty': float,
   'temperature': float,
   'beam': bool,
   'early_stopping': bool,
   'length_penalty': float
 }) 
-<br>
-print(r.json())
-</code>
+print(response.json())
+        </code></pre>
+
         <h4>cURL example for text completion endpoint:</h4>
-        <code style="font-size: 12px">
-curl "https://professorparakeet.com/api/completion" --header 
-'Content-Type: application/json' 
---request POST
--H "Authorization: Bearer xxx" 
---data-binary
-'{"prompt": str,
-"n": int,
-"model" : str,
-"top_k": float,
-"top_p": float,
-"best_of": int,
-"max_tokens": int,
-"frequency_penalty": float,
-"presense_penalty": float,
-"temperature": float,
-"beam': bool,
-"early_stopping": bool,
-"length_penalty": float
-}'
-</code>
+        <pre style="font-size: 14px;"><code class="language-bash" >curl "https://professorparakeet.com/api/completion" --request POST \
+-H "Authorization: Bearer str" -H 'Content-Type: application/json' \
+--data-binary '{"prompt": str, 
+            "model" : str,
+            "top_k": float,
+            "top_p": float,
+            "best_of": int,
+            "max_tokens": int,
+            "frequency_penalty": float,
+            "presence_penalty": float,
+            "temperature": float,
+            "beam": bool,
+            "early_stopping": bool,
+            "length_penalty": float
+          }'
+</code></pre>
         <p><a href="/api/docs">Test API</a></p>
         <p></p>
 
