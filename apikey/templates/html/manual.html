@@ -14,6 +14,8 @@
   <meta property="og:image" content="https://professorparakeet.com/static/image/android-chrome-192x192.png"/>
   <link rel="stylesheet" href="static/css/pico-main/css/pico.min.css" />
   <link rel="stylesheet" href="static/css/pico-main/css/pico.colors.min.css" />
+  <link href="static/css/prism.css" rel="stylesheet" />
+  <script src="static/js/prism.js"></script>
 </head>
 
 <body>
@@ -69,47 +71,48 @@
           models via three modes below: </p>
         <h1>API endpoints</h1>
         <p> This website fowards your request to the GPU servers and return the results. </p>
-        <h4>Python example for chat endpoint:</h4>
-        <code style="font-size: 12px">
-r = requests.post("https://professorparakeet.com/api/chat", 
-headers={"Authorization": "Bearer xxx"}, 
+        <div class="grid">
+          <div class="container">
+            <h4>Python example for chat endpoint:</h4>
+            <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >r = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
 json={"prompt": str,
-  "model" : str,
-  'top_k': float,
-  'top_p': float,
-  'best_of': int,
-  'max_tokens': int,
-  'frequency_penalty': float,
-  'presense_penalty': float,
-  'temperature': float,
-  'beam': bool,
-  'early_stopping': bool,
-  'length_penalty': float
+      "model" : str,
+      'top_k': float,
+      'top_p': float,
+      'best_of': int,
+      'max_tokens': int,
+      'frequency_penalty': float,
+      'presence_penalty': float,
+      'temperature': float,
+      'beam': bool,
+      'early_stopping': bool,
+      'length_penalty': float
 }) 
-<br>
 print(r.json())
-</code>
-        <h4>cURL example for text completion endpoint:</h4>
-        <code style="font-size: 12px">
-curl "https://professorparakeet.com/api/completion" --header 
-'Content-Type: application/json' 
---request POST
--H "Authorization: Bearer xxx" 
---data-binary
-'{"prompt": str,
-"model" : str,
-"top_k": float,
-"top_p": float,
-"best_of": int,
-"max_tokens": int,
-"frequency_penalty": float,
-"presense_penalty": float,
-"temperature": float,
-"beam': bool,
-"early_stopping": bool,
-"length_penalty": float
-}'
-</code>
+            </code></pre>
+          </div>
+          <div clas="container">
+            <h4>cURL example for text completion endpoint:</h4>
+            <pre style="font-size: 14px;"><code class="language-bash" >curl "https://professorparakeet.com/api/completion" --request POST \
+-H "Authorization: Bearer str" -H 'Content-Type: application/json' \
+--data-binary '{"prompt": str, 
+                "model" : str,
+                "top_k": float,
+                "top_p": float,
+                "best_of": int,
+                "max_tokens": int,
+                "frequency_penalty": float,
+                "presence_penalty": float,
+                "temperature": float,
+                "beam": bool,
+                "early_stopping": bool,
+                "length_penalty": float
+              }'
+              </code></pre>
+          </div>
+        </div> <br>
+
+       
         <small><i>NOTE: If the server is currently offline, you should send a warm up request to boot it up, otherwise you
           will get a lot a status reponses for your prompts.</i></small>
         <h1>Chat Bot Mode</h1>
