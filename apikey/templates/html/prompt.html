@@ -114,7 +114,7 @@
                 </div><br>
                 <label for="top_k" >Top_k:</label>
                 <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                  <input type="range"  step=".001"  name="top_k" min="0.01" max="1" value="-1" oninput="this.nextElementSibling.value = this.value">
+                  <input type="range"  step="1"  name="top_k" min="0" max="100" value="-1" oninput="this.nextElementSibling.value = this.value">
                   <output>-1</output>
                 </div><br>
                 <label for="max_tokens">Max_tokens:</label>
@@ -184,7 +184,7 @@
         <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >response = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
 json={"prompt": str,
   "model" : str,
-  'top_k': float,
+  'top_k': int,
   'top_p': float,
   'best_of': int,
   'max_tokens': int,
@@ -203,7 +203,7 @@ print(response.json())
 -H "Authorization: Bearer str" -H 'Content-Type: application/json' \
 --data-binary '{"prompt": str, 
             "model" : str,
-            "top_k": float,
+            "top_k": int,
             "top_p": float,
             "best_of": int,
             "max_tokens": int,

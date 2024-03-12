@@ -53,7 +53,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message = text_data_json["message"]
             top_p = text_data_json["top_p"]
             best_of = text_data_json["best_of"]
-            top_k = text_data_json["top_k"]
+            top_k = int(text_data_json["top_k"])
+            if top_k <= 0:
+                top_k = -1
             max_tokens = text_data_json["max_tokens"]
             frequency_penalty = text_data_json["frequency_penalty"]
             presence_penalty = text_data_json["presence_penalty"]

@@ -186,8 +186,10 @@ def prompt(request):
                       ) if "top_p" in request.POST else constant.DEFAULT_TOP_P
         best_of = float(request.POST.get(
             "best_of")) if "best_of" in request.POST else constant.DEFAULT_BEST_OF
-        top_k = float(request.POST.get("top_k")
+        top_k = int(request.POST.get("top_k")
                       ) if "top_k" in request.POST else constant.DEFAULT_TOP_K
+        if top_k <= 0:
+            top_k = -1
         max_tokens = int(request.POST.get(
             "max_tokens")) if "max_tokens" in request.POST else constant.DEFAULT_MAX_TOKENS
         frequency_penalty = float(request.POST.get(

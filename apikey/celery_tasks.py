@@ -75,7 +75,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
         room_group_name (string): the group name of the channel layer to send response back
         model (string): model name
         stream (bool): stream or not stream the response from GPU server
-        top_k (float): top_k
+        top_k (int): top_k
         top_p (float): top_[]
         best_of (int): _description_
         temperature (float): temperature
@@ -113,7 +113,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
         "temperature": float(temperature),
         "max_tokens": int(max_tokens),
         "stream": stream,
-        "top_k": float(-1),
+        "top_k": int(top_k),
         "top_p": float(top_p),
         "length_penalty": float(length_penalty),
         "frequency_penalty": float(frequency_penalty),

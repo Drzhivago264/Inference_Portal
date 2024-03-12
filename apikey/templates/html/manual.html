@@ -77,7 +77,7 @@
             <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >r = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
 json={"prompt": str,
       "model" : str,
-      'top_k': float,
+      'top_k': int,
       'top_p': float,
       'best_of': int,
       'max_tokens': int,
@@ -97,7 +97,7 @@ print(r.json())
 -H "Authorization: Bearer str" -H 'Content-Type: application/json' \
 --data-binary '{"prompt": str, 
                 "model" : str,
-                "top_k": float,
+                "top_k": int,
                 "top_p": float,
                 "best_of": int,
                 "max_tokens": int,
