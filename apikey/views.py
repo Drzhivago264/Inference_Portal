@@ -1,14 +1,11 @@
 from django.shortcuts import render, HttpResponseRedirect
-import random
 import stripe
 from django.core.paginator import Paginator
 from datetime import datetime
-import secrets
 from .models import Price, Product, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
-from django_ratelimit.decorators import ratelimit
 from django.views.decorators.cache import cache_page
 from django.shortcuts import redirect
 from django.conf import settings
@@ -17,18 +14,15 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.views import View
-from django.template import loader
 from django.urls import reverse
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from django.views.generic import TemplateView
 from .celery_tasks import send_email_, Inference
 from .util.commond_func import get_key 
-from django_ratelimit.exceptions import Ratelimited
 from django.core.cache import cache
 from apikey.util import constant
-from .permissions import HasCustomAPIKey
+from .forms import RoomRedirectForm, PromptForm, LogForm
+from hashlib import sha256
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @cache_page(60*15)
@@ -41,9 +35,19 @@ def manual(request):
     return render(request, "html/manual.html")
 
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def chat(request):
-    return render(request, "html/chat.html")
+    if request.method == "POST":
+        form = RoomRedirectForm(request.POST)
+        if form.is_valid():
+            destination = form.cleaned_data['room']
+            key = form.cleaned_data['key']
+            key_hash = sha256(key.encode('utf-8')).hexdigest()
+            return HttpResponseRedirect(f"/{destination}/{key_hash}")
+    else:
+        form = RoomRedirectForm()
+    context ={"form":form}
+    return render(request, "html/chat.html", context=context)
 
 
 @cache_page(60)
@@ -181,84 +185,82 @@ def contact(request):
 
 def prompt(request):
     llm = LLM.objects.filter(agent_availability=False)
-    if request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'prompt':
-        top_p = float(request.POST.get("top_p")
-                      ) if "top_p" in request.POST else constant.DEFAULT_TOP_P
-        best_of = float(request.POST.get(
-            "best_of")) if "best_of" in request.POST else constant.DEFAULT_BEST_OF
-        top_k = int(request.POST.get("top_k")
-                      ) if "top_k" in request.POST else constant.DEFAULT_TOP_K
-        if top_k <= 0:
-            top_k = -1
-        max_tokens = int(request.POST.get(
-            "max_tokens")) if "max_tokens" in request.POST else constant.DEFAULT_MAX_TOKENS
-        frequency_penalty = float(request.POST.get(
-            "frequency_penalty")) if "frequency_penalty" in request.POST else constant.DEFAULT_FREQUENCY_PENALTY
-        presence_penalty = float(request.POST.get(
-            "presence_penalty")) if "presence_penalty" in request.POST else constant.DEFAULT_PRESENCE_PENALTY
-        temperature = float(request.POST.get(
-            "temperature")) if "temperature" in request.POST else constant.DEFAULT_TEMPERATURE
-        beam = request.POST.get(
-            "beam") if "beam" in request.POST else constant.DEFAULT_BEAM
-        early_stopping = request.POST.get(
-            "early_stopping") if "early_stopping" in request.POST else constant.DEFAULT_EARLY_STOPPING
-        length_penalty = float(request.POST.get(
-            "length_penalty")) if "length_penalty" in request.POST else constant.DEFAULT_LENGTH_PENALTY
-        beam = True if beam == "True" else False
-        early_stopping = True if early_stopping == "True" else False
-        m = request.POST.get(
-            'model') if "model" in request.POST else constant.DEFAULT_MODEL
-        mode = request.POST.get(
-            'mode') if "mode" in request.POST else constant.DEFAULT_MODE
-        prompt = bleach.clean((request.POST.get('prompt'))) if len(
-            request.POST.get('prompt')) > 1 else " "
-        k = request.POST.get('key')
-        n = request.POST.get('name')
-        instance = cache.get(f"{k}:{n}")
-        if instance == None:
-            instance = get_key(n, k)
-        if instance == False:
-            response = "Error: key or key name is not correct"
+    
+    if request.method == "POST":
+        print(request.POST)
+        form = PromptForm(request.POST)
+        logform = LogForm(request.POST) 
+        if form.is_valid():
+            top_p = form.cleaned_data['top_p']
+            best_of = form.cleaned_data['best_of']
+            top_k = form.cleaned_data['top_k']
+            if top_k <= 0:
+                top_k = -1
+            max_tokens = form.cleaned_data['max_tokens']
+
+            frequency_penalty = form.cleaned_data['frequency_penalty'] 
+            presence_penalty = form.cleaned_data['presence_penalty']  
+            temperature = form.cleaned_data['temperature']
+            beam = form.cleaned_data['beam'] if form.cleaned_data['beam'] else False  
+            early_stopping = form.cleaned_data['early_stopping'] if form.cleaned_data['early_stopping'] else False
+            length_penalty = form.cleaned_data['length_penalty']
+            m = form.cleaned_data['model']
+            mode = form.cleaned_data['mode']
+            prompt = form.cleaned_data['prompt']
+            k = form.cleaned_data['key']
+            n = form.cleaned_data['key_name']
+            instance = cache.get(f"{k}:{n}")
+            if instance == None:
+                instance = get_key(n, k)
+            if instance == False:
+                response = "Error: key or key name is not correct"
+            else:
+                cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
+                Inference.delay(unique=None,
+                                mode=mode,
+                                stream=False, 
+                                type_="prompt", 
+                                key=str(request.POST.get('key')), 
+                                credit=instance.credit, 
+                                room_group_name=None, 
+                                model=m, 
+                                top_k=top_k, 
+                                top_p=top_p,
+                                best_of=best_of, 
+                                temperature=temperature, 
+                                max_tokens=max_tokens, 
+                                presence_penalty=presence_penalty, 
+                                frequency_penalty=frequency_penalty,
+                                length_penalty=length_penalty, 
+                                early_stopping=early_stopping, 
+                                beam=beam, 
+                                prompt=prompt)
+                response = "Your prompt is queued, refer to Prompt-Response Log for detail"
+            messages.info(
+                request, f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
+            return HttpResponseRedirect("/prompt")
+        elif logform.is_valid():
+            key = logform.cleaned_data['key_']
+            name = logform.cleaned_data['key_name']
+            check = get_key(key=key, name=name)
+            if check:
+                return HttpResponseRedirect(f"/prompt/{key}")
+            else:
+                messages.error(
+                    request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
+                return HttpResponseRedirect("/promptresponse")
         else:
-            cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
-            Inference.delay(unique=None,
-                            mode=mode,
-                            stream=False, 
-                            type_="prompt", 
-                            key=str(request.POST.get('key')), 
-                            credit=instance.credit, 
-                            room_group_name=None, 
-                            model=m, 
-                            top_k=top_k, 
-                            top_p=top_p,
-                            best_of=best_of, 
-                            temperature=temperature, 
-                            max_tokens=max_tokens, 
-                            presence_penalty=presence_penalty, 
-                            frequency_penalty=frequency_penalty,
-                            length_penalty=length_penalty, 
-                            early_stopping=early_stopping, 
-                            beam=beam, 
-                            prompt=prompt)
-            response = "Your prompt is queued, refer to Prompt-Response Log for detail"
-        messages.info(
-            request, f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
-        return HttpResponseRedirect("/prompt")
-    elif request.method == "POST" and bleach.clean(request.POST.get("form_type")) == 'checklog':
-        key = str(request.POST.get('key'))
-        name = str(request.POST.get('name'))
-        check = get_key(key=key, name=name)
-        if check:
-            return HttpResponseRedirect(f"/prompt/{key}")
-        else:
-            messages.error(
-                request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
-            return HttpResponseRedirect("/prompt-response")
+            print(form.errors.as_data()) 
     else:
         response = f"Default to Mistral Chat 13B"
         messages.info(
             request, f"{response} (Server {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
-    return render(request, "html/prompt.html", context={"llms": llm})
+    context = {
+        "llms": llm,
+        "form": PromptForm(),
+        "log_form": LogForm()
+    }
+    return render(request, "html/prompt.html", context=context)
 
 
 def room(request,  key):
