@@ -61,24 +61,24 @@
 </header>
 <hr>
 <main class="container">
+  <form method="post">
+    {% csrf_token %}
+  {{ form.non_field_errors }}
+
   <div class="grid">
     <div class="container">
         <h2>Bring me to:</h2>
-        <form>
-        <input type="radio" id="mode1" name="mode" class="checkbox_mode" value="chat" checked="checked">
-        <label for="mode1">Chat Bot Mode</label><br>
-        <input type="radio" id="mode2" name="mode" class="checkbox_mode" value="engineering">
-        <label for="mode2">Agent Mode</label>
-        </form>
+        {{form.room}}
     </div>
     <div class="container">
         <h2>Enter your key </h2>
         <div class="grid">
-          <input placeholder="Key" id="key" type="text">
-          <input id="room-name-submit" type="button" value="Go">
+          {{form.key}}
+          <button type="submit">Go</button>
         </div>
     </div>
   </div>
+</form>
 </main>
     <script>
 

@@ -78,27 +78,19 @@
 
         <form autocomplete="off" method="post">
           {% csrf_token %}
+          {{ form.non_field_errors }}
           <div class="form_settings">
-            <input type="hidden" name="form_type" value="prompt">
-            <input  placeholder="Key name" type="password" name="name" />
-            <input type="text" placeholder="Key" name="key" />
-          
-            <textarea  placeholder="Prompt" rows="8" cols="50" name="prompt"></textarea>
+            {{form.key_name}}
+            {{form.key}}
+            {{form.prompt}}
             <div class="grid">
               <div class="container">
                 <h3> Available Models </h3>
-                {% for llm in llms %}
-                    {% if llm.name == 'Mistral Chat 13B' %}
-                        <input type="radio" class= "checkbox" name="model"  value= "{{llm.name}}" checked="checked"> {{llm.name}}<br>
-                    {% else %}
-                        <input type="radio" class= "checkbox" name="model"  value= "{{llm.name}}"> {{llm.name}}<br>
-                    {% endif %}
-                {% endfor %}
+                  {{form.model}}
               </div>
               <div class="container">
                 <h3> Parameters </h3>
-                <input type="radio" class= "checkbox" name="mode"  value= "chat"> Chat Bot Mode<br>
-                <input type="radio" class= "checkbox" name="mode"  value= "generate"   checked="checked"> Sentence Completion
+                  {{form.mode}}
               </div>
             </div>
             <hr>
@@ -109,48 +101,46 @@
               <div class="container">
                 <label for="top_p">Top_p:</label>
                 <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                  <input type="range"  step=".001"  name="top_p" min="0.01" max="1" value="0.73" oninput="this.nextElementSibling.value = this.value">
+                  {{form.top_p}}
                   <output>0.73</output>
                 </div><br>
                 <label for="top_k" >Top_k:</label>
                 <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                  <input type="range"  step="1"  name="top_k" min="0" max="100" value="-1" oninput="this.nextElementSibling.value = this.value">
+                  {{form.top_k}}
                   <output>-1</output>
                 </div><br>
                 <label for="max_tokens">Max_tokens:</label>
                 <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                  <input type="range"  step="1"  name="max_tokens" min="1" max="4096" value="128" oninput="this.nextElementSibling.value = this.value">
+                  {{form.max_tokens}}
                   <output>128</output>
                 </div>
               </div>
               <div class="container">
                 <label for="temperature">Temperature:</label>
             <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                <input type="range"  step=".001"  name="temperature" min="0" max="1" value="0.72" oninput="this.nextElementSibling.value = this.value">
+              {{form.temperature}}
                 <output>0.72</output>
               </div><br>
               <label for="frequency_penalty">Frequency penalty:</label>
               <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                <input type="range"  step=".001"  name="frequency_penalty" min="-2" max="2" value="0" oninput="this.nextElementSibling.value = this.value">
+                {{form.frequency_penalty}}
                 <output>0</output>
               </div><br>
               <label for="presence_penalty">Presence penalty:</label>
               <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                <input type="range"  step=".001"  name="presence_penalty" min="-2" max="2" value="0" oninput="this.nextElementSibling.value = this.value">
+                {{form.presence_penalty}}
                 <output>0</output>
               </div>
               </div>
             </div>
- 
-            
             <hr>
             <small><i>NOTE: These parameters go along with each others, please know what you are doing.</i></small><br>
             <small><i>NOTE: Return to default value if you messed up the parameters</i></small>
             <hr>
-            <input  type="checkbox" class= "checkbox_beam" name="beam" id = "beam" > Beam Search (default = False) 
-            <input  type="checkbox" class= "checkbox_early_stopping" name="early_stopping" id ="early_stopping" > Early Stop (default = False) <br> <br>
-            <input style="width: 10ch;" type="number" step="any" name="length_penalty" min="-2" max="2" value="0"> Length Penalty (default = 0)<br>
-            <input style="width: 10ch;" type="number" step="1" name="best_of" min="1" max="5" value="1"> Best of (default = 2 for beam search, 1 for sampling) <br>
+            {{form.beam}} Beam Search (default = False) <br>
+            {{form.early_stopping}} Early Stop (default = False) <br> <br>
+            {{form.length_penalty}}Length Penalty (default = 0)<br>
+            {{form.best_of}} Best of (default = 2 for beam search, 1 for sampling) <br>
             <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" value="Submit" /></p>
           </div>
 
@@ -172,9 +162,8 @@
         <h4>You can check your response log here:</h4>
         <form method="post">
           {% csrf_token %}
-          <input type="hidden" name="form_type" value="checklog">
-          <input placeholder="Key" type="text" style="float: right;" size="20" name="key" /> <br>
-          <input placeholder="Key name" type="password" style="float: right;" size="20" name="name" />
+          {{form.key}}
+          {{form.key_name}}
           <input class="submit" style="float: right;" type="submit" value=" Check " />
        
         </form>
