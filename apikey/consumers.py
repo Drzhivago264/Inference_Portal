@@ -81,7 +81,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             type_="chatroom",
                             stream=True,
                             key=self.key,
-                            key_name=key_object.name,
                             credit=key_object.credit,
                             room_group_name=self.room_group_name,
                             model=choosen_models,
