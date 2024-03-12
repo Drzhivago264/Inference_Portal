@@ -33,7 +33,7 @@ class PromptSchema(Schema):
     prompt: str = ""
     model: str = constant.DEFAULT_MODEL
     top_p: float = constant.DEFAULT_TOP_P
-    top_k: float = constant.DEFAULT_TOP_K
+    top_k: int = constant.DEFAULT_TOP_K
     temperature: float = constant.DEFAULT_TEMPERATURE
     beam: bool = constant.DEFAULT_BEAM
     best_of: int = constant.DEFAULT_BEST_OF
@@ -183,6 +183,10 @@ async def textcompletion(request, data: PromptSchema):
                 best_of = data.best_of
                 length_penalty = data.length_penalty
                 early_stopping = True
+            if data.top_k <= 0:
+                top_k = -1
+            else:
+                top_k = data.top_k
             context = {
                 "prompt": data.prompt,
                 "n": data.n,
@@ -192,7 +196,7 @@ async def textcompletion(request, data: PromptSchema):
                 "temperature": data.temperature,
                 "max_tokens": data.max_tokens,
                 "stream": False,
-                "top_k": data.top_k,
+                "top_k": int(top_k),
                 "top_p": data.top_p,
                 "length_penalty": length_penalty,
                 "frequency_penalty": data.frequency_penalty,

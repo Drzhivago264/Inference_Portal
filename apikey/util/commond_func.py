@@ -374,58 +374,6 @@ def get_model(model):
     except LLM.DoesNotExist as e:
         return False
 
-
-def static_view_inference(model, mode, key, server_status, instance_id, inference_url, top_k, top_p, best_of, temperature, max_tokens, presence_penalty, frequency_penalty, length_penalty, early_stopping, beam, prompt):
-
-    if beam == False:
-        length_penalty = 1
-        early_stopping = False
-        best_of = int(1)
-    else:
-        best_of = int(best_of)
-        length_penalty = float(length_penalty)
-        if early_stopping == "true":
-            early_stopping = True
-        else:
-            early_stopping = True
-    processed_prompt = inference_mode(
-        model=model, key=key, mode=mode, prompt=prompt)
-    context = {
-        "prompt": processed_prompt,
-        "n": 1,
-        'best_of': best_of,
-        'presence_penalty': float(presence_penalty),
-        "use_beam_search": beam,
-        "temperature": float(temperature),
-        "max_tokens": int(max_tokens),
-        "stream": False,
-        "top_k": float(top_k),
-        "top_p": float(top_p),
-        "length_penalty": float(length_penalty),
-        "frequency_penalty": float(frequency_penalty),
-        "early_stopping": early_stopping,
-    }
-    update_server_status_in_db(instance_id=instance_id, update_type="time")
-    if server_status == "running":
-        response = send_request(
-            stream=False, url=inference_url, instance_id=instance_id, context=context)
-        response = response_mode(
-            model=model, response=response, mode=mode, prompt=processed_prompt)
-    elif server_status == "stopped" or "stopping":
-        command_EC2(instance_id, region=region, action="on")
-        response = "Server is starting up, try again in 400 seconds"
-        update_server_status_in_db(
-            instance_id=instance_id, update_type="status")
-    elif server_status == "pending":
-        response = "Server is setting up, try again in 300 seconds"
-    else:
-        response = send_request(
-            stream=False, url=inference_url, instance_id=instance_id, context=context)
-        response = response_mode(
-            model=model, response=response, mode=mode, prompt=processed_prompt)
-    return response
-
-
 def get_chat_context(model, key):
     """_summary_
 
