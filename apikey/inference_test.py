@@ -14,18 +14,22 @@ from util import constant
 
 promtp= "hehe"
 context = {
- "prompt": "hola, how are you?",
-  "stream": True
+ "prompt": "what is 1 + 1?",
+ "top_k": 1
+
 }
 model = "Mistral Chat 13B"
 template = constant.MODEL_TEMPLATE_TABLE[model]
 ami = "ami-0810c2d824776b340"
 
 import json
+from openai import OpenAI
+
+# Modify OpenAI's API key and API base to use vLLM's API server.
 
 
 
-response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
+response = requests.post("http://3.238.236.96/generate", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
    
 print(response)
 if not isinstance(response, str):

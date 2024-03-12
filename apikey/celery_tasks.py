@@ -21,13 +21,13 @@ region = REGION
 
 
 @shared_task
-def send_email_(subject, message, email_from, recipient_list):
+def send_email_(subject: str, message: str, email_from: str, recipient_list: list) -> None:
     send_mail(subject, message, email_from, recipient_list)
     return
 
 
 @shared_task()
-def periodically_monitor_EC2_instance():
+def periodically_monitor_EC2_instance() -> str:
     """This is a func to periodically update EC2 status of GPU server
 
     Returns:
@@ -47,7 +47,7 @@ def periodically_monitor_EC2_instance():
 
 
 @shared_task()
-def periodically_shutdown_EC2_instance():
+def periodically_shutdown_EC2_instance() -> None:
     """This is a func to shutdown unuse EC2 GPU instance ever 1200 secs
     """
     available_server = InferenceServer.objects.filter(availability="Available")
@@ -62,30 +62,47 @@ def periodically_shutdown_EC2_instance():
 
 
 @shared_task
-def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model, stream, top_k, top_p, best_of, temperature, max_tokens, presence_penalty, frequency_penalty, length_penalty, early_stopping, beam, prompt):
-    """Send message from prompt view and channel layer to vLLM GPU servers, process the response and send it back the the channel
+def Inference(unique: str, 
+              mode: str, 
+              type_: str, 
+              key: str, 
+              credit: float, 
+              room_group_name: str, 
+              model: str, 
+              stream: bool, 
+              top_k: int, 
+              top_p: float, 
+              best_of: int, 
+              temperature: float, 
+              max_tokens: int, 
+              presence_penalty: float, 
+              frequency_penalty: float, 
+              length_penalty: float, 
+              early_stopping: bool, 
+              beam: bool,
+              prompt: str) -> None:
+    """_summary_
 
     Args:
-        unique (string): the unique id of the chat response placeholder generated in django channel that is used to send stream data back to the chatroom 
-        mode (string): inference mode (either 'chat' or 'prompt')
-        type_ (string): either "chatroom" or "prompt" 
-        key (string): the API key of the user
-        key_name (string): the API key name of the user
-        credit (string): the credit of the API key
-        room_group_name (string): the group name of the channel layer to send response back
-        model (string): model name
-        stream (bool): stream or not stream the response from GPU server
-        top_k (int): top_k
-        top_p (float): top_[]
+        unique (str): _description_
+        mode (str): _description_
+        type_ (str): _description_
+        key (str): _description_
+        credit (float): _description_
+        room_group_name (str): _description_
+        model (str): _description_
+        stream (bool): _description_
+        top_k (int): _description_
+        top_p (float): _description_
         best_of (int): _description_
-        temperature (float): temperature
-        max_tokens (int): the maximum number of token in the response from the GPU server
-        presence_penalty (float): presence_penalty
-        frequency_penalty (float): frequency_penalty
-        length_penalty (float): length_penalty 
-        early_stopping (bool): early_stopping
-        beam (bool): beam search option
-        prompt (string): the prompt provided by the user
+        temperature (float): _description_
+        max_tokens (int): _description_
+        presence_penalty (float): _description_
+        frequency_penalty (float): _description_
+        length_penalty (float): _description_
+        early_stopping (bool): _description_
+        beam (bool): _description_
+        prompt (str): _description_
     """
     if beam == "false" or beam == False:
         beam = False
@@ -129,12 +146,11 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
         server_status = random_url.status
         update_server_status_in_db(instance_id=instance_id, update_type="time")
         if server_status == "running":
-
             if not stream:
                 response = send_request(
                     stream=False, url=url, instance_id=instance_id, context=context)
                 response = response_mode(
-                    model=model, response=response, mode=mode, prompt=processed_prompt)
+                    response=response, mode=mode, prompt=processed_prompt)
             else:
                 response = send_request(
                     stream=True, url=url, instance_id=instance_id, context=context)
@@ -149,7 +165,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
                             data = json.loads(chunk.decode("utf-8"))
                             output = data["text"][0]
                             output = response_mode(
-                                model=model, response=output, mode=mode, prompt=processed_prompt)
+                                response=output, mode=mode, prompt=processed_prompt)
                             re = output.replace(previous_output, "")
                             full_response += re
                             previous_output = output
@@ -196,98 +212,78 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
 
 
 @shared_task
-def Agent_Inference(key, current_turn_inner, stream, model, unique, credit, room_group_name, agent_instruction, message, session_history, model_type, max_turns, temperature, max_tokens, top_p, frequency_penalty, presence_penalty):
+def Agent_Inference(key: str, 
+                    current_turn_inner: int, 
+                    stream: bool, 
+                    model: str, 
+                    unique: str, 
+                    credit: float, 
+                    room_group_name: int, 
+                    agent_instruction: str, 
+                    message: str, 
+                    session_history: list, 
+                    model_type: str, 
+                    max_turns: int, 
+                    temperature: float, 
+                    max_tokens: int, 
+                    top_p: float, 
+                    frequency_penalty: float, 
+                    presence_penalty: float) -> None:
     """_summary_
 
     Args:
-        key (_type_): _description_
-        current_turn_inner (_type_): _description_
-        stream (_type_): _description_
-        model (_type_): _description_
-        unique (_type_): _description_
-        credit (_type_): _description_
-        room_group_name (_type_): _description_
-        agent_instruction (_type_): _description_
-        message (_type_): _description_
-        session_history (_type_): _description_
-        model_type (_type_): _description_
-        max_turns (_type_): _description_
-        temperature (_type_): _description_
-        max_tokens (_type_): _description_
-        top_p (_type_): _description_
-        frequency_penalty (_type_): _description_
-        presence_penalty (_type_): _description_
+        key (str): _description_
+        current_turn_inner (int): _description_
+        stream (bool): _description_
+        model (str): _description_
+        unique (str): _description_
+        credit (float): _description_
+        room_group_name (int): _description_
+        agent_instruction (str): _description_
+        message (str): _description_
+        session_history (list): _description_
+        model_type (str): _description_
+        max_turns (int): _description_
+        temperature (float): _description_
+        max_tokens (int): _description_
+        top_p (float): _description_
+        frequency_penalty (float): _description_
+        presence_penalty (float): _description_
     """
     client = OpenAI(api_key=config("GPT_KEY"))
     clean_response = ""
-    if current_turn_inner == 0:
-        prompt = [
-            {'role': 'system', 'content': f"{agent_instruction}"}, {
-                'role': 'user', 'content': f'{message}'}
-        ]
-        session_history.extend(prompt)
-        clean_response = send_request_openai(client=client,
-                                             session_history=session_history,
-                                             model=model,
-                                             model_type=model_type,
-                                             credit=credit,
-                                             unique=unique,
-                                             current_turn_inner=current_turn_inner,
-                                             stream=stream,
-                                             room_group_name=room_group_name,
-                                             clean_response=clean_response,
-                                             frequency_penalty=frequency_penalty,
-                                             top_p=top_p,
-                                             max_tokens=max_tokens,
-                                             temperature=temperature,
-                                             presence_penalty=presence_penalty)
-        log_prompt_response(key=key, model=model_type, prompt=message,
-                            response=clean_response, type_="open_ai")
+    if current_turn_inner >= 0 and current_turn_inner <= (max_turns-1):
+        if current_turn_inner == 0:
+            prompt = [
+                {'role': 'system', 'content': f"{agent_instruction}"}, {
+                    'role': 'user', 'content': f'{message}'}
+            ]
+        elif current_turn_inner > 0 and current_turn_inner < (max_turns-1):
+            prompt = [
+                {'role': 'system', 'content': f'Response:{message}\n'}
+            ]
 
-    elif current_turn_inner > 0 and current_turn_inner < (max_turns-1):
-        prompt = [
-            {'role': 'system', 'content': f'Response:{message}\n'}
-        ]
+        elif current_turn_inner == (max_turns-1):
+            force_stop = "You should directly give results based on history information."
+            prompt = [
+                {'role': 'system', 'content': f'Response:{force_stop}\n'}
+            ]
         session_history.extend(prompt)
         clean_response = send_request_openai(client=client,
-                                             session_history=session_history,
-                                             model=model,
-                                             model_type=model_type,
-                                             credit=credit,
-                                             unique=unique,
-                                             current_turn_inner=current_turn_inner,
-                                             stream=stream,
-                                             room_group_name=room_group_name,
-                                             clean_response=clean_response,
-                                             frequency_penalty=frequency_penalty,
-                                             top_p=top_p,
-                                             max_tokens=max_tokens,
-                                             temperature=temperature,
-                                             presence_penalty=presence_penalty)
-        log_prompt_response(key=key, model=model_type, prompt=message,
-                            response=clean_response, type_="open_ai")
-
-    elif current_turn_inner == (max_turns-1):
-        force_stop = "You should directly give results based on history information."
-        prompt = [
-            {'role': 'system', 'content': f'Response:{force_stop}\n'}
-        ]
-        session_history.extend(prompt)
-        clean_response = send_request_openai(client=client,
-                                             session_history=session_history,
-                                             model=model,
-                                             model_type=model_type,
-                                             credit=credit,
-                                             unique=unique,
-                                             current_turn_inner=current_turn_inner,
-                                             stream=stream,
-                                             room_group_name=room_group_name,
-                                             clean_response=clean_response,
-                                             frequency_penalty=frequency_penalty,
-                                             top_p=top_p,
-                                             max_tokens=max_tokens,
-                                             temperature=temperature,
-                                             presence_penalty=presence_penalty)
+                                            session_history=session_history,
+                                            model=model,
+                                            model_type=model_type,
+                                            credit=credit,
+                                            unique=unique,
+                                            current_turn_inner=current_turn_inner,
+                                            stream=stream,
+                                            room_group_name=room_group_name,
+                                            clean_response=clean_response,
+                                            frequency_penalty=frequency_penalty,
+                                            top_p=top_p,
+                                            max_tokens=max_tokens,
+                                            temperature=temperature,
+                                            presence_penalty=presence_penalty)
         log_prompt_response(key=key, model=model_type, prompt=message,
                             response=clean_response, type_="open_ai")
     else:

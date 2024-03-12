@@ -226,7 +226,6 @@ def prompt(request):
                             stream=False, 
                             type_="prompt", 
                             key=str(request.POST.get('key')), 
-                            key_name=str(request.POST.get('name')), 
                             credit=instance.credit, 
                             room_group_name=None, 
                             model=m, 

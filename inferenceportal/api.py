@@ -3,6 +3,7 @@ from apikey.util import constant, commond_func
 from ninja.security import HttpBearer
 from apikey.models import InferenceServer, LLM, PromptResponse, APIKEY
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async
 import asyncio
 from ninja.errors import ValidationError
@@ -46,14 +47,14 @@ class PromptSchema(Schema):
 
 
 
-async def get_model(model):
+async def get_model(model: str) -> QuerySet[LLM] | bool:
     try:
         return await LLM.objects.aget(name=model)
     except LLM.DoesNotExist as e:
         return False  
       
 @sync_to_async
-def get_model_url(model):
+def get_model_url(model: str) -> list | bool:
     try:
         model_list = cache.get(f"{model}_link_list")
         if model_list == None:
@@ -65,7 +66,7 @@ def get_model_url(model):
     except:
         return False
 
-async def update_server_status_in_db(instance_id, update_type):
+async def update_server_status_in_db(instance_id: str, update_type: str) -> None:
     ser_obj = await InferenceServer.objects.aget(name=instance_id)
     if update_type == "status":
         ser_obj.status = "pending"
@@ -76,7 +77,7 @@ async def update_server_status_in_db(instance_id, update_type):
     return
 
 @sync_to_async
-def command_EC2(instance_id, region, action):
+def command_EC2(instance_id: str, region: str, action: str) -> None | str:
     """This func is used to turn on, off, or reboot ec2 instances
 
     Args:
@@ -124,7 +125,7 @@ def command_EC2(instance_id, region, action):
         return
     
 @sync_to_async
-def get_chat_context(model, key):
+def get_chat_context(model: str, key: str) -> str:
     key_ = APIKEY.objects.get_from_key(key)
     message_list = list(reversed(PromptResponse.objects.filter(
         model__name=model, key=key_, p_type="chatroom").order_by("-id")[:10]))
@@ -146,7 +147,7 @@ def get_chat_context(model, key):
     return full_instruct
 
 @sync_to_async
-def log_prompt_response(key, model, prompt, response, type_):
+def log_prompt_response(key: str, model: str, prompt: str, response: str, type_:str) -> None:
     """_summary_
 
     Args:

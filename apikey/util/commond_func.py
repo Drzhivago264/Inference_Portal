@@ -6,6 +6,7 @@ from . import constant
 from decouple import config
 import boto3
 import re
+from django.db.models.query import QuerySet
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
 from openai import OpenAI
@@ -18,7 +19,7 @@ aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
 
-def get_EC2_status(instance_id, region):
+def get_EC2_status(instance_id: str, region: str) -> str:
     """_summary_
 
     Args:
@@ -37,7 +38,7 @@ def get_EC2_status(instance_id, region):
         return e
 
 
-def inference_mode(model, key,  mode, prompt):
+def inference_mode(model: str, key: str,  mode: str, prompt: str) -> str:
     """_summary_
 
     Args:
@@ -59,7 +60,7 @@ def inference_mode(model, key,  mode, prompt):
         return prompt
 
 
-def response_mode(model, mode, response, prompt):
+def response_mode(mode: str, response: str, prompt: str) -> str:
     """_summary_
 
     Args:
@@ -78,7 +79,7 @@ def response_mode(model, mode, response, prompt):
         return response
 
 
-def log_prompt_response(key, model, prompt, response, type_):
+def log_prompt_response(key: str, model: str, prompt: str, response: str, type_: str) -> None:
     """_summary_
 
     Args:
@@ -95,7 +96,7 @@ def log_prompt_response(key, model, prompt, response, type_):
     pair_save.save()
 
 
-def command_EC2(instance_id, region, action):
+def command_EC2(instance_id: str, region: str, action: str) -> None | str:
     """This func is used to turn on, off, or reboot ec2 instances
 
     Args:
@@ -143,7 +144,7 @@ def command_EC2(instance_id, region, action):
         return
 
 
-def get_model_url(model):
+def get_model_url(model: str) -> list | bool:
     """Get a list of EC2 instance enpoints that serve a given model
 
     Args:
@@ -164,7 +165,7 @@ def get_model_url(model):
         return False
 
 
-def update_server_status_in_db(instance_id, update_type):
+def update_server_status_in_db(instance_id: str, update_type:str) -> None:
 
     ser_obj = InferenceServer.objects.get(name=instance_id)
     if update_type == "status":
@@ -176,7 +177,7 @@ def update_server_status_in_db(instance_id, update_type):
     return
 
 
-def send_request(stream, url, instance_id, context):
+def send_request(stream: bool, url: str, instance_id: str, context) -> str:
     """_summary_
 
     Args:
@@ -208,7 +209,7 @@ def send_request(stream, url, instance_id, context):
     return response
 
 
-def action_parse(context):
+def action_parse(context: str) -> list | bool:
     """_summary_
 
     Args:
@@ -225,28 +226,42 @@ def action_parse(context):
         return action_match
 
 
-def send_request_openai(stream, session_history, model_type, current_turn_inner, model, unique, credit, room_group_name, client, clean_response, max_tokens, frequency_penalty, temperature, top_p, presence_penalty):
+def send_request_openai(stream: bool, 
+                        session_history: list, 
+                        model_type: str, 
+                        current_turn_inner: int, 
+                        model: str, 
+                        unique: str, 
+                        credit: float, 
+                        room_group_name: str, 
+                        client: object, 
+                        clean_response: str, 
+                        max_tokens: int, 
+                        frequency_penalty: float, 
+                        temperature: float, 
+                        top_p: float, 
+                        presence_penalty: float) -> str:
     """_summary_
 
     Args:
-        stream (_type_): _description_
-        session_history (_type_): _description_
-        model_type (_type_): _description_
-        current_turn_inner (_type_): _description_
-        model (_type_): _description_
-        unique (_type_): _description_
-        credit (_type_): _description_
-        room_group_name (_type_): _description_
-        client (_type_): _description_
-        clean_response (_type_): _description_
-        max_tokens (_type_): _description_
-        frequency_penalty (_type_): _description_
-        temperature (_type_): _description_
-        top_p (_type_): _description_
-        presence_penalty (_type_): _description_
+        stream (bool): _description_
+        session_history (list): _description_
+        model_type (str): _description_
+        current_turn_inner (int): _description_
+        model (str): _description_
+        unique (str): _description_
+        credit (float): _description_
+        room_group_name (str): _description_
+        client (object): _description_
+        clean_response (str): _description_
+        max_tokens (int): _description_
+        frequency_penalty (float): _description_
+        temperature (float): _description_
+        top_p (float): _description_
+        presence_penalty (float): _description_
 
     Returns:
-        _type_: _description_
+        str: _description_
     """
     channel_layer = get_channel_layer()
     try:
@@ -340,7 +355,7 @@ def send_request_openai(stream, session_history, model_type, current_turn_inner,
         return e
 
 
-def get_key(name, key):
+def get_key(name: str, key: str) -> object | QuerySet[APIKEY]:
     """Get API key from name and key
 
     Args:
@@ -360,7 +375,7 @@ def get_key(name, key):
         return False
 
 
-def get_model(model):
+def get_model(model: str) -> QuerySet[LLM] | bool:
     """get LLM by name
 
     Args:
@@ -374,7 +389,7 @@ def get_model(model):
     except LLM.DoesNotExist as e:
         return False
 
-def get_chat_context(model, key):
+def get_chat_context(model: str, key: str) -> str:
     """_summary_
 
     Args:
