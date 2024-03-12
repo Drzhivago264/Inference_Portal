@@ -14,10 +14,8 @@ from util import constant
 
 promtp= "hehe"
 context = {
- "prompt": "Hello",
-    "stream": True,
-    'top_k': 0
-  
+ "prompt": "hola, how are you?",
+  "stream": True
 }
 model = "Mistral Chat 13B"
 template = constant.MODEL_TEMPLATE_TABLE[model]
@@ -27,7 +25,7 @@ import json
 
 
 
-response = requests.post("http://3.235.21.42:80/generate", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
+response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
    
 print(response)
 if not isinstance(response, str):

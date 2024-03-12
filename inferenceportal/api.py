@@ -45,10 +45,10 @@ class PromptSchema(Schema):
     n: int = constant.DEFAULT_N
 
 
-@sync_to_async
-def get_model(model):
+
+async def get_model(model):
     try:
-        return LLM.objects.get(name=model)
+        return await LLM.objects.aget(name=model)
     except LLM.DoesNotExist as e:
         return False  
       
@@ -64,16 +64,15 @@ def get_model_url(model):
         return model_list
     except:
         return False
-    
-@sync_to_async
-def update_server_status_in_db(instance_id, update_type):
-    ser_obj = InferenceServer.objects.get(name=instance_id)
+
+async def update_server_status_in_db(instance_id, update_type):
+    ser_obj = await InferenceServer.objects.aget(name=instance_id)
     if update_type == "status":
         ser_obj.status = "pending"
-        ser_obj.save()
+        await ser_obj.asave()
     elif update_type == "time":
         ser_obj.last_message_time = timezone.now()
-        ser_obj.save()
+        await ser_obj.asave()
     return
 
 @sync_to_async
@@ -206,9 +205,9 @@ async def textcompletion(request, data: PromptSchema):
             if server_status == "running":
                 try:
                     async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2)) as client:
-                        response = await client.post(inference_server.url, json=context,  timeout=10)
+                        response = await client.post(inference_server.url, json=context,  timeout=60)
                         response = response.json()['text'][0] if response.status_code == 200 else None
-                        if not data:
+                        if not response:
                             raise HttpError(404, "Time Out! Slow down")  
                         else:
                             await log_prompt_response(key=request.auth, model=data.model, prompt=data.prompt, response=response, type_="prompt")
@@ -257,7 +256,7 @@ async def chatcompletion(request, data: PromptSchema):
                 "temperature": data.temperature,
                 "max_tokens": data.max_tokens,
                 "stream": False,
-                "top_k": data.top_k,
+                "top_k": int(data.top_k),
                 "top_p": data.top_p,
                 "length_penalty": length_penalty,
                 "frequency_penalty": data.frequency_penalty,
@@ -267,7 +266,7 @@ async def chatcompletion(request, data: PromptSchema):
             if server_status == "running":
                 try:
                     async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2)) as client:
-                        response = await client.post(inference_server.url, json=context,  timeout=10)
+                        response = await client.post(inference_server.url, json=context,  timeout=120)
                         response  = response.json()['text'][0] if response.status_code == 200 else None
                         if not response:
                             raise HttpError(404, "Time Out! Slow down")  
