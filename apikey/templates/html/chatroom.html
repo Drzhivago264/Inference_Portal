@@ -133,7 +133,7 @@
                 </div><br>
                 <label for="top_k" >Top_k:</label>
                 <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                  <input type="range"  step=".001"  name="top_k" min="0.01" max="1" value="-1" oninput="this.nextElementSibling.value = this.value">
+                  <input type="range"  step=".001"  name="top_k" min="0" max="1" value="0" oninput="this.nextElementSibling.value = this.value">
                   <output>-1</output>
                 </div><br>
                 <label for="max_tokens">Max_tokens:</label>
@@ -238,7 +238,11 @@
                 }
                 const api_key = document.getElementById('api_key').value
                 const top_p = document.getElementsByName("top_p")[0].value
-                const top_k = document.getElementsByName("top_k")[0].value
+                var top_k = document.getElementsByName("top_k")[0].value
+
+                if (top_k == 0) {
+                    top_k = -1
+                }
                 const best_of = document.getElementsByName("best_of")[0].value
                 const max_tokens = document.getElementsByName("max_tokens")[0].value
                 const temperature = document.getElementsByName("temperature")[0].value

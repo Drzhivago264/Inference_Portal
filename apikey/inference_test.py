@@ -14,8 +14,8 @@ from util import constant
 
 promtp= "hehe"
 context = {
- "prompt": "hola, how are you?",
-  "stream": True
+ "prompt": "Hello",
+    "stream": True
   
 }
 model = "Mistral Chat 13B"
@@ -26,7 +26,7 @@ import json
 
 
 
-response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
+response = requests.post("http://3.239.126.55:80/generate", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
    
 print(response)
 if not isinstance(response, str):

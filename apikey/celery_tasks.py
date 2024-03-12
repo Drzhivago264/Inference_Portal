@@ -113,7 +113,7 @@ def Inference(unique, mode, type_, key, key_name, credit, room_group_name, model
         "temperature": float(temperature),
         "max_tokens": int(max_tokens),
         "stream": stream,
-        "top_k": float(top_k),
+        "top_k": float(-1),
         "top_p": float(top_p),
         "length_penalty": float(length_penalty),
         "frequency_penalty": float(frequency_penalty),
