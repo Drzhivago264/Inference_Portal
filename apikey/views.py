@@ -21,6 +21,7 @@ from .util.commond_func import get_key
 from django.core.cache import cache
 from apikey.util import constant
 from .forms import RoomRedirectForm, PromptForm, LogForm
+from django.core.signing import Signer
 from hashlib import sha256
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -35,7 +36,7 @@ def manual(request):
     return render(request, "html/manual.html")
 
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def chat(request):
     if request.method == "POST":
         form = RoomRedirectForm(request.POST)
@@ -61,12 +62,13 @@ def model_infor(request):
 def response_prompt_redirect(request):
     if request.method == 'POST':
         form = LogForm(request.POST)
+        signer = Signer()
         if form.is_valid():
             key = form.cleaned_data['key_']
             name = form.cleaned_data['key_name']
             check = get_key(key=key, name=name)
             if check:
-                return HttpResponseRedirect(f"/prompt/{key}")
+                return HttpResponseRedirect(f"/prompt/{signer.sign(key)}")
             else:
                 messages.error(
                     request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
@@ -75,6 +77,15 @@ def response_prompt_redirect(request):
         
         return render(request, "html/prompt_log_redirect.html", context={'form':LogForm()})
 
+def room_prompt(request,  key):
+    signer = Signer()
+    key_ = APIKEY.objects.get_from_key(signer.unsign(key))
+    response_log = PromptResponse.objects.filter(key=key_).order_by('-id')
+    paginator = Paginator(response_log, 30)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'response_log': page_obj,  "key": key}
+    return render(request, "html/prompt_log.html", context)
 
 class ProductListView(ListView):
     model = Product
@@ -284,14 +295,7 @@ def agentroom(request,  key):
     return render(request, "html/lagent.html", context)
 
 
-def room_prompt(request,  key):
-    key_ = APIKEY.objects.get_from_key(key)
-    response_log = PromptResponse.objects.filter(key=key_).order_by('-id')
-    paginator = Paginator(response_log, 30)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {'response_log': page_obj,  "key": key}
-    return render(request, "html/prompt_log.html", context)
+
 
 
 class SuccessView(TemplateView):
