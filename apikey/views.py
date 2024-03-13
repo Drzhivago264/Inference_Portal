@@ -31,7 +31,7 @@ def index(request):
     return render(request, "html/index.html")
 
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def manual(request):
     return render(request, "html/manual.html")
 

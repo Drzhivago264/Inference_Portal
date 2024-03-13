@@ -31,7 +31,7 @@ from openai import OpenAI
 
 
 
-response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer dlBGKQsj.dBJUtOrTdQylvn229uC3WLqLZ4teDzap"}, json=context, stream=True ) 
+response = requests.post("https://professorparakeet.com/api/chat", headers = {"Authorization": "Bearer dlBGKQsj.dBJUtOrTdQylvn229uC3WLqLZ4teDzap"}, json=context, stream=True ) 
    
 
 for chunk in response.iter_lines():
