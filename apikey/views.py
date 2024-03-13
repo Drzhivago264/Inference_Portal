@@ -74,7 +74,6 @@ def response_prompt_redirect(request):
                     request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
                 return HttpResponseRedirect("/promptresponse")
     elif request.method == 'GET':
-        
         return render(request, "html/prompt_log_redirect.html", context={'form':LogForm()})
 
 def room_prompt(request,  key):

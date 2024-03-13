@@ -7,9 +7,12 @@ from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async
 import asyncio
 from ninja.errors import ValidationError
+from django.http import StreamingHttpResponse
 from ninja.errors import HttpError
 from django.core.cache import cache
 from decouple import config
+import time
+import json
 import boto3
 import re
 import httpx
@@ -46,6 +49,21 @@ class PromptSchema(Schema):
     n: int = constant.DEFAULT_N
 
 
+class ChatSchema(Schema):
+    prompt: str = ""
+    model: str = constant.DEFAULT_MODEL
+    top_p: float = constant.DEFAULT_TOP_P
+    top_k: int = constant.DEFAULT_TOP_K
+    temperature: float = constant.DEFAULT_TEMPERATURE
+    beam: bool = constant.DEFAULT_BEAM
+    best_of: int = constant.DEFAULT_BEST_OF
+    max_tokens: int = constant.DEFAULT_MAX_TOKENS
+    presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
+    frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
+    length_penalty: float = constant.DEFAULT_LENGTH_PENALTY
+    early_stopping: bool = constant.DEFAULT_EARLY_STOPPING
+    n: int = constant.DEFAULT_N
+    stream: bool = False
 
 async def get_model(model: str) -> QuerySet[LLM] | bool:
     try:
@@ -225,7 +243,7 @@ async def textcompletion(request, data: PromptSchema):
                 raise HttpError(442, "Server is setting up, try again in 300 seconds")
 
 @api.post("/chat")
-async def chatcompletion(request, data: PromptSchema):
+async def chatcompletion(request, data: ChatSchema):
     model = await get_model(data.model)
     if not model:
         raise HttpError(442, "Unknown Model Error. Check your model name.")
@@ -256,7 +274,7 @@ async def chatcompletion(request, data: PromptSchema):
                 "use_beam_search": data.beam,
                 "temperature": data.temperature,
                 "max_tokens": data.max_tokens,
-                "stream": False,
+                "stream": data.stream,
                 "top_k": int(data.top_k),
                 "top_p": data.top_p,
                 "length_penalty": length_penalty,
@@ -265,19 +283,33 @@ async def chatcompletion(request, data: PromptSchema):
             }
             await update_server_status_in_db(instance_id=inference_server.name, update_type="time")
             if server_status == "running":
-                try:
-                    async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2)) as client:
-                        response = await client.post(inference_server.url, json=context,  timeout=120)
-                        response  = response.json()['text'][0] if response.status_code == 200 else None
-                        if not response:
-                            raise HttpError(404, "Time Out! Slow down")  
-                        else:
-                            response = response.replace(processed_prompt, "")
-                            await log_prompt_response(key=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatroom")
-                            return 200, {'response': response,
-                                        'context' : context}
-                except httpx.ReadTimeout:
-                    raise HttpError(404, "Time Out! Slow down")  
+                if not data.stream:
+                    try:
+                        async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2)) as client:
+                            response = await client.post(inference_server.url, json=context,  timeout=120)
+                            response  = response.json()['text'][0] if response.status_code == 200 else None
+                            if not response:
+                                raise HttpError(404, "Time Out! Slow down")  
+                            else:
+                                response = response.replace(processed_prompt, "")
+                                await log_prompt_response(key=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatroom")
+                                return 200, {'response': response,
+                                            'context' : context}
+                    except httpx.ReadTimeout:
+                        raise HttpError(404, "Time Out! Slow down")  
+                else:
+                    async def event_stream():
+                        client = httpx.AsyncClient()
+                        async with  client.stream('POST', inference_server.url, json=context) as response:
+                            async for chunk in response.aiter_text():
+                                chunk = chunk[:-1]
+                                c = json.loads(chunk)
+                                output = c['text'][0].replace(processed_prompt, "")
+                                yield str({"response": c, "delta": output}) + "\n"
+                    res = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
+                    res['X-Accel-Buffering'] = 'no' 
+                    res['Cache-Control'] = 'no-cache'
+                    return res 
             elif server_status == "stopped" or "stopping":
                 await command_EC2(inference_server.name, region=constant.REGION, action="on")
                 await update_server_status_in_db(

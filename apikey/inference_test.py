@@ -15,7 +15,9 @@ from util import constant
 promtp= "hehe"
 context = {
  "prompt": "what is 1 + 1?",
- "top_k": 1
+ "stream": True,
+
+
 
 }
 model = "Mistral Chat 13B"
@@ -29,15 +31,12 @@ from openai import OpenAI
 
 
 
-response = requests.post("http://3.238.236.96/generate", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context ) 
+response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer dlBGKQsj.dBJUtOrTdQylvn229uC3WLqLZ4teDzap"}, json=context, stream=True ) 
    
-print(response)
-if not isinstance(response, str):
-    previous_output = str()
-    full_response = str()
-    for chunk in response.iter_lines():
-        if chunk:
-            print(chunk)
+
+for chunk in response.iter_lines():
+    if chunk:
+        print(chunk)
 
 """ with mp.Pool(1) as pool:
   for result in pool.map(send_req, range(10000)):
