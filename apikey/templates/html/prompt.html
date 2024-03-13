@@ -12,6 +12,7 @@
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
   <link href="static/css/prism.css" rel="stylesheet" />
   <script src="static/js/prism.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <style>
   #chat-log {
@@ -28,6 +29,16 @@
   .message_log_container {
     margin: 10px;
   }
+
+  #id_captcha_1{
+  font-size: 14px;
+
+  height: 20px;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  }
+
 </style>
 
 <body>
@@ -162,10 +173,14 @@
         <h4>You can check your response log here:</h4>
         <form method="post">
           {% csrf_token %}
-          {{form.key}}
-          {{form.key_name}}
-          <input class="submit" style="float: right;" type="submit" value=" Check " />
-       
+          {{log_form.key_name}}
+          {{log_form.key_}}
+          
+              <div class="grid">
+                {{log_form.captcha}}
+                
+              </div>  
+              <input class="submit" style="float: right;" type="submit" value="Go" />
         </form>
         <h2>API Endpoints</h2>
         <h4>Python example for chat endpoint:</h4>
@@ -212,5 +227,29 @@ print(response.json())
     </div>
 
   </div>
+  <script>
+            $(document).ready(function () {
+            // Add refresh button after field (this can be done in the template as well)
+            $('img.captcha').after(
+                $('<a href="#void" class="captcha-refresh"><i class="fa fa-refresh"></i>Refresh</a>')
+            );
+
+            // Click-handler for the refresh-link
+            $('.captcha-refresh').click(function () {
+                var $form = $(this).parents('form');
+                var url = location.protocol + "//" + window.location.hostname + ":"
+                    + location.port + "/captcha/refresh/";
+
+                // Make the AJAX-call
+                $.getJSON(url, {}, function (json) {
+                    $form.find('input[name="captcha_0"]').val(json.key);
+                    $form.find('img.captcha').attr('src', json.image_url);
+                });
+
+                return false;
+            });
+        });
+ 
+  </script>
 </body>
 </html>

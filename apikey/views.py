@@ -60,17 +60,20 @@ def model_infor(request):
 
 def response_prompt_redirect(request):
     if request.method == 'POST':
-        key = bleach.clean(request.POST.get('key'))
-        name = bleach.clean(request.POST.get('name'))
-        check = get_key(key=key, name=name)
-        if check:
-            return HttpResponseRedirect(f"/prompt/{key}")
-        else:
-            messages.error(
-                request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
-            return HttpResponseRedirect("/promptresponse")
+        form = LogForm(request.POST)
+        if form.is_valid():
+            key = form.cleaned_data['key_']
+            name = form.cleaned_data['key_name']
+            check = get_key(key=key, name=name)
+            if check:
+                return HttpResponseRedirect(f"/prompt/{key}")
+            else:
+                messages.error(
+                    request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
+                return HttpResponseRedirect("/promptresponse")
     elif request.method == 'GET':
-        return render(request, "html/prompt_log_redirect.html")
+        
+        return render(request, "html/prompt_log_redirect.html", context={'form':LogForm()})
 
 
 class ProductListView(ListView):
@@ -250,17 +253,19 @@ def prompt(request):
                     request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
                 return HttpResponseRedirect("/promptresponse")
         else:
-            print(form.errors.as_data()) 
+            messages.info(
+                request, "Error: Invalid Captcha.")
+            return HttpResponseRedirect("/prompt")
     else:
         response = f"Default to Mistral Chat 13B"
         messages.info(
             request, f"{response} (Server {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
-    context = {
-        "llms": llm,
-        "form": PromptForm(),
-        "log_form": LogForm()
-    }
-    return render(request, "html/prompt.html", context=context)
+        context = {
+            "llms": llm,
+            "form": PromptForm(),
+            "log_form": LogForm()
+        }
+        return render(request, "html/prompt.html", context=context)
 
 
 def room(request,  key):

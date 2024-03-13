@@ -19,9 +19,9 @@ class RoomRedirectForm(forms.Form):
             raise forms.ValidationError('Corret your Key and choose a Mode')
         
 class LogForm(forms.Form):
-
     key_ = forms.CharField( widget=forms.TextInput(attrs={'placeholder': 'Key'}))
     key_name = forms.CharField( widget=forms.TextInput(attrs={'placeholder': 'Key Name'}))
+    captcha = CaptchaField(label="Captcha(Math): ")
     
 class PromptForm(forms.Form):
 
