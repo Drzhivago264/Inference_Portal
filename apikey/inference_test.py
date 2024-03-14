@@ -14,8 +14,7 @@ from util import constant
 
 promtp= "hehe"
 context = {
- "prompt": "what is 1 + 1?",
- "stream": True,
+
 
 
 
@@ -31,12 +30,12 @@ from openai import OpenAI
 
 
 
-response = requests.post("https://professorparakeet.com/api/chat", headers = {"Authorization": "Bearer dlBGKQsj.dBJUtOrTdQylvn229uC3WLqLZ4teDzap"}, json=context, stream=True ) 
+response = requests.post("http://127.0.0.1:8000/api/responselog", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=False ) 
    
-
-for chunk in response.iter_lines():
+print(response.content)
+""" for chunk in response.iter_lines():
     if chunk:
-        print(chunk)
+        print(chunk) """
 
 """ with mp.Pool(1) as pool:
   for result in pool.map(send_req, range(10000)):
