@@ -140,7 +140,7 @@ async def chatcompletion(request, data: ChatSchema):
                 early_stopping = True
             template = constant.SHORTEN_TEMPLATE_TABLE[data.model]
             chat_prompt = template.format(data.prompt, "")
-            chat_history = await get_chat_context(model=data.model, key=request.auth)
+            chat_history = await get_chat_context(model=data.model, key=request.auth,raw_prompt = data.prompt)
             processed_prompt = chat_history + "\n" + chat_prompt
             context = {
                 "prompt": processed_prompt,
@@ -173,7 +173,7 @@ async def chatcompletion(request, data: ChatSchema):
                         raise HttpError(404, "Time Out! Slow down")  
                 else:
                     try:
-                        res = StreamingHttpResponse(send_stream_request_async(inference_server.url, context, processed_prompt), content_type="text/event-stream")
+                        res = StreamingHttpResponse(send_stream_request_async(url=inference_server.url, context=context, processed_prompt=processed_prompt, request=request, data=data), content_type="text/event-stream")
                         res['X-Accel-Buffering'] = 'no' 
                         res['Cache-Control'] = 'no-cache'
                         return res 

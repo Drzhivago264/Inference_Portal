@@ -5,6 +5,7 @@ from apikey.models import InferenceServer, LLM, PromptResponse, APIKEY
 from . import constant
 from decouple import config
 import boto3
+
 import re
 from django.db.models.query import QuerySet
 from botocore.exceptions import ClientError
@@ -12,7 +13,8 @@ from celery.utils.log import get_task_logger
 from openai import OpenAI
 import openai
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+from vectordb import  vectordb
+from asgiref.sync import async_to_sync, sync_to_async
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
@@ -53,7 +55,7 @@ def inference_mode(model: str, key: str,  mode: str, prompt: str) -> str:
     template = constant.SHORTEN_TEMPLATE_TABLE[model]
     if mode == "chat":
         prompt_ = template.format(prompt, "")
-        chat_history = get_chat_context(model=model, key=key)
+        chat_history = get_chat_context(model=model, key=key, raw_prompt=prompt)
         prompt_ = chat_history + "\n" + prompt_
         return prompt_
     elif mode == "generate":
@@ -389,32 +391,35 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
     except LLM.DoesNotExist as e:
         return False
 
-def get_chat_context(model: str, key: str) -> str:
+def get_chat_context(model: str, key: str, raw_prompt: str) -> str:
     """_summary_
 
     Args:
-        model (_type_): _description_
-        key (_type_): _description_
+        model (str): _description_
+        key (str): _description_
 
     Returns:
-        _type_: _description_
+        str: _description_
     """
     key_ = APIKEY.objects.get_from_key(key)
-    message_list = list(reversed(PromptResponse.objects.filter(
-        model__name=model, key=key_, p_type="chatroom").order_by("-id")[:10]))
+    #message_list_sql = list(reversed(PromptResponse.objects.filter(
+    #    model__name=model, key=key_, p_type="chatroom").order_by("-id")[:constant.DEFAULT_CHAT_HISTORY_OBJECT]))
+    hashed_key = key_.hashed_key
+    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(raw_prompt, k= constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT) 
     shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
     full_instruct = ""
     max_history_length = constant.MAX_HISTORY_LENGTH[model]
     tokeniser = constant.TOKENIZER_TABLE[model]
-    for i, mess in enumerate(message_list):
-        template = shorten_template.format(mess.prompt, mess.response)
+    for mess in message_list_vector:
+        template = shorten_template.format(mess.metadata['prompt'], mess.metadata['response'])
         full_instruct += "\n\n"
         full_instruct += template
         inputs = tokeniser(full_instruct)
         current_history_length = len(inputs['input_ids'])
-
         if current_history_length > int(max_history_length):
-            full_instruct = full_instruct[(
-                current_history_length-max_history_length):]
+            full_instruct = full_instruct[:-(
+                current_history_length-max_history_length)]
+
     full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
     return full_instruct
+

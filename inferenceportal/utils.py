@@ -9,6 +9,7 @@ import json
 import boto3
 import httpx
 from botocore.exceptions import ClientError
+from vectordb import vectordb
 from django.utils import timezone
 
 async def get_model(model: str) -> QuerySet[LLM] | bool:
@@ -89,25 +90,27 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
         return
     
 @sync_to_async
-def get_chat_context(model: str, key: str) -> str:
+def get_chat_context(model: str, key: str, raw_prompt: str) -> str:
     key_ = APIKEY.objects.get_from_key(key)
-    message_list = list(reversed(PromptResponse.objects.filter(
-        model__name=model, key=key_, p_type="chatroom").order_by("-id")[:10]))
+    hashed_key = key_.hashed_key
+    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(raw_prompt, k= constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT) 
     shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
     full_instruct = ""
     max_history_length = constant.MAX_HISTORY_LENGTH[model]
     tokeniser = constant.TOKENIZER_TABLE[model]
-    for i, mess in enumerate(message_list):
-        template = shorten_template.format(mess.prompt, mess.response)
+    for mess in message_list_vector:
+        template = shorten_template.format(mess.metadata['prompt'], mess.metadata['response'])
+        print(mess)
         full_instruct += "\n\n"
         full_instruct += template
         inputs = tokeniser(full_instruct)
         current_history_length = len(inputs['input_ids'])
 
         if current_history_length > int(max_history_length):
-            full_instruct = full_instruct[(
-                current_history_length-max_history_length):]
+            full_instruct = full_instruct[:-(
+                current_history_length-max_history_length)]
     full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
+
     return full_instruct
 
 @sync_to_async
@@ -133,11 +136,17 @@ async def send_request_async(url, context):
         response = response.json()['text'][0] if response.status_code == 200 else None
         return response
 
-async def send_stream_request_async(url, context, processed_prompt):          
+async def send_stream_request_async(url, context, processed_prompt, request, data):          
     client = httpx.AsyncClient()
+    full_response =""
     async with  client.stream('POST', url, json=context) as response:
         async for chunk in response.aiter_text():
-            chunk = chunk[:-1]
-            c = json.loads(chunk)
-            output = c['text'][0].replace(processed_prompt, "")
-            yield str({"response": c, "delta": output}) + "\n"
+            try:
+                chunk = chunk[:-1]
+                c = json.loads(chunk)
+                output = c['text'][0].replace(processed_prompt, "")
+                full_response =output
+                yield str({"response": c, "delta": output}) + "\n"
+            except:
+                pass
+    await log_prompt_response(key=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chatroom")
