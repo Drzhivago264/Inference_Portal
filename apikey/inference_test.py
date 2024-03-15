@@ -2,10 +2,10 @@ from vllm import LLM, SamplingParams
 import json
 import requests
 from django.utils import timezone
-from models import  APIKEY
+
 import requests
 import multiprocessing as mp
-import vectordb
+
 from decouple import config
 import boto3
 from botocore.exceptions import ClientError
@@ -21,7 +21,8 @@ from util import constant
 
 promtp= "hehe"
 context = {
-
+    "prompt": "What is my cat's name",
+    "stream": True
 
 
 
@@ -37,9 +38,9 @@ from openai import OpenAI
 
 
 
-#response = requests.post("http://127.0.0.1:8000/api/responselog", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=False ) 
+response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=True ) 
    
-#print(response.content)
+print(response.content)
 """ for chunk in response.iter_lines():
     if chunk:
         print(chunk) """
