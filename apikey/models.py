@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.utils.timezone import now
 from django.db import models
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from django_bleach.models import BleachField
@@ -69,6 +71,20 @@ class PromptResponse(models.Model):
         
     def __str__(self) -> str:
         return self.prompt
+    def get_vectordb_text(self):
+        # Use title and description for vector search
+        return f"{self.prompt} -- {self.response}"
+    def get_vectordb_metadata(self):
+        # Enable filtering by any of these metadata
+        return {"key":self.key.hashed_key,
+                "key_name": self.key.name,
+                "p_type": self.p_type, 
+                "model": self.model.name, 
+                "prompt": self.prompt,
+                "response": self.response,
+                "created_at": json.dumps(self.created_at, cls=DjangoJSONEncoder)}
+
+
         
 class Product(models.Model):
     name = models.CharField(max_length=200)

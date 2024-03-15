@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1','34.198.186.123', "professorparakeet.com", "www.professorparakeet.com"]
 CSRF_TRUSTED_ORIGINS=["http://localhost:8000", "https://34.198.186.123:443", "https://34.198.186.123", "https://professorparakeet.com", "https://www.professorparakeet.com"]
 
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'captcha',
     'rest_framework',
     "rest_framework_api_key",
+    'vectordb',
 
 ]
 CHANNEL_LAYERS = {
@@ -49,6 +50,16 @@ CHANNEL_LAYERS = {
             "expiry": 10,  # default 60
         },
     },
+}
+
+DJANGO_VECTOR_DB = {
+    "DEFAULT_EMBEDDING_CLASS": "vectordb.embedding_functions.SentenceTransformerEncoder",
+    "DEFAULT_EMBEDDING_MODEL": "all-MiniLM-L6-v2",
+    "DEFAULT_EMBEDDING_SPACE": "l2", # Can be "cosine" or "l2"
+    "DEFAULT_EMBEDDING_DIMENSION": 384, # Default is 384 for "all-MiniLM-L6-v2"
+    "DEFAULT_MAX_N_RESULTS": 10, # Number of results to return from search maximum is default is 10
+    "DEFAULT_MIN_SCORE": 0.0, # Minimum score to return from search default is 0.0
+    "DEFAULT_MAX_BRUTEFORCE_N": 10_000, # Maximum number of items to search using brute force default is 10_000. If the number of items is greater than this number, the search will be done using the HNSW index.
 }
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'

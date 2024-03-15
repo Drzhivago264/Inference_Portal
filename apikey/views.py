@@ -23,7 +23,7 @@ from apikey.util import constant
 from .forms import RoomRedirectForm, PromptForm, LogForm
 from django.core.signing import Signer
 from hashlib import sha256
-
+from vectordb import vectordb
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @cache_page(60*15)
