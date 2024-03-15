@@ -2,15 +2,22 @@ from vllm import LLM, SamplingParams
 import json
 import requests
 from django.utils import timezone
-
+from models import  APIKEY
 import requests
 import multiprocessing as mp
-
+import vectordb
 from decouple import config
 import boto3
 from botocore.exceptions import ClientError
 from util import constant
-
+"""TEST Vectordb"""
+""" k = APIKEY.objects.get_from_key(key='3lqqVZUw.hn7SWE7bXn5Qn6MOgV0PNfQBtEI30t7D')
+    print(k.hashed_key)
+    content = vectordb.filter(metadata__key=k.hashed_key).search("haha", k=10) 
+        for c in content:
+        prompt = c.metadata['prompt']
+        response = c.metadata['response']
+        print(prompt, response)"""
 
 promtp= "hehe"
 context = {
@@ -30,9 +37,9 @@ from openai import OpenAI
 
 
 
-response = requests.post("http://127.0.0.1:8000/api/responselog", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=False ) 
+#response = requests.post("http://127.0.0.1:8000/api/responselog", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=False ) 
    
-print(response.content)
+#print(response.content)
 """ for chunk in response.iter_lines():
     if chunk:
         print(chunk) """
