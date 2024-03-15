@@ -1,7 +1,7 @@
 django-inference-portal
 =======================
 
-This is a simple dynamic django server that uses django channels, django ninja, celery and Redis to interact with GPU servers for language model inference.
+This is a simple dynamic django server that uses django channels, django ninja, celery, vectordb and Redis to interact with GPU servers for language model inference.
 
 Purpose
 -------
@@ -16,12 +16,13 @@ Design
 Explain:
 - Redis server fowards the message for the websockets that are used for real time chat.
 - SQL stores API key and model metadata using the default SQLlite shipped with Django. 
+- The chat and prompt history of user is vectorised and stored for vector search
 - Django Ninja open REST api endpoints forward the user requests to GPU servers.
 - GPU servers do inference, each GPU server holds one model and uses vLLM to open endpoints. 
 - Nginx is used as a proxy for the Django server and serve static files.
 - Celery is used to run multiple background tasks including spin up, stop, create and terminate EC GPU instances. Celery is also used to queue 
  API requests to GPU servers.
-- Django server are used to connect all components.
+- Django server is used to connect all components.
 
 Installation
 --------------
