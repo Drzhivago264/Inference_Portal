@@ -20,13 +20,13 @@ import httpx
 from botocore.exceptions import ClientError
 import random
 from django.utils import timezone
-from .utils import get_chat_context, get_model, get_model_url, command_EC2, update_server_status_in_db, log_prompt_response, send_request_async, send_stream_request_async
+from .utils import get_chat_context, get_model, get_model_url, command_EC2, update_server_status_in_db, log_prompt_response, send_request_async, send_stream_request_async, query_response_log
 class GlobalAuth(HttpBearer):
     @sync_to_async
     def authenticate(self, request, token):
         try:
-            APIKEY.objects.get_from_key(token)
-            return token
+            key_object = APIKEY.objects.get_from_key(token)
+            return key_object
         except ObjectDoesNotExist:
             pass
 api = NinjaAPI(auth=GlobalAuth())
@@ -177,7 +177,7 @@ async def chatcompletion(request, data: ChatSchema):
                         res['X-Accel-Buffering'] = 'no' 
                         res['Cache-Control'] = 'no-cache'
                         return res 
-                    except httpx.ReadTimeout:
+                    except:
                         raise HttpError(404, "Time Out! Slow down")  
             elif server_status == "stopped" or "stopping":
                 await command_EC2(inference_server.name, region=constant.REGION, action="on")
@@ -190,21 +190,12 @@ async def chatcompletion(request, data: ChatSchema):
 class ResponseLogRequest(Schema):
     quantity: int = 10
     lastest: bool = True
+    filter_by: list =["chatroom", "prompt","open_ai"]
 
-
-@sync_to_async
-def query_response_log(key,  order, quantity):
-    key = APIKEY.objects.get_from_key(key)
-    log = PromptResponse.objects.filter(key=key).order_by(order)[:quantity]
-
-
-    return json.dumps(list(log.values()), cls=DjangoJSONEncoder)
 
 @api.post("/responselog")
 async def log(request, data: ResponseLogRequest):
     quantity = 1 if data.quantity < 10 else data.quantity
     order = "-id" if data.lastest else "id"
-
-    response_log = await query_response_log(key = request.auth, order=order, quantity=quantity)
-
+    response_log = await query_response_log(key_object = request.auth, order=order, quantity=quantity, type_=data.filter_by)
     return response_log

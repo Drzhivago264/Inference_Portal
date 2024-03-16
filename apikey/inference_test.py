@@ -21,11 +21,8 @@ from util import constant
 
 promtp= "hehe"
 context = {
-    "prompt": "What is my cat's name",
-    "stream": True
-
-
-
+    "prompt": "What is my cat's name?",
+    "stream": False,
 }
 model = "Mistral Chat 13B"
 template = constant.MODEL_TEMPLATE_TABLE[model]
@@ -38,7 +35,7 @@ from openai import OpenAI
 
 
 
-response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=True ) 
+response = requests.post("http://127.0.0.1:8000/api/responselog", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=False ) 
    
 print(response.content)
 """ for chunk in response.iter_lines():

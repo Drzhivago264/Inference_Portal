@@ -13,14 +13,15 @@
   <link href="static/css/prism.css" rel="stylesheet" />
   <script src="static/js/prism.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="static/js/colour-theme-toggle.js"></script>
 </head>
 <style>
   #chat-log {
     width: 100% !important;
     resize: vertical;
-    background-color: rgb(37, 37, 37);
+    background-color: black;
+    border-radius: 10px;
     color: white;
-    border: 1px solid #ccc;
     box-sizing: border-box;
     height: 20vh;
     overflow: auto;
@@ -77,6 +78,7 @@
         </li> 
         <li><a class="contrast" href="/buy">Get Key</a></li>
         <li><a class="contrast" href="/promptresponse">Response Log</a></li>
+        <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
       </ul>
     </nav>
   </header>

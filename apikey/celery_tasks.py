@@ -7,7 +7,7 @@ from django.utils import timezone
 import random
 import requests
 import json
-from .models import InferenceServer, PromptResponse, LLM
+from .models import InferenceServer, PromptResponse, LLM, APIKEY
 from decouple import config
 import boto3
 from openai import OpenAI
@@ -18,8 +18,8 @@ logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = REGION
-
-
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
 @shared_task
 def send_email_(subject: str, message: str, email_from: str, recipient_list: list) -> None:
     send_mail(subject, message, email_from, recipient_list)
@@ -104,6 +104,7 @@ def Inference(unique: str,
         beam (bool): _description_
         prompt (str): _description_
     """
+    key_object = APIKEY.objects.get_from_key(key)
     if beam == "false" or beam == False:
         beam = False
         length_penalty = 1
@@ -120,7 +121,7 @@ def Inference(unique: str,
         else:
             early_stopping = True
     processed_prompt = inference_mode(
-        model=model, key=key, mode=mode, prompt=prompt)
+        model=model, key_object=key_object, mode=mode, prompt=prompt)
     context = {
         "prompt": processed_prompt,
         "n": 1,
@@ -180,7 +181,7 @@ def Inference(unique: str,
                                     'unique': unique
                                 }
                             )
-                    log_prompt_response(key, model, prompt,
+                    log_prompt_response(key_object, model, prompt,
                                         full_response, type_=type_)
 
         elif server_status == "stopped" or "stopping":
@@ -208,7 +209,7 @@ def Inference(unique: str,
             }
         )
     elif type_ == "prompt":
-        log_prompt_response(key, model, prompt, response, type_=type_)
+        log_prompt_response(key_object, model, prompt, response, type_=type_)
 
 
 @shared_task
@@ -251,6 +252,7 @@ def Agent_Inference(key: str,
         presence_penalty (float): _description_
     """
     client = OpenAI(api_key=config("GPT_KEY"))
+    key_object = APIKEY.objects.get_from_key(key)
     clean_response = ""
     if current_turn_inner >= 0 and current_turn_inner <= (max_turns-1):
         if current_turn_inner == 0:
@@ -284,7 +286,7 @@ def Agent_Inference(key: str,
                                             max_tokens=max_tokens,
                                             temperature=temperature,
                                             presence_penalty=presence_penalty)
-        log_prompt_response(key=key, model=model_type, prompt=message,
+        log_prompt_response(key_object=key_object, model=model_type, prompt=message,
                             response=clean_response, type_="open_ai")
     else:
         channel_layer = get_channel_layer()
