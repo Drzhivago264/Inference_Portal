@@ -26,6 +26,7 @@
     <script src="/static/js/editor-js/inline-code@latest.js"></script>
     <script src="/static/js/editor-js/underline.min.js"></script>
     <script src="/static/js/editor-js/table@latest.js"></script>
+    <script src="/static/js/editor-js/edjsHTML.js"></script>
     <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
 </head>
 <style>
@@ -146,9 +147,16 @@
                     {% endfor %}
                 </form>
                 <hr>
-                <button  style="display: block; margin: 0 auto;" id="doc-export">
-                     Export Document 
-                </button>
+                <div class="grid">
+                    <a  style="display: block; margin: 10px auto; " id="doc-export">
+                        Export: 
+                   </a>
+                <select name="format" id="format" aria-label="Format" required>
+                    <option>json</option>
+                    <option>html</option>
+                    <option>txt</option>
+                  </select>
+                </div>
             </div>
             <div class="container" id="site_content_document">
                 <div id="document-instruction">
@@ -296,13 +304,35 @@
             </div>
         </main>
         <script>
-
+            
+            const edjsParser = edjsHTML();
+            
             function download(mimeType, filename){
                 editor.save().then((outputData) => {
                 download_content = outputData
-                download_content = JSON.stringify(download_content, null, 4)
+                if (mimeType == "application/json"){
+                    download_content = JSON.stringify(download_content, null, 4)
+                }
+                else if (mimeType == "text/html") {
+                    download_content = edjsParser.parse(download_content);
+
+                }
+                else if (mimeType == "text/plain") {
+                    html = edjsParser.parse(download_content);
+                    html = html.toString()
+                    html = html.replace(/<style([\s\S]*?)<\/style>/gi, '');
+                    html = html.replace(/<script([\s\S]*?)<\/script>/gi, '');
+                    html = html.replace(/<\/div>/ig, '\n');
+                    html = html.replace(/<\/li>/ig, '\n');
+                    html = html.replace(/<li>/ig, '  *  ');
+                    html = html.replace(/<\/ul>/ig, '\n');
+                    html = html.replace(/<\/p>/ig, '\n');
+                    html = html.replace(/<br\s*[\/]?>/gi, "\n");
+                    html = html.replace(/<[^>]+>/ig, '');
+                    download_content = html
+                }
                 var a = document.createElement('a')
-                console.log(download_content)
+
                 var blob = new Blob([download_content], {type: mimeType})
                 var url = URL.createObjectURL(blob)
                 a.setAttribute('href', url)
@@ -315,7 +345,16 @@
                 
             }
             document.getElementById("doc-export").addEventListener("click", function() {
-                download("application/json", 'Written_By_Professor_Parakeet.json')
+                var format = document.getElementById("format").value
+                if (format == "json") {
+                    download("application/json", 'Written_By_Professor_Parakeet.json')
+                }
+                else if (format == "html"){
+                    download("text/html", 'Written_By_Professor_Parakeet.html')
+                }
+                else if (format == "txt"){
+                    download("text/plain", 'Written_By_Professor_Parakeet.txt')
+                }
             });
             const key = JSON.parse(document.getElementById('key').textContent);
             var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
