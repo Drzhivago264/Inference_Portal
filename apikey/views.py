@@ -26,7 +26,7 @@ from hashlib import sha256
 from vectordb import vectordb
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def index(request):
     return render(request, "html/index.html")
 

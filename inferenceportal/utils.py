@@ -90,17 +90,16 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
         return
     
 @sync_to_async
-def get_chat_context(model: str, key: str, raw_prompt: str) -> str:
-    key_ = APIKEY.objects.get_from_key(key)
-    hashed_key = key_.hashed_key
+def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
+
+    hashed_key = key_object.hashed_key
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(raw_prompt, k= constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT) 
     shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
     full_instruct = ""
     max_history_length = constant.MAX_HISTORY_LENGTH[model]
     tokeniser = constant.TOKENIZER_TABLE[model]
     for mess in message_list_vector:
-        template = shorten_template.format(mess.metadata['prompt'], mess.metadata['response'])
-        print(mess)
+        template = shorten_template.format(mess.content_object.prompt, mess.content_object.response)
         full_instruct += "\n\n"
         full_instruct += template
         inputs = tokeniser(full_instruct)
@@ -114,7 +113,7 @@ def get_chat_context(model: str, key: str, raw_prompt: str) -> str:
     return full_instruct
 
 @sync_to_async
-def log_prompt_response(key: str, model: str, prompt: str, response: str, type_:str) -> None:
+def log_prompt_response(key_object: object, model: str, prompt: str, response: str, type_:str) -> None:
     """_summary_
 
     Args:
@@ -124,10 +123,9 @@ def log_prompt_response(key: str, model: str, prompt: str, response: str, type_:
         response (string): the response from GPU
         type_ (_type_): _description_
     """
-    key_ = APIKEY.objects.get_from_key(key)
     llm = LLM.objects.get(name=model)
     pair_save = PromptResponse(
-        prompt=prompt, response=response, key=key_, model=llm, p_type=type_)
+        prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)
     pair_save.save()
 
 async def send_request_async(url, context):
@@ -136,17 +134,35 @@ async def send_request_async(url, context):
         response = response.json()['text'][0] if response.status_code == 200 else None
         return response
 
-async def send_stream_request_async(url, context, processed_prompt, request, data):          
+async def send_stream_request_async(url: str, context: object, processed_prompt: str, request: object, data: object):           
     client = httpx.AsyncClient()
     full_response =""
-    async with  client.stream('POST', url, json=context) as response:
-        async for chunk in response.aiter_text():
-            try:
-                chunk = chunk[:-1]
-                c = json.loads(chunk)
-                output = c['text'][0].replace(processed_prompt, "")
-                full_response =output
-                yield str({"response": c, "delta": output}) + "\n"
-            except:
-                pass
-    await log_prompt_response(key=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chatroom")
+    try:
+        async with  client.stream('POST', url, json=context) as response:
+            async for chunk in response.aiter_text():
+                try:
+                    chunk = chunk[:-1]
+                    c = json.loads(chunk)
+                    output = c['text'][0].replace(processed_prompt, "")
+                    full_response =output
+                    yield str({"response": c, "delta": output}) + "\n"
+                except:
+                    pass
+        await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chatroom")
+    except httpx.ReadTimeout:
+        raise httpx.ReadTimeout
+    
+
+@sync_to_async
+def query_response_log(key_object: str,  order: str, quantity: int, type_: list) -> object:
+    response = list()
+    log = PromptResponse.objects.filter(key=key_object, p_type__in = type_).order_by(order)[:quantity]
+    for l in log:
+        response.append({
+            "prompt": l.prompt,
+            "response": l.response,
+            "created_at": l.created_at,
+            "type": l.p_type,
+            "model": l.model.name
+        })
+    return response

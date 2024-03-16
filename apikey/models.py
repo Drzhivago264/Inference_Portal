@@ -66,6 +66,7 @@ class PromptResponse(models.Model):
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     p_type = models.TextField(default="prompt")
+    cost = models.FloatField(default=0.0)
     class Meta:
         ordering = ("-created_at",)
         
@@ -79,12 +80,9 @@ class PromptResponse(models.Model):
         return {"key":self.key.hashed_key,
                 "key_name": self.key.name,
                 "p_type": self.p_type, 
+                "cost": self.cost,
                 "model": self.model.name, 
-                "prompt": self.prompt,
-                "response": self.response,
                 "created_at": json.dumps(self.created_at, cls=DjangoJSONEncoder)}
-
-
         
 class Product(models.Model):
     name = models.CharField(max_length=200)

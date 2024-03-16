@@ -26,6 +26,7 @@
     <script src="/static/js/editor-js/inline-code@latest.js"></script>
     <script src="/static/js/editor-js/underline.min.js"></script>
     <script src="/static/js/editor-js/table@latest.js"></script>
+    <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
 </head>
 <style>
     #chat-log {
@@ -124,7 +125,7 @@
             </li> 
             <li><a class="contrast" href="/buy">Get Key</a></li>
             <li><a class="contrast" href="/promptresponse">Response Log</a></li>
-            
+            <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
           </ul>
           
         </nav>
