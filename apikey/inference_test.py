@@ -32,12 +32,14 @@ import json
 from openai import OpenAI
 
 # Modify OpenAI's API key and API base to use vLLM's API server.
+aws = config("aws_access_key_id")
+aws_secret = config("aws_secret_access_key")
+ec2_resource = boto3.resource(
+    'ec2', region_name="us-east-1", aws_access_key_id=aws, aws_secret_access_key=aws_secret)
 
-
-
-response = requests.post("http://127.0.0.1:8000/api/responselog", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=False ) 
+#response = requests.post("http://127.0.0.1:8000/api/responselog", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=False ) 
    
-print(response.content)
+#print(response.content)
 """ for chunk in response.iter_lines():
     if chunk:
         print(chunk) """

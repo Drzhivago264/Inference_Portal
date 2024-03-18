@@ -36,7 +36,10 @@ class InferenceServer(models.Model):
     name = models.CharField(max_length=200)
     instance_type = models.CharField(max_length=200)
     url = models.URLField(max_length = 200) 
+    alternative_url = models.URLField(max_length = 200)
     hosted_model = models.ForeignKey(LLM, on_delete=models.CASCADE)
+    public_ip = models.GenericIPAddressField()
+    private_ip = models.GenericIPAddressField()
     status = models.CharField(max_length = 200, default="off")
     last_message_time = models.DateTimeField(default=now)
     availability = models.CharField(max_length = 200, default="Not Available")
@@ -60,12 +63,12 @@ class APIKEY(AbstractAPIKey):
     updated_at = models.DateTimeField(auto_now=True)
 
 class PromptResponse(models.Model):
-    prompt = models.CharField(max_length=4048)
-    response = models.CharField(max_length=4048)
+    prompt = models.CharField(max_length=4096)
+    response = models.CharField(max_length=4096)
     model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    p_type = models.TextField(default="prompt")
+    p_type = models.CharField(max_length=4096, default="prompt")
     cost = models.FloatField(default=0.0)
     class Meta:
         ordering = ("-created_at",)
