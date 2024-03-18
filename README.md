@@ -48,7 +48,7 @@ Next you must install Redis and start Redis Server at port 6380:
     sudo apt-get install redis
     redis-server --port 6380
 
-Next you must install celery with redis support and launch a Celery Worker:
+Next you must install celery and celery-beat with redis support and launch a Celery Worker and a Celery Beat Worker:
 
     pip install celery[redis]
     celery -A inferenceportal worker --loglevel=info

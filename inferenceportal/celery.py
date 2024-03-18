@@ -19,11 +19,12 @@ app.conf.beat_schedule = {
     'periodically_monitor_EC2_instance': {
         'task': 'apikey.celery_tasks.periodically_monitor_EC2_instance',      
         'schedule': MONITOR_ITERVAL,
-
+        'options': {'queue': 'periodic'}
     },
     'periodically_shutdown_EC2_instance': {
         'task': 'apikey.celery_tasks.periodically_shutdown_EC2_instance',      
         'schedule': SHUTDOWN_INTERVAL,
+        'options': {'queue': 'periodic'}
 
     },
 }

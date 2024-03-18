@@ -97,55 +97,6 @@ def log_prompt_response(key_object: object, model: str, prompt: str, response: s
         prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)
     pair_save.save()
 
-
-def command_EC2(instance_id: str, region: str, action: str) -> None | str:
-    """This func is used to turn on, off, or reboot ec2 instances
-
-    Args:
-        instance_id (string): the id of EC2 instance
-        region (string): the region of EC2 instances
-        action (string): either turn on, off or reboot instance
-
-    Returns:
-        string or None: either return error or nothing
-    """
-    aws = config("aws_access_key_id")
-    aws_secret = config("aws_secret_access_key")
-    ec2 = boto3.client('ec2', region_name=region,
-                       aws_access_key_id=aws, aws_secret_access_key=aws_secret)
-    if action == "on":
-        try:
-            ec2.start_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if 'DryRunOperation' not in str(e):
-                raise
-        try:
-            ec2.start_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-    elif action == "off":
-        try:
-            ec2.stop_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if 'DryRunOperation' not in str(e):
-                raise
-        try:
-            ec2.stop_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-    elif action == "reboot":
-        try:
-            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if 'DryRunOperation' not in str(e):
-                raise
-        try:
-            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-        return
-
-
 def get_model_url(model: str) -> list | bool:
     """Get a list of EC2 instance enpoints that serve a given model
 
@@ -168,7 +119,12 @@ def get_model_url(model: str) -> list | bool:
 
 
 def update_server_status_in_db(instance_id: str, update_type:str) -> None:
+    """_summary_
 
+    Args:
+        instance_id (str): the string of instance id
+        update_type (str): the type of status change
+    """
     ser_obj = InferenceServer.objects.get(name=instance_id)
     if update_type == "status":
         ser_obj.status = "pending"

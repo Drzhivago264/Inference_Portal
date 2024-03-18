@@ -9,9 +9,10 @@ import requests
 import json
 from .models import InferenceServer, PromptResponse, LLM, APIKEY
 from decouple import config
+from botocore.exceptions import ClientError
 import boto3
 from openai import OpenAI
-from .util.commond_func import get_model_url, command_EC2, update_server_status_in_db, send_request, log_prompt_response, inference_mode, response_mode, send_request_openai
+from .util.commond_func import get_model_url, update_server_status_in_db, send_request, log_prompt_response, inference_mode, response_mode, send_request_openai
 from .util.constant import *
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
@@ -26,12 +27,12 @@ def send_email_(subject: str, message: str, email_from: str, recipient_list: lis
     return
 
 
-@shared_task()
+@shared_task(queue='periodic')
 def periodically_monitor_EC2_instance() -> str:
     """This is a func to periodically update EC2 status of GPU server
 
     Returns:
-        string : the status of the server
+        str : the status of the server
     """
     available_server = InferenceServer.objects.filter(availability="Available")
     for server in available_server:
@@ -40,6 +41,11 @@ def periodically_monitor_EC2_instance() -> str:
         try:
             instance = ec2_resource.Instance(server.name)
             server.status = instance.state['Name']
+            server.private_ip = instance.private_ip_address
+            server.url = "http://" + instance.private_ip_address +":80/generate"
+            if instance.public_ip_address:
+                server.public_ip = instance.public_ip_address
+                server.alternative_url = "http://" + instance.public_ip_address +":80/generate"
             server.save()
             return instance.state['Name']
         except Exception as e:
@@ -54,13 +60,60 @@ def periodically_shutdown_EC2_instance() -> None:
     for server in available_server:
         un_used_time = timezone.now() - server.last_message_time
         if un_used_time.total_seconds() > SERVER_TTL and (server.status != "stopped" or server.status != "stopping"):
-            command_EC2(server.name, region=region, action="off")
+            command_EC2.delay(server.name, region=region, action="off")
             server.status = "stopping"
             server.save()
         else:
             pass
 
+@shared_task()
+def command_EC2(instance_id: str, region: str, action: str) -> None | str:
+    """This func is used to turn on, off, or reboot ec2 instances
 
+    Args:
+        instance_id (string): the id of EC2 instance
+        region (string): the region of EC2 instances
+        action (string): either turn on, off or reboot instance
+
+    Returns:
+        string or None: either return error or nothing
+    """
+    aws = config("aws_access_key_id")
+    aws_secret = config("aws_secret_access_key")
+    ec2 = boto3.client('ec2', region_name=region,
+                       aws_access_key_id=aws, aws_secret_access_key=aws_secret)
+    if action == "on":
+        try:
+            ec2.start_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.start_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+    elif action == "off":
+        try:
+            ec2.stop_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.stop_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+    elif action == "reboot":
+        try:
+            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=True)
+        except ClientError as e:
+            if 'DryRunOperation' not in str(e):
+                raise
+        try:
+            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=False)
+        except ClientError as e:
+            return e
+        return
+    
 @shared_task
 def Inference(unique: str, 
               mode: str, 
@@ -87,7 +140,7 @@ def Inference(unique: str,
         unique (str): _description_
         mode (str): _description_
         type_ (str): _description_
-        key (str): _description_
+        key (str): API key
         credit (float): _description_
         room_group_name (str): _description_
         model (str): _description_
@@ -185,7 +238,7 @@ def Inference(unique: str,
                                         full_response, type_=type_)
 
         elif server_status == "stopped" or "stopping":
-            command_EC2(instance_id, region=region, action="on")
+            command_EC2.delay(instance_id, region=region, action="on")
             response = "Server is starting up, try again in 400 seconds"
             update_server_status_in_db(
                 instance_id=instance_id, update_type="status")
