@@ -51,7 +51,9 @@ Next you must install Redis and start Redis Server at port 6380:
 Next you must install celery and celery-beat with redis support and launch a Celery Worker and a Celery Beat Worker:
 
     pip install celery[redis]
-    celery -A inferenceportal worker --loglevel=info
+    celery -A inferenceportal worker --loglevel=info --pool threads
+    celery -A inferenceportal worker --loglevel=info --pool threads -Q "periodic"
+    celery -A inferenceportal beat --loglevel=info
 
 Next you must setup STRIPE CLI and start a webhook:
 

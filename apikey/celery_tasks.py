@@ -27,7 +27,7 @@ def send_email_(subject: str, message: str, email_from: str, recipient_list: lis
     return
 
 
-@shared_task(queue='periodic')
+@shared_task()
 def periodically_monitor_EC2_instance() -> str:
     """This is a func to periodically update EC2 status of GPU server
 
