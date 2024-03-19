@@ -223,11 +223,11 @@ def prompt(request):
             k = form.cleaned_data['key']
             n = form.cleaned_data['key_name']
             instance = cache.get(f"{k}:{n}")
-            if instance == None:
+            if instance is None:
                 instance = get_key(n, k)
-            if instance == False:
+            if not instance:
                 response = "Error: key or key name is not correct"
-            else:
+            elif instance:
                 cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
                 Inference.delay(unique=None,
                                 mode=mode,
@@ -292,9 +292,6 @@ def agentroom(request,  key):
     context = {'llms': llm, "templates": templates,
                "template": default_template, "key": key}
     return render(request, "html/lagent.html", context)
-
-
-
 
 
 class SuccessView(TemplateView):

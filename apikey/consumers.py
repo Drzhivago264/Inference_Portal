@@ -41,13 +41,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         self.key = text_data_json["key"]
         key_object = cache.get(f"{self.key}")
-        if key_object == None:
+        if key_object is None:
             key_object = await self.check_key()
 
-        if key_object == False:
+        if not key_object:
             await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
             await self.disconnect(self)
-        else:
+        elif key_object:
             cache.set(f"{self.key}", key_object, constant.CACHE_AUTHENTICATION)
             mode = text_data_json["mode"]
             message = text_data_json["message"]
@@ -184,13 +184,13 @@ class AgentConsumer(AsyncWebsocketConsumer):
         elif 'message' in text_data_json:
             self.key = text_data_json["key"]
             key_object = cache.get(f"{self.key}")
-            if key_object == None:
+            if key_object is None:
                 key_object = await self.check_key()
 
-            if key_object == False:
+            if not key_object:
                 await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
                 await self.disconnect(self)
-            else:
+            elif key_object:
                 cache.set(f"{self.key}", key_object,
                           constant.CACHE_AUTHENTICATION)
                 agent_instruction = text_data_json['agent_instruction']
@@ -202,7 +202,6 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 choosen_template = text_data_json["choosen_template"]
                 role = text_data_json["role"]
                 unique_response_id = str(uuid.uuid4())
-
                 top_p = float(text_data_json["top_p"])
                 max_tokens = int(text_data_json["max_tokens"]) if len(
                     text_data_json["max_tokens"]) > 0 else None
