@@ -26,6 +26,18 @@ def send_email_(subject: str, message: str, email_from: str, recipient_list: lis
     send_mail(subject, message, email_from, recipient_list)
     return
 
+@shared_task
+def manage_monero(command, payment_id=None):
+    rpc_input = {
+        "method": command
+    }
+    if payment_id is not None:
+        rpc_input.update({
+            "params":{"payment_id":payment_id}
+        })
+    rpc_input.update({"jsonrpc": "2.0", "id": "0"})        
+    response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
+    return response
 
 @shared_task()
 def periodically_monitor_EC2_instance() -> str:

@@ -14,6 +14,29 @@ def get_image_filename(instance, filename):
     slug = slugify(name)
     return f"products/{slug}-{filename}"
     
+class APIKEY(AbstractAPIKey):
+    credit = models.FloatField(default=0.0) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Crypto(models.Model):
+    coin = models.CharField(max_length=200)
+    address = models.CharField(max_length=400)
+    balance = models.FloatField(default=0.0)
+
+class PaymentHistory(models.Model):
+    key =  models.ForeignKey(APIKEY, on_delete=models.CASCADE) 
+    crypto  =  models.ForeignKey(Crypto, on_delete=models.CASCADE) 
+    amount = models.FloatField(default=0.0)
+    integrated_address = models.CharField(max_length=400)
+    transaction_id = models.CharField(max_length=400)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=100)
+    current_block_num = models.IntegerField(default=0)
+
+
 class LLM(models.Model):
     name = models.CharField(max_length=200)
     size =  models.IntegerField(default=1)
@@ -56,11 +79,7 @@ class ProductTag(models.Model):
     def __str__(self) -> str:
         return self.name
         
-    
-class APIKEY(AbstractAPIKey):
-    credit = models.FloatField(default=0.0) 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
 
 class PromptResponse(models.Model):
     prompt = models.CharField(max_length=4096)
