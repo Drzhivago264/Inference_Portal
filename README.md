@@ -63,6 +63,11 @@ Next you must setup STRIPE CLI and start a webhook:
     sudo apt install stripe
     stripe listen --forward-to localhost:8000/webhooks/stripe/
 
+Next you must setup Monero and start a rpc server, I am working on a full tutorial to deploy your own node and payment server:
+    ./monero-wallet-rpc --daemon-address {Your node address} --rpc-bind-port 18082 --wallet-file {your wallet file} --password {your password} --disable-rpc-login
+
+*Noting that in production server you must generate "View-only" wallet from your local wallet (secret key) to avoid being robbed by the society.
+
 Next you need to set up .env file and setup the following key:
 
     STRIPE_PUBLISHABLE_KEY=""
@@ -81,7 +86,7 @@ Next you need to set up .env file and setup the following key:
     GPT_KEY = "" (OPENAI key for the agent function)
     CMC_API = "" (Coinmarketcap API to get the exchange rate of Monero, you may use different API but you need to rewrite the update_crypto_rate() in celery_tasks.py)
 
-*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchange for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down.
+*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchange for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down. However, if people go that far to trace you down, you seem to have bigger problems to deal with already. Good luck with them.
 
 Finally you can test the server with:
 

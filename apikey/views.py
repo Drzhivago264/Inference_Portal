@@ -291,7 +291,7 @@ def prompt(request):
     llm = LLM.objects.filter(agent_availability=False)
     
     if request.method == "POST":
-        print(request.POST)
+        signer = Signer()
         form = PromptForm(request.POST)
         logform = LogForm(request.POST) 
         if form.is_valid():
@@ -310,6 +310,12 @@ def prompt(request):
             length_penalty = form.cleaned_data['length_penalty']
             m = form.cleaned_data['model']
             mode = form.cleaned_data['mode']
+     
+            if mode =="chat":
+                type_ = "prompt_room"
+            elif mode == "generate":
+                type_ = "prompt"
+         
             prompt = form.cleaned_data['prompt']
             k = form.cleaned_data['key']
             n = form.cleaned_data['key_name']
@@ -324,7 +330,7 @@ def prompt(request):
                 Inference.delay(unique=None,
                                 mode=mode,
                                 stream=False, 
-                                type_="prompt", 
+                                type_=type_, 
                                 key=str(request.POST.get('key')), 
                                 credit=instance.credit, 
                                 room_group_name=None, 
@@ -350,7 +356,7 @@ def prompt(request):
             name = logform.cleaned_data['key_name']
             check = get_key(key=key, name=name)
             if check:
-                return HttpResponseRedirect(f"/prompt/{key}")
+                return HttpResponseRedirect(f"/prompt/{signer.sign(key)}")
             else:
                 messages.error(
                     request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
