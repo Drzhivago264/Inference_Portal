@@ -283,8 +283,9 @@ def Inference(unique: str,
                 'unique': unique
             }
         )
-    elif type_ == "prompt":
-        log_prompt_response(key_object, model, prompt, response, type_=type_)
+    elif type_ == "prompt" or type_=="prompt_room":
+        print(type_)
+        log_prompt_response(key_object, model, prompt, response, type_="prompt")
 
 
 @shared_task
