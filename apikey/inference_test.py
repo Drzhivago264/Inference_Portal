@@ -25,16 +25,16 @@ def manage_monero(command, payment_id=None):
     response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
 
     return response
-wallet = json.loads(manage_monero("make_integrated_address", "e302f3ca09ec0279").text)
-print(wallet['result']['integrated_address'])
-print(wallet['result']['payment_id'])
+#wallet = json.loads(manage_monero("make_integrated_address", "e302f3ca09ec0279").text)
+#print(wallet['result']['integrated_address'])
+#print(wallet['result']['payment_id'])
 #manage_monero("get_balance")
-manage_monero("make_integrated_address", "e302f3ca09ec0279")
+#manage_monero("make_integrated_address", "e302f3ca09ec0279")
 #manage_monero("get_payments","4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030")
 
 promtp= "hehe"
 context = {
-    "prompt": "What is my cat's name?",
+    "prompt": "what is my name",
     "stream": False,
 }
 model = "Mistral Chat 13B"
@@ -44,15 +44,11 @@ ami = "ami-0810c2d824776b340"
 import json
 from openai import OpenAI
 
-# Modify OpenAI's API key and API base to use vLLM's API server.
-aws = config("aws_access_key_id")
-aws_secret = config("aws_secret_access_key")
-ec2_resource = boto3.resource(
-    'ec2', region_name="us-east-1", aws_access_key_id=aws, aws_secret_access_key=aws_secret)
 
-#response = requests.post("http://127.0.0.1:8000/api/responselog", headers = {"Authorization": "Bearer TverG56n.RzT4tNDcrU6aClfTNkvdoXff9YH8rWtj"}, json=context, stream=False ) 
+
+response = requests.post("http://127.0.0.1:8000/api/completion", headers = {"Authorization": "Bearer atnBnvVo.RCJnC24H5blnp4wocG9cw40yRaTqGjpO"}, json=context, stream=False ) 
    
-#print(response.content)
+print(response.content)
 """ for chunk in response.iter_lines():
     if chunk:
         print(chunk) """
