@@ -106,7 +106,7 @@ async def textcompletion(request, data: PromptSchema):
                     if not response:
                         raise HttpError(404, "Time Out! Slow down")  
                     else:
-                        await log_prompt_response(key=request.auth, model=data.model, prompt=data.prompt, response=response, type_="prompt")
+                        await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="prompt")
                         return 200, {'response': response,
                                     'context' : context}
                 except httpx.ReadTimeout:
@@ -142,7 +142,7 @@ async def chatcompletion(request, data: ChatSchema):
             template = constant.SHORTEN_TEMPLATE_TABLE[data.model]
             chat_prompt = template.format(data.prompt, "")
             if data.include_memory:
-                chat_history = await get_chat_context(model=data.model, key=request.auth,raw_prompt = data.prompt)
+                chat_history = await get_chat_context(model=data.model, key_object=request.auth,raw_prompt = data.prompt)
                 processed_prompt = chat_history + "\n" + chat_prompt
             else:
                 processed_prompt = chat_prompt
@@ -170,7 +170,7 @@ async def chatcompletion(request, data: ChatSchema):
                             raise HttpError(404, "Time Out! Slow down")  
                         else:
                             response = response.replace(processed_prompt, "")
-                            await log_prompt_response(key=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatroom")
+                            await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatroom")
                             return 200, {'response': response,
                                         'context' : context}
                     except httpx.ReadTimeout:

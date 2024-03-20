@@ -246,9 +246,14 @@
                     top_k = -1
                 }
                 const best_of = document.getElementsByName("best_of")[0].value
-                const include_memory = document.getElementsByName("include_memory")[0].value
+
                 const max_tokens = document.getElementsByName("max_tokens")[0].value
                 const temperature = document.getElementsByName("temperature")[0].value
+                if (document.getElementById('include_memory').checked) {
+                    include_memory = "true"
+                } else {
+                    include_memory = "false"
+                }
                 const frequency_penalty = document.getElementsByName("frequency_penalty")[0].value
                 const presence_penalty = document.getElementsByName("presence_penalty")[0].value
                 if (document.getElementById('beam').checked) {
