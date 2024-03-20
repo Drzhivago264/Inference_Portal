@@ -16,14 +16,19 @@ def get_image_filename(instance, filename):
     
 class APIKEY(AbstractAPIKey):
     credit = models.FloatField(default=0.0) 
+    monero_credit = models.FloatField(default=0.0) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    integrated_address = models.CharField(max_length=400)
+    payment_id = models.CharField(max_length=400)
 
 class Crypto(models.Model):
     coin = models.CharField(max_length=200)
     address = models.CharField(max_length=400)
     balance = models.FloatField(default=0.0)
+    coin_usd_rate= models.FloatField(default=0.0)
+    def __str__(self) -> str:
+        return self.coin
 
 class PaymentHistory(models.Model):
     key =  models.ForeignKey(APIKEY, on_delete=models.CASCADE) 
@@ -35,7 +40,8 @@ class PaymentHistory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=100)
     current_block_num = models.IntegerField(default=0)
-
+    def __str__(self) -> str:
+        return self.amount
 
 class LLM(models.Model):
     name = models.CharField(max_length=200)
@@ -105,7 +111,7 @@ class PromptResponse(models.Model):
                 "cost": self.cost,
                 "model": self.model.name, 
                 "created_at": json.dumps(self.created_at, cls=DjangoJSONEncoder)}
-        
+
 class Product(models.Model):
     name = models.CharField(max_length=200)
     tags = models.ManyToManyField(ProductTag, blank=True)

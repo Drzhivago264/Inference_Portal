@@ -23,11 +23,14 @@ def manage_monero(command, payment_id=None):
         })
     rpc_input.update({"jsonrpc": "2.0", "id": "0"})        
     response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
+
     return response
-    
-manage_monero("get_balance")
-manage_monero("make_integrated_address")
-manage_monero("get_payments","60900e5603bf96e3")
+wallet = json.loads(manage_monero("make_integrated_address", "e302f3ca09ec0279").text)
+print(wallet['result']['integrated_address'])
+print(wallet['result']['payment_id'])
+#manage_monero("get_balance")
+manage_monero("make_integrated_address", "e302f3ca09ec0279")
+#manage_monero("get_payments","4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030")
 
 promtp= "hehe"
 context = {

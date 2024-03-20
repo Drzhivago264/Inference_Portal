@@ -79,6 +79,9 @@ Next you need to set up .env file and setup the following key:
     ADMIN_PATH = "" (your admin path, keep it hard to guess)
     DJANGO_SECRET_KEY = "" 
     GPT_KEY = "" (OPENAI key for the agent function)
+    CMC_API = "" (Coinmarketcap API to get the exchange rate of Monero, you may use different API but you need to rewrite the update_crypto_rate() in celery_tasks.py)
+
+*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchange for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down.
 
 Finally you can test the server with:
 

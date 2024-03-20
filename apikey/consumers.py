@@ -64,6 +64,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             early_stopping = text_data_json["early_stopping"]
             length_penalty = text_data_json["length_penalty"]
             choosen_models = text_data_json["choosen_models"]
+            include_memory = text_data_json["include_memory"]
             role = text_data_json["role"]
             unique_response_id = str(uuid.uuid4())
             # Send message to room group
@@ -94,7 +95,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             length_penalty=length_penalty,
                             early_stopping=early_stopping,
                             beam=beam,
-                            prompt=message)
+                            prompt=message,
+                            include_memory = include_memory)
     # Receive message from room group
 
     async def chat_message(self, event):

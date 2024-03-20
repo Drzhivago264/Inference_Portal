@@ -120,6 +120,7 @@
             <h3> Parameters </h3>
             <input type="radio" class="checkbox_mode" name="mode" value="chat" checked="checked"> Chat Bot Mode<br>
             <input type="radio" class="checkbox_mode" name="mode" value="generate"> Sentence Completion<br>
+            <input type="checkbox" class="checkbox_include_memory" name="include_memory" id="include_memory" checked> Include Memory (for chat mode) <br>
             <hr>
             <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small> <br>
             <small><i>NOTE: In order to better understand these parameters, refer to <a
@@ -245,6 +246,7 @@
                     top_k = -1
                 }
                 const best_of = document.getElementsByName("best_of")[0].value
+                const include_memory = document.getElementsByName("include_memory")[0].value
                 const max_tokens = document.getElementsByName("max_tokens")[0].value
                 const temperature = document.getElementsByName("temperature")[0].value
                 const frequency_penalty = document.getElementsByName("frequency_penalty")[0].value
@@ -279,7 +281,8 @@
                     'temperature': temperature,
                     'beam': beam,
                     'early_stopping': early_stopping,
-                    'length_penalty': length_penalty
+                    'length_penalty': length_penalty,
+                    'include_memory': include_memory
                 }));
                 messageInputDom.value = '';
             };
