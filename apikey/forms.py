@@ -32,7 +32,7 @@ class PromptForm(forms.Form):
     key_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'placeholder': 'Key Name'}))
     prompt = forms.CharField(required=True, widget=forms.Textarea(attrs={"rows":"5", "cols":"50"}))
     
-    
+    include_memory = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'checked': True}),  initial=constant.DEFAULT_MEMORY)
     mode = forms.ChoiceField(widget=forms.RadioSelect, choices=GENERATION_CHOICES, required=True, initial=constant.DEFAULT_MODE)
     model = forms.ChoiceField(widget=forms.RadioSelect, choices=MODEL_CHOICES, required=True, initial=constant.DEFAULT_MODEL)
     top_p = forms.FloatField(widget=forms.NumberInput(attrs={'type':'range', 'step': '0.001', 'min': '0.001', 'max':'1','oninput':'this.nextElementSibling.value = this.value'}), initial=constant.DEFAULT_TOP_P)

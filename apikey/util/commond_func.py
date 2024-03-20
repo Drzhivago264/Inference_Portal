@@ -40,7 +40,7 @@ def get_EC2_status(instance_id: str, region: str) -> str:
         return e
 
 
-def inference_mode(model: str, key_object: object,  mode: str, prompt: str) -> str:
+def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool) -> str:
     """_summary_
 
     Args:
@@ -55,9 +55,12 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str) -> s
     template = constant.SHORTEN_TEMPLATE_TABLE[model]
     if mode == "chat":
         prompt_ = template.format(prompt, "")
-        chat_history = get_chat_context(model=model, key_object=key_object, raw_prompt=prompt)
-        prompt_ = chat_history + "\n" + prompt_
-        return prompt_
+        if include_memory:
+            chat_history = get_chat_context(model=model, key_object=key_object, raw_prompt=prompt)
+            prompt_ = chat_history + "\n" + prompt_
+            return prompt_
+        else:
+            return prompt_
     elif mode == "generate":
         return prompt
 
@@ -374,3 +377,14 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
     full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
     return full_instruct
 
+def manage_monero(command: str, payment_id: str=None) -> str:
+    rpc_input = {
+        "method": command
+    }
+    if payment_id is not None:
+        rpc_input.update({
+            "params":{"payment_id":payment_id}
+        })
+    rpc_input.update({"jsonrpc": "2.0", "id": "0"})        
+    response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
+    return response

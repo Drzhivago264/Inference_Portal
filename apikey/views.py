@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect
 import stripe
 from django.core.paginator import Paginator
 from datetime import datetime
-from .models import Price, Product, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY
+from .models import Price, Product, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY, Crypto
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
@@ -17,13 +17,14 @@ from django.views import View
 from django.urls import reverse
 from django.views.generic import TemplateView
 from .celery_tasks import send_email_, Inference
-from .util.commond_func import get_key 
+from .util.commond_func import get_key, manage_monero 
 from django.core.cache import cache
 from apikey.util import constant
 from .forms import RoomRedirectForm, PromptForm, LogForm
 from django.core.signing import Signer
 from hashlib import sha256
 from vectordb import vectordb
+import json
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 #@cache_page(60*15)
@@ -86,28 +87,88 @@ def room_prompt(request,  key):
     context = {'response_log': page_obj,  "key": key}
     return render(request, "html/prompt_log.html", context)
 
+def generate_key_success(request, key):
+    signer = Signer()
+    key_ = APIKEY.objects.get_from_key(signer.unsign(key))
+    form = CaptchaForm()
+    if request.method =='POST':
+        if bleach.clean(request.POST.get("form_type")) == 'checkform':
+            form = CaptchaForm(request.POST)
+            k = bleach.clean(request.POST.get('key'))
+            name = bleach.clean(request.POST.get('name'))
+            if form.is_valid():
+                try:
+                    key = APIKEY.objects.get_from_key(k)
+
+                    credit = str(key.credit)
+                    monero_credit = str(key.monero_credit)
+                    if key.name == name:
+                        messages.error(
+                            request, f"Your credit is {credit} USD, {monero_credit} XMR.",  extra_tags='credit')
+                    else:
+                        messages.error(
+                            request, "Error: Key Name is incorrent.",  extra_tags='credit')
+                    return HttpResponseRedirect("/buy")
+                except Exception as e:
+                    messages.error(
+                        request, "Error: Key is incorrent.",  extra_tags='credit')
+                    return HttpResponseRedirect("/buy")
+            else:
+                form = CaptchaForm()
+                messages.error(request, "Error: Captcha Failed.",
+                               extra_tags='credit')
+                return HttpResponseRedirect("/buy")
+        elif bleach.clean(request.POST.get("form_type")) == 'topupform':
+            k = bleach.clean(request.POST.get('key'))
+            name = bleach.clean(request.POST.get('name'))
+            product_id = bleach.clean(request.POST.get('product_id'))
+            try:
+                key = APIKEY.objects.get_from_key(k)
+                if key.name == name:
+                    return redirect(reverse('apikey:product-detail', kwargs={'pk': product_id, 'key': k, 'name': name}))
+                else:
+                    messages.error(
+                        request, "Key Name is incorrect",  extra_tags='credit')
+                    return HttpResponseRedirect("/buy")
+            except:
+                messages.error(request, "Key is incorrect",
+                               extra_tags='credit')
+                return HttpResponseRedirect("/buy")
+            
+    products = Product.objects.all()
+    context = {"form":form, "products": products, 'name': key_.name, 'key': signer.unsign(key), 'form': form, 
+                           'integrated_address': key_.integrated_address, 
+                           'payment_id':key_.payment_id,}
+    return render(request, "html/create_key_success.html", context)
+
 class ProductListView(ListView):
     model = Product
     context_object_name = "products"
     template_name = "html/buy.html"
-
+    
     def get_context_data(self, **kwargs):
         context = super(ProductListView, self).get_context_data(**kwargs)
         context['form'] = CaptchaForm()
         return context
 
     def post(self, request):
+        signer = Signer()
         form = CaptchaForm()
-        products = Product.objects.all()
         name = bleach.clean(str(request.POST.get('name')))
         ### Deal with create key requests###
         if bleach.clean(request.POST.get("form_type")) == 'createform':
             form = CaptchaForm(request.POST)
             if form.is_valid():
-                api_key, key = APIKEY.objects.create_key(name=name)
-                context = {'products': products,
-                           'name': api_key, 'key': key, 'form': form}
-                return render(request, "html/buy.html", context)
+                try:
+                    wallet = manage_monero("make_integrated_address")
+                    integrated_address = json.loads(wallet.text)['result']['integrated_address']
+                    payment_id = json.loads(wallet.text)['result']['payment_id']
+                except:
+                    integrated_address = ""
+                    payment_id = ""
+                name, key = APIKEY.objects.create_key(name=name,integrated_address = integrated_address,payment_id = payment_id)
+
+                return HttpResponseRedirect(f"/buy/{signer.sign(key)}")
             else:
                 form = CaptchaForm()
                 messages.error(request, "Error: Captcha Failed.",
@@ -122,9 +183,10 @@ class ProductListView(ListView):
                 try:
                     key = APIKEY.objects.get_from_key(k)
                     credit = str(key.credit)
+                    monero_credit = str(key.monero_credit)
                     if key.name == name:
                         messages.error(
-                            request, f"Your credit is {credit} AUD.",  extra_tags='credit')
+                            request, f"Your credit is {credit} USD, {monero_credit} XMR.",  extra_tags='credit')
                     else:
                         messages.error(
                             request, "Error: Key Name is incorrent.",  extra_tags='credit')
@@ -154,6 +216,35 @@ class ProductListView(ListView):
             except:
                 messages.error(request, "Key is incorrect",
                                extra_tags='credit')
+                return HttpResponseRedirect("/buy")
+            
+        elif bleach.clean(request.POST.get("form_type")) == 'get_xmr_address':
+            k = bleach.clean(request.POST.get('key'))
+            try:
+                key = APIKEY.objects.get_from_key(k)
+                if len(key.payment_id) > 1:
+                    payment_id = key.payment_id
+                    wallet = manage_monero("make_integrated_address", payment_id)
+                    integrated_address = json.loads(wallet.text)['result']['integrated_address']
+                    return HttpResponseRedirect(f"/buy/{signer.sign(k)}")
+                else:
+                    try:
+                        wallet = manage_monero("make_integrated_address")
+                        integrated_address = json.loads(wallet.text)['result']['integrated_address']
+                        payment_id = json.loads(wallet.text)['result']['payment_id']
+                        key.integrated_address = integrated_address
+                        key.payment_id = payment_id
+                        key.save()
+                        return HttpResponseRedirect(f"/buy/{signer.sign(k)}")
+                    except:
+                        integrated_address = ""
+                        payment_id = ""
+                        messages.error(request, "Your Key does not have a Monero wallet, create a new Key",
+                                extra_tags='monero')
+                    return HttpResponseRedirect("/buy")
+            except:
+                messages.error(request, "Key is incorrect",
+                            extra_tags='monero')
                 return HttpResponseRedirect("/buy")
 
 
@@ -222,6 +313,7 @@ def prompt(request):
             prompt = form.cleaned_data['prompt']
             k = form.cleaned_data['key']
             n = form.cleaned_data['key_name']
+            include_memory = form.cleaned_data['include_memory']
             instance = cache.get(f"{k}:{n}")
             if instance is None:
                 instance = get_key(n, k)
@@ -247,7 +339,8 @@ def prompt(request):
                                 length_penalty=length_penalty, 
                                 early_stopping=early_stopping, 
                                 beam=beam, 
-                                prompt=prompt)
+                                prompt=prompt,
+                                include_memory=include_memory)
                 response = "Your prompt is queued, refer to Prompt-Response Log for detail"
             messages.info(
                 request, f"{response} ({m} {datetime.today().strftime('%Y-%m-%d %H:%M:%S')})")
@@ -312,7 +405,7 @@ class CreateStripeCheckoutSessionView(View):
             line_items=[
                 {
                     "price_data": {
-                        "currency": "aud",
+                        "currency": "usd",
                         "unit_amount": int(price.price) * 100,
                         "product_data": {
                             "name": price.product.name,

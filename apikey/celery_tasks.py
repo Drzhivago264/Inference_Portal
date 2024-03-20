@@ -7,7 +7,7 @@ from django.utils import timezone
 import random
 import requests
 import json
-from .models import InferenceServer, PromptResponse, LLM, APIKEY
+from .models import InferenceServer, PromptResponse, LLM, APIKEY, Crypto
 from decouple import config
 from botocore.exceptions import ClientError
 import boto3
@@ -20,24 +20,32 @@ aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = REGION
 import os
-os.environ["OMP_NUM_THREADS"] = "1"
+
 @shared_task
 def send_email_(subject: str, message: str, email_from: str, recipient_list: list) -> None:
     send_mail(subject, message, email_from, recipient_list)
     return
 
 @shared_task
-def manage_monero(command, payment_id=None):
-    rpc_input = {
-        "method": command
-    }
-    if payment_id is not None:
-        rpc_input.update({
-            "params":{"payment_id":payment_id}
-        })
-    rpc_input.update({"jsonrpc": "2.0", "id": "0"})        
-    response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
-    return response
+def update_crypto_rate(coin: str):
+    BASE_URL = 'https://pro-api.coinmarketcap.com'
+    endpoint = '/v2/cryptocurrency/quotes/latest'
+    url = BASE_URL + endpoint
+    if coin == "xmr":
+        headers = {
+                    'Accepts': 'application/json',
+                    'X-CMC_PRO_API_KEY': config('CMC_API'),
+                }
+        params = {
+            'id': '328',
+            'convert': 'USD',
+        }
+        response= requests.get(url, headers=headers, params=params)
+        price= json.loads(response.text)['data']['328']['quote']['USD']['price']
+        crypto = Crypto.objects.get(coin=coin)
+        crypto.coin_usd_rate = price
+        crypto.save()
+
 
 @shared_task()
 def periodically_monitor_EC2_instance() -> str:
@@ -145,14 +153,15 @@ def Inference(unique: str,
               length_penalty: float, 
               early_stopping: bool, 
               beam: bool,
-              prompt: str) -> None:
+              prompt: str,
+              include_memory: bool) -> None:
     """_summary_
 
     Args:
         unique (str): _description_
         mode (str): _description_
         type_ (str): _description_
-        key (str): API key
+        key (str): _description_
         credit (float): _description_
         room_group_name (str): _description_
         model (str): _description_
@@ -168,6 +177,7 @@ def Inference(unique: str,
         early_stopping (bool): _description_
         beam (bool): _description_
         prompt (str): _description_
+        include_memory (bool): _description_
     """
     key_object = APIKEY.objects.get_from_key(key)
     if beam == "false" or beam == False:
@@ -186,7 +196,7 @@ def Inference(unique: str,
         else:
             early_stopping = True
     processed_prompt = inference_mode(
-        model=model, key_object=key_object, mode=mode, prompt=prompt)
+        model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory)
     context = {
         "prompt": processed_prompt,
         "n": 1,

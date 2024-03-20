@@ -7,11 +7,11 @@
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-  <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
-  <link rel="stylesheet" href="static/css/pico-main/css/pico.min.css" />
-  <link rel="stylesheet" href="static/css/pico-main/css/pico.colors.min.css" />
+  <link rel="shortcut icon" type="image/png" href="/static/image/favicon.ico" />
+  <link rel="stylesheet" href="/static/css/pico-main/css/pico.min.css" />
+  <link rel="stylesheet" href="/static/css/pico-main/css/pico.colors.min.css" />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script type="text/javascript" src="static/js/colour-theme-toggle.js"></script>
+  <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
 </head>
 <style>
   #id_captcha_1{
@@ -95,11 +95,11 @@
             <br>
             <ul>
               <li> Please remember your Key and Key Name to inference the model </li>
-              <li> If I was you, I would copy and paste my Key and Key Name in to a Word and Text document </li>
+              <li> If I was you, I would export my Key into a Text document </li>
               <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly</li>
-              <li> If you face any problem, please contact us </li>
+              <li> If you face any problems, please contact us </li>
             </ul>
-            <textarea style="width:100%;" id = "keyresponse" name="keyresponse">Your key name is: {{ name }}&#13;&#10;Your key is: {{ key }}
+            <textarea style="width:100%; height: 200px;" id = "keyresponse" name="keyresponse">Your key name: {{ name }}&#13;&#10;Your key: {{ key }}&#13;&#10;Your integrated Monero wallet: {{integrated_address}}&#13;&#10;Monero payment ID: {{payment_id}}
             </textarea>
             <button  style="display: block; margin: 0 auto;" id="key-export">
               Export Key
@@ -139,9 +139,10 @@
         </div>
         </div>
         <hr>
-        <h2> Top up </h2>
+        <h2>Stripe pay</h2>
         <small><i> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do not
-          even confirm your email). If you are concerned please use throw away credit/debit cards</i></small>
+          even confirm your email). If you are concerned please use throw away credit/debit cards.</i></small> <br>
+        <small><i> NOTE: Stripe payment is currently in test mode, you may and should pay by Monero instead.</i></small> <br>
         <div style="display: flex; justify-content: space-between;" class="card">
           {% block content %} {% for product in products %}
           <details>
@@ -162,18 +163,42 @@
         <p> Your Key or Key Name is wrong !!!</p>
         {% endif %}
       <hr>
-      <h2> Crypto Options</h2>
-      <small><i> NOTE: We did not plan to periodically query the following networks to confirm payments. Doing so is quite a
-        risk for everyone, this is certainly not a job for individuals.
-        Please contact us if you want to pay in crypto, we will manually create key for you.
-        For now, the following address can be used for donation.
-      </i></small><br>
-      <ul>
-        <li>USDT (TRC20): TNxSARdRz8g1K7tqHXcihhGtcACqQE2ATT </li>
-        <li>XMR: 84ZR5nsGeKQPn3rj5C9AFzWC5HuhGggMKMrtvsvgy6Sy5qQAfeAfzZGC2MCnKxt88WTyxQjpoWsrsNXV97VMbaFzFQnYjme </li>
-        <li>CFX (CFX network): cfx:aamcex1dudewysu92cdpahuravbswkmsr2peed2ew9 </li>
-        <li>DOGE (doge network): DB3Ut1ajNzqkPdFHyQsyh7ZrqDFjqBPPgE </li>
-      </ul>
+      <h2>Pay by Monero</h2>
+      <div class="grid">
+      <div class="container">
+        <small><i> NOTE: Generate a new address whenever you want to topup, never send fund to the same address twice.
+        </i></small><br>
+        <small><i> NOTE: There will be no refund for payment after it is sent, we can add more credit to your key if our nodes are down. 
+        </i></small><br>
+        <small><i> NOTE: Processing the payment may take up to 30 minutes after it has been confirmed on the blockchain. Use sufficient fees so the TX gets confirmed on time.
+        </i></small>
+      </div>
+      <div class="container">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="get_xmr_address">   
+          <div class="grid">
+            <div class="container">
+              <input type="text" placeholder="Key" name="key" /> 
+            </div>
+            <div class="container">
+              <input type="submit" value="Get Address" />
+            </div>
+
+          </div>
+         
+         {% if integrated_address and payment_id%}
+          <textarea style="width:100%" id = "wallet_response" name="wallet_response">{{integrated_address}}</textarea>
+         {% endif %}
+         {%for message in messages %}
+         {%if "monero" in message.tags %}
+         <h4> {{message}} </h4>
+         {%endif%}
+         {%endfor%}
+      </div>
+    </form>
+    </div>
+    <hr>
     </div>
     </main>
     <script>

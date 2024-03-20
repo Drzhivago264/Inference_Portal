@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
 from django.conf import settings
+import json
 import apikey
 from apikey.util.constant import *
 # Set the default Django settings module for the 'celery' program.
@@ -24,6 +25,13 @@ app.conf.beat_schedule = {
     'periodically_shutdown_EC2_instance': {
         'task': 'apikey.celery_tasks.periodically_shutdown_EC2_instance',      
         'schedule': SHUTDOWN_INTERVAL,
+        'options': {'queue': 'periodic'}
+
+    },
+    'periodically_update_xrm_prince': {
+        'task': 'apikey.celery_tasks.update_crypto_rate',      
+        'schedule': XMR_PRICE_INTERVAL,
+        'args': (['xmr']),
         'options': {'queue': 'periodic'}
 
     },

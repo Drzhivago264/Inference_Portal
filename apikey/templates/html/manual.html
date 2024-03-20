@@ -87,7 +87,8 @@ json={"prompt": str,
       'temperature': float,
       'beam': bool,
       'early_stopping': bool,
-      'length_penalty': float
+      'length_penalty': float,
+      'include_memory': bool
 }) 
 print(r.json())
             </code></pre>
@@ -145,15 +146,14 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
         <small><i>NOTE: If the server is currently offline, you should send a warm up request to boot it up, otherwise you
           will get a lot a status reponses for your prompts.</i></small>
         <h1>Chat Bot Mode</h1>
-        <p>We offer standard chatbot mode with custom chat template. We use a vectorised database to store 5 previous model's responses and query them to answer your questions.
+        <p>We offer standard chatbot mode with custom chat template. We use a vectorised database and query 5 previous model's responses what are the most relevant to answer your questions.
         </p>
         <p>
           The maximum context length is 4096 tokens, please do not input a 10000-page book into the chatroom, the model will give you nothing. </p>
         <h1>Hard Core Prompt Engineering Mode</h1>
         <p>We are working on a feature that use Lagent to split our model into multiple smart workers for complicated
           tasks that require multiple reasoning steps.
-          User can participate into the creation of such prompts for their own tasks.
-          You can contribute or chew gum. </p>
+          User can participate into the creation of such prompts for their own tasks.</p>
         <h1>The behaviors of this website</h1>
         <ul>
           <li>This website dynamically boot up GPU servers on users' demands</li>

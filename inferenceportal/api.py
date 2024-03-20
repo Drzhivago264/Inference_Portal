@@ -62,6 +62,7 @@ class ChatSchema(Schema):
     early_stopping: bool = constant.DEFAULT_EARLY_STOPPING
     n: int = constant.DEFAULT_N
     stream: bool = False   
+    include_memory: bool = constant.DEFAULT_MEMORY
 
 @api.post("/completion")
 async def textcompletion(request, data: PromptSchema):
@@ -140,8 +141,11 @@ async def chatcompletion(request, data: ChatSchema):
                 early_stopping = True
             template = constant.SHORTEN_TEMPLATE_TABLE[data.model]
             chat_prompt = template.format(data.prompt, "")
-            chat_history = await get_chat_context(model=data.model, key=request.auth,raw_prompt = data.prompt)
-            processed_prompt = chat_history + "\n" + chat_prompt
+            if data.include_memory:
+                chat_history = await get_chat_context(model=data.model, key=request.auth,raw_prompt = data.prompt)
+                processed_prompt = chat_history + "\n" + chat_prompt
+            else:
+                processed_prompt = chat_prompt
             context = {
                 "prompt": processed_prompt,
                 "n": data.n,
