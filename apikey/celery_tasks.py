@@ -28,20 +28,23 @@ def send_email_(subject: str, message: str, email_from: str, recipient_list: lis
 
 @shared_task
 def update_crypto_rate(coin: str):
-    BASE_URL = 'https://pro-api.coinmarketcap.com'
-    endpoint = '/v2/cryptocurrency/quotes/latest'
-    url = BASE_URL + endpoint
     if coin == "xmr":
-        headers = {
-                    'Accepts': 'application/json',
-                    'X-CMC_PRO_API_KEY': config('CMC_API'),
-                }
-        params = {
-            'id': '328',
-            'convert': 'USD',
-        }
-        response= requests.get(url, headers=headers, params=params)
-        price= json.loads(response.text)['data']['328']['quote']['USD']['price']
+        try:
+            url = "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd"
+            response = requests.get(url)
+            price= float(json.loads(response.text)['monero']['usd'])
+        except KeyError:
+            url = 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest'
+            headers = {
+                        'Accepts': 'application/json',
+                        'X-CMC_PRO_API_KEY': config('CMC_API'),
+                    }
+            params = {
+                'id': '328',
+                'convert': 'USD',
+            }
+            response= requests.get(url, headers=headers, params=params)
+            price= json.loads(response.text)['data']['328']['quote']['USD']['price']
         crypto = Crypto.objects.get(coin=coin)
         crypto.coin_usd_rate = price
         crypto.save()
@@ -284,7 +287,6 @@ def Inference(unique: str,
             }
         )
     elif type_ == "prompt" or type_=="prompt_room":
-        print(type_)
         log_prompt_response(key_object, model, prompt, response, type_="prompt")
 
 
