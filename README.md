@@ -64,6 +64,7 @@ Next you must setup STRIPE CLI and start a webhook:
     stripe listen --forward-to localhost:8000/webhooks/stripe/
 
 Next you must setup Monero and start a rpc server, I am working on a full tutorial to deploy your own node and payment server:
+
     ./monero-wallet-rpc --daemon-address {Your node address} --rpc-bind-port 18082 --wallet-file {your wallet file} --password {your password} --disable-rpc-login
 
 *Noting that in production server you must generate "View-only" wallet from your local wallet (secret key) to avoid being robbed by the society.
@@ -100,7 +101,7 @@ About the GPU intances, you need to set up a vLLM server to serve the models lis
 
     # Install vLLM with CUDA 12.1.
     pip install vllm
-    python -m vllm.entrypoints.openai.api_server --model {model name}
+     python -m vllm.entrypoints.api_server --model {your model}
 
 If you expose this instance to the internet you may need Nginx or Apache server in front of it. If you route it through your subnet or have a security policy that only accept requests from your Django server then you are good to go.
 
@@ -111,7 +112,7 @@ Development environment setup
 After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page):
 
     pip install vllm
-    python -m vllm.entrypoints.openai.api_server --model {model name}
+    python -m vllm.entrypoints.api_server --model gpt2 --port 8080
 
 You need to run a vLLM server to serve the a model (remember to avoid 8000 and 6380 port that Django is running):
 
