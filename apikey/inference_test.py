@@ -44,11 +44,18 @@ ami = "ami-0810c2d824776b340"
 import json
 from openai import OpenAI
 
+import requests
+
+url = "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd"
 
 
-response = requests.post("http://127.0.0.1:8000/api/completion", headers = {"Authorization": "Bearer atnBnvVo.RCJnC24H5blnp4wocG9cw40yRaTqGjpO"}, json=context, stream=False ) 
+
+response = requests.get(url)
+
+print(float(json.loads(response.text)['monero']['usd']))
+#response = requests.post("http://127.0.0.1:8000/api/completion", headers = {"Authorization": "Bearer atnBnvVo.RCJnC24H5blnp4wocG9cw40yRaTqGjpO"}, json=context, stream=False ) 
    
-print(response.content)
+#print(response.content)
 """ for chunk in response.iter_lines():
     if chunk:
         print(chunk) """
