@@ -133,11 +133,11 @@
       
     </header>
     <hr>
-    <main class="grid">
-        <div class="container grid" style="grid-template-columns: 28% 70%;">
-            <div id="container" style="padding-left: 10px;">
+    <main class="grid" style="grid-template-columns: 50% 45%; min-width: 1250px;">
+        <div class="grid" style="grid-template-columns: 28% 70%; min-width: 600px;">
+            <div id="container" style="padding-left: 2px; min-width: 150px;">
                 <h3>Templates</h3>
-                <form autocomplete="off">
+                <form style="font-size:calc(10px + 0.7vw);" autocomplete="off">
                     {% for template in templates %}
                     {% if template.template_name == 'Assignment Agent' %}
                     <input type="radio" class="checkbox" name="template" value="{{template.template_name}}" checked="checked"> {{template.template_name}}<br>
@@ -158,7 +158,7 @@
                   </select>
                 </div>
             </div>
-            <div class="container" id="site_content_document">
+            <div class="container" style="min-width: 400px;" id="site_content_document">
                 <div id="document-instruction">
                     <h3>Agent Instruction</h3>
 
@@ -234,7 +234,7 @@
             </div>
 
             </div>
-            <div class="container grid" style="grid-template-columns: 55% 45%;" id="site_content_chat">
+            <div class="grid" style="grid-template-columns: 65% 35%; min-width: 600px;" id="site_content_chat">
                 <div clas="container">
                     <h3> Chat </h3>
                     <div id="chat-log">
@@ -256,7 +256,7 @@
                         {{ name|json_script:"name" }}
                         {{ key|json_script:"key" }}
                     </div>
-                <div style="max-width: 380px; " class="container">
+                <div style="max-width: 380px; font-size:calc(10px + 0.7vw);  padding-left: 1px;" class="container">
                     <h3> Available Models </h3>
                     {% for llm in llms %}
                     {% if llm.name == 'gpt-4' %}

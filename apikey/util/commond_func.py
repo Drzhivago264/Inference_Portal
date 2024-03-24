@@ -377,14 +377,12 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
     full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
     return full_instruct
 
-def manage_monero(command: str, payment_id: str=None) -> str:
+def manage_monero(command, params=None):
     rpc_input = {
         "method": command
     }
-    if payment_id is not None:
-        rpc_input.update({
-            "params":{"payment_id":payment_id}
-        })
+    if params is not None:
+        rpc_input.update({'params': params})
     rpc_input.update({"jsonrpc": "2.0", "id": "0"})        
     response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
     return response

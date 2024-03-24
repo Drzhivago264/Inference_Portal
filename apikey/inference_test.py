@@ -13,25 +13,22 @@ from util import constant
 
 """Test monero"""
 
-def manage_monero(command, payment_id=None):
+def manage_monero(command, params=None):
     rpc_input = {
         "method": command
     }
-    if payment_id is not None:
-        rpc_input.update({
-            "params":{"payment_id":payment_id}
-        })
+    if params is not None:
+        rpc_input.update({'params': params})
     rpc_input.update({"jsonrpc": "2.0", "id": "0"})        
     response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
 
     return response
-#wallet = json.loads(manage_monero("make_integrated_address", "e302f3ca09ec0279").text)
-#print(wallet['result']['integrated_address'])
-#print(wallet['result']['payment_id'])
-#manage_monero("get_balance")
-#manage_monero("make_integrated_address", "e302f3ca09ec0279")
-#manage_monero("get_payments","4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030")
+#print(json.loads(manage_monero("get_balance", {"account_index":0}).text))
 
+#print(manage_monero("get_transfers", {"in":True}).text)
+#print(json.loads(manage_monero("make_integrated_address", {"payment_id":"399f9bf8ce13f73a"}).text))
+print(json.loads(manage_monero("get_payments",{"payment_id":"8c83d1a8499ce3a2"}).text))
+#print(json.loads(manage_monero("transfer", {"destinations":[{"amount":3000000000,"address":"4LHcvZ1EWX1ZxZ4BYVJmPL7MABVBu7bQxKZwtUDZA12jC2WZ2XrA5EmDmd6Q94S5QejbgEbQmgeMXFWCTfd7PW7U8u9GXS5qpzJ7aV1Khj"}]}).text))
 promtp= "hehe"
 context = {
     "prompt": "what is my name",
@@ -46,13 +43,8 @@ from openai import OpenAI
 
 import requests
 
-url = "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd"
 
 
-
-response = requests.get(url)
-
-print(float(json.loads(response.text)['monero']['usd']))
 #response = requests.post("http://127.0.0.1:8000/api/completion", headers = {"Authorization": "Bearer atnBnvVo.RCJnC24H5blnp4wocG9cw40yRaTqGjpO"}, json=context, stream=False ) 
    
 #print(response.content)
