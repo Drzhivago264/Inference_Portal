@@ -35,13 +35,12 @@ class PaymentHistory(models.Model):
     crypto  =  models.ForeignKey(Crypto, on_delete=models.CASCADE) 
     amount = models.FloatField(default=0.0)
     integrated_address = models.CharField(max_length=400)
-    transaction_id = models.CharField(max_length=400)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=100)
-    current_block_num = models.IntegerField(default=0)
+    payment_id = models.CharField(max_length=400)
+    transaction_hash = models.CharField(max_length=400)
+    locked = models.BooleanField()
+    block_height = models.IntegerField(default=0)
     def __str__(self) -> str:
-        return self.amount
+        return str(self.amount)
 
 class LLM(models.Model):
     name = models.CharField(max_length=200)

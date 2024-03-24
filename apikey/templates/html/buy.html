@@ -99,7 +99,7 @@
               <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly</li>
               <li> If you face any problems, please contact us </li>
             </ul>
-            <textarea style="width:100%; height: 200px;" id = "keyresponse" name="keyresponse">Your key name: {{ name }}&#13;&#10;Your key: {{ key }}&#13;&#10;Your integrated Monero wallet: {{integrated_address}}&#13;&#10;Monero payment ID: {{payment_id}}
+            <textarea style="width:100%; height: 200px;" id = "keyresponse" name="keyresponse">Your key name: {{ name }}&#13;&#10;Your key: {{ key }}&#13;&#10;Monero address: {{integrated_address}}&#13;&#10;Monero payment ID: {{payment_id}}
             </textarea>
             <button  style="display: block; margin: 0 auto;" id="key-export">
               Export Key
@@ -139,7 +139,7 @@
         </div>
         </div>
         <hr>
-        <h2>Stripe pay</h2>
+        <h2>Pay by Stripe</h2>
         <small><i> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do not
           even confirm your email). If you are concerned please use throw away credit/debit cards.</i></small> <br>
         <small><i> NOTE: Stripe payment is currently in test mode, you may and should pay by Monero instead.</i></small> <br>
@@ -166,11 +166,9 @@
       <h2>Pay by Monero</h2>
       <div class="grid">
       <div class="container">
-        <small><i> NOTE: Generate a new address whenever you want to topup, never send fund to the same address twice.
-        </i></small><br>
         <small><i> NOTE: There will be no refund for payment after it is sent, we can add more credit to your key if our nodes are down. 
         </i></small><br>
-        <small><i> NOTE: Processing the payment may take up to 30 minutes after it has been confirmed on the blockchain. Use sufficient fees so the TX gets confirmed on time.
+        <small><i> NOTE: Processing the payment may take up to 30 minutes after it has been confirmed on the blockchain. Use sufficient fees so the transactions gets confirmed on time.
         </i></small>
       </div>
       <div class="container">
@@ -182,21 +180,35 @@
               <input type="text" placeholder="Key" name="key" /> 
             </div>
             <div class="container">
-              <input type="submit" value="Get Address" />
+              <input type="submit" value="Check Address" />
             </div>
 
           </div>
-         
-         {% if integrated_address and payment_id%}
-          <textarea style="width:100%" id = "wallet_response" name="wallet_response">{{integrated_address}}</textarea>
-         {% endif %}
          {%for message in messages %}
-         {%if "monero" in message.tags %}
+         {%if "monero_address" in message.tags %}
          <h4> {{message}} </h4>
          {%endif%}
          {%endfor%}
-      </div>
-    </form>
+      </form>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="check_xmr_payment">   
+        <div class="grid">
+          <div class="container">
+            <input type="text" placeholder="Key" name="key" /> 
+          </div>
+          <div class="container">
+            <input type="submit" value="Confirm Payment" />
+          </div>  
+        </div>
+        {%for message in messages %}
+        {%if "monero_payment" in message.tags %}
+        <h4> {{message}} </h4>
+        {%endif%}
+        {%endfor%}
+        </form>
+        </div>
+    
     </div>
     <hr>
     </div>

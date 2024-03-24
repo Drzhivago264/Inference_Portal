@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect
 import stripe
 from django.core.paginator import Paginator
 from datetime import datetime
-from .models import Price, Product, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY, Crypto
+from .models import Price, Product, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY, Crypto, PaymentHistory
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
@@ -20,6 +20,7 @@ from .celery_tasks import send_email_, Inference
 from .util.commond_func import get_key, manage_monero 
 from django.core.cache import cache
 from apikey.util import constant
+from django.core.exceptions import ObjectDoesNotExist
 from .forms import RoomRedirectForm, PromptForm, LogForm
 from django.core.signing import Signer
 from hashlib import sha256
@@ -224,7 +225,7 @@ class ProductListView(ListView):
                 key = APIKEY.objects.get_from_key(k)
                 if len(key.payment_id) > 1:
                     payment_id = key.payment_id
-                    wallet = manage_monero("make_integrated_address", payment_id)
+                    wallet = manage_monero("make_integrated_address", {"payment_id":payment_id})
                     integrated_address = json.loads(wallet.text)['result']['integrated_address']
                     return HttpResponseRedirect(f"/buy/{signer.sign(k)}")
                 else:
@@ -240,14 +241,71 @@ class ProductListView(ListView):
                         integrated_address = ""
                         payment_id = ""
                         messages.error(request, "Your Key does not have a Monero wallet, create a new Key",
-                                extra_tags='monero')
+                                extra_tags='monero_address')
                     return HttpResponseRedirect("/buy")
-            except:
+            except ObjectDoesNotExist:
                 messages.error(request, "Key is incorrect",
-                            extra_tags='monero')
+                            extra_tags='monero_address')
                 return HttpResponseRedirect("/buy")
-
-
+            
+        elif bleach.clean(request.POST.get("form_type")) == 'check_xmr_payment':
+            k = bleach.clean(request.POST.get('key'))
+            try:
+                key = APIKEY.objects.get_from_key(k)
+                payment_check = manage_monero("get_payments", {"payment_id": key.payment_id})
+                if "error" in json.loads(payment_check.text):
+                    messages.error(request, "Payment ID is incorrect",
+                            extra_tags='monero_payment')
+                    return HttpResponseRedirect(f"/buy")
+                elif len(json.loads(payment_check.text)["result"]) == 0:
+                    messages.error(request, "No transaction detected",
+                            extra_tags='monero_payment')
+                    return HttpResponseRedirect(f"/buy")
+                else:
+                    payment_id_response = json.loads(payment_check.text)["result"]['payments'][0]['payment_id']
+                    address_response = json.loads(payment_check.text)["result"]['payments'][0]['address']
+                    amount = json.loads(payment_check.text)["result"]['payments'][0]['amount']
+                    block_height = json.loads(payment_check.text)["result"]['payments'][0]['block_height']
+                    locked = json.loads(payment_check.text)["result"]['payments'][0]['locked']
+                    tx_hash = json.loads(payment_check.text)["result"]['payments'][0]['tx_hash']
+                    unlock_time = json.loads(payment_check.text)["result"]['payments'][0]['unlock_time']
+                    crypto = Crypto.objects.get(coin="xmr")
+                    if int(unlock_time) == 0 and not locked:
+                        try:
+                            PaymentHistory.objects.get(
+                                key= key,
+                                crypto=crypto,
+                                amount=amount/1e+12,
+                                integrated_address = address_response,
+                                payment_id = payment_id_response,
+                                locked = locked,
+                                transaction_hash = tx_hash,
+                                block_height = block_height,    
+                            )
+                            messages.success(request, f"The lastest tx_hash is {tx_hash}, no change to xmr credit of key: {k}", extra_tags='monero_payment')
+                        except ObjectDoesNotExist:
+                            PaymentHistory.objects.create(
+                                key= key,
+                                crypto=crypto,
+                                amount=amount/1e+12,
+                                integrated_address = address_response,
+                                payment_id = payment_id_response,
+                                locked = locked,
+                                transaction_hash = tx_hash,
+                                block_height = block_height,
+                                
+                            )
+                            key.monero_credit += amount/1e+12
+                            key.save()
+                            messages.success(request, f"Transaction is success, add {amount/1e+12} XMR to key {k}",
+                        extra_tags='monero_payment')
+                    else:
+                        messages.error(request, f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations",
+                        extra_tags='monero_payment')
+            except ObjectDoesNotExist:
+                messages.error(request, f"Key is incorrect",
+                extra_tags='monero_payment')
+            return HttpResponseRedirect("/buy")
 class ProductDetailView(DetailView):
     model = Product
     context_object_name = "product"

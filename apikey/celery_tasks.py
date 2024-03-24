@@ -33,21 +33,27 @@ def update_crypto_rate(coin: str):
             url = "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd"
             response = requests.get(url)
             price= float(json.loads(response.text)['monero']['usd'])
+            crypto = Crypto.objects.get(coin=coin)
+            crypto.coin_usd_rate = price
+            crypto.save()
         except KeyError:
-            url = 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest'
-            headers = {
-                        'Accepts': 'application/json',
-                        'X-CMC_PRO_API_KEY': config('CMC_API'),
-                    }
-            params = {
-                'id': '328',
-                'convert': 'USD',
-            }
-            response= requests.get(url, headers=headers, params=params)
-            price= json.loads(response.text)['data']['328']['quote']['USD']['price']
-        crypto = Crypto.objects.get(coin=coin)
-        crypto.coin_usd_rate = price
-        crypto.save()
+            try:
+                url = 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest'
+                headers = {
+                            'Accepts': 'application/json',
+                            'X-CMC_PRO_API_KEY': config('CMC_API'),
+                        }
+                params = {
+                    'id': '328',
+                    'convert': 'USD',
+                }
+                response= requests.get(url, headers=headers, params=params)
+                price= json.loads(response.text)['data']['328']['quote']['USD']['price']
+                crypto = Crypto.objects.get(coin=coin)
+                crypto.coin_usd_rate = price
+                crypto.save()
+            except KeyError:
+                pass
 
 
 @shared_task()
