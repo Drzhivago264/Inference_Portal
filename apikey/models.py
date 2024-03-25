@@ -59,7 +59,15 @@ class CustomTemplate(models.Model):
     bot_instruct = models.TextField(default="")
     def __str__(self) -> str:
         return self.template_name
-    
+
+class AgentInstruct(models.Model):
+    name = models.CharField(max_length=200)
+    template = models.ForeignKey(CustomTemplate, on_delete=models.CASCADE)
+    code = models.CharField(max_length=10)
+    instruct = models.TextField(default="")
+    def __str__(self) -> str:
+        return f"{self.name} - {self.template.template_name}"
+
 class InferenceServer(models.Model):
     name = models.CharField(max_length=200)
     instance_type = models.CharField(max_length=200)
@@ -84,8 +92,6 @@ class ProductTag(models.Model):
     def __str__(self) -> str:
         return self.name
         
-
-
 class PromptResponse(models.Model):
     prompt = models.CharField(max_length=4096)
     response = models.CharField(max_length=4096)
@@ -100,10 +106,8 @@ class PromptResponse(models.Model):
     def __str__(self) -> str:
         return self.prompt
     def get_vectordb_text(self):
-        # Use title and description for vector search
         return f"{self.prompt} -- {self.response}"
     def get_vectordb_metadata(self):
-        # Enable filtering by any of these metadata
         return {"key":self.key.hashed_key,
                 "key_name": self.key.name,
                 "p_type": self.p_type, 
@@ -119,7 +123,6 @@ class Product(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     class Meta:
         ordering = ("-created_at",)
 
@@ -129,9 +132,7 @@ class Product(models.Model):
 class Price(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.DecimalField(decimal_places=2, max_digits=10)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     def __str__(self) -> str:
         return f"{self.product.name} {self.price}"

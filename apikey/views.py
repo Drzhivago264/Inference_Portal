@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect
 import stripe
 from django.core.paginator import Paginator
 from datetime import datetime
-from .models import Price, Product, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY, Crypto, PaymentHistory
+from .models import Price, Product, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY, Crypto, PaymentHistory, AgentInstruct
 from .forms import CaptchaForm
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
@@ -28,12 +28,12 @@ from vectordb import vectordb
 import json
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def index(request):
     return render(request, "html/index.html")
 
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def manual(request):
     return render(request, "html/manual.html")
 
@@ -306,6 +306,7 @@ class ProductListView(ListView):
                 messages.error(request, f"Key is incorrect",
                 extra_tags='monero_payment')
             return HttpResponseRedirect("/buy")
+        
 class ProductDetailView(DetailView):
     model = Product
     context_object_name = "product"
@@ -445,9 +446,14 @@ def agentroom(request,  key):
     llm = LLM.objects.filter(agent_availability=True)
     default_template = CustomTemplate.objects.get(
         template_name="Assignment Agent")
+    default_child_template = AgentInstruct.objects.filter(
+        template = default_template, 
+    )
     templates = CustomTemplate.objects.all()
     context = {'llms': llm, "templates": templates,
-               "template": default_template, "key": key}
+               "template": default_template, 
+               "child_template": default_child_template,
+               "key": key}
     return render(request, "html/lagent.html", context)
 
 

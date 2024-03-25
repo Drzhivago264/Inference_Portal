@@ -61,31 +61,31 @@
     }
 
     #editorjs h1{
-        font-size: 32px;
-        color: black;
-    }
-    #editorjs h2{
         font-size: 28px;
         color: black;
     }
-    #editorjs h3{
+    #editorjs h2{
         font-size: 24px;
         color: black;
     }
-    #editorjs h4{
+    #editorjs h3{
         font-size: 20px;
         color: black;
     }
-    #editorjs h5{
+    #editorjs h4{
         font-size: 18px;
         color: black;
     }
-    #editorjs h6{
+    #editorjs h5{
         font-size: 16px;
         color: black;
     }
-    #editorjs small{
+    #editorjs h6{
         font-size: 14px;
+        color: black;
+    }
+    #editorjs small{
+        font-size: 12px;
         color: black;
     }
 </style>
@@ -135,17 +135,17 @@
     <hr>
     <main class="grid" style="grid-template-columns: 50% 45%; min-width: 1250px;">
         <div class="grid" style="grid-template-columns: 28% 70%; min-width: 600px;">
-            <div id="container" style="padding-left: 2px; min-width: 150px;">
-                <h3>Templates</h3>
-                <form style="font-size:calc(10px + 0.7vw);" autocomplete="off">
-                    {% for template in templates %}
-                    {% if template.template_name == 'Assignment Agent' %}
-                    <input type="radio" class="checkbox" name="template" value="{{template.template_name}}" checked="checked"> {{template.template_name}}<br>
+            <div id="container" style="padding-left: 10px; min-width: 145px;">
+                <h4>Structure</h4>
+                <ul id="document-structure"> 
+                    {% for child in child_template %}
+                    {% if child.name == "Introduction"%}
+                    <li><a class="primary">{{child.name}}</a></li>
                     {% else %}
-                    <input type="radio" class="checkbox" name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
+                    <li><a class="secondary">{{child.name}}</a></li>
                     {% endif %}
                     {% endfor %}
-                </form>
+                </ul>
                 <hr>
                 <div class="grid">
                     <a  style="display: block; margin: 10px auto; " id="doc-export">
@@ -160,13 +160,21 @@
             </div>
             <div class="container" style="min-width: 400px;" id="site_content_document">
                 <div id="document-instruction">
-                    <h3>Agent Instruction</h3>
-
-                    <textarea id="agent_instruction" rows="20" style="font-size: 12px;" autocomplete="off">{{template.bot_instruct|safe}}</textarea>
+                    <h4>Agent Instruction</h4>
+                    <textarea id="agent_instruction" rows="10" style="font-size: 12px;" autocomplete="off">{{template.bot_instruct|safe}}</textarea>
+                </div>
+                <hr>
+                <div id="document-child-instruction"> 
+                    <h4>Child Instruction</h4>
+                    {% for child in child_template %}
+                    {% if child.name == "Introduction"%}
+                    <textarea id="child_instruction" rows="10" style="font-size: 12px;" autocomplete="off">{{child.instruct|safe}}</textarea>
+                    {% endif %}
+                    {% endfor %}
                 </div>
                 <hr>
                 <div id="document-template">
-                    <h3 >Document Editor</h3>
+                    <h3 >Editor</h4>
                     <div id="editorjs">
 
                         <script>
@@ -236,12 +244,23 @@
             </div>
             <div class="grid" style="grid-template-columns: 65% 35%; min-width: 600px;" id="site_content_chat">
                 <div clas="container">
-                    <h3> Chat </h3>
+                    <div class="grid" style="grid-template-columns: 35% 60%;">
+                        <h4> Chat with:</h4>
+                        <select autocomplete="off" name="template-select" id="template-select" style="height: 35px; padding-top: 5px; padding-bottom: 5px ;font-size:calc(1px + 0.7vw);" aria-label="Select your agent..." required>
+                            {% for template in templates %}
+                            {% if template.template_name == 'Assignment Agent' %}
+                            <option selected name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
+                            {% else %}
+                            <option name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
+                            {% endif %}
+                            {% endfor %}
+                      </select>
+                    </div>
                     <div id="chat-log">
                         <div class="message_log_container"
                             style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
                             <span> Input your Key:
-                                <input style="height: 20px; width: 20ch;" id="api_key">
+                                <input style="height: 20px; width: 20ch; font-size:calc(1px + 0.7vw);" id="api_key">
                             </span>
                         </div>
                         <div id="chat-log_">
@@ -256,8 +275,8 @@
                         {{ name|json_script:"name" }}
                         {{ key|json_script:"key" }}
                     </div>
-                <div style="max-width: 380px; font-size:calc(10px + 0.7vw);  padding-left: 1px;" class="container">
-                    <h3> Available Models </h3>
+                <div style="max-width: 380px; font-size:calc(5px + 0.7vw);  padding-left: 1px;" class="container">
+                    <h4> Available Models </h4>
                     {% for llm in llms %}
                     {% if llm.name == 'gpt-4' %}
                     <input type="radio" class="checkbox_model" name="model" value="{{llm.name}}" checked="checked"> {{llm.name}}<br>
@@ -265,7 +284,7 @@
                     <input type="radio" class="checkbox_model" name="model" value="{{llm.name}}"> {{llm.name}}<br>
                     {% endif %}
                     {% endfor %}
-                    <h3> Parameters </h3>
+                    <h4> Parameters </h4>
                     <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small><br>
                     <small><i>NOTE: In order to better understand these parameters, refer to <a
                             href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a
@@ -381,9 +400,22 @@
                 else if (data.paragraph || data.paragraph == 0) {
                     currentParagraph = data.paragraph    
                 }
+                else if (data.child_instruct) {
+                    document.getElementById("child_instruction").value = data.child_instruct; 
+                }
                 else if (data.swap_instruction) {
                     document.getElementById("agent_instruction").value = data.swap_instruction; 
+                    document.getElementById("child_instruction").value = data.default_child_instruct; 
                     editor.render(JSON.parse(data.swap_template));
+                    document.querySelector('#document-structure').innerHTML = ""
+                    for (let child of data.child_template_name_list){
+                        if (child == "Attention" || child == "Introduction") {
+                            document.querySelector('#document-structure').innerHTML += ("<li><a class='primary'>"+ child +"</a></li>")
+                        }
+                        else {
+                                document.querySelector('#document-structure').innerHTML += ("<li><a class='secondary'>"+ child +"</a></li>")
+                        }
+                    }         
                 }
                 else if (data.agent_action == "STOP"){
                     var blockToAdd = {
@@ -425,13 +457,8 @@
                         break;
                     }
                 }
-                var templateElements = document.getElementsByClassName('checkbox');
-                for (var i = 0; templateElements[i]; ++i) {
-                    if (templateElements[i].checked) {
-                        choosen_template = templateElements[i].value;
-                        break;
-                    }
-                }                
+                var choosen_template = document.getElementById("template-select").value;
+         
                 var modeElements = document.getElementsByClassName('checkbox_mode');
                 for (var i = 0; modeElements[i]; ++i) {
                     if (modeElements[i].checked) {
@@ -440,6 +467,7 @@
                     }
                 }
                 const agent_instruction = document.getElementById('agent_instruction').value
+                const child_instruction = document.getElementById('child_instruction').value
                 const api_key = document.getElementById('api_key').value
                 const top_p = document.getElementsByName("top_p")[0].value
                 var max_tokens = document.getElementsByName("max_tokens")[0].value
@@ -467,18 +495,32 @@
                     'frequency_penalty': frequency_penalty,
                     'presence_penalty': presence_penalty,
                     'temperature': temperature,
-                    'agent_instruction': agent_instruction
+                    'agent_instruction': agent_instruction,
+                    'child_instruction': child_instruction
                 }));
                 messageInputDom.value = '';
             };
-            function swaptemplate(event) {
+
+            var template_select = document.getElementById('template-select');
+            template_select.onchange = (event) => {
+                var template = event.target.value;
                 chatSocket.send(JSON.stringify({
-                            'swap_template': event.target.value,
+                            'swap_template': template,
                     }));
             }
-            document.querySelectorAll("input[name='template']").forEach((input) => {
-                input.addEventListener('change', swaptemplate);
-            });
-        </script>
+            var ul = document.getElementById('document-structure');
+            ul.onclick = function(event) {
+                var lis = document.querySelectorAll('#document-structure a');
+                for(var j=0;j<lis.length;j++){
+                    console.log(lis[j].className="secondary");
+                } 
+                if (event.target.tagName == "A"){
+                    event.target.className="primary"
+                chatSocket.send(JSON.stringify({
+                            'swap_child_instruct': event.target.innerHTML,
+                    }));
+                }
+            };
+</script>
 </body>
 </html>
