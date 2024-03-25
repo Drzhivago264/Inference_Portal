@@ -4,7 +4,7 @@ from datetime import datetime
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
-from .models import Price, Product,  LLM, InferenceServer, CustomTemplate, APIKEY
+from .models import Price, Product,  LLM, InferenceServer, CustomTemplate, APIKEY, AgentInstruct
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import send_email_, Inference, Agent_Inference
@@ -134,6 +134,18 @@ class AgentConsumer(AsyncWebsocketConsumer):
             return template
         except:
             return False
+        
+    @database_sync_to_async
+    def get_child_tempalte_name(self, template, name=None):
+        try:
+            if name is None:
+                child_template = AgentInstruct.objects.filter(template=template).order_by("code")
+                return {"name_list":[c.name for c in child_template], "default_instruct": child_template[0].instruct }
+            else:
+                child_template = AgentInstruct.objects.get(name=name)
+                return child_template.instruct
+        except Exception as e:
+            return e
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
@@ -148,7 +160,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         await self.send(text_data=json.dumps({"message": "Default to GPT4 or choose model on the left", "role": "Server", "time": self.time}))
-        await self.send(text_data=json.dumps({"message": "Instruction to the user: \n 1. Click on the paragraph that you want to work on, then give the agent instructions to write \n 2. If you face any bug, refresh and retry. \n 3. You can export all paragraphs by clicking on [Export Document] button on the right.", "role": "Server", "time": self.time}))
+        await self.send(text_data=json.dumps({"message": "Instruction to the user: \n 1. Click on the paragraph that you want to work on, then give the agent instructions to write \n 2. If you face any bug, refresh and retry. \n 3. You can export all paragraphs by clicking on [Export] on the right.", "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -173,6 +185,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 pass
         elif 'swap_template' in text_data_json:
             swap_template = await self.get_tempalte(text_data_json['swap_template'])
+            child_template = await self.get_child_tempalte_name(swap_template, None)
             swap_instruction = swap_template.bot_instruct
             swap_template_ = swap_template.template
             await self.channel_layer.group_send(
@@ -180,7 +193,19 @@ class AgentConsumer(AsyncWebsocketConsumer):
                     "type": "chat_message",
                     "swap_name": text_data_json['swap_template'],
                     "swap_instruction": swap_instruction,
-                    "swap_template": swap_template_
+                    "swap_template": swap_template_,
+                    "child_template_name_list": child_template['name_list'],
+                    "default_child_instruct": child_template['default_instruct']
+                }
+            )
+        elif 'swap_child_instruct' in text_data_json:
+            swap_child_instruct = text_data_json['swap_child_instruct']
+            child_instruct = await self.get_child_tempalte_name(None, swap_child_instruct)
+            await self.channel_layer.group_send(
+                self.room_group_name, {
+                    "type": "chat_message",
+                    
+                    "child_instruct": child_instruct
                 }
             )
         elif 'message' in text_data_json:
@@ -196,6 +221,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 cache.set(f"{self.key}", key_object,
                           constant.CACHE_AUTHENTICATION)
                 agent_instruction = text_data_json['agent_instruction']
+                child_instruction = text_data_json['child_instruction']
                 current_turn_inner = self.current_turn
                 currentParagraph = text_data_json['currentParagraph']
                 self.working_paragraph = currentParagraph
@@ -210,7 +236,8 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 frequency_penalty = float(text_data_json["frequency_penalty"])
                 presence_penalty = float(text_data_json["presence_penalty"])
                 temperature = float(text_data_json["temperature"])
-
+                
+                agent_instruction += child_instruction
                 Agent_Inference.delay(unique=unique_response_id,
                                       key=self.key,
                                       stream=True,
@@ -289,11 +316,18 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"agent_action": agent_action, "result_id": self.working_paragraph, "full_result": full_result}))
                 self.session_history = []
                 self.current_turn = 0
-
+        if "child_instruct" in event:
+            child_instruct = event['child_instruct']
+            if child_instruct is not None:
+                await self.send(text_data=json.dumps({"child_instruct": child_instruct}))
         if "swap_template" in event:
             swap_template_name = event['swap_name']
             swap_instruction = event['swap_instruction']
             swap_template = event['swap_template']
+            child_template_name_list = event['child_template_name_list']
+            default_child_instruct = event['default_child_instruct']
             await self.send(text_data=json.dumps({"message": f"Swap to {swap_template_name}, what do you want me to write?", "role": "Server", "time": self.time}))
             await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
-                                                  "swap_template": swap_template}))
+                                                  "swap_template": swap_template,
+                                                  "child_template_name_list": child_template_name_list,
+                                                  "default_child_instruct": default_child_instruct}))
