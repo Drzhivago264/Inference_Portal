@@ -285,25 +285,27 @@
 
                 const messageInputDom = document.querySelector('#chat-message-input');
                 const message = messageInputDom.value;
-                chatSocket.send(JSON.stringify({
-                    'mode': mode,
-                    'message': message,
-                    'key': api_key,
-                    'choosen_models': choosen_models,
-                    'role': 'Human',
-                    'top_k': top_k,
-                    'top_p': top_p,
-                    'best_of': best_of,
-                    'max_tokens': max_tokens,
-                    'frequency_penalty': frequency_penalty,
-                    'presence_penalty': presence_penalty,
-                    'temperature': temperature,
-                    'beam': beam,
-                    'early_stopping': early_stopping,
-                    'length_penalty': length_penalty,
-                    'include_memory': include_memory
-                }));
-                messageInputDom.value = '';
+                if (message.trim() !== ""){
+                    chatSocket.send(JSON.stringify({
+                        'mode': mode,
+                        'message': message,
+                        'key': api_key,
+                        'choosen_models': choosen_models,
+                        'role': 'Human',
+                        'top_k': top_k,
+                        'top_p': top_p,
+                        'best_of': best_of,
+                        'max_tokens': max_tokens,
+                        'frequency_penalty': frequency_penalty,
+                        'presence_penalty': presence_penalty,
+                        'temperature': temperature,
+                        'beam': beam,
+                        'early_stopping': early_stopping,
+                        'length_penalty': length_penalty,
+                        'include_memory': include_memory
+                    }));
+                    messageInputDom.value = '';
+                }
             };
         </script>
 </body>

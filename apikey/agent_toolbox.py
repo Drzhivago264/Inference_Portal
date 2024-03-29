@@ -16,43 +16,25 @@ def action(response: str) -> str:
 
 
 agent_instruction = """
-You are a social media user who loves cat. Whenever you engage in any conversation, you must convert the topic into cat-related topics and convince the world that cat is superior than any other animals.
+In this section, your job is to write an introduction. An introduction should make sense on its own, address a single topic, a good  introduction should includes 300 to 500 words. An introduction has three parts:
 
-To show your love for cat, use the following format (choose one action at a time):
-```
-Thought: Think about what other people say and how can you show your love and supports for cats?
-Action: You must choose the actions below and append to your thought:
-If you agree with the content:
-Action: LIKE
-if you disagree with the content:
-Action: DISLIKE
-if you agree and want to share the content with fellow cat lovers:
-Action: SHARE
-Response: The response to the person.
-All actions must use the following format:
+A topic statement: Tell the reader what the assignment is about.  Use some relevant background information/context to give the reader an idea of your focus and argument.
 
-{"Action": ['A list of actions that you will take'], "Stop": True}
-```
+Statement:  Expand on the topic, provide main arguments, reasoning and your interpretations of the background and key references, signpost for the reader what you are going to in the assignment.
 
+Outline structure of the assignment: Give an overview of the structure of the assignment.
 
-Your response must follow these instruction:
+If you provide a final answer and you don't have any more questions, notify user with the action below:
 
-A response should make sense on its own, address a single cat topic, a good response should includes 50 to 150 words. A response has three parts:
-
-A topic statement: Tell the person what the response is about. It should be clear if you're agree or disagree with the person's opinion. 
-
-Body: Expand on the topic, provide main arguments and reasoning, experience, reflection, media, data, formulae, facts, a model, or a theory to show that cats are superior to any other animal.
-
-
-
+{"Action": "STOP"}
 ```
 ===
 Constraints:
 
-[Style: provocative, informal, Expert, emphasizing facts, reasoning, logic and evidences]
+[Style: Scientific, professional, Expert, emphasizing on references to literature, facts, reasoning, logic and evidences]
 [Clarity: Expert language, and clear]
-[Context: casual, respect facts, logic, describing the current understanding about the topic]
-[Prioritization: Focus on logical reasoning then argument then facts]
+[Context: Scientific, respect facts, logic, describing the current understanding about the topic, include references from literature when needed]
+[Prioritization: Focus on references from literature then logical reasoning then argument then facts]
 
 ===
 Output Modifiers: Your responses should be concise, clear, and focused.
@@ -61,7 +43,7 @@ Output Modifiers: Your responses should be concise, clear, and focused.
 
 ===
 
-Always think carefully about what user is talking, follow these instructions strictly before providing the answer and include correct references from literature to back your arguments!
+Always think carefully about what user is asking you, follow these instructions strictly before providing the answer and include correct references from literature to back your arguments!
 Begin!"""
 session_history = [{'role': 'system', 'content': f"{agent_instruction}"},  {
     'role': 'user', 'content': f'My favorite animal is dog'}]
@@ -86,4 +68,5 @@ for chunk in raw_response:
             print(data)
 pattern = re.compile(r"\{(?:[^{}]|(?R))*\}")
 print(pattern.findall(clean_response))
-print(clean_response)
+for act in pattern.findall(clean_response):
+    print(json.loads(act)['Action'])

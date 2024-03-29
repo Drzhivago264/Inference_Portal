@@ -497,24 +497,26 @@
 
                 const messageInputDom = document.querySelector('#chat-message-input');
                 const message = messageInputDom.value;
-                chatSocket.send(JSON.stringify({
-                    'mode': mode,
-                    'currentParagraph': currentParagraph,
-                    'message': message,
-                    'key': api_key,
-                    'choosen_models': choosen_models,
-                    'choosen_template': choosen_template,
-                    'role': 'Human',
-                    'top_p': top_p,
-                    'max_tokens': max_tokens,
-                    'frequency_penalty': frequency_penalty,
-                    'presence_penalty': presence_penalty,
-                    'temperature': temperature,
-                    'agent_instruction': agent_instruction,
-                    'child_instruction': child_instruction
-                }));
-                messageInputDom.value = '';
-            };
+                if (message.trim() !== ""){
+                    chatSocket.send(JSON.stringify({
+                        'mode': mode,
+                        'currentParagraph': currentParagraph,
+                        'message': message,
+                        'key': api_key,
+                        'choosen_models': choosen_models,
+                        'choosen_template': choosen_template,
+                        'role': 'Human',
+                        'top_p': top_p,
+                        'max_tokens': max_tokens,
+                        'frequency_penalty': frequency_penalty,
+                        'presence_penalty': presence_penalty,
+                        'temperature': temperature,
+                        'agent_instruction': agent_instruction,
+                        'child_instruction': child_instruction
+                    }));
+                    messageInputDom.value = '';
+                };
+            }
 
             var template_select = document.getElementById('template-select');
             template_select.onchange = (event) => {

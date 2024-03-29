@@ -5,8 +5,8 @@ from apikey.models import InferenceServer, LLM, PromptResponse, APIKEY
 from . import constant
 from decouple import config
 import boto3
-
-import re
+import json
+import regex as re
 from django.db.models.query import QuerySet
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
@@ -169,24 +169,22 @@ def send_request(stream: bool, url: str, instance_id: str, context) -> str:
         response = "Server is setting up, wait."
     return response
 
-
-def action_parse(context: str) -> list | bool:
+def action_parse_json(context: str) -> list | bool:
     """_summary_
 
     Args:
-        context (_type_): _description_
+        context (str): _description_
 
     Returns:
-        _type_: _description_
+        list | bool: _description_
     """
-    action_regex = f"/ACTION: (.*?)/"
-    action_match = re.findall(action_regex, context)
+    pattern = re.compile(r"\{(?:[^{}]|(?R))*\}")
+    action_match = pattern.findall(context)
     if not action_match:
         return False
     else:
         return action_match
-
-
+    
 def send_request_openai(stream: bool, 
                         session_history: list, 
                         model_type: str, 
@@ -259,16 +257,18 @@ def send_request_openai(stream: bool,
                         }
                     )
 
-        action_list = action_parse(session_history[-1]['content'])
+        action_list = action_parse_json(session_history[-1]['content'])
         if action_list:
-            if "STOP" in action_list:
-                async_to_sync(channel_layer.group_send)(
-                    room_group_name,
-                    {
-                        "type": "chat_message",
-                        "agent_action": "STOP"
-                    }
-                )
+            for act in action_list:
+                action = json.loads(act)['Action']   
+                if "STOP" == action:
+                    async_to_sync(channel_layer.group_send)(
+                        room_group_name,
+                        {
+                            "type": "chat_message",
+                            "agent_action": action
+                        }
+                    )
         return clean_response
 
     except openai.APIConnectionError as e:
@@ -350,11 +350,11 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
     """_summary_
 
     Args:
-        model (str): _description_
-        key (str): _description_
+        model (str): model name
+        key (str): they users' api key
 
     Returns:
-        str: _description_
+        str: chat history of user including 3 relevant responses
     """
     #message_list_sql = list(reversed(PromptResponse.objects.filter(
     #    model__name=model, key=key_, p_type="chatroom").order_by("-id")[:constant.DEFAULT_CHAT_HISTORY_OBJECT]))

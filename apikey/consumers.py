@@ -37,18 +37,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     # Receive message from WebSocket
-
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         self.key = text_data_json["key"]
         key_object = cache.get(f"{self.key}")
         if key_object is None:
             key_object = await self.check_key()
-
         if not key_object:
             await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
             await self.disconnect(self)
-        elif key_object:
+        elif not text_data_json["message"].strip():
+            await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
+        elif key_object and text_data_json["message"].strip():
             cache.set(f"{self.key}", key_object, constant.CACHE_AUTHENTICATION)
             mode = text_data_json["mode"]
             message = text_data_json["message"]
@@ -205,7 +205,6 @@ class AgentConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
                 self.room_group_name, {
                     "type": "chat_message",
-                    
                     "child_instruct": child_instruct
                 }
             )
@@ -214,11 +213,12 @@ class AgentConsumer(AsyncWebsocketConsumer):
             key_object = cache.get(f"{self.key}")
             if key_object is None:
                 key_object = await self.check_key()
-
             if not key_object:
                 await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
                 await self.disconnect(self)
-            elif key_object:
+            elif not text_data_json["message"].strip():
+                 await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
+            elif key_object and text_data_json["message"].strip():
                 cache.set(f"{self.key}", key_object,
                           constant.CACHE_AUTHENTICATION)
                 agent_instruction = text_data_json['agent_instruction']
@@ -305,10 +305,9 @@ class AgentConsumer(AsyncWebsocketConsumer):
 
         if "agent_action" in event:
             agent_action = event['agent_action']
-
             if agent_action == "STOP":
                 full_result = self.session_history[-1]['content']
-                full_result = full_result.replace("/ACTION: STOP/", "")
+                full_result = full_result.replace('{"Action":"STOP"}', "")
                 full_result = full_result.replace("Final Answer:", "")
                 thought_match = re.findall("Thought: (.*)\n", full_result)
                 full_result = full_result.replace(thought_match[0], "")
