@@ -11,7 +11,16 @@
         border-radius: 5px;
         overflow: auto;
     }
-
+    .input-wrapper{
+        position: relative; 
+    }
+    #chat-message-submit{
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        font-size: 16px;
+        padding: 5px;
+    }
     .message_log_container {
         margin: 10px;
     }
@@ -100,9 +109,9 @@
 
                 </div>
                 <hr>
-                <div role="group">
-                    <input id="chat-message-input"  name="message">
-                    <input type="image" style=" width: 15%; background-color: rgb(1, 114, 173);" id="chat-message-submit" src="/static/image/5208419_arrow_forward_navigation_send_share_icon.svg" >
+                <div class="input-wrapper">
+                    <textarea id="chat-message-input" name="message"></textarea>
+                    <button id="chat-message-submit" >Send</button>
                 </div>
                 {{ name|json_script:"name" }}
                 {{ key|json_script:"key" }}
@@ -219,7 +228,12 @@
                     document.querySelector('#chat-message-submit').click();
                 }
             };
-
+            var textarea = document.getElementById("chat-message-input");
+            var limit = 300;
+            textarea.oninput = function() {
+                textarea.style.height = "";
+                textarea.style.height = Math.min(textarea.scrollHeight, limit) + "px";
+            };
 
             document.querySelector('#chat-message-submit').onclick = function (e) {
                 var choosen_models = null;
