@@ -3,7 +3,7 @@ from openai import OpenAI
 import openai
 from decouple import config
 from langchain_core.utils.function_calling import convert_to_openai_tool
-
+import regex as re
 
 def stop(response: str) -> str:
     """provide your final response to the user"""
@@ -23,13 +23,15 @@ To show your love for cat, use the following format (choose one action at a time
 Thought: Think about what other people say and how can you show your love and supports for cats?
 Action: You must choose the actions below and append to your thought:
 If you agree with the content:
-ACTION: LIKE
+Action: LIKE
 if you disagree with the content:
-ACTION: DISLIKE
+Action: DISLIKE
 if you agree and want to share the content with fellow cat lovers:
-ACTION: SHARE(destination)
+Action: SHARE
 Response: The response to the person.
+All actions must use the following format:
 
+{"Action": ['A list of actions that you will take'], "Stop": True}
 ```
 
 
@@ -41,9 +43,7 @@ A topic statement: Tell the person what the response is about. It should be clea
 
 Body: Expand on the topic, provide main arguments and reasoning, experience, reflection, media, data, formulae, facts, a model, or a theory to show that cats are superior to any other animal.
 
-The response must use the following format:
 
-{"Response": "The response including explainations and arguments", "Thought": "Your thought leading to the response", "Action": ['A list of actions that you will take'], "Stop": "True"}
 
 ```
 ===
@@ -66,15 +66,24 @@ Begin!"""
 session_history = [{'role': 'system', 'content': f"{agent_instruction}"},  {
     'role': 'user', 'content': f'My favorite animal is dog'}]
 client = OpenAI(api_key=config("GPT_KEY"))
-response = client.chat.completions.create(model="gpt-4",
+raw_response = client.chat.completions.create(model="gpt-4",
                                           messages=session_history,
+                                          stream=True
 
                                           )
 
-print(response.choices[0].message.content)
-j = json.loads(response.choices[0].message.content)
-
-print(j['Response'])
-print(j['Thought'])
-print(j['Action'])
-print(j['Stop'])
+clean_response = str()
+for chunk in raw_response:
+    if chunk:
+        data = chunk.choices[0].delta.content
+        if data != None:
+            clean_response += data
+            response_json = [
+                {'role': 'assistant', 'content': f'{clean_response}'}
+            ]
+            session_history.pop()
+            session_history.extend(response_json)
+            print(data)
+pattern = re.compile(r"\{(?:[^{}]|(?R))*\}")
+print(pattern.findall(clean_response))
+print(clean_response)

@@ -6,6 +6,7 @@ from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
 from .models import Price, Product,  LLM, InferenceServer, CustomTemplate, APIKEY, AgentInstruct
 from channels.db import database_sync_to_async
+from django.core.exceptions import ObjectDoesNotExist
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import send_email_, Inference, Agent_Inference
 from decouple import config
@@ -20,7 +21,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             key = APIKEY.objects.get_from_key(self.key)
             return key
-        except:
+        except ObjectDoesNotExist:
             return False
 
     async def connect(self):
@@ -124,7 +125,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
         try:
             key = APIKEY.objects.get_from_key(self.key)
             return key
-        except:
+        except ObjectDoesNotExist:
             return False
 
     @database_sync_to_async
@@ -132,7 +133,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
         try:
             template = CustomTemplate.objects.get(template_name=name)
             return template
-        except:
+        except ObjectDoesNotExist:
             return False
         
     @database_sync_to_async
