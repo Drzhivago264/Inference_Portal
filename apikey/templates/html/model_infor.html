@@ -8,10 +8,11 @@
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="shortcut icon" type="image/png" href="static/image/favicon.ico" />
   <meta property="og:title" content="Inference Portal for multiple Large Language Models">
-  <meta property="og:description" content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
+  <meta property="og:description"
+    content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
   <meta property="og:type" content="article">
   <meta property="og:url" content="static/image/android-chrome-192x192.png">
-  <meta property="og:image" content="static/image/android-chrome-192x192.png"/>
+  <meta property="og:image" content="static/image/android-chrome-192x192.png" />
   <link rel="stylesheet" href="static/css/pico-main/css/pico.min.css" />
   <link rel="stylesheet" href="static/css/pico-main/css/pico.colors.min.css" />
   <script type="text/javascript" src="static/js/colour-theme-toggle.js"></script>
@@ -21,27 +22,27 @@
   <header class="container">
     <nav>
       <ul>
-        <hgroup  onclick="window.location.href = '/';">
+        <hgroup onclick="window.location.href = '/';">
           <h1><b>Inference</b></h1>
         </hgroup>
       </ul>
       <ul>
         <li>
-          <details  class="dropdown">
+          <details class="dropdown">
             <summary role="button" class="outline">
               About
             </summary>
             <ul dir="rtl">
-              <li><a  href="/">Introduction</a></li>
-              <li><a  aria-current="page" href="/model_infor">Model</a></li>
+              <li><a href="/">Introduction</a></li>
+              <li><a aria-current="page" href="/model_infor">Model</a></li>
               <li><a href="/manual">User Manual</a></li>
               <li><a href="/contact">Contact Us</a></li>
             </ul>
-          </details> 
+          </details>
         </li>
-       
+
         <li>
-          <details  class="dropdown">
+          <details class="dropdown">
             <summary>
               Modes
             </summary>
@@ -50,63 +51,60 @@
               <li><a href="/chat">Chat Bot and Agent</a></li>
             </ul>
           </details>
-        </li> 
+        </li>
         <li><a class="contrast" href="/buy">Get Key</a></li>
         <li><a class="contrast" href="/promptresponse">Response Log</a></li>
         <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
       </ul>
-      
+
     </nav>
-  
-</header>
-<hr>
-<main class="container">
-  <div id="site_content" class="grid">
-    <div class="container"   id="content">
-      <h2>Available Models:</h2>
-      {% for llm in llms %}
-      <details>
-        <summary>
-          {{llm.name}}
-        </summary>
-        <p>{{llm.desc|linebreaks}} </p>
-      </details>
-    
-        
-    
-      {% endfor %}
-  </div>
-        <div class="container">
 
-          <h2>Servers Status</h2>
+  </header>
+  <hr>
+  <main class="container">
+    <div id="site_content" class="grid">
+      <div class="container" id="content">
+        <h2>Available Models:</h2>
+        {% for llm in llms %}
+        <details>
+          <summary>
+            {{llm.name}}
+          </summary>
+          <p>{{llm.desc|linebreaks}} </p>
+        </details>
+        {% endfor %}
+      </div>
+      <div class="container">
 
-          <table style="  margin-left: auto; margin-right: auto; ">
-            <tr>
-              <th>Servers</th>
-              <th>Models</th>
-              <th>Status</th>
-              <th>Availability</th>
-            </tr>
-            {% for server in servers %}
-            <tr>
-              <td>Server-{{ server.id }}</td>
-              <td> {{server.hosted_model.name }}</td>
-              <td>{{server.status}}</td>
-              <td>{{server.availability}}</td>
-            </tr>
-            {% endfor %}
-          </table>
-          <small><i>NOTE:
+        <h2>Servers Status</h2>
+
+        <table style="  margin-left: auto; margin-right: auto; ">
+          <tr>
+            <th>Servers</th>
+            <th>Models</th>
+            <th>Status</th>
+            <th>Availability</th>
+          </tr>
+          {% for server in servers %}
+          <tr>
+            <td>Server-{{ server.id }}</td>
+            <td> {{server.hosted_model.name }}</td>
+            <td>{{server.status}}</td>
+            <td>{{server.availability}}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        <small><i>NOTE:
             <li>Status can be "pending", "running", "stopping" and "stopped" which refers to the current stage of
-            GPU servers</li>
+              GPU servers</li>
             <li>Availability can be "availabe" and "not availabe" which refers to the ability of users to boot the
               instance by themselves</li>
             <li>Highly demanded models are load-balanced across multiple servers</li>
           </i></small>
-        </div>
+      </div>
 
     </div>
-    </main>
+  </main>
 </body>
 
 </html>

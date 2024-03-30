@@ -67,13 +67,13 @@ class ChatSchema(BaseModel):
     role: str
     @field_validator('frequency_penalty','length_penalty','presence_penalty')
     @classmethod
-    def check_range_fre_pre(cls, v: float, info: ValidationInfo):
+    def check_range_fre_pre_len(cls, v: float, info: ValidationInfo):
         if not (-2 <= v <= 2): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
 
     @field_validator('top_k')
     @classmethod
-    def check_range_fre_pre(cls, v: int, info: ValidationInfo):
+    def check_range_top_k(cls, v: int, info: ValidationInfo):
         if not (-1 <= v <= 100): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
     
