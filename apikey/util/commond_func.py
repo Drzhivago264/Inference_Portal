@@ -7,10 +7,10 @@ from decouple import config
 import boto3
 import json
 import regex as re
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import QuerySet
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
-from openai import OpenAI
 import openai
 from channels.layers import get_channel_layer
 from vectordb import  vectordb
@@ -328,7 +328,7 @@ def get_key(name: str, key: str) -> object | QuerySet[APIKEY]:
     try:
         key_ = APIKEY.objects.get_from_key(key)
         return key_
-    except:
+    except ObjectDoesNotExist:
         return False
 
 
@@ -343,7 +343,7 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
     """
     try:
         return LLM.objects.get(name=model)
-    except LLM.DoesNotExist as e:
+    except ObjectDoesNotExist:
         return False
 
 def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:

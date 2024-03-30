@@ -1,4 +1,5 @@
 
+import os
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from celery import shared_task
@@ -19,12 +20,13 @@ logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = REGION
-import os
+
 
 @shared_task
 def send_email_(subject: str, message: str, email_from: str, recipient_list: list) -> None:
     send_mail(subject, message, email_from, recipient_list)
     return
+
 
 @shared_task
 def update_crypto_rate(coin: str):
@@ -32,7 +34,7 @@ def update_crypto_rate(coin: str):
         try:
             url = "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd"
             response = requests.get(url)
-            price= float(json.loads(response.text)['monero']['usd'])
+            price = float(json.loads(response.text)['monero']['usd'])
             crypto = Crypto.objects.get(coin=coin)
             crypto.coin_usd_rate = price
             crypto.save()
@@ -40,15 +42,16 @@ def update_crypto_rate(coin: str):
             try:
                 url = 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest'
                 headers = {
-                            'Accepts': 'application/json',
-                            'X-CMC_PRO_API_KEY': config('CMC_API'),
-                        }
+                    'Accepts': 'application/json',
+                    'X-CMC_PRO_API_KEY': config('CMC_API'),
+                }
                 params = {
                     'id': '328',
                     'convert': 'USD',
                 }
-                response= requests.get(url, headers=headers, params=params)
-                price= json.loads(response.text)['data']['328']['quote']['USD']['price']
+                response = requests.get(url, headers=headers, params=params)
+                price = json.loads(response.text)[
+                    'data']['328']['quote']['USD']['price']
                 crypto = Crypto.objects.get(coin=coin)
                 crypto.coin_usd_rate = price
                 crypto.save()
@@ -71,10 +74,10 @@ def periodically_monitor_EC2_instance() -> str:
             instance = ec2_resource.Instance(server.name)
             server.status = instance.state['Name']
             server.private_ip = instance.private_ip_address
-            server.url = "http://" + instance.private_ip_address +":80/generate"
+            server.url = "http://" + instance.private_ip_address + ":80/generate"
             if instance.public_ip_address:
                 server.public_ip = instance.public_ip_address
-                server.alternative_url = "http://" + instance.public_ip_address +":80/generate"
+                server.alternative_url = "http://" + instance.public_ip_address + ":80/generate"
             server.save()
             return instance.state['Name']
         except Exception as e:
@@ -94,6 +97,7 @@ def periodically_shutdown_EC2_instance() -> None:
             server.save()
         else:
             pass
+
 
 @shared_task()
 def command_EC2(instance_id: str, region: str, action: str) -> None | str:
@@ -142,25 +146,26 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
         except ClientError as e:
             return e
         return
-    
+
+
 @shared_task
-def Inference(unique: str, 
-              mode: str, 
-              type_: str, 
-              key: str, 
-              credit: float, 
-              room_group_name: str, 
-              model: str, 
-              stream: bool, 
-              top_k: int, 
-              top_p: float, 
-              best_of: int, 
-              temperature: float, 
-              max_tokens: int, 
-              presence_penalty: float, 
-              frequency_penalty: float, 
-              length_penalty: float, 
-              early_stopping: bool, 
+def Inference(unique: str,
+              mode: str,
+              type_: str,
+              key: str,
+              credit: float,
+              room_group_name: str,
+              model: str,
+              stream: bool,
+              top_k: int,
+              top_p: float,
+              best_of: int,
+              temperature: float,
+              max_tokens: int,
+              presence_penalty: float,
+              frequency_penalty: float,
+              length_penalty: float,
+              early_stopping: bool,
               beam: bool,
               prompt: str,
               include_memory: bool) -> None:
@@ -189,21 +194,16 @@ def Inference(unique: str,
         include_memory (bool): _description_
     """
     key_object = APIKEY.objects.get_from_key(key)
-    if beam == "false" or beam == False:
-        beam = False
+    if not beam:
         length_penalty = 1
         early_stopping = False
         best_of = int(1)
     else:
-        beam = True
         best_of = int(best_of)
         if best_of == 1:
             best_of += 1
         length_penalty = float(length_penalty)
-        if early_stopping == "true":
-            early_stopping = True
-        else:
-            early_stopping = True
+        
     processed_prompt = inference_mode(
         model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory)
     context = {
@@ -292,27 +292,28 @@ def Inference(unique: str,
                 'unique': unique
             }
         )
-    elif type_ == "prompt" or type_=="prompt_room":
-        log_prompt_response(key_object, model, prompt, response, type_="prompt")
+    elif type_ == "prompt" or type_ == "prompt_room":
+        log_prompt_response(key_object, model, prompt,
+                            response, type_="prompt")
 
 
 @shared_task
-def Agent_Inference(key: str, 
-                    current_turn_inner: int, 
-                    stream: bool, 
-                    model: str, 
-                    unique: str, 
-                    credit: float, 
-                    room_group_name: int, 
-                    agent_instruction: str, 
-                    message: str, 
-                    session_history: list, 
-                    model_type: str, 
-                    max_turns: int, 
-                    temperature: float, 
-                    max_tokens: int, 
-                    top_p: float, 
-                    frequency_penalty: float, 
+def Agent_Inference(key: str,
+                    current_turn_inner: int,
+                    stream: bool,
+                    model: str,
+                    unique: str,
+                    credit: float,
+                    room_group_name: int,
+                    agent_instruction: str,
+                    message: str,
+                    session_history: list,
+                    model_type: str,
+                    max_turns: int,
+                    temperature: float,
+                    max_tokens: int,
+                    top_p: float,
+                    frequency_penalty: float,
                     presence_penalty: float) -> None:
     """_summary_
 
@@ -356,20 +357,20 @@ def Agent_Inference(key: str,
             ]
         session_history.extend(prompt)
         clean_response = send_request_openai(client=client,
-                                            session_history=session_history,
-                                            model=model,
-                                            model_type=model_type,
-                                            credit=credit,
-                                            unique=unique,
-                                            current_turn_inner=current_turn_inner,
-                                            stream=stream,
-                                            room_group_name=room_group_name,
-                                            clean_response=clean_response,
-                                            frequency_penalty=frequency_penalty,
-                                            top_p=top_p,
-                                            max_tokens=max_tokens,
-                                            temperature=temperature,
-                                            presence_penalty=presence_penalty)
+                                             session_history=session_history,
+                                             model=model,
+                                             model_type=model_type,
+                                             credit=credit,
+                                             unique=unique,
+                                             current_turn_inner=current_turn_inner,
+                                             stream=stream,
+                                             room_group_name=room_group_name,
+                                             clean_response=clean_response,
+                                             frequency_penalty=frequency_penalty,
+                                             top_p=top_p,
+                                             max_tokens=max_tokens,
+                                             temperature=temperature,
+                                             presence_penalty=presence_penalty)
         log_prompt_response(key_object=key_object, model=model_type, prompt=message,
                             response=clean_response, type_="open_ai")
     else:

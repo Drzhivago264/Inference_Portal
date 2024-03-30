@@ -96,7 +96,8 @@ print(r.json())
           <div clas="container">
             <h4>cURL example for text completion endpoint:</h4>
             <pre style="font-size: 14px;"><code class="language-bash" >curl "https://professorparakeet.com/api/completion" --request POST \
--H "Authorization: Bearer str" -H 'Content-Type: application/json' \
+-H "Authorization: Bearer str" 
+-H 'Content-Type: application/json' \
 --data-binary '{"prompt": str, 
                 "model" : str,
                 "top_k": int,
