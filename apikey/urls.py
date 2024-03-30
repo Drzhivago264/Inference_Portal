@@ -26,5 +26,9 @@ urlpatterns = [
     path("chat/<str:key>/", views.room, name="room"),
     path("engineer/<str:key>/", views.agentroom, name="room"),
     path('promptresponse', views.response_prompt_redirect, name='promptresponse'),
-
+    path('generatekey', views.generate_key, name='generatekey'),
+    path('getxmraddress', views.get_xmr_address, name='getxmraddress'),
+    path('checkxmrpayment', views.check_xmr_payment, name='checkxmrpayment'),
+    path('checkcredit', views.check_credit, name='checkcredit'),
+    path('topup', views.topup, name='topup'),
 ]

@@ -73,7 +73,7 @@
       <div class="grid">
         <div class="container">
           <h2> Create a Key </h2>
-          <form style="text-align: center;" method="post">
+          <form action="/generatekey" style="text-align: center;" method="post">
             {% csrf_token %}
             <input type="hidden" name="form_type" value="createform">
             <input type="password" placeholder="key name" name="name" />
@@ -114,7 +114,7 @@
         </div>
         <div class="container">
           <h2>Or Check Credit</h2>
-          <form style="text-align: center;" method="post">
+          <form  action="/checkcredit" style="text-align: center;" method="post">
             {% csrf_token %}
             <input type="hidden" name="form_type" value="checkform">
             <div class="grid">
@@ -147,7 +147,7 @@
         {% block content %} {% for product in products %}
         <details>
           <summary> <a> Top up {{product.name}} </a> </summary>
-          <form method="post">
+          <form action="/topup" method="post">
             {% csrf_token %}
             <br>
             <input type="hidden" name="form_type" value="topupform">
@@ -174,7 +174,7 @@
             </i></small>
         </div>
         <div class="container">
-          <form method="post">
+          <form  action="/getxmraddress" method="post">
             {% csrf_token %}
             <input type="hidden" name="form_type" value="get_xmr_address">
             <div class="grid">
@@ -192,7 +192,7 @@
             {%endif%}
             {%endfor%}
           </form>
-          <form method="post">
+          <form action="/checkxmrpayment" method="post">
             {% csrf_token %}
             <input type="hidden" name="form_type" value="check_xmr_payment">
             <div class="grid">
@@ -229,11 +229,9 @@
       a.click()
     }
     $(document).ready(function () {
-      // Add refresh button after field (this can be done in the template as well)
       $('img.captcha').after(
         $('<a href="#void" class="captcha-refresh"><i class="fa fa-refresh"></i>Refresh Captcha</a>')
       );
-      // Click-handler for the refresh-link
       $('.captcha-refresh').click(function () {
         var $form = $(this).parents('form');
         var url = location.protocol + "//" + window.location.hostname + ":"

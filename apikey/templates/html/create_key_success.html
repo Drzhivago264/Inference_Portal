@@ -96,7 +96,7 @@
 
         <div class="container">
           <h2>Check Credit</h2>
-          <form style="text-align: center;" method="post">
+          <form action="/checkcredit" style="text-align: center;" method="post">
             {% csrf_token %}
             <input type="hidden" name="form_type" value="checkform">
             <div class="grid">
@@ -131,7 +131,7 @@
         {% block content %} {% for product in products %}
         <details>
           <summary> <a> Top up {{product.name}} </a> </summary>
-          <form method="post">
+          <form action="/topup" method="post">
             {% csrf_token %}
             <br>
             <input type="hidden" name="form_type" value="topupform">
