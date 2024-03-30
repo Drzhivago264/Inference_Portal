@@ -5,14 +5,6 @@ from decouple import config
 from langchain_core.utils.function_calling import convert_to_openai_tool
 import regex as re
 
-def stop(response: str) -> str:
-    """provide your final response to the user"""
-    return response
-
-
-def action(response: str) -> str:
-    """provide your action to the user"""
-    return response
 
 
 agent_instruction = """
