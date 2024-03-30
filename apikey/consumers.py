@@ -1,14 +1,12 @@
 import json
 import uuid
 from datetime import datetime
-from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
-from .models import Price, Product,  LLM, InferenceServer, CustomTemplate, APIKEY, AgentInstruct
+from .models import CustomTemplate, APIKEY, AgentInstruct
 from channels.db import database_sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import Inference, Agent_Inference
-from decouple import config
 from .util import constant
 from .pydantic_validator import ChatSchema, AgentSchemaInstruct, AgentSchemaMessage, AgentSchemaParagraph, AgentSchemaTemplate
 import regex as re

@@ -36,7 +36,6 @@
         background-color: #f2f2f5 !important
     }
 </style>
-
 <head>
     <title>Chat Mode</title>
     <meta name="description" content="website description" />
@@ -52,9 +51,7 @@
     <meta property="og:url" content="https://professorparakeet.com/static/image/android-chrome-192x192.png">
     <meta property="og:image" content="https://professorparakeet.com/static/image/android-chrome-192x192.png" />
     <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
-
 </head>
-
 <body>
     <header class="container">
         <nav>
@@ -77,7 +74,6 @@
                         </ul>
                     </details>
                 </li>
-
                 <li>
                     <details class="dropdown">
                         <summary role="button" class="outline">
@@ -94,13 +90,10 @@
                 <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" />
                 </li>
             </ul>
-
         </nav>
-
     </header>
     <hr>
     <main class="container grid" style="grid-template-columns: 70% 30%;">
-
         <div class="container">
             <div id="chat-log">
                 <div class="message_log_container"
@@ -123,7 +116,6 @@
             {{ key|json_script:"key" }}
         </div>
         <div class="container">
-
             <h3> Available Models </h3>
             {% for llm in llms %}
             {% if llm.name == 'Mistral Chat 13B' %}
@@ -198,7 +190,6 @@
             search, 1 for sampling) <br>
         </div>
     </main>
-
     <script>
         const key = JSON.parse(document.getElementById('key').textContent);
         var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -210,11 +201,9 @@
             + key
             + '/'
         );
-
         chatSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
             if (data.role == 'Human') {
-
                 document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role + "-" + data.time + ") " + data.message.replace(/\n/g, "<br>") + '</span></div> ');
             }
             else if (data.holder) {
@@ -227,7 +216,6 @@
                 document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message.replace(/\n/g, "<br>") + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
 
             }
-
             logTa = document.getElementById("chat-log")
             logTa.scrollTop = logTa.scrollHeight;
 
@@ -293,7 +281,6 @@
                 early_stopping = false
             }
             const length_penalty = document.getElementsByName("length_penalty")[0].value
-
             const message = textarea.value;
             if (message.trim() !== "") {
                 chatSocket.send(JSON.stringify({

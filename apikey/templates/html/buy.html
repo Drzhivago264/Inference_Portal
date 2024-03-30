@@ -14,26 +14,27 @@
   <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
 </head>
 <style>
-  #id_captcha_1{
-  font-size: 14px;
+  #id_captcha_1 {
+    font-size: 14px;
 
-  height: 20px;
-  color: #555;
-  background-color: #fff;
-  background-image: none;
+    height: 20px;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
   }
 </style>
+
 <body>
   <header class="container">
     <nav>
       <ul>
-        <hgroup  onclick="window.location.href = '/';">
+        <hgroup onclick="window.location.href = '/';">
           <h1><b>Inference</b></h1>
         </hgroup>
       </ul>
       <ul>
         <li>
-          <details  class="dropdown">
+          <details class="dropdown">
             <summary>
               About
             </summary>
@@ -43,11 +44,11 @@
               <li><a href="/manual">User Manual</a></li>
               <li><a href="/contact">Contact Us</a></li>
             </ul>
-          </details> 
+          </details>
         </li>
-       
+
         <li>
-          <details  class="dropdown">
+          <details class="dropdown">
             <summary>
               Modes
             </summary>
@@ -56,201 +57,195 @@
               <li><a href="/chat">Chat Bot and Agent</a></li>
             </ul>
           </details>
-        </li> 
+        </li>
         <li><a href="/buy">Get Key</a></li>
         <li><a class="contrast" href="/promptresponse">Response Log</a></li>
         <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
-        
-      </ul>
-      
-    </nav>
-  
-</header>
-<hr>
-    <main id="site_content">
-      <div  class="container">
-        <div class="grid">
-          <div  class="container">
-            <h2> Create a Key </h2>
-            <form style="text-align: center;" method="post">
-              {% csrf_token %}
-              <input type="hidden" name="form_type" value="createform">
-                <input type="password" placeholder="key name" name="name" />
-                <div class="grid">
-                   {{form.title}} 
-                   {{ form.captcha }} 
-                  
-                </div>
-                <input type="submit" value="Create" />
-              <br>
-              <br>
-              {%for message in messages %}
-              {%if "key" in message.tags %}
-              <h4> {{message}} </h4>
-              {%endif%}
-              {%endfor%}
 
-            </form>
-            {% if key and name %}
+      </ul>
+
+    </nav>
+
+  </header>
+  <hr>
+  <main id="site_content">
+    <div class="container">
+      <div class="grid">
+        <div class="container">
+          <h2> Create a Key </h2>
+          <form style="text-align: center;" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="createform">
+            <input type="password" placeholder="key name" name="name" />
+            <div class="grid">
+              {{form.title}}
+              {{ form.captcha }}
+
+            </div>
+            <input type="submit" value="Create" />
             <br>
-            <ul>
-              <li> Please remember your Key and Key Name to inference the model </li>
-              <li> If I was you, I would export my Key into a Text document </li>
-              <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly</li>
-              <li> If you face any problems, please contact us </li>
-            </ul>
-            <textarea style="width:100%; height: 200px;" id = "keyresponse" name="keyresponse">Your key name: {{ name }}&#13;&#10;Your key: {{ key }}&#13;&#10;Monero address: {{integrated_address}}&#13;&#10;Monero payment ID: {{payment_id}}
+            <br>
+            {%for message in messages %}
+            {%if "key" in message.tags %}
+            <h4> {{message}} </h4>
+            {%endif%}
+            {%endfor%}
+          </form>
+          {% if key and name %}
+          <br>
+          <ul>
+            <li> Please remember your Key and Key Name to inference the model </li>
+            <li> If I was you, I would export my Key into a Text document </li>
+            <li> Before topping up your Key, use the check credit function below to ensure that you get them correctly
+            </li>
+            <li> If you face any problems, please contact us </li>
+          </ul>
+          <textarea style="width:100%; height: 200px;" id="keyresponse" name="keyresponse">Your key name: {{ name }}&#13;&#10;Your key: {{ key }}&#13;&#10;Monero address: {{integrated_address}}&#13;&#10;Monero payment ID: {{payment_id}}
             </textarea>
-            <button  style="display: block; margin: 0 auto;" id="key-export">
-              Export Key
-            </button>
-            <script>
-                    document.getElementById("key-export").addEventListener("click", function() {
-                      download('text/plain', 'User_Key_For_Professor_Parakeet_KEEP_IT_SECURE.txt')
-                    });
-            </script>
-            {% endif %}
+          <button style="display: block; margin: 0 auto;" id="key-export">
+            Export Key
+          </button>
+          <script>
+            document.getElementById("key-export").addEventListener("click", function () {
+              download('text/plain', 'User_Key_For_Professor_Parakeet_KEEP_IT_SECURE.txt')
+            });
+          </script>
+          {% endif %}
         </div>
-     
-        <div  class="container">
+        <div class="container">
           <h2>Or Check Credit</h2>
-        <form style="text-align: center;" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="form_type" value="checkform">
-          <div class="grid">
-            <input type="password" placeholder="Key name" name="name" /> 
-            <input type="text" placeholder="Key" name="key" /> 
-          </div>
-          <div class="grid">
-            {{form.title}}  
-            {{ form.captcha }} 
-            
-          </div>
-          <input type="submit" value="Check" />
-          <br>
-          <br>
-          {%for message in messages %}
-          {%if "credit" in message.tags %}
-          <h4> {{message}} </h4>
-          {%endif%}
-          {%endfor%}
-        </form>
-        
+          <form style="text-align: center;" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="checkform">
+            <div class="grid">
+              <input type="password" placeholder="Key name" name="name" />
+              <input type="text" placeholder="Key" name="key" />
+            </div>
+            <div class="grid">
+              {{form.title}}
+              {{ form.captcha }}
+            </div>
+            <input type="submit" value="Check" />
+            <br>
+            <br>
+            {%for message in messages %}
+            {%if "credit" in message.tags %}
+            <h4> {{message}} </h4>
+            {%endif%}
+            {%endfor%}
+          </form>
         </div>
-        </div>
-        <hr>
-        <h2>Pay by Stripe</h2>
-        <small><i> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do not
+      </div>
+      <hr>
+      <h2>Pay by Stripe</h2>
+      <small><i> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do
+          not
           even confirm your email). If you are concerned please use throw away credit/debit cards.</i></small> <br>
-        <small><i> NOTE: Stripe payment is currently in test mode, you may and should pay by Monero instead.</i></small> <br>
-        <div style="display: flex; justify-content: space-between;" class="card">
-          {% block content %} {% for product in products %}
-          <details>
-            <summary> <a> Top up {{product.name}} </a> </summary>
-            <form method="post">
-              {% csrf_token %}
-              <br>
-              <input type="hidden" name="form_type" value="topupform">
-              <input type="hidden" name="product_id" value={{ product.id }}>
-              <input placeholder="Key name" type="password" name="name" />
-              <input placeholder="Key" type="text" name="key" />
-              <input type="submit" value="Take my money" />
-            </form>
-          </details>
-          {% endfor %} {% endblock content %}
-        </div>
-        {% if key_error == "error" %}
-        <p> Your Key or Key Name is wrong !!!</p>
-        {% endif %}
+      <small><i> NOTE: Stripe payment is currently in test mode, you may and should pay by Monero instead.</i></small>
+      <br>
+      <div style="display: flex; justify-content: space-between;" class="card">
+        {% block content %} {% for product in products %}
+        <details>
+          <summary> <a> Top up {{product.name}} </a> </summary>
+          <form method="post">
+            {% csrf_token %}
+            <br>
+            <input type="hidden" name="form_type" value="topupform">
+            <input type="hidden" name="product_id" value={{ product.id }}>
+            <input placeholder="Key name" type="password" name="name" />
+            <input placeholder="Key" type="text" name="key" />
+            <input type="submit" value="Take my money" />
+          </form>
+        </details>
+        {% endfor %} {% endblock content %}
+      </div>
+      {% if key_error == "error" %}
+      <p> Your Key or Key Name is wrong !!!</p>
+      {% endif %}
       <hr>
       <h2>Pay by Monero</h2>
       <div class="grid">
-      <div class="container">
-        <small><i> NOTE: There will be no refund for payment after it is sent, we can add more credit to your key if our nodes are down. 
-        </i></small><br>
-        <small><i> NOTE: Processing the payment may take up to 30 minutes after it has been confirmed on the blockchain. Use sufficient fees so the transactions gets confirmed on time.
-        </i></small>
+        <div class="container">
+          <small><i> NOTE: There will be no refund for payment after it is sent, we can add more credit to your key if
+              our nodes are down.
+            </i></small><br>
+          <small><i> NOTE: Processing the payment may take up to 30 minutes after it has been confirmed on the
+              blockchain. Use sufficient fees so the transactions gets confirmed on time.
+            </i></small>
+        </div>
+        <div class="container">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="get_xmr_address">
+            <div class="grid">
+              <div class="container">
+                <input type="text" placeholder="Key" name="key" />
+              </div>
+              <div class="container">
+                <input type="submit" value="Check Address" />
+              </div>
+
+            </div>
+            {%for message in messages %}
+            {%if "monero_address" in message.tags %}
+            <h4> {{message}} </h4>
+            {%endif%}
+            {%endfor%}
+          </form>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="check_xmr_payment">
+            <div class="grid">
+              <div class="container">
+                <input type="text" placeholder="Key" name="key" />
+              </div>
+              <div class="container">
+                <input type="submit" value="Confirm Payment" />
+              </div>
+            </div>
+            {%for message in messages %}
+            {%if "monero_payment" in message.tags %}
+            <h4> {{message}} </h4>
+            {%endif%}
+            {%endfor%}
+          </form>
+        </div>
+
       </div>
-      <div class="container">
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="form_type" value="get_xmr_address">   
-          <div class="grid">
-            <div class="container">
-              <input type="text" placeholder="Key" name="key" /> 
-            </div>
-            <div class="container">
-              <input type="submit" value="Check Address" />
-            </div>
-
-          </div>
-         {%for message in messages %}
-         {%if "monero_address" in message.tags %}
-         <h4> {{message}} </h4>
-         {%endif%}
-         {%endfor%}
-      </form>
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="check_xmr_payment">   
-        <div class="grid">
-          <div class="container">
-            <input type="text" placeholder="Key" name="key" /> 
-          </div>
-          <div class="container">
-            <input type="submit" value="Confirm Payment" />
-          </div>  
-        </div>
-        {%for message in messages %}
-        {%if "monero_payment" in message.tags %}
-        <h4> {{message}} </h4>
-        {%endif%}
-        {%endfor%}
-        </form>
-        </div>
-    
+      <hr>
     </div>
-    <hr>
-    </div>
-    </main>
-    <script>
-        function download(mimeType, filename){
-          var download_content = ""
-          var a = document.createElement('a')
-          var paragraph = document.getElementById('keyresponse');
-          download_content = paragraph.value
-          console.log(download_content)
-          var blob = new Blob([download_content], {type: mimeType})
-          var url = URL.createObjectURL(blob)
-          a.setAttribute('href', url)
-          a.setAttribute('download', filename)
-          a.click()
-      }
-     
-            $(document).ready(function () {
-            // Add refresh button after field (this can be done in the template as well)
-            $('img.captcha').after(
-                $('<a href="#void" class="captcha-refresh"><i class="fa fa-refresh"></i>Refresh Captcha</a>')
-            );
-
-            // Click-handler for the refresh-link
-            $('.captcha-refresh').click(function () {
-                var $form = $(this).parents('form');
-                var url = location.protocol + "//" + window.location.hostname + ":"
-                    + location.port + "/captcha/refresh/";
-
-                // Make the AJAX-call
-                $.getJSON(url, {}, function (json) {
-                    $form.find('input[name="captcha_0"]').val(json.key);
-                    $form.find('img.captcha').attr('src', json.image_url);
-                });
-
-                return false;
-            });
+  </main>
+  <script>
+    function download(mimeType, filename) {
+      var download_content = ""
+      var a = document.createElement('a')
+      var paragraph = document.getElementById('keyresponse');
+      download_content = paragraph.value
+      console.log(download_content)
+      var blob = new Blob([download_content], { type: mimeType })
+      var url = URL.createObjectURL(blob)
+      a.setAttribute('href', url)
+      a.setAttribute('download', filename)
+      a.click()
+    }
+    $(document).ready(function () {
+      // Add refresh button after field (this can be done in the template as well)
+      $('img.captcha').after(
+        $('<a href="#void" class="captcha-refresh"><i class="fa fa-refresh"></i>Refresh Captcha</a>')
+      );
+      // Click-handler for the refresh-link
+      $('.captcha-refresh').click(function () {
+        var $form = $(this).parents('form');
+        var url = location.protocol + "//" + window.location.hostname + ":"
+          + location.port + "/captcha/refresh/";
+        // Make the AJAX-call
+        $.getJSON(url, {}, function (json) {
+          $form.find('input[name="captcha_0"]').val(json.key);
+          $form.find('img.captcha').attr('src', json.image_url);
         });
- 
-
-    </script>
+        return false;
+      });
+    });
+  </script>
 </body>
-
 </html>
