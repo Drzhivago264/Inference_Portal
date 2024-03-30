@@ -65,6 +65,7 @@ class AgentInstruct(models.Model):
     template = models.ForeignKey(CustomTemplate, on_delete=models.CASCADE)
     code = models.CharField(max_length=10)
     instruct = models.TextField(default="")
+    default = models.BooleanField(default=False)
     def __str__(self) -> str:
         return f"{self.name} - {self.template.template_name}"
 
