@@ -308,7 +308,6 @@ def contact(request):
 
 def prompt(request):
     llm = LLM.objects.filter(agent_availability=False)
-    
     if request.method == "POST":
         signer = Signer()
         form = PromptForm(request.POST)
@@ -396,9 +395,9 @@ def prompt(request):
         return render(request, "html/prompt.html", context=context)
 
 
-def room(request,  key):
+def chatroom(request,  key):
     llm = LLM.objects.filter(agent_availability=False)
-    context = {'llms': llm,  "key": key}
+    context = {'llms': llm,  "key": key, "destination": "chat"}
     return render(request, "html/chatroom.html", context)
 
 
@@ -413,8 +412,19 @@ def agentroom(request,  key):
     context = {'llms': llm, "templates": templates,
                "template": default_template, 
                "child_template": default_child_template,
-               "key": key}
+               "key": key,
+               "destination": "engineer"}
     return render(request, "html/lagent.html", context)
+
+def hotpotroom(request,  key):
+    llm = LLM.objects.filter(agent_availability=False)
+    templates = CustomTemplate.objects.all()
+    context = {'llms': llm, 
+               "key": key,
+               "templates": templates,
+               "destination": "hotpot",
+               }
+    return render(request, "html/hotpot.html", context)
 
 
 class SuccessView(TemplateView):

@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<html data-theme="dark">
+
+<head>
+    <title>Hotpot</title>
+    <meta name="description" content="website description" />
+    <meta name="keywords" content="website keywords, website keywords" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/static/css/pico-main/css/pico.min.css" />
+    <link rel="stylesheet" href="/static/css/pico-main/css/pico.colors.min.css" />
+    <link rel="shortcut icon" type="image/png" href="/static/image/favicon.ico" />
+    <meta property="og:title" content="Inference Portal for multiple Large Language Models">
+    <meta property="og:description"
+        content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
+    <meta property="og:type" content="article">
+    <meta property="og:url"
+        content="/static/image/pixlr-image-generator-ccb98607-7b6b-4c78-bf2c-394c3ac278f6.png">
+    <meta property="og:image"
+        content="/static/image/pixlr-image-generator-ccb98607-7b6b-4c78-bf2c-394c3ac278f6.png" />
+    <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
+</head>
+<style>
+    #chat-log-bot, #chat-log-agent {
+        width: 100% !important;
+        min-width: 250px;
+        min-height: 150px;
+        resize: vertical;
+        background-color: black;
+        color: white;
+        box-sizing: border-box;
+        height: 393px;
+        overflow: auto;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .message_log_container {
+        margin: 10px;
+    }
+
+    input {
+        width: 7ch;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    #chat-message-submit {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    #editorjs {
+        background-color: white;
+        color: black;
+        border-radius: 5px;
+        padding: 25px;
+        font-size: 16px;
+    }
+
+    #editorjs h1 {
+        font-size: 28px;
+        color: black;
+    }
+
+    #editorjs h2 {
+        font-size: 24px;
+        color: black;
+    }
+
+    #editorjs h3 {
+        font-size: 20px;
+        color: black;
+    }
+
+    #editorjs h4 {
+        font-size: 18px;
+        color: black;
+    }
+
+    #editorjs h5 {
+        font-size: 16px;
+        color: black;
+    }
+
+    #editorjs h6 {
+        font-size: 14px;
+        color: black;
+    }
+
+    #editorjs small {
+        font-size: 12px;
+        color: black;
+    }
+</style>
+
+<body>
+    <header class="container">
+        <nav>
+            <ul>
+                <hgroup onclick="window.location.href = '/';">
+                    <h1><b>Inference</b></h1>
+                </hgroup>
+            </ul>
+            <ul>
+                <li>
+                    <details class="dropdown">
+                        <summary>
+                            About
+                        </summary>
+                        <ul dir="rtl">
+                            <li><a href="/">Introduction</a></li>
+                            <li><a href="/model_infor">Model</a></li>
+                            <li><a href="/manual">User Manual</a></li>
+                            <li><a href="/contact">Contact Us</a></li>
+                        </ul>
+                    </details>
+                </li>
+
+                <li>
+                    <details class="dropdown">
+                        <summary role="button" class="outline">
+                            Modes
+                        </summary>
+                        <ul dir="rtl">
+                            <li><a href="/prompt">Prompt and API</a></li>
+                            <li><a aria-current="page" href="/chat">Chat Bot and Agent</a></li>
+                        </ul>
+                    </details>
+                </li>
+                <li><a class="contrast" href="/buy">Get Key</a></li>
+                <li><a class="contrast" href="/promptresponse">Response Log</a></li>
+                <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" />
+                </li>
+            </ul>
+
+        </nav>
+
+    </header>
+    <hr>
+    <main>
+        <div class="container">
+        <div class="grid" style=" min-width: 1250px;grid-template-columns: 25% 35% 35%;">
+            <div id="container" style="padding-left: 10px; min-width: 145px;">
+                <span>Key:
+                    <input style="height: 20px; width: 20ch; font-size:calc(1px + 0.7vw);" id="api_key">
+                </span>
+            </div>
+            <div class="container" style="min-width: 400px;" id="site_content_document">
+                <div class="grid" style="grid-template-columns: 35% 60%;">
+                    <h4>Bot:</h4>
+                    <select autocomplete="off" name="template-select" id="template-select"
+                        style="height: 35px; padding-top: 5px; padding-bottom: 5px ;font-size:calc(5px + 0.5vw);"
+                        aria-label="Select your agent..." required>
+                        {% for model in llms %}
+                        {% if model.name == 'Mistral Chat 13B' %}
+                        <option selected name="template" value="{{modelname}}">
+                            {{model.name}}<br>
+                            {% else %}
+                        <option name="template" value="{{model.name}}"> {{model.name}}<br>
+                            {% endif %}
+                            {% endfor %}
+                    </select>
+                </div>
+                <div id="chat-log-bot">
+                    <div class="message_log_container"
+                        style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+
+                    </div>
+                    <div id="chat-log-bot_">
+                    </div>
+
+                </div>
+                <hr>
+                <div class="input-wrapper">
+                    <textarea id="chat-message-input" name="message"></textarea>
+                    <button id="chat-message-submit">Send</button>
+                </div>
+            </div>
+
+            <div clas="container">
+                <div class="grid" style="grid-template-columns: 35% 60%;">
+                    <h4>Agent:</h4>
+                    <select autocomplete="off" name="template-select" id="template-select"
+                        style="height: 35px; padding-top: 5px; padding-bottom: 5px ;font-size:calc(5px + 0.5vw);"
+                        aria-label="Select your agent..." required>
+                        {% for template in templates %}
+                        {% if template.template_name == 'Assignment Agent' %}
+                        <option selected name="template" value="{{template.template_name}}">
+                            {{template.template_name}}<br>
+                            {% else %}
+                        <option name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
+                            {% endif %}
+                            {% endfor %}
+                    </select>
+                </div>
+                <div id="chat-log-agent">
+                    <div class="message_log_container"
+                        style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+
+                    </div>
+                    <div id="chat-log-agent_">
+                    </div>
+
+                </div>
+                <hr>
+                <div class="input-wrapper">
+                    <textarea id="chat-message-input" name="message"></textarea>
+                    <button id="chat-message-submit">Send</button>
+                </div>
+                {{ name|json_script:"name" }}
+                {{ key|json_script:"key" }}
+            </div>
+            <div style="max-width: 380px; font-size:calc(5px + 0.7vw);  padding-left: 1px;" class="container">
+
+            </div>
+        </div>
+    </div>
+    </main>
+    <script>
+
+        const key = JSON.parse(document.getElementById('key').textContent);
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        const chatSocket_agent = new WebSocket(
+            ws_scheme
+            + '://'
+            + window.location.host
+            + '/ws/{{destination}}/'
+            + key
+            + '/'
+        );
+        const chatSocket_bot = new WebSocket(
+            ws_scheme
+            + '://'
+            + window.location.host
+            + '/ws/chat/'
+            + key
+            + '/'
+        );
+        chatSocket_agent.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if (data.role == 'Human') {
+                document.querySelector('#chat-log-agent_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role + "-" + data.time + ") " + data.message.replace(/\n/g, "<br>") + '</span></div> ');
+            }
+            else if (data.holder) {
+                document.querySelector('#chat-log-agent_').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.role + "-" + data.time + ": " + '</span></div> ');
+            }
+            else if (data.stream_id) {
+                document.getElementById(data.stream_id).innerHTML += data.message.replace(/\n/g, "<br>")
+            }
+            else {
+                document.querySelector('#chat-log-agent_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message.replace(/\n/g, "<br>") + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
+            }
+
+            logTa = document.getElementById("chat-log-agent")
+            logTa.scrollTop = logTa.scrollHeight;
+        };
+        chatSocket_agent.onclose = function (e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+        chatSocket_bot.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if (data.role == 'Human') {
+                document.querySelector('#chat-log-bot_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role + "-" + data.time + ") " + data.message.replace(/\n/g, "<br>") + '</span></div> ');
+            }
+            else if (data.holder) {
+                document.querySelector('#chat-log-bot_').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.role + "-" + data.time + ": " + '</span></div> ');
+            }
+            else if (data.stream_id) {
+                document.getElementById(data.stream_id).innerHTML += data.message.replace(/\n/g, "<br>")
+            }
+            else {
+                document.querySelector('#chat-log-bot_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message.replace(/\n/g, "<br>") + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
+
+            }
+            logTa = document.getElementById("chat-log-bot")
+            logTa.scrollTop = logTa.scrollHeight;
+
+        };
+
+        chatSocket_bot.onclose = function (e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+        var textarea = document.getElementById("chat-message-input");
+        var textarea_submit_button = document.querySelector('#chat-message-submit')
+        textarea.focus();
+        textarea.onkeyup = function (e) {
+            if (e.keyCode === 13 && !e.shiftKey) {
+                textarea_submit_button.click();
+            }
+        };
+        var textarea_size_litmit = 300;
+        textarea.oninput = function () {
+            textarea.style.height = "";
+            textarea.style.height = Math.min(textarea.scrollHeight, textarea_size_litmit) + "px";
+        };
+        textarea_submit_button.onclick = function (e) {
+            var choosen_models = null;
+            var mode = null;
+            var choosen_template = null
+            var inputElements = document.getElementsByClassName('checkbox_model');
+            for (var i = 0; inputElements[i]; ++i) {
+                if (inputElements[i].checked) {
+                    choosen_models = inputElements[i].value;
+                    break;
+                }
+            }
+            const api_key = document.getElementById('api_key').value
+
+            const message = textarea.value;
+            if (message.trim() !== "") {
+                chatSocket_agent.send(JSON.stringify({
+                    'message': message,
+                    'key': api_key,
+                    'role': 'Human',
+                }));
+                textarea.value = '';
+            };
+        }
+
+    </script>
+</body>
+
+</html>
