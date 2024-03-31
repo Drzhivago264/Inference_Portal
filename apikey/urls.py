@@ -23,7 +23,7 @@ urlpatterns = [
     path("buy/<str:key>/", views.generate_key_success, name="key_success"),
     path("<int:pk>/<str:key>/<str:name>/", ProductDetailView.as_view(), name="product-detail"),
     path("prompt/<str:key>/", views.room_prompt, name="room_prompt"),
-    path("chat/<str:key>/", views.room, name="room"),
+    path("chat/<str:key>/", views.chatroom, name="room"),
     path("engineer/<str:key>/", views.agentroom, name="room"),
     path('promptresponse', views.response_prompt_redirect, name='promptresponse'),
     path('generatekey', views.generate_key, name='generatekey'),
@@ -31,4 +31,5 @@ urlpatterns = [
     path('checkxmrpayment', views.check_xmr_payment, name='checkxmrpayment'),
     path('checkcredit', views.check_credit, name='checkcredit'),
     path('topup', views.topup, name='topup'),
+    path("hotpot/<str:key>/", views.hotpotroom, name="hotpot_room"),
 ]
