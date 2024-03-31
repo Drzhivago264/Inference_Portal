@@ -28,12 +28,12 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @cache_page(60*15)
 def index(request):
-    return render(request, "html/index.html")
+    return render(request, "html/index.html", {"title": "Inference"})
 
 
 @cache_page(60*15)
 def manual(request):
-    return render(request, "html/manual.html")
+    return render(request, "html/manual.html", {"title": "Manual"})
 
 
 @cache_page(60*15)
@@ -47,7 +47,7 @@ def chat(request):
             return HttpResponseRedirect(f"/{destination}/{key_hash}")
     else:
         form = RoomRedirectForm()
-    context ={"form":form}
+    context ={"form":form, "title": "Inference Mode"}
     return render(request, "html/chat.html", context=context)
 
 
@@ -55,7 +55,7 @@ def chat(request):
 def model_infor(request):
     llm = LLM.objects.filter(agent_availability=False)
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
-    context = {'llms': llm, 'servers': servers}
+    context = {'llms': llm, 'servers': servers, 'title': 'Model Detail'}
     return render(request, "html/model_infor.html", context)
 
 
@@ -74,7 +74,7 @@ def response_prompt_redirect(request):
                     request, "Error: Key or/and Key Name is/are incorrent.",  extra_tags='credit')
                 return HttpResponseRedirect("/promptresponse")
     elif request.method == 'GET':
-        return render(request, "html/prompt_log_redirect.html", context={'form':LogForm()})
+        return render(request, "html/prompt_log_redirect.html", context={'form':LogForm(), 'title':'Get Log'})
 
 def room_prompt(request,  key):
     signer = Signer()
@@ -83,7 +83,7 @@ def room_prompt(request,  key):
     paginator = Paginator(response_log, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    context = {'response_log': page_obj,  "key": key}
+    context = {'response_log': page_obj,  "key": key, 'title': "Log"}
     return render(request, "html/prompt_log.html", context)
 
 def generate_key_success(request, key):
@@ -93,7 +93,8 @@ def generate_key_success(request, key):
     products = Product.objects.all()
     context = {"form":form, "products": products, 'name': key_.name, 'key': signer.unsign(key), 'form': form, 
                            'integrated_address': key_.integrated_address, 
-                           'payment_id':key_.payment_id,}
+                           'payment_id':key_.payment_id,
+                           'title': "Manage API Key"}
     return render(request, "html/create_key_success.html", context)
 
 def generate_key(request):
@@ -227,7 +228,7 @@ def check_credit(request):
                         messages.error(
                             request, "Error: Key Name is incorrent.",  extra_tags='credit')
                     return HttpResponseRedirect("/buy")
-                except Exception as e:
+                except ObjectDoesNotExist:
                     messages.error(
                         request, "Error: Key is incorrent.",  extra_tags='credit')
                     return HttpResponseRedirect("/buy")
@@ -252,7 +253,7 @@ def topup(request):
                 messages.error(
                     request, "Key Name is incorrect",  extra_tags='credit')
                 return HttpResponseRedirect("/buy")
-        except:
+        except ObjectDoesNotExist:
             messages.error(request, "Key is incorrect",
                             extra_tags='credit')
             return HttpResponseRedirect("/buy")  
@@ -265,6 +266,7 @@ class ProductListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(ProductListView, self).get_context_data(**kwargs)
         context['form'] = CaptchaForm()
+        context['title'] = "Manage API Key"
         return context
                     
 class ProductDetailView(DetailView):
@@ -277,6 +279,7 @@ class ProductDetailView(DetailView):
         context["prices"] = Price.objects.filter(product=self.get_object())
         context["name"] = bleach.clean(self.kwargs["name"])
         context["key"] =  signer.unsign(bleach.clean(self.kwargs["key"]))
+        context["title"] = "Topup"
         return context
 
 
@@ -303,7 +306,7 @@ def contact(request):
             messages.error(request, "Captcha Failed.",  extra_tags='email')
             return HttpResponseRedirect("/contact")
     elif request.method == 'GET':
-        return render(request, "html/contact.html", {'form': form})
+        return render(request, "html/contact.html", {'form': form, "title": "Contact"})
 
 
 def prompt(request):
@@ -390,14 +393,15 @@ def prompt(request):
         context = {
             "llms": llm,
             "form": PromptForm(),
-            "log_form": LogForm()
+            "log_form": LogForm(),
+            "title": "Prompt & API"
         }
         return render(request, "html/prompt.html", context=context)
 
 
 def chatroom(request,  key):
     llm = LLM.objects.filter(agent_availability=False)
-    context = {'llms': llm,  "key": key, "destination": "chat"}
+    context = {'llms': llm,  "key": key, "destination": "chat", "title": "Chat Bot"}
     return render(request, "html/chatroom.html", context)
 
 
@@ -413,7 +417,8 @@ def agentroom(request,  key):
                "template": default_template, 
                "child_template": default_child_template,
                "key": key,
-               "destination": "engineer"}
+               "destination": "engineer",
+               "title": "Prompt Engineer"}
     return render(request, "html/lagent.html", context)
 
 def hotpotroom(request,  key):
@@ -423,17 +428,24 @@ def hotpotroom(request,  key):
                "key": key,
                "templates": templates,
                "destination": "hotpot",
+               "title": "Hotpot Mode"
                }
     return render(request, "html/hotpot.html", context)
 
 
 class SuccessView(TemplateView):
     template_name = "html/success.html"
-
+    def get_context_data(self, **kwargs):
+        context = super(SuccessView, self).get_context_data(**kwargs)
+        context['title'] = "Payment Success"
+        return context
 
 class CancelView(TemplateView):
     template_name = "html/cancel.html"
-
+    def get_context_data(self, **kwargs):
+        context = super(CancelView, self).get_context_data(**kwargs)
+        context['title'] = "Payment Canceled"
+        return context
 
 class CreateStripeCheckoutSessionView(View):
 

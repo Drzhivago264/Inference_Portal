@@ -2,20 +2,8 @@
 <html data-theme="dark">
 
 <head>
-    <title>Engineering</title>
-    <meta name="description" content="website description" />
-    <meta name="keywords" content="website keywords, website keywords" />
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="/static/css/pico-main/css/pico.min.css" />
-    <link rel="stylesheet" href="/static/css/pico-main/css/pico.colors.min.css" />
-    <link rel="shortcut icon" type="image/png" href="/static/image/favicon.ico" />
-    <meta property="og:title" content="Inference Portal for multiple Large Language Models">
-    <meta property="og:description"
-        content="Inference Portal that offers API, Chat Bot Mode and more for multiple large language modelS">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="/static/image/pixlr-image-generator-ccb98607-7b6b-4c78-bf2c-394c3ac278f6.png">
-    <meta property="og:image" content="/static/image/pixlr-image-generator-ccb98607-7b6b-4c78-bf2c-394c3ac278f6.png" />
+    {% include "component_html/header.html" %} 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="/static/js/editor-js/editorjs.umd.js"></script>
     <script src="/static/js/editor-js/header.umd.min.js "></script>
     <script src="/static/js/editor-js/list.umd.min.js "></script>
@@ -29,7 +17,8 @@
     <script src="/static/js/editor-js/table@latest.js"></script>
     <script src="/static/js/editor-js/edjsHTML.js"></script>
     <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
-</head>
+</head> 
+
 <style>
     #chat-log {
         width: 100% !important;

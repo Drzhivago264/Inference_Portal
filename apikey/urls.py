@@ -6,12 +6,12 @@ app_name = "apikey"
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("model_infor", views.model_infor, name="model_infor"),    
-    path("manual", views.manual, name="manual"),
+    path("model_infor/", views.model_infor, name="model_infor"),    
+    path("manual/", views.manual, name="manual"),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
-    path("contact", views.contact, name="contact"), 
-    path("chat", views.chat, name="chat"),
-    path("prompt", views.prompt, name="prompt"), 
+    path("contact/", views.contact, name="contact"), 
+    path("chat/", views.chat, name="chat"),
+    path("prompt/", views.prompt, name="prompt"), 
     path(
         "create-checkout-session/<int:pk>/<str:name>/<str:key>",
         CreateStripeCheckoutSessionView.as_view(),
@@ -25,7 +25,7 @@ urlpatterns = [
     path("prompt/<str:key>/", views.room_prompt, name="room_prompt"),
     path("chat/<str:key>/", views.chatroom, name="room"),
     path("engineer/<str:key>/", views.agentroom, name="room"),
-    path('promptresponse', views.response_prompt_redirect, name='promptresponse'),
+    path('promptresponse/', views.response_prompt_redirect, name='promptresponse'),
     path('generatekey', views.generate_key, name='generatekey'),
     path('getxmraddress', views.get_xmr_address, name='getxmraddress'),
     path('checkxmrpayment', views.check_xmr_payment, name='checkxmrpayment'),
