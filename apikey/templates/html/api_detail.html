@@ -1,78 +1,29 @@
-<!DOCTYPE HTML>
-<html data-theme="dark">
-  <head>
-    {% include "component_html/header.html" %} 
-  </head>
+{% extends "component_html/base.html" %}
+{% block head %}
+<script src="https://js.stripe.com/v3/"></script>
+{% endblock head %}
+{% block content %}
+<main>
+  <div class="container">
 
-<body>
-  <header class="container">
-    <nav>
-      <ul>
-        <hgroup onclick="window.location.href = '/';">
-          <h1><b>Inference</b></h1>
-        </hgroup>
-      </ul>
-      <ul>
-        <li>
-          <details class="dropdown">
-            <summary>
-              About
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/">Introduction</a></li>
-              <li><a href="/model_infor">Model</a></li>
-              <li><a href="/manual">User Manual</a></li>
-              <li><a href="/contact">Contact Us</a></li>
-            </ul>
-          </details>
-        </li>
-
-        <li>
-          <details class="dropdown">
-            <summary>
-              Modes
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/prompt">Prompt and API</a></li>
-              <li><a href="/chat">Chat Bot and Agent</a></li>
-            </ul>
-          </details>
-        </li>
-        <li><a href="/buy">Get Key</a></li>
-        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
-        <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
-
-      </ul>
-
-    </nav>
-
-  </header>
-  <hr>
-  <main id="site_content container">
-    <div class="container">
-      {% block script %}
-      <script src="https://js.stripe.com/v3/"></script> {% endblock script%}
-      {% block content %}
-      <div class="card-deck">
-        {% for price in prices %}
-        <div class="card">
-          <div class="card-body">
-            <h3 class="card-text"> Top up {{ price.price }} USD for: </h3>
-            <h4> Key name: {{ name}} </h4>
-            <h4> Key: {{ key}} </h4>
-            <div class="card-text">
-              <form action="{% url 'apikey:create-checkout-session' price.id name key%}" method="POST">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Confirm</button>
-              </form>
-            </div>
+    <div class="card-deck">
+      {% for price in prices %}
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-text"> Top up {{ price.price }} USD for: </h3>
+          <h4> Key name: {{ name}} </h4>
+          <h4> Key: {{ key}} </h4>
+          <div class="card-text">
+            <form action="{% url 'apikey:create-checkout-session' price.id name key%}" method="POST">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary">Confirm</button>
+            </form>
           </div>
         </div>
-        {% endfor %}
       </div>
-      {% endblock content %}
+      {% endfor %}
     </div>
-  </main>
-</body>
 
-</html>
+  </div>
+</main>
+{% endblock content %}

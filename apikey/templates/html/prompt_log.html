@@ -1,99 +1,50 @@
-<!DOCTYPE HTML>
-<html data-theme="dark">
-
-<head>
-  {% include "component_html/header.html" %} 
-</head>
-<body>
-  <header class="container">
-    <nav>
-      <ul>
-        <hgroup  onclick="window.location.href = '/';">
-          <h1><b>Inference</b></h1>
-        </hgroup>
-      </ul>
-      <ul>
-        <li>
-          <details  class="dropdown">
-            <summary>
-              About
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/">Introduction</a></li>
-              <li><a href="/model_infor">Model</a></li>
-              <li><a href="/manual">User Manual</a></li>
-              <li><a href="/contact">Contact Us</a></li>
-            </ul>
-          </details> 
-        </li>
-       
-        <li>
-          <details  class="dropdown">
-            <summary>
-              Modes
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/prompt">Prompt and API</a></li>
-              <li><a href="/chat">Chat Bot and Agent</a></li>
-            </ul>
-          </details>
-        </li> 
-        <li><a class="contrast" href="/buy">Get Key</a></li>
-        <li><a  href="/promptresponse">Response Log</a></li>
-        <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
-      </ul>
-      
-    </nav>
-  
-</header>
-<hr>
-    <main id="site_content container">
-      <div class="container">
-      <h1>Your previous API calls and prompts are displayed here</h1>
-      <table style="  margin-left: auto;
+{% extends "component_html/base.html" %}
+{% block content% }
+<main id="site_content">
+  <div class="container">
+    <h1>Your previous API calls and prompts are displayed here</h1>
+    <table style="  margin-left: auto;
         margin-right: auto; ">
-        <tr>
-          <th>No.</th>
-          <th>Prompts</th>
-          <th>Responses</th>
-          <th>Models</th>
-          <th>Created Time</th>
-          <th>Type</th>
-          <th>Cost</th>
-        </tr>
-        {% for log in response_log %}
-        <tr>
-          <td>
-            <p>{{ log.id }}</p>
-          </td>
-          <td>
-            <p style="width: 200px; word-wrap: break-word; overflow-wrap: break-word;">{{ log.prompt }}</p>
-          </td>
-          <td>
-            <p style="width: 300px; word-wrap: break-word; overflow-wrap: break-word;">{{ log.response }} </p>
-          </td>
-          <td>{{ log.model }}</td>
-          <td>{{ log.created_at }}</td>
-          <td>{{ log.p_type }}</td>
-          <td>{{ log.model.price }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-      <div style="text-align: center;">
-        {% if response_log.has_previous %}
-        <a href="?page={{ response_log.previous_page_number }}">
-          << Previous</a>
-            {% endif %}
+      <tr>
+        <th>No.</th>
+        <th>Prompts</th>
+        <th>Responses</th>
+        <th>Models</th>
+        <th>Created Time</th>
+        <th>Type</th>
+        <th>Cost</th>
+      </tr>
+      {% for log in response_log %}
+      <tr>
+        <td>
+          <p>{{ log.id }}</p>
+        </td>
+        <td>
+          <p style="width: 200px; word-wrap: break-word; overflow-wrap: break-word;">{{ log.prompt }}</p>
+        </td>
+        <td>
+          <p style="width: 300px; word-wrap: break-word; overflow-wrap: break-word;">{{ log.response }} </p>
+        </td>
+        <td>{{ log.model }}</td>
+        <td>{{ log.created_at }}</td>
+        <td>{{ log.p_type }}</td>
+        <td>{{ log.model.price }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <div style="text-align: center;">
+      {% if response_log.has_previous %}
+      <a href="?page={{ response_log.previous_page_number }}">
+        << Previous</a>
+          {% endif %}
 
-            <span class="current-page">{{ response_log.number }}</span>
+          <span class="current-page">{{ response_log.number }}</span>
 
-            {% if response_log.has_next %}
-            <a href="?page={{ response_log.next_page_number }}">Next >></a>
-            {% endif %}
-      </div>
+          {% if response_log.has_next %}
+          <a href="?page={{ response_log.next_page_number }}">Next >></a>
+          {% endif %}
     </div>
-    </div>
-  </main>
-</body>
-
-</html>
+  </div>
+  </div>
+</main>
+{% endblock content %}

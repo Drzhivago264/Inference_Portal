@@ -1,71 +1,23 @@
-<!DOCTYPE HTML>
-<html data-theme="dark">
-  <head>
-    {% include "component_html/header.html" %} 
-  </head>
-<body>
-  <header class="container">
-    <nav>
-      <ul>
-        <hgroup onclick="window.location.href = '/';">
-          <h1><b>Inference</b></h1>
-        </hgroup>
-      </ul>
-      <ul>
-        <li>
-          <details class="dropdown">
-            <summary>
-              About
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/">Introduction</a></li>
-              <li><a href="/model_infor">Model</a></li>
-              <li><a href="/manual">User Manual</a></li>
-              <li><a href="/contact">Contact Us</a></li>
-            </ul>
-          </details>
-        </li>
+{% extends "component_html/base.html" %}
+{% block content%}
+<main class="container">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
 
-        <li>
-          <details class="dropdown">
-            <summary role="button" class="outline">
-              Modes
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/prompt">Prompt and API</a></li>
-              <li><a aria-current="page" href="/chat">Chat Bot and Agent</a></li>
-            </ul>
-          </details>
-        </li>
-        <li><a class="contrast" href="/buy">Get Key</a></li>
-        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
-        <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
-      </ul>
-
-    </nav>
-
-  </header>
-  <hr>
-  <main class="container">
-    <form method="post">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-
-      <div class="grid">
-        <div class="container">
-          <h2>Bring me to:</h2>
-          {{form.room}}
-        </div>
-        <div class="container">
-          <h2>Enter your key </h2>
-          <div class="grid">
-            {{form.key}}
-            <button type="submit">Go</button>
-          </div>
+    <div class="grid">
+      <div class="container">
+        <h2>Bring me to:</h2>
+        {{form.room}}
+      </div>
+      <div class="container">
+        <h2>Enter your key </h2>
+        <div class="grid">
+          {{form.key}}
+          <button type="submit">Go</button>
         </div>
       </div>
-    </form>
-  </main>
-</body>
-
-</html>
+    </div>
+  </form>
+</main>
+{% endblock content %}

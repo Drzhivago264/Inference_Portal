@@ -1,91 +1,36 @@
-<!DOCTYPE HTML>
-<html data-theme="dark">
-<style>
-  #id_captcha_1 {
-    font-size: 14px;
-    width: 35%;
-    height: 20px;
-    color: #555;
-    background-color: #fff;
-    background-image: none;
-  }
-</style>
+{% extends "component_html/base.html" %}
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="/static/css/captcha.css">
+<script type="text/javascript" src="/static/js/refresh-captcha.js"></script>
 
-<head>
-  {% include "component_html/header.html" %} 
-</head>
+{% endblock head%}
+{% block content %}
+<main>
+  <div id="content" class="container">
+    <h1>{{title}}</h1>
+    <form method="post">
 
-<body>
-  <header class="container">
-    <nav>
-      <ul>
-        <hgroup onclick="window.location.href = '/';">
-          <h1><b>Inference</b></h1>
-        </hgroup>
-      </ul>
-      <ul>
-        <li>
-          <details class="dropdown">
-            <summary role="button" class="outline">
-              About
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/">Introduction</a></li>
-              <li><a href="/model_infor">Model</a></li>
-              <li><a href="/manual">User Manual</a></li>
-              <li><a aria-current="page" href="/contact">Contact Us</a></li>
-            </ul>
-          </details>
-        </li>
+      <div class="grid">
+        {% csrf_token %}
+        <input placeholder="Name" class="contact" type="text" name="name" value="" />
+        <input placeholder="Mail" class="contact" type="text" name="sender_email" value="" />
+      </div>
+      <textarea placeholder="Message" class="contact textarea" rows="8" cols="50" name="message"></textarea>
+      <div class="grid">
+        <div class="grid"> <span>{{form.title}} </span> {{ form.captcha }}</div>
+        <input class="submit" type="submit" name="contact_submitted" value="submit" />
+      </div>
+    </form>
+    {%for message in messages %}
+    {%if "email" in message.tags %}
+    <h4> {{message}} </h4>
+    {%endif%}
+    {%endfor%}
+    <h5><br /><br />NOTE: This may not work yet, we are using consumers' Gmail to foward your message, the maximum
+      number of emails can be sent is 500 per day</h5>
+  </div>
+  </div>
 
-        <li>
-          <details class="dropdown">
-            <summary>
-              Modes
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/prompt">Prompt and API</a></li>
-              <li><a href="/chat">Chat Bot and Agent</a></li>
-            </ul>
-          </details>
-        </li>
-        <li><a class="contrast" href="/buy">Get Key</a></li>
-        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
-        <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
-      </ul>
-
-    </nav>
-
-  </header>
-  <hr>
-  <main>
-    <div id="content" class="container">
-      <!-- insert the page content here -->
-      <h1>Contact Us</h1>
-      <form method="post">
-
-        <div class="grid">
-          {% csrf_token %}
-          <input placeholder="Name" class="contact" type="text" name="name" value="" />
-          <input placeholder="Mail" class="contact" type="text" name="sender_email" value="" />
-        </div>
-        <textarea placeholder="Message" class="contact textarea" rows="8" cols="50" name="message"></textarea>
-        <div class="grid">
-          <p> <span>{{form.title}} </span> {{ form.captcha }} </p>
-          <input class="submit" type="submit" name="contact_submitted" value="submit" />
-        </div>
-      </form>
-      {%for message in messages %}
-      {%if "email" in message.tags %}
-      <h4> {{message}} </h4>
-      {%endif%}
-      {%endfor%}
-      <h5><br /><br />NOTE: This may not work yet, we are using consumers' Gmail to foward your message, the maximum
-        number of emails can be sent is 500 per day</h5>
-    </div>
-    </div>
-
-  </main>
-</body>
-
-</html>
+</main>
+{% endblock content %}

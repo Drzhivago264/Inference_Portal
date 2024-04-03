@@ -1,13 +1,11 @@
-<!DOCTYPE HTML>
-<html data-theme="dark">
-
-<head>
-  {% include "component_html/header.html" %} 
+{% extends "component_html/base.html" %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/captcha.css">
   <link href="/static/css/prism.css" rel="stylesheet" />
   <script src="/static/js/prism.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-</head> 
-
+<script type="text/javascript" src="/static/js/refresh-captcha.js"></script>
+  
 <style>
   #chat-log {
     width: 100% !important;
@@ -24,58 +22,12 @@
     margin: 10px;
   }
 
-  #id_captcha_1{
-  font-size: 14px;
 
-  height: 20px;
-  color: #555;
-  background-color: #fff;
-  background-image: none;
-  }
 
 </style>
+{% endblock head %}
 
-<body>
-  <header class="container">
-    <nav>
-      <ul>
-        <hgroup  onclick="window.location.href = '/';">
-          <h1><b>Inference</b></h1>
-        </hgroup>
-      </ul>
-      <ul>
-        <li>
-          <details  class="dropdown">
-            <summary >
-              About
-            </summary>
-            <ul dir="rtl">
-              <li><a  href="/">Introduction</a></li>
-              <li><a  href="/model_infor">Model</a></li>
-              <li><a  href="/manual">User Manual</a></li>
-              <li><a href="/contact">Contact Us</a></li>
-            </ul>
-          </details> 
-        </li>
-       
-        <li>
-          <details  class="dropdown">
-            <summary role="button" class="outline">
-              Modes
-            </summary>
-            <ul dir="rtl">
-              <li><a aria-current="page" href="/prompt">Prompt and API</a></li>
-              <li><a href="/chat">Chat Bot and Agent</a></li>
-            </ul>
-          </details>
-        </li> 
-        <li><a class="contrast" href="/buy">Get Key</a></li>
-        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
-        <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
-      </ul>
-    </nav>
-  </header>
-  <hr>
+{% block content%}
   <main class="container">
     <div id="site_content" style="grid-template-columns: 70% 30%;" class="grid">
      
@@ -223,29 +175,4 @@ print(response.json())
     </div>
 
   </div>
-  <script>
-            $(document).ready(function () {
-            // Add refresh button after field (this can be done in the template as well)
-            $('img.captcha').after(
-                $('<a href="#void" class="captcha-refresh"><i class="fa fa-refresh"></i>Refresh</a>')
-            );
-
-            // Click-handler for the refresh-link
-            $('.captcha-refresh').click(function () {
-                var $form = $(this).parents('form');
-                var url = location.protocol + "//" + window.location.hostname + ":"
-                    + location.port + "/captcha/refresh/";
-
-                // Make the AJAX-call
-                $.getJSON(url, {}, function (json) {
-                    $form.find('input[name="captcha_0"]').val(json.key);
-                    $form.find('img.captcha').attr('src', json.image_url);
-                });
-
-                return false;
-            });
-        });
- 
-  </script>
-</body>
-</html>
+{% endblock content%}

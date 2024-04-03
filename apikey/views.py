@@ -26,17 +26,17 @@ from hashlib import sha256
 import json
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def index(request):
     return render(request, "html/index.html", {"title": "Inference"})
 
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def manual(request):
     return render(request, "html/manual.html", {"title": "Manual"})
 
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def chat(request):
     if request.method == "POST":
         form = RoomRedirectForm(request.POST)
@@ -51,7 +51,7 @@ def chat(request):
     return render(request, "html/chat.html", context=context)
 
 
-@cache_page(60)
+#@cache_page(60)
 def model_infor(request):
     llm = LLM.objects.filter(agent_availability=False)
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
@@ -422,7 +422,7 @@ def agentroom(request,  key):
     return render(request, "html/lagent.html", context)
 
 def hotpotroom(request,  key):
-    llm = LLM.objects.filter(agent_availability=False)
+    llm = LLM.objects.all()
     templates = CustomTemplate.objects.all()
     context = {'llms': llm, 
                "key": key,
@@ -444,7 +444,7 @@ class CancelView(TemplateView):
     template_name = "html/cancel.html"
     def get_context_data(self, **kwargs):
         context = super(CancelView, self).get_context_data(**kwargs)
-        context['title'] = "Payment Canceled"
+        context['title'] = "Payment Cancelled"
         return context
 
 class CreateStripeCheckoutSessionView(View):

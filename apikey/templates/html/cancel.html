@@ -1,64 +1,10 @@
-<!DOCTYPE HTML>
-<html data-theme="dark">
-
-<head>
-  {% include "component_html/header.html" %} 
-</head>
-
-<body>
-  <header class="container">
-    <nav>
-      <ul>
-        <hgroup onclick="window.location.href = '/';">
-          <h1><b>Inference</b></h1>
-        </hgroup>
-      </ul>
-      <ul>
-        <li>
-          <details class="dropdown">
-            <summary>
-              About
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/">Introduction</a></li>
-              <li><a href="/model_infor">Model</a></li>
-              <li><a href="/manual">User Manual</a></li>
-              <li><a href="/contact">Contact Us</a></li>
-            </ul>
-          </details>
-        </li>
-
-        <li>
-          <details class="dropdown">
-            <summary>
-              Modes
-            </summary>
-            <ul dir="rtl">
-              <li><a href="/prompt">Prompt and API</a></li>
-              <li><a href="/chat">Chat Bot and Agent</a></li>
-            </ul>
-          </details>
-        </li>
-        <li><a href="/buy">Get Key</a></li>
-        <li><a class="contrast" href="/promptresponse">Response Log</a></li>
-        <li><input name="colour-mode" type="checkbox" id="colour-mode" role="switch" onclick="switchColour()" /></li>
-
-      </ul>
-
-    </nav>
-
-  </header>
-  <hr>
-  <main id="site_content container">
+{% extends "component_html/base.html" %}
+{% block content %}
+  <main>
     <div class="container">
-      {% block title %} Cancel {% endblock title%}
-      {% block content %}
       <div class="alert alert-info" role="alert">
         <a href="{% url 'apikey:product-list' %}">Go Back</a>
       </div>
-      {% endblock content %}
     </div>
   </main>
-</body>
-
-</html>
+{% endblock content %}
