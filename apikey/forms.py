@@ -8,8 +8,8 @@ class CaptchaForm(forms.Form):
         super (CaptchaForm, self).__init__ (*args, **kwargs) 
 
 class RoomRedirectForm(forms.Form):
-    CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode')]
-    CHOICES_TEST = [('chat','Chat Bot Mode'),('engineer','Agent Mode'),('hotpot', 'Hotpot Mode')]
+    #CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode')]
+    CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode'),('hotpot', 'Hotpot Mode')]
     room = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES, required=True)
     key = forms.CharField( widget=forms.TextInput(attrs={'placeholder': 'Key'}))
     def clean(self):
