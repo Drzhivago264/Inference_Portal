@@ -2,10 +2,11 @@
 <html data-theme="dark">
 
 <head>
-    {% include "component_html/header.html" %} 
+    {% include "component_html/header.html" %}
 </head>
 <style>
-    #chat-log-bot, #chat-log-agent {
+    #chat-log-bot,
+    #chat-log-agent {
         width: 100% !important;
         min-width: 250px;
         min-height: 150px;
@@ -13,7 +14,7 @@
         background-color: black;
         color: white;
         box-sizing: border-box;
-        height: 393px;
+        height: 500px;
         overflow: auto;
         border-radius: 5px;
         font-size: 14px;
@@ -31,7 +32,8 @@
         position: relative;
     }
 
-    #chat-message-submit {
+    #chat-message-submit-bot,
+    #chat-message-submit-agent {
         position: absolute;
         bottom: 10px;
         right: 10px;
@@ -81,6 +83,13 @@
         font-size: 12px;
         color: black;
     }
+
+    select {
+        height: 35px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        font-size: calc(10px + 0.25vw);
+    }
 </style>
 
 <body>
@@ -129,82 +138,162 @@
     <hr>
     <main>
         <div class="container">
-        <div class="grid" style=" min-width: 1250px;grid-template-columns: 25% 35% 35%;">
-            <div id="container" style="padding-left: 10px; min-width: 145px;">
-                <span>Key:
-                    <input style="height: 20px; width: 20ch; font-size:calc(1px + 0.7vw);" id="api_key">
-                </span>
-            </div>
-            <div class="container" style="min-width: 400px;" id="site_content_document">
-                <div class="grid" style="grid-template-columns: 35% 60%;">
-                    <h4>Bot:</h4>
-                    <select autocomplete="off" name="template-select" id="template-select"
-                        style="height: 35px; padding-top: 5px; padding-bottom: 5px ;font-size:calc(5px + 0.5vw);"
-                        aria-label="Select your agent..." required>
-                        {% for model in llms %}
-                        {% if model.name == 'Mistral Chat 13B' %}
-                        <option selected name="template" value="{{modelname}}">
-                            {{model.name}}<br>
-                            {% else %}
-                        <option name="template" value="{{model.name}}"> {{model.name}}<br>
-                            {% endif %}
-                            {% endfor %}
-                    </select>
+            <div class="grid" style=" min-width: 1250px;grid-template-columns: 25% 35% 35%;">
+                <div id="container" style="padding-left: 10px; min-width: 145px;">
+                    <span>Key:
+                        <input style="height: 20px; width: 80%; font-size:calc(1px + 0.7vw);" id="api_key">
+                    </span>
+                    <br>
+                    <span>
+                        <input type="checkbox" class="duplicate-message" name="duplicate-message" id="duplicate-message"
+                            checked> Duplicate message
+                    </span>
+                    <div>
+                        <small><i>NOTE: If the default parameters does not work for you, you can adjust them
+                                here.</i></small> <br>
+                        <small><i>NOTE: In order to better understand these parameters, refer to <a
+                                    href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a
+                                    href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This
+                                    Code. </a>
+                            </i></small>
+                        <hr>
+                        <label for="top_p">Top_p:</label>
+                        <div class="grid" style="grid-template-columns: 80% 20%;">
+                            <input type="range" step=".001" name="top_p" min="0.01" max="1" value="0.73"
+                                oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
+                            <output>0.73</output>
+                        </div><br>
+                        <label for="top_k">Top_k:</label>
+                        <div class="grid" style="grid-template-columns: 80% 20%;">
+                            <input type="range" step="1" name="top_k" min="0" max="100" value="0"
+                                oninput="this.nextElementSibling.value = this.value">
+                            <output>-1</output>
+                        </div><br>
+                        <label for="max_tokens">Max_tokens:</label>
+                        <div class="grid" style="grid-template-columns: 80% 20%;">
+                            <input type="range" step="1" name="max_tokens" min="1" max="4096" value="128"
+                                oninput="this.nextElementSibling.value = this.value">
+                            <output>128</output>
+                        </div><br>
+
+
+                        <label for="temperature">Temperature:</label>
+                        <div class="grid" style="grid-template-columns: 80% 20%;">
+                            <input type="range" step=".001" name="temperature" min="0" max="1.0" value="0.72"
+                                oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
+                            <output>0.72</output>
+                        </div><br>
+                        <label for="frequency_penalty">Frequency penalty:</label>
+                        <div class="grid" style="grid-template-columns: 80% 20%;">
+                            <input type="range" step=".001" name="frequency_penalty" min="-2.0" max="2.0" value="0"
+                                oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
+                            <output>0</output>
+                        </div><br>
+                        <label for="presence_penalty">Presence penalty:</label>
+                        <div class="grid" style="grid-template-columns: 80% 20%;">
+                            <input type="range" step=".001" name="presence_penalty" min="-2.0" max="2.0" value="0"
+                                oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
+                            <output>0</output>
+                        </div>
+
+                        <hr>
+                        <small><i>NOTE: These parameters go along with each others, please know what you are
+                                doing.</i></small><br>
+                        <small><i>NOTE: Return to default value if you messed up the parameters</i></small>
+                        <hr>
+                        <input type="checkbox" class="checkbox_beam" name="beam" id="beam"> Beam Search (default =
+                        False) <br>
+                        <input type="checkbox" class="checkbox_early_stopping" name="early_stopping"
+                            id="early_stopping"> Early
+                        Stop (default = False) <br><br>
+                        <input style="width: 10ch;" type="number" step="0.01" name="length_penalty" min="-2.0" max="2.0"
+                            value="0">
+                        Length Penalty
+                        (default = 0)<br>
+                        <input style="width: 10ch;" type="number" step="1" name="best_of" min="1" max="5" value="2">
+                        Best of
+                        (default = 2 for beam
+                        search, 1 for sampling) <br>
+                    </div>
                 </div>
-                <div id="chat-log-bot">
-                    <div class="message_log_container"
-                        style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+                <div class="container" style="min-width: 400px;" id="site_content_document">
+                    <div class="grid" style="grid-template-columns: 35% 60%;">
+                        <h4>Bot:</h4>
+                        <select autocomplete="off" name="template-select" id="bot-select"
+                            aria-label="Select your agent..." required>
+                            {% for model in llms %}
+                            {% if model.name == 'Mistral Chat 13B' and not model.agent_availability %}
+                            <option selected name="template" value="{{model.name}}">
+                                {{model.name}}<br>
+                                {% else %}
+                            <option name="template" value="{{model.name}}"> {{model.name}}<br>
+                                {% endif %}
+                                {% endfor %}
+                        </select>
+                    </div>
+                    <div id="chat-log-bot">
+                        <div class="message_log_container"
+                            style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+
+                        </div>
+                        <div id="chat-log-bot_">
+                        </div>
 
                     </div>
-                    <div id="chat-log-bot_">
+                    <hr>
+                    <div class="input-wrapper">
+                        <textarea id="chat-message-input-bot" name="message"></textarea>
+                        <button id="chat-message-submit-bot">Send</button>
                     </div>
+                </div>
 
-                </div>
-                <hr>
-                <div class="input-wrapper">
-                    <textarea id="chat-message-input" name="message"></textarea>
-                    <button id="chat-message-submit">Send</button>
-                </div>
-            </div>
-
-            <div clas="container">
-                <div class="grid" style="grid-template-columns: 35% 60%;">
-                    <h4>Agent:</h4>
-                    <select autocomplete="off" name="template-select" id="template-select"
-                        style="height: 35px; padding-top: 5px; padding-bottom: 5px ;font-size:calc(5px + 0.5vw);"
-                        aria-label="Select your agent..." required>
-                        {% for template in templates %}
-                        {% if template.template_name == 'Assignment Agent' %}
-                        <option selected name="template" value="{{template.template_name}}">
-                            {{template.template_name}}<br>
-                            {% else %}
-                        <option name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
-                            {% endif %}
-                            {% endfor %}
-                    </select>
-                </div>
-                <div id="chat-log-agent">
-                    <div class="message_log_container"
-                        style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+                <div clas="container">
+                    <div class="grid" style="grid-template-columns: 20% 40% 30%;">
+                        <h4>Agent:</h4>
+                        <select autocomplete="off" name="template-select" id="template-select-agent"
+                            aria-label="Select your agent..." required>
+                            {% for template in templates %}
+                            {% if template.template_name == 'Assignment Agent' %}
+                            <option selected name="template" value="{{template.template_name}}">
+                                {{template.template_name}}<br>
+                                {% else %}
+                            <option name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
+                                {% endif %}
+                                {% endfor %}
+                        </select>
+                        <select autocomplete="off" name="template-select" id="agent-select"
+                            aria-label="Select your agent..." required>
+                            {% for model in llms %}
+                            {% if model.name == 'gpt-4' and model.agent_availability %}
+                            <option selected name="template" value="{{model.name}}">
+                                {{model.name}}<br>
+                                {% elif model.agent_availability%}
+                            <option name="template" value="{{model.name}}"> {{model.name}}<br>
+                                {% endif %}
+                                {% endfor %}
+                        </select>
+                    </div>
+                    <div id="chat-log-agent">
+                        <div class="message_log_container"
+                            style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+                        </div>
+                        <div id="chat-log-agent_">
+                        </div>
 
                     </div>
-                    <div id="chat-log-agent_">
+                    <hr>
+                    <div class="input-wrapper">
+                        <textarea id="chat-message-input-agent" name="message"></textarea>
+                        <button id="chat-message-submit-agent">Send</button>
                     </div>
+                    {{ name|json_script:"name" }}
+                    {{ key|json_script:"key" }}
+                </div>
+                <div style="max-width: 380px; font-size:calc(5px + 0.7vw);  padding-left: 1px;" class="container">
 
                 </div>
-                <hr>
-                <div class="input-wrapper">
-                    <textarea id="chat-message-input" name="message"></textarea>
-                    <button id="chat-message-submit">Send</button>
-                </div>
-                {{ name|json_script:"name" }}
-                {{ key|json_script:"key" }}
-            </div>
-            <div style="max-width: 380px; font-size:calc(5px + 0.7vw);  padding-left: 1px;" class="container">
-
             </div>
         </div>
-    </div>
     </main>
     <script>
 
@@ -214,7 +303,7 @@
             ws_scheme
             + '://'
             + window.location.host
-            + '/ws/{{destination}}/'
+            + '/ws/engineer/'
             + key
             + '/'
         );
@@ -270,40 +359,53 @@
         chatSocket_bot.onclose = function (e) {
             console.error('Chat socket closed unexpectedly');
         };
-        var textarea = document.getElementById("chat-message-input");
-        var textarea_submit_button = document.querySelector('#chat-message-submit')
-        textarea.focus();
-        textarea.onkeyup = function (e) {
+        var textarea_agent = document.getElementById("chat-message-input-agent");
+        var textarea_submit_button_agent = document.querySelector('#chat-message-submit-agent')
+        textarea_agent.focus();
+        textarea_agent.onkeyup = function (e) {
             if (e.keyCode === 13 && !e.shiftKey) {
                 textarea_submit_button.click();
             }
         };
         var textarea_size_litmit = 300;
-        textarea.oninput = function () {
-            textarea.style.height = "";
-            textarea.style.height = Math.min(textarea.scrollHeight, textarea_size_litmit) + "px";
+        textarea_agent.oninput = function () {
+            textarea_agent.style.height = "";
+            textarea_agent.style.height = Math.min(textarea_agent.scrollHeight, textarea_size_litmit) + "px";
         };
-        textarea_submit_button.onclick = function (e) {
-            var choosen_models = null;
-            var mode = null;
-            var choosen_template = null
-            var inputElements = document.getElementsByClassName('checkbox_model');
-            for (var i = 0; inputElements[i]; ++i) {
-                if (inputElements[i].checked) {
-                    choosen_models = inputElements[i].value;
-                    break;
-                }
-            }
+        textarea_submit_button_agent.onclick = function (e) {
+            var choosen_models = document.getElementById("agent-select").value;
+            var choosen_template = document.getElementById("template-select-agent").value;
+            const agent_instruction = document.getElementById('agent_instruction').value
+            const child_instruction = document.getElementById('child_instruction').value
             const api_key = document.getElementById('api_key').value
+            const top_p = document.getElementsByName("top_p")[0].value
+            var max_tokens = document.getElementsByName("max_tokens")[0].value
+            if (max_tokens == 0) {
+                max_tokens = null
+            }
 
-            const message = textarea.value;
+            const temperature = document.getElementsByName("temperature")[0].value
+            const frequency_penalty = document.getElementsByName("frequency_penalty")[0].value
+            const presence_penalty = document.getElementsByName("presence_penalty")[0].value
+
+            const message = textarea_agent.value;
             if (message.trim() !== "") {
                 chatSocket_agent.send(JSON.stringify({
+                    'currentParagraph': currentParagraph,
                     'message': message,
                     'key': api_key,
+                    'choosen_models': choosen_models,
+                    'choosen_template': choosen_template,
                     'role': 'Human',
+                    'top_p': parseFloat(top_p).toFixed(2),
+                    'max_tokens': max_tokens,
+                    'frequency_penalty': parseFloat(frequency_penalty).toFixed(2),
+                    'presence_penalty': parseFloat(presence_penalty).toFixed(2),
+                    'temperature': parseFloat(temperature).toFixed(2),
+                    'agent_instruction': agent_instruction,
+                    'child_instruction': child_instruction
                 }));
-                textarea.value = '';
+                textarea_agent.value = '';
             };
         }
 

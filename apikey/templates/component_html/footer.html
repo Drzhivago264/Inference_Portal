@@ -1,0 +1,68 @@
+
+<footer  data-theme="dark">
+    <div class="container footerholder">
+        <div class="grid">
+            <div>
+                <h6>Key Information:</h6>
+                <ul>
+                    {% if title == "Inference"%}
+                    <li><a href="/">Introduction</a></li>
+                    {% else %}
+                    <li><a class="contrast" href="/">Introduction</a></li>
+                    {% endif %}
+                    {% if title == "Model Detail"%}
+                    <li><a href="/model_infor">Model</a></li>
+                    {% else %}
+                    <li><a class="contrast" href="/model_infor">Model</a></li>
+                    {% endif %}
+                    {% if title == "Manual"%}
+                    <li><a href="/manual">User Manual</a></li>
+                    {% else %}
+                    <li><a class="contrast" href="/manual">User Manual</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div>
+                <h6>Money Talks:</h6>
+                <ul>
+                    {% if title == "Manage API Key" or title == "Payment Success" or title == "Payment Cancelled"%}
+                    <li><a href="/buy">Get Key</a></li>
+                    {% else %}
+                    <li><a class="contrast" href="/buy">Get Key</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div>
+                <h6>Inference Mode:</h6>
+                <ul>
+                    {% if title == "Prompt & API"%}
+                    <li><a href="/prompt">Prompt and API</a></li>
+                    {% else%}
+                    <li><a class="contrast" href="/prompt">Prompt and API</a></li>
+                    {% endif %}
+                    {% if title == "Inference Mode"%}
+                    <li><a href="/chat">Chat Bot and Agent</a></li>
+                    {% else %}
+                    <li><a class="contrast" href="/chat">Chat Bot and Agent</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div>
+                <h6>Great Minds Think Alike:</h6>
+                <ul>
+                    {% if title == "Contact"%}
+                    <li><a href="/contact">Contact Us</a></li>
+                    {% else %}
+                    <li><a class="contrast" href="/contact">Contact Us</a></li>
+                    {% endif %}
+                    {% if title == "Frankenstein"%}
+                    <li><a href="/#">Frankenstein Models</a></li>
+                    {% else %}
+                    <li><a class="contrast" href="/#">Frankenstein Models</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</footer>
