@@ -31,5 +31,6 @@ urlpatterns = [
     path('checkxmrpayment', views.check_xmr_payment, name='checkxmrpayment'),
     path('checkcredit', views.check_credit, name='checkcredit'),
     path('topup', views.topup, name='topup'),
+    path('frankenstein/', views.frankenstein, name='frankenstein'),
     path("hotpot/<str:key>/", views.hotpotroom, name="hotpot_room"),
 ]

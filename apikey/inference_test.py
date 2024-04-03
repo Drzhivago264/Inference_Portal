@@ -27,8 +27,8 @@ def manage_monero(command, params=None):
 
 #print(manage_monero("get_transfers", {"in":True}).text)
 #print(json.loads(manage_monero("make_integrated_address", {"payment_id":"399f9bf8ce13f73a"}).text))
-print(json.loads(manage_monero("get_payments",{"payment_id":"8c83d1a8499ce3a2"}).text))
-#print(json.loads(manage_monero("transfer", {"destinations":[{"amount":3000000000,"address":"4LHcvZ1EWX1ZxZ4BYVJmPL7MABVBu7bQxKZwtUDZA12jC2WZ2XrA5EmDmd6Q94S5QejbgEbQmgeMXFWCTfd7PW7U8u9GXS5qpzJ7aV1Khj"}]}).text))
+#print(json.loads(manage_monero("get_payments",{"payment_id":"8c83d1a8499ce3a2"}).text))
+##print(json.loads(manage_monero("transfer", {"destinations":[{"amount":3000000000,"address":"4LHcvZ1EWX1ZxZ4BYVJmPL7MABVBu7bQxKZwtUDZA12jC2WZ2XrA5EmDmd6Q94S5QejbgEbQmgeMXFWCTfd7PW7U8u9GXS5qpzJ7aV1Khj"}]}).text))
 promtp= "hehe"
 context = {
     "prompt": "what is my name",
@@ -44,7 +44,17 @@ from openai import OpenAI
 import requests
 
 
+from openai import OpenAI
+client = OpenAI(api_key=config("GPT_KEY"))
 
+completion = client.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "user", "content": "hi"}
+  ]
+)
+
+print(completion.choices[0].message)
 #response = requests.post("http://127.0.0.1:8000/api/completion", headers = {"Authorization": "Bearer atnBnvVo.RCJnC24H5blnp4wocG9cw40yRaTqGjpO"}, json=context, stream=False ) 
    
 #print(response.content)

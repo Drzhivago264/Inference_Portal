@@ -98,7 +98,7 @@
             <div class="container" style="min-width: 400px;" id="site_content_document">
                 <div class="grid" style="grid-template-columns: 35% 60%;">
                     <h4>Bot:</h4>
-                    <select autocomplete="off" name="template-select" id="bot-select" aria-label="Select your bot..."
+                    <select  name="template-select" id="bot-select" aria-label="Select your bot..."
                         required>
                         {% for model in llms %}
                         {% if model.name == 'Mistral Chat 13B' and not model.agent_availability %}
@@ -286,6 +286,14 @@
             textarea_submit_button_agent.click();
             if (duplicate) {
                 textarea_submit_button_bot.click();
+            }
+        }
+    };
+    textarea_bot.onkeyup = function (e) {
+        if (e.keyCode === 13 && !e.shiftKey) {
+            textarea_submit_button_bot.click();
+            if (duplicate) {
+                textarea_submit_button_agent.click();
             }
         }
     };

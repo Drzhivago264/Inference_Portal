@@ -203,99 +203,122 @@ def Inference(unique: str,
         if best_of == 1:
             best_of += 1
         length_penalty = float(length_penalty)
-        
+
+    llm = LLM.objects.get(name=model)
+    url_list = get_model_url(llm)
+
     processed_prompt = inference_mode(
-        model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory)
-    context = {
-        "prompt": processed_prompt,
-        "n": 1,
-        'best_of': best_of,
-        'presence_penalty': float(presence_penalty),
-        "use_beam_search": beam,
-        "temperature": float(temperature),
-        "max_tokens": int(max_tokens),
-        "stream": stream,
-        "top_k": int(top_k),
-        "top_p": float(top_p),
-        "length_penalty": float(length_penalty),
-        "frequency_penalty": float(frequency_penalty),
-        "early_stopping": early_stopping,
+        model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability = llm.agent_availability)
+    if not llm.agent_availability:
+        context = {
+            "prompt": processed_prompt,
+            "n": 1,
+            'best_of': best_of,
+            'presence_penalty': float(presence_penalty),
+            "use_beam_search": beam,
+            "temperature": float(temperature),
+            "max_tokens": int(max_tokens),
+            "stream": stream,
+            "top_k": int(top_k),
+            "top_p": float(top_p),
+            "length_penalty": float(length_penalty),
+            "frequency_penalty": float(frequency_penalty),
+            "early_stopping": early_stopping,
 
-    }
-    ''' Query a list of inference servers for a given model, pick a random one '''
-    url_list = get_model_url(model)
-    if url_list:
-        random_url = random.choice(url_list)
-        url = random_url.url
-        instance_id = random_url.name
-        server_status = random_url.status
-        update_server_status_in_db(instance_id=instance_id, update_type="time")
-        if server_status == "running":
-            if not stream:
-                response = send_request(
-                    stream=False, url=url, instance_id=instance_id, context=context)
-                response = response_mode(
-                    response=response, mode=mode, prompt=processed_prompt)
+        }
+        ''' Query a list of inference servers for a given model, pick a random one '''
+        if url_list:
+            random_url = random.choice(url_list)
+            url = random_url.url
+            instance_id = random_url.name
+            server_status = random_url.status
+            update_server_status_in_db(instance_id=instance_id, update_type="time")
+            if server_status == "running":
+                if not stream:
+                    response = send_request(
+                        stream=False, url=url, instance_id=instance_id, context=context)
+                    response = response_mode(
+                        response=response, mode=mode, prompt=processed_prompt)
+                else:
+                    response = send_request(
+                        stream=True, url=url, instance_id=instance_id, context=context)
+
+                    if not isinstance(response, str):
+                        previous_output = str()
+                        full_response = str()
+                        for chunk in response.iter_lines(chunk_size=8192,
+                                                        decode_unicode=False,
+                                                        delimiter=b"\0"):
+                            if chunk:
+                                data = json.loads(chunk.decode("utf-8"))
+                                output = data["text"][0]
+                                output = response_mode(
+                                    response=output, mode=mode, prompt=processed_prompt)
+                                re = output.replace(previous_output, "")
+                                full_response += re
+                                previous_output = output
+                                channel_layer = get_channel_layer()
+                                async_to_sync(channel_layer.group_send)(
+                                    room_group_name,
+                                    {
+                                        "type": "chat_message",
+                                        "role": model,
+                                        "message": re,
+                                        'credit': credit,
+                                        'unique': unique
+                                    }
+                                )
+                        log_prompt_response(key_object, model, prompt,
+                                            full_response, type_=type_)
+
+            elif server_status == "stopped" or "stopping":
+                command_EC2.delay(instance_id, region=region, action="on")
+                response = "Server is starting up, try again in 400 seconds"
+                update_server_status_in_db(
+                    instance_id=instance_id, update_type="status")
+            elif server_status == "pending":
+                response = "Server is setting up, try again in 30 seconds"
             else:
-                response = send_request(
-                    stream=True, url=url, instance_id=instance_id, context=context)
-
-                if not isinstance(response, str):
-                    previous_output = str()
-                    full_response = str()
-                    for chunk in response.iter_lines(chunk_size=8192,
-                                                     decode_unicode=False,
-                                                     delimiter=b"\0"):
-                        if chunk:
-                            data = json.loads(chunk.decode("utf-8"))
-                            output = data["text"][0]
-                            output = response_mode(
-                                response=output, mode=mode, prompt=processed_prompt)
-                            re = output.replace(previous_output, "")
-                            full_response += re
-                            previous_output = output
-                            channel_layer = get_channel_layer()
-                            async_to_sync(channel_layer.group_send)(
-                                room_group_name,
-                                {
-                                    "type": "chat_message",
-                                    "role": model,
-                                    "message": re,
-                                    'credit': credit,
-                                    'unique': unique
-                                }
-                            )
-                    log_prompt_response(key_object, model, prompt,
-                                        full_response, type_=type_)
-
-        elif server_status == "stopped" or "stopping":
-            command_EC2.delay(instance_id, region=region, action="on")
-            response = "Server is starting up, try again in 400 seconds"
-            update_server_status_in_db(
-                instance_id=instance_id, update_type="status")
-        elif server_status == "pending":
-            response = "Server is setting up, try again in 30 seconds"
+                response = "Unknown Server state, wait 5 seconds"
         else:
-            response = "Unknown Server state, wait 5 seconds"
+            response = "Model is currently offline"
+
+        if type_ == "chatroom" and isinstance(response, str):
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                room_group_name,
+                {
+                    "type": "chat_message",
+                    "role": model,
+                    "message": response,
+                    'credit': credit,
+                    'unique': unique
+                }
+            )
+        elif type_ == "prompt" or type_ == "prompt_room":
+            log_prompt_response(key_object, model, prompt,
+                                response, type_="prompt")
     else:
-        response = "Model is currently offline"
-
-    if type_ == "chatroom" and isinstance(response, str):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            room_group_name,
-            {
-                "type": "chat_message",
-                "role": model,
-                "message": response,
-                'credit': credit,
-                'unique': unique
-            }
-        )
-    elif type_ == "prompt" or type_ == "prompt_room":
-        log_prompt_response(key_object, model, prompt,
-                            response, type_="prompt")
-
+        logger.info(processed_prompt)
+        client = OpenAI(api_key=config("GPT_KEY"))
+        clean_response = ""
+        clean_response = send_request_openai(client=client,
+                                             session_history=processed_prompt,
+                                             model=model,
+                                             model_type=model,
+                                             credit=credit,
+                                             unique=unique,
+                                             current_turn_inner=False,
+                                             stream=stream,
+                                             room_group_name=room_group_name,
+                                             clean_response=clean_response,
+                                             frequency_penalty=frequency_penalty,
+                                             top_p=top_p,
+                                             max_tokens=max_tokens,
+                                             temperature=temperature,
+                                             presence_penalty=presence_penalty)
+        log_prompt_response(key_object=key_object, model=model, prompt=prompt,
+                        response=clean_response, type_="open_ai")
 
 @shared_task
 def Agent_Inference(key: str,
