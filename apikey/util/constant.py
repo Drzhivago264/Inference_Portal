@@ -31,7 +31,8 @@ MAX_HISTORY_LENGTH = {
     "Mistral Chat 13B": 3000,
     "Llama 2  Chat 13B": 3000,
     "4Chan /Pol 2.7B": 100,
-    "Reddit Helper 2.7B": 100
+    "Reddit Helper 2.7B": 100,
+    "openai": 4096
 }
 DEFAULT_TOP_P =  0.73
 DEFAULT_BEST_OF =  1

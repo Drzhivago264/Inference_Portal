@@ -26,17 +26,17 @@ from hashlib import sha256
 import json
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def index(request):
     return render(request, "html/index.html", {"title": "Inference"})
 
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def manual(request):
     return render(request, "html/manual.html", {"title": "Manual"})
 
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def chat(request):
     if request.method == "POST":
         form = RoomRedirectForm(request.POST)
@@ -51,13 +51,15 @@ def chat(request):
     return render(request, "html/chat.html", context=context)
 
 
-#@cache_page(60)
+@cache_page(60)
 def model_infor(request):
     llm = LLM.objects.filter(agent_availability=False)
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
     context = {'llms': llm, 'servers': servers, 'title': 'Model Detail'}
     return render(request, "html/model_infor.html", context)
 
+def frankenstein(request):
+    return render(request, "html/frankenstein.html", {"title": "Frankenstein"}) 
 
 def response_prompt_redirect(request):
     if request.method == 'POST':

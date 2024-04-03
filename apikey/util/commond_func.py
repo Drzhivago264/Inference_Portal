@@ -6,6 +6,7 @@ from . import constant
 from decouple import config
 import boto3
 import json
+import tiktoken
 import regex as re
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import QuerySet
@@ -40,7 +41,7 @@ def get_EC2_status(instance_id: str, region: str) -> str:
         return e
 
 
-def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool) -> str:
+def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str:
     """_summary_
 
     Args:
@@ -52,15 +53,32 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
     Returns:
         _type_: _description_
     """
-    template = constant.SHORTEN_TEMPLATE_TABLE[model]
+    
+
     if mode == "chat":
-        prompt_ = template.format(prompt, "")
-        if include_memory:
-            chat_history = get_chat_context(model=model, key_object=key_object, raw_prompt=prompt)
-            prompt_ = chat_history + "\n" + prompt_
-            return prompt_
+        if not agent_availability:
+            template = constant.SHORTEN_TEMPLATE_TABLE[model]
+            prompt_ = template.format(prompt, "")
+            if include_memory:
+                chat_history = get_chat_context(model=model, 
+                                                key_object=key_object,
+                                                raw_prompt=prompt, 
+                                                agent_availability=agent_availability)
+                prompt_ = chat_history + "\n" + prompt_
+                return prompt_
+            else:
+                return prompt_
         else:
-            return prompt_
+            prompt_ = {"role": "user", "content": f"{prompt}"}
+            if include_memory:
+                chat_history = get_chat_context(model=model, 
+                                                key_object=key_object,
+                                                raw_prompt=prompt, 
+                                                agent_availability=agent_availability)
+                chat_history.append(prompt_)
+                return chat_history
+            else:
+                return prompt_
     elif mode == "generate":
         return prompt
 
@@ -100,7 +118,7 @@ def log_prompt_response(key_object: object, model: str, prompt: str, response: s
         prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)
     pair_save.save()
 
-def get_model_url(model: str) -> list | bool:
+def get_model_url(model: object) -> list | bool:
     """Get a list of EC2 instance enpoints that serve a given model
 
     Args:
@@ -113,7 +131,7 @@ def get_model_url(model: str) -> list | bool:
         model_list = cache.get(f"{model}_link_list")
         if model_list == None:
             model_list = list(InferenceServer.objects.filter(
-                hosted_model__name=model, availability="Available"))
+                hosted_model=model, availability="Available"))
             cache.set(f"{model}_link_list", model_list,
                       constant.CACHE_SERVER_LINK_RETRIVAL)
         return model_list
@@ -233,43 +251,61 @@ def send_request_openai(stream: bool,
                                                       frequency_penalty=frequency_penalty,
                                                       presence_penalty=presence_penalty
                                                       )
-        current_turn_inner += 1
-        for chunk in raw_response:
-            if chunk:
-                data = chunk.choices[0].delta.content
-                if data != None:
-                    clean_response += data
-                    response_json = [
-                        {'role': 'assistant', 'content': f'{clean_response}'}
-                    ]
-                    session_history.pop()
-                    session_history.extend(response_json)
-                    async_to_sync(channel_layer.group_send)(
-                        room_group_name,
-                        {
-                            "type": "chat_message",
-                            "role": model,
-                            "message": data,
-                            'credit': credit,
-                            'unique': unique,
-                            "session_history": session_history,
-                            "current_turn": current_turn_inner
-                        }
-                    )
+        if current_turn_inner:
+            current_turn_inner += 1
+            for chunk in raw_response:
+                if chunk:
+                    data = chunk.choices[0].delta.content
+                    if data != None:
+                        clean_response += data
+                        response_json = [
+                            {'role': 'assistant', 'content': f'{clean_response}'}
+                        ]
+                        session_history.pop()
+                        session_history.extend(response_json)
+                        async_to_sync(channel_layer.group_send)(
+                            room_group_name,
+                            {
+                                "type": "chat_message",
+                                "role": model,
+                                "message": data,
+                                'credit': credit,
+                                'unique': unique,
+                                "session_history": session_history,
+                                "current_turn": current_turn_inner
+                            }
+                        )
 
-        action_list = action_parse_json(session_history[-1]['content'])
-        if action_list:
-            for act in action_list:
-                action = json.loads(act)['Action']   
-                if "STOP" == action:
-                    async_to_sync(channel_layer.group_send)(
-                        room_group_name,
-                        {
-                            "type": "chat_message",
-                            "agent_action": action
-                        }
-                    )
-        return clean_response
+            action_list = action_parse_json(session_history[-1]['content'])
+            if action_list:
+                for act in action_list:
+                    action = json.loads(act)['Action']   
+                    if "STOP" == action:
+                        async_to_sync(channel_layer.group_send)(
+                            room_group_name,
+                            {
+                                "type": "chat_message",
+                                "agent_action": action
+                            }
+                        )
+            return clean_response
+        else:
+            for chunk in raw_response:
+                if chunk:
+                    data = chunk.choices[0].delta.content
+                    if data != None:
+                        clean_response += data
+                        async_to_sync(channel_layer.group_send)(
+                            room_group_name,
+                            {
+                                "type": "chat_message",
+                                "role": model,
+                                "message": data,
+                                'credit': credit,
+                                'unique': unique
+                            }
+                        )       
+            return clean_response
 
     except openai.APIConnectionError as e:
         async_to_sync(channel_layer.group_send)(
@@ -346,7 +382,7 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
     except ObjectDoesNotExist:
         return False
 
-def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
+def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool) -> str | list:
     """_summary_
 
     Args:
@@ -356,26 +392,43 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
     Returns:
         str: chat history of user including 3 relevant responses
     """
-    #message_list_sql = list(reversed(PromptResponse.objects.filter(
-    #    model__name=model, key=key_, p_type="chatroom").order_by("-id")[:constant.DEFAULT_CHAT_HISTORY_OBJECT]))
+
     hashed_key = key_object.hashed_key
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(raw_prompt, k= constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT) 
-    shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
-    full_instruct = ""
-    max_history_length = constant.MAX_HISTORY_LENGTH[model]
-    tokeniser = constant.TOKENIZER_TABLE[model]
-    for mess in message_list_vector:
-        template = shorten_template.format(mess.content_object.prompt, mess.content_object.response)
-        full_instruct += "\n\n"
-        full_instruct += template
-        inputs = tokeniser(full_instruct)
-        current_history_length = len(inputs['input_ids'])
-        if current_history_length > int(max_history_length):
-            full_instruct = full_instruct[:-(
-                current_history_length-max_history_length)]
-
-    full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
-    return full_instruct
+    if not agent_availability:
+        shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
+        full_instruct = ""
+        max_history_length = constant.MAX_HISTORY_LENGTH[model]
+        tokeniser = constant.TOKENIZER_TABLE[model]
+        for mess in message_list_vector:
+            template = shorten_template.format(mess.content_object.prompt, mess.content_object.response)
+            full_instruct += "\n\n"
+            full_instruct += template
+            inputs = tokeniser(full_instruct)
+            current_history_length = len(inputs['input_ids'])
+            if current_history_length > int(max_history_length):
+                full_instruct = full_instruct[:-(
+                    current_history_length-max_history_length)]
+        full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
+        return full_instruct
+    else:
+        try:
+            tokeniser= tiktoken.encoding_for_model(model)
+        except:
+            tokeniser = tiktoken.encoding_for_model("gpt-4")
+        max_history_length = constant.MAX_HISTORY_LENGTH["openai"]
+        current_history_length = 0
+        full_instruct_list = []
+        for mess in message_list_vector:
+            full_instruct_list += [
+                {'role': 'user', 'content': f'{mess.content_object.prompt}'},
+                {'role': 'assistant', 'content': f'{mess.content_object.response}'}
+            ]
+            current_history_length += len(tokeniser.encode(mess.content_object.prompt +" "+ mess.content_object.response))
+            if current_history_length > int(max_history_length):
+                full_instruct_list = full_instruct_list[:-2 or None]
+        return full_instruct_list
+    
 
 def manage_monero(command, params=None):
     rpc_input = {
