@@ -424,10 +424,17 @@ def agentroom(request,  key):
 def hotpotroom(request,  key):
     llm = LLM.objects.all()
     templates = CustomTemplate.objects.all()
+    default_template = CustomTemplate.objects.get(
+        template_name="Assignment Agent")
+    default_child_template = AgentInstruct.objects.filter(
+        template = default_template, 
+    )
     context = {'llms': llm, 
                "key": key,
                "templates": templates,
                "destination": "hotpot",
+               "template": default_template, 
+               "child_template": default_child_template,
                "title": "Hotpot Mode"
                }
     return render(request, "html/hotpot.html", context)

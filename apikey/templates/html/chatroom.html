@@ -52,19 +52,19 @@
             <input type="range" step=".001" name="top_p" min="0.01" max="1" value="0.73"
                 oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
             <output>0.73</output>
-        </div><br>
+        </div>
         <label for="top_k">Top_k:</label>
         <div class="grid" style="grid-template-columns: 80% 20%;">
             <input type="range" step="1" name="top_k" min="0" max="100" value="0"
                 oninput="this.nextElementSibling.value = this.value">
             <output>-1</output>
-        </div><br>
+        </div>
         <label for="max_tokens">Max_tokens:</label>
         <div class="grid" style="grid-template-columns: 80% 20%;">
             <input type="range" step="1" name="max_tokens" min="1" max="4096" value="128"
                 oninput="this.nextElementSibling.value = this.value">
             <output>128</output>
-        </div><br>
+        </div>
 
 
         <label for="temperature">Temperature:</label>
@@ -72,13 +72,13 @@
             <input type="range" step=".001" name="temperature" min="0" max="1.0" value="0.72"
                 oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
             <output>0.72</output>
-        </div><br>
+        </div>
         <label for="frequency_penalty">Frequency penalty:</label>
         <div class="grid" style="grid-template-columns: 80% 20%;">
             <input type="range" step=".001" name="frequency_penalty" min="-2.0" max="2.0" value="0"
                 oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
             <output>0</output>
-        </div><br>
+        </div>
         <label for="presence_penalty">Presence penalty:</label>
         <div class="grid" style="grid-template-columns: 80% 20%;">
             <input type="range" step=".001" name="presence_penalty" min="-2.0" max="2.0" value="0"

@@ -1,11 +1,11 @@
 {% extends "component_html/base.html" %}
 {% block head %}
 <link rel="stylesheet" href="/static/css/captcha.css">
-  <link href="/static/css/prism.css" rel="stylesheet" />
-  <script src="/static/js/prism.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link href="/static/css/prism.css" rel="stylesheet" />
+<script src="/static/js/prism.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="/static/js/refresh-captcha.js"></script>
-  
+
 <style>
   #chat-log {
     width: 100% !important;
@@ -21,119 +21,119 @@
   .message_log_container {
     margin: 10px;
   }
-
-
-
 </style>
 {% endblock head %}
 
 {% block content%}
-  <main class="container">
-    <div id="site_content" style="grid-template-columns: 70% 30%;" class="grid">
-     
-      <div class="container" id="content">
-        <h2>Prompt testing/Server warm up</h2>
+<main class="container">
+  <div id="site_content" style="grid-template-columns: 70% 30%;" class="grid">
 
-        <form autocomplete="off" method="post">
-          {% csrf_token %}
-          {{ form.non_field_errors }}
-          <div class="form_settings">
-            {{form.key_name}}
-            {{form.key}}
-            {{form.prompt}}
-            <div class="grid">
-              <div class="container">
-                <h3> Available Models </h3>
-                  {{form.model}} 
+    <div class="container" id="content">
+      <h2>Prompt testing/Server warm up</h2>
+
+      <form autocomplete="off" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form_settings">
+          {{form.key_name}}
+          {{form.key}}
+          {{form.prompt}}
+          <div class="grid">
+            <div class="container">
+              <h3> Available Models </h3>
+              {{form.model}}
+            </div>
+            <div class="container">
+              <h3> Mode </h3>
+              {{form.mode}}
+              {{form.include_memory}} Include Memory (for chat mode)
+            </div>
+          </div>
+          <hr>
+          <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small><br>
+          <small><i>NOTE: In order to better understand these parameters, refer to <a
+                href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a
+                href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a>
+            </i></small>
+          <hr>
+          <div class="grid">
+            <div class="container">
+              <label for="top_p">Top_p:</label>
+              <div class="grid" style="grid-template-columns: 80% 20%;">
+                {{form.top_p}}
+                <output>0.73</output>
               </div>
-              <div class="container">
-                <h3> Mode </h3>
-                  {{form.mode}}
-                  {{form.include_memory}} Include Memory (for chat mode)
+              <label for="top_k">Top_k:</label>
+              <div class="grid" style="grid-template-columns: 80% 20%;">
+                {{form.top_k}}
+                <output>-1</output>
+              </div>
+              <label for="max_tokens">Max_tokens:</label>
+              <div class="grid" style="grid-template-columns: 80% 20%;">
+                {{form.max_tokens}}
+                <output>128</output>
               </div>
             </div>
-            <hr>
-            <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small><br>
-            <small><i>NOTE: In order to better understand these parameters, refer to <a href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a> </i></small>                  
-            <hr>
-            <div class="grid" >
-              <div class="container">
-                <label for="top_p">Top_p:</label>
-                <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                  {{form.top_p}}
-                  <output>0.73</output>
-                </div><br>
-                <label for="top_k" >Top_k:</label>
-                <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                  {{form.top_k}}
-                  <output>-1</output>
-                </div><br>
-                <label for="max_tokens">Max_tokens:</label>
-                <div class="grid" style="grid-template-columns: 80% 20%;"> 
-                  {{form.max_tokens}}
-                  <output>128</output>
-                </div>
-              </div>
-              <div class="container">
-                <label for="temperature">Temperature:</label>
-            <div class="grid" style="grid-template-columns: 80% 20%;"> 
-              {{form.temperature}}
+            <div class="container">
+              <label for="temperature">Temperature:</label>
+              <div class="grid" style="grid-template-columns: 80% 20%;">
+                {{form.temperature}}
                 <output>0.72</output>
-              </div><br>
+              </div>
               <label for="frequency_penalty">Frequency penalty:</label>
-              <div class="grid" style="grid-template-columns: 80% 20%;"> 
+              <div class="grid" style="grid-template-columns: 80% 20%;">
                 {{form.frequency_penalty}}
                 <output>0</output>
-              </div><br>
+              </div>
               <label for="presence_penalty">Presence penalty:</label>
-              <div class="grid" style="grid-template-columns: 80% 20%;"> 
+              <div class="grid" style="grid-template-columns: 80% 20%;">
                 {{form.presence_penalty}}
                 <output>0</output>
               </div>
-              </div>
             </div>
-            <hr>
-            <small><i>NOTE: These parameters go along with each others, please know what you are doing.</i></small><br>
-            <small><i>NOTE: Return to default value if you messed up the parameters</i></small>
-            <hr>
-            {{form.beam}} Beam Search (default = False) <br>
-            {{form.early_stopping}} Early Stop (default = False) <br> <br>
-            {{form.length_penalty}}Length Penalty (default = 0)<br>
-            {{form.best_of}} Best of (default = 2 for beam search, 1 for sampling) <br>
-            <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" value="Submit" /></p>
           </div>
+          <hr>
+          <small><i>NOTE: These parameters go along with each others, please know what you are doing.</i></small><br>
+          <small><i>NOTE: Return to default value if you messed up the parameters</i></small>
+          <hr>
+          {{form.beam}} Beam Search (default = False) <br>
+          {{form.early_stopping}} Early Stop (default = False) <br> <br>
+          {{form.length_penalty}}Length Penalty (default = 0)<br>
+          {{form.best_of}} Best of (default = 2 for beam search, 1 for sampling) <br>
+          <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" value="Submit" /></p>
+        </div>
 
-        </form>
-      </div>
-      <div class="container"   id="content">
-        <!-- insert your sidebar items here -->
-        <h2>Status</h2>
-        <div id="chat-log">
-          <p>
-            {%for message in messages %}
-          <div class="message_log_container"
-            style="text-align: left; word-wrap: break-word; overflow-wrap: break-word;"><span> {{ message }}</span>
-          </div>
-          {% endfor %}
-          </p>
-        </div><br>
-        <h2>Response Log</h2>
-        <h4>You can check your response log here:</h4>
-        <form method="post">
-          {% csrf_token %}
-          {{log_form.key_name}}
-          {{log_form.key_}}
-          
-              <div class="grid">
-                {{log_form.captcha}}
-                
-              </div>  
-              <input class="submit" style="float: right;" type="submit" value="Go" />
-        </form>
-        <h2>API Endpoints</h2>
-        <h4>Python example for chat endpoint:</h4>
+      </form>
+    </div>
+    <div class="container" id="content">
+      <!-- insert your sidebar items here -->
+      <h2>Status</h2>
+      <div id="chat-log">
+        <p>
+          {%for message in messages %}
+        <div class="message_log_container" style="text-align: left; word-wrap: break-word; overflow-wrap: break-word;">
+          <span> {{ message }}</span>
+        </div>
+        {% endfor %}
+        </p>
+      </div><br>
+      <h2>Response Log</h2>
+      <h4>You can check your response log here:</h4>
+      <form method="post">
+        {% csrf_token %}
+        {{log_form.key_name}}
+        {{log_form.key_}}
 
-        <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >response = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
+        <div class="grid">
+          {{log_form.captcha}}
+
+        </div>
+        <input class="submit" style="float: right;" type="submit" value="Go" />
+      </form>
+      <h2>API Endpoints</h2>
+      <h4>Python example for chat endpoint:</h4>
+
+      <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >response = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
 json={"prompt": str,
   "model" : str,
   'top_k': int,
@@ -150,8 +150,8 @@ json={"prompt": str,
 print(response.json())
         </code></pre>
 
-        <h4>cURL example for text completion endpoint:</h4>
-        <pre style="font-size: 14px;"><code class="language-bash" >curl "https://professorparakeet.com/api/completion" --request POST \
+      <h4>cURL example for text completion endpoint:</h4>
+      <pre style="font-size: 14px;"><code class="language-bash" >curl "https://professorparakeet.com/api/completion" --request POST \
 -H "Authorization: Bearer str" -H 'Content-Type: application/json' \
 --data-binary '{"prompt": str, 
             "model" : str,
@@ -167,12 +167,13 @@ print(response.json())
             "length_penalty": float
           }'
 </code></pre>
-        <p><a href="/api/docs">Test API</a></p>
-        <p></p>
+      <p><a href="/api/docs">Test API</a></p>
+      <p></p>
 
 
-      </div>
     </div>
+  </div>
 
   </div>
+</main>
 {% endblock content%}
