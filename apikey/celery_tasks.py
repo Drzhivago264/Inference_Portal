@@ -1,5 +1,3 @@
-
-import os
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from celery import shared_task
@@ -8,12 +6,24 @@ from django.utils import timezone
 import random
 import requests
 import json
-from .models import InferenceServer, PromptResponse, LLM, APIKEY, Crypto
+from .models import (InferenceServer,
+                     LLM, 
+                     APIKEY, 
+                     Crypto
+                     )
 from decouple import config
 from botocore.exceptions import ClientError
 import boto3
 from openai import OpenAI
-from .util.commond_func import get_model_url, update_server_status_in_db, send_request, log_prompt_response, inference_mode, response_mode, send_request_openai
+from .util.commond_func import (get_model_url, 
+                                update_server_status_in_db, 
+                                send_request, 
+                                log_prompt_response, 
+                                inference_mode, 
+                                response_mode, 
+                                send_agent_request_openai, 
+                                send_chat_request_openai
+                                )
 from .util.constant import *
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
@@ -299,16 +309,14 @@ def Inference(unique: str,
             log_prompt_response(key_object, model, prompt,
                                 response, type_="prompt")
     else:
-        logger.info(processed_prompt)
         client = OpenAI(api_key=config("GPT_KEY"))
         clean_response = ""
-        clean_response = send_request_openai(client=client,
+        clean_response = send_chat_request_openai(client=client,
                                              session_history=processed_prompt,
                                              model=model,
                                              model_type=model,
                                              credit=credit,
                                              unique=unique,
-                                             current_turn_inner=False,
                                              stream=stream,
                                              room_group_name=room_group_name,
                                              clean_response=clean_response,
@@ -379,7 +387,7 @@ def Agent_Inference(key: str,
                 {'role': 'system', 'content': f'Response:{force_stop}\n'}
             ]
         session_history.extend(prompt)
-        clean_response = send_request_openai(client=client,
+        clean_response = send_agent_request_openai(client=client,
                                              session_history=session_history,
                                              model=model,
                                              model_type=model_type,

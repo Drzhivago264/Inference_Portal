@@ -5,7 +5,6 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
-from django_bleach.models import BleachField
 from rest_framework_api_key.models import AbstractAPIKey
 User = settings.AUTH_USER_MODEL
     

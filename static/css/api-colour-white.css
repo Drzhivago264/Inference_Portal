@@ -10,3 +10,6 @@ h6{
 .contrast{
     color: white!important;
 }
+.json-schema-2020-12__title, .json-schema-2020-12-accordion, .json-schema-2020-12-expand-deep-button{
+    background-color: transparent!important;
+}

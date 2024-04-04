@@ -10,12 +10,11 @@ import tiktoken
 import regex as re
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import QuerySet
-from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
 import openai
 from channels.layers import get_channel_layer
 from vectordb import  vectordb
-from asgiref.sync import async_to_sync, sync_to_async
+from asgiref.sync import async_to_sync
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
@@ -200,8 +199,107 @@ def action_parse_json(context: str) -> list | bool:
         return False
     else:
         return action_match
+
+def send_chat_request_openai(stream: bool, 
+                        session_history: list, 
+                        model_type: str, 
+                        model: str, 
+                        unique: str, 
+                        credit: float, 
+                        room_group_name: str, 
+                        client: object, 
+                        clean_response: str, 
+                        max_tokens: int, 
+                        frequency_penalty: float, 
+                        temperature: float, 
+                        top_p: float, 
+                        presence_penalty: float) -> str:
+    """_summary_
+
+    Args:
+        stream (bool): True to use stream chat esle False
+        session_history (list): _description_
+        model_type (str): _description_
+        model (str): _description_
+        unique (str): _description_
+        credit (float): _description_
+        room_group_name (str): _description_
+        client (object): _description_
+        clean_response (str): _description_
+        max_tokens (int): _description_
+        frequency_penalty (float): _description_
+        temperature (float): _description_
+        top_p (float): _description_
+        presence_penalty (float): _description_
+
+    Returns:
+        str: _description_
+    """
+    try:
+        channel_layer = get_channel_layer()
+        raw_response = client.chat.completions.create(model=model_type,
+                                                        messages=session_history,
+                                                        stream=stream,
+                                                        max_tokens=max_tokens,
+                                                        temperature=temperature,
+                                                        top_p=top_p,
+                                                        frequency_penalty=frequency_penalty,
+                                                        presence_penalty=presence_penalty
+                                                        )
+        for chunk in raw_response:
+            if chunk:
+                data = chunk.choices[0].delta.content
+                if data != None:
+                    clean_response += data
+                    async_to_sync(channel_layer.group_send)(
+                        room_group_name,
+                        {
+                            "type": "chat_message",
+                            "role": model,
+                            "message": data,
+                            'credit': credit,
+                            'unique': unique
+                        }
+                    )       
+        return clean_response
     
-def send_request_openai(stream: bool, 
+    except openai.APIConnectionError as e:
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                "type": "chat_message",
+                "role": model,
+                "message": f"Failed to connect to OpenAI API: {e}",
+                'credit': credit,
+                'unique': unique,
+            }
+        )
+        return e
+    except openai.RateLimitError as e:
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                "type": "chat_message",
+                "role": model,
+                "message": f"OpenAI API request exceeded rate limit: {e}",
+                'credit': credit,
+                'unique': unique,
+            }
+        )
+        return e
+    except openai.APIError as e:
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                "type": "chat_message",
+                "role": model,
+                "message": f"OpenAI API returned an API Error: {e}",
+                'credit': credit,
+                'unique': unique,
+            }
+        )
+        return e
+def send_agent_request_openai(stream: bool, 
                         session_history: list, 
                         model_type: str, 
                         current_turn_inner: int, 
@@ -249,61 +347,46 @@ def send_request_openai(stream: bool,
                                                       frequency_penalty=frequency_penalty,
                                                       presence_penalty=presence_penalty
                                                       )
-        if current_turn_inner:
-            current_turn_inner += 1
-            for chunk in raw_response:
-                if chunk:
-                    data = chunk.choices[0].delta.content
-                    if data != None:
-                        clean_response += data
-                        response_json = [
-                            {'role': 'assistant', 'content': f'{clean_response}'}
-                        ]
-                        session_history.pop()
-                        session_history.extend(response_json)
-                        async_to_sync(channel_layer.group_send)(
-                            room_group_name,
-                            {
-                                "type": "chat_message",
-                                "role": model,
-                                "message": data,
-                                'credit': credit,
-                                'unique': unique,
-                                "session_history": session_history,
-                                "current_turn": current_turn_inner
-                            }
-                        )
 
-            action_list = action_parse_json(session_history[-1]['content'])
-            if action_list:
-                for act in action_list:
-                    action = json.loads(act)['Action']   
-                    if "STOP" == action:
-                        async_to_sync(channel_layer.group_send)(
-                            room_group_name,
-                            {
-                                "type": "chat_message",
-                                "agent_action": action
-                            }
-                        )
-            return clean_response
-        else:
-            for chunk in raw_response:
-                if chunk:
-                    data = chunk.choices[0].delta.content
-                    if data != None:
-                        clean_response += data
-                        async_to_sync(channel_layer.group_send)(
-                            room_group_name,
-                            {
-                                "type": "chat_message",
-                                "role": model,
-                                "message": data,
-                                'credit': credit,
-                                'unique': unique
-                            }
-                        )       
-            return clean_response
+        current_turn_inner += 1
+        for chunk in raw_response:
+            if chunk:
+                data = chunk.choices[0].delta.content
+                if data != None:
+                    clean_response += data
+                    response_json = [
+                        {'role': 'assistant', 'content': f'{clean_response}'}
+                    ]
+                    session_history.pop()
+                    session_history.extend(response_json)
+                    async_to_sync(channel_layer.group_send)(
+                        room_group_name,
+                        {
+                            "type": "chat_message",
+                            "role": model,
+                            "message": data,
+                            'credit': credit,
+                            'unique': unique,
+                            "session_history": session_history,
+                            "current_turn": current_turn_inner
+                        }
+                    )
+
+        action_list = action_parse_json(session_history[-1]['content'])
+        if action_list:
+            for act in action_list:
+                action = json.loads(act)['Action']   
+                if "STOP" == action:
+                    async_to_sync(channel_layer.group_send)(
+                        room_group_name,
+                        {
+                            "type": "chat_message",
+                            "agent_action": action
+                        }
+                    )
+        return clean_response
+        
+
 
     except openai.APIConnectionError as e:
         async_to_sync(channel_layer.group_send)(

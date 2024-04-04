@@ -1,26 +1,24 @@
 from ninja import NinjaAPI, Schema
-from apikey.util import constant, commond_func
+from apikey.util import constant
 from ninja.security import HttpBearer
-from apikey.models import InferenceServer, LLM, PromptResponse, APIKEY
+from apikey.models import APIKEY
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async
-from django.core.serializers.json import DjangoJSONEncoder
-from ninja.errors import ValidationError
 from django.http import StreamingHttpResponse
 from django.db.models import Q
 from ninja.errors import HttpError
-from django.core.cache import cache
-from decouple import config
-import time
-import json
-import boto3
-import re
 import httpx
-from botocore.exceptions import ClientError
 import random
-from django.utils import timezone
-from .utils import get_chat_context, get_model, get_model_url, command_EC2, update_server_status_in_db, log_prompt_response, send_request_async, send_stream_request_async, query_response_log
+from .utils import (get_chat_context, 
+                    get_model, 
+                    get_model_url, 
+                    command_EC2, 
+                    update_server_status_in_db, 
+                    log_prompt_response, 
+                    send_request_async, 
+                    send_stream_request_async, 
+                    query_response_log
+                    )
 
 
 class GlobalAuth(HttpBearer):
@@ -71,7 +69,7 @@ class ChatSchema(Schema):
     include_memory: bool = constant.DEFAULT_MEMORY
 
 
-@api.post("/completion")
+@api.post("/completion", tags=["Inference"], summary="Text completion")
 async def textcompletion(request, data: PromptSchema):
     model = await get_model(data.model)
     if not model:
@@ -129,7 +127,7 @@ async def textcompletion(request, data: PromptSchema):
                     442, "Server is setting up, try again in 300 seconds")
 
 
-@api.post("/chat")
+@api.post("/chat", tags=["Inference"], summary="Infer Chatbots")
 async def chatcompletion(request, data: ChatSchema):
     model = await get_model(data.model)
     if not model:
@@ -211,7 +209,7 @@ class ResponseLogRequest(Schema):
     filter_by: list = ["chatroom", "prompt", "open_ai"]
 
 
-@api.post("/responselog")
+@api.post("/responselog", tags=["Log"], summary="Get log")
 async def log(request, data: ResponseLogRequest):
     quantity = 1 if data.quantity < 10 else data.quantity
     order = "-id" if data.lastest else "id"
