@@ -8,7 +8,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import Inference, Agent_Inference
 from .util import constant
-from .pydantic_validator import ChatSchema, AgentSchemaInstruct, AgentSchemaMessage, AgentSchemaParagraph, AgentSchemaTemplate
+from .pydantic_validator import (ChatSchema, 
+                                 AgentSchemaInstruct, 
+                                 AgentSchemaMessage, 
+                                 AgentSchemaParagraph, 
+                                 AgentSchemaTemplate
+                                 )
 import regex as re
 from pydantic import ValidationError
 
