@@ -53,8 +53,6 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
     Returns:
         _type_: _description_
     """
-    
-
     if mode == "chat":
         if not agent_availability:
             template = constant.SHORTEN_TEMPLATE_TABLE[model]

@@ -101,7 +101,7 @@ About the GPU intances, you need to set up a vLLM server to serve the models lis
 
     # Install vLLM with CUDA 12.1.
     pip install vllm
-     python -m vllm.entrypoints.api_server --model {your model}
+    python -m vllm.entrypoints.api_server --model {your model}
 
 If you expose this instance to the internet you may need Nginx or Apache server in front of it. If you route it through your subnet or have a security policy that only accept requests from your Django server then you are good to go.
 
@@ -109,13 +109,9 @@ In addition, as we need to automatically boot and shutdown your GPU intances, yo
 
 Development environment setup
 -----------------------------
-After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page):
+After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page and remember to avoid 8000 and 6380 port that Django is running)):
 
     pip install vllm
-    python -m vllm.entrypoints.api_server --model gpt2 --port 8080
-
-You need to run a vLLM server to serve the a model (remember to avoid 8000 and 6380 port that Django is running):
-
     python -m vllm.entrypoints.api_server --model gpt2 --port 8080
 
 If you have more than 1 GPU, you can serve multiple models at multiple ports (remember of use unique ports):
