@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'apikey',
     'django_bleach',
     'captcha',
-    'rest_framework',
     "rest_framework_api_key",
     'vectordb',
 
