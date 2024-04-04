@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link type="text/css" rel="stylesheet" href="{% static 'ninja/swagger-ui.css' %}">
+    <link rel="shortcut icon" type="image/png" href="/static/image/favicon.ico" />
+    <link rel="stylesheet" href="/static/css/pico-main/css/pico.conditional.min.css" />
+    <link rel="stylesheet" href="/static/css/pico-main/css/pico.colors.min.css" />
+    <title>{{ api.title }}</title>
+</head>
+<style>
+    .scheme-container{
+        background-color: transparent!important;
+    } 
+    h6{
+        font-size: 20px!important;
+        padding: 0px!important;
+        margin-bottom: 0px!important;
+    }
+
+    .json-schema-2020-12__title, .json-schema-2020-12-accordion, .json-schema-2020-12-expand-deep-button{
+        color: white!important;
+        background-color: transparent!important;
+    }
+    .json-schema-2020-12__attribute, .json-schema-2020-12__attribute--primary{
+        color: rgb(73, 204, 144)!important
+    }
+    .json-schema-2020-12-keyword__value, .json-schema-2020-12-keyword__value--const{
+        color: rgb(211, 99, 99)!important;
+    }
+    .opblock-section-header{
+        background-color: transparent!important;
+    }
+
+    .opblock-title, .opblock-summary-description, button, td, a, h2, h4, p{
+        color: white!important;
+    }
+    .json-schema-2020-12-keyword__name, .json-schema-2020-12-keyword__name--primary{
+        color: rgb(136, 145, 164)!important;
+    }
+    article{
+    background: black!important; 
+
+    }
+    svg, ​path {
+    fill: white!important;
+    }
+    .link, .nostyle {
+        color: rgb(1, 170, 255)!important
+    }
+</style>
+<body
+    data-csrf-token="{% if add_csrf %}{{ csrf_token }}{% endif %}"
+    data-api-csrf="{% if add_csrf %}true{% endif %}">
+    {% include "component_html/nav.html" %}
+    <script type="application/json" id="swagger-settings">
+        {{ swagger_settings | safe }}
+    </script>
+    
+    <div id="swagger-ui"></div>
+
+    <script src="{% static 'ninja/swagger-ui-bundle.js' %}"></script>
+    <script src="{% static 'ninja/swagger-ui-init.js' %}"></script>
+
+</body>
+{% include "component_html/footer.html" %}
+</html>
