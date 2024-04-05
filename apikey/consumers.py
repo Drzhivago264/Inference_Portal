@@ -8,14 +8,15 @@ from django.core.exceptions import ObjectDoesNotExist
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import Inference, Agent_Inference
 from .util import constant
-from .pydantic_validator import (ChatSchema, 
-                                 AgentSchemaInstruct, 
-                                 AgentSchemaMessage, 
-                                 AgentSchemaParagraph, 
+from .pydantic_validator import (ChatSchema,
+                                 AgentSchemaInstruct,
+                                 AgentSchemaMessage,
+                                 AgentSchemaParagraph,
                                  AgentSchemaTemplate
                                  )
 import regex as re
 from pydantic import ValidationError
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
@@ -23,7 +24,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             key = APIKEY.objects.get_from_key(self.key)
             return key
-        except ObjectDoesNotExist:
+        except APIKEY.DoesNotExist:
             return False
 
     async def connect(self):
@@ -39,6 +40,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     # Receive message from WebSocket
+
     async def receive(self, text_data):
         try:
             validated = ChatSchema.model_validate_json(text_data)
@@ -52,7 +54,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             elif not validated.message.strip():
                 await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
             elif key_object and validated.message.strip():
-                cache.set(f"{self.key}", key_object, constant.CACHE_AUTHENTICATION)
+                cache.set(f"{self.key}", key_object,
+                          constant.CACHE_AUTHENTICATION)
                 mode = validated.mode
                 message = validated.message
                 top_p = validated.top_p
@@ -74,12 +77,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 # Send message to room group
                 await self.channel_layer.group_send(
                     self.room_group_name, {"type": "chat_message",
-                                        "role": role,
-                                        "message": message,
-                                        "credit": key_object.credit,
-                                        "unique": unique_response_id,
-                                        "choosen_model": choosen_models
-                                        }
+                                           "role": role,
+                                           "message": message,
+                                           "credit": key_object.credit,
+                                           "unique": unique_response_id,
+                                           "choosen_model": choosen_models
+                                           }
                 )
                 Inference.delay(unique=unique_response_id,
                                 mode=mode,
@@ -100,7 +103,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                 early_stopping=early_stopping,
                                 beam=beam,
                                 prompt=message,
-                                include_memory = include_memory)
+                                include_memory=include_memory)
         except ValidationError as e:
             await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
     # Receive message from room group
@@ -129,25 +132,24 @@ class AgentConsumer(AsyncWebsocketConsumer):
         try:
             key = APIKEY.objects.get_from_key(self.key)
             return key
-        except ObjectDoesNotExist:
+        except APIKEY.DoesNotExist:
             return False
 
-    @database_sync_to_async
-    def get_tempalte(self, name):
+    async def get_tempalte(self, name):
         try:
-            template = CustomTemplate.objects.get(template_name=name)
+            template = await CustomTemplate.objects.aget(template_name=name)
             return template
-        except ObjectDoesNotExist:
+        except CustomTemplate.DoesNotExist:
             return False
-        
-    @database_sync_to_async
-    def get_child_tempalte_name(self, template, name=None):
+
+    async def get_child_tempalte_name(self, template, name=None):
         try:
             if name is None:
-                child_template = AgentInstruct.objects.filter(template=template).order_by("code")
-                return {"name_list":[c.name for c in child_template], "default_child": child_template[0].name,"default_instruct": child_template[0].instruct }
+                child_template = AgentInstruct.objects.filter(
+                    template=template).order_by("code")
+                return {"name_list": [c.name async for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
             else:
-                child_template = AgentInstruct.objects.get(name=name)
+                child_template = AgentInstruct.objects.aget(name=name)
                 return child_template.instruct
         except Exception as e:
             return e
@@ -169,18 +171,20 @@ class AgentConsumer(AsyncWebsocketConsumer):
                                               1. Click on the paragraph that you want to work on, then give the agent instructions to write \n\
                                               2. If you face any bug, refresh and retry.\n\
                                               3. Shift-Enter to drop line in chatbox.\n\
-                                              4. You can export all paragraphs by clicking on [Export] on the right.", 
+                                              4. You can export all paragraphs by clicking on [Export] on the right.",
                                               "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     # Receive message from WebSocket
+
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         if 'paragraph' in text_data_json:
             try:
-                paragraph = AgentSchemaParagraph.model_validate_json(text_data).paragraph
+                paragraph = AgentSchemaParagraph.model_validate_json(
+                    text_data).paragraph
                 if self.working_paragraph != paragraph:
                     self.working_paragraph = paragraph
                     self.current_turn = 0
@@ -195,7 +199,8 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
         elif 'swap_template' in text_data_json:
             try:
-                swap = AgentSchemaTemplate.model_validate_json(text_data).swap_template
+                swap = AgentSchemaTemplate.model_validate_json(
+                    text_data).swap_template
                 swap_template = await self.get_tempalte(swap)
                 child_template = await self.get_child_tempalte_name(swap_template, None)
                 swap_instruction = swap_template.bot_instruct
@@ -215,7 +220,8 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
         elif 'swap_child_instruct' in text_data_json:
             try:
-                swap_child_instruct = AgentSchemaInstruct.model_validate_json(text_data).swap_child_instruct
+                swap_child_instruct = AgentSchemaInstruct.model_validate_json(
+                    text_data).swap_child_instruct
                 child_instruct = await self.get_child_tempalte_name(None, swap_child_instruct)
                 await self.channel_layer.group_send(
                     self.room_group_name, {
@@ -239,14 +245,14 @@ class AgentConsumer(AsyncWebsocketConsumer):
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
                 elif key_object and text_data_json["message"].strip():
                     cache.set(f"{self.key}", key_object,
-                            constant.CACHE_AUTHENTICATION)
+                              constant.CACHE_AUTHENTICATION)
                     agent_instruction = validated.agent_instruction
                     child_instruction = validated.child_instruction
                     current_turn_inner = self.current_turn
                     currentParagraph = validated.currentParagraph
                     self.working_paragraph = currentParagraph
                     message = validated.message
-                    self.model_type =  validated.choosen_models
+                    self.model_type = validated.choosen_models
                     choosen_template = validated.choosen_template
                     role = validated.role
                     unique_response_id = str(uuid.uuid4())
@@ -254,36 +260,36 @@ class AgentConsumer(AsyncWebsocketConsumer):
                     max_tokens = validated.max_tokens
                     frequency_penalty = validated.frequency_penalty
                     presence_penalty = validated.presence_penalty
-                    temperature = validated.temperature                
+                    temperature = validated.temperature
                     agent_instruction += child_instruction
                     Agent_Inference.delay(unique=unique_response_id,
-                                        key=self.key,
-                                        stream=True,
-                                        message=message,
-                                        credit=key_object.credit,
-                                        room_group_name=self.room_group_name,
-                                        model=choosen_template,
-                                        max_turns=self.max_turns,
-                                        current_turn_inner=current_turn_inner,
-                                        agent_instruction=agent_instruction,
-                                        session_history=self.session_history,
-                                        model_type=self.model_type,
-                                        frequency_penalty=frequency_penalty,
-                                        top_p=top_p,
-                                        max_tokens=max_tokens,
-                                        temperature=temperature,
-                                        presence_penalty=presence_penalty,
-                                        )
+                                          key=self.key,
+                                          stream=True,
+                                          message=message,
+                                          credit=key_object.credit,
+                                          room_group_name=self.room_group_name,
+                                          model=choosen_template,
+                                          max_turns=self.max_turns,
+                                          current_turn_inner=current_turn_inner,
+                                          agent_instruction=agent_instruction,
+                                          session_history=self.session_history,
+                                          model_type=self.model_type,
+                                          frequency_penalty=frequency_penalty,
+                                          top_p=top_p,
+                                          max_tokens=max_tokens,
+                                          temperature=temperature,
+                                          presence_penalty=presence_penalty,
+                                          )
 
                     await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message",
-                                            "role": role,
-                                            "message": message,
-                                            "credit": key_object.credit,
-                                            "unique": unique_response_id,
-                                            "choosen_model":  choosen_template,
-                                            "current_turn": current_turn_inner
-                                            }
+                                               "role": role,
+                                               "message": message,
+                                               "credit": key_object.credit,
+                                               "unique": unique_response_id,
+                                               "choosen_model":  choosen_template,
+                                               "current_turn": current_turn_inner
+                                               }
                     )
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
@@ -305,8 +311,6 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 if role == "Human":
                     unique_response_id = event['unique']
                     await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
-                else:
-                    pass
             else:
                 unique_response_id = event['unique']
                 await self.send(text_data=json.dumps({"message": message,  "stream_id":  unique_response_id, "credit": credit}))
