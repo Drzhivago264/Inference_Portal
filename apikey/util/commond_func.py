@@ -200,6 +200,7 @@ def action_parse_json(context: str) -> list | bool:
     else:
         return action_match
 
+
 def send_chat_request_openai(stream: bool, 
                         session_history: list, 
                         model_type: str, 
@@ -385,9 +386,6 @@ def send_agent_request_openai(stream: bool,
                         }
                     )
         return clean_response
-        
-
-
     except openai.APIConnectionError as e:
         async_to_sync(channel_layer.group_send)(
             room_group_name,
@@ -445,7 +443,7 @@ def get_key(name: str, key: str) -> object | QuerySet[APIKEY]:
     try:
         key_ = APIKEY.objects.get_from_key(key)
         return key_
-    except ObjectDoesNotExist:
+    except APIKEY.DoesNotExist:
         return False
 
 
@@ -460,7 +458,7 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
     """
     try:
         return LLM.objects.get(name=model)
-    except ObjectDoesNotExist:
+    except  LLM.DoesNotExist:
         return False
 
 def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool) -> str | list:

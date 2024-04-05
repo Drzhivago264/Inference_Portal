@@ -227,7 +227,7 @@ def check_xmr_payment(request: HttpRequest) -> HttpResponseRedirect:
                         )
                         messages.success(
                             request, f"The lastest tx_hash is {tx_hash}, no change to xmr credit of key: {k}", extra_tags='monero_payment')
-                    except ObjectDoesNotExist:
+                    except PaymentHistory.DoesNotExist:
                         PaymentHistory.objects.create(
                             key=key,
                             crypto=crypto,
@@ -271,7 +271,7 @@ def check_credit(request: HttpRequest) -> HttpResponseRedirect:
                         messages.error(
                             request, "Error: Key Name is incorrent.",  extra_tags='credit')
                     return HttpResponseRedirect("/buy")
-                except ObjectDoesNotExist:
+                except APIKEY.DoesNotExist:
                     messages.error(
                         request, "Error: Key is incorrent.",  extra_tags='credit')
                     return HttpResponseRedirect("/buy")
@@ -297,7 +297,7 @@ def topup(request: HttpRequest) -> HttpResponseRedirect:
                 messages.error(
                     request, "Key Name is incorrect",  extra_tags='credit')
                 return HttpResponseRedirect("/buy")
-        except ObjectDoesNotExist:
+        except APIKEY.DoesNotExist:
             messages.error(request, "Key is incorrect",
                            extra_tags='credit')
             return HttpResponseRedirect("/buy")
@@ -461,12 +461,13 @@ class Room(ListView):
             context['title'] = "Chat Bot"
             context['destination'] = "chat"
         elif self.template_name == "html/lagent.html" or self.template_name == "html/hotpot.html":
-            default_template = CustomTemplate.objects.get(
-                template_name="Assignment Agent")
-            default_child_template = AgentInstruct.objects.filter(
-                template=default_template,
-            )
             templates = CustomTemplate.objects.all()
+            for t in templates:
+                if t.template_name == "Assignment Agent":
+                    default_template = t
+                    default_child_template = AgentInstruct.objects.filter(
+                        template=t,
+                    )
             context['templates'] = templates
             context['template'] = default_template
             context['child_template'] = default_child_template

@@ -7,16 +7,19 @@ from asgiref.sync import sync_to_async
 from django.http import StreamingHttpResponse
 from django.db.models import Q
 from ninja.errors import HttpError
+from datetime import datetime
 import httpx
+from typing import List
 import random
-from .utils import (get_chat_context, 
-                    get_model, 
-                    get_model_url, 
-                    command_EC2, 
-                    update_server_status_in_db, 
-                    log_prompt_response, 
-                    send_request_async, 
-                    send_stream_request_async, 
+import datetime
+from .utils import (get_chat_context,
+                    get_model,
+                    get_model_url,
+                    command_EC2,
+                    update_server_status_in_db,
+                    log_prompt_response,
+                    send_request_async,
+                    send_stream_request_async,
                     query_response_log
                     )
 
@@ -27,7 +30,7 @@ class GlobalAuth(HttpBearer):
         try:
             key_object = APIKEY.objects.get_from_key(token)
             return key_object
-        except ObjectDoesNotExist:
+        except APIKEY.DoesNotExist:
             pass
 
 
@@ -69,13 +72,42 @@ class ChatSchema(Schema):
     include_memory: bool = constant.DEFAULT_MEMORY
 
 
-@api.post("/completion", tags=["Inference"], summary="Text completion")
+class ResponseLogRequest(Schema):
+    quantity: int = 10
+    lastest: bool = True
+    filter_by: list = ["chatroom", "prompt", "open_ai"]
+
+
+class ResponseLogResponse(Schema):
+    prompt: str
+    response: str
+    created_at: datetime.datetime
+    type: str
+    model: str
+
+
+class Error(Schema):
+    detail: str
+
+
+class PromptResponse(Schema):
+    response: str
+    context: PromptSchema
+
+
+class ChatResponse(Schema):
+    response: str
+    context: ChatSchema
+
+
+@api.post("/completion", tags=["Inference"], summary="Text completion", response={200: PromptResponse, 401: Error, 442: Error, 404: Error})
 async def textcompletion(request, data: PromptSchema):
     model = await get_model(data.model)
     if not model:
-        raise HttpError(442, "Unknown Model Error. Check your model name.")
+        raise HttpError(404, "Unknown Model Error. Check your model name.")
     else:
         available_server_list = await get_model_url(data.model)
+        print(available_server_list)
         if not available_server_list:
             raise HttpError(442, "Server is currently offline")
         else:
@@ -127,11 +159,11 @@ async def textcompletion(request, data: PromptSchema):
                     442, "Server is setting up, try again in 300 seconds")
 
 
-@api.post("/chat", tags=["Inference"], summary="Infer Chatbots")
+@api.post("/chat", tags=["Inference"], summary="Infer Chatbots", response={200: ChatResponse, 401: Error, 442: Error, 404: Error})
 async def chatcompletion(request, data: ChatSchema):
     model = await get_model(data.model)
     if not model:
-        raise HttpError(442, "Unknown Model Error. Check your model name.")
+        raise HttpError(404, "Unknown Model Error. Check your model name.")
     else:
         available_server_list = await get_model_url(data.model)
         if not available_server_list:
@@ -203,13 +235,7 @@ async def chatcompletion(request, data: ChatSchema):
                     442, "Server is setting up, try again in 300 seconds")
 
 
-class ResponseLogRequest(Schema):
-    quantity: int = 10
-    lastest: bool = True
-    filter_by: list = ["chatroom", "prompt", "open_ai"]
-
-
-@api.post("/responselog", tags=["Log"], summary="Get log")
+@api.post("/responselog", tags=["Log"], summary="Get log", response={200: List[ResponseLogResponse], 401: Error})
 async def log(request, data: ResponseLogRequest):
     quantity = 1 if data.quantity < 10 else data.quantity
     order = "-id" if data.lastest else "id"

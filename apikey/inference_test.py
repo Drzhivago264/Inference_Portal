@@ -31,8 +31,8 @@ def manage_monero(command, params=None):
 ##print(json.loads(manage_monero("transfer", {"destinations":[{"amount":3000000000,"address":"4LHcvZ1EWX1ZxZ4BYVJmPL7MABVBu7bQxKZwtUDZA12jC2WZ2XrA5EmDmd6Q94S5QejbgEbQmgeMXFWCTfd7PW7U8u9GXS5qpzJ7aV1Khj"}]}).text))
 promtp= "hehe"
 context = {
-    "prompt": "what is my name",
-    "stream": False,
+    "prompt": "hi",
+    "stream": True,
 }
 model = "Mistral Chat 13B"
 template = constant.MODEL_TEMPLATE_TABLE[model]
@@ -43,24 +43,12 @@ from openai import OpenAI
 
 import requests
 
-
-from openai import OpenAI
-client = OpenAI(api_key=config("GPT_KEY"))
-
-completion = client.chat.completions.create(
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "user", "content": "hi"}
-  ]
-)
-
-print(completion.choices[0].message)
-#response = requests.post("http://127.0.0.1:8000/api/completion", headers = {"Authorization": "Bearer atnBnvVo.RCJnC24H5blnp4wocG9cw40yRaTqGjpO"}, json=context, stream=False ) 
+response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer atnBnvVo.RCJnC24H5blnp4wocG9cw40yRaTqGjpO"}, json=context, stream=True ) 
    
 #print(response.content)
-""" for chunk in response.iter_lines():
+for chunk in response.iter_lines():
     if chunk:
-        print(chunk) """
+        print(chunk)
 
 """ with mp.Pool(1) as pool:
   for result in pool.map(send_req, range(10000)):

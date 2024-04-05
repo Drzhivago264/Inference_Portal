@@ -1,5 +1,4 @@
 from apikey.util import constant
-from ninja.security import HttpBearer
 from apikey.models import InferenceServer, LLM, PromptResponse, APIKEY
 from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async
@@ -12,24 +11,24 @@ from botocore.exceptions import ClientError
 from vectordb import vectordb
 from django.utils import timezone
 
+
 async def get_model(model: str) -> QuerySet[LLM] | bool:
     try:
         return await LLM.objects.aget(name=model)
-    except LLM.DoesNotExist as e:
-        return False  
-      
-@sync_to_async
-def get_model_url(model: str) -> list | bool:
+    except LLM.DoesNotExist:
+        return False
+
+
+async def get_model_url(model: str) -> list | bool:
+    model_list = []
     try:
-        model_list = cache.get(f"{model}_link_list")
-        if model_list == None:
-            model_list = list(InferenceServer.objects.filter(
-                hosted_model__name=model, availability="Available"))
-            cache.set(f"{model}_link_list", model_list,
-                      constant.CACHE_SERVER_LINK_RETRIVAL)
+        async for m in InferenceServer.objects.filter(
+                hosted_model__name=model, availability="Available"):
+            model_list.append(m)
         return model_list
     except:
         return False
+
 
 async def update_server_status_in_db(instance_id: str, update_type: str) -> None:
     ser_obj = await InferenceServer.objects.aget(name=instance_id)
@@ -40,6 +39,7 @@ async def update_server_status_in_db(instance_id: str, update_type: str) -> None
         ser_obj.last_message_time = timezone.now()
         await ser_obj.asave()
     return
+
 
 @sync_to_async
 def command_EC2(instance_id: str, region: str, action: str) -> None | str:
@@ -88,18 +88,21 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
         except ClientError as e:
             return e
         return
-    
+
+
 @sync_to_async
 def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
 
     hashed_key = key_object.hashed_key
-    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(raw_prompt, k= constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT) 
+    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(
+        raw_prompt, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT)
     shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
     full_instruct = ""
     max_history_length = constant.MAX_HISTORY_LENGTH[model]
     tokeniser = constant.TOKENIZER_TABLE[model]
     for mess in message_list_vector:
-        template = shorten_template.format(mess.content_object.prompt, mess.content_object.response)
+        template = shorten_template.format(
+            mess.content_object.prompt, mess.content_object.response)
         full_instruct += "\n\n"
         full_instruct += template
         inputs = tokeniser(full_instruct)
@@ -112,8 +115,8 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
 
     return full_instruct
 
-@sync_to_async
-def log_prompt_response(key_object: object, model: str, prompt: str, response: str, type_:str) -> None:
+
+async def log_prompt_response(key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
     """_summary_
 
     Args:
@@ -123,46 +126,49 @@ def log_prompt_response(key_object: object, model: str, prompt: str, response: s
         response (string): the response from GPU
         type_ (_type_): _description_
     """
-    llm = LLM.objects.get(name=model)
+    llm = await LLM.objects.aget(name=model)
     pair_save = PromptResponse(
         prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)
-    pair_save.save()
+    await pair_save.asave()
+
 
 async def send_request_async(url, context):
     async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2)) as client:
         response = await client.post(url, json=context,  timeout=60)
-        response = response.json()['text'][0] if response.status_code == 200 else None
+        response = response.json(
+        )['text'][0] if response.status_code == 200 else None
         return response
 
-async def send_stream_request_async(url: str, context: object, processed_prompt: str, request: object, data: object):           
+
+async def send_stream_request_async(url: str, context: object, processed_prompt: str, request: object, data: object):
     client = httpx.AsyncClient()
-    full_response =""
+    full_response = ""
     try:
-        async with  client.stream('POST', url, json=context) as response:
+        async with client.stream('POST', url, json=context) as response:
             async for chunk in response.aiter_text():
                 try:
                     chunk = chunk[:-1]
                     c = json.loads(chunk)
                     output = c['text'][0].replace(processed_prompt, "")
-                    full_response =output
-                    yield str({"response": c, "delta": output}) + "\n"
+                    yield str({"response": c, "delta": output.replace(full_response, "")}) + "\n"
+                    full_response = output
                 except:
                     pass
         await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chatroom")
     except httpx.ReadTimeout:
         raise httpx.ReadTimeout
-    
 
-@sync_to_async
-def query_response_log(key_object: str,  order: str, quantity: int, type_: list) -> object:
+
+async def query_response_log(key_object: str,  order: str, quantity: int, type_: list) -> object:
     response = list()
-    log = PromptResponse.objects.filter(key=key_object, p_type__in = type_).order_by(order)[:quantity]
-    for l in log:
+    log = PromptResponse.objects.filter(
+        key=key_object, p_type__in=type_).order_by(order)[:quantity]
+    async for l in log:
         response.append({
             "prompt": l.prompt,
             "response": l.response,
             "created_at": l.created_at,
             "type": l.p_type,
-            "model": l.model.name
+            "model": await sync_to_async(lambda: l.model.name)()
         })
     return response
