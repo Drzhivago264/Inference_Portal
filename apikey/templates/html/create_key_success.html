@@ -39,8 +39,8 @@
           {% csrf_token %}
           <input type="hidden" name="form_type" value="checkform">
           <div class="grid">
-            <input type="password" placeholder="Key name" name="name" />
-            <input type="text" placeholder="Key" name="key" />
+            <input type="text" placeholder="Key name" name="name" value="{{name}}"/>
+            <input type="password" placeholder="Key" name="key" value="{{key}}"/>
           </div>
           <div class="grid">
             {{form.title}}
@@ -75,8 +75,8 @@
           <br>
           <input type="hidden" name="form_type" value="topupform">
           <input type="hidden" name="product_id" value={{ product.id }}>
-          <input placeholder="Key name" type="password" name="name" />
-          <input placeholder="Key" type="text" name="key" />
+          <input placeholder="Key name" type="text" value="{{name}}" name="name" />
+          <input placeholder="Key" type="password" value="{{key}}" name="key" />
           <input type="submit" value="Take my money" />
         </form>
       </details>

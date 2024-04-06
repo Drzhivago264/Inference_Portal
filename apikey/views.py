@@ -3,6 +3,7 @@ import typing
 import stripe
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
+import requests
 from datetime import datetime
 from .models import (Price,
                      Product,
@@ -146,7 +147,7 @@ def generate_key(request: HttpRequest) -> HttpResponseRedirect:
                 integrated_address = json.loads(
                     wallet.text)['result']['integrated_address']
                 payment_id = json.loads(wallet.text)['result']['payment_id']
-            except:
+            except requests.exceptions.ConnectionError:
                 integrated_address = ""
                 payment_id = ""
             name, key = APIKEY.objects.create_key(
@@ -167,11 +168,13 @@ def get_xmr_address(request: HttpRequest) -> HttpResponseRedirect:
             key = APIKEY.objects.get_from_key(k)
             if len(key.payment_id) > 1:
                 payment_id = key.payment_id
+             
                 wallet = manage_monero("make_integrated_address", {
-                                       "payment_id": payment_id})
+                                    "payment_id": payment_id})
                 integrated_address = json.loads(
                     wallet.text)['result']['integrated_address']
                 return HttpResponseRedirect(f"/buy/{signer.sign(k)}")
+
             else:
                 try:
                     wallet = manage_monero("make_integrated_address")
@@ -183,15 +186,19 @@ def get_xmr_address(request: HttpRequest) -> HttpResponseRedirect:
                     key.payment_id = payment_id
                     key.save()
                     return HttpResponseRedirect(f"/buy/{signer.sign(k)}")
-                except:
+                except requests.exceptions.ConnectionError:
                     integrated_address = ""
                     payment_id = ""
                     messages.error(request, "Your Key does not have a Monero wallet, create a new Key",
                                    extra_tags='monero_address')
                 return HttpResponseRedirect("/buy")
-        except ObjectDoesNotExist:
+        except APIKEY.DoesNotExist:
             messages.error(request, "Key is incorrect",
                            extra_tags='monero_address')
+            return HttpResponseRedirect("/buy")
+        except requests.exceptions.ConnectionError:
+            messages.error(request, "Cannot connect to RPC",
+                extra_tags='monero_address')
             return HttpResponseRedirect("/buy")
 
 
@@ -258,10 +265,15 @@ def check_xmr_payment(request: HttpRequest) -> HttpResponseRedirect:
                 else:
                     messages.error(request, f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations",
                                    extra_tags='monero_payment')
-        except ObjectDoesNotExist:
+        except APIKEY.DoesNotExist:
             messages.error(request, f"Key is incorrect",
                            extra_tags='monero_payment')
-        return HttpResponseRedirect("/buy")
+            return HttpResponseRedirect("/buy")
+        except requests.exceptions.ConnectionError:
+            messages.error(request, "Cannot connect to RPC",
+                extra_tags='monero_payment')
+            return HttpResponseRedirect("/buy")
+
 
 
 def check_credit(request: HttpRequest) -> HttpResponseRedirect:
