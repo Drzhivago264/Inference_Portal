@@ -6,8 +6,18 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from rest_framework_api_key.models import AbstractAPIKey
+from tinymce.models import HTMLField
 User = settings.AUTH_USER_MODEL
-    
+
+class Article(models.Model):
+    name = models.CharField(max_length=200)
+    a_type = models.CharField(max_length=200)
+    content = HTMLField() 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self) -> str:
+        return f"{self.name} - {self.a_type} - {self.updated_at}"
+
 def get_image_filename(instance, filename):
     name = instance.name
     slug = slugify(name)

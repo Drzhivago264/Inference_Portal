@@ -10,105 +10,10 @@
 <main class="container">
   <div id="content" class="container">
     <!-- insert the page content here -->
-    <h1>What can this website do?</h1>
-    <p> This website is trying to sell you the access to several language models. The users can access the language
-      models via three modes below: </p>
-    <h1>API endpoints</h1>
-    <p> This website fowards your request to the GPU servers and return the results. </p>
-    <div class="grid">
-      <div class="container">
-        <h4>Python example for chat endpoint:</h4>
-        <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >r = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
-json={"prompt": str,
-      "model" : str,
-      'top_k': int,
-      'top_p': float,
-      'best_of': int,
-      'max_tokens': int,
-      'frequency_penalty': float,
-      'presence_penalty': float,
-      'temperature': float,
-      'beam': bool,
-      'early_stopping': bool,
-      'length_penalty': float,
-      'include_memory': bool
-}) 
-print(r.json())
-            </code></pre>
-      </div>
-      <div clas="container">
-        <h4>cURL example for text completion endpoint:</h4>
-        <pre style="font-size: 14px;"><code class="language-bash" >curl "https://professorparakeet.com/api/completion" --request POST \
--H "Authorization: Bearer str" 
--H 'Content-Type: application/json' \
---data-binary '{"prompt": str, 
-                "model" : str,
-                "top_k": int,
-                "top_p": float,
-                "best_of": int,
-                "max_tokens": int,
-                "frequency_penalty": float,
-                "presence_penalty": float,
-                "temperature": float,
-                "beam": bool,
-                "early_stopping": bool,
-                "length_penalty": float
-              }'
-              </code></pre>
-      </div>
-    </div> <br>
-    <div class="grid">
-      <div class="container">
-        <h4> You can also stream our response in chat API. </h4>
-        <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >r = requests.post("https://professorparakeet.com/api/chat", 
-headers={"Authorization": "Bearer str"}, 
-json={"prompt": "What is 1 + 1?",
-      "model" : str,
-      'stream': True,
-    }, stream=True) 
-for chunk in response.iter_lines():
-    if chunk:
-        print(chunk)
-  </code></pre>
-      </div>
-      <div clas="container">
-        <h4>Sample Stream Output:</h4>
-        <pre style="font-size: 14px;"><code class="language-bash" >b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1']}, 'delta': '1'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 +']}, 'delta': '1 +'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1']}, 'delta': '1 + 1'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is']}, 'delta': '1 + 1 is'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal']}, 'delta': '1 + 1 is equal'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to']}, 'delta': '1 + 1 is equal to'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to ']}, 'delta': '1 + 1 is equal to '}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to 2']}, 'delta': '1 + 1 is equal to 2'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to 2.']}, 'delta': '1 + 1 is equal to 2.'}"
-      </code></pre>
-      </div>
-    </div>
-  </div>
-  <small><i>NOTE: Streamming is only available in chat mode.</i></small><br>
-  <small><i>NOTE: If the server is currently offline, you should send a warm up request to boot it up, otherwise you
-      will get a lot a status reponses for your prompts.</i></small>
-  <h1>Chat Bot Mode</h1>
-  <p>We offer standard chatbot mode with custom chat template. We use a vectorised database and query 5 previous model's
-    responses what are the most relevant to answer your questions.
-  </p>
-  <p>
-    The maximum context length is 4096 tokens, please do not input a 10000-page book into the chatroom, the model will
-    give you nothing. </p>
-  <h1>Hard Core Prompt Engineering Mode</h1>
-  <p>We are working on a feature that use Lagent to split our model into multiple smart workers for complicated
-    tasks that require multiple reasoning steps.
-    User can participate into the creation of such prompts for their own tasks.</p>
-  <h1>The behaviors of this website</h1>
-  <ul>
-    <li>This website dynamically boot up GPU servers on users' demands</li>
-    <li>1200 seconds from the last resonpses, GPU servers are automatically shut down. </li>
-    <li>GPU servers are kept running if there is a constant demand. </li>
-    <li>Global Rate Limit is 3 requests/second. API Rate Limit is 5 requests/second </li>
-    <li>You can check and collect your promptresponse log in <a href="/promptresponse">Response Log</a>.
-    </li>
-  </ul>
+    {{introduction|safe}}
+    {{authentication|safe}}
+    {{inference|safe}}
+  {{behavior|safe}}
   </ul>
   </div>
 </main>

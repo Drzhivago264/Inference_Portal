@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from decouple import config
 from pathlib import Path
 from datetime import datetime
-
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("DJANGO_SECRET_KEY")
@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'captcha',
     "rest_framework_api_key",
     'vectordb',
-    'ninja'
-
+    'ninja',
+    'tinymce',
 ]
 CHANNEL_LAYERS = {
     "default": {
@@ -180,3 +180,18 @@ REST_FRAMEWORK = {
 
 }
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
+
+TINYMCE_DEFAULT_CONFIG = {
+    "height": "320px",
+    "width": "960px",
+    "menubar": "file edit view insert format tools table help",
+    "plugins": "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code "
+    "fullscreen insertdatetime media table code help wordcount",
+    "toolbar": "undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft "
+    "aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor "
+    "backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | "
+    "fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | tableofcontents | "
+    "a11ycheck ltr rtl | showcomments addcomment code",
+    "custom_undo_redo_levels": 10,
+
+}
