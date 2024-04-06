@@ -4,11 +4,19 @@
   <div id="site_content" style="grid-template-columns: 70% 30%;" class="grid">
     <div class="container" id="content">
       <!-- insert the page content here -->
-    {{introduction|safe}}
+      {% for c in content_list%}
+      {% if c.a_type == "introduction"%}
+      {{c.content|safe}}
+      {% endif %}
+      {% endfor %}
     </div>
 
     <div class="container" style=" margin-right: 0;">
-    {{link|safe}}
+      {% for c in content_list%}
+      {% if c.a_type == "link"%}
+      {{c.content|safe}}
+      {% endif %}
+      {% endfor %}
     </div>
 
   </div>
