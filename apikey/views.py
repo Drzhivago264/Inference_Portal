@@ -45,37 +45,19 @@ from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseRed
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def index(request: HttpRequest) -> HttpResponse:
     page_content = Article.objects.filter(name="index")
-    for p in page_content:
-        if p.a_type == "introduction":
-            introduction = p.content
-        elif p.a_type == "link":
-            link = p.content
     context =  {"title": "Inference", 
-                "introduction": introduction,
-                "link": link}
+                "content_list": page_content,}
     return render(request, "html/index.html", context=context)
 
 
-#@cache_page(60*15)
+@cache_page(60*15)
 def manual(request: HttpRequest) -> HttpResponse:
     page_content = Article.objects.filter(name='manual')
-    for p in page_content:
-        if p.a_type == "introduction":
-            introduction = p.content
-        elif p.a_type == "authentication":
-            authentication = p.content
-        elif p.a_type == "behavior":
-            behavior = p.content
-        elif p.a_type == "inference":
-            inference = p.content
     context = {
-        "introduction": introduction,
-        "authentication": authentication,
-        "behavior": behavior,
-        "inference": inference,
+        "content_list": page_content,
         "title": "Manual"
     }
     return render(request, "html/manual.html", context=context)
