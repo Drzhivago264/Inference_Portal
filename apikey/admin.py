@@ -1,7 +1,17 @@
 
 from django.contrib import admin
-
-from .models import Price, Product, ProductTag, LLM, InferenceServer, PromptResponse, CustomTemplate, APIKEY, Crypto, PaymentHistory, AgentInstruct
+from .models import (Price, 
+                     Product, 
+                     ProductTag, 
+                     LLM, 
+                     InferenceServer, 
+                     PromptResponse, 
+                     CustomTemplate, 
+                     APIKEY, 
+                     Crypto, 
+                     PaymentHistory, 
+                     AgentInstruct, 
+                     Article)
 
 class PriceAdmin(admin.StackedInline):
     model = Price
@@ -29,3 +39,4 @@ admin.site.register(PromptResponse)
 admin.site.register(Crypto)
 admin.site.register(PaymentHistory)
 admin.site.register(AgentInstruct)
+admin.site.register(Article)
