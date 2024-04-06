@@ -147,7 +147,7 @@
                 <div class="message_log_container"
                     style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
                     <span> Input your Key:
-                        <input style="height: 20px; width: 20ch; font-size:calc(1px + 0.7vw);" id="api_key">
+                        <input type="password" style="height: 20px; width: 20ch; font-size:calc(10px + 0.3vw);" id="api_key">
                     </span>
                 </div>
                 <div id="chat-log_">
@@ -162,7 +162,7 @@
             {{ name|json_script:"name" }}
             {{ key|json_script:"key" }}
         </div>
-        <div style="max-width: 380px; font-size:calc(5px + 0.7vw);  padding-left: 1px;" class="container">
+        <div style="max-width: 380px;  font-size:calc(10px + 0.3vw);  padding-left: 1px;" class="container">
             <h4> Available Models </h4>
             {% for llm in llms %}
             {% if llm.name == 'gpt-4' %}

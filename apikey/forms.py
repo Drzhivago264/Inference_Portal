@@ -11,7 +11,7 @@ class RoomRedirectForm(forms.Form):
     #CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode')]
     CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode'),('hotpot', 'Hotpot Mode')]
     room = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES, required=True)
-    key = forms.CharField( widget=forms.TextInput(attrs={'placeholder': 'Key'}))
+    key = forms.CharField( widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     def clean(self):
         cleaned_data = super(RoomRedirectForm, self).clean()
         room = cleaned_data.get('room')
@@ -20,7 +20,7 @@ class RoomRedirectForm(forms.Form):
             raise forms.ValidationError('Corret your Key and choose a Mode')
         
 class LogForm(forms.Form):
-    key_ = forms.CharField( widget=forms.TextInput(attrs={'placeholder': 'Key'}))
+    key_ = forms.CharField( widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     key_name = forms.CharField( widget=forms.TextInput(attrs={'placeholder': 'Key Name'}))
     captcha = CaptchaField(label="Captcha(Math): ")
     
@@ -29,7 +29,7 @@ class PromptForm(forms.Form):
     GENERATION_CHOICES = [('chat','Chat Bot Mode'),('generate','Text Completion')]
     MODEL_CHOICES = [('Reddit Helper 2.7B','Reddit Helper 2.7B'),('4Chan /Pol 2.7B','Text Completion'),('Mistral Chat 13B', 'Mistral Chat 13B'),('Llama 2 Chat 13B','Llama 2 Chat 13B')]
 
-    key = forms.CharField(required=True, widget=forms.TextInput(attrs={'placeholder': 'Key'}))
+    key = forms.CharField(required=True, widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     key_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'placeholder': 'Key Name'}))
     prompt = forms.CharField(required=True, widget=forms.Textarea(attrs={"rows":"5", "cols":"50"}))
     

@@ -53,7 +53,7 @@ def index(request: HttpRequest) -> HttpResponse:
     return render(request, "html/index.html", context=context)
 
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def manual(request: HttpRequest) -> HttpResponse:
     page_content = Article.objects.filter(name='manual')
     context = {
@@ -63,7 +63,7 @@ def manual(request: HttpRequest) -> HttpResponse:
     return render(request, "html/manual.html", context=context)
 
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def chat(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     if request.method == "POST":
         form = RoomRedirectForm(request.POST)
@@ -500,11 +500,9 @@ class SuccessView(TemplateView):
 
 
 class CancelView(TemplateView):
-    template_name = "html/cancel.html"
-
+    template_name = "html/index.html"
     def get_context_data(self, **kwargs: typing.Any) -> object:
         context = super(CancelView, self).get_context_data(**kwargs)
-        context['title'] = "Payment Cancelled"
         return context
 
 

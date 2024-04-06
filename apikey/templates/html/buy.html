@@ -15,7 +15,7 @@
         <form action="/generatekey" style="text-align: center;" method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="createform">
-          <input type="password" placeholder="key name" name="name" />
+          <input placeholder="key name" name="name" />
           <div class="grid">
             {{form.title}}
             {{ form.captcha }}
@@ -57,8 +57,8 @@
           {% csrf_token %}
           <input type="hidden" name="form_type" value="checkform">
           <div class="grid">
-            <input type="password" placeholder="Key name" name="name" />
-            <input type="text" placeholder="Key" name="key" />
+            <input  placeholder="Key name" name="name" />
+            <input  type="password"  placeholder="Key" name="key" />
           </div>
           <div class="grid">
             {{form.title}}
@@ -91,8 +91,8 @@
           <br>
           <input type="hidden" name="form_type" value="topupform">
           <input type="hidden" name="product_id" value={{ product.id }}>
-          <input placeholder="Key name" type="password" name="name" />
-          <input placeholder="Key" type="text" name="key" />
+          <input placeholder="Key name" type="text" name="name" />
+          <input placeholder="Key" type="password" name="key" />
           <input type="submit" value="Take my money" />
         </form>
       </details>
@@ -118,7 +118,7 @@
           <input type="hidden" name="form_type" value="get_xmr_address">
           <div class="grid">
             <div class="container">
-              <input type="text" placeholder="Key" name="key" />
+              <input type="password" placeholder="Key" name="key" />
             </div>
             <div class="container">
               <input type="submit" value="Check Address" />
@@ -136,7 +136,7 @@
           <input type="hidden" name="form_type" value="check_xmr_payment">
           <div class="grid">
             <div class="container">
-              <input type="text" placeholder="Key" name="key" />
+              <input  type="password"  placeholder="Key" name="key" />
             </div>
             <div class="container">
               <input type="submit" value="Confirm Payment" />
