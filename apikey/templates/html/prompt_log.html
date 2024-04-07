@@ -1,50 +1,57 @@
 {% extends "component_html/base.html" %}
+
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.css" />
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.dataTables.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
+
+
+{% endblock head %}
 {% block content %}
 <main id="site_content">
   <div class="container">
-    <h1>Your previous API calls and prompts are displayed here</h1>
-    <table style="  margin-left: auto;
+    <h1>View, query or export your previous inferences</h1>
+    <table id="logTable" style="  margin-left: auto;
         margin-right: auto; ">
-      <tr>
-        <th>No.</th>
-        <th>Prompts</th>
-        <th>Responses</th>
-        <th>Models</th>
-        <th>Created Time</th>
-        <th>Type</th>
-        <th>Cost</th>
-      </tr>
-      {% for log in response_log %}
-      <tr>
-        <td>
-          <p>{{ log.id }}</p>
-        </td>
-        <td>
-          <p style="width: 200px; word-wrap: break-word; overflow-wrap: break-word;">{{ log.prompt }}</p>
-        </td>
-        <td>
-          <p style="width: 300px; word-wrap: break-word; overflow-wrap: break-word;">{{ log.response }} </p>
-        </td>
-        <td>{{ log.model }}</td>
-        <td>{{ log.created_at }}</td>
-        <td>{{ log.p_type }}</td>
-        <td>{{ log.model.price }}</td>
-      </tr>
-      {% endfor %}
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Prompts</th>
+          <th>Responses</th>
+          <th>Models</th>
+          <th>Created Time</th>
+          <th>Type</th>
+          <th>Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
     </table>
-    <div style="text-align: center;">
-      {% if response_log.has_previous %}
-      <a href="?page={{ response_log.previous_page_number }}">
-        << Previous</a>
-          {% endif %}
-
-          <span class="current-page">{{ response_log.number }}</span>
-
-          {% if response_log.has_next %}
-          <a href="?page={{ response_log.next_page_number }}">Next >></a>
-          {% endif %}
-    </div>
   </div>
   </div>
+  <script>
+    var picotheme = document.getElementById("picotheme");
+    picotheme.setAttribute("href", "/static/css/pico-main/css/pico.conditional.min.css");
+    new DataTable('#logTable', {
+      responsive: true,
+      layout: {
+        topStart: {
+          buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+        }
+      },
+      "processing": true,
+      "serverSide": true,
+      "ajax": "/log/{{key}}"
+    });
+
+
+  </script>
 </main>
 {% endblock content %}

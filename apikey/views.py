@@ -42,7 +42,14 @@ from .forms import (RoomRedirectForm,
 from django.core.signing import Signer
 from hashlib import sha256
 import json
-from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http import (HttpRequest, 
+                         HttpResponse, 
+                         JsonResponse, 
+                         HttpResponseRedirect
+                         )
+from django_datatables_view.base_datatable_view import BaseDatatableView
+from django.utils.html import escape
+from django.db.models import Q
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
@@ -79,7 +86,7 @@ def chat(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     return render(request, "html/chat.html", context=context)
 
 
-@cache_page(60)
+#@cache_page(60)
 def model_infor(request: HttpRequest) -> HttpResponse:
     llm = LLM.objects.filter(agent_availability=False)
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
@@ -114,14 +121,23 @@ def response_prompt_redirect(request: HttpRequest) -> HttpResponse | HttpRespons
 
 
 def room_prompt(request: HttpRequest,  key: str) -> HttpResponse:
-    signer = Signer()
-    key_ = APIKEY.objects.get_from_key(signer.unsign(key))
-    response_log = PromptResponse.objects.filter(key=key_).order_by('-id')
-    paginator = Paginator(response_log, 30)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {'response_log': page_obj,  "key": key, 'title': "Log"}
+    context = {"key": key, 'title': "Log"}
     return render(request, "html/prompt_log.html", context)
+
+class LogListJson(BaseDatatableView):
+    columns = ['id', 'prompt', 'response', 'model.name', 'created_at', 'p_type', 'cost']
+    order_columns = ['id', 'prompt', 'response','model.name','created_at', 'p_type', 'cost']
+    max_display_length = 500
+    def get_initial_queryset(self):
+        signer = Signer()
+        filter_key = self.kwargs['key']
+        key_ = APIKEY.objects.get_from_key(signer.unsign(filter_key))
+        return PromptResponse.objects.filter(key=key_).order_by('-id')
+    def filter_queryset(self, qs):
+        search = self.request.GET.get('search[value]', None)
+        if search:
+            qs = qs.filter(Q(prompt__icontains=search) | Q(response__icontains=search))
+        return qs
 
 
 def generate_key_success(request: HttpRequest, key: str) -> HttpResponse:
