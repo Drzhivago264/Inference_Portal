@@ -19,9 +19,18 @@
 {% endblock head %}
 
 {% block content %}
-<main class="grid" style="grid-template-columns: 50% 45%; min-width: 1250px;">
-    <div class="grid" style="grid-template-columns: 28% 70%; min-width: 600px;">
-        <div id="container" style="padding-left: 10px; min-width: 145px;">
+<style>
+    html,
+    body, 
+    main,
+    .pagewrapper 
+    {
+        min-width: 1250px!important;
+    }
+</style>
+<main class="grid" style="grid-template-columns: 50% 45%;">
+    <div class="grid" style="grid-template-columns: 28% 70%; ">
+        <div id="container" style="padding-left: 10px; ">
             <h4>Structure</h4>
             <ul id="document-structure">
                 {% for child in child_template %}
@@ -44,7 +53,7 @@
                 </select>
             </div>
         </div>
-        <div class="container" style="min-width: 400px;" id="site_content_document">
+        <div class="container"  id="site_content_document">
             <div id="document-instruction">
                 <h4>Agent Instruction</h4>
                 <textarea id="agent_instruction" rows="10" style="font-size: 12px;"
@@ -127,7 +136,7 @@
         </div>
 
     </div>
-    <div class="grid" style="grid-template-columns: 65% 35%; min-width: 600px;" id="site_content_chat">
+    <div class="grid" style="grid-template-columns: 65% 35%;" id="site_content_chat">
         <div clas="container">
             <div class="grid" style="grid-template-columns: 35% 60%;">
                 <h4> Chat with:</h4>

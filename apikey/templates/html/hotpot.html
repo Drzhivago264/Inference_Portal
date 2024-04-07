@@ -1,14 +1,26 @@
 {% extends "component_html/base.html" %}
 {% block head %}
 <link rel="stylesheet" href="/static/css/hotpot.css">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 {% endblock head %}
 
 {% block content%}
+<style>
+    html,
+    body, 
+    main,
+    .pagewrapper 
+    {
+        min-width: 1250px!important;
+    }
+</style>
 <main>
-    <div class="container">
+    <div class="pagewrapper container">
         
-        <div class="grid" style=" min-width: 1250px;grid-template-columns: 25% 35% 35%;">
-            <div id="container" style="padding-left: 10px; min-width: 145px;">
+        <div class="grid" style="grid-template-columns: 25% 35% 35%;">
+            <div id="container" style="padding-left: 10px">
                 <span>Key:
                     <input type="password" style="height: 20px; width: 80%; font-size:calc(10px + 0.3vw);" id="api_key">
                 </span>
@@ -95,7 +107,7 @@
                     search, 1 for sampling) <br>
                 </div>
             </div>
-            <div class="container" style="min-width: 400px;" id="site_content_document">
+            <div class="container" id="site_content_document">
                 <div class="grid" style="grid-template-columns: 35% 60%;">
                     <h4>Bot:</h4>
                     <select  name="template-select" id="bot-select" aria-label="Select your bot..."
