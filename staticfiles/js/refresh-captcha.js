@@ -1,7 +1,7 @@
 $(document).ready(function () {
     // Add refresh button after field (this can be done in the template as well)
     $('img.captcha').after(
-      $('<a href="#void" class="captcha-refresh"><i class="fa fa-refresh"></i>Refresh Captcha</a>')
+      $('<br><input type="button" href="#void" class="captcha-refresh" value="Refresh">')
     );
 
     // Click-handler for the refresh-link

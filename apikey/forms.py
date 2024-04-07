@@ -1,8 +1,12 @@
 from django import forms
-from captcha.fields import CaptchaField
-from apikey.util import constant    
+from captcha.fields import CaptchaField, CaptchaTextInput
+from apikey.util import constant
+
+class CustomCaptchaTextInput(CaptchaTextInput):
+    template_name = 'component_html/captcha.html'
+
 class CaptchaForm(forms.Form):
-    captcha = CaptchaField()
+    captcha = CaptchaField(widget=CustomCaptchaTextInput)
     def __init__ (self,  *args, **kwargs):
         self.title = "Captcha (math):"
         super (CaptchaForm, self).__init__ (*args, **kwargs) 
