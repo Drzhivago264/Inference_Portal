@@ -6,32 +6,40 @@
 {% endblock head %}
 {% block content%}
 <main>
+  <style>
+label {
+  display: inline-block;
+  width: 100px;
+  text-align: right;
+}
+
+  </style>
   <div class="container">
-    <h2>Enter your key </h2>
+    <hr>
+  <div class="grid">
+    <b>Enter your key: </b>
     <form method="post">
       {% csrf_token %}
-      <div class="grid">
-        {{form.key_name}}
-        {{form.key_}}
-      </div>
-      <div class="grid">
+
         <div class="container">
-          <div class="grid">
-            {{form.captcha.label}}
-            {{form.captcha}}
-          </div>
+
+          {{form}}
+        
 
         </div>
-        <div class="container">
+     
           <input class="submit" type="submit" value="Check" />
-        </div>
-      </div>
+ 
     </form>
-
+    <div>
     {%for message in messages %}
     <h4> {{message}} </h4>
     {%endfor%}
   </div>
+
+  </div>
+  <hr>
+</div>
 </main>
 
 {% endblock content%}

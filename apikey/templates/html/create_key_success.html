@@ -1,6 +1,5 @@
 {% extends "component_html/base.html" %}
 {% block head %}
-<link rel="stylesheet" href="/static/css/captcha.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="/static/js/refresh-captcha.js"></script>
 <script type="text/javascript" src="/static/js/export-key.js"></script>
@@ -35,20 +34,16 @@
 
       <div class="container">
         <h2>Check Credit</h2>
-        <form action="/checkcredit" style="text-align: center;" method="post">
+        <form action="/checkcredit" method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="checkform">
           <div class="grid">
-            <input type="text" placeholder="Key name" name="name" value="{{name}}"/>
-            <input type="password" placeholder="Key" name="key" value="{{key}}"/>
+            <input type="text" placeholder="Key name" name="name" />
+            <input type="password" placeholder="Key" name="key" />
+            <input type="submit" value="Check" />
           </div>
-          <div class="grid">
-            {{form.title}}
-            {{ form.captcha }}
+          {{form}}
 
-          </div>
-          <input type="submit" value="Check" />
-          <br>
           <br>
           {%for message in messages %}
           {%if "credit" in message.tags %}
@@ -56,7 +51,6 @@
           {%endif%}
           {%endfor%}
         </form>
-
       </div>
     </div>
     <hr>
@@ -70,13 +64,12 @@
       {% for product in products %}
       <details>
         <summary> <a> Top up {{product.name}} </a> </summary>
-        <form action="/topup" method="post">
+        <form action="/topup" style="text-align: center;" method="post">
           {% csrf_token %}
-          <br>
           <input type="hidden" name="form_type" value="topupform">
           <input type="hidden" name="product_id" value={{ product.id }}>
-          <input placeholder="Key name" type="text" value="{{name}}" name="name" />
-          <input placeholder="Key" type="password" value="{{key}}" name="key" />
+          <input placeholder="Key name" type="text" name="name" /> <br>
+          <input placeholder="Key" type="password" name="key" /> <br>
           <input type="submit" value="Take my money" />
         </form>
       </details>

@@ -180,40 +180,46 @@ def get_xmr_address(request: HttpRequest) -> HttpResponseRedirect:
     if request.method == 'POST' and bleach.clean(request.POST.get("form_type")) == 'get_xmr_address':
         k = bleach.clean(request.POST.get('key'))
         signer = Signer()
-        try:
-            key = APIKEY.objects.get_from_key(k)
-            if len(key.payment_id) > 1:
-                payment_id = key.payment_id
-             
-                wallet = manage_monero("make_integrated_address", {
-                                    "payment_id": payment_id})
-                integrated_address = json.loads(
-                    wallet.text)['result']['integrated_address']
-                return HttpResponseRedirect(f"/buy/{signer.sign(k)}")
-
-            else:
-                try:
-                    wallet = manage_monero("make_integrated_address")
+        form = CaptchaForm(request.POST)
+        if form.is_valid():
+            try:
+                key = APIKEY.objects.get_from_key(k)
+                if len(key.payment_id) > 1:
+                    payment_id = key.payment_id
+                
+                    wallet = manage_monero("make_integrated_address", {
+                                        "payment_id": payment_id})
                     integrated_address = json.loads(
                         wallet.text)['result']['integrated_address']
-                    payment_id = json.loads(wallet.text)[
-                        'result']['payment_id']
-                    key.integrated_address = integrated_address
-                    key.payment_id = payment_id
-                    key.save()
                     return HttpResponseRedirect(f"/buy/{signer.sign(k)}")
-                except requests.exceptions.ConnectionError:
-                    integrated_address = ""
-                    payment_id = ""
-                    messages.error(request, "Your Key does not have a Monero wallet, create a new Key",
-                                   extra_tags='monero_address')
+
+                else:
+                    try:
+                        wallet = manage_monero("make_integrated_address")
+                        integrated_address = json.loads(
+                            wallet.text)['result']['integrated_address']
+                        payment_id = json.loads(wallet.text)[
+                            'result']['payment_id']
+                        key.integrated_address = integrated_address
+                        key.payment_id = payment_id
+                        key.save()
+                        return HttpResponseRedirect(f"/buy/{signer.sign(k)}")
+                    except requests.exceptions.ConnectionError:
+                        integrated_address = ""
+                        payment_id = ""
+                        messages.error(request, "Your Key does not have a Monero wallet, create a new Key",
+                                    extra_tags='monero_address')
+                    return HttpResponseRedirect("/buy")
+            except APIKEY.DoesNotExist:
+                messages.error(request, "Key is incorrect",
+                            extra_tags='monero_address')
                 return HttpResponseRedirect("/buy")
-        except APIKEY.DoesNotExist:
-            messages.error(request, "Key is incorrect",
-                           extra_tags='monero_address')
-            return HttpResponseRedirect("/buy")
-        except requests.exceptions.ConnectionError:
-            messages.error(request, "Cannot connect to RPC",
+            except requests.exceptions.ConnectionError:
+                messages.error(request, "Cannot connect to RPC",
+                    extra_tags='monero_address')
+                return HttpResponseRedirect("/buy")
+        else:
+            messages.error(request, "Error: Captcha is incorrect.",
                 extra_tags='monero_address')
             return HttpResponseRedirect("/buy")
 
@@ -221,72 +227,78 @@ def get_xmr_address(request: HttpRequest) -> HttpResponseRedirect:
 def check_xmr_payment(request: HttpRequest) -> HttpResponseRedirect:
     if request.method == 'POST' and bleach.clean(request.POST.get("form_type")) == 'check_xmr_payment':
         k = bleach.clean(request.POST.get('key'))
-        try:
-            key = APIKEY.objects.get_from_key(k)
-            payment_check = manage_monero(
-                "get_payments", {"payment_id": key.payment_id})
-            if "error" in json.loads(payment_check.text):
-                messages.error(request, "Payment ID is incorrect",
-                               extra_tags='monero_payment')
-                return HttpResponseRedirect(f"/buy")
-            elif len(json.loads(payment_check.text)["result"]) == 0:
-                messages.error(request, "No transaction detected",
-                               extra_tags='monero_payment')
-                return HttpResponseRedirect(f"/buy")
-            else:
-                payment_id_response = json.loads(payment_check.text)[
-                    "result"]['payments'][0]['payment_id']
-                address_response = json.loads(payment_check.text)[
-                    "result"]['payments'][0]['address']
-                amount = json.loads(payment_check.text)[
-                    "result"]['payments'][0]['amount']
-                block_height = json.loads(payment_check.text)[
-                    "result"]['payments'][0]['block_height']
-                locked = json.loads(payment_check.text)[
-                    "result"]['payments'][0]['locked']
-                tx_hash = json.loads(payment_check.text)[
-                    "result"]['payments'][0]['tx_hash']
-                unlock_time = json.loads(payment_check.text)[
-                    "result"]['payments'][0]['unlock_time']
-                crypto = Crypto.objects.get(coin="xmr")
-                if int(unlock_time) == 0 and not locked:
-                    try:
-                        PaymentHistory.objects.get(
-                            key=key,
-                            crypto=crypto,
-                            amount=amount/1e+12,
-                            integrated_address=address_response,
-                            payment_id=payment_id_response,
-                            locked=locked,
-                            transaction_hash=tx_hash,
-                            block_height=block_height,
-                        )
-                        messages.success(
-                            request, f"The lastest tx_hash is {tx_hash}, no change to xmr credit of key: {k}", extra_tags='monero_payment')
-                    except PaymentHistory.DoesNotExist:
-                        PaymentHistory.objects.create(
-                            key=key,
-                            crypto=crypto,
-                            amount=amount/1e+12,
-                            integrated_address=address_response,
-                            payment_id=payment_id_response,
-                            locked=locked,
-                            transaction_hash=tx_hash,
-                            block_height=block_height,
-                        )
-                        key.monero_credit += amount/1e+12
-                        key.save()
-                        messages.success(request, f"Transaction is success, add {amount/1e+12} XMR to key {k}",
-                                         extra_tags='monero_payment')
+        form = CaptchaForm(request.POST)
+        if form.is_valid():
+            try:
+                key = APIKEY.objects.get_from_key(k)
+                payment_check = manage_monero(
+                    "get_payments", {"payment_id": key.payment_id})
+                if "error" in json.loads(payment_check.text):
+                    messages.error(request, "Payment ID is incorrect",
+                                extra_tags='monero_payment')
+                    return HttpResponseRedirect(f"/buy")
+                elif len(json.loads(payment_check.text)["result"]) == 0:
+                    messages.error(request, "No transaction detected",
+                                extra_tags='monero_payment')
+                    return HttpResponseRedirect(f"/buy")
                 else:
-                    messages.error(request, f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations",
-                                   extra_tags='monero_payment')
-        except APIKEY.DoesNotExist:
-            messages.error(request, f"Key is incorrect",
-                           extra_tags='monero_payment')
-            return HttpResponseRedirect("/buy")
-        except requests.exceptions.ConnectionError:
-            messages.error(request, "Cannot connect to RPC",
+                    payment_id_response = json.loads(payment_check.text)[
+                        "result"]['payments'][0]['payment_id']
+                    address_response = json.loads(payment_check.text)[
+                        "result"]['payments'][0]['address']
+                    amount = json.loads(payment_check.text)[
+                        "result"]['payments'][0]['amount']
+                    block_height = json.loads(payment_check.text)[
+                        "result"]['payments'][0]['block_height']
+                    locked = json.loads(payment_check.text)[
+                        "result"]['payments'][0]['locked']
+                    tx_hash = json.loads(payment_check.text)[
+                        "result"]['payments'][0]['tx_hash']
+                    unlock_time = json.loads(payment_check.text)[
+                        "result"]['payments'][0]['unlock_time']
+                    crypto = Crypto.objects.get(coin="xmr")
+                    if int(unlock_time) == 0 and not locked:
+                        try:
+                            PaymentHistory.objects.get(
+                                key=key,
+                                crypto=crypto,
+                                amount=amount/1e+12,
+                                integrated_address=address_response,
+                                payment_id=payment_id_response,
+                                locked=locked,
+                                transaction_hash=tx_hash,
+                                block_height=block_height,
+                            )
+                            messages.success(
+                                request, f"The lastest tx_hash is {tx_hash}, no change to xmr credit of key: {k}", extra_tags='monero_payment')
+                        except PaymentHistory.DoesNotExist:
+                            PaymentHistory.objects.create(
+                                key=key,
+                                crypto=crypto,
+                                amount=amount/1e+12,
+                                integrated_address=address_response,
+                                payment_id=payment_id_response,
+                                locked=locked,
+                                transaction_hash=tx_hash,
+                                block_height=block_height,
+                            )
+                            key.monero_credit += amount/1e+12
+                            key.save()
+                            messages.success(request, f"Transaction is success, add {amount/1e+12} XMR to key {k}",
+                                            extra_tags='monero_payment')
+                    else:
+                        messages.error(request, f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations",
+                                    extra_tags='monero_payment')
+            except APIKEY.DoesNotExist:
+                messages.error(request, f"Key is incorrect",
+                            extra_tags='monero_payment')
+                return HttpResponseRedirect("/buy")
+            except requests.exceptions.ConnectionError:
+                messages.error(request, "Cannot connect to RPC",
+                    extra_tags='monero_payment')
+                return HttpResponseRedirect("/buy")
+        else:
+            messages.error(request, "Error: Captcha is incorrect.",
                 extra_tags='monero_payment')
             return HttpResponseRedirect("/buy")
 
