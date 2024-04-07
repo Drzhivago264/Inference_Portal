@@ -1,30 +1,44 @@
 {% extends "component_html/base.html" %}
-
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.css" />
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.dataTables.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
+{% endblock head %}
 {% block content %}
-  <main class="container">
-    <div id="site_content" class="grid">
-      <div class="container" id="content">
-        <h2>Available Models:</h2>
-        {% for llm in llms %}
-        <details>
-          <summary>
-            {{llm.name}}
-          </summary>
-          <p>{{llm.desc|linebreaks}} </p>
-        </details>
-        {% endfor %}
-      </div>
-      <div class="container">
+<main style="height: 100vh" class="container">
+  <div id="site_content" class="grid">
+    <div class="container" id="content">
+      <h2>Available Models:</h2>
+      {% for llm in llms %}
+      <details>
+        <summary>
+          {{llm.name}}
+        </summary>
+        <p>{{llm.desc|linebreaks}} </p>
+      </details>
+      {% endfor %}
+    </div>
+    <div class="container">
 
-        <h2>Servers Status</h2>
+      <h2>Servers Status</h2>
 
-        <table style="  margin-left: auto; margin-right: auto; ">
+      <table id="modelTable" style="  margin-left: auto; margin-right: auto; ">
+        <thead>
           <tr>
             <th>Servers</th>
             <th>Models</th>
             <th>Status</th>
             <th>Availability</th>
           </tr>
+        </thead>
+        <tbody>
           {% for server in servers %}
           <tr>
             <td>Server-{{ server.id }}</td>
@@ -33,16 +47,26 @@
             <td>{{server.availability}}</td>
           </tr>
           {% endfor %}
-        </table>
-        <small><i>NOTE:
-            <li>Status can be "pending", "running", "stopping" and "stopped" which refers to the current stage of
-              GPU servers</li>
-            <li>Availability can be "availabe" and "not availabe" which refers to the ability of users to boot the
-              instance by themselves</li>
-            <li>Highly demanded models are load-balanced across multiple servers</li>
-          </i></small>
-      </div>
-
+        </tbody>
+      </table>
+      <small><i>NOTE:
+          <li>Status can be "pending", "running", "stopping" and "stopped" which refers to the current stage of
+            GPU servers</li>
+          <li>Availability can be "availabe" and "not availabe" which refers to the ability of users to boot the
+            instance by themselves</li>
+          <li>Highly demanded models are load-balanced across multiple servers</li>
+        </i></small>
     </div>
-  </main>
-  {% endblock content %}
+
+  </div>
+  <script>
+    var picotheme = document.getElementById("picotheme");
+    picotheme.setAttribute("href", "/static/css/pico-main/css/pico.conditional.min.css");
+    new DataTable('#modelTable', {
+
+    });
+
+  </script>
+
+</main>
+{% endblock content %}

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-from .views import CreateStripeCheckoutSessionView, SuccessView, CancelView, ProductDetailView, ProductListView, StripeWebhookView, Room
+from .views import CreateStripeCheckoutSessionView, SuccessView, CancelView, ProductDetailView, ProductListView, StripeWebhookView, Room, LogListJson
 app_name = "apikey"
 
 urlpatterns = [
@@ -23,6 +23,8 @@ urlpatterns = [
     path("buy/<str:key>/", views.generate_key_success, name="key_success"),
     path("<int:pk>/<str:key>/<str:name>/", ProductDetailView.as_view(), name="product-detail"),
     path("prompt/<str:key>/", views.room_prompt, name="room_prompt"),
+    path("log/<str:key>/", LogListJson.as_view()),
+
     path("chat/<str:key>/", Room.as_view(template_name='html/chatroom.html'), name="chatroom"),
     path("engineer/<str:key>/", Room.as_view(template_name='html/lagent.html'), name="agent_room"),
     path('promptresponse/', views.response_prompt_redirect, name='promptresponse'),
