@@ -149,7 +149,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                     template=template).order_by("code")
                 return {"name_list": [c.name async for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
             else:
-                child_template = AgentInstruct.objects.aget(name=name)
+                child_template = await AgentInstruct.objects.aget(name=name)
                 return child_template.instruct
         except Exception as e:
             return e
@@ -188,13 +188,10 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 if self.working_paragraph != paragraph:
                     self.working_paragraph = paragraph
                     self.current_turn = 0
-                    await self.channel_layer.group_send(
-                        self.room_group_name, {
-                            "type": "chat_message",
-                            "paragraph": paragraph,
-                            "current_turn": self.current_turn
-                        }
-                    )
+                    self.session_history = []
+                    await self.send(text_data=json.dumps({"message": f"Working on block {paragraph}, what do you want me to write?", "role": "Server", "time": self.time}))
+                    await self.send(text_data=json.dumps({"paragraph": paragraph}))
+
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
         elif 'swap_template' in text_data_json:
@@ -205,17 +202,12 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 child_template = await self.get_child_tempalte_name(swap_template, None)
                 swap_instruction = swap_template.bot_instruct
                 swap_template_ = swap_template.template
-                await self.channel_layer.group_send(
-                    self.room_group_name, {
-                        "type": "chat_message",
-                        "swap_name": text_data_json['swap_template'],
-                        "swap_instruction": swap_instruction,
-                        "swap_template": swap_template_,
-                        "child_template_name_list": child_template['name_list'],
-                        "default_child_instruct": child_template['default_instruct'],
-                        "default_child": child_template['default_child']
-                    }
-                )
+                await self.send(text_data=json.dumps({"message": f"Swap to {text_data_json['swap_template']}, what do you want me to write?", "role": "Server", "time": self.time}))
+                await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
+                                                  "swap_template": swap_template_,
+                                                  "child_template_name_list": child_template['name_list'],
+                                                  "default_child": child_template['default_child'],
+                                                  "default_child_instruct": child_template['default_instruct']}))
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
         elif 'swap_child_instruct' in text_data_json:
@@ -223,12 +215,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 swap_child_instruct = AgentSchemaInstruct.model_validate_json(
                     text_data).swap_child_instruct
                 child_instruct = await self.get_child_tempalte_name(None, swap_child_instruct)
-                await self.channel_layer.group_send(
-                    self.room_group_name, {
-                        "type": "chat_message",
-                        "child_instruct": child_instruct
-                    }
-                )
+                await self.send(text_data=json.dumps({"child_instruct": child_instruct}))
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
         elif 'message' in text_data_json:
@@ -262,7 +249,8 @@ class AgentConsumer(AsyncWebsocketConsumer):
                     presence_penalty = validated.presence_penalty
                     temperature = validated.temperature
                     agent_instruction += child_instruction
-                    Agent_Inference.delay(unique=unique_response_id,
+                    Agent_Inference.delay(
+                                          unique=unique_response_id,
                                           key=self.key,
                                           stream=True,
                                           message=message,
@@ -315,14 +303,6 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 unique_response_id = event['unique']
                 await self.send(text_data=json.dumps({"message": message,  "stream_id":  unique_response_id, "credit": credit}))
 
-        elif "paragraph" in event:
-            paragraph = event['paragraph']
-            self.current_turn = event['current_turn']
-            self.session_history = []
-            displayed_paragraph = paragraph
-            await self.send(text_data=json.dumps({"message": f"Working on block {displayed_paragraph}, what do you want me to write?", "role": "Server", "time": self.time}))
-            await self.send(text_data=json.dumps({"paragraph": paragraph}))
-
         if "agent_action" in event:
             agent_action = event['agent_action']
             if agent_action == "STOP":
@@ -337,20 +317,5 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"agent_action": agent_action, "result_id": self.working_paragraph, "full_result": full_result}))
                 self.session_history = []
                 self.current_turn = 0
-        if "child_instruct" in event:
-            child_instruct = event['child_instruct']
-            if child_instruct is not None:
-                await self.send(text_data=json.dumps({"child_instruct": child_instruct}))
-        if "swap_template" in event:
-            swap_template_name = event['swap_name']
-            swap_instruction = event['swap_instruction']
-            swap_template = event['swap_template']
-            child_template_name_list = event['child_template_name_list']
-            default_child = event['default_child']
-            default_child_instruct = event['default_child_instruct']
-            await self.send(text_data=json.dumps({"message": f"Swap to {swap_template_name}, what do you want me to write?", "role": "Server", "time": self.time}))
-            await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
-                                                  "swap_template": swap_template,
-                                                  "child_template_name_list": child_template_name_list,
-                                                  "default_child": default_child,
-                                                  "default_child_instruct": default_child_instruct}))
+
+
