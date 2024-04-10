@@ -284,7 +284,7 @@ def Inference(unique: str,
                                     }
                                 )
                         log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                                  full_response=full_response, type_=type_)
+                                                  response=full_response, type_=type_)
 
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=region, action="on")
@@ -309,8 +309,8 @@ def Inference(unique: str,
                     'unique': unique
                 }
             )
-            log_prompt_response(is_session_start_node, key_object, model, prompt,
-                                        full_response, type_=type_)
+            log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+                                        response=response, type_=type_)
             
         elif type_ == "prompt" or type_ == "prompt_room":
             log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
@@ -338,6 +338,7 @@ def Inference(unique: str,
 
 @shared_task
 def Agent_Inference(key: str,
+                    is_session_start_node: bool|None,
                     current_turn_inner: int,
                     stream: bool,
                     model: str,
@@ -410,7 +411,7 @@ def Agent_Inference(key: str,
                                                    max_tokens=max_tokens,
                                                    temperature=temperature,
                                                    presence_penalty=presence_penalty)
-        log_prompt_response.delay(key_object=key_object, model=model_type, prompt=message,
+        log_prompt_response(is_session_start_node=is_session_start_node,key_object=key_object, model=model_type, prompt=message,
                                   response=clean_response, type_="open_ai")
     else:
         channel_layer = get_channel_layer()

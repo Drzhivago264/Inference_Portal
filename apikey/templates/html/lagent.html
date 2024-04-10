@@ -58,7 +58,7 @@
             <div id="document-instruction">
                 <h4>Agent Instruction</h4>
                 <textarea id="agent_instruction" rows="10" style="font-size: 12px;"
-                    autocomplete="off">{{template.bot_instruct|safe}}</textarea>
+                    autocomplete="off">{{template.instruct|safe}}</textarea>
             </div>
             <hr>
             <div id="document-child-instruction">
@@ -118,7 +118,7 @@
                                     table: Table,
 
                                 },
-                                data: {{ template.template | safe }}
+                                data: {{ template.default_editor_template | safe }}
                             })
 
                             document.getElementById("editorjs").onclick = function save_editor() {
@@ -144,11 +144,11 @@
                 <select autocomplete="off" name="template-select" id="template-select" aria-label="Select your agent..."
                     required>
                     {% for template in templates %}
-                    {% if template.template_name == 'Assignment Agent' %}
-                    <option selected name="template" value="{{template.template_name}}">
-                        {{template.template_name}}<br>
+                    {% if template.name == 'Assignment Agent' %}
+                    <option selected name="template" value="{{template.name}}">
+                        {{template.name}}<br>
                         {% else %}
-                    <option name="template" value="{{template.template_name}}"> {{template.template_name}}<br>
+                    <option name="template" value="{{template.name}}"> {{template.name}}<br>
                         {% endif %}
                         {% endfor %}
                 </select>
