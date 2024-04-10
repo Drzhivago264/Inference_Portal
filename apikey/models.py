@@ -7,7 +7,11 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from rest_framework_api_key.models import AbstractAPIKey
 from tinymce.models import HTMLField
+
+from mptt.models import MPTTModel, TreeForeignKey
 User = settings.AUTH_USER_MODEL
+
+
 
 class Article(models.Model):
     name = models.CharField(max_length=200)
@@ -146,3 +150,19 @@ class Price(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self) -> str:
         return f"{self.product.name} {self.price}"
+
+class MemoryTree(MPTTModel):
+    name = models.CharField(max_length=200, unique=True)
+    prompt = models.CharField(max_length=4096)
+    response = models.CharField(max_length=4096)
+    model = models.ForeignKey(LLM, on_delete=models.CASCADE)
+    key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    p_type = models.CharField(max_length=4096, default="prompt")
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    is_session_start_node = models.BooleanField(default=False)
+    def __str__(self) -> str:
+        return f"{self.name}"
+    
+    class MPTTMeta:
+        order_insertion_by = ['name']

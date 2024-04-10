@@ -31,6 +31,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         self.room_group_name = "chat_%s" % self.url
+        self.is_session_start_node = True
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -84,7 +85,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                            "choosen_model": choosen_models
                                            }
                 )
+                print(self.is_session_start_node)
                 Inference.delay(unique=unique_response_id,
+                                is_session_start_node = self.is_session_start_node,
                                 mode=mode,
                                 type_="chatroom",
                                 stream=True,
@@ -114,13 +117,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         credit = event["credit"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
-        if role == "Human" or role == "Server":
+        if role == "Human":
+            self.is_session_start_node = False
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
-            if role == "Human":
-                unique_response_id = event['unique']
-                await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
-            else:
-                pass
+            unique_response_id = event['unique']
+            await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
+
         else:
             unique_response_id = event['unique']
             await self.send(text_data=json.dumps({"message": message, "stream_id":  unique_response_id, "credit": credit}))
@@ -204,10 +206,10 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 swap_template_ = swap_template.template
                 await self.send(text_data=json.dumps({"message": f"Swap to {text_data_json['swap_template']}, what do you want me to write?", "role": "Server", "time": self.time}))
                 await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
-                                                  "swap_template": swap_template_,
-                                                  "child_template_name_list": child_template['name_list'],
-                                                  "default_child": child_template['default_child'],
-                                                  "default_child_instruct": child_template['default_instruct']}))
+                                                      "swap_template": swap_template_,
+                                                      "child_template_name_list": child_template['name_list'],
+                                                      "default_child": child_template['default_child'],
+                                                      "default_child_instruct": child_template['default_instruct']}))
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
         elif 'swap_child_instruct' in text_data_json:
@@ -250,24 +252,24 @@ class AgentConsumer(AsyncWebsocketConsumer):
                     temperature = validated.temperature
                     agent_instruction += child_instruction
                     Agent_Inference.delay(
-                                          unique=unique_response_id,
-                                          key=self.key,
-                                          stream=True,
-                                          message=message,
-                                          credit=key_object.credit,
-                                          room_group_name=self.room_group_name,
-                                          model=choosen_template,
-                                          max_turns=self.max_turns,
-                                          current_turn_inner=current_turn_inner,
-                                          agent_instruction=agent_instruction,
-                                          session_history=self.session_history,
-                                          model_type=self.model_type,
-                                          frequency_penalty=frequency_penalty,
-                                          top_p=top_p,
-                                          max_tokens=max_tokens,
-                                          temperature=temperature,
-                                          presence_penalty=presence_penalty,
-                                          )
+                        unique=unique_response_id,
+                        key=self.key,
+                        stream=True,
+                        message=message,
+                        credit=key_object.credit,
+                        room_group_name=self.room_group_name,
+                        model=choosen_template,
+                        max_turns=self.max_turns,
+                        current_turn_inner=current_turn_inner,
+                        agent_instruction=agent_instruction,
+                        session_history=self.session_history,
+                        model_type=self.model_type,
+                        frequency_penalty=frequency_penalty,
+                        top_p=top_p,
+                        max_tokens=max_tokens,
+                        temperature=temperature,
+                        presence_penalty=presence_penalty,
+                    )
 
                     await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message",
@@ -317,5 +319,3 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"agent_action": agent_action, "result_id": self.working_paragraph, "full_result": full_result}))
                 self.session_history = []
                 self.current_turn = 0
-
-

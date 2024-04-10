@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'vectordb',
     'ninja',
     'tinymce',
+    'mptt', #tree graph in sql
 ]
 CHANNEL_LAYERS = {
     "default": {

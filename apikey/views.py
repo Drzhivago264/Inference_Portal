@@ -15,7 +15,8 @@ from .models import (Price,
                      Crypto,
                      PaymentHistory,
                      AgentInstruct,
-                     Article
+                     Article,
+                     MemoryTree
                      )
 from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
@@ -53,7 +54,7 @@ from django.db.models import Q
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-@cache_page(60*15)
+#@cache_page(60*15)
 def index(request: HttpRequest) -> HttpResponse:
     page_content = Article.objects.filter(name="index")
     context =  {"title": "Inference", 
@@ -449,6 +450,7 @@ def prompt(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
             elif instance:
                 cache.set(f"{k}:{n}", instance, constant.CACHE_AUTHENTICATION)
                 Inference.delay(unique=None,
+                                is_session_start_node=None,
                                 mode=mode,
                                 stream=False,
                                 type_=type_,
@@ -501,12 +503,10 @@ def prompt(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
 class Room(ListView):
     template_name = ""
     def get_queryset(self) -> QuerySet[LLM]:
-        if self.template_name == "html/chatroom.html":
-            return LLM.objects.filter(agent_availability=False)
-        elif self.template_name == "html/lagent.html": 
-            return LLM.objects.filter(agent_availability=True) 
-        elif self.template_name == "html/hotpot.html":
+        if self.template_name == ("html/chatroom.html" or "html/hotpot.html"):
             return LLM.objects.all()
+        elif self.template_name == "html/lagent.html": 
+            return LLM.objects.filter(agent_availability=True)             
 
     def get_context_data(self, **kwargs: typing.Any) -> object:
         context = super(Room, self).get_context_data(**kwargs)

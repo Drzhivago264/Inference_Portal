@@ -2,27 +2,30 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from celery import shared_task
 from django.core.mail import send_mail
+from vectordb import  vectordb
 from django.utils import timezone
 import random
 import requests
 import json
 from .models import (InferenceServer,
-                     LLM, 
-                     APIKEY, 
-                     Crypto
+                     LLM,
+                     APIKEY,
+                     Crypto,
+                     PromptResponse,
+                     MemoryTree
                      )
 from decouple import config
 from botocore.exceptions import ClientError
 import boto3
 from openai import OpenAI
-from .util.commond_func import (get_model_url, 
-                                update_server_status_in_db, 
-                                send_request, 
-                                log_prompt_response, 
-                                inference_mode, 
-                                response_mode, 
-                                send_agent_request_openai, 
-                                send_chat_request_openai
+from .util.commond_func import (get_model_url,
+                                update_server_status_in_db,
+                                send_request,
+                                inference_mode,
+                                response_mode,
+                                send_agent_request_openai,
+                                send_chat_request_openai,
+                                log_prompt_response
                                 )
 from .util.constant import *
 from celery.utils.log import get_task_logger
@@ -160,6 +163,7 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
 
 @shared_task
 def Inference(unique: str,
+              is_session_start_node: bool|None,
               mode: str,
               type_: str,
               key: str,
@@ -203,6 +207,7 @@ def Inference(unique: str,
         prompt (str): _description_
         include_memory (bool): _description_
     """
+    channel_layer = get_channel_layer()
     key_object = APIKEY.objects.get_from_key(key)
     if not beam:
         length_penalty = 1
@@ -218,7 +223,7 @@ def Inference(unique: str,
     url_list = get_model_url(llm)
 
     processed_prompt = inference_mode(
-        model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability = llm.agent_availability)
+        model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
     if not llm.agent_availability:
         context = {
             "prompt": processed_prompt,
@@ -242,7 +247,8 @@ def Inference(unique: str,
             url = random_url.url
             instance_id = random_url.name
             server_status = random_url.status
-            update_server_status_in_db(instance_id=instance_id, update_type="time")
+            update_server_status_in_db(
+                instance_id=instance_id, update_type="time")
             if server_status == "running":
                 if not stream:
                     response = send_request(
@@ -257,8 +263,8 @@ def Inference(unique: str,
                         previous_output = str()
                         full_response = str()
                         for chunk in response.iter_lines(chunk_size=8192,
-                                                        decode_unicode=False,
-                                                        delimiter=b"\0"):
+                                                         decode_unicode=False,
+                                                         delimiter=b"\0"):
                             if chunk:
                                 data = json.loads(chunk.decode("utf-8"))
                                 output = data["text"][0]
@@ -267,7 +273,6 @@ def Inference(unique: str,
                                 re = output.replace(previous_output, "")
                                 full_response += re
                                 previous_output = output
-                                channel_layer = get_channel_layer()
                                 async_to_sync(channel_layer.group_send)(
                                     room_group_name,
                                     {
@@ -278,8 +283,8 @@ def Inference(unique: str,
                                         'unique': unique
                                     }
                                 )
-                        log_prompt_response(key_object, model, prompt,
-                                            full_response, type_=type_)
+                        log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+                                                  full_response=full_response, type_=type_)
 
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=region, action="on")
@@ -294,7 +299,6 @@ def Inference(unique: str,
             response = "Model is currently offline"
 
         if type_ == "chatroom" and isinstance(response, str):
-            channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 room_group_name,
                 {
@@ -305,28 +309,32 @@ def Inference(unique: str,
                     'unique': unique
                 }
             )
+            log_prompt_response(is_session_start_node, key_object, model, prompt,
+                                        full_response, type_=type_)
+            
         elif type_ == "prompt" or type_ == "prompt_room":
-            log_prompt_response(key_object, model, prompt,
-                                response, type_="prompt")
+            log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+                                      response=response, type_="prompt")
     else:
         client = OpenAI(api_key=config("GPT_KEY"))
         clean_response = ""
         clean_response = send_chat_request_openai(client=client,
-                                             session_history=processed_prompt,
-                                             model=model,
-                                             model_type=model,
-                                             credit=credit,
-                                             unique=unique,
-                                             stream=stream,
-                                             room_group_name=room_group_name,
-                                             clean_response=clean_response,
-                                             frequency_penalty=frequency_penalty,
-                                             top_p=top_p,
-                                             max_tokens=max_tokens,
-                                             temperature=temperature,
-                                             presence_penalty=presence_penalty)
-        log_prompt_response(key_object=key_object, model=model, prompt=prompt,
-                        response=clean_response, type_="open_ai")
+                                                  session_history=processed_prompt,
+                                                  model=model,
+                                                  model_type=model,
+                                                  credit=credit,
+                                                  unique=unique,
+                                                  stream=stream,
+                                                  room_group_name=room_group_name,
+                                                  clean_response=clean_response,
+                                                  frequency_penalty=frequency_penalty,
+                                                  top_p=top_p,
+                                                  max_tokens=max_tokens,
+                                                  temperature=temperature,
+                                                  presence_penalty=presence_penalty)
+        log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+                                  response=clean_response, type_="open_ai")
+
 
 @shared_task
 def Agent_Inference(key: str,
@@ -388,22 +396,22 @@ def Agent_Inference(key: str,
             ]
         session_history.extend(prompt)
         clean_response = send_agent_request_openai(client=client,
-                                             session_history=session_history,
-                                             model=model,
-                                             model_type=model_type,
-                                             credit=credit,
-                                             unique=unique,
-                                             current_turn_inner=current_turn_inner,
-                                             stream=stream,
-                                             room_group_name=room_group_name,
-                                             clean_response=clean_response,
-                                             frequency_penalty=frequency_penalty,
-                                             top_p=top_p,
-                                             max_tokens=max_tokens,
-                                             temperature=temperature,
-                                             presence_penalty=presence_penalty)
-        log_prompt_response(key_object=key_object, model=model_type, prompt=message,
-                            response=clean_response, type_="open_ai")
+                                                   session_history=session_history,
+                                                   model=model,
+                                                   model_type=model_type,
+                                                   credit=credit,
+                                                   unique=unique,
+                                                   current_turn_inner=current_turn_inner,
+                                                   stream=stream,
+                                                   room_group_name=room_group_name,
+                                                   clean_response=clean_response,
+                                                   frequency_penalty=frequency_penalty,
+                                                   top_p=top_p,
+                                                   max_tokens=max_tokens,
+                                                   temperature=temperature,
+                                                   presence_penalty=presence_penalty)
+        log_prompt_response.delay(key_object=key_object, model=model_type, prompt=message,
+                                  response=clean_response, type_="open_ai")
     else:
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(

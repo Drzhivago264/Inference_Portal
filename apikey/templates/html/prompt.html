@@ -1,6 +1,5 @@
 {% extends "component_html/base.html" %}
 {% block head %}
-<link rel="stylesheet" id="picotheme" href="/static/css/pico-main/css/pico.min.css" />
 <link href="/static/css/prism.css" rel="stylesheet" />
 <script src="/static/js/prism.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -21,6 +20,7 @@
   .message_log_container {
     margin: 10px;
   }
+  
 </style>
 {% endblock head %}
 
@@ -35,19 +35,26 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
         <div class="form_settings">
-          {{form.key_name}}
-          {{form.key}}
-          {{form.prompt}}
-          <div class="grid">
+
+          <div class="grid" style="grid-template-columns: 60% 40%;">
             <div class="container">
-              <h3> Available Models </h3>
+              <div class="grid" >
+                {{form.key_name}}
+                {{form.key}}
+                <input class="submit" type="submit" value="Submit" />
+              </div>
+              <br>
+              {{form.prompt}}
+            </div>
+            <div class="container">
               {{form.model}}
             </div>
-            <div class="container">
-              <h3> Mode </h3>
-              {{form.mode}}
-              {{form.include_memory}} Include Memory (for chat mode)
-            </div>
+ 
+          </div>
+          <div class="container">
+            <h3> Mode </h3>
+            {{form.mode}}
+            {{form.include_memory}} Include Memory (for chat mode)
           </div>
           <hr>
           <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small><br>
@@ -100,7 +107,7 @@
           {{form.early_stopping}} Early Stop (default = False) <br> <br>
           {{form.length_penalty}}Length Penalty (default = 0)<br>
           {{form.best_of}} Best of (default = 2 for beam search, 1 for sampling) <br>
-          <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" value="Submit" /></p>
+          
         </div>
 
       </form>
@@ -121,14 +128,10 @@
       <h4>You can check your response log here:</h4>
       <form method="post">
         {% csrf_token %}
-        {{log_form.key_name}}
-        {{log_form.key_}}
-
-        <div class="grid">
-          {{log_form.captcha}}
-
-        </div>
-        <input class="submit" style="float: right;" type="submit" value="Go" />
+        <div class="container">
+        {{log_form}}
+        
+      </div>
       </form>
       <h2>API Endpoints</h2>
       <h4>Python example for chat endpoint:</h4>
