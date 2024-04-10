@@ -64,23 +64,6 @@ class LLM(models.Model):
     agent_availability = models.BooleanField(default=False)
     def __str__(self) -> str:
         return self.name
-    
-class CustomTemplate(models.Model):
-    template_name = models.CharField(max_length=300)
-    model = models.ManyToManyField(LLM)
-    template = models.TextField(default="")
-    bot_instruct = models.TextField(default="")
-    def __str__(self) -> str:
-        return self.template_name
-
-class AgentInstruct(models.Model):
-    name = models.CharField(max_length=200)
-    template = models.ForeignKey(CustomTemplate, on_delete=models.CASCADE)
-    code = models.CharField(max_length=10)
-    instruct = models.TextField(default="")
-    default = models.BooleanField(default=False)
-    def __str__(self) -> str:
-        return f"{self.name} - {self.template.template_name}"
 
 class InferenceServer(models.Model):
     name = models.CharField(max_length=200)
@@ -165,4 +148,17 @@ class MemoryTree(MPTTModel):
         return f"{self.name}"
     
     class MPTTMeta:
-        order_insertion_by = ['name']
+        order_insertion_by = ['created_at']
+
+class InstructionTree(MPTTModel):
+    name = models.CharField(max_length=200, unique=True)
+    code = models.CharField(max_length=10)
+    instruct = models.TextField(default="")
+    default_child = models.BooleanField(default=False)
+    default_editor_template = models.TextField(default="")
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    def __str__(self) -> str:
+        return f"{self.name}"
+    class MPTTMeta:
+        order_insertion_by = ['code']
+    

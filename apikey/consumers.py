@@ -2,7 +2,7 @@ import json
 import uuid
 from datetime import datetime
 from django.core.cache import cache
-from .models import CustomTemplate, APIKEY, AgentInstruct
+from .models import APIKEY, InstructionTree
 from channels.db import database_sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -85,7 +85,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                            "choosen_model": choosen_models
                                            }
                 )
-                print(self.is_session_start_node)
                 Inference.delay(unique=unique_response_id,
                                 is_session_start_node = self.is_session_start_node,
                                 mode=mode,
@@ -117,11 +116,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         credit = event["credit"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
-        if role == "Human":
-            self.is_session_start_node = False
+        if role == "Human" or role == "Server":
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
-            unique_response_id = event['unique']
-            await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
+            if role == "Human":
+                self.is_session_start_node = False
+                unique_response_id = event['unique']
+                await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
 
         else:
             unique_response_id = event['unique']
@@ -137,21 +137,22 @@ class AgentConsumer(AsyncWebsocketConsumer):
         except APIKEY.DoesNotExist:
             return False
 
-    async def get_tempalte(self, name):
+    async def get_template(self, name):
         try:
-            template = await CustomTemplate.objects.aget(template_name=name)
+            template = await InstructionTree.objects.aget(name=name)
             return template
-        except CustomTemplate.DoesNotExist:
+        except InstructionTree.DoesNotExist:
             return False
-
-    async def get_child_tempalte_name(self, template, name=None):
+        
+    @database_sync_to_async
+    def get_child_tempalte_name(self, template, name=None):
         try:
             if name is None:
-                child_template = AgentInstruct.objects.filter(
-                    template=template).order_by("code")
-                return {"name_list": [c.name async for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
+                child_template = InstructionTree.objects.get(
+                    name=template).get_leafnodes()
+                return {"name_list": [c.name for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
             else:
-                child_template = await AgentInstruct.objects.aget(name=name)
+                child_template = InstructionTree.objects.get(name=name)
                 return child_template.instruct
         except Exception as e:
             return e
@@ -163,6 +164,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
         self.current_turn = 0
         self.session_history = []
         self.working_paragraph = str()
+        self.is_session_start_node = True
         self.model_type = ""
         self.room_group_name = "agent_%s" % self.url
         # Join room group
@@ -200,10 +202,10 @@ class AgentConsumer(AsyncWebsocketConsumer):
             try:
                 swap = AgentSchemaTemplate.model_validate_json(
                     text_data).swap_template
-                swap_template = await self.get_tempalte(swap)
+                swap_template = await self.get_template(swap)
                 child_template = await self.get_child_tempalte_name(swap_template, None)
-                swap_instruction = swap_template.bot_instruct
-                swap_template_ = swap_template.template
+                swap_instruction = swap_template.instruct
+                swap_template_ = swap_template.default_editor_template
                 await self.send(text_data=json.dumps({"message": f"Swap to {text_data_json['swap_template']}, what do you want me to write?", "role": "Server", "time": self.time}))
                 await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
                                                       "swap_template": swap_template_,
@@ -252,6 +254,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                     temperature = validated.temperature
                     agent_instruction += child_instruction
                     Agent_Inference.delay(
+                        is_session_start_node=self.is_session_start_node, 
                         unique=unique_response_id,
                         key=self.key,
                         stream=True,
@@ -299,6 +302,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
             if role == "Human" or role == "Server":
                 await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
                 if role == "Human":
+                    self.is_session_start_node = False
                     unique_response_id = event['unique']
                     await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
             else:

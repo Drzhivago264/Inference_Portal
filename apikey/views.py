@@ -10,11 +10,10 @@ from .models import (Price,
                      LLM,
                      InferenceServer,
                      PromptResponse,
-                     CustomTemplate,
                      APIKEY,
                      Crypto,
                      PaymentHistory,
-                     AgentInstruct,
+                     InstructionTree,
                      Article,
                      MemoryTree
                      )
@@ -57,6 +56,9 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 #@cache_page(60*15)
 def index(request: HttpRequest) -> HttpResponse:
     page_content = Article.objects.filter(name="index")
+    memory_tree_node_number = MemoryTree.objects.filter(key=APIKEY.objects.get_from_key("ltjYwNkz.I19C8zz0jgpfpMUb9W8R8WGrMdo1yPXP"))
+    #print(memory_tree_node_number[0].get_children())
+    #print(memory_tree_node_number)
     context =  {"title": "Inference", 
                 "content_list": page_content,}
     return render(request, "html/index.html", context=context)
@@ -503,27 +505,27 @@ def prompt(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
 class Room(ListView):
     template_name = ""
     def get_queryset(self) -> QuerySet[LLM]:
-        if self.template_name == ("html/chatroom.html" or "html/hotpot.html"):
+
+        if self.template_name == "html/chatroom.html" or self.template_name == "html/hotpot.html":
             return LLM.objects.all()
         elif self.template_name == "html/lagent.html": 
             return LLM.objects.filter(agent_availability=True)             
 
     def get_context_data(self, **kwargs: typing.Any) -> object:
+     
         context = super(Room, self).get_context_data(**kwargs)
         if self.template_name == "html/chatroom.html":
             context['title'] = "Chat Bot"
             context['destination'] = "chat"
         elif self.template_name == "html/lagent.html" or self.template_name == "html/hotpot.html":
-            templates = CustomTemplate.objects.all()
-            for t in templates:
-                if t.template_name == "Assignment Agent":
-                    default_template = t
-                    default_child_template = AgentInstruct.objects.filter(
-                        template=t,
-                    )
-            context['templates'] = templates
+            root_nodes = InstructionTree.objects.filter(level=0)
+            for root in root_nodes:
+                if root.name == "Assignment Agent":
+                    default_template = root
+                    default_child_template = root.get_children()
+            context['templates'] = root_nodes
             context['template'] = default_template
-            context['child_template'] = default_child_template
+            context['child_template'] = default_child_template.order_by('code')
             if self.template_name == "html/lagent.html":
                 context['destination'] = "engineer"
                 context['title'] = "Prompt Engineer"
