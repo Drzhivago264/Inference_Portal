@@ -1,6 +1,5 @@
 {% extends "component_html/base.html" %}
 {% block head %}
-<link rel="stylesheet" id="picotheme" href="/static/css/pico-main/css/pico.min.css" />
 {% endblock head %}
 {% block content%}
 <main class="container">
@@ -8,17 +7,17 @@
     {% csrf_token %}
     {{ form.non_field_errors }}
 
-    <div class="grid">
+    <div class="grid" >
       <div class="container">
         <h2>Bring me to:</h2>
         {{form.room}}
       </div>
       <div class="container">
         <h2>Enter your key </h2>
-        <div class="grid">
+
           {{form.key}}
-          <button type="submit">Go</button>
-        </div>
+          <button type="submit">Enter</button>
+     
       </div>
     </div>
   </form>

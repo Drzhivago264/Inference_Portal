@@ -1,9 +1,15 @@
 from django.core.cache import cache
 from django.utils import timezone
 import requests
-from apikey.models import InferenceServer, LLM, PromptResponse, APIKEY
+from apikey.models import (InferenceServer, 
+                           LLM, 
+                           PromptResponse, 
+                           APIKEY, 
+                           MemoryTree
+                           )
 from . import constant
 from decouple import config
+from transformers import AutoTokenizer
 import boto3
 import json
 import tiktoken
@@ -98,22 +104,34 @@ def response_mode(mode: str, response: str, prompt: str) -> str:
     elif mode == "generate":
         return response
 
-
-def log_prompt_response(key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
-    """_summary_
-
+def log_prompt_response(is_session_start_node:bool|None, key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
+    """This function store log into a db then build a memory tree 
     Args:
-        key (string): _description_
-        model (string): the name of the model
-        prompt (string): the user's prompt
-        response (string): the response from GPU
-        type_ (_type_): _description_
+        is_session_start_node (bool | None): _description_
+        key_object (object): _description_
+        model (str): _description_
+        prompt (str): _description_
+        response (str): _description_
+        type_ (str): _description_
     """
-
     llm = LLM.objects.get(name=model)
     pair_save = PromptResponse(
         prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)
     pair_save.save()
+    if is_session_start_node is not None:
+        memory_tree_node_number = MemoryTree.objects.filter(key=key_object).count()
+        if memory_tree_node_number == 0:
+            MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
+        elif memory_tree_node_number > 0 and is_session_start_node:
+            most_similar_vector = vectordb.filter(metadata__key=key_object.hashed_key, metadata__model=model).search(prompt, k=1)
+            most_similar_prompt = most_similar_vector[0].content_object.prompt
+            most_similar_response = most_similar_vector[0].content_object.response
+            most_similar_node = MemoryTree.objects.filter(key=key_object, prompt=most_similar_prompt, response=most_similar_response).earliest('created_at')
+            MemoryTree.objects.create(name=f"{prompt} -- session_start_at {timezone.now()}", parent=most_similar_node, key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
+        elif memory_tree_node_number > 0 and not is_session_start_node:
+            parent_node = MemoryTree.objects.filter(key=key_object, is_session_start_node=True).latest('created_at')
+            MemoryTree.objects.create(name=f"{prompt} -- child_node_added_at {timezone.now()}", parent=parent_node, key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)
+
 
 def get_model_url(model: object) -> list | bool:
     """Get a list of EC2 instance enpoints that serve a given model
@@ -483,7 +501,7 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
             template = shorten_template.format(mess.content_object.prompt, mess.content_object.response)
             full_instruct += "\n\n"
             full_instruct += template
-            inputs = tokeniser(full_instruct)
+            inputs = AutoTokenizer.from_pretrained(tokeniser)(full_instruct)
             current_history_length = len(inputs['input_ids'])
             if current_history_length > int(max_history_length):
                 full_instruct = full_instruct[:-(

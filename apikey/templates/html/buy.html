@@ -69,7 +69,7 @@
         </form>
       </div>
       <div class="container">
-        <h2> Or Get Monero Wallet </h2>
+        <h2>Your XMR Wallet</h2>
         <form action="/getxmraddress" method="post">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="get_xmr_address">
@@ -135,7 +135,7 @@
           <input type="hidden" name="form_type" value="check_xmr_payment">
           <div class="grid">
             <div class="container">
-              <input type="password" placeholder="Key" name="key" />
+              <input type="password" style="max-width: 150px;" placeholder="Key" name="key" />
               <input type="submit" value="Confirm Payment" />
             </div>
             <div class="container">

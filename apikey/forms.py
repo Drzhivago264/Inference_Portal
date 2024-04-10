@@ -35,7 +35,7 @@ class PromptForm(forms.Form):
 
     key = forms.CharField(required=True, widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     key_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'placeholder': 'Key Name'}))
-    prompt = forms.CharField(required=True, widget=forms.Textarea(attrs={"rows":"5", "cols":"50"}))
+    prompt = forms.CharField(required=True, widget=forms.Textarea(attrs={"style":"width:100%; height:100px"}))
     
     include_memory = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'checked': True}),  initial=constant.DEFAULT_MEMORY)
     mode = forms.ChoiceField(widget=forms.RadioSelect, choices=GENERATION_CHOICES, required=True, initial=constant.DEFAULT_MODE)
