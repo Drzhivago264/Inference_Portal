@@ -95,7 +95,7 @@ class ToolSchema(BaseModel):
     choosen_models: str
     key: str
     tool: str
-    emotion_list: str = None
+    emotion_list: str | None = None
     topic_list: str | None = None
     top_p: float = constant.DEFAULT_TOP_P
     frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
