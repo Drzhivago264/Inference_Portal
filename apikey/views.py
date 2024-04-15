@@ -506,9 +506,9 @@ class Room(ListView):
     template_name = ""
     def get_queryset(self) -> QuerySet[LLM]:
 
-        if self.template_name == "html/chatroom.html" or self.template_name == "html/hotpot.html":
+        if self.template_name == "html/chatroom.html" or self.template_name == "html/hotpot.html" :
             return LLM.objects.all()
-        elif self.template_name == "html/lagent.html": 
+        elif self.template_name == "html/lagent.html" or self.template_name== "html/functional_agent.html": 
             return LLM.objects.filter(agent_availability=True)             
 
     def get_context_data(self, **kwargs: typing.Any) -> object:
@@ -517,6 +517,9 @@ class Room(ListView):
         if self.template_name == "html/chatroom.html":
             context['title'] = "Chat Bot"
             context['destination'] = "chat"
+        if self.template_name == "html/functional_agent.html":
+            context['title'] = "Toolbox"
+            context['destination'] = "toolbox"
         elif self.template_name == "html/lagent.html" or self.template_name == "html/hotpot.html":
             root_nodes = InstructionTree.objects.filter(level=0)
             for root in root_nodes:

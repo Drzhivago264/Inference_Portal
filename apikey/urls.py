@@ -42,4 +42,5 @@ urlpatterns = [
     path('topup', views.topup, name='topup'),
     path('frankenstein/', views.frankenstein, name='frankenstein'),
     path("hotpot/<str:key>/", Room.as_view(template_name='html/hotpot.html'), name="hotpot_room"),
+    path("toolbox/<str:key>/", Room.as_view(template_name='html/functional_agent.html'), name="toolbox"),
 ]
