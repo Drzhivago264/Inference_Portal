@@ -1,17 +1,29 @@
 from ninja import NinjaAPI, Schema
+from decouple import config
 from apikey.util import constant
 from ninja.security import HttpBearer
 from apikey.models import APIKEY
-from django.core.exceptions import ObjectDoesNotExist
+from apikey.util.llm_toolbox import Emotion, TopicClassification
+import dspy
 from asgiref.sync import sync_to_async
 from django.http import StreamingHttpResponse
-from django.db.models import Q
 from ninja.errors import HttpError
-from datetime import datetime
 import httpx
 from typing import List
 import random
-import datetime
+from .api_schema import (
+    Error,
+    ChatResponse,
+    PromptResponse,
+    ChatSchema,
+    PromptSchema,
+    ResponseLogRequest,
+    ResponseLogResponse,
+    SentimentandSummarySchema,
+    ClassificationSchema,
+    SentimentandSummaryResponseSchema,
+    ClassificationResponseSchema
+)
 from .utils import (get_chat_context,
                     get_model,
                     get_model_url,
@@ -36,68 +48,6 @@ class GlobalAuth(HttpBearer):
 
 api = NinjaAPI(auth=GlobalAuth(),
                title="Professor Parakeet API")
-
-
-class PromptSchema(Schema):
-    prompt: str = ""
-    model: str = constant.DEFAULT_MODEL
-    top_p: float = constant.DEFAULT_TOP_P
-    top_k: int = constant.DEFAULT_TOP_K
-    temperature: float = constant.DEFAULT_TEMPERATURE
-    beam: bool = constant.DEFAULT_BEAM
-    best_of: int = constant.DEFAULT_BEST_OF
-    max_tokens: int = constant.DEFAULT_MAX_TOKENS
-    presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
-    frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
-    length_penalty: float = constant.DEFAULT_LENGTH_PENALTY
-    early_stopping: bool = constant.DEFAULT_EARLY_STOPPING
-    n: int = constant.DEFAULT_N
-
-
-class ChatSchema(Schema):
-    prompt: str = ""
-    model: str = constant.DEFAULT_MODEL
-    top_p: float = constant.DEFAULT_TOP_P
-    top_k: int = constant.DEFAULT_TOP_K
-    temperature: float = constant.DEFAULT_TEMPERATURE
-    beam: bool = constant.DEFAULT_BEAM
-    best_of: int = constant.DEFAULT_BEST_OF
-    max_tokens: int = constant.DEFAULT_MAX_TOKENS
-    presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
-    frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
-    length_penalty: float = constant.DEFAULT_LENGTH_PENALTY
-    early_stopping: bool = constant.DEFAULT_EARLY_STOPPING
-    n: int = constant.DEFAULT_N
-    stream: bool = False
-    include_memory: bool = constant.DEFAULT_MEMORY
-
-
-class ResponseLogRequest(Schema):
-    quantity: int = 10
-    lastest: bool = True
-    filter_by: list = ["chatroom", "prompt", "open_ai"]
-
-
-class ResponseLogResponse(Schema):
-    prompt: str
-    response: str
-    created_at: datetime.datetime
-    type: str
-    model: str
-
-
-class Error(Schema):
-    detail: str
-
-
-class PromptResponse(Schema):
-    response: str
-    context: PromptSchema
-
-
-class ChatResponse(Schema):
-    response: str
-    context: ChatSchema
 
 
 @api.post("/completion", tags=["Inference"], summary="Text completion", response={200: PromptResponse, 401: Error, 442: Error, 404: Error})
@@ -128,13 +78,13 @@ async def textcompletion(request, data: PromptSchema):
                 "use_beam_search": data.beam,
                 "stream": False,
                 "early_stopping": early_stopping,
-                'presence_penalty': data.presence_penalty if -2 <= data.presence_penalty <= 2 else 0,
-                "temperature": data.temperature if 0 <= data.temperature <= 1 else 0.73,
-                "max_tokens": data.max_tokens if 0 < data.max_tokens <= 4096 else 128,
-                "top_k": int(data.top_k) if 0 < data.top_k <= 100 else -1,
-                "top_p": data.top_p if 0 <= data.top_p <= 1 else 0.73,
-                "length_penalty": length_penalty if -2 <= data.length_penalty <= 2 else 0,
-                "frequency_penalty": data.frequency_penalty if -2 <= data.frequency_penalty <= 2 else 0,
+                'presence_penalty': data.presence_penalty,
+                "temperature": data.temperature,
+                "max_tokens": data.max_tokens,
+                "top_k": int(data.top_k),
+                "top_p": data.top_p,
+                "length_penalty": length_penalty,
+                "frequency_penalty": data.frequency_penalty
             }
             await update_server_status_in_db(instance_id=inference_server.name, update_type="time")
             if server_status == "running":
@@ -190,13 +140,13 @@ async def chatcompletion(request, data: ChatSchema):
                 "prompt": processed_prompt,
                 "n": data.n,
                 'best_of': best_of,
-                'presence_penalty': data.presence_penalty if -2 <= data.presence_penalty <= 2 else 0,
-                "temperature": data.temperature if 0 <= data.temperature <= 1 else 0.73,
-                "max_tokens": data.max_tokens if 0 < data.max_tokens <= 4096 else 128,
-                "top_k": int(data.top_k) if 0 < data.top_k <= 100 else -1,
-                "top_p": data.top_p if 0 <= data.top_p <= 1 else 0.73,
-                "length_penalty": length_penalty if -2 <= data.length_penalty <= 2 else 0,
-                "frequency_penalty": data.frequency_penalty if -2 <= data.frequency_penalty <= 2 else 0,
+                'presence_penalty': data.presence_penalty,
+                "temperature": data.temperature,
+                "max_tokens": data.max_tokens,
+                "top_k": int(data.top_k),
+                "top_p": data.top_p,
+                "length_penalty": length_penalty,
+                "frequency_penalty": data.frequency_penalty,
                 "early_stopping": early_stopping,
                 "stream": data.stream,
                 "use_beam_search": data.beam,
@@ -241,3 +191,148 @@ async def log(request, data: ResponseLogRequest):
     order = "-id" if data.lastest else "id"
     response_log = await query_response_log(key_object=request.auth, order=order, quantity=quantity, type_=data.filter_by)
     return response_log
+
+
+@api.post("/predictsentiment", tags=["Inference"], summary="Predict Sentiment", response={200: SentimentandSummaryResponseSchema, 401: Error, 442: Error, 404: Error})
+async def predict_sentiment(request, data: SentimentandSummarySchema):
+    """
+    To predict sentiment please choose among the following model:
+     - **gpt-4**
+     - **gpt-3.5-turbo-0125**
+     - **gpt-3.5-turbo-instruct**
+     - **gpt-4-0125-preview**
+    """
+    model = await get_model(data.model)
+    if not model:
+        raise HttpError(404, "Unknown Model Error. Check your model name.")
+    else:
+        prompt = data.prompt
+        presence_penalty = data.presence_penalty
+        temperature = data.temperature 
+        max_tokens = data.max_tokens
+        top_p = data.top_p 
+        frequency_penalty = data.frequency_penalty
+        client = dspy.OpenAI(model=model.name,
+                             max_tokens=max_tokens,
+                             top_p=top_p,
+                             presence_penalty=presence_penalty,
+                             frequency_penalty=frequency_penalty,
+                             temperature=temperature,
+                             api_key=config("GPT_KEY"))
+        dspy.configure(lm=client)
+        predict = dspy.Predict('document -> sentiment')
+        response = predict(document=prompt)
+        return 200, {'response': response.sentiment,
+                     'context': data}
+
+
+@api.post("/summarizedocument", tags=["Inference"], summary="Summarize Document", response={200: SentimentandSummaryResponseSchema, 401: Error, 442: Error, 404: Error})
+async def summarize_document(request, data: SentimentandSummarySchema):
+    """
+    To summarizedocument please choose among the following model:
+     - **gpt-4**
+     - **gpt-3.5-turbo-0125**
+     - **gpt-3.5-turbo-instruct**
+     - **gpt-4-0125-preview**
+    """    
+    model = await get_model(data.model)
+    if not model:
+        raise HttpError(404, "Unknown Model Error. Check your model name.")
+    else:
+        prompt = data.prompt
+        presence_penalty = data.presence_penalty 
+        temperature = data.temperature 
+        max_tokens = data.max_tokens
+        top_p = data.top_p 
+        frequency_penalty = data.frequency_penalty
+        client = dspy.OpenAI(model=model.name,
+                             max_tokens=max_tokens,
+                             top_p=top_p,
+                             presence_penalty=presence_penalty,
+                             frequency_penalty=frequency_penalty,
+                             temperature=temperature,
+                             api_key=config("GPT_KEY"))
+        dspy.configure(lm=client)
+        predict = dspy.Predict('document -> summary')
+        response = predict(document=prompt)
+        return 200, {'response': response.summary,
+                     'context': data}
+
+
+@api.post("/classifydocument", tags=["Inference"], summary="Classify Document", response={200: ClassificationResponseSchema, 401: Error, 442: Error, 404: Error})
+async def classify_document(request, data: ClassificationSchema):
+    """
+    To classify document please choose among the following model:
+     - **gpt-4**
+     - **gpt-3.5-turbo-0125**
+     - **gpt-3.5-turbo-instruct**
+     - **gpt-4-0125-preview**
+    """
+    model = await get_model(data.model)
+    if not model:
+        raise HttpError(404, "Unknown Model Error. Check your model name.")
+    else:
+        prompt = data.prompt
+        presence_penalty = data.presence_penalty 
+        temperature = data.temperature 
+        max_tokens = data.max_tokens
+        top_p = data.top_p 
+        frequency_penalty = data.frequency_penalty 
+        client = dspy.OpenAI(model=model.name,
+                             max_tokens=max_tokens,
+                             top_p=top_p,
+                             presence_penalty=presence_penalty,
+                             frequency_penalty=frequency_penalty,
+                             temperature=temperature,
+                             api_key=config("GPT_KEY"))
+        dspy.configure(lm=client)
+        topic_list = data.classification_list
+        if topic_list is not None:
+            Topic_ = TopicClassification
+            Topic_.__doc__ = f"""Classify topic among {topic_list}."""
+        else:
+            Topic_ = TopicClassification
+        predict = dspy.Predict(Topic_)
+        response = predict(document=prompt)
+        return 200, {'response': response.topic,
+                     'context': data}
+
+
+@api.post("/predictemotion", tags=["Inference"], summary="Predict Emotion", response={200: ClassificationResponseSchema, 401: Error, 442: Error, 404: Error})
+async def predict_emotion(request, data: ClassificationSchema):
+    """
+    To predict emotion please choose among the following model:
+     - **gpt-4**
+     - **gpt-3.5-turbo-0125**
+     - **gpt-3.5-turbo-instruct**
+     - **gpt-4-0125-preview**
+    """
+    model = await get_model(data.model)
+    if not model:
+        raise HttpError(404, "Unknown Model Error. Check your model name.")
+    else:
+        prompt = data.prompt
+        presence_penalty = data.presence_penalty 
+        temperature = data.temperature 
+        max_tokens = data.max_tokens
+        top_p = data.top_p 
+        frequency_penalty = data.frequency_penalty 
+        client = dspy.OpenAI(model=model.name,
+                             max_tokens=max_tokens,
+                             top_p=top_p,
+                             presence_penalty=presence_penalty,
+                             frequency_penalty=frequency_penalty,
+                             temperature=temperature,
+                             api_key=config("GPT_KEY"))
+        dspy.configure(lm=client)
+        emotion_list = data.classification_list
+        if emotion_list is not None:
+            Emotion_ = Emotion
+            Emotion_.__doc__ = f"""Classify emotion among {emotion_list}."""
+        else:
+            Emotion_ = Emotion
+        predict = dspy.Predict(Emotion_)
+        response = predict(sentence=prompt)
+
+        return 200, {'response': response.emotion,
+                     'context': data}

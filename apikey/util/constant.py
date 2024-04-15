@@ -33,6 +33,8 @@ MAX_HISTORY_LENGTH = {
     "Reddit Helper 2.7B": 100,
     "openai": 4096
 }
+
+OPEN_AI_MODEL_LIST = ['gpt-4', 'gpt-3.5-turbo-0125', 'gpt-3.5-turbo-instruct', 'gpt-4-0125-preview']
 DEFAULT_TOP_P =  0.73
 DEFAULT_BEST_OF =  1
 DEFAULT_TOP_K =  -1
