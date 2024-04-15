@@ -13,7 +13,7 @@ class CaptchaForm(forms.Form):
 
 class RoomRedirectForm(forms.Form):
     #CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode')]
-    CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode'),('hotpot', 'Hotpot Mode')]
+    CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode'),('hotpot', 'Hotpot Mode'), ('toolbox', 'LLM backend functions')]
     room = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES, required=True)
     key = forms.CharField( widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     def clean(self):

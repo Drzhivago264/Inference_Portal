@@ -89,3 +89,35 @@ class ChatSchema(BaseModel):
         if v is not None:
             if not (0 <= v <= 4096): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
+
+class ToolSchema(BaseModel):
+    message: str
+    choosen_models: str
+    key: str
+    tool: str
+    emotion_list: str = None
+    topic_list: str | None = None
+    top_p: float = constant.DEFAULT_TOP_P
+    frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
+    presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
+    temperature:float = constant.DEFAULT_TEMPERATURE
+    max_tokens: int = constant.DEFAULT_MAX_TOKENS
+    role: str
+    @field_validator('frequency_penalty', 'presence_penalty')
+    @classmethod
+    def check_range_fre_pre(cls, v: float, info: ValidationInfo):
+        if not (-2 <= v <= 2): raise ValueError(f'{v} is not a valid {info.field_name}.')
+        return v
+
+    @field_validator('top_p', 'temperature')
+    @classmethod
+    def check_range_top_p_tem(cls, v: float, info: ValidationInfo):
+        if not (0 <= v <= 1): raise ValueError(f'{v} is not a valid {info.field_name}.')
+        return v
+    
+    @field_validator('max_tokens')
+    @classmethod
+    def check_range_tokens(cls, v: int | None, info: ValidationInfo):
+        if v is not None:
+            if not (0 <= v <= 8192): raise ValueError(f'{v} is not a valid {info.field_name}.')
+        return v
