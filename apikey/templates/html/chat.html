@@ -7,16 +7,16 @@
     {% csrf_token %}
     {{ form.non_field_errors }}
 
-    <div class="grid" >
+    <div class="grid" style="grid-template-columns: 30% 70%;">
       <div class="container">
-        <h2>Bring me to:</h2>
+        <h3>Bring me to:</h3>
         {{form.room}}
+        <h3>Enter your key:</h3>
+        {{form.key}}
+        <button type="submit">Enter</button>
       </div>
       <div class="container">
-        <h2>Enter your key </h2>
-
-          {{form.key}}
-          <button type="submit">Enter</button>
+        {{explaination.content|safe}}
      
       </div>
     </div>

@@ -46,3 +46,6 @@ input[type=text]{
     width: 100%!important;
     color: black!important;
 }
+.renderedMarkdown{
+    color: rgb(73, 204, 144)!important;
+}

@@ -38,6 +38,12 @@ class PromptSchema(Schema):
         if v is not None:
             if not (0 <= v <= 8192): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
+    @field_validator('top_k')
+    @classmethod
+    def check_range_tokens(cls, v: int | None, info: ValidationInfo):
+        if not (-1 <= v <= 100): 
+            raise ValueError(f'{v} is not a valid {info.field_name}.')
+        return v
 
 class ChatSchema(PromptSchema):
     stream: bool = False
