@@ -1,6 +1,6 @@
 {% extends "component_html/base.html" %}
 {% block head %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="/static/js/jquery.min.js"></script>
 <script type="text/javascript" src="/static/js/refresh-captcha.js"></script>
 <script type="text/javascript" src="/static/js/export-key.js"></script>
 {% endblock head%}
@@ -53,33 +53,6 @@
         </form>
       </div>
     </div>
-    <hr>
-    <h2>Stripe pay</h2>
-    <small><i> NOTE: We use Stripe to process payments. We do not record your payment details or email address (we do
-        not
-        even confirm your email). If you are concerned please use throw away credit/debit cards.</i></small> <br>
-    <small><i> NOTE: Stripe payment is currently in test mode, you may and should pay by Monero instead.</i></small>
-    <br>
-    <div style="display: flex; justify-content: space-between;" class="card">
-      {% for product in products %}
-      <details>
-        <summary> <a> Top up {{product.name}} </a> </summary>
-        <form action="/topup" style="text-align: center;" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="form_type" value="topupform">
-          <input type="hidden" name="product_id" value={{ product.id }}>
-          <input placeholder="Key name" type="text" name="name" /> <br>
-          <input placeholder="Key" type="password" name="key" /> <br>
-          <input type="submit" value="Take my money" />
-        </form>
-      </details>
-      {% endfor %}
-    </div>
-    {% if key_error == "error" %}
-    <p> Your Key or Key Name is wrong !!!</p>
-    {% endif %}
-    <hr>
-
   </div>
 </main>
 {% endblock content%}

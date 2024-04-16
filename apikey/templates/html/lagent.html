@@ -1,7 +1,7 @@
 {% extends "component_html/base.html" %}
 
 {% block head %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="/static/js/jquery.min.js"></script>
 <script src="/static/js/editor-js/editorjs.umd.js"></script>
 <script src="/static/js/editor-js/header.umd.min.js "></script>
 <script src="/static/js/editor-js/list.umd.min.js "></script>
@@ -13,10 +13,13 @@
 <script src="/static/js/editor-js/inline-code@latest.js"></script>
 <script src="/static/js/editor-js/underline.min.js"></script>
 <script src="/static/js/editor-js/table@latest.js"></script>
-<script src="/static/js/editor-js/edjsHTML.js"></script>
+<script src="/static/js/Parser.browser.min.js"></script>
 <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
 <link rel="stylesheet" id="picotheme" href="/static/css/pico-main/css/pico.min.css" />
 <link rel="stylesheet" href="/static/css/lagent.css">
+<script src="/static/js/pdfmake.min.js"></script>
+<script src="/static/js/vfs_fonts.js"></script>
+<script src="/static/js/html-to-pdfmake.js"></script>
 {% endblock head %}
 
 {% block content %}
@@ -51,6 +54,7 @@
                     <option>json</option>
                     <option>html</option>
                     <option>txt</option>
+                    <option>pdf</option>
                 </select>
             </div>
         </div>
@@ -228,7 +232,7 @@
 </main>
 
 <script>
-    const edjsParser = edjsHTML();
+    const parser = new edjsParser();
     function download(mimeType, filename) {
         editor.save().then((outputData) => {
             download_content = outputData
@@ -236,10 +240,10 @@
                 download_content = JSON.stringify(download_content, null, 4)
             }
             else if (mimeType == "text/html") {
-                download_content = edjsParser.parse(download_content);
+                download_content = parser.parse(download_content);
             }
             else if (mimeType == "text/plain") {
-                html = edjsParser.parse(download_content);
+                html = parser.parse(download_content);
                 html = html.toString()
                 html = html.replace(/<style([\s\S]*?)<\/style>/gi, '');
                 html = html.replace(/<script([\s\S]*?)<\/script>/gi, '');
@@ -252,12 +256,20 @@
                 html = html.replace(/<[^>]+>/ig, '');
                 download_content = html
             }
-            var a = document.createElement('a')
-            var blob = new Blob([download_content], { type: mimeType })
-            var url = URL.createObjectURL(blob)
-            a.setAttribute('href', url)
-            a.setAttribute('download', filename)
-            a.click()
+            else if (mimeType == "application/pdf") {
+                html = parser.parse(download_content);
+                html_to_pdf = htmlToPdfmake(html);
+                pdf = {content:html_to_pdf};
+                pdfMake.createPdf(pdf).download('Written_By_Professor_Parakeet.pdf')
+            }
+            if (mimeType != "application/pdf") {
+                var a = document.createElement('a')
+                var blob = new Blob([download_content], { type: mimeType })
+                var url = URL.createObjectURL(blob)
+                a.setAttribute('href', url)
+                a.setAttribute('download', filename)
+                a.click()
+            }
         }).catch((error) => {
             console.log('Saving failed: ', error)
         });
@@ -272,6 +284,9 @@
         }
         else if (format == "txt") {
             download("text/plain", 'Written_By_Professor_Parakeet.txt')
+        }
+        else if (format == "pdf") {
+            download("application/pdf", 'Written_By_Professor_Parakeet.pdf')
         }
     });
     const key = JSON.parse(document.getElementById('key').textContent);

@@ -196,7 +196,7 @@ async def log(request, data: ResponseLogRequest):
 @api.post("/predictsentiment", tags=["Inference"], summary="Predict Sentiment", response={200: SentimentandSummaryResponseSchema, 401: Error, 442: Error, 404: Error})
 async def predict_sentiment(request, data: SentimentandSummarySchema):
     """
-    To predict sentiment please choose among the following model:
+    To predict sentiment please choose among the following models:
      - **gpt-4**
      - **gpt-3.5-turbo-0125**
      - **gpt-3.5-turbo-instruct**
@@ -229,7 +229,7 @@ async def predict_sentiment(request, data: SentimentandSummarySchema):
 @api.post("/summarizedocument", tags=["Inference"], summary="Summarize Document", response={200: SentimentandSummaryResponseSchema, 401: Error, 442: Error, 404: Error})
 async def summarize_document(request, data: SentimentandSummarySchema):
     """
-    To summarizedocument please choose among the following model:
+    To summarize document please choose among the following models:
      - **gpt-4**
      - **gpt-3.5-turbo-0125**
      - **gpt-3.5-turbo-instruct**
@@ -262,7 +262,7 @@ async def summarize_document(request, data: SentimentandSummarySchema):
 @api.post("/classifydocument", tags=["Inference"], summary="Classify Document", response={200: ClassificationResponseSchema, 401: Error, 442: Error, 404: Error})
 async def classify_document(request, data: ClassificationSchema):
     """
-    To classify document please choose among the following model:
+    To classify document please choose among the following models:
      - **gpt-4**
      - **gpt-3.5-turbo-0125**
      - **gpt-3.5-turbo-instruct**
@@ -301,7 +301,7 @@ async def classify_document(request, data: ClassificationSchema):
 @api.post("/predictemotion", tags=["Inference"], summary="Predict Emotion", response={200: ClassificationResponseSchema, 401: Error, 442: Error, 404: Error})
 async def predict_emotion(request, data: ClassificationSchema):
     """
-    To predict emotion please choose among the following model:
+    To predict emotion please choose among the following models:
      - **gpt-4**
      - **gpt-3.5-turbo-0125**
      - **gpt-3.5-turbo-instruct**
