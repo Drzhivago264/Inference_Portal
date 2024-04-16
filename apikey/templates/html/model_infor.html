@@ -1,16 +1,16 @@
 {% extends "component_html/base.html" %}
 {% block head %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.css" />
-<script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.dataTables.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="/static/js/jquery.min.js"></script>
+<link rel="stylesheet" href="/static/css/dataTables.dataTables.css" />
+<script src="/static/js/dataTables.js"></script>
+<script src="/static/js/dataTables.buttons.js"></script>
+<script src="/static/js/buttons.dataTables.js"></script>
+<script src="/static/js/jszip.min.js"></script>
 {% endblock head %}
 {% block content %}
 <style>
   table{
-    width: 700px!important;
+    max-width: 700px!important;
     font-size: 16px;
   }
   h6{
