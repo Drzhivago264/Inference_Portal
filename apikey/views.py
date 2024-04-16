@@ -85,7 +85,8 @@ def chat(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
             return HttpResponseRedirect(f"/{destination}/{key_hash}")
     else:
         form = RoomRedirectForm()
-    context = {"form": form, "title": "Inference Mode"}
+        explaination = Article.objects.get(name="redirect", a_type="explaination")
+    context = {"form": form, "title": "Inference Mode", "explaination": explaination}
     return render(request, "html/chat.html", context=context)
 
 
@@ -344,7 +345,7 @@ def topup(request: HttpRequest) -> HttpResponseRedirect:
     if request.method == 'POST' and bleach.clean(request.POST.get("form_type")) == 'topupform':
         name = bleach.clean(str(request.POST.get('name')))
         k = bleach.clean(request.POST.get('key'))
-        product_id = bleach.clean(request.POST.get('product_id'))
+        product_id = bleach.clean(request.POST.get('product'))
         try:
             key = APIKEY.objects.get_from_key(k)
             if key.name == name:
