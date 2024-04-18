@@ -41,7 +41,7 @@ class PromptSchema(Schema):
     
     @field_validator('top_k')
     @classmethod
-    def check_range_tokens(cls, v: int | None, info: ValidationInfo):
+    def check_range_top_k(cls, v: int | None, info: ValidationInfo):
         if not (-1 <= v <= 100): 
             raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
