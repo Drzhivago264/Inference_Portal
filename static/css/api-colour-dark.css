@@ -23,7 +23,7 @@ h6{
     background-color: transparent!important;
 }
 
-.opblock-title, .opblock-summary-description, button, td, a, h2, h3 ,h4, p, code,label{
+.opblock-title, .opblock-summary-description, button, td, h2, h3 ,h4, p, code,label{
     color: white!important;
 }
 .json-schema-2020-12-keyword__name, .json-schema-2020-12-keyword__name--primary, h5{

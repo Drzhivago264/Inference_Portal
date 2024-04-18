@@ -331,6 +331,7 @@
     };
 
     textarea_submit_button_agent.onclick = function (e) {
+        textarea_agent.style.height =  "100px";
         var choosen_models = document.getElementById("agent-select").value;
         var choosen_template = document.getElementById("template-select-agent").value;
         const agent_instruction = document.getElementById('agent_instruction').value
@@ -367,6 +368,7 @@
         };
     }
     textarea_submit_button_bot.onclick = function (e) {
+        textarea_bot.style.height =  "100px";
         var choosen_models = document.getElementById("bot-select").value;
         const api_key = document.getElementById('api_key').value
         const top_p = document.getElementsByName("top_p")[0].value

@@ -2,6 +2,11 @@
 {% block head %}
 {% endblock head %}
 {% block content%}
+<style>
+  #id_key{
+    width: 55%;
+  }
+</style>
 <main class="container">
   <form method="post">
     {% csrf_token %}
