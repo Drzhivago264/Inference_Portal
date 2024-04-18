@@ -20,6 +20,7 @@
 <script src="/static/js/pdfmake.min.js"></script>
 <script src="/static/js/vfs_fonts.js"></script>
 <script src="/static/js/html-to-pdfmake.js"></script>
+
 {% endblock head %}
 
 {% block content %}
@@ -47,7 +48,7 @@
             </ul>
             <hr>
             <div class="grid">
-                <a style="display: block; margin: 10px auto; " id="doc-export">
+                <a style="display: block; margin-left: 10px; " id="doc-export">
                     Export:
                 </a>
                 <select name="format" id="format" aria-label="Format" required>
@@ -364,6 +365,7 @@
         textarea.style.height = Math.min(textarea.scrollHeight, textarea_size_litmit) + "px";
     };
     textarea_submit_button.onclick = function (e) {
+        textarea.style.height =  "100px";
         var inputElements = document.getElementsByClassName('checkbox_model');
         for (var i = 0; inputElements[i]; ++i) {
             if (inputElements[i].checked) {

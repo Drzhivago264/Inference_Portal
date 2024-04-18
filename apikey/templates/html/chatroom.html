@@ -167,6 +167,7 @@
         }
     }
     textarea_submit_button.onclick = function (e) {
+        textarea.style.height =  "100px";
         var choosen_models = null;
         var inputElements = document.getElementsByClassName('checkbox');
         choosen_models = get_value_by_name(inputElements)

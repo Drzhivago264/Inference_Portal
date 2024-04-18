@@ -60,7 +60,11 @@
                     {% else %}
                     <li><a class="contrast" href="/chat">Chat Bot and Agent</a></li>
                     {% endif %}
+                    {% if api.title == "Professor Parakeet API"%}
+                    <li><a href="/api/docs">API Docs</a></li>
+                    {% else %}
                     <li><a class="contrast" href="/api/docs">API Docs</a></li>
+                    {% endif %}
                 </ul>
             </div>
             <div>

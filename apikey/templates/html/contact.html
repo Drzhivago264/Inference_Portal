@@ -1,15 +1,15 @@
 {% extends "component_html/base.html" %}
 {% block head %}
 <script src="/static/js/jquery.min.js"></script>
-<link rel="stylesheet" href="/static/css/captcha.css">
 <script type="text/javascript" src="/static/js/refresh-captcha.js"></script>
 
 {% endblock head%}
 {% block content %}
 <main>
   <div id="content" class="container">
+    <div style="width: 380px; margin: 0 auto;">
     <h1>{{title}}</h1>
-    <form style="width: 380px" method="post">
+    <form method="post">
 
         {% csrf_token %}
         <input placeholder="Name" class="contact" type="text" name="name" value="" />
@@ -28,6 +28,6 @@
 
   </div>
   </div>
-
+</div>
 </main>
 {% endblock content %}

@@ -144,6 +144,7 @@
     textarea.onkeyup = function (e) {
         if (e.keyCode === 13 && !e.shiftKey) {
             textarea_submit_button.click();
+       
         }
     };
     var textarea_size_litmit = 300;
@@ -159,6 +160,7 @@
         }
     }
     textarea_submit_button.onclick = function (e) {
+        textarea.style.height =  "100px";
         var choosen_models = null;
         var inputElements = document.getElementsByClassName('checkbox');
         choosen_models = get_value_by_name(inputElements)
