@@ -103,6 +103,8 @@ class ToolSchema(BaseModel):
     temperature:float = constant.DEFAULT_TEMPERATURE
     max_tokens: int = constant.DEFAULT_MAX_TOKENS
     role: str
+    number_of_word: int | None = 50
+    style_list: str | None = None
     @field_validator('frequency_penalty', 'presence_penalty')
     @classmethod
     def check_range_fre_pre(cls, v: float, info: ValidationInfo):

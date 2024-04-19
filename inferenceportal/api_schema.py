@@ -79,7 +79,7 @@ class ChatResponse(Schema):
     context: ChatSchema
 
 
-class SentimentandSummarySchema(Schema):
+class BaseLLMSchema(Schema):
     prompt: str = ""
     model: str = "gpt-4"
     top_p: float = constant.DEFAULT_TOP_P
@@ -112,12 +112,26 @@ class SentimentandSummarySchema(Schema):
         if not v in constant.OPEN_AI_MODEL_LIST: raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
 
-class ClassificationSchema(SentimentandSummarySchema):
+class ClassificationSchema(BaseLLMSchema):
     classification_list: str | None = None
 
-class SentimentandSummaryResponseSchema(Schema):
+class SummarizeSchema(BaseLLMSchema):
+    number_of_word: int | None = 50
+
+class RestyleSchema(BaseLLMSchema):
+    style_list: str | None = None
+
+class SummarizeResponseSchema(Schema):
     response: str
-    context: SentimentandSummarySchema
+    context: SummarizeSchema
+
+class BaseLLMResponseSchema(Schema):
+    response: str
+    context: BaseLLMSchema
+
+class RestyleResponseSchema(Schema):
+    response: str
+    context: RestyleSchema
 
 class ClassificationResponseSchema(Schema):
     response: str
