@@ -395,6 +395,7 @@ async def restyle_document(request, data: RestyleSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-3.5-turbo-instruct**
      - **gpt-4-0125-preview**
+     
      The new style can be an adjective (e.g., **sad**) or multiple strings of adjectives (e.g., **professional**, **serious**)
     """
     model = await get_model(data.model)
