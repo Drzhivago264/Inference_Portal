@@ -8,7 +8,12 @@ from decouple import config
 import dspy
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .celery_tasks import Inference, Agent_Inference
-from .util.llm_toolbox import Emotion, TopicClassification
+from .util.llm_toolbox import (Emotion, 
+                               TopicClassification, 
+                               SummarizeDocument, 
+                               ParaphaseDocument, 
+                               ChangeWrittingStyle
+                               )
 from .util import constant
 from .pydantic_validator import (ChatSchema,
                                  AgentSchemaInstruct,
@@ -398,6 +403,8 @@ class ToolboxConsumer(AsyncWebsocketConsumer):
                                            "max_tokens": max_tokens,
                                            "emotion_list": validated.emotion_list,
                                            "topic_list": validated.topic_list,
+                                           "style_list": validated.style_list,
+                                           "number_of_word": validated.number_of_word,
                                            "top_p": top_p,
                                            "presence_penalty": presence_penalty,
                                            "frequency_penalty": frequency_penalty,
@@ -435,7 +442,14 @@ class ToolboxConsumer(AsyncWebsocketConsumer):
                 dspy.configure(lm=client)
 
                 if role == "summary":
-                    summarize = dspy.ChainOfThought('document -> summary')
+                    number_of_word = event['number_of_word']
+                    if number_of_word is not None and isinstance(number_of_word, int):
+                        Summarizer_ = SummarizeDocument
+                        Summarizer_.__doc__ = f"Compress document in {number_of_word} words."
+                    else:
+                        Summarizer_ = SummarizeDocument
+                    summarize = dspy.ChainOfThought(Summarizer_)
+
                     response = summarize(document=message)
                     await self.send(text_data=json.dumps({"message": response.summary, "stream_id":  unique_response_id, "credit": credit}))
 
@@ -462,8 +476,24 @@ class ToolboxConsumer(AsyncWebsocketConsumer):
                         Topic_ = TopicClassification
                     predict = dspy.Predict(Topic_)
                     response = predict(document=message)
-                    await self.send(text_data=json.dumps({"message": response.topic, "stream_id":  unique_response_id, "credit": credit}))         
+                    await self.send(text_data=json.dumps({"message": response.topic, "stream_id":  unique_response_id, "credit": credit}))      
+                elif role == "paraphrase":
+                    paraphaser = dspy.ChainOfThought(ParaphaseDocument)
+                    response = paraphaser(document=message)
+                    await self.send(text_data=json.dumps({"message": response.paraphased, "stream_id":  unique_response_id, "credit": credit}))
+                elif role == "restyle":
+                    new_style = event['style_list']
+                    if new_style is not None:
+                        Restyler_ = ChangeWrittingStyle
+                        Restyler_.__doc__ = f"""Writing document in {new_style} style."""
+                    else:
+                        Restyler_ = ChangeWrittingStyle
+                    restyler = dspy.ChainOfThought(Restyler_)
+                    response = restyler(document=message)
+                    await self.send(text_data=json.dumps({"message": response.styled, "stream_id":  unique_response_id, "credit": credit}))
                 else:
                     await self.send(text_data=json.dumps({"message": message, "stream_id":  unique_response_id, "credit": credit}))
+
             except Exception as e:
+                print(e)
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))

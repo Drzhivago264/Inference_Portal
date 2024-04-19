@@ -19,14 +19,26 @@
     <div class="grid" style="grid-template-columns: 30% 65%;">
         <div class="container">
             <h3>Toolbox</h3>
-            <input type="radio" class="tool" name="tool" value="sentiment"> Predict Sentiment<br>
-            <input type="radio" class="tool" name="tool" value="summary" checked = "checked"> Summary<br>
+            <input type="radio" class="tool" name="tool" value="paraphrase"> Paraphase Document<br>
+            <input type="radio" class="tool" name="tool" value="sentiment"> Predict Sentiment<br><br>
+            <div class="grid">
+                <div class="container">
+                    <input type="radio" class="tool" name="tool" value="summary" checked="checked">Summary
+                </div>
+                <div class="container">
+                <input type="number" style="height: 35px;" name="number_of_word" min="10" max="500" value=""> 
+            </div>
+            </div>
             <input type="radio" class="tool" name="tool" value="emotion"> Predict Emotion<br><br>
             <lable for="emotion_list">Emotion List</lable>
-            <textarea class="emotion_list" name="emotion_list">sadness, joy, love, anger, fear, surprise, neutral</textarea><br>
+            <textarea class="emotion_list"
+                name="emotion_list">sadness, joy, love, anger, fear, surprise, neutral</textarea><br>
             <input type="radio" class="tool" name="tool" value="topic"> Topic Classification<br><br>
             <lable for="topic_list">Topic List</lable>
             <textarea class="topic_list" name="topic_list"></textarea><br>
+            <input type="radio" class="tool" name="tool" value="restyle"> Restyle Document<br><br>
+            <textarea class="emotion_list" name="style_list">sadness, serious</textarea><br>
+
         </div>
         <div class="container">
             <div id="chat-log">
@@ -61,7 +73,7 @@
         {% endif %}
         {% endfor %}
         <h3> Parameters </h3>
-     
+
         <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small> <br>
         <small><i>NOTE: In order to better understand these parameters, refer to <a
                     href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a
@@ -77,9 +89,9 @@
 
         <label for="max_tokens">Max_tokens:</label>
         <div class="grid" style="grid-template-columns: 80% 20%;">
-            <input type="range" step="1" name="max_tokens" min="1" max="4096" value="128"
+            <input type="range" step="1" name="max_tokens" min="1" max="4096" value="512"
                 oninput="this.nextElementSibling.value = this.value">
-            <output>128</output>
+            <output>512</output>
         </div>
 
 
@@ -125,7 +137,7 @@
         }
         else if (data.stream_id) {
             thinking = document.getElementById("thinking");
-            if (thinking != null){
+            if (thinking != null) {
                 thinking.remove();
             }
             document.getElementById(data.stream_id).innerHTML += data.message.replace(/\n/g, "<br>")
@@ -148,7 +160,7 @@
     textarea.onkeyup = function (e) {
         if (e.keyCode === 13 && !e.shiftKey) {
             textarea_submit_button.click();
-       
+
         }
     };
     var textarea_size_litmit = 300;
@@ -164,21 +176,31 @@
         }
     }
     textarea_submit_button.onclick = function (e) {
-        textarea.style.height =  "100px";
+        textarea.style.height = "100px";
         var choosen_models = null;
         var inputElements = document.getElementsByClassName('checkbox');
         choosen_models = get_value_by_name(inputElements)
 
         var toolElements = document.getElementsByClassName('tool');
         tool = get_value_by_name(toolElements)
-       
+
         const api_key = document.getElementById('api_key').value
         const emotion_list = document.getElementsByName("emotion_list")[0].value
+        if (emotion_list === "") {
+            emotion_list = null
+        }
         topic_list = document.getElementsByName("topic_list")[0].value
         if (topic_list === "") {
             topic_list = null
         }
-
+        style_list = document.getElementsByName("style_list")[0].value
+        if (style_list === "") {
+            style_list = null
+        }
+        number_of_word = document.getElementsByName("number_of_word")[0].value
+        if (number_of_word === "") {
+            number_of_word = null
+        }
         const top_p = document.getElementsByName("top_p")[0].value
 
         const max_tokens = document.getElementsByName("max_tokens")[0].value
@@ -200,8 +222,10 @@
                 'presence_penalty': parseFloat(presence_penalty).toFixed(2),
                 'temperature': parseFloat(temperature).toFixed(2),
                 'emotion_list': emotion_list,
-                'topic_list': topic_list
-        
+                'topic_list': topic_list,
+                'style_list': style_list,
+                'number_of_word': number_of_word
+
             }));
             textarea.value = '';
         }
