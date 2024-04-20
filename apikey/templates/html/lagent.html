@@ -15,7 +15,6 @@
 <script src="/static/js/editor-js/table@latest.js"></script>
 <script src="/static/js/Parser.browser.min.js"></script>
 <script type="text/javascript" src="/static/js/colour-theme-toggle.js"></script>
-<link rel="stylesheet" id="picotheme" href="/static/css/pico-main/css/pico.min.css" />
 <link rel="stylesheet" href="/static/css/lagent.css">
 <script src="/static/js/pdfmake.min.js"></script>
 <script src="/static/js/vfs_fonts.js"></script>
@@ -36,8 +35,8 @@
 <main class="grid" style="grid-template-columns: 50% 45%;">
     <div class="grid" style="grid-template-columns: 28% 70%; ">
         <div id="container" style="padding-left: 10px; ">
-            <h4>Structure</h4>
-            <ul id="document-structure">
+            <h4 class="pico">Structure</h4>
+            <ul class="pico" id="document-structure">
                 {% for child in child_template %}
                 {% if child.name == "Introduction"%}
                 <li><a class="primary">{{child.name}}</a></li>
@@ -48,9 +47,9 @@
             </ul>
             <hr>
             <div class="grid">
-                <a style="display: block; margin-left: 10px; " id="doc-export">
-                    Export:
-                </a>
+                <button style="display: block; margin-left: 10px; " id="doc-export">
+                    Export  
+                </button>
                 <select name="format" id="format" aria-label="Format" required>
                     <option>json</option>
                     <option>html</option>
@@ -59,7 +58,7 @@
                 </select>
             </div>
         </div>
-        <div class="container"  id="site_content_document">
+        <div class="container pico"  id="site_content_document">
             <div id="document-instruction">
                 <h4>Agent Instruction</h4>
                 <textarea id="agent_instruction" rows="10" style="font-size: 12px;"
@@ -142,20 +141,21 @@
         </div>
 
     </div>
-    <div class="grid" style="grid-template-columns: 65% 35%;" id="site_content_chat">
+    <div class="grid pico" style="grid-template-columns: 65% 35%;" id="site_content_chat">
         <div clas="container">
             <div class="grid" style="grid-template-columns: 35% 60%;">
                 <h4> Chat with:</h4>
-                <select autocomplete="off" name="template-select" id="template-select" aria-label="Select your agent..."
+                <select  autocomplete="off" name="template-select" id="template-select" aria-label="Select your agent..."
                     required>
                     {% for template in templates %}
                     {% if template.name == 'Assignment Agent' %}
-                    <option selected name="template" value="{{template.name}}">
-                        {{template.name}}<br>
+                    <option  selected name="template" value="{{template.name}}">
+                        {{template.name}}
                         {% else %}
-                    <option name="template" value="{{template.name}}"> {{template.name}}<br>
+                    <option  name="template" value="{{template.name}}"> {{template.name}}
                         {% endif %}
                         {% endfor %}
+      
                 </select>
             </div>
             <div id="chat-log">
