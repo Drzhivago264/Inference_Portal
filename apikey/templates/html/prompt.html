@@ -20,7 +20,14 @@
   .message_log_container {
     margin: 10px;
   }
-  
+  .redirect_log label {
+  display: inline-block;
+  width: 100px;
+  text-align: right;
+}
+.redirect_log img {
+  margin-bottom: -4px!important;
+}
 </style>
 {% endblock head %}
 
@@ -107,14 +114,12 @@
           {{form.early_stopping}} Early Stop (default = False) <br> <br>
           {{form.length_penalty}}Length Penalty (default = 0)<br>
           {{form.best_of}} Best of (default = 2 for beam search, 1 for sampling) <br>
-          
         </div>
-
       </form>
     </div>
     <div class="container" id="content">
       <!-- insert your sidebar items here -->
-      <h2>Status</h2>
+      <h3>Status</h3>
       <div id="chat-log">
         <p>
           {%for message in messages %}
@@ -123,56 +128,20 @@
         </div>
         {% endfor %}
         </p>
-      </div><br>
-      <h2>Response Log</h2>
+      </div>
+      <h3>Response Log</h3>
       <h4>You can check your response log here:</h4>
-      <form method="post">
+      <form class="redirect_log" method="post">
         {% csrf_token %}
-        <div class="container">
+
         {{log_form}}
         
-      </div>
+    
       </form>
-      <h2>API Endpoints</h2>
-      <h4>Python example for chat endpoint:</h4>
-
-      <pre style="font-size: 14px;"><code class="language-Python" data-prismjs-copy="Copy" >response = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
-json={"prompt": str,
-  "model" : str,
-  'top_k': int,
-  'top_p': float,
-  'best_of': int,
-  'max_tokens': int,
-  'frequency_penalty': float,
-  'presence_penalty': float,
-  'temperature': float,
-  'beam': bool,
-  'early_stopping': bool,
-  'length_penalty': float
-}) 
-print(response.json())
-        </code></pre>
-
-      <h4>cURL example for text completion endpoint:</h4>
-      <pre style="font-size: 14px;"><code class="language-bash" >curl "https://professorparakeet.com/api/completion" --request POST \
--H "Authorization: Bearer str" -H 'Content-Type: application/json' \
---data-binary '{"prompt": str, 
-            "model" : str,
-            "top_k": int,
-            "top_p": float,
-            "best_of": int,
-            "max_tokens": int,
-            "frequency_penalty": float,
-            "presence_penalty": float,
-            "temperature": float,
-            "beam": bool,
-            "early_stopping": bool,
-            "length_penalty": float
-          }'
-</code></pre>
+      <div class="grid">
+      <h3>API Endpoints:</h3>
       <p><a href="/api/docs">Test API</a></p>
-      <p></p>
-
+    </div>
 
     </div>
   </div>

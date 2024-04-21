@@ -8,7 +8,7 @@
         {% if audio %}
             <a title="{% trans "Play CAPTCHA as audio file" %}" href="{{ audio }}">
         {% endif %}
-        <img src="{{ image }}" alt="captcha" class="captcha" />
+        <img style="margin-bottom: -4px;" src="{{ image }}" alt="captcha" class="captcha" />
       </div>
       {% include "django/forms/widgets/multiwidget.html" %}
     </div>

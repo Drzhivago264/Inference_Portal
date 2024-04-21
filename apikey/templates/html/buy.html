@@ -19,7 +19,9 @@
 
             <input type="submit" value="Create" />
           </div>
+          <div style="width:200px">
           {{ form}}
+        </div>
           <br>
           {%for message in messages %}
           {%if "key" in message.tags %}
@@ -59,7 +61,10 @@
             <input type="submit" value="Check" />
 
           </div>
-          {{form}}
+          <div style="width:200px">
+            {{ form}}
+          </div>
+  
           <br>
           {%for message in messages %}
           {%if "monero_address" in message.tags %}
@@ -74,22 +79,23 @@
     <div class="grid">
       <div class="container">
         <h2>Pay by Stripe</h2>
-        <div class="grid">
+
           <div class="container">
             <small><i> NOTE: We use Stripe to process payments. We do not record your payment details or email address
                 (we do
                 not
-                even confirm your email). If you are concerned please use throw away credit/debit cards.</i></small>
-                <br>
-            <small><i> NOTE: Stripe payment is currently in test mode, you may and should pay by Monero
+                even confirm your email). If you are concerned please use throw away credit/debit cards. <br>
+                NOTE: Stripe payment is currently in test mode, you may and should pay by Monero
                 instead.</i></small>
-          </div>
-          <div class="container">
+                <br>
+
+                
             <div class="container">
               <form action="/topup" style="text-align: center;" method="post">
                 {% csrf_token %}
                 <div class="grid" style="margin-bottom: 10px;">
                   <input placeholder="Key name" type="text" name="name" />
+                  <input placeholder="Key" type="password" name="key" />
                   <select name="product" id="product" aria-label="product" required>
                     {% for product in products %}
                     {% if product.name == "10 USD" %}
@@ -99,23 +105,23 @@
                     {% endif %}
                     {% endfor %}
                   </select>
+                  <input type="submit" value="Pay" />
                 </div>
           
 
-                <div class="grid">
-                  <input placeholder="Key" type="password" name="key" />
-                  <input type="submit" value="Pay" />
+     
+
+          
                 </div>
                 <input type="hidden" name="form_type" value="topupform">
               </form>
 
-            </div>
             {% if key_error == "error" %}
             <p> Your Key or Key Name is wrong !!!</p>
             {% endif %}
           </div>
         </div>
-      </div>
+
 
 
 
@@ -129,7 +135,9 @@
             <input type="password" placeholder="Key" name="key" />
             <input type="submit" value="Check" />
           </div>
-          {{form}}
+          <div style="width:200px">
+          {{ form}}
+        </div>
 
           <br>
           {%for message in messages %}
