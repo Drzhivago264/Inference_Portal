@@ -1,0 +1,8 @@
+
+> flowise-components@1.6.7 build /home/h/Desktop/Inference_Portal/Flowise/packages/components
+> tsc && gulp
+
+[13:25:59] Requiring external module ts-node/register
+[13:26:00] Using gulpfile ~/Desktop/Inference_Portal/Flowise/packages/components/gulpfile.ts
+[13:26:00] Starting 'default'...
+[13:26:01] Finished 'default' after 131 ms

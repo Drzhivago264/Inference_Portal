@@ -1,0 +1,57 @@
+2024-04-20 13:28:30 [INFO]: Starting Flowise...
+2024-04-20 13:28:30 [INFO]: ⚡️ [server]: Flowise Server is listening at 3000
+2024-04-20 13:28:30 [INFO]: 📦 [server]: Data Source is initializing...
+2024-04-20 13:28:32 [INFO]: 📦 [server]: Data Source has been initialized!
+2024-04-20 13:29:00 [INFO]: ⬆️ POST /api/v1/node-load-method/openAI
+2024-04-20 13:29:51 [INFO]: ⬆️ POST /api/v1/credentials
+2024-04-20 13:30:13 [INFO]: ⬆️ POST /api/v1/node-load-method/openAI
+2024-04-20 13:30:33 [INFO]: ⬆️ POST /api/v1/chatflows
+2024-04-20 13:30:40 [INFO]: ⬆️ POST /api/v1/internal-prediction/42c31352-9bb8-4b35-90fc-53f3fad79de7
+2024-04-20 13:30:40 [ERROR]: [server]: Error: Ending node must be either a Chain or Agent
+Error: Ending node must be either a Chain or Agent
+    at getEndingNodes (/home/h/Desktop/Inference_Portal/Flowise/packages/server/dist/utils/index.js:235:25)
+    at utilBuildChatflow (/home/h/Desktop/Inference_Portal/Flowise/packages/server/dist/utils/buildChatflow.js:174:60)
+    at async createInternalPrediction (/home/h/Desktop/Inference_Portal/Flowise/packages/server/dist/controllers/internal-predictions/index.js:7:29)
+2024-04-20 13:32:06 [INFO]: ⬆️ POST /api/v1/node-load-method/openAI
+2024-04-20 13:33:06 [INFO]: ⬆️ POST /api/v1/node-load-method/chatOpenAI
+2024-04-20 13:33:22 [INFO]: 🖊 PUT /api/v1/chatflows/42c31352-9bb8-4b35-90fc-53f3fad79de7
+2024-04-20 13:33:26 [INFO]: ⬆️ POST /api/v1/internal-prediction/42c31352-9bb8-4b35-90fc-53f3fad79de7
+2024-04-20 13:33:26 [INFO]: [server]: Chatflow 42c31352-9bb8-4b35-90fc-53f3fad79de7 added into ChatflowPool
+2024-04-20 13:33:26 [ERROR]: [server]: Error: memory.getChatMessages is not a function
+TypeError: memory.getChatMessages is not a function
+    at RunnableLambda.chat_history [as func] (/home/h/Desktop/Inference_Portal/Flowise/packages/components/dist/nodes/chains/ConversationChain/ConversationChain.js:206:46)
+    at /home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1361:45
+    at MockAsyncLocalStorage.run (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/singletons/index.cjs:10:9)
+    at /home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1359:78
+    at new Promise (<anonymous>)
+    at RunnableLambda._invoke (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1354:16)
+    at RunnableLambda._callWithConfig (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:208:33)
+    at async /home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1276:31
+    at async Promise.all (index 1)
+    at async RunnableMap.invoke (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1275:13)
+    at async RunnableSequence.invoke (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1066:33)
+    at async ConversationChain_Chains.run (/home/h/Desktop/Inference_Portal/Flowise/packages/components/dist/nodes/chains/ConversationChain/ConversationChain.js:106:19)
+    at async utilBuildChatflow (/home/h/Desktop/Inference_Portal/Flowise/packages/server/dist/utils/buildChatflow.js:237:15)
+    at async createInternalPrediction (/home/h/Desktop/Inference_Portal/Flowise/packages/server/dist/controllers/internal-predictions/index.js:7:29)
+2024-04-20 13:34:21 [INFO]: ⬆️ POST /api/v1/internal-prediction/42c31352-9bb8-4b35-90fc-53f3fad79de7
+2024-04-20 13:34:21 [ERROR]: [server]: Error: memory.getChatMessages is not a function
+TypeError: memory.getChatMessages is not a function
+    at RunnableLambda.chat_history [as func] (/home/h/Desktop/Inference_Portal/Flowise/packages/components/dist/nodes/chains/ConversationChain/ConversationChain.js:206:46)
+    at /home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1361:45
+    at MockAsyncLocalStorage.run (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/singletons/index.cjs:10:9)
+    at /home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1359:78
+    at new Promise (<anonymous>)
+    at RunnableLambda._invoke (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1354:16)
+    at RunnableLambda._callWithConfig (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:208:33)
+    at async /home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1276:31
+    at async Promise.all (index 1)
+    at async RunnableMap.invoke (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1275:13)
+    at async RunnableSequence.invoke (/home/h/Desktop/Inference_Portal/Flowise/node_modules/.pnpm/@langchain+core@0.1.57/node_modules/@langchain/core/dist/runnables/base.cjs:1066:33)
+    at async ConversationChain_Chains.run (/home/h/Desktop/Inference_Portal/Flowise/packages/components/dist/nodes/chains/ConversationChain/ConversationChain.js:106:19)
+    at async utilBuildChatflow (/home/h/Desktop/Inference_Portal/Flowise/packages/server/dist/utils/buildChatflow.js:237:15)
+    at async createInternalPrediction (/home/h/Desktop/Inference_Portal/Flowise/packages/server/dist/controllers/internal-predictions/index.js:7:29)
+2024-04-20 13:34:35 [INFO]: 🖊 PUT /api/v1/chatflows/42c31352-9bb8-4b35-90fc-53f3fad79de7
+2024-04-20 13:34:35 [INFO]: [server]: Chatflow 42c31352-9bb8-4b35-90fc-53f3fad79de7 updated inSync=false in ChatflowPool
+2024-04-20 13:34:38 [INFO]: ⬆️ POST /api/v1/internal-prediction/42c31352-9bb8-4b35-90fc-53f3fad79de7
+2024-04-20 13:34:38 [INFO]: [server]: Chatflow 42c31352-9bb8-4b35-90fc-53f3fad79de7 added into ChatflowPool
+2024-04-20 13:35:48 [INFO]: Shutting down Flowise...

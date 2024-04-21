@@ -1,0 +1,75 @@
+{
+  "name": "device-detector-js",
+  "version": "3.0.3",
+  "description": "A javascript port of Matomo device-detector",
+  "homepage": "https://github.com/etienne-martin/device-detector-js#readme",
+  "keywords": [
+    "user-agent",
+    "parsing",
+    "parser",
+    "device",
+    "mobile",
+    "tablet",
+    "phone",
+    "desktop",
+    "os",
+    "bot",
+    "browser",
+    "detector"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": {
+    "name": "Etienne Martin",
+    "url": "http://etiennemartin.ca/"
+  },
+  "contributors": [
+    "Alex Beauchemin <alexbeauchemin01@gmail.com> (https://github.com/AlexBeauchemin)",
+    "Ayan Dey <ayand04@gmail.com> (https://github.com/whimsicaldreamer)",
+    "Julien Maitrehenry <julien.maitrehenry@me.com> (https://github.com/jmaitrehenry)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/etienne-martin/device-detector-js"
+  },
+  "bugs": {
+    "url": "https://github.com/etienne-martin/device-detector-js/issues"
+  },
+  "engines": {
+    "node": ">= 8.11.4"
+  },
+  "license": "LGPL-3.0",
+  "scripts": {
+    "dev": "tsc --pretty --watch",
+    "predev": "yarn fixtures",
+    "fixtures": "sh load-fixtures.sh",
+    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "pretest": "yarn build",
+    "test": "jest src --coverage --verbose",
+    "test:watch": "jest src --coverage --verbose --watch",
+    "coverage": "coveralls < ./coverage/lcov.info",
+    "prebuild": "rm -rf dist/ && yarn lint",
+    "build": "tsc --pretty"
+  },
+  "napa": {
+    "device-detector": "https://github.com/matomo-org/device-detector#4.2.3"
+  },
+  "napa-config": {
+    "cache": false
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "22.2.3",
+    "@types/node": "10.9.2",
+    "coveralls": "3.0.2",
+    "glob": "^7.1.6",
+    "jest": "22.4.4",
+    "js-yaml": "3.13.1",
+    "napa": "3.0.0",
+    "ts-jest": "22.4.6",
+    "tslint": "5.11.0",
+    "tslint-config-prettier": "1.15.0",
+    "tslint-eslint-rules": "4.1.1",
+    "typescript": "3.7.3"
+  }
+}

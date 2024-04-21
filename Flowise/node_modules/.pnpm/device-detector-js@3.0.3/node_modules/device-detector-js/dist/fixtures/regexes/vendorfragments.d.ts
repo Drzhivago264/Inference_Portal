@@ -1,0 +1,15 @@
+export declare const Dell: string[];
+export declare const Acer: string[];
+export declare const Sony: string[];
+export declare const Asus: string[];
+export declare const Samsung: string[];
+export declare const Lenovo: string[];
+export declare const Toshiba: string[];
+export declare const Medion: string[];
+export declare const MSI: string[];
+export declare const Gateway: string[];
+export declare const Fujitsu: string[];
+export declare const Compaq: string[];
+export declare const HP: string[];
+export declare const Hyrican: string[];
+export declare const Ordissimo: string[];
