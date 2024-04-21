@@ -3,7 +3,10 @@
 from django.contrib import admin
 from decouple import config
 from django.urls import include, path
-from apikey import views
+from apikey.views.information import (handler_403, 
+                                      handler_404, 
+                                      handler_429, 
+                                      handler_500)
 from .api import api
 
 urlpatterns = [
@@ -14,7 +17,7 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
 ]
 
-handler403 = views.handler_403
-handler404 = views.handler_404
-handler429 = views.handler_429
-handler500 = views.handler_500
+handler403 = handler_403
+handler404 = handler_404
+handler429 = handler_429
+handler500 = handler_500

@@ -1,0 +1,361 @@
+{% extends "component_html/base.html" %}
+{% block head %}
+<script src="/static/js/jquery.min.js"></script>
+<link rel="stylesheet" href="/static/css/dataTables.dataTables.css" />
+<script src="/static/js/dataTables.js"></script>
+<script src="/static/js/dataTables.buttons.js"></script>
+<script src="/static/js/buttons.dataTables.js"></script>
+<script src="/static/js/jszip.min.js"></script>
+<script src="/static/js/pdfmake.min.js"></script>
+<script src="/static/js/vfs_fonts.js"></script>
+<script src="/static/js/buttons.html5.min.js"></script>
+<script src="/static/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/select/2.0.1/js/dataTables.select.min.js"></script>
+<link rel="stylesheet" href="/static/css/chatbot.css">
+<script src="/static/js/PapaParse-5.0.2/papaparse.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.colVis.min.js"></script>
+{% endblock head %}
+
+{% block content%}
+<style>
+    html,
+    body {
+        min-width: 1200px !important;
+    }
+
+    main {
+        min-width: 1200px;
+        font-size: 16px;
+    }
+
+    input {
+        font-size: 16px !important;
+    }
+</style>
+<main class="grid" style="grid-template-columns: 80% 17%;">
+    <div class="grid" style="grid-template-columns: 20% 40% 35%;">
+        <div class="container  pico">
+            <h3>Toolbox</h3>
+            <input type="radio" class="tool" name="tool" value="paraphrase">Paraphase<br>
+            <input type="radio" class="tool" name="tool" value="sentiment">Predict Sentiment<br><br>
+            <div class="grid">
+                <div class="container" style="white-space: nowrap!important;">
+                    <input type="radio" class="tool" name="tool" value="summary" checked="checked">Summary
+                </div>
+
+                <input type="number" style="height: 35px;" name="number_of_word" min="10" max="500" value="">
+
+            </div>
+            <input type="radio" class="tool" name="tool" value="emotion">Predict Emotion<br><br>
+            <textarea class="emotion_list"
+                name="emotion_list">sadness, joy, love, anger, fear, surprise, neutral</textarea><br>
+            <input type="radio" class="tool" name="tool" value="topic">Topic Classification<br><br>
+            <textarea class="topic_list" name="topic_list"></textarea><br>
+            <input type="radio" class="tool" name="tool" value="restyle">Restyle<br><br>
+            <textarea class="emotion_list" name="style_list">sadness, serious</textarea><br>
+
+        </div>
+        <div class="container">
+            <div class="pico">
+                <h3>Data Table</h3>
+                <label for="fileSelect">Input your spreadsheet:</label>
+                <input id="fileSelect" type="file"
+                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+            </div>
+            <div id="csv-preview"></div>
+        </div>
+        <div class="container pico">
+            <div id="chat-log">
+                <div class="message_log_container"
+                    style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">
+                    <span> Input your API Key:
+                        <input type="password" style="width: 20ch; height: 20px;" id="api_key">
+                    </span>
+                </div>
+                <div id="chat-log_">
+
+                </div>
+
+            </div>
+            <hr>
+            <div class="input-wrapper">
+                <textarea id="chat-message-input" name="message"></textarea>
+                <button id="chat-message-submit">Send</button>
+            </div>
+            {{ name|json_script:"name" }}
+            {{ key|json_script:"key" }}
+        </div>
+
+    </div>
+    <div class="container  pico">
+        <h3> Available Models </h3>
+        {% for llm in llms %}
+        {% if llm.name == 'gpt-4' %}
+        <input type="radio" class="checkbox" name="model" value="{{llm.name}}" checked="checked"> {{llm.name}}<br>
+        {% else %}
+        <input type="radio" class="checkbox" name="model" value="{{llm.name}}"> {{llm.name}}<br>
+        {% endif %}
+        {% endfor %}
+        <h3> Parameters </h3>
+
+        <small><i>NOTE: If the default parameters does not work for you, you can adjust them here.</i></small> <br>
+        <small><i>NOTE: In order to better understand these parameters, refer to <a
+                    href='https://huggingface.co/blog/how-to-generate'> This Blog </a> or <a
+                    href='https://github.com/vllm-project/vllm/blob/main/vllm/sampling_params.py'> This Code. </a>
+            </i></small>
+        <hr>
+        <label for="top_p">Top_p:</label>
+        <div class="grid" style="grid-template-columns: 80% 20%;">
+            <input type="range" step=".001" name="top_p" min="0.01" max="1" value="0.73"
+                oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
+            <output>0.73</output>
+        </div>
+
+        <label for="max_tokens">Max_tokens:</label>
+        <div class="grid" style="grid-template-columns: 80% 20%;">
+            <input type="range" step="1" name="max_tokens" min="1" max="4096" value="512"
+                oninput="this.nextElementSibling.value = this.value">
+            <output>512</output>
+        </div>
+
+
+        <label for="temperature">Temperature:</label>
+        <div class="grid" style="grid-template-columns: 80% 20%;">
+            <input type="range" step=".001" name="temperature" min="0" max="1.0" value="0.72"
+                oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
+            <output>0.72</output>
+        </div>
+        <label for="frequency_penalty">Frequency penalty:</label>
+        <div class="grid" style="grid-template-columns: 80% 20%;">
+            <input type="range" step=".001" name="frequency_penalty" min="-2.0" max="2.0" value="0"
+                oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
+            <output>0</output>
+        </div>
+        <label for="presence_penalty">Presence penalty:</label>
+        <div class="grid" style="grid-template-columns: 80% 20%;">
+            <input type="range" step=".001" name="presence_penalty" min="-2.0" max="2.0" value="0"
+                oninput="this.nextElementSibling.value = parseFloat(this.value).toFixed(2)">
+            <output>0</output>
+        </div>
+
+    </div>
+</main>
+<script>
+    var column_data = {}
+    if (document.getElementById("fileSelect").value != "") {
+        Papa.parse(document.getElementById("fileSelect").files[0], {
+            complete: function (result) {
+                if (result.data && result.data.length > 0) {
+                    htmlTableGenerator(result.data)
+                }
+            }
+        });
+    }
+
+    document.getElementById('fileSelect').addEventListener(
+        'change', preview_csv, false
+    );
+
+
+    function preview_csv(e) {
+
+        if (!e.target.files.length) {
+            alert("Please choose a csv file...");
+            return
+        }
+
+        const file = e.target.files[0];
+
+        // parse file then pass to html generator
+        Papa.parse(file, {
+            complete: function (result) {
+                if (result.data && result.data.length > 0) {
+                    htmlTableGenerator(result.data)
+                }
+            }
+        });
+    }
+    function htmlTableGenerator(content) {
+        let csv_preview = document.getElementById('csv-preview');
+
+        let html = '<table id="table" class="table table-condensed table-hover table-striped" style="width:100%">';
+
+        if (content.length == 0 || typeof (content[0]) === 'undefined') {
+            return null
+        } else {
+            const header = content[0];
+            const data = content.slice(1);
+
+            html += '<thead>';
+            html += '<tr>';
+            header.forEach(function (colData) {
+                html += '<th>' + colData + '</th>';
+            });
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+
+            data.forEach(function (row) {
+                if (header.length === row.length) {
+                    html += '<tr>';
+                    row.forEach(function (colData) {
+                        html += '<td>' + colData + '</td>';
+                    });
+                    html += '</tr>';
+                }
+            });
+
+            html += '</tbody>';
+            html += '</table>';
+
+            // insert table element into csv preview
+            csv_preview.innerHTML = html;
+
+            // initialise DataTable
+            initDataTable();
+        }
+    }
+   
+    function initDataTable() {
+        var table = $('#table').dataTable({
+            select: true,
+            scrollX: true,
+            scrollY: (window.innerHeight / 2) + "px",
+            dom: 'Bfrtip',
+            buttons: [
+                'colvis',
+                {
+                    extend: 'csv',
+                    text: 'Download CSV',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                },
+
+            ]
+        })
+
+    $('#table tbody').on('click', 'tr td', function (e) {
+
+        column_index = table.api().cell(this).index().column;
+        column_data = table.api().column(column_index).data()
+        console.log(column_data)
+    });
+    }
+
+
+    const key = JSON.parse(document.getElementById('key').textContent);
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    const chatSocket = new WebSocket(
+        ws_scheme
+        + '://'
+        + window.location.host
+        + '/ws/{{destination}}/'
+        + key
+        + '/'
+    );
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.role == 'Human') {
+            document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: right;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + " (" + data.role + "-" + data.time + ") " + data.message.replace(/\n/g, "<br>") + '</span></div> ');
+        }
+        else if (data.holder) {
+            document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" id =' + data.holderid + ' style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.role + "-" + data.time + ": " + ' <span id="thinking" aria-busy="true"> Thinking time...</span></span></div> ');
+        }
+        else if (data.stream_id) {
+            thinking = document.getElementById("thinking");
+            if (thinking != null) {
+                thinking.remove();
+            }
+            document.getElementById(data.stream_id).innerHTML += data.message.replace(/\n/g, "<br>")
+        }
+        else {
+            document.querySelector('#chat-log_').innerHTML += ('<div class="message_log_container" style="text-align: left;word-wrap: break-word; overflow-wrap: break-word;">  <span>' + data.message.replace(/\n/g, "<br>") + " (" + data.role + "-" + data.time + ") " + '</span></div> ');
+
+        }
+        logTa = document.getElementById("chat-log")
+        logTa.scrollTop = logTa.scrollHeight;
+
+    };
+
+    chatSocket.onclose = function (e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+    var textarea = document.getElementById("chat-message-input");
+    var textarea_submit_button = document.querySelector('#chat-message-submit')
+    textarea.focus();
+    textarea.onkeyup = function (e) {
+        if (e.keyCode === 13 && !e.shiftKey) {
+            textarea_submit_button.click();
+
+        }
+    };
+    var textarea_size_litmit = 300;
+    textarea.oninput = function () {
+        textarea.style.height = "";
+        textarea.style.height = Math.min(textarea.scrollHeight, textarea_size_litmit) + "px";
+    };
+    function get_value_by_name(inputElements) {
+        for (var i = 0; inputElements[i]; ++i) {
+            if (inputElements[i].checked) {
+                return inputElements[i].value;
+            }
+        }
+    }
+    textarea_submit_button.onclick = function (e) {
+        textarea.style.height = "100px";
+        var choosen_models = null;
+        var inputElements = document.getElementsByClassName('checkbox');
+        choosen_models = get_value_by_name(inputElements)
+
+        var toolElements = document.getElementsByClassName('tool');
+        tool = get_value_by_name(toolElements)
+
+        const api_key = document.getElementById('api_key').value
+        const emotion_list = document.getElementsByName("emotion_list")[0].value
+        if (emotion_list === "") {
+            emotion_list = null
+        }
+        topic_list = document.getElementsByName("topic_list")[0].value
+        if (topic_list === "") {
+            topic_list = null
+        }
+        style_list = document.getElementsByName("style_list")[0].value
+        if (style_list === "") {
+            style_list = null
+        }
+        number_of_word = document.getElementsByName("number_of_word")[0].value
+        if (number_of_word === "") {
+            number_of_word = null
+        }
+        const top_p = document.getElementsByName("top_p")[0].value
+
+        const max_tokens = document.getElementsByName("max_tokens")[0].value
+        const temperature = document.getElementsByName("temperature")[0].value
+
+        const frequency_penalty = document.getElementsByName("frequency_penalty")[0].value
+        const presence_penalty = document.getElementsByName("presence_penalty")[0].value
+        const message = textarea.value;
+        if (message.trim() !== "") {
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'tool': tool,
+                'key': api_key,
+                'choosen_models': choosen_models,
+                'role': 'Human',
+                'top_p': parseFloat(top_p).toFixed(2),
+                'max_tokens': max_tokens,
+                'frequency_penalty': parseFloat(frequency_penalty).toFixed(2),
+                'presence_penalty': parseFloat(presence_penalty).toFixed(2),
+                'temperature': parseFloat(temperature).toFixed(2),
+                'emotion_list': emotion_list,
+                'topic_list': topic_list,
+                'style_list': style_list,
+                'number_of_word': number_of_word
+
+            }));
+            textarea.value = '';
+        }
+    };
+</script>
+{% endblock content%}
