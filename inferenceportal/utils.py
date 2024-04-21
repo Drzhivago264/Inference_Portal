@@ -1,5 +1,5 @@
-from apikey.util import constant
-from apikey.models import InferenceServer, LLM, PromptResponse, APIKEY
+from server.util import constant
+from server.models import InferenceServer, LLM, PromptResponse, APIKEY
 from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async
 from django.core.cache import cache

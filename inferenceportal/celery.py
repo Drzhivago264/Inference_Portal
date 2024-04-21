@@ -3,8 +3,8 @@ import os
 from celery import Celery
 from django.conf import settings
 import json
-import apikey
-from apikey.util.constant import *
+import server
+from server.util.constant import *
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inferenceportal.settings')
 
@@ -18,18 +18,18 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 app.conf.beat_schedule = {
     'periodically_monitor_EC2_instance': {
-        'task': 'apikey.celery_tasks.periodically_monitor_EC2_instance',      
+        'task': 'server.celery_tasks.periodically_monitor_EC2_instance',      
         'schedule': MONITOR_ITERVAL,
         'options': {'queue': 'periodic'}
     },
     'periodically_shutdown_EC2_instance': {
-        'task': 'apikey.celery_tasks.periodically_shutdown_EC2_instance',      
+        'task': 'server.celery_tasks.periodically_shutdown_EC2_instance',      
         'schedule': SHUTDOWN_INTERVAL,
         'options': {'queue': 'periodic'}
 
     },
     'periodically_update_xrm_prince': {
-        'task': 'apikey.celery_tasks.update_crypto_rate',      
+        'task': 'server.celery_tasks.update_crypto_rate',      
         'schedule': XMR_PRICE_INTERVAL,
         'args': (['xmr']),
         'options': {'queue': 'periodic'}
