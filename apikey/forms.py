@@ -12,7 +12,11 @@ class CaptchaForm(forms.Form):
         super (CaptchaForm, self).__init__ (*args, **kwargs) 
 
 class RoomRedirectForm(forms.Form):
-    CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode'),('hotpot', 'Hotpot Mode'), ('toolbox', 'LLM functions')]
+    CHOICES = [('chat','Chat Bot Mode'),
+               ('engineer','Agent Mode'),
+               ('hotpot', 'Hotpot Mode'), 
+               ('toolbox', 'LLM functions'),
+               ('dataanalysis', 'Data Analysis Mode' )]
     room = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES, required=True)
     key = forms.CharField( widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     def clean(self):
@@ -30,7 +34,10 @@ class LogForm(forms.Form):
 class PromptForm(forms.Form):
 
     GENERATION_CHOICES = [('chat','Chat Bot Mode'),('generate','Text Completion')]
-    MODEL_CHOICES = [('Reddit Helper 2.7B','Reddit Helper 2.7B'),('4Chan /Pol 2.7B','Text Completion'),('Mistral Chat 13B', 'Mistral Chat 13B'),('Llama 2 Chat 13B','Llama 2 Chat 13B')]
+    MODEL_CHOICES = [('Reddit Helper 2.7B','Reddit Helper 2.7B'),
+                     ('4Chan /Pol 2.7B','Text Completion'),
+                     ('Mistral Chat 13B', 'Mistral Chat 13B'),
+                     ('Llama 2 Chat 13B','Llama 2 Chat 13B')]
 
     key = forms.CharField(required=True, widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     key_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'placeholder': 'Key Name'}))
