@@ -12,28 +12,32 @@
 
     main {
         min-width: 750px;
+        font-size: 16px;
+    }
+    input{
+        font-size: 16px!important;
     }
 </style>
 <main class="container grid pico" style="grid-template-columns: 75% 23%;">
     <div class="grid" style="grid-template-columns: 30% 65%;">
         <div class="container">
             <h3>Toolbox</h3>
-            <input type="radio" class="tool" name="tool" value="paraphrase"> Paraphase Document<br>
-            <input type="radio" class="tool" name="tool" value="sentiment"> Predict Sentiment<br><br>
+            <input type="radio" class="tool" name="tool" value="paraphrase">Paraphase<br>
+            <input type="radio" class="tool" name="tool" value="sentiment">Predict Sentiment<br><br>
             <div class="grid">
-                <div class="container">
+                <div class="container" style="white-space: nowrap!important;">
                     <input type="radio" class="tool" name="tool" value="summary" checked="checked">Summary
                 </div>
-                <div class="container">
+   
                 <input type="number" style="height: 35px;" name="number_of_word" min="10" max="500" value=""> 
+           
             </div>
-            </div>
-            <input type="radio" class="tool" name="tool" value="emotion"> Predict Emotion<br><br>
+            <input type="radio" class="tool" name="tool" value="emotion">Predict Emotion<br><br>
             <textarea class="emotion_list"
                 name="emotion_list">sadness, joy, love, anger, fear, surprise, neutral</textarea><br>
-            <input type="radio" class="tool" name="tool" value="topic"> Topic Classification<br><br>
+            <input type="radio" class="tool" name="tool" value="topic">Topic Classification<br><br>
             <textarea class="topic_list" name="topic_list"></textarea><br>
-            <input type="radio" class="tool" name="tool" value="restyle"> Restyle Document<br><br>
+            <input type="radio" class="tool" name="tool" value="restyle">Restyle<br><br>
             <textarea class="emotion_list" name="style_list">sadness, serious</textarea><br>
 
         </div>

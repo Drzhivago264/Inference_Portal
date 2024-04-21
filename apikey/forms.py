@@ -12,8 +12,7 @@ class CaptchaForm(forms.Form):
         super (CaptchaForm, self).__init__ (*args, **kwargs) 
 
 class RoomRedirectForm(forms.Form):
-    #CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode')]
-    CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode'),('hotpot', 'Hotpot Mode'), ('toolbox', 'LLM backend functions')]
+    CHOICES = [('chat','Chat Bot Mode'),('engineer','Agent Mode'),('hotpot', 'Hotpot Mode'), ('toolbox', 'LLM functions')]
     room = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES, required=True)
     key = forms.CharField( widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     def clean(self):
@@ -26,7 +25,7 @@ class RoomRedirectForm(forms.Form):
 class LogForm(forms.Form):
     key_ = forms.CharField( widget=forms.PasswordInput(attrs={'placeholder': 'Key'}))
     key_name = forms.CharField( widget=forms.TextInput(attrs={'placeholder': 'Key Name'}))
-    captcha = CaptchaField(label="Captcha(Math): ")
+    captcha = CaptchaField()
     
 class PromptForm(forms.Form):
 
