@@ -33,7 +33,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apikey',
+    'rest_framework',
+    'corsheaders',
+    'server',
     'django_bleach',
     'captcha',
     "rest_framework_api_key",
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     'tinymce',
     'mptt', #tree graph in sql
 ]
+CORS_ORIGIN_ALLOW_ALL = True
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -79,7 +82,7 @@ ROOT_URLCONF = 'inferenceportal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["inferenceportal/apikey/templates",],
+        'DIRS': ["inferenceportal/server/templates",],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

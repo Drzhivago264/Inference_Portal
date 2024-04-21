@@ -3,14 +3,14 @@
 from django.contrib import admin
 from decouple import config
 from django.urls import include, path
-from apikey.views.information import (handler_403, 
+from server.views.information import (handler_403, 
                                       handler_404, 
                                       handler_429, 
                                       handler_500)
 from .api import api
 
 urlpatterns = [
-    path("", include("apikey.urls")),
+    path("", include("server.urls")),
     path(f"{config('ADMIN_PATH')}/", admin.site.urls),
     path('captcha/', include('captcha.urls')),
     path("api/", api.urls),
