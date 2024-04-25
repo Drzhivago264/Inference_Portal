@@ -4,12 +4,22 @@ from server.models import (
     InferenceServer,
     Article,
 )
+from rest_framework import viewsets
+from server.serializer import ArticleSerializer
+ 
 from django.http import HttpResponse
 from django.http import (
     HttpRequest,
     HttpResponse,
 )
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+@api_view(['GET'])
+def article_api(request, name, a_type):
+    page_content = Article.objects.get(name=name, a_type=a_type)
+    serializer = ArticleSerializer(page_content)
+    return Response({'article': serializer.data})
 
 # @cache_page(60*15)
 def index(request: HttpRequest) -> HttpResponse:

@@ -5,7 +5,8 @@ from server.views.contact import contact
 from server.views.information import (index, 
                                       model_infor,
                                       manual,
-                                      frankenstein
+                                      frankenstein,
+                                      article_api
                                       )
 from server.views.key_purchase import (StripeWebhookView,
                                        generate_key,
@@ -25,7 +26,11 @@ from server.views.room_view import (Room, agent_select, prompt)
 app_name = "server"
 
 urlpatterns = [
-    path('hello-webpack/', TemplateView.as_view(template_name='html/webpack_test.html')),
+    path('frontend-testing', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend-testing/manual', TemplateView.as_view(template_name='frontend_index.html')),
+
+    path('frontend-api/article/<str:name>/<str:a_type>',  article_api , name='information'),
+
     path("", index, name="index"),
     path("model_infor/", model_infor, name="model_infor"),    
     path("manual/", manual, name="manual"),

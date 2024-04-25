@@ -82,7 +82,7 @@ ROOT_URLCONF = 'inferenceportal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["inferenceportal/server/templates",],
+        'DIRS': ["inferenceportal/server/templates", "frontend/templates",],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
