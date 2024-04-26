@@ -5,7 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Button as BaseButton } from '@mui/base/Button';
-import { useNavigate, redirect, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Dropdown } from '@mui/base/Dropdown';
 import { Menu } from '@mui/base/Menu';
 import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
@@ -117,8 +117,8 @@ const MenuButton = styled(BaseMenuButton)(
   `,
 );
 
-export const NavLink = styled(Link)`
-    color: #808080;
+const NavLink = styled(Link)`
+    color: white;
     display: flex;
     align-items: center;
     text-decoration: none;
@@ -163,7 +163,7 @@ const Button = styled(BaseButton)(
   `,
 );
 
-const pages = ['Get Key', 'Contact'];
+const pages = ['Get & Credit', 'Contact'];
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -185,26 +185,23 @@ function ResponsiveAppBar() {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="sticky" sx={{ bgcolor: "black" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-
+          
           <Typography
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="/"
             sx={{
               mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
               fontWeight: 700,
-              letterSpacing: '.3rem',
               color: 'inherit',
               textDecoration: 'none',
             }}
           >
-            INFERENCE
+            Inference
           </Typography>
         
                         
@@ -212,46 +209,42 @@ function ResponsiveAppBar() {
               <MenuButton>Information</MenuButton>
               <Menu slots={{ listbox: Listbox }}>
 
-              <MenuItem> <NavLink   to="/frontend-testing"> Introduction</NavLink></MenuItem> 
-                <MenuItem> <NavLink   to="/frontend-testing/manual"> Manual</NavLink></MenuItem>  
+              <MenuItem> <NavLink   to="/frontend">Introduction</NavLink></MenuItem> 
+              <MenuItem> <NavLink   to="/frontend/manual">Manual</NavLink></MenuItem>  
+              <MenuItem> <NavLink   to="/frontend/model">Model</NavLink></MenuItem>  
               
               </Menu>
           </Dropdown>
           <Dropdown>
               <MenuButton>Modes</MenuButton>
               <Menu slots={{ listbox: Listbox }}>
-                <MenuItem >Chat</MenuItem>
+                <MenuItem ><NavLink   to="/frontend/hub">Chat & Log</NavLink></MenuItem>
                 <MenuItem >API</MenuItem>
               </Menu>
           </Dropdown>
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            INFERENCE
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
+  
+
               <Button
-                key={page}
+                key= 'key-management'
+                href="/frontend/key-management"
                 onClick={handleCloseNavMenu}
+                sx={{
+                  textDecoration: 'none',
+                }}
               >
-                {page}
+                Key & Credit
               </Button>
-            ))}
-          </Box>
+
+              <Button
+                key= 'contact'
+                href="/frontend/contact"
+                onClick={handleCloseNavMenu}
+                sx={{
+                  textDecoration: 'none',
+                }}
+              >
+                Contact
+              </Button>
 
 
         </Toolbar>
