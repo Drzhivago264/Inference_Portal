@@ -5,7 +5,9 @@ from server.models import (
     Article,
 )
 from rest_framework import viewsets
-from server.serializer import ArticleSerializer
+from server.serializer import (ArticleSerializer, 
+                               ModelSerializer, 
+                               ServerSerializer)
  
 from django.http import HttpResponse
 from django.http import (
@@ -20,6 +22,14 @@ def article_api(request, name, a_type):
     page_content = Article.objects.get(name=name, a_type=a_type)
     serializer = ArticleSerializer(page_content)
     return Response({'article': serializer.data})
+
+@api_view(['GET'])
+def model_api(request):
+    servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
+    models =  LLM.objects.filter(agent_availability=False)
+    serializer_server = ServerSerializer(servers, many=True)
+    serializer_model = ModelSerializer(models, many=True )
+    return Response({"servers": serializer_server.data, "models": serializer_model.data})
 
 # @cache_page(60*15)
 def index(request: HttpRequest) -> HttpResponse:

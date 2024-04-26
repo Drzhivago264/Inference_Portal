@@ -1,15 +1,15 @@
 import * as React from 'react';
 import Container from '@mui/material/Container';
-
-import Box from '@mui/material/Box';
 import ResponsiveAppBar from './navbar';
 import Footer from './footer';
 import Manual from './manual';
 import Information from './introduction';
+import ModelInfor from './model';
+import Hub from './redirect';
+import Key from './key_management';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-
 import {
   BrowserRouter as Router,
   Routes,
@@ -36,8 +36,11 @@ export default function App() {
       <Router>
         <ResponsiveAppBar />
         <Routes>
-          <Route exact path="/frontend-testing" element={<Information />} />
-          <Route path="/frontend-testing/manual" element={<Manual />} />
+          <Route exact path="/frontend" element={<Information />} />
+          <Route path="/frontend/manual" element={<Manual />} />
+          <Route path="/frontend/model" element={<ModelInfor />} />
+          <Route path="/frontend/key-management" element={<Key />} />
+          <Route path="/frontend/hub" element={<Hub />} />
         </Routes>
       </Router>
       <Container maxWidth={false} disableGutters>

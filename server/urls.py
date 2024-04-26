@@ -6,7 +6,8 @@ from server.views.information import (index,
                                       model_infor,
                                       manual,
                                       frankenstein,
-                                      article_api
+                                      article_api,
+                                      model_api
                                       )
 from server.views.key_purchase import (StripeWebhookView,
                                        generate_key,
@@ -21,15 +22,21 @@ from server.views.key_purchase import (StripeWebhookView,
                                        ProductDetailView,
                                        CreateStripeCheckoutSessionView
                                        ) 
-from server.views.room_view import (Room, agent_select, prompt)
+from server.views.room_view import (Room, agent_select, prompt, hub_redirect_api)
 
 app_name = "server"
 
 urlpatterns = [
-    path('frontend-testing', TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend-testing/manual', TemplateView.as_view(template_name='frontend_index.html')),
-
+    path('frontend', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/manual', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/model', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/hub', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/key-management', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/contact', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend-api/article/<str:name>/<str:a_type>',  article_api , name='information'),
+    path('frontend-api/model/',  model_api , name='model'),
+    path('frontend-api/hub-redirect',  hub_redirect_api , name='model'),
+
 
     path("", index, name="index"),
     path("model_infor/", model_infor, name="model_infor"),    
