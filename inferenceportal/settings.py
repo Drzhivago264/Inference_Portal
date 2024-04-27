@@ -174,12 +174,18 @@ REST_FRAMEWORK = {
 
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
+        'rest_framework.throttling.UserRateThrottle',
+        'server.api_throttling_rates.KeyCreateRateThrottle',
+        'server.api_throttling_rates.CreditCheckRateThrottle',
+        'server.api_throttling_rates.XMRConfirmationRateThrottle'
     ],
 
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/s',
-        'user': '5/s'
+        'anon': '20/s',
+        'user': '20/s',
+        'create_key': '100/day',
+        'check_key': '100/hour',
+        'confirm_monero': '100/hour'
     }
 
 }

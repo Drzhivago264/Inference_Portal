@@ -14,16 +14,18 @@ from django.http import (
     HttpRequest,
     HttpResponse,
 )
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
-
+from rest_framework.throttling import AnonRateThrottle
 @api_view(['GET'])
+@throttle_classes([AnonRateThrottle])
 def article_api(request, name, a_type):
     page_content = Article.objects.get(name=name, a_type=a_type)
     serializer = ArticleSerializer(page_content)
     return Response({'article': serializer.data})
 
 @api_view(['GET'])
+@throttle_classes([AnonRateThrottle])
 def model_api(request):
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
     models =  LLM.objects.filter(agent_availability=False)

@@ -30,9 +30,11 @@ from django.http import (
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+from rest_framework.throttling import AnonRateThrottle
+from rest_framework.decorators import api_view, throttle_classes
 from server.serializer import RedirectSerializer
 @api_view(['POST'])
+@throttle_classes([AnonRateThrottle])
 def hub_redirect_api(request):
     serializer = RedirectSerializer(data=request.data)
     

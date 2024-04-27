@@ -6,7 +6,8 @@ import Manual from './manual';
 import Information from './introduction';
 import ModelInfor from './model';
 import Hub from './redirect';
-import Key from './key_management';
+import KeyManagement from './key_management';
+import Contact from './contact';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -39,8 +40,9 @@ export default function App() {
           <Route exact path="/frontend" element={<Information />} />
           <Route path="/frontend/manual" element={<Manual />} />
           <Route path="/frontend/model" element={<ModelInfor />} />
-          <Route path="/frontend/key-management" element={<Key />} />
+          <Route path="/frontend/key-management" element={<KeyManagement />} />
           <Route path="/frontend/hub" element={<Hub />} />
+          <Route path="/frontend/contact" element={<Contact />} />
         </Routes>
       </Router>
       <Container maxWidth={false} disableGutters>
