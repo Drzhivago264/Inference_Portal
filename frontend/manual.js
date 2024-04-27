@@ -33,12 +33,10 @@ function Manual() {
         position: sticky;
         display: inline-block;
         top: 100px;
+    
         `;
 
-    const BareLink = styled(Link)`
-        text-decoration: none;
-        color: white;
-        `;
+
     const [intro, setMessage] = useState('');
     const [inference, setMessage_inference] = useState('');
     const [behavior, setMessage_behavior] = useState('');
@@ -71,48 +69,44 @@ function Manual() {
                 gap={4}
                 p={2}
             >
-            <title>Manual</title>
-            <Grid container spacing={2}>
-                <Grid item md={4} lg={3}>
-                    <StickyBox sx={{ display: { xs: 'none', sm: 'none', md:'block' } }}>
-                        <h3>Content:</h3>
-                        <List>
-                            <ListItemButton><BareLink style={{ textDecoration: 'none' }} href="#1">1. Setting Up Your API Key</BareLink> </ListItemButton>
+                <title>Manual</title>
+                <Grid container spacing={2}>
+                    <Grid item md={4} lg={3}>
+                  
+                        <StickyBox sx={{ display: { xs: 'none', sm: 'none', md: 'block',  p: 1, border: '1px solid grey',  borderRadius: 5,  } }}>
 
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#1.1">1.1 Creating a New API Key</BareLink> </ListItemButton>
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#1.2">1.2 Making API Request</BareLink> </ListItemButton>
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#1.3">1.3 Edit or Delete API Key</BareLink></ListItemButton>
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#1.4">1.4 API Usage Report</BareLink></ListItemButton>
+                            <List dense={true}
+                                    subheader={<ListSubheader>Content</ListSubheader>}>
+
+                                <ListItemButton  component={Link} to='#1'> 1. Setting Up Your API Key </ListItemButton>
+                                <ListItemButton component={Link} to='#1.1' sx={{ pl: 4 }}>1.1 Creating a New API Key</ListItemButton>
+                                <ListItemButton component={Link} to='#1.2' sx={{ pl: 4 }}>1.2 Making API Request</ListItemButton>
+                                <ListItemButton component={Link} to='#1.3' sx={{ pl: 4 }}>1.3 Edit or Delete API Key</ListItemButton>
+                                <ListItemButton component={Link} to='#1.4' sx={{ pl: 4 }}>1.4 API Usage Report</ListItemButton>
+                                <ListItemButton component={Link} to='#2' >2. Credit & Authentication</ListItemButton>
+                                <ListItemButton component={Link} to='#2.1' sx={{ pl: 4 }}>2.1 Payment Methods</ListItemButton>
+                                <ListItemButton component={Link} to='#2.2' sx={{ pl: 4 }}>2.2 Cost Calculation</ListItemButton>
+                                <ListItemButton component={Link} to='#2.3' sx={{ pl: 4 }}>2.3 Authentication</ListItemButton>
+                                <ListItemButton component={Link} to='#3'>3. Inference Modes</ListItemButton>
+                                <ListItemButton component={Link} to='#3.1' sx={{ pl: 4 }}>3.1 API Endpoints</ListItemButton>
+                                <ListItemButton component={Link} to='#3.2' sx={{ pl: 4 }}>3.2 Chat Bot Mode</ListItemButton>
+                                <ListItemButton component={Link} to='#3.3' sx={{ pl: 4 }}>3.3 Engineering Mode</ListItemButton>
+                                <ListItemButton component={Link} to='#4'>4. Website Behaviors</ListItemButton>
+                            </List>
+
+                        </StickyBox>
+            
+                    </Grid>
+                    <Grid item md={8} lg={9}>
+                        <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
+                        <div dangerouslySetInnerHTML={{ __html: authentication }} ></div>
+                        <div dangerouslySetInnerHTML={{ __html: inference }} ></div>
+                        <div dangerouslySetInnerHTML={{ __html: behavior }} ></div>
+
+                    </Grid>
 
 
-                            <ListItemButton><BareLink href="#2">2. Credit & Authentication</BareLink></ListItemButton>
-
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#2.1">2.1 Payment Methods</BareLink></ListItemButton>
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#2.2">2.2 Cost Calculation</BareLink></ListItemButton>
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#2.3">2.3 Authentication</BareLink></ListItemButton>
-
-
-                            <ListItemButton><BareLink href="#3">3. Inference Modes</BareLink> </ListItemButton>
-
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#3.1">3.1 API Endpoints</BareLink></ListItemButton>
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#3.2">3.2 Chat Bot Mode</BareLink></ListItemButton>
-                            <ListItemButton sx={{ pl: 4 }}><BareLink href="#3.3">3.3 Engineering Mode</BareLink></ListItemButton>
-
-
-                            <ListItemButton><BareLink href="#4">4. Website Behaviors</BareLink></ListItemButton>
-                        </List>
-                    </StickyBox>
                 </Grid>
-                <Grid item  md={8} lg={9}>
-                    <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
-                    <div dangerouslySetInnerHTML={{ __html: authentication }} ></div>
-                    <div dangerouslySetInnerHTML={{ __html: inference }} ></div>
-                    <div dangerouslySetInnerHTML={{ __html: behavior }} ></div>
-
-                </Grid>
-
-
-            </Grid>
             </Box>
         </Container>
     );

@@ -1,7 +1,7 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from server.views.response_log import LogListJson, response_log, log_redirect
-from server.views.contact import contact
+from server.views.contact import contact, contact_api
 from server.views.information import (index, 
                                       model_infor,
                                       manual,
@@ -20,7 +20,14 @@ from server.views.key_purchase import (StripeWebhookView,
                                        CancelView,
                                        ProductListView,
                                        ProductDetailView,
-                                       CreateStripeCheckoutSessionView
+                                       CreateStripeCheckoutSessionView,
+
+                                       generate_key_api,
+                                       confirm_xmr_payment_api,
+                                       retrive_xmr_wallet_api,
+                                       check_credit_api ,
+                                       stripe_redirect,
+                                       product_list_api
                                        ) 
 from server.views.room_view import (Room, agent_select, prompt, hub_redirect_api)
 
@@ -33,10 +40,18 @@ urlpatterns = [
     path('frontend/hub', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/key-management', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/contact', TemplateView.as_view(template_name='frontend_index.html')),
+
     path('frontend-api/article/<str:name>/<str:a_type>',  article_api , name='information'),
     path('frontend-api/model/',  model_api , name='model'),
-    path('frontend-api/hub-redirect',  hub_redirect_api , name='model'),
+    path('frontend-api/hub-redirect',  hub_redirect_api , name='hub-redirect'),
 
+    path('frontend-api/generate-key',  generate_key_api , name='generate-key'),
+    path('frontend-api/check-credit',  check_credit_api , name='check-key'),
+    path('frontend-api/get-xmr-wallet', retrive_xmr_wallet_api, name='get-xmr-wallet'),
+    path('frontend-api/confirm-xmr-payment', confirm_xmr_payment_api, name='confirm-xmr-payment'),
+    path('frontend-api/stripe-redirect', stripe_redirect, name='stripe-payment'),
+    path('frontend-api/products', product_list_api, name='product-list'),
+    path('frontend-api/send-mail', contact_api, name='product-list'),
 
     path("", index, name="index"),
     path("model_infor/", model_infor, name="model_infor"),    

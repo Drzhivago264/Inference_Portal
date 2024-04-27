@@ -16,7 +16,7 @@
           <h4> Key name: {{ name}} </h4>
           <h4> Key: {{ key}} </h4>
           <div class="card-text">
-            <form action="{% url 'apikey:create-checkout-session' price.id name key%}" method="POST">
+            <form action="{% url 'server:create-checkout-session' price.id name key%}" method="POST">
               {% csrf_token %}
               <button type="submit" class="btn btn-primary">Confirm</button>
             </form>
