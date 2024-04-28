@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import { FormControl, FormLabel } from '@mui/material';
@@ -45,6 +45,7 @@ import SendIcon from '@mui/icons-material/Send';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 660,
     height: 700,
+    overflow: 'auto',
     padding: theme.spacing(2),
     ...theme.typography.body2,
 }));
@@ -54,6 +55,8 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function Chat() {
+    const websocket = useRef(null)
+    const messagesEndRef = useRef(null)
     const [model_objects, setModels] = useState([]);
     const [chat_message, setChatMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
@@ -66,16 +69,14 @@ function Chat() {
     const [temperature, setTemperature] = useState(0.73);
     const [beam, setBeam] = useState(false);
     const [earlystopping, setEarlyStopping] = useState(false);
+    const [bestof, setBestof] = useState(2);
     const [presencepenalty, setPresencePenalty] = useState(0);
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [lengthpenalty, setLengthPenalty] = useState(0);
-    const handleChange = (event) => {
-     
-        if (switch_name == "beam") {
-            setBeam(!event)
-         
-        }
-      };
+    const [usermessage, setUserMessage] = useState("");
+    const [usermessageError, setUserMessageError] = useState(false);
+    const [key, setKey] = useState("");
+    const [keyError, setKeyError] = useState(false);
     useEffect(() => {
         axios.all([
             axios.get('/frontend-api/model'),
@@ -88,57 +89,137 @@ function Chat() {
                 console.log(error);
             });
     }, []);
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
+      }
+    
+      useEffect(() => {
+        scrollToBottom()
+      }, [chat_message]);
 
-    const submitChat = () => {
-        console.log({
-            "top_p": top_p,
-            "top_k": top_k,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "choosen_models": choosen_model,
-            "lengthpenalty": lengthpenalty,
-            "frequencypenalty": frequencypenalty,
-            "presencepenalty": presencepenalty,
-            "beam": beam,
-            "use_memory": usememory,
-            "mode": mode,
-            "early_stopping": earlystopping
-        })
-    }
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     const [searchParams] = useSearchParams();
 
     const type = searchParams.get("type");
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-    const websocket = new W3CWebSocket(ws_scheme + '://127.0.0.1:8000/ws/' + url[url.length - 2] +'/' + url[url.length - 1] + '/');
-    websocket.onopen = () => {
-        console.log("WebSocket Client Connected");
-      };
-    websocket.onmessage = (message) => {
-        const dataFromServer = JSON.parse(message.data);
-        if (dataFromServer) {
-            setChatMessage([
-                ...chat_message,
-                dataFromServer,
-            ])
-         console.log(dataFromServer)
-          };
+        websocket.current = new WebSocket(ws_scheme + '://127.0.0.1:8000/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/');
+        websocket.current.onopen = () => {
+            console.log("WebSocket  Connected");
+        };
+        websocket.current.onclose = () => {
+            console.log("WebSocket  Disconnected");
+        };
+        websocket.current.onmessage = (message) => {
+            const dataFromServer = JSON.parse(message.data);
+            if (dataFromServer) {
+                if (dataFromServer.role == "Human" || dataFromServer.role == "Server" || dataFromServer.holder) {
+                    setChatMessage(chat_message => [
+                        ...chat_message,
+                        dataFromServer,
+                    ])
+
+                }
+
+                else {
+                    console.log(dataFromServer)
+                    thinking = document.getElementById("thinking");
+                    if (thinking != null) {
+                        thinking.remove();
+                    }
+                    document.getElementById(dataFromServer.stream_id).innerHTML += dataFromServer.message
+
+                };
+                var logTa = document.getElementById("chat-log")
+                logTa.scrollTop = logTa.scrollHeight;
+            }
         }
     }, []);
+
+    const handleEnter = (e) => {
+        if (e.key == "Enter" && !e.shiftKey) {
+            submitChat()
+        }
+    }
+    const submitChat = () => {
+
+        if (key == '') {
+            setKeyError(true)
+        }
+        if (usermessage == '') {
+            setUserMessageError(true)
+        }
+        else {
+            var data = {
+                'mode': mode,
+                'message': usermessage,
+                'key': key,
+                'choosen_models': choosen_model,
+                'role': 'Human',
+                'top_k': top_k,
+                'top_p': top_p,
+                'best_of': bestof,
+                'max_tokens': max_tokens,
+                'frequency_penalty': frequencypenalty,
+                'presence_penalty': presencepenalty,
+                'temperature': temperature,
+                'beam': beam,
+                'early_stopping': earlystopping,
+                'length_penalty': lengthpenalty,
+                'include_memory': usememory
+            }
+            websocket.current.send(JSON.stringify(data))
+            setUserMessage("")
+        }
+    }
+
     return (
         <Container maxWidth="lg" sx={{ width: 1200 }}>
             <title>Chat</title>
             <Box m={2}>
                 <Grid container spacing={2}>
                     <Grid item md={8}>
-                        <ChatPaper variant="outlined">
-                        {chat_message.map((mess) => {
-                                        return (
-                                            <div key={mess.time}>{mess.message} ({mess.role} {mess.time})</div> 
-                                        )
-                                    })}
+                        <ChatPaper id={'chat-log'} variant="outlined">
+                            <TextField
+                                margin="normal"
+                                label="Key"
+                                type="password"
+                                size="small"
+                                onChange={e => setKey(e.target.value)}
+                                value={key}
+                                error={keyError}
+                                autoComplete="off"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <KeyIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                            <Stack  spacing={1}>
+                            {chat_message.map((mess) => {
 
+                                if (mess.role == 'Human') {
+                                    return (
+                                        <Paper  ><Box p={2} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper> 
+                                    )
+                                }
+                                else if (mess.holder) {
+                                    return (
+                                        <Paper ><Box p={2} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
+                                    )
+                                }
+                                else if (mess.role == 'Server') {
+                                    return (
+                                        <div className="message_log_container" >  <span> {mess.message.replace(/\n/g, "<br>")} ({mess.role} - {mess.time}) </span></div>
+                                    )
+                                }
+
+                            })}
+                            
+                            </Stack>
+                            <div ref={messagesEndRef}> </div>
                         </ChatPaper>
                         <Box mt={2}>
                             <Paper
@@ -149,11 +230,15 @@ function Chat() {
                                     id="standard-multiline-flexible"
                                     multiline
                                     maxRows={6}
+                                    value={usermessage}
+                                    error={usermessageError}
+                                    onChange={e => setUserMessage(e.target.value)}
+                                    onKeyUp={e => handleEnter(e)}
                                     minRows={4}
                                     variant="standard"
                                     InputProps={{
-                                        endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end"> 
-                                        <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitChat} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
+                                        endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end">
+                                            <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitChat} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
                                     }}
                                 />
 
@@ -267,14 +352,25 @@ function Chat() {
                                     onChange={e => setEarlyStopping(e.target.checked)}
                                     value={earlystopping}
                                 />} label="Early Stopping: " />
-                                <Typography gutterBottom>Length penalty: {lengthpenalty}</Typography>
+                                <Typography gutterBottom>Best_of: {bestof}</Typography>
                                 <Slider
-                                    onChange={e => setLengthPenalty(e.target.value)}
-                                    value={lengthpenalty}
+                                    onChange={e => setBestof(e.target.value)}
+                                    value={bestof}
                                     defaultValue={2}
                                     step={1}
                                     min={1}
                                     max={5}
+                                    valueLabelDisplay="off"
+                                />
+
+                                <Typography gutterBottom>Length penalty: {lengthpenalty}</Typography>
+                                <Slider
+                                    onChange={e => setLengthPenalty(e.target.value)}
+                                    value={lengthpenalty}
+                                    defaultValue={0}
+                                    step={0.01}
+                                    min={-2}
+                                    max={2}
                                     valueLabelDisplay="off"
                                 />
                             </Stack>
