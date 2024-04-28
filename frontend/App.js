@@ -8,6 +8,7 @@ import ModelInfor from './model';
 import Hub from './redirect';
 import KeyManagement from './key_management';
 import Contact from './contact';
+import Chat from './chat';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -42,6 +43,10 @@ export default function App() {
           <Route path="/frontend/model" element={<ModelInfor />} />
           <Route path="/frontend/key-management" element={<KeyManagement />} />
           <Route path="/frontend/hub" element={<Hub />} />
+          <Route path="/frontend/chat/:keyhash" element={<Chat />} />
+          <Route path="/frontend/engineer/:keyhash" element={<Chat />} />
+          <Route path="/frontend/toolbox/:keyhash" element={<Chat />} />
+          <Route path="/frontend/prompt/:keysigned" element={<Chat />} />
           <Route path="/frontend/contact" element={<Contact />} />
         </Routes>
       </Router>

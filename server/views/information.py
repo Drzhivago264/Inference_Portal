@@ -28,10 +28,18 @@ def article_api(request, name, a_type):
 @throttle_classes([AnonRateThrottle])
 def model_api(request):
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
-    models =  LLM.objects.filter(agent_availability=False)
+
+    models_charoom = LLM.objects.all()
+    models_display = [i for i in models_charoom if not i.agent_availability] 
+    models_agent =  [i for i in models_charoom if i.agent_availability] 
     serializer_server = ServerSerializer(servers, many=True)
-    serializer_model = ModelSerializer(models, many=True )
-    return Response({"servers": serializer_server.data, "models": serializer_model.data})
+    serializer_model_display = ModelSerializer(models_display, many=True )
+    serializer_model_chatroom = ModelSerializer(models_charoom, many=True )
+    serializer_model_agent = ModelSerializer(models_agent, many=True )
+    return Response({"servers": serializer_server.data,
+                      "models": serializer_model_display.data, 
+                      'models_agent': serializer_model_agent.data
+                      })
 
 # @cache_page(60*15)
 def index(request: HttpRequest) -> HttpResponse:
