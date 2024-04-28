@@ -37,18 +37,18 @@ from server.serializer import RedirectSerializer
 @throttle_classes([AnonRateThrottle])
 def hub_redirect_api(request):
     serializer = RedirectSerializer(data=request.data)
-    
     if serializer.is_valid():
         signer = Signer()
         key = serializer.data['key']
         destination = serializer.data['destination']
         if destination != "log":
             key_hash = sha256(key.encode('utf-8')).hexdigest()
-            return Response({"redirect_link": f"/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
+            return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
         else:           
-            return Response({"redirect_link": f"/prompt/{signer.sign(key)}"}, status=status.HTTP_200_OK)
+            return Response({"redirect_link": f"/frontend/prompt/{signer.sign(key)}"}, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     
 def agent_select(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     if request.method == "POST":

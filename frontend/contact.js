@@ -210,7 +210,7 @@ function Contact() {
     };
     return (
         <Container maxWidth="lg">
-            <title>Key Management</title>
+            <title>Contact</title>
             <Box
                 my={1}
                 alignItems="center"

@@ -107,7 +107,7 @@ function Hub() {
                 gap={4}
                 p={2}
             >
-                <title>Modes</title>
+                <title>Hub</title>
                 <Grid container spacing={2}>
                     <Grid item md={4} lg={3}>
                         <form autoComplete="off" onSubmit={handleSubmit}>
