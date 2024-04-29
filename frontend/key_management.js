@@ -7,6 +7,7 @@ import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
+import ResponsiveAppBar from './navbar';
 import Alert from '@mui/material/Alert';
 import KeyIcon from '@mui/icons-material/Key';
 import Link from '@mui/material/Link';
@@ -378,212 +379,215 @@ function KeyManagement() {
         );
     };
     return (
-        <Container maxWidth="lg">
+        <Container maxWidth={false} disableGutters>
             <title>Key Management</title>
-            <Box
-                my={1}
-                alignItems="center"
-                gap={4}
-                p={2}
-            >
+            <ResponsiveAppBar />
+            <Container maxWidth="lg">
 
-                <StyledPaper variant="outlined">
-                    <ThemeProvider theme={fontsizetheme}>
-                        <Typography variant="h4" >
-                            <Box sx={{ mb: 2, fontWeight: 'bold' }}>  Get started with Professor Parakeet</Box>
+                <Box
+                    my={1}
+                    alignItems="center"
+                    gap={4}
+                    p={2}
+                >
+                    <StyledPaper variant="outlined">
+                        <ThemeProvider theme={fontsizetheme}>
+                            <Typography variant="h4" >
+                                <Box sx={{ mb: 2, fontWeight: 'bold' }}>  Get started with Professor Parakeet</Box>
+                            </Typography>
+                        </ThemeProvider>
+                        <Typography variant="h5" >
+                            <Box sx={{ lineHeight: 2, fontWeight: '700' }}> 1. Create a Key </Box>
                         </Typography>
-                    </ThemeProvider>
-                    <Typography variant="h5" >
-                        <Box sx={{ lineHeight: 2, fontWeight: '700' }}> 1. Create a Key </Box>
-                    </Typography>
-                    <Typography variant="body1" >
-                        Start by generating a random key by giving it a name.
-                    </Typography>
-                    <Box my={4}>
-                        <form autoComplete="off" onSubmit={handleCreateKey}>
-                            <FormControl defaultValue="" required>
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        <Typography variant="body1" >
+                            Start by generating a random key by giving it a name.
+                        </Typography>
+                        <Box my={4}>
+                            <form autoComplete="off" onSubmit={handleCreateKey}>
+                                <FormControl defaultValue="" required>
+                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                        <TextField
+                                            margin="normal"
+                                            label="Key Name"
+                                            type="text"
+                                            size="small"
+                                            onChange={e => setKeyName(e.target.value)}
+                                            value={keyname}
+                                            error={keynameError}
+                                            autoComplete="off"
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <CreateIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                        <Button size="small" variant="contained" type="submit" endIcon={<LockOpenIcon />}>Create Key</Button>
+                                    </Stack>
+                                </FormControl>
+                            </form>
+                        </Box>
+                        {keycreateresponse && <KeyCreateExport key_={keycreateresponse.key} key_name={keycreateresponse.key_name} payment_id={keycreateresponse.payment_id} integrated_wallet={keycreateresponse.integrated_wallet} />}
+                        {keycreateerror && <ErrorAlert error={keycreateerror} />}
+                        <Divider></Divider>
+                        <Typography variant="h5" >
+                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>2. Add credit to your key</Box>
+                        </Typography>
+                        <Typography variant="body1"  >
+                            We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
+                            - To pay by Stripe, include the Key and Key Name in the form below and click Stripe. <br></br>
+                            - To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file, then (after 10 confirmation blocks), click on confirm XMR payment.
+                            With XMR payment you don't need to matched the amount listed in the below form.
+                        </Typography>
+                        <Box my={4}>
+                            <form autoComplete="off" >
+
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2}>
                                     <TextField
-                                        margin="normal"
-                                        label="Key Name"
-                                        type="text"
-                                        size="small"
-                                        onChange={e => setKeyName(e.target.value)}
-                                        value={keyname}
-                                        error={keynameError}
-                                        autoComplete="off"
+                                        margin="normal" label="Key Name" type="text" size="small" onChange={e => setKeyNamePay(e.target.value)} value={keynamepay} error={keynamepayError} autoComplete="off"
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
                                                     <CreateIcon />
                                                 </InputAdornment>
                                             ),
+                                        }} />
+                                    <TextField
+                                        margin="normal"
+                                        label="Key"
+                                        type="password"
+                                        size="small"
+                                        onChange={e => setKey(e.target.value)}
+                                        value={key}
+                                        error={keyError}
+                                        autoComplete="off"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <KeyIcon />
+                                                </InputAdornment>
+                                            ),
                                         }}
                                     />
-                                    <Button size="small" variant="contained" type="submit" endIcon={<LockOpenIcon />}>Create Key</Button>
+                                    <FormControl defaultValue="" required size="small">
+                                        <InputLabel id="demo-simple-select-label">Amount</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            onChange={e => setAmount(e.target.value)}
+                                            value={amount}
+                                            label="Amount"
+                                        >
+                                            {product_objects.map((product_object) => {
+                                                return (
+                                                    <MenuItem key={product_object.id} value={product_object.id}>{product_object.name}</MenuItem>
+                                                )
+                                            })}
+
+                                        </Select>
+                                    </FormControl>
                                 </Stack>
-                            </FormControl>
-                        </form>
-                    </Box>
-                    {keycreateresponse && <KeyCreateExport key_={keycreateresponse.key} key_name={keycreateresponse.key_name} payment_id={keycreateresponse.payment_id} integrated_wallet={keycreateresponse.integrated_wallet} />}
-                    {keycreateerror && <ErrorAlert error={keycreateerror} />}
-                    <Divider></Divider>
-                    <Typography variant="h5" >
-                        <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>2. Add credit to your key</Box>
-                    </Typography>
-                    <Typography variant="body1"  >
-                        We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
-                        - To pay by Stripe, include the Key and Key Name in the form below and click Stripe. <br></br>
-                        - To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file, then (after 10 confirmation blocks), click on confirm XMR payment.
-                        With XMR payment you don't need to matched the amount listed in the below form.
-                    </Typography>
-                    <Box my={4}>
-                        <form autoComplete="off" >
-
-                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2}>
-                                <TextField
-                                    margin="normal" label="Key Name" type="text" size="small" onChange={e => setKeyNamePay(e.target.value)} value={keynamepay} error={keynamepayError} autoComplete="off"
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <CreateIcon />
-                                            </InputAdornment>
-                                        ),
-                                    }} />
-                                <TextField
-                                    margin="normal"
-                                    label="Key"
-                                    type="password"
-                                    size="small"
-                                    onChange={e => setKey(e.target.value)}
-                                    value={key}
-                                    error={keyError}
-                                    autoComplete="off"
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <KeyIcon />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-                                <FormControl defaultValue="" required size="small">
-                                    <InputLabel id="demo-simple-select-label">Amount</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        onChange={e => setAmount(e.target.value)}
-                                        value={amount}
-                                        label="Amount"
+                                <Accordion defaultExpanded>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1-content"
+                                        id="panel1-header"
                                     >
-                                        {product_objects.map((product_object) => {
-                                            return (
-                                                <MenuItem key={product_object.id} value={product_object.id}>{product_object.name}</MenuItem>
-                                            )
-                                        })}
-
-                                    </Select>
-                                </FormControl>
-                            </Stack>
-                            <Accordion defaultExpanded>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel1-content"
-                                    id="panel1-header"
-                                >
-                                    <Typography variant="h6" >
-                                        2.1 Check credit balance
-                                    </Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Typography>
-                                        Before paying, you may check your current balance (and Key and Key Name) to avoid undesirable accidents.
-                                    </Typography>
-                                    <Box mt={2}>
-                                        <Button variant="contained" name="checkcredit" onClick={handleCheckKey.bind(this)} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</Button>
-                                    </Box>
-                                    {keycheckresponse && <KeyCheckDisplay key_={keycheckresponse.key} key_name={keycheckresponse.key_name} monero_balance={keycheckresponse.monero_balance} fiat_balance={keycheckresponse.fiat_balance} />}
-                                    {keycheckerror && <ErrorAlert error={keycheckerror} />}
-                                </AccordionDetails>
-                            </Accordion>
-                            <Accordion>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel2-content"
-                                    id="panel2-header"
-                                >
-                                    <Typography variant="h6" >
-                                        2.2 Pay by Stripe
-                                    </Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Typography>
-                                        You will be redirected to Stripe Payment portal by choosing this payment option.
-                                    </Typography>
-                                    <Box mt={2}>
-                                        <Button variant="contained" onClick={handleStripeRedirect.bind(this)} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
-                                    </Box>
-                                    {striperedirecterror && <ErrorAlert error={striperedirecterror} />}
-                                </AccordionDetails>
-                            </Accordion>
-                            <Accordion>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel3-content"
-                                    id="panel3-header"
-                                >
-                                    <Typography variant="h6" >
-                                        2.3 Retrieve XMR intergrated wallet
-                                    </Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Typography>
-                                        If (for issues with our XMR node) your Key is not associated with a XMR intergrated wallet, you can associate your Key with a Wallet here.
-                                        You can also use this function to retrieve your Wallet before payment.
-                                    </Typography>
-                                    <Box mt={2}>
-                                        <Button variant="contained" type="submit" onClick={handleXMRRetrive.bind(this)} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</Button>
-                                    </Box>
-                                    {xmrwalletresponse && <XMRWalletDisplay key_={xmrwalletresponse.key} key_name={xmrwalletresponse.key_name} payment_id={xmrwalletresponse.payment_id} integrated_wallet={xmrwalletresponse.integrated_wallet} />}
-                                    {xmrwalleterror && <ErrorAlert error={xmrwalleterror} />}
-                                </AccordionDetails>
-                            </Accordion>
-                            <Accordion>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel4-content"
-                                    id="panel4-header"
-                                >
-                                    <Typography variant="h6" >
-                                        2.4 Confirm your XMR Payment
-                                    </Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Typography>
-                                        Processing the XMR payment may take up to 30 minutes after it has been confirmed on the blockchain.
-                                        Use sufficient fees so the transactions gets confirmed on time.
-                                    </Typography>
-                                    <Box mt={2}>
-                                        <Button variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<ConfirmationNumberIcon />}>Confirm XMR Payment</Button>
-                                    </Box>
-                                    {xmrconfirmationresponse && <XMRWConfirmationDisplay detail={xmrconfirmationresponse.detail} />}
-                                    {xmrconfirmationerror && <ErrorAlert error={xmrconfirmationerror} />}
-                                </AccordionDetails>
-                            </Accordion>
-                        </form>
-                    </Box>
-                    <Divider></Divider>
-                    <Typography variant="h5" >
-                        <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> 3. Check user manual </Box>
-                    </Typography>
-                    <Typography variant="body1" >
-                        Check the <Link href="/frontend/manual" variant="body1">
-                            {'User Manual'}
-                        </Link> to learn more about how to pay and use our services.
-                    </Typography>
-                </StyledPaper>
-            </Box>
-        </Container >
+                                        <Typography variant="h6" >
+                                            2.1 Check credit balance
+                                        </Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Typography>
+                                            Before paying, you may check your current balance (and Key and Key Name) to avoid undesirable accidents.
+                                        </Typography>
+                                        <Box mt={2}>
+                                            <Button variant="contained" name="checkcredit" onClick={handleCheckKey.bind(this)} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</Button>
+                                        </Box>
+                                        {keycheckresponse && <KeyCheckDisplay key_={keycheckresponse.key} key_name={keycheckresponse.key_name} monero_balance={keycheckresponse.monero_balance} fiat_balance={keycheckresponse.fiat_balance} />}
+                                        {keycheckerror && <ErrorAlert error={keycheckerror} />}
+                                    </AccordionDetails>
+                                </Accordion>
+                                <Accordion>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel2-content"
+                                        id="panel2-header"
+                                    >
+                                        <Typography variant="h6" >
+                                            2.2 Pay by Stripe
+                                        </Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Typography>
+                                            You will be redirected to Stripe Payment portal by choosing this payment option.
+                                        </Typography>
+                                        <Box mt={2}>
+                                            <Button variant="contained" onClick={handleStripeRedirect.bind(this)} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
+                                        </Box>
+                                        {striperedirecterror && <ErrorAlert error={striperedirecterror} />}
+                                    </AccordionDetails>
+                                </Accordion>
+                                <Accordion>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel3-content"
+                                        id="panel3-header"
+                                    >
+                                        <Typography variant="h6" >
+                                            2.3 Retrieve XMR intergrated wallet
+                                        </Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Typography>
+                                            If (for issues with our XMR node) your Key is not associated with a XMR intergrated wallet, you can associate your Key with a Wallet here.
+                                            You can also use this function to retrieve your Wallet before payment.
+                                        </Typography>
+                                        <Box mt={2}>
+                                            <Button variant="contained" type="submit" onClick={handleXMRRetrive.bind(this)} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</Button>
+                                        </Box>
+                                        {xmrwalletresponse && <XMRWalletDisplay key_={xmrwalletresponse.key} key_name={xmrwalletresponse.key_name} payment_id={xmrwalletresponse.payment_id} integrated_wallet={xmrwalletresponse.integrated_wallet} />}
+                                        {xmrwalleterror && <ErrorAlert error={xmrwalleterror} />}
+                                    </AccordionDetails>
+                                </Accordion>
+                                <Accordion>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel4-content"
+                                        id="panel4-header"
+                                    >
+                                        <Typography variant="h6" >
+                                            2.4 Confirm your XMR Payment
+                                        </Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Typography>
+                                            Processing the XMR payment may take up to 30 minutes after it has been confirmed on the blockchain.
+                                            Use sufficient fees so the transactions gets confirmed on time.
+                                        </Typography>
+                                        <Box mt={2}>
+                                            <Button variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<ConfirmationNumberIcon />}>Confirm XMR Payment</Button>
+                                        </Box>
+                                        {xmrconfirmationresponse && <XMRWConfirmationDisplay detail={xmrconfirmationresponse.detail} />}
+                                        {xmrconfirmationerror && <ErrorAlert error={xmrconfirmationerror} />}
+                                    </AccordionDetails>
+                                </Accordion>
+                            </form>
+                        </Box>
+                        <Divider></Divider>
+                        <Typography variant="h5" >
+                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> 3. Check user manual </Box>
+                        </Typography>
+                        <Typography variant="body1" >
+                            Check the <Link href="/frontend/manual" variant="body1">
+                                {'User Manual'}
+                            </Link> to learn more about how to pay and use our services.
+                        </Typography>
+                    </StyledPaper>
+                </Box>
+            </Container >
+        </Container>
     );
 }
 export default KeyManagement;

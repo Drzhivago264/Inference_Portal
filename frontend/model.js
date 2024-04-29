@@ -8,7 +8,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
-
+import ResponsiveAppBar from './navbar';
 function ModelInfor() {
     const [server_objects, setMessage] = useState([]);
     const [model_objects, setMessage_model] = useState([]);
@@ -51,53 +51,73 @@ function ModelInfor() {
         i++;
     }
     return (
-        <Container maxWidth="lg">
+        <Container maxWidth={false} disableGutters>
             <title>Models</title>
-            <Box
-                my={4}
-                display="flex"
-                alignItems="center"
-                gap={4}
-                p={2}
-            >
-                <Grid container spacing={2}>
-                    <Grid item md={6}>
-                        {model_objects.map((model_object) => {
-                            return (
-                                <Accordion key={model_object.id}>
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls="panel1-content"
-                                        id={model_object.id}
-                                    >
-                                        {model_object.name}
-                                    </AccordionSummary>
-                                    <AccordionDetails style={{ whiteSpace: "pre-wrap" }}>
-                                        {model_object.desc}
-                                    </AccordionDetails>
-                                </Accordion>
+            <ResponsiveAppBar />
+            <Container maxWidth="lg">
+                <Box
+                    my={4}
+                    display="flex"
+                    alignItems="center"
+                    gap={4}
+                    p={2}
+                >
+                    <Grid container spacing={2}>
+                        <Grid item md={6}>
+                            {model_objects.map((model_object) => {
+                                if (model_object.name == 'Reddit Helper 2.7B') {
+                                    return (
+                                        <Accordion key={model_object.id} defaultExpanded>
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon />}
+                                                id={model_object.id}
+                                            >
+                                                {model_object.name}
+                                            </AccordionSummary>
+                                            <AccordionDetails style={{ whiteSpace: "pre-wrap" }}>
+                                                {model_object.desc}
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    )
+                                }
+                                else {
+                                    return (
+                                        <Accordion key={model_object.id}>
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon />}
+                                                id={model_object.id}
+                                            >
+                                                {model_object.name}
+                                            </AccordionSummary>
+                                            <AccordionDetails style={{ whiteSpace: "pre-wrap" }}>
+                                                {model_object.desc}
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    )
+                                }
+                            }
                             )
-                        })}
+                            }
+                        </Grid>
+                        <Grid item md={6}>
+                            <div style={{ height: 400, width: '100%' }}>
+                                <DataGrid
+                                    rows={rows}
+                                    columns={columns}
+                                    initialState={{
+                                        pagination: {
+                                            paginationModel: { page: 0, pageSize: 5 },
+                                        },
+                                    }}
+                                    disableRowSelectionOnClick
+                                    pageSizeOptions={[5, 10]}
+                                />
+                            </div>
+                        </Grid>
                     </Grid>
-                    <Grid item md={6}>
-                        <div style={{ height: 400, width: '100%' }}>
-                            <DataGrid
-                                rows={rows}
-                                columns={columns}
-                                initialState={{
-                                    pagination: {
-                                        paginationModel: { page: 0, pageSize: 5 },
-                                    },
-                                }}
-                                disableRowSelectionOnClick
-                                pageSizeOptions={[5, 10]}
-                            />
-                        </div>
-
-                    </Grid>
-                </Grid>
-            </Box>
-        </Container >
+                </Box>
+            </Container >
+        </Container>
     );
 }
 

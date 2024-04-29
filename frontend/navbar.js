@@ -30,6 +30,7 @@ import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturi
 import LayersIcon from '@mui/icons-material/Layers';
 import KeyIcon from '@mui/icons-material/Key';
 import EmailIcon from '@mui/icons-material/Email';
+import VerticalNav from './component/vertical_nav.js';
 const blue = Constant_Colours.blue;
 const grey = Constant_Colours.grey;
 
@@ -80,27 +81,27 @@ const MenuItem = styled(BaseMenuItem)(
 
 const MenuButton = styled(BaseMenuButton)(
   ({ theme }) => `
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 600;
-  font-size: 0.875rem;
+
+  font-size: 14px;
   line-height: 1;
   padding: 8px;
   border-radius: 8px;
   transition: all 150ms ease;
-  margin: 5px;
   cursor: pointer;
-  background: ${theme.palette.mode === 'dark' ? grey[900] : '#fff'};
-  border: 1px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
-  color: ${theme.palette.mode === 'dark' ? grey[200] : grey[900]};
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  background: transparent;
+  border: 0px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
+  color: ${theme.palette.mode === 'dark' ? grey[100] : grey[100]};
 
   &:hover {
-    background: ${theme.palette.mode === 'dark' ? grey[800] : grey[50]};
+    background: ${theme.palette.mode === 'dark' ? grey[800] : grey[100]};
+    color: ${theme.palette.mode === 'dark' ? grey[200] : grey[900]};
     border-color: ${theme.palette.mode === 'dark' ? grey[600] : grey[300]};
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   }
 
   &:active {
     background: ${theme.palette.mode === 'dark' ? grey[700] : grey[100]};
+    color: ${theme.palette.mode === 'dark' ? grey[100] : grey[900]}
   }
 
   &:focus-visible {
@@ -125,24 +126,25 @@ const NavLink = styled(Link)(
 );
 const Button = styled(BaseButton)(
   ({ theme }) => `
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 600;
-  font-size: 0.875rem;
-  line-height: 1.2;
-  padding: 8px;
-  margin: 2px;
+
+  font-size: 14px;
+  line-height: 1;
+  padding-top: 8px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
   border-radius: 8px;
   transition: all 150ms ease;
   cursor: pointer;
   border: 0px;
   background: transparent;
-
-  color: ${theme.palette.mode === 'dark' ? grey[200] : grey[100]};
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  color: ${theme.palette.mode === 'dark' ? grey[100] : grey[100]};
 
   &:hover {
-    background: ${theme.palette.mode === 'dark' ? grey[800] : grey[900]};
+    background: ${theme.palette.mode === 'dark' ? grey[800] : grey[100]};
+    color: ${theme.palette.mode === 'dark' ? grey[200] : grey[900]};
     border-color: ${theme.palette.mode === 'dark' ? grey[600] : grey[300]};
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   }
 
   &:active {
@@ -167,62 +169,12 @@ function ResponsiveAppBar() {
   };
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
-      <List>
-        <ListItemButton onClick={(event) => handleListItemClick(event, "key")}>
-          <ListItemIcon>
-            <KeyIcon />
-          </ListItemIcon>
-          <ListItemText primary="Key & Credit" />
-        </ListItemButton>
-        <Divider component="li" />
-        <ListItemButton onClick={(event) => handleListItemClick(event, "APIs")}>
-          <ListItemIcon>
-            <ApiIcon />
-          </ListItemIcon>
-          <ListItemText primary="APIs" />
-        </ListItemButton>
-        <Divider component="li" />
-        <ListItemButton onClick={(event) => handleListItemClick(event, "chat")}>
-          <ListItemIcon>
-            <ChatIcon />
-          </ListItemIcon>
-          <ListItemText primary="Chatbots & Agents" />
-        </ListItemButton>
-        <Divider component="li" />
-        <ListItemButton button component={Link} href="/frontend/manual">
-          <ListItemIcon>
-            <ArticleIcon />
-          </ListItemIcon>
-          <ListItemText primary="Manual" />
-        </ListItemButton>
-        <Divider component="li" />
-        <ListItemButton button component={Link} href="/frontend/model">
-          <ListItemIcon>
-            <LayersIcon />
-          </ListItemIcon>
-          <ListItemText primary="Available Models" />
-        </ListItemButton>
-        <Divider component="li" />
-
-        <ListItemButton>
-          <ListItemIcon>
-            <PrecisionManufacturingIcon />
-          </ListItemIcon>
-          <ListItemText primary="Construction Zone" />
-        </ListItemButton>
-        <Divider component="li" />
-        <ListItemButton>
-          <ListItemIcon>
-            <EmailIcon />
-          </ListItemIcon>
-          <ListItemText primary="Contact Us" />
-        </ListItemButton>
-      </List>
+      <VerticalNav />
     </Box>
   );
   return (
 
-    <AppBar position="sticky" sx={{ bgcolor: "black" }}>
+    <AppBar position="sticky" >
       <Drawer open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
       </Drawer>

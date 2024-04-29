@@ -35,6 +35,7 @@ import { saveAs } from "file-saver";
 import EmailIcon from '@mui/icons-material/Email';
 import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import ResponsiveAppBar from './navbar';
 import {
     createTheme,
     responsiveFontSizes,
@@ -166,7 +167,7 @@ function Contact() {
                 key: key,
                 username: username,
                 message: message,
-                mail:mail
+                mail: mail
             }
             axios.post("/frontend-api/send-mail", data, config)
                 .then((response) => {
@@ -206,116 +207,119 @@ function Contact() {
         );
     };
     return (
-        <Container maxWidth="lg">
+        <Container maxWidth={false} disableGutters>
             <title>Contact</title>
-            <Box
-                my={1}
-                alignItems="center"
-                gap={4}
-                p={2}
-            >
-                <StyledPaper variant="outlined">
+            <ResponsiveAppBar />
+            <Container maxWidth="lg">
+                <Box
+                    my={1}
+                    alignItems="center"
+                    gap={4}
+                    p={2}
+                >
+                    <StyledPaper variant="outlined">
 
-                    <Box textAlign='center' my={4}>
-                        <Typography variant="h4" >
-                            <Box sx={{ mb: 2, fontWeight: 'bold' }}>Contact Us</Box>
-                        </Typography>
-                        <form autoComplete="off" onSubmit={handleCreateKey}>
-                            <FormControl defaultValue="" margin='normal' required>
-                            <Stack direction={{ xs: 'column' }} spacing={1}>
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                                    <TextField
-                                        margin="normal"
-                                        label="Key Name"
-                                        type="text"
-                                        size="small"
-                                        onChange={e => setKeyName(e.target.value)}
-                                        value={keyname}
-                                        error={keynameError}
-                                        autoComplete="off"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <CreateIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                    <TextField
-                                        margin="normal"
-                                        label="Key"
-                                        type="password"
-                                        size="small"
-                                        onChange={e => setKey(e.target.value)}
-                                        value={key}
-                                        error={keyError}
-                                        autoComplete="off"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <KeyIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </Stack>
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                                    <TextField
-                                        margin="normal"
-                                        label="Your Name"
-                                        type="text"
-                                        size="small"
-                                        onChange={e => setUserName(e.target.value)}
-                                        value={username}
-                                        error={usernameError}
-                                        autoComplete="off"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <AccountBoxIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                    <TextField
-                                        m={1}
-                                        margin="normal"
-                                        label="Email"
-                                        type="text"
-                                        size="small"
-                                        onChange={e => setMail(e.target.value)}
-                                        value={mail}
-                                        error={mailError}
-                                        autoComplete="off"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <EmailIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </Stack>
-                                <TextField
-                                    p={1}
-                                    id="filled-multiline-flexible"
-                                    label="Message"
-                                    multiline
-                                    rows={4}
-                                    onChange={e => setMessage(e.target.value)}
-                                    value={message}
-                                    error={messageError}
-                                />
-                                <Button size="small" variant="contained" type="submit" endIcon={<ForwardToInboxIcon />}>Send Mail</Button>
-                                </Stack>
-                            </FormControl>
-                        </form>
-                    </Box>
-                    {mailsentresponse && <SuccessAlert detail={mailsentresponse.detail} />}                       
-                    {mailsenterror && <ErrorAlert error={mailsenterror} />}
-                </StyledPaper>
-            </Box>
-        </Container >
+                        <Box textAlign='center' my={4}>
+                            <Typography variant="h4" >
+                                <Box sx={{ mb: 2, fontWeight: 'bold' }}>Contact Us</Box>
+                            </Typography>
+                            <form autoComplete="off" onSubmit={handleCreateKey}>
+                                <FormControl defaultValue="" margin='normal' required>
+                                    <Stack direction={{ xs: 'column' }} spacing={1}>
+                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                            <TextField
+                                                margin="normal"
+                                                label="Key Name"
+                                                type="text"
+                                                size="small"
+                                                onChange={e => setKeyName(e.target.value)}
+                                                value={keyname}
+                                                error={keynameError}
+                                                autoComplete="off"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <CreateIcon />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                            <TextField
+                                                margin="normal"
+                                                label="Key"
+                                                type="password"
+                                                size="small"
+                                                onChange={e => setKey(e.target.value)}
+                                                value={key}
+                                                error={keyError}
+                                                autoComplete="off"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <KeyIcon />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                        </Stack>
+                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                            <TextField
+                                                margin="normal"
+                                                label="Your Name"
+                                                type="text"
+                                                size="small"
+                                                onChange={e => setUserName(e.target.value)}
+                                                value={username}
+                                                error={usernameError}
+                                                autoComplete="off"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <AccountBoxIcon />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                            <TextField
+                                                m={1}
+                                                margin="normal"
+                                                label="Email"
+                                                type="text"
+                                                size="small"
+                                                onChange={e => setMail(e.target.value)}
+                                                value={mail}
+                                                error={mailError}
+                                                autoComplete="off"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <EmailIcon />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                        </Stack>
+                                        <TextField
+                                            p={1}
+                                            id="filled-multiline-flexible"
+                                            label="Message"
+                                            multiline
+                                            rows={4}
+                                            onChange={e => setMessage(e.target.value)}
+                                            value={message}
+                                            error={messageError}
+                                        />
+                                        <Button size="small" variant="contained" type="submit" endIcon={<ForwardToInboxIcon />}>Send Mail</Button>
+                                    </Stack>
+                                </FormControl>
+                            </form>
+                        </Box>
+                        {mailsentresponse && <SuccessAlert detail={mailsentresponse.detail} />}
+                        {mailsenterror && <ErrorAlert error={mailsenterror} />}
+                    </StyledPaper>
+                </Box>
+            </Container >
+        </Container>
     );
 }
 

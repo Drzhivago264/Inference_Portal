@@ -9,17 +9,13 @@ import TextField from '@mui/material/TextField';
 import { useNavigate } from "react-router-dom";
 import KeyIcon from '@mui/icons-material/Key';
 import InputAdornment from '@mui/material/InputAdornment';
-
+import ResponsiveAppBar from './navbar';
 import Button from '@mui/material/Button';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
-import { styled } from '@mui/system';
 import { FormControl, FormLabel } from '@mui/material';
-import ShortcutIcon from '@mui/icons-material/Shortcut';
-import { Input, inputClasses } from '@mui/base/Input';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import LoginIcon from '@mui/icons-material/Login';
-import clsx from 'clsx';
 
 function Hub() {
 
@@ -38,13 +34,6 @@ function Hub() {
         }
         return cookieValue;
     }
-
-    const StickyBox = styled(Box)`
-        position: -webkit-sticky;
-        position: sticky;
-        display: inline-block;
-        top: 100px;
-        `;
 
     const [explaination, setMessage] = useState('');
     const navigate = useNavigate();
@@ -74,11 +63,11 @@ function Hub() {
                 destination: destination
             }
             console.log(key, destination)
-            axios.post("/frontend-api/hub-redirect", data , config)
+            axios.post("/frontend-api/hub-redirect", data, config)
 
                 .then((response) => {
-                    navigate( response.data.redirect_link, { replace: true });
-    
+                    navigate(response.data.redirect_link, { replace: true });
+
                 }).catch(error => {
                     console.log(error);
                 });;
@@ -97,63 +86,66 @@ function Hub() {
     }, []);
 
     return (
-        <Container maxWidth="lg">
-            <Box
-                my={1}
-                display="flex"
-                alignItems="center"
-                gap={4}
-                p={2}
-            >
-                <title>Hub</title>
-                <Grid container spacing={2}>
-                    <Grid item md={4} lg={3}>
-                        <form autoComplete="off" onSubmit={handleSubmit}>
-                            <FormControl defaultValue="" required>
-                                <Stack direction="row" spacing={1}>
-                                    <TextField
-                                        margin="normal"
-                                        label="Key"
-                                        type="password"
-                                        size="small"
-                                        onChange={e => setKey(e.target.value)}
-                                        value={key}
-                                        error={keyError}
-                                        autoComplete="off"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <KeyIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                    <Button variant="contained" type="submit" endIcon={<LoginIcon />}>Go</Button>
-                                </Stack>
-                                <FormLabel sx={{ m: 2 }}>Bring me to:</FormLabel>
-                                <RadioGroup
-                                    aria-labelledby="demo-radio-buttons-group-label"
-                                    name="radio-buttons-group"
-                                    onChange={e => setDestination(e.target.value)}
-                                    value={destination}
-                                    sx={{ ml: 2 }}
+        <Container maxWidth={false} disableGutters>
+            <title>Hub</title>
+            <ResponsiveAppBar />
+            <Container maxWidth="lg">
+                <Box
+                    my={1}
+                    display="flex"
+                    alignItems="center"
+                    gap={4}
+                    p={2}
+                >
+                    <Grid container spacing={2}>
+                        <Grid item md={4} lg={3}>
+                            <form autoComplete="off" onSubmit={handleSubmit}>
+                                <FormControl defaultValue="" required>
+                                    <Stack direction="row" spacing={1}>
+                                        <TextField
+                                            margin="normal"
+                                            label="Key"
+                                            type="password"
+                                            size="small"
+                                            onChange={e => setKey(e.target.value)}
+                                            value={key}
+                                            error={keyError}
+                                            autoComplete="off"
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <KeyIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                        <Button variant="contained" type="submit" endIcon={<LoginIcon />}>Go</Button>
+                                    </Stack>
+                                    <FormLabel sx={{ m: 2 }}>Bring me to:</FormLabel>
+                                    <RadioGroup
+                                        aria-labelledby="demo-radio-buttons-group-label"
+                                        name="radio-buttons-group"
+                                        onChange={e => setDestination(e.target.value)}
+                                        value={destination}
+                                        sx={{ ml: 2 }}
 
-                                >
-                                    <FormControlLabel value="chat" control={<Radio />} label="Chatbots" />
-                                    <FormControlLabel value="engineer" control={<Radio />} label="Agents" />
-                                    <FormControlLabel value="hotpot" control={<Radio />} label="Hotpot Mode" />
-                                    <FormControlLabel value="toolbox" control={<Radio />} label="LLM Functions" />
-                                    <FormControlLabel value="log" control={<Radio />} label="Retrieve Log" />
-                                </RadioGroup>
+                                    >
+                                        <FormControlLabel value="chat" control={<Radio />} label="Chatbots" />
+                                        <FormControlLabel value="engineer" control={<Radio />} label="Agents" />
+                                        <FormControlLabel value="hotpot" control={<Radio />} label="Hotpot Mode" />
+                                        <FormControlLabel value="toolbox" control={<Radio />} label="LLM Functions" />
+                                        <FormControlLabel value="log" control={<Radio />} label="Retrieve Log" />
+                                    </RadioGroup>
 
-                            </FormControl>
-                        </form>
+                                </FormControl>
+                            </form>
+                        </Grid>
+                        <Grid item md={8} lg={9}>
+                            <div dangerouslySetInnerHTML={{ __html: explaination }} ></div>
+                        </Grid>
                     </Grid>
-                    <Grid item md={8} lg={9}>
-                        <div dangerouslySetInnerHTML={{ __html: explaination }} ></div>
-                    </Grid>
-                </Grid>
-            </Box>
+                </Box>
+            </Container>
         </Container>
     );
 }

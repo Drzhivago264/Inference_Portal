@@ -41,6 +41,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useMatch } from "react-router-dom";
 import SearchIcon from '@mui/icons-material/Search';
 import DirectionsIcon from '@mui/icons-material/Directions';
+import ResponsiveAppBar from './navbar';
 import SendIcon from '@mui/icons-material/Send';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 660,
@@ -174,214 +175,218 @@ function Chat() {
     }
 
     return (
-        <Container maxWidth="lg" sx={{ width: 1200 }}>
+
+        <Container  maxWidth={false} disableGutters>
             <title>Chat</title>
-            <Box m={2}>
-                <Grid container spacing={2}>
-                    <Grid item md={8}>
-                        <ChatPaper id={'chat-log'} variant="outlined">
-                            <TextField
-                                margin="normal"
-                                label="Key"
-                                type="password"
-                                size="small"
-                                onChange={e => setKey(e.target.value)}
-                                value={key}
-                                error={keyError}
-                                autoComplete="off"
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <KeyIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            <Stack spacing={1}>
-                                {chat_message.map((mess) => {
-
-                                    if (mess.role == 'Human') {
-                                        return (
-                                            <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
-                                        )
-                                    }
-                                    else if (mess.holder) {
-                                        return (
-                                            <Paper ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
-                                        )
-                                    }
-                                    else if (mess.role == 'Server') {
-                                        return (
-                                            <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
-                                        )
-                                    }
-
-                                })}
-
-                            </Stack>
-                            <div ref={messagesEndRef}> </div>
-                        </ChatPaper>
-                        <Box mt={2}>
-                            <Paper
-                                component="form"
-                                sx={{ p: '2px 4px', display: 'flex', minWidth: 660 }}
-                            >
-                                <ChatInput
-                                    id="standard-multiline-flexible"
-                                    multiline
-                                    maxRows={6}
-                                    value={usermessage}
-                                    error={usermessageError}
-                                    onChange={e => setUserMessage(e.target.value)}
-                                    onKeyUp={e => handleEnter(e)}
-                                    minRows={4}
-                                    variant="standard"
+            <ResponsiveAppBar />
+            <Container maxWidth="lg" sx={{ width: 1200 }}>
+                <Box m={2}>
+                    <Grid container spacing={2}>
+                        <Grid item md={8}>
+                            <ChatPaper id={'chat-log'} variant="outlined">
+                                <TextField
+                                    margin="normal"
+                                    label="Key"
+                                    type="password"
+                                    size="small"
+                                    onChange={e => setKey(e.target.value)}
+                                    value={key}
+                                    error={keyError}
+                                    autoComplete="off"
                                     InputProps={{
-                                        endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end">
-                                            <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitChat} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
-
-                                        startAdornment: <InputAdornment position="start">   </InputAdornment>,
-
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <KeyIcon />
+                                            </InputAdornment>
+                                        ),
                                     }}
                                 />
+                                <Stack spacing={1}>
+                                    {chat_message.map((mess) => {
 
-                            </Paper>
+                                        if (mess.role == 'Human') {
+                                            return (
+                                                <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
+                                            )
+                                        }
+                                        else if (mess.holder) {
+                                            return (
+                                                <Paper ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
+                                            )
+                                        }
+                                        else if (mess.role == 'Server') {
+                                            return (
+                                                <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
+                                            )
+                                        }
 
-                        </Box>
-                    </Grid>
-                    <Grid item md={4}>
-                        <FormControl defaultValue="">
-                            <Stack direction='column' spacing={1}>
-                                <InputLabel id="demo-simple-select-label">Models</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
-                                    onChange={e => setChoosenModel(e.target.value)}
-                                    value={choosen_model}
-                                    label="Models"
-                                >
-                                    {model_objects.map((model_object_) => {
-                                        return (
-                                            <MenuItem key={model_object_.name} value={model_object_.name}>{model_object_.name}</MenuItem>
-                                        )
                                     })}
-                                    {agent_objects.map((agent_object_) => {
-                                        return (
-                                            <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
-                                        )
-                                    })}
-                                </Select>
-                                <Divider></Divider>
-                                <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
-                                <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
-                                <RadioGroup
-                                    defaultValue="chat"
-                                    name="radio-buttons-group"
-                                    onChange={e => setMode(e.target.value)}
-                                    value={mode}
+
+                                </Stack>
+                                <div ref={messagesEndRef}> </div>
+                            </ChatPaper>
+                            <Box mt={2}>
+                                <Paper
+                                    component="form"
+                                    sx={{ p: '2px 4px', display: 'flex', minWidth: 660 }}
                                 >
-                                    <FormControlLabel key="chat" value='chat' control={<Radio size="small" />} label="Chat Bot Mode" />
-                                    <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Sentence Completion" />
+                                    <ChatInput
+                                        id="standard-multiline-flexible"
+                                        multiline
+                                        maxRows={6}
+                                        value={usermessage}
+                                        error={usermessageError}
+                                        onChange={e => setUserMessage(e.target.value)}
+                                        onKeyUp={e => handleEnter(e)}
+                                        minRows={4}
+                                        variant="standard"
+                                        InputProps={{
+                                            endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end">
+                                                <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitChat} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
+
+                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
+
+                                        }}
+                                    />
+
+                                </Paper>
+
+                            </Box>
+                        </Grid>
+                        <Grid item md={4}>
+                            <FormControl defaultValue="">
+                                <Stack direction='column' spacing={1}>
+                                    <InputLabel id="demo-simple-select-label">Models</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-label"
+                                        id="demo-simple-select"
+                                        onChange={e => setChoosenModel(e.target.value)}
+                                        value={choosen_model}
+                                        label="Models"
+                                    >
+                                        {model_objects.map((model_object_) => {
+                                            return (
+                                                <MenuItem key={model_object_.name} value={model_object_.name}>{model_object_.name}</MenuItem>
+                                            )
+                                        })}
+                                        {agent_objects.map((agent_object_) => {
+                                            return (
+                                                <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
+                                            )
+                                        })}
+                                    </Select>
                                     <Divider></Divider>
+                                    <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
+                                    <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
+                                    <RadioGroup
+                                        defaultValue="chat"
+                                        name="radio-buttons-group"
+                                        onChange={e => setMode(e.target.value)}
+                                        value={mode}
+                                    >
+                                        <FormControlLabel key="chat" value='chat' control={<Radio size="small" />} label="Chat Bot Mode" />
+                                        <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Sentence Completion" />
+                                        <Divider></Divider>
 
-                                </RadioGroup>
-                                <Typography gutterBottom>Top_p: {top_p}</Typography>
-                                <Slider
-                                    step={0.01}
-                                    min={0}
-                                    max={1}
-                                    valueLabelDisplay="off"
-                                    onChange={e => setTopp(e.target.value)}
-                                    value={top_p}
-                                />
-                                <Typography gutterBottom>Top_k: {top_k}</Typography>
-                                <Slider
-                                    defaultValue={-1}
-                                    step={1}
-                                    min={-1}
-                                    max={100}
-                                    valueLabelDisplay="off"
-                                    onChange={e => setTopk(e.target.value)}
-                                    value={top_k}
-                                />
-                                <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
-                                <Slider
-                                    defaultValue={512}
-                                    step={1}
-                                    min={1}
-                                    max={4090}
-                                    onChange={e => setMaxToken(e.target.value)}
-                                    value={max_tokens}
-                                    valueLabelDisplay="off"
-                                />
-                                <Typography gutterBottom>Temperature: {temperature}</Typography>
-                                <Slider
-                                    defaultValue={0.73}
-                                    step={0.01}
-                                    min={0}
-                                    max={1}
-                                    onChange={e => setTemperature(e.target.value)}
-                                    value={temperature}
-                                    valueLabelDisplay="off"
-                                />
-                                <Typography gutterBottom>Presence penalty: {presencepenalty}</Typography>
-                                <Slider
-                                    aria-label="Small steps"
-                                    defaultValue={0}
-                                    step={0.01}
-                                    min={-2}
-                                    max={2}
-                                    onChange={e => setPresencePenalty(e.target.value)}
-                                    value={presencepenalty}
-                                    valueLabelDisplay="off"
-                                />
-                                <Typography gutterBottom>Frequency penalty: {frequencypenalty}</Typography>
-                                <Slider
-                                    aria-label="Small steps"
-                                    defaultValue={0}
-                                    step={0.01}
-                                    min={-2}
-                                    max={2}
-                                    onChange={e => setFrequencyPenalty(e.target.value)}
-                                    value={frequencypenalty}
-                                    valueLabelDisplay="off"
-                                />
-                                <Divider></Divider>
-                                <FormControlLabel control={<Switch
-                                    onChange={e => setBeam(e.target.checked)}
-                                    value={beam}
-                                />} label="Beam Search: " />
-                                <FormControlLabel control={<Switch
-                                    onChange={e => setEarlyStopping(e.target.checked)}
-                                    value={earlystopping}
-                                />} label="Early Stopping: " />
-                                <Typography gutterBottom>Best_of: {bestof}</Typography>
-                                <Slider
-                                    onChange={e => setBestof(e.target.value)}
-                                    value={bestof}
-                                    defaultValue={2}
-                                    step={1}
-                                    min={1}
-                                    max={5}
-                                    valueLabelDisplay="off"
-                                />
+                                    </RadioGroup>
+                                    <Typography gutterBottom>Top_p: {top_p}</Typography>
+                                    <Slider
+                                        step={0.01}
+                                        min={0}
+                                        max={1}
+                                        valueLabelDisplay="off"
+                                        onChange={e => setTopp(e.target.value)}
+                                        value={top_p}
+                                    />
+                                    <Typography gutterBottom>Top_k: {top_k}</Typography>
+                                    <Slider
+                                        defaultValue={-1}
+                                        step={1}
+                                        min={-1}
+                                        max={100}
+                                        valueLabelDisplay="off"
+                                        onChange={e => setTopk(e.target.value)}
+                                        value={top_k}
+                                    />
+                                    <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
+                                    <Slider
+                                        defaultValue={512}
+                                        step={1}
+                                        min={1}
+                                        max={4090}
+                                        onChange={e => setMaxToken(e.target.value)}
+                                        value={max_tokens}
+                                        valueLabelDisplay="off"
+                                    />
+                                    <Typography gutterBottom>Temperature: {temperature}</Typography>
+                                    <Slider
+                                        defaultValue={0.73}
+                                        step={0.01}
+                                        min={0}
+                                        max={1}
+                                        onChange={e => setTemperature(e.target.value)}
+                                        value={temperature}
+                                        valueLabelDisplay="off"
+                                    />
+                                    <Typography gutterBottom>Presence penalty: {presencepenalty}</Typography>
+                                    <Slider
+                                        aria-label="Small steps"
+                                        defaultValue={0}
+                                        step={0.01}
+                                        min={-2}
+                                        max={2}
+                                        onChange={e => setPresencePenalty(e.target.value)}
+                                        value={presencepenalty}
+                                        valueLabelDisplay="off"
+                                    />
+                                    <Typography gutterBottom>Frequency penalty: {frequencypenalty}</Typography>
+                                    <Slider
+                                        aria-label="Small steps"
+                                        defaultValue={0}
+                                        step={0.01}
+                                        min={-2}
+                                        max={2}
+                                        onChange={e => setFrequencyPenalty(e.target.value)}
+                                        value={frequencypenalty}
+                                        valueLabelDisplay="off"
+                                    />
+                                    <Divider></Divider>
+                                    <FormControlLabel control={<Switch
+                                        onChange={e => setBeam(e.target.checked)}
+                                        value={beam}
+                                    />} label="Beam Search: " />
+                                    <FormControlLabel control={<Switch
+                                        onChange={e => setEarlyStopping(e.target.checked)}
+                                        value={earlystopping}
+                                    />} label="Early Stopping: " />
+                                    <Typography gutterBottom>Best_of: {bestof}</Typography>
+                                    <Slider
+                                        onChange={e => setBestof(e.target.value)}
+                                        value={bestof}
+                                        defaultValue={2}
+                                        step={1}
+                                        min={1}
+                                        max={5}
+                                        valueLabelDisplay="off"
+                                    />
 
-                                <Typography gutterBottom>Length penalty: {lengthpenalty}</Typography>
-                                <Slider
-                                    onChange={e => setLengthPenalty(e.target.value)}
-                                    value={lengthpenalty}
-                                    defaultValue={0}
-                                    step={0.01}
-                                    min={-2}
-                                    max={2}
-                                    valueLabelDisplay="off"
-                                />
-                            </Stack>
-                        </FormControl>
+                                    <Typography gutterBottom>Length penalty: {lengthpenalty}</Typography>
+                                    <Slider
+                                        onChange={e => setLengthPenalty(e.target.value)}
+                                        value={lengthpenalty}
+                                        defaultValue={0}
+                                        step={0.01}
+                                        min={-2}
+                                        max={2}
+                                        valueLabelDisplay="off"
+                                    />
+                                </Stack>
+                            </FormControl>
 
+                        </Grid>
                     </Grid>
-                </Grid>
-            </Box>
+                </Box>
+            </Container>
         </Container>
     );
 }

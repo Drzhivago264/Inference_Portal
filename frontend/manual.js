@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import ResponsiveAppBar from './navbar';
 import Container from '@mui/material/Container';
 import Prism from "prismjs";
 import Link from '@mui/material/Link';
@@ -56,53 +57,57 @@ function Manual() {
     }, []);
 
     return (
-        <Container maxWidth="lg">
-            <Box
-                my={1}
-                display="flex"
-                alignItems="center"
-                gap={4}
-                p={2}
-            >
-                <title>Manual</title>
-                <Grid container spacing={2}>
-                    <Grid item md={4} lg={3}>
-                  
-                        <StickyBox sx={{ display: { xs: 'none', sm: 'none', md: 'block',  p: 1, border: '1px solid grey',  borderRadius: 5,  } }}>
+        <Container maxWidth={false} disableGutters>
+            <title>Manual</title>
+            <ResponsiveAppBar />
+            <Container maxWidth="lg">
+                <Box
+                    my={1}
+                    display="flex"
+                    alignItems="center"
+                    gap={4}
+                    p={2}
+                >
 
-                            <List dense={true}
+                    <Grid container spacing={2}>
+                        <Grid item md={4} lg={3}>
+
+                            <StickyBox sx={{ display: { xs: 'none', sm: 'none', md: 'block', p: 1, border: '1px solid grey', borderRadius: 5, } }}>
+
+                                <List dense={true}
                                     subheader={<ListSubheader>Content</ListSubheader>}>
 
-                                <ListItemButton  component={Link} to='#1'> 1. Setting Up Your API Key </ListItemButton>
-                                <ListItemButton component={Link} to='#1.1' sx={{ pl: 4 }}>1.1 Creating a New API Key</ListItemButton>
-                                <ListItemButton component={Link} to='#1.2' sx={{ pl: 4 }}>1.2 Making API Request</ListItemButton>
-                                <ListItemButton component={Link} to='#1.3' sx={{ pl: 4 }}>1.3 Edit or Delete API Key</ListItemButton>
-                                <ListItemButton component={Link} to='#1.4' sx={{ pl: 4 }}>1.4 API Usage Report</ListItemButton>
-                                <ListItemButton component={Link} to='#2' >2. Credit & Authentication</ListItemButton>
-                                <ListItemButton component={Link} to='#2.1' sx={{ pl: 4 }}>2.1 Payment Methods</ListItemButton>
-                                <ListItemButton component={Link} to='#2.2' sx={{ pl: 4 }}>2.2 Cost Calculation</ListItemButton>
-                                <ListItemButton component={Link} to='#2.3' sx={{ pl: 4 }}>2.3 Authentication</ListItemButton>
-                                <ListItemButton component={Link} to='#3'>3. Inference Modes</ListItemButton>
-                                <ListItemButton component={Link} to='#3.1' sx={{ pl: 4 }}>3.1 API Endpoints</ListItemButton>
-                                <ListItemButton component={Link} to='#3.2' sx={{ pl: 4 }}>3.2 Chat Bot Mode</ListItemButton>
-                                <ListItemButton component={Link} to='#3.3' sx={{ pl: 4 }}>3.3 Engineering Mode</ListItemButton>
-                                <ListItemButton component={Link} to='#4'>4. Website Behaviors</ListItemButton>
-                            </List>
+                                    <ListItemButton component={Link} to='#1'> 1. Setting Up Your API Key </ListItemButton>
+                                    <ListItemButton component={Link} to='#1.1' sx={{ pl: 4 }}>1.1 Creating a New API Key</ListItemButton>
+                                    <ListItemButton component={Link} to='#1.2' sx={{ pl: 4 }}>1.2 Making API Request</ListItemButton>
+                                    <ListItemButton component={Link} to='#1.3' sx={{ pl: 4 }}>1.3 Edit or Delete API Key</ListItemButton>
+                                    <ListItemButton component={Link} to='#1.4' sx={{ pl: 4 }}>1.4 API Usage Report</ListItemButton>
+                                    <ListItemButton component={Link} to='#2' >2. Credit & Authentication</ListItemButton>
+                                    <ListItemButton component={Link} to='#2.1' sx={{ pl: 4 }}>2.1 Payment Methods</ListItemButton>
+                                    <ListItemButton component={Link} to='#2.2' sx={{ pl: 4 }}>2.2 Cost Calculation</ListItemButton>
+                                    <ListItemButton component={Link} to='#2.3' sx={{ pl: 4 }}>2.3 Authentication</ListItemButton>
+                                    <ListItemButton component={Link} to='#3'>3. Inference Modes</ListItemButton>
+                                    <ListItemButton component={Link} to='#3.1' sx={{ pl: 4 }}>3.1 API Endpoints</ListItemButton>
+                                    <ListItemButton component={Link} to='#3.2' sx={{ pl: 4 }}>3.2 Chat Bot Mode</ListItemButton>
+                                    <ListItemButton component={Link} to='#3.3' sx={{ pl: 4 }}>3.3 Engineering Mode</ListItemButton>
+                                    <ListItemButton component={Link} to='#4'>4. Website Behaviors</ListItemButton>
+                                </List>
 
-                        </StickyBox>
-            
+                            </StickyBox>
+
+                        </Grid>
+                        <Grid item md={8} lg={9}>
+                            <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
+                            <div dangerouslySetInnerHTML={{ __html: authentication }} ></div>
+                            <div dangerouslySetInnerHTML={{ __html: inference }} ></div>
+                            <div dangerouslySetInnerHTML={{ __html: behavior }} ></div>
+
+                        </Grid>
+
+
                     </Grid>
-                    <Grid item md={8} lg={9}>
-                        <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
-                        <div dangerouslySetInnerHTML={{ __html: authentication }} ></div>
-                        <div dangerouslySetInnerHTML={{ __html: inference }} ></div>
-                        <div dangerouslySetInnerHTML={{ __html: behavior }} ></div>
-
-                    </Grid>
-
-
-                </Grid>
-            </Box>
+                </Box>
+            </Container>
         </Container>
     );
 }
