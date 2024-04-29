@@ -75,13 +75,13 @@ export default function Footer() {
                     <Typography variant="body2" fontWeight={600}>
                         Information
                     </Typography>
-                    <Link color="text.secondary" href="#">
+                    <Link color="text.secondary" href="/frontend">
                         Introduction
                     </Link>
-                    <Link color="text.secondary" href="#">
+                    <Link color="text.secondary" href="/frontend/model">
                         Model
                     </Link>
-                    <Link color="text.secondary" href="#">
+                    <Link color="text.secondary" href="/frontend/manual">
                         User Manual
                     </Link>
                 </Box>
@@ -95,10 +95,10 @@ export default function Footer() {
                     <Typography variant="body2" fontWeight={600}>
                         Money Talks
                     </Typography>
-                    <Link color="text.secondary" href="#">
+                    <Link color="text.secondary" href="/frontend/key-management">
                         Get Key
                     </Link>
-                    <Link color="text.secondary" href="#">
+                    <Link color="text.secondary" href="/frontend/model">
                         Pricing
                     </Link>
                 </Box>
@@ -112,14 +112,11 @@ export default function Footer() {
                     <Typography variant="body2" fontWeight={600}>
                         Inference Mode
                     </Typography>
-                    <Link color="text.secondary" href="#">
-                        Chat Bots
+                    <Link color="text.secondary" href="/frontend/hub">
+                        Chat Bots & Agents
                     </Link>
                     <Link color="text.secondary" href="#">
-                        Agents
-                    </Link>
-                    <Link color="text.secondary" href="#">
-                        LLM Functions
+                        API Docs
                     </Link>
                 </Box>
                 <Box
@@ -132,7 +129,7 @@ export default function Footer() {
                     <Typography variant="body2" fontWeight={600}>
                         Great Minds Think Alike
                     </Typography>
-                    <Link color="text.secondary" href="#">
+                    <Link color="text.secondary" href="/frontend/contact">
                         Contact Us
                     </Link>
                     <Link color="text.secondary" href="#">

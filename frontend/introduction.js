@@ -17,7 +17,9 @@ import KeyIcon from '@mui/icons-material/Key';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import EmailIcon from '@mui/icons-material/Email';
-
+import Box from '@mui/material/Box';
+import ResponsiveAppBar from './navbar';
+import VerticalNav from './component/vertical_nav';
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,
@@ -42,72 +44,22 @@ function Information() {
                 console.log(error);
             });
     }, []);
-    const handleListItemClick = (event, destination) => {
-        console.log(destination)
-    };
     return (
-        <Container maxWidth="lg">
+        <Container maxWidth={false} disableGutters>
             <title>Introduction</title>
-            <Grid container spacing={2}>
-                <Grid item md={8}>
-                    <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
+            <ResponsiveAppBar />
+            <Container maxWidth="lg">
+                <Grid container spacing={2}>
+                    <Grid item md={8}>
+                        <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
+                    </Grid>
+                    <Grid item md={4}>
+                        <Box sx={{ maxWidth: 225, display: { xs: 'none', sm: 'block' } }}>
+                            <VerticalNav />
+                        </Box>
+                    </Grid>
                 </Grid>
-                <Grid item md={4}>
-                    <List sx={{ maxWidth: 225, display: { xs: 'none', sm: 'block' }  }}>
-                        <ListItemButton onClick={(event) => handleListItemClick(event, "key")}>
-                            <ListItemIcon>
-                                <KeyIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Key & Credit" />
-                        </ListItemButton>
-                        <Divider component="li" />
-                        <ListItemButton onClick={(event) => handleListItemClick(event, "APIs")}>
-                            <ListItemIcon>
-                                <ApiIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="APIs" />
-                        </ListItemButton>
-                        <Divider component="li" />
-                        <ListItemButton onClick={(event) => handleListItemClick(event, "chat")}>
-                            <ListItemIcon>
-                                <ChatIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Chatbots & Agents" />
-                        </ListItemButton>
-                        <Divider component="li" />
-                        <ListItemButton button component={Link} href="/frontend/manual">
-                            <ListItemIcon>
-                                <ArticleIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Manual" />
-                        </ListItemButton>
-                        <Divider component="li" />
-                        <ListItemButton button component={Link} href="/frontend/model">
-                            <ListItemIcon>
-                                <LayersIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Available Models" />
-                        </ListItemButton>
-                        <Divider component="li" />
-
-                        <ListItemButton>
-                            <ListItemIcon>
-                                <PrecisionManufacturingIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Construction Zone" />
-                        </ListItemButton>
-                        <Divider component="li" />
-                        <ListItemButton>
-                            <ListItemIcon>
-                                <EmailIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Contact Us" />
-                        </ListItemButton>
-
-                    </List>
-
-                </Grid>
-            </Grid>
+            </Container>
         </Container>
     );
 }

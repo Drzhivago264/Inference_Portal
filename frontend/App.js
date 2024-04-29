@@ -1,6 +1,5 @@
 import * as React from 'react';
 import Container from '@mui/material/Container';
-import ResponsiveAppBar from './navbar';
 import Footer from './footer';
 import Manual from './manual';
 import Information from './introduction';
@@ -12,6 +11,7 @@ import Chat from './chat';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -36,7 +36,6 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <ResponsiveAppBar />
         <Routes>
           <Route exact path="/frontend" element={<Information />} />
           <Route path="/frontend/manual" element={<Manual />} />
