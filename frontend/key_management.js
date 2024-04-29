@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import axios from 'axios';
-import Grid from '@mui/material/Grid';
 import { TextareaAutosize as BaseTextareaAutosize } from '@mui/base/TextareaAutosize';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -9,7 +8,6 @@ import Stack from '@mui/material/Stack';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
 import Alert from '@mui/material/Alert';
-import { useNavigate } from "react-router-dom";
 import KeyIcon from '@mui/icons-material/Key';
 import Link from '@mui/material/Link';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -28,11 +26,9 @@ import Divider from '@mui/material/Divider';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Accordion from '@mui/material/Accordion';
-import AccordionActions from '@mui/material/AccordionActions';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { saveAs } from "file-saver";
-import blue from './navbar.js'
 import {
     createTheme,
     responsiveFontSizes,
@@ -129,14 +125,6 @@ function KeyManagement() {
         }
         return cookieValue;
     }
-
-    const StickyBox = styled(Box)`
-        position: -webkit-sticky;
-        position: sticky;
-        display: inline-block;
-        top: 100px;
-        `;
-
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
     const [keynamepay, setKeyNamePay] = useState("")
@@ -157,7 +145,7 @@ function KeyManagement() {
         event.preventDefault()
         setKeyNameError(false)
         if (keyname == '') {
-            setKeyError(true)
+            setKeyNameError(true)
         }
         if (keyname) {
             const csrftoken = getCookie('csrftoken');
@@ -183,9 +171,12 @@ function KeyManagement() {
         event.preventDefault()
         setKeyNamePayError(false)
         if (keynamepay == '') {
+            setKeyNamePayError(true)
+        }
+        if (key == '') {
             setKeyError(true)
         }
-        if (keynamepay) {
+        if (keynamepay && key) {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -210,9 +201,12 @@ function KeyManagement() {
         event.preventDefault()
         setKeyNamePayError(false)
         if (keynamepay == '') {
+            setKeyNamePayError(true)
+        }
+        if (key == '') {
             setKeyError(true)
         }
-        if (keynamepay) {
+        if (keynamepay && key) {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -233,14 +227,16 @@ function KeyManagement() {
                 });
         }
     }
-
     const handleXMRConfirmation = (event) => {
         event.preventDefault()
         setKeyNamePayError(false)
         if (keynamepay == '') {
+            setKeyNamePayError(true)
+        }
+        if (key == '') {
             setKeyError(true)
         }
-        if (keynamepay) {
+        if (keynamepay && key) {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -260,14 +256,16 @@ function KeyManagement() {
                 });
         }
     }
-
     const handleStripeRedirect = (event) => {
         event.preventDefault()
         setKeyNamePayError(false)
         if (keynamepay == '') {
             setKeyNamePayError(true)
         }
-        if (keynamepay) {
+        if (key == '') {
+            setKeyError(true)
+        }
+        if (keynamepay && key && amount) {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -286,14 +284,13 @@ function KeyManagement() {
                 }).catch(error => {
                     console.log(error.response.data.detail)
                     setStripeRedirectError(error.response.data.detai)
-                });l
+                }); l
         }
     }
     function exportKey(keyfile) {
         var blob = new Blob([keyfile], { type: "text/plain;charset=utf-8" });
         saveAs(blob, "Key_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
     }
-
     const KeyCreateExport = ({ key_, key_name, integrated_wallet, payment_id }) => {
         return (
             <Box my={4}>
@@ -327,6 +324,39 @@ function KeyManagement() {
                     <Textarea
                         defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nMonero Balance: ${monero_balance} \nFiat Balance: ${fiat_balance}`}
                         minRows={4}
+                        maxRows={10}
+                    />
+                </Box>
+            </Box >
+        );
+    };
+
+    const XMRWalletDisplay = ({ key_, key_name, integrated_wallet, payment_id }) => {
+        return (
+            <Box my={4}>
+                <Typography variant="body1"  >
+                    Wallet Information:
+                </Typography>
+                <Box textAlign='center' mt={4}>
+                    <Textarea
+                        defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nIntergrated Wallet: ${integrated_wallet} \nPayment id: ${payment_id}`}
+                        minRows={4}
+                        maxRows={10}
+                    />
+                </Box>
+            </Box >
+        );
+    };
+    const XMRWConfirmationDisplay = ({ detail }) => {
+        return (
+            <Box my={4}>
+                <Typography variant="body1"  >
+                    Confirmation Status:
+                </Typography>
+                <Box textAlign='center' mt={4}>
+                    <Textarea
+                        defaultValue={`${detail}`}
+                        minRows={2}
                         maxRows={10}
                     />
                 </Box>
@@ -369,7 +399,6 @@ function KeyManagement() {
                     <Typography variant="body1" >
                         Start by generating a random key by giving it a name.
                     </Typography>
-
                     <Box my={4}>
                         <form autoComplete="off" onSubmit={handleCreateKey}>
                             <FormControl defaultValue="" required>
@@ -456,7 +485,6 @@ function KeyManagement() {
                                     </Select>
                                 </FormControl>
                             </Stack>
-
                             <Accordion defaultExpanded>
                                 <AccordionSummary
                                     expandIcon={<ExpandMoreIcon />}
@@ -516,6 +544,7 @@ function KeyManagement() {
                                     <Box mt={2}>
                                         <Button variant="contained" type="submit" onClick={handleXMRRetrive.bind(this)} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</Button>
                                     </Box>
+                                    {xmrwalletresponse && <XMRWalletDisplay key_={xmrwalletresponse.key} key_name={xmrwalletresponse.key_name} payment_id={xmrwalletresponse.payment_id} integrated_wallet={xmrwalletresponse.integrated_wallet} />}
                                     {xmrwalleterror && <ErrorAlert error={xmrwalleterror} />}
                                 </AccordionDetails>
                             </Accordion>
@@ -537,10 +566,10 @@ function KeyManagement() {
                                     <Box mt={2}>
                                         <Button variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<ConfirmationNumberIcon />}>Confirm XMR Payment</Button>
                                     </Box>
+                                    {xmrconfirmationresponse && <XMRWConfirmationDisplay detail={xmrconfirmationresponse.detail} />}
                                     {xmrconfirmationerror && <ErrorAlert error={xmrconfirmationerror} />}
                                 </AccordionDetails>
                             </Accordion>
-
                         </form>
                     </Box>
                     <Divider></Divider>
@@ -557,5 +586,4 @@ function KeyManagement() {
         </Container >
     );
 }
-
 export default KeyManagement;

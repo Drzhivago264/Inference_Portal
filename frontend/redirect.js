@@ -63,7 +63,6 @@ function Hub() {
 
         if (key && destination) {
             const csrftoken = getCookie('csrftoken');
-
             const config = {
                 headers: {
                     'content-type': 'application/json',
@@ -89,7 +88,6 @@ function Hub() {
         axios.all([
             axios.get('/frontend-api/article/redirect/explaination'),
         ])
-
             .then(axios.spread((explaination_object) => {
                 setMessage(explaination_object.data.article.content);
             }))

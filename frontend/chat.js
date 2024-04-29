@@ -91,11 +91,11 @@ function Chat() {
     }, []);
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
-      }
-    
-      useEffect(() => {
+    }
+
+    useEffect(() => {
         scrollToBottom()
-      }, [chat_message]);
+    }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     const [searchParams] = useSearchParams();
@@ -197,27 +197,27 @@ function Chat() {
                                     ),
                                 }}
                             />
-                            <Stack  spacing={1}>
-                            {chat_message.map((mess) => {
+                            <Stack spacing={1}>
+                                {chat_message.map((mess) => {
 
-                                if (mess.role == 'Human') {
-                                    return (
-                                        <Paper  ><Box p={2} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper> 
-                                    )
-                                }
-                                else if (mess.holder) {
-                                    return (
-                                        <Paper ><Box p={2} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
-                                    )
-                                }
-                                else if (mess.role == 'Server') {
-                                    return (
-                                        <div className="message_log_container" >  <span> {mess.message.replace(/\n/g, "<br>")} ({mess.role} - {mess.time}) </span></div>
-                                    )
-                                }
+                                    if (mess.role == 'Human') {
+                                        return (
+                                            <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
+                                        )
+                                    }
+                                    else if (mess.holder) {
+                                        return (
+                                            <Paper ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
+                                        )
+                                    }
+                                    else if (mess.role == 'Server') {
+                                        return (
+                                            <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
+                                        )
+                                    }
 
-                            })}
-                            
+                                })}
+
                             </Stack>
                             <div ref={messagesEndRef}> </div>
                         </ChatPaper>
@@ -239,6 +239,9 @@ function Chat() {
                                     InputProps={{
                                         endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end">
                                             <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitChat} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
+
+                                        startAdornment: <InputAdornment position="start">   </InputAdornment>,
+
                                     }}
                                 />
 

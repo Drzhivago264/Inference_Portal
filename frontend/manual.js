@@ -9,8 +9,6 @@ import "prismjs/themes/prism-okaidia.min.css";
 import "prismjs/plugins/toolbar/prism-toolbar.min.css";
 import "prismjs/plugins/toolbar/prism-toolbar.min";
 import "prismjs/plugins/copy-to-clipboard/prism-copy-to-clipboard.min";
-import Paper from '@mui/material/Paper';
-
 import { styled } from '@mui/system';
 require("prismjs/components/prism-c");
 require("prismjs/components/prism-python");
@@ -19,9 +17,6 @@ require("prismjs/plugins/normalize-whitespace/prism-normalize-whitespace");
 import ListSubheader from '@mui/material/ListSubheader';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { colors } from '@mui/material';
 
 function Manual() {
     useEffect(() => {

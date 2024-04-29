@@ -53,7 +53,7 @@ function Information() {
                     <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
                 </Grid>
                 <Grid item md={4}>
-                    <List sx={{ maxWidth: 225 }}>
+                    <List sx={{ maxWidth: 225, display: { xs: 'none', sm: 'block' }  }}>
                         <ListItemButton onClick={(event) => handleListItemClick(event, "key")}>
                             <ListItemIcon>
                                 <KeyIcon />

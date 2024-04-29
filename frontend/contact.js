@@ -153,7 +153,7 @@ function Contact() {
         if (mail == '') {
             setMailError(true)
         }
-        if (keyname) {
+        if (keyname && key && username && message && mail) {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -171,29 +171,11 @@ function Contact() {
             axios.post("/frontend-api/send-mail", data, config)
                 .then((response) => {
                     setMailResponse(response.data)
-
                 }).catch(error => {
                     setMailError(error.response.data.detail)
                 });
         }
     }
-
-    const KeyCheckDisplay = ({ key_, key_name, monero_balance, fiat_balance }) => {
-        return (
-            <Box my={4}>
-                <Typography variant="body1"  >
-                    Congrats! Your Key is correct
-                </Typography>
-                <Box textAlign='center' mt={4}>
-                    <Textarea
-                        defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nMonero Balance: ${monero_balance} \nFiat Balance: ${fiat_balance}`}
-                        minRows={4}
-                        maxRows={10}
-                    />
-                </Box>
-            </Box >
-        );
-    };
     const ErrorAlert = ({ error }) => {
         return (
             <Box mt={4}>
@@ -208,6 +190,21 @@ function Contact() {
             </Box >
         );
     };
+
+    const SuccessAlert = ({ detail }) => {
+        return (
+            <Box mt={4}>
+                <Typography variant="body1"  >
+                    Request Successed!
+                </Typography>
+                <Box textAlign='center' my={2}>
+                    <Alert variant="filled" severity="error">
+                        {detail}
+                    </Alert>
+                </Box>
+            </Box >
+        );
+    };
     return (
         <Container maxWidth="lg">
             <title>Contact</title>
@@ -217,7 +214,6 @@ function Contact() {
                 gap={4}
                 p={2}
             >
-
                 <StyledPaper variant="outlined">
 
                     <Box textAlign='center' my={4}>
@@ -315,7 +311,7 @@ function Contact() {
                             </FormControl>
                         </form>
                     </Box>
-
+                    {mailsentresponse && <SuccessAlert detail={mailsentresponse.detail} />}                       
                     {mailsenterror && <ErrorAlert error={mailsenterror} />}
                 </StyledPaper>
             </Box>
