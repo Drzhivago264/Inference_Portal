@@ -18,7 +18,6 @@ require("prismjs/components/prism-python");
 require("prismjs/components/prism-bash");
 import Divider from '@mui/material/Divider';
 require("prismjs/plugins/normalize-whitespace/prism-normalize-whitespace");
-import ListSubheader from '@mui/material/ListSubheader';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import "./component/editor-js.css"
@@ -71,14 +70,15 @@ function Manual() {
                     <Grid container spacing={3}>
                         
                         <Grid item md={8} lg={9}>
+                            <Box mt={5} mb={5}>
                             <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
                             <div dangerouslySetInnerHTML={{ __html: authentication }} ></div>
                             <div dangerouslySetInnerHTML={{ __html: inference }} ></div>
                             <div dangerouslySetInnerHTML={{ __html: behavior }} ></div>
-
+                            </Box>
                         </Grid>
                         <Grid item md={4} lg={3}>
-                            <StickyBox sx={{ display: { xs: 'none', sm: 'none', md: 'block', p: 1 } }}>
+                            <StickyBox mt={5} sx={{ display: { xs: 'none', sm: 'none', md: 'block', p: 1 } }}>
                                 <Paper  elevation={5} square={false}>
                                     <List dense={true}
                                         subheader={<Typography pl={2} pt={1} sx={{ color: 'white', }}>   Content</Typography>}>

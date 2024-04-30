@@ -379,17 +379,17 @@ function Hotpot() {
                                     {chat_message.map((mess) => {
                                         if (mess.role == 'Human') {
                                             return (
-                                                <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
+                                                <Paper  ><Box p={1} sx={{ borderRight: 5,  borderColor: 'primary.main', borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
                                             )
                                         }
                                         else if (mess.holder) {
                                             return (
-                                                <Paper ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
+                                                <Paper ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
                                             )
                                         }
                                         else if (mess.role == 'Server') {
                                             return (
-                                                <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
+                                                <Paper  ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }}  className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
                                             )
                                         }
                                     })}
@@ -427,7 +427,7 @@ function Hotpot() {
 
                                         if (mess.role == 'Human') {
                                             return (
-                                                <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
+                                                <Paper  ><Box p={1} sx={{ borderRight: 5,  borderColor: 'primary.main', borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
                                             )
                                         }
                                         else if (mess.holder) {
@@ -479,6 +479,7 @@ function Hotpot() {
                                         onChange={e => setChoosenChatModel(e.target.value)}
                                         value={choosen_chat_model}
                                         label="Models"
+                                        size="small"
                                     >
                                         {agent_objects.map((agent_object_) => {
                                             return (
@@ -500,6 +501,7 @@ function Hotpot() {
                                         onChange={e => setChoosenAgentModel(e.target.value)}
                                         value={choosen_agent_model}
                                         label="Models"
+                                        size="small"
                                     >
                                         {agent_objects.map((agent_object_) => {
                                             return (
@@ -516,6 +518,7 @@ function Hotpot() {
                                         onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value) }}
                                         value={choosen_template}
                                         label="Agents"
+                                        size="small"
                                     >
                                         {template_list.map((template) => {
                                             return (

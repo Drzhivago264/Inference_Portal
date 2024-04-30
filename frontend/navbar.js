@@ -107,6 +107,14 @@ const Button = styled(BaseButton)(
   }
   `,
 );
+const AppBarColored = styled(AppBar)(
+  ({ theme }) => `
+  background: ${theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.55)' : 'rgba(0, 0, 0, 0.04)'};
+  color: ${theme.palette.mode === 'dark' ? 'white' : 'black'};
+  border-bottom: 1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : grey[200]};
+  backdrop-filter: blur(20px); 
+  `,
+);
 const MenuButton = styled(BaseMenuButton)(
   ({ theme }) => `
   font-family: 'IBM Plex Sans', sans-serif;
@@ -160,7 +168,7 @@ function ResponsiveAppBar() {
   );
   return (
 
-    <AppBar position="sticky" color="default" >
+    <AppBarColored position="sticky" >
       <Drawer open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
       </Drawer>
@@ -232,7 +240,7 @@ function ResponsiveAppBar() {
           </Button>
         </Toolbar>
       </Container>
-    </AppBar>
+    </AppBarColored>
   );
 }
 export default ResponsiveAppBar;

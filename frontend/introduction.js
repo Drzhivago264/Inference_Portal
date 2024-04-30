@@ -12,7 +12,6 @@ require("prismjs/components/prism-c");
 require("prismjs/components/prism-python");
 require("prismjs/components/prism-bash");
 import Box from '@mui/material/Box';
-
 import ResponsiveAppBar from './navbar';
 import VerticalNav from './component/vertical_nav';
 const Item = styled(Paper)(({ theme }) => ({
@@ -45,12 +44,16 @@ function Information() {
             <title>Introduction</title>
             <ResponsiveAppBar />
             <Container maxWidth="lg">
-                <Grid container spacing={2}>
-                    <Grid item md={8}>
-                        <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
+                <Grid container spacing={1}>
+                    <Grid item md={9}>
+                
+                            <Box  mt={5} mb={5} p={1}>
+                                 <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
+                            </Box>
+                       
                     </Grid>
-                    <Grid item md={4}>
-                        <Box sx={{ maxWidth: 225, display: { xs: 'none', sm: 'block' } }}>
+                    <Grid item md={3}>
+                        <Box m={7} sx={{ width: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
                             <VerticalNav />
                         </Box>
                     </Grid>
