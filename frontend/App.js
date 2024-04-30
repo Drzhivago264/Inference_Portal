@@ -59,7 +59,7 @@ export default function App() {
             <Route path="/frontend/engineer/:keyhash" element={<Agent />} />
             <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLM />} />
             <Route path="/frontend/hotpot/:keyhash" element={<Hotpot />} />
-            <Route path="/frontend/prompt/:keysigned" element={<Chat />} />
+            <Route path="/api/docs" element={<APIRedirect />} />
             <Route path="/frontend/contact" element={<Contact />} />
           </Routes>
         </Router>
@@ -69,4 +69,8 @@ export default function App() {
       </ThemeProvider>
     </ColorModeContext.Provider>
   );
+}
+function APIRedirect() {
+  window.location.href = '/api/docs';
+  return null;
 }

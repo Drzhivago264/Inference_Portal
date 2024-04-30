@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Button as BaseButton } from '@mui/base/Button';
 import { Link } from "react-router-dom";
+import { Link as HardLink} from "react-router-dom";
 import { Dropdown } from '@mui/base/Dropdown';
 import { Menu } from '@mui/base/Menu';
 import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
@@ -219,7 +220,7 @@ function ResponsiveAppBar() {
             <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>Modes</MenuButton>
             <Menu slots={{ listbox: Listbox }}>
               <MenuItem ><NavLink to="/frontend/hub">Chat & Log</NavLink></MenuItem>
-              <MenuItem >API</MenuItem>
+              <MenuItem ><NavLink to="/api/docs">API Docs</NavLink></MenuItem>
             </Menu>
           </Dropdown>
 
