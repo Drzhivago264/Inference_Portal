@@ -271,9 +271,10 @@ function KeyManagement() {
             }
             axios.post("/frontend-api/confirm-xmr-payment", data, config)
                 .then((response) => {
-
+                    console.log(response)
                     setXMRConfirmationResponse(response.data)
                 }).catch(error => {
+                    console.log(error)
                     setXMRConfirmationError(error.response.data.detail)
                 });
         }
