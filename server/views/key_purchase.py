@@ -82,6 +82,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
     if serializer.is_valid():
         key_name = serializer.data['key_name']
         key_ = serializer.data['key']
+        
         try:
             key = APIKEY.objects.get_from_key(key_)
             if key.name == key_name:
@@ -135,6 +136,8 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                             key.monero_credit += amount/1e+12
                             key.save()
                             return Response({"detail": f"Transaction is success, add {amount/1e+12} XMR to key {key_}"}, status=status.HTTP_200_OK)
+                        except Exception as e:
+                            return Response({"detail": f"{e}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
                     else:
                         return Response({"detail": f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations"}, status=status.HTTP_200_OK)
             else:
@@ -190,7 +193,7 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
                     integrated_address = json.loads(
                         wallet.text)['result']['integrated_address']
                     return Response({"key_name": key_name,
-                                    'key': key,
+                                    'key': key_,
                                     'payment_id': payment_id,
                                     'integrated_wallet': integrated_address
                                     }, status=status.HTTP_200_OK)
@@ -205,7 +208,7 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
                         key.payment_id = payment_id
                         key.save()
                         return Response({"key_name": key_name,
-                                        'key': key,
+                                        'key': key_,
                                         'payment_id': payment_id,
                                         'integrated_wallet': integrated_address
                                         }, status=status.HTTP_200_OK)
@@ -262,7 +265,7 @@ def stripe_redirect(request: HttpRequest) -> Response:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-    
+
 def generate_key_success(request: HttpRequest, key: str) -> HttpResponse:
     signer = Signer()
     key_ = APIKEY.objects.get_from_key(signer.unsign(key))
