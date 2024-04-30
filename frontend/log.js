@@ -43,7 +43,6 @@ function Log() {
                     topStart: 'pageLength',
                     top2Start: {
                         buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5', 'print',],
-                        
                     }
                 },
                 columns: [

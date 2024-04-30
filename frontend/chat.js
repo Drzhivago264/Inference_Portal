@@ -61,7 +61,7 @@ function Chat() {
     const [model_objects, setModels] = useState([]);
     const [chat_message, setChatMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
-    const [choosen_model, setChoosenModel] = useState("gpt-4");
+    const [choosen_model, setChoosenModel] = useState("Mistral Chat 13B");
     const [top_p, setTopp] = useState(0.72);
     const [top_k, setTopk] = useState(-1);
     const [mode, setMode] = useState("chat");
