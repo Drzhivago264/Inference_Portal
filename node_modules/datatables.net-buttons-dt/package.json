@@ -1,0 +1,54 @@
+{
+    "name": "datatables.net-buttons-dt",
+    "description": "Buttons for DataTables with styling for [DataTables](https://datatables.net/)",
+    "main": "js/buttons.dataTables.js",
+    "module": "js/buttons.dataTables.mjs",
+    "style": "css/buttons.dataTables.css",
+    "types": "./types/buttons.dataTables.d.ts",
+    "version": "3.0.2",
+    "files": [
+        "css/**/*.css",
+        "js/**/*.js",
+        "js/**/*.mjs",
+        "types/**/*.d.ts"
+    ],
+    "keywords": [
+        "Buttons",
+        "Column Visibility",
+        "csv",
+        "excel",
+        "pdf",
+        "print",
+        "Datatables",
+        "jQuery",
+        "table",
+        "filter",
+        "sort"
+    ],
+    "dependencies": {
+        "datatables.net-buttons": "3.0.2",
+        "datatables.net-dt": "^2",
+        "jquery": ">=1.7"
+    },
+    "moduleType": [
+        "globals",
+        "amd",
+        "node"
+    ],
+    "ignore": [
+        "composer.json",
+        "datatables.json",
+        "package.json"
+    ],
+    "author": {
+        "name": "SpryMedia Ltd",
+        "url": "http://datatables.net"
+    },
+    "homepage": "https://datatables.net",
+    "bugs": "https://datatables.net/forums",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DataTables/Dist-DataTables-Buttons-DataTables.git"
+    }
+}

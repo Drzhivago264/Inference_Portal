@@ -27,6 +27,7 @@ from django.http import (
     HttpResponse,
     HttpResponseRedirect
 )
+from server.models import APIKEY
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -43,11 +44,15 @@ def hub_redirect_api(request):
         signer = Signer()
         key = serializer.data['key']
         destination = serializer.data['destination']
-        if destination != "log":
-            key_hash = sha256(key.encode('utf-8')).hexdigest()
-            return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
-        else:
-            return Response({"redirect_link": f"/frontend/prompt/{signer.sign(key)}"}, status=status.HTTP_200_OK)
+        try:
+            APIKEY.objects.get_from_key(key)
+            if destination != "log":
+                key_hash = sha256(key.encode('utf-8')).hexdigest()
+                return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"redirect_link": f"/frontend/{destination}/{signer.sign(key)}"}, status=status.HTTP_200_OK)
+        except APIKEY.DoesNotExist:
+                return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -11,6 +11,7 @@ import Chat from './chat';
 import Agent from './agent.js'
 import FunctionLLM from './function_llm.js';
 import Hotpot from './hotpot.js';
+import Log from './log.js';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
@@ -59,6 +60,7 @@ export default function App() {
             <Route path="/frontend/engineer/:keyhash" element={<Agent />} />
             <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLM />} />
             <Route path="/frontend/hotpot/:keyhash" element={<Hotpot />} />
+            <Route path="/frontend/log/:keyhash" element={<Log />} />
             <Route path="/api/docs" element={<APIRedirect />} />
             <Route path="/frontend/contact" element={<Contact />} />
           </Routes>
