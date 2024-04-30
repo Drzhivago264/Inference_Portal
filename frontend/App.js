@@ -51,7 +51,8 @@ export default function App() {
         <CssBaseline />
         <Router>
           <Routes>
-            <Route exact path="/frontend" element={<Information />} />
+            <Route exact path="/" element={<Information />} />
+            <Route exact path="" element={<Information />} />
             <Route path="/frontend/manual" element={<Manual />} />
             <Route path="/frontend/model" element={<ModelInfor />} />
             <Route path="/frontend/key-management" element={<KeyManagement />} />

@@ -75,7 +75,7 @@ export default function Footer() {
                     <Typography variant="body2" fontWeight={600}>
                         Information
                     </Typography>
-                    <Link color="text.secondary" href="/frontend">
+                    <Link color="text.secondary" href="/">
                         Introduction
                     </Link>
                     <Link color="text.secondary" href="/frontend/model">

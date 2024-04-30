@@ -35,7 +35,7 @@ from server.views.room_view import (Room, agent_select, prompt, hub_redirect_api
 app_name = "server"
 
 urlpatterns = [
-    path('frontend', TemplateView.as_view(template_name='frontend_index.html')),
+    path('', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/model', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/hub', TemplateView.as_view(template_name='frontend_index.html')),
@@ -61,7 +61,7 @@ urlpatterns = [
     path('frontend-api/products', product_list_api, name='product-list'),
     path('frontend-api/send-mail', contact_api, name='product-list'),
 
-    path("", index, name="index"),
+    #path("", index, name="index"),
     path("model_infor/", model_infor, name="model_infor"),    
     path("manual/", manual, name="manual"),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),

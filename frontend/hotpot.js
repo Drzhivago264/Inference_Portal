@@ -72,7 +72,7 @@ function Hotpot() {
     const [agent_message, setAgentMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
     const [choosen_agent_model, setChoosenAgentModel] = useState("gpt-4");
-    const [choosen_chat_model, setChoosenChatModel] = useState("gpt-4");
+    const [choosen_chat_model, setChoosenChatModel] = useState("Mistral Chat 13B");
     const [top_p, setTopp] = useState(0.72);
     const [top_k, setTopk] = useState(-1);
     const [mode, setMode] = useState("chat");

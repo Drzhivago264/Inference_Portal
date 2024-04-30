@@ -23,7 +23,7 @@ const VerticalNav = () => {
                 <ListItemText primary="Key & Credit" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton button component={Link} href="#">
+            <ListItemButton button component={Link} href="/api/docs">
                 <ListItemIcon>
                     <ApiIcon />
                 </ListItemIcon>
@@ -51,7 +51,7 @@ const VerticalNav = () => {
                 <ListItemText primary="Available Models" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton>
+            <ListItemButton  button component={Link} href="https://construction.professorparakeet.com/"> 
                 <ListItemIcon>
                     <PrecisionManufacturingIcon />
                 </ListItemIcon>

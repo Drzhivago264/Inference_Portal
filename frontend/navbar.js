@@ -8,34 +8,18 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Button as BaseButton } from '@mui/base/Button';
 import { Link } from "react-router-dom";
-import { Link as HardLink} from "react-router-dom";
 import { Dropdown } from '@mui/base/Dropdown';
 import { Menu } from '@mui/base/Menu';
 import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
 import { styled } from '@mui/system';
 import Constant_Colours from './component/color.js'
-import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import { useNavigate } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
-import ApiIcon from '@mui/icons-material/Api';
-import ChatIcon from '@mui/icons-material/Chat';
-import ArticleIcon from '@mui/icons-material/Article';
-import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
-import LayersIcon from '@mui/icons-material/Layers';
-import KeyIcon from '@mui/icons-material/Key';
-import EmailIcon from '@mui/icons-material/Email';
 import VerticalNav from './component/vertical_nav.js';
+import {Link as HardLink} from '@mui/material/Link';
 const blue = Constant_Colours.blue;
 const grey = Constant_Colours.grey;
-
-
 const Listbox = styled('ul')(
   ({ theme }) => `
   font-family: 'IBM Plex Sans', sans-serif;
@@ -55,7 +39,6 @@ const Listbox = styled('ul')(
   z-index: 1;
   `,
 );
-
 const MenuItem = styled(BaseMenuItem)(
   ({ theme }) => `
   list-style: none;
@@ -79,39 +62,6 @@ const MenuItem = styled(BaseMenuItem)(
   }
   `,
 );
-
-const MenuButton = styled(BaseMenuButton)(
-  ({ theme }) => `
-
-  font-size: 14px;
-  line-height: 1;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 150ms ease;
-  cursor: pointer;
-  background: transparent;
-  border: 0px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
-  color: ${theme.palette.mode === 'dark' ? grey[100] : grey[900]};
-
-  &:hover {
-    background: ${theme.palette.mode === 'dark' ? grey[800] : grey[100]};
-    color: ${theme.palette.mode === 'dark' ? grey[200] : grey[900]};
-    border-color: ${theme.palette.mode === 'dark' ? grey[600] : grey[300]};
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  }
-
-  &:active {
-    background: ${theme.palette.mode === 'dark' ? grey[700] : grey[100]};
-    color: ${theme.palette.mode === 'dark' ? grey[100] : grey[900]}
-  }
-
-  &:focus-visible {
-    box-shadow: 0 0 0 4px ${theme.palette.mode === 'dark' ? blue[300] : blue[200]};
-    outline: none;
-  }
-  `,
-);
-
 const NavLink = styled(Link)(
   ({ theme }) => `
     display: flex;
@@ -127,11 +77,10 @@ const NavLink = styled(Link)(
 );
 const Button = styled(BaseButton)(
   ({ theme }) => `
-
   font-size: 14px;
   line-height: 1;
   padding-top: 8px;
-  padding-bottom: 4px;
+  padding-bottom: 8px;
   padding-left: 8px;
   padding-right: 8px;
   border-radius: 8px;
@@ -158,12 +107,48 @@ const Button = styled(BaseButton)(
   }
   `,
 );
+const MenuButton = styled(BaseMenuButton)(
+  ({ theme }) => `
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 8px 16px;
+  margin: 5px;
+  border-radius: 8px;
+  color: white;
+  transition: all 150ms ease;
+  cursor: pointer;
+  background: ${theme.palette.mode === 'dark' ? grey[900] : '#fff'};
+  border: 1px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
+  color: ${theme.palette.mode === 'dark' ? grey[200] : grey[900]};
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  &:hover {
+    background: ${theme.palette.mode === 'dark' ? grey[800] : grey[50]};
+    border-color: ${theme.palette.mode === 'dark' ? grey[600] : grey[300]};
+  }
+
+  &:active {
+    background: ${theme.palette.mode === 'dark' ? grey[700] : grey[100]};
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 4px ${theme.palette.mode === 'dark' ? blue[300] : blue[200]};
+    outline: none;
+  }
+  `,
+);
 function ResponsiveAppBar() {
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
+  const navigate = useNavigate();
+  const redirect = (e) => {
+    if (e.target.value == "key-management") {
+      navigate('/frontend/key-management');
+    }
+    else if (e.target.value == "contact") {
+      navigate('/frontend/contact');
+    }
   };
-
-
   const [open, setOpen] = React.useState(false);
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -175,7 +160,7 @@ function ResponsiveAppBar() {
   );
   return (
 
-    <AppBar position="sticky"  color="default" >
+    <AppBar position="sticky" color="default" >
       <Drawer open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
       </Drawer>
@@ -189,7 +174,6 @@ function ResponsiveAppBar() {
             sx={{ mr: 2, display: { xs: 'block', sm: 'none' } }}
             onClick={toggleDrawer(true)}
           >
-
             <MenuIcon />
           </IconButton>
           <Typography
@@ -207,11 +191,10 @@ function ResponsiveAppBar() {
             Inference
           </Typography>
 
-
           <Dropdown>
             <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>Information</MenuButton>
             <Menu slots={{ listbox: Listbox }}>
-              <MenuItem> <NavLink to="/frontend">Introduction</NavLink></MenuItem>
+              <MenuItem> <NavLink to="/">Introduction</NavLink></MenuItem>
               <MenuItem> <NavLink to="/frontend/manual">Manual</NavLink></MenuItem>
               <MenuItem> <NavLink to="/frontend/model">Model</NavLink></MenuItem>
             </Menu>
@@ -227,8 +210,8 @@ function ResponsiveAppBar() {
 
           <Button
             key='key-management'
-            href="/frontend/key-management"
-            onClick={handleCloseNavMenu}
+            value='key-management'
+            onClick={(e) => redirect(e)}
             sx={{
               textDecoration: 'none',
               display: { xs: 'none', sm: 'block' }
@@ -238,8 +221,8 @@ function ResponsiveAppBar() {
           </Button>
           <Button
             key='contact'
-            href="/frontend/contact"
-            onClick={handleCloseNavMenu}
+            value ='contact'
+            onClick={(e) => redirect(e)}
             sx={{
               textDecoration: 'none',
               display: { xs: 'none', sm: 'block' }
@@ -247,8 +230,6 @@ function ResponsiveAppBar() {
           >
             Contact
           </Button>
-
-
         </Toolbar>
       </Container>
     </AppBar>

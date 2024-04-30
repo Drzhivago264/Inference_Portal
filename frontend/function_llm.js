@@ -5,10 +5,7 @@ import { FormControl, FormLabel } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import InputLabel from '@mui/material/InputLabel';
-import Checkbox from '@mui/material/Checkbox';
-import edjsParser from "editorjs-parser"
 import Radio from '@mui/material/Radio';
-
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import RadioGroup from '@mui/material/RadioGroup';
@@ -20,39 +17,11 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Slider from '@mui/material/Slider';
 import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
-import Switch from '@mui/material/Switch';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
-import { useSearchParams } from 'react-router-dom';
-import List from '@mui/material/List';
-import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import Link from '@mui/material/Link';
-import ApiIcon from '@mui/icons-material/Api';
-import ArticleIcon from '@mui/icons-material/Article';
-import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
-import LayersIcon from '@mui/icons-material/Layers';
-import ChatIcon from '@mui/icons-material/Chat';
 import KeyIcon from '@mui/icons-material/Key';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import EmailIcon from '@mui/icons-material/Email';
-import InputBase from '@mui/material/InputBase';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import { useMatch } from "react-router-dom";
-import SearchIcon from '@mui/icons-material/Search';
-import DirectionsIcon from '@mui/icons-material/Directions';
-import ListItem from '@mui/material/ListItem';
-import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from './navbar';
 import SendIcon from '@mui/icons-material/Send';
-import EditorJS from "@editorjs/editorjs";
-import Paragraph from "@editorjs/paragraph";
-import Header from "@editorjs/header";
-import Delimiter from "@editorjs/delimiter";
-import CheckList from "@editorjs/checklist";
-import GetAppIcon from '@mui/icons-material/GetApp';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -195,7 +164,7 @@ function FunctionLLM() {
         }
     }
     return (
-        <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
+        <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Agent</title>
             <ResponsiveAppBar />
             <Container maxWidth="xl" sx={{ minWidth: 1200 }}>
