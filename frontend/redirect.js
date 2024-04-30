@@ -14,9 +14,10 @@ import Button from '@mui/material/Button';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import { FormControl, FormLabel } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import LoginIcon from '@mui/icons-material/Login';
-
+import Typography from '@mui/material/Typography';
 function Hub() {
 
     function getCookie(name) {
@@ -40,7 +41,7 @@ function Hub() {
     const [key, setKey] = useState("")
     const [destination, setDestination] = useState("engineer")
     const [keyError, setKeyError] = useState(false)
-
+    const [redirecterror, setRedirectError] = useState(null);
     const handleSubmit = (event) => {
 
         event.preventDefault()
@@ -64,12 +65,11 @@ function Hub() {
             }
             console.log(key, destination)
             axios.post("/frontend-api/hub-redirect", data, config)
-
                 .then((response) => {
                     navigate(response.data.redirect_link, { replace: true });
-
                 }).catch(error => {
-                    console.log(error);
+                    console.log(error.response.data.detail)
+                    setRedirectError(error.response.data.detail)
                 });;
         }
     }
@@ -84,7 +84,20 @@ function Hub() {
                 console.log(error);
             });
     }, []);
-
+    const ErrorAlert = ({ error }) => {
+        return (
+            <Box mt={4}>
+                <Typography variant="body1"  >
+                    Request Failed!
+                </Typography>
+                <Box textAlign='center' my={2}>
+                    <Alert variant="filled" severity="error">
+                        {error}
+                    </Alert>
+                </Box>
+            </Box >
+        );
+    };
     return (
         <Container maxWidth={false} disableGutters>
             <title>Hub</title>
@@ -139,6 +152,7 @@ function Hub() {
 
                                 </FormControl>
                             </form>
+                            {redirecterror && <ErrorAlert error={redirecterror} />}
                         </Grid>
                         <Grid item md={8} lg={9}>
                             <div dangerouslySetInnerHTML={{ __html: explaination }} ></div>

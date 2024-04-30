@@ -45,6 +45,7 @@ urlpatterns = [
     path('frontend/engineer/<str:key>/', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/toolbox/<str:key>/', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/hotpot/<str:key>/', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/log/<str:key>/', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/dataanalysis/<str:key>/', TemplateView.as_view(template_name='frontend_index.html')),
 
     path('frontend-api/article/<str:name>/<str:a_type>',  article_api , name='information'),
