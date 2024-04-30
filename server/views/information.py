@@ -17,16 +17,18 @@ from django.http import (
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
+
+"""--------REACT FRONTEND API---------"""
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
-def article_api(request, name, a_type):
+def article_api(request: HttpRequest, name: str, a_type: str) -> Response:
     page_content = Article.objects.get(name=name, a_type=a_type)
     serializer = ArticleSerializer(page_content)
     return Response({'article': serializer.data})
 
 @api_view(['GET'])
-@throttle_classes([AnonRateThrottle])
-def model_api(request):
+@throttle_classes([AnonRateThrottle]) 
+def model_api(request: HttpRequest) -> Response:
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
     models_charoom = LLM.objects.all()
     models_display = [i for i in models_charoom if not i.agent_availability] 
@@ -39,6 +41,8 @@ def model_api(request):
                       'models_agent': serializer_model_agent.data
                       })
 
+
+"""--------OLD VIEW FOR DJANGO TEMPLATE---------"""
 # @cache_page(60*15)
 def index(request: HttpRequest) -> HttpResponse:
     page_content = Article.objects.filter(name="index")

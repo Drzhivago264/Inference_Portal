@@ -13,6 +13,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import Link from '@mui/material/Link';
 import InputAdornment from '@mui/material/InputAdornment';
 import CreateIcon from '@mui/icons-material/Create';
+import LoadingButton from '@mui/lab/LoadingButton';
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import { styled } from '@mui/system';
@@ -50,7 +51,6 @@ function KeyManagement() {
         axios.all([
             axios.get('/frontend-api/products'),
         ])
-
             .then(axios.spread((server_object) => {
                 setProduct(server_object.data.products);
 
@@ -126,6 +126,11 @@ function KeyManagement() {
         }
         return cookieValue;
     }
+    const [keycreateloading, setKeyCreateLoading] = useState(false);
+    const [keycheckloading, setKeyCheckLoading] = useState(false);
+    const [xmrretrieveloading, setXMRRetrieveLoading] = useState(false);
+    const [xmrconfirmationloading, setXMRConfirmationLoading] = useState(false);
+
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
     const [keynamepay, setKeyNamePay] = useState("")
@@ -144,8 +149,11 @@ function KeyManagement() {
     const [striperedirecterror, setStripeRedirectError] = useState(null);
     const handleCreateKey = (event) => {
         event.preventDefault()
+        setKeyCreateLoading(true);
+        setKeyCreateResponse(null)
         setKeyNameError(false)
         if (keyname == '') {
+            setKeyCreateLoading(false)
             setKeyNameError(true)
         }
         if (keyname) {
@@ -161,6 +169,7 @@ function KeyManagement() {
             }
             axios.post("/frontend-api/generate-key", data, config)
                 .then((response) => {
+                    setKeyCreateLoading(false)
                     setKeyCreateResponse(response.data)
 
                 }).catch(error => {
@@ -170,11 +179,16 @@ function KeyManagement() {
     }
     const handleCheckKey = (event) => {
         event.preventDefault()
+        setKeyCheckError(null)
+        setKeyCheckResponse(null)
+        setKeyCheckLoading(true)
         setKeyNamePayError(false)
         if (keynamepay == '') {
+            setKeyCheckLoading(fasle)
             setKeyNamePayError(true)
         }
         if (key == '') {
+            setKeyCheckLoading(fasle)
             setKeyError(true)
         }
         if (keynamepay && key) {
@@ -192,6 +206,7 @@ function KeyManagement() {
             axios.post("/frontend-api/check-credit", data, config)
 
                 .then((response) => {
+                    setKeyCheckLoading(fasle)
                     setKeyCheckResponse(response.data)
                 }).catch(error => {
                     setKeyCheckError(error.response.data.detail)
@@ -200,11 +215,16 @@ function KeyManagement() {
     }
     const handleXMRRetrive = (event) => {
         event.preventDefault()
+        setXMRWalletError(null)
+        setXMRWalletResponse(null)
+        setXMRRetrieveLoading(true)
         setKeyNamePayError(false)
         if (keynamepay == '') {
+            setXMRRetrieveLoading(false)
             setKeyNamePayError(true)
         }
         if (key == '') {
+            setXMRRetrieveLoading(false)
             setKeyError(true)
         }
         if (keynamepay && key) {
@@ -221,6 +241,7 @@ function KeyManagement() {
             }
             axios.post("/frontend-api/get-xmr-wallet", data, config)
                 .then((response) => {
+                    setXMRRetrieveLoading(false)
                     setXMRWalletResponse(response.data)
 
                 }).catch(error => {
@@ -230,12 +251,17 @@ function KeyManagement() {
     }
     const handleXMRConfirmation = (event) => {
         event.preventDefault()
+        setXMRConfirmationError(null)
+        setXMRConfirmationResponse(null)
+        setXMRConfirmationLoading(true)
         setKeyNamePayError(false)
         if (keynamepay == '') {
             setKeyNamePayError(true)
+            setXMRConfirmationLoading(false)
         }
         if (key == '') {
             setKeyError(true)
+            setXMRConfirmationLoading(false)
         }
         if (keynamepay && key) {
             const csrftoken = getCookie('csrftoken');
@@ -251,6 +277,7 @@ function KeyManagement() {
             }
             axios.post("/frontend-api/confirm-xmr-payment", data, config)
                 .then((response) => {
+                    setXMRConfirmationLoading(false)
                     setXMRConfirmationResponse(response.data)
                 }).catch(error => {
                     setXMRConfirmationError(error.response.data.detail)
@@ -423,7 +450,7 @@ function KeyManagement() {
                                                 ),
                                             }}
                                         />
-                                        <Button size="small" variant="contained" type="submit" endIcon={<LockOpenIcon />}>Create Key</Button>
+                                        <LoadingButton size="small" loading={keycreateloading}  loadingPosition="end" variant="contained" type="submit" endIcon={<LockOpenIcon />}>Generate</LoadingButton>
                                     </Stack>
                                 </FormControl>
                             </form>
@@ -503,7 +530,7 @@ function KeyManagement() {
                                             Before paying, you may check your current balance (and Key and Key Name) to avoid undesirable accidents.
                                         </Typography>
                                         <Box mt={2}>
-                                            <Button variant="contained" name="checkcredit" onClick={handleCheckKey.bind(this)} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</Button>
+                                            <LoadingButton loading={keycheckloading}  variant="contained" name="checkcredit" onClick={handleCheckKey.bind(this)} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
                                         </Box>
                                         {keycheckresponse && <KeyCheckDisplay key_={keycheckresponse.key} key_name={keycheckresponse.key_name} monero_balance={keycheckresponse.monero_balance} fiat_balance={keycheckresponse.fiat_balance} />}
                                         {keycheckerror && <ErrorAlert error={keycheckerror} />}
@@ -545,7 +572,7 @@ function KeyManagement() {
                                             You can also use this function to retrieve your Wallet before payment.
                                         </Typography>
                                         <Box mt={2}>
-                                            <Button variant="contained" type="submit" onClick={handleXMRRetrive.bind(this)} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</Button>
+                                            <LoadingButton loading={xmrretrieveloading}  variant="contained" type="submit" onClick={handleXMRRetrive.bind(this)} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
                                         </Box>
                                         {xmrwalletresponse && <XMRWalletDisplay key_={xmrwalletresponse.key} key_name={xmrwalletresponse.key_name} payment_id={xmrwalletresponse.payment_id} integrated_wallet={xmrwalletresponse.integrated_wallet} />}
                                         {xmrwalleterror && <ErrorAlert error={xmrwalleterror} />}
@@ -567,7 +594,7 @@ function KeyManagement() {
                                             Use sufficient fees so the transactions gets confirmed on time.
                                         </Typography>
                                         <Box mt={2}>
-                                            <Button variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<ConfirmationNumberIcon />}>Confirm XMR Payment</Button>
+                                            <LoadingButton loading={xmrconfirmationloading} variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<ConfirmationNumberIcon />}>Confirm XMR Payment</LoadingButton>
                                         </Box>
                                         {xmrconfirmationresponse && <XMRWConfirmationDisplay detail={xmrconfirmationresponse.detail} />}
                                         {xmrconfirmationerror && <ErrorAlert error={xmrconfirmationerror} />}

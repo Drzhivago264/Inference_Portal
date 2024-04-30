@@ -50,7 +50,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
-def product_list_api(request):
+def product_list_api(request: HttpRequest) -> Response:
     page_content = Product.objects.all()
     serializer = ProductSerializer(page_content, many=True)
     return Response({'products': serializer.data})
@@ -260,6 +260,8 @@ def stripe_redirect(request: HttpRequest) -> Response:
             return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
     
 def generate_key_success(request: HttpRequest, key: str) -> HttpResponse:
     signer = Signer()
