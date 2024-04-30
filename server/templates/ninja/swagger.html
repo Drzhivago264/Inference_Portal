@@ -13,7 +13,6 @@
 <body
     data-csrf-token="{% if add_csrf %}{{ csrf_token }}{% endif %}"
     data-api-csrf="{% if add_csrf %}true{% endif %}">
-    {% include "component_html/nav.html" %}
     <script type="application/json" id="swagger-settings">
         {{ swagger_settings | safe }}
     </script>
@@ -24,7 +23,6 @@
     <script src="{% static 'ninja/swagger-ui-init.js' %}"></script>
 
 </body>
-{% include "component_html/footer.html" %}
 <script>
     function switchColour(){
     var light=document.getElementById("colour-mode");

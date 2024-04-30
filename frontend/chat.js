@@ -93,11 +93,9 @@ function Chat() {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
     }
-
     useEffect(() => {
         scrollToBottom()
     }, [chat_message]);
-
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
@@ -118,7 +116,6 @@ function Chat() {
                     ])
                 }
                 else {
-                    console.log(dataFromServer)
                     thinking = document.getElementById("thinking");
                     if (thinking != null) {
                         thinking.remove();
@@ -167,7 +164,7 @@ function Chat() {
         }
     }
     return (
-        <Container  maxWidth={false} disableGutters>
+        <Container maxWidth={false} disableGutters>
             <title>Chat</title>
             <ResponsiveAppBar />
             <Container maxWidth="lg" sx={{ width: 1200 }}>
