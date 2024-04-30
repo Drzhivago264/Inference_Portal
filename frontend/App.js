@@ -9,7 +9,8 @@ import KeyManagement from './key_management';
 import Contact from './contact';
 import Chat from './chat';
 import Agent from './agent.js'
-
+import FunctionLLM from './function_llm.js';
+import Hotpot from './hotpot.js';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
@@ -56,7 +57,8 @@ export default function App() {
             <Route path="/frontend/hub" element={<Hub />} />
             <Route path="/frontend/chat/:keyhash" element={<Chat />} />
             <Route path="/frontend/engineer/:keyhash" element={<Agent />} />
-            <Route path="/frontend/toolbox/:keyhash" element={<Chat />} />
+            <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLM />} />
+            <Route path="/frontend/hotpot/:keyhash" element={<Hotpot />} />
             <Route path="/frontend/prompt/:keysigned" element={<Chat />} />
             <Route path="/frontend/contact" element={<Contact />} />
           </Routes>

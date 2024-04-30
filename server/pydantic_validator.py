@@ -101,7 +101,7 @@ class ToolSchema(BaseModel):
     frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
     presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
     temperature:float = constant.DEFAULT_TEMPERATURE
-    max_tokens: int = constant.DEFAULT_MAX_TOKENS
+    max_tokens: int | None = constant.DEFAULT_MAX_TOKENS
     role: str
     number_of_word: int | None = 50
     style_list: str | None = None
