@@ -32,7 +32,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.decorators import api_view, throttle_classes
-from server.serializer import RedirectSerializer
+from server.serializer import RedirectSerializer, InstructionTreeSerializer
+
+
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
 def hub_redirect_api(request):
@@ -44,12 +46,23 @@ def hub_redirect_api(request):
         if destination != "log":
             key_hash = sha256(key.encode('utf-8')).hexdigest()
             return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
-        else:           
+        else:
             return Response({"redirect_link": f"/frontend/prompt/{signer.sign(key)}"}, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
+
+
+@api_view(['GET'])
+@throttle_classes([AnonRateThrottle])
+def instruction_tree_api(request):
+    root_nodes = InstructionTree.objects.filter(level=0)
+    serializer = InstructionTreeSerializer(root_nodes, many=True)
+    for root in root_nodes:
+        if root.name == "Assignment Agent":
+            default_child_template = root.get_children()
+            serializer_childrend = InstructionTreeSerializer(default_child_template, many=True)
+    return Response({'root_nodes': serializer.data, 'default_children': serializer_childrend.data})
+
 def agent_select(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     if request.method == "POST":
         form = RoomRedirectForm(request.POST)

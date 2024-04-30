@@ -27,9 +27,10 @@ from server.views.key_purchase import (StripeWebhookView,
                                        retrive_xmr_wallet_api,
                                        check_credit_api ,
                                        stripe_redirect,
-                                       product_list_api
+                                       product_list_api,
+
                                        ) 
-from server.views.room_view import (Room, agent_select, prompt, hub_redirect_api)
+from server.views.room_view import (Room, agent_select, prompt, hub_redirect_api, instruction_tree_api)
 
 app_name = "server"
 
@@ -49,6 +50,7 @@ urlpatterns = [
     path('frontend-api/article/<str:name>/<str:a_type>',  article_api , name='information'),
     path('frontend-api/model/',  model_api , name='model'),
     path('frontend-api/hub-redirect',  hub_redirect_api , name='hub-redirect'),
+    path('frontend-api/instruction-tree',  instruction_tree_api , name='instruction-tree'),
 
     path('frontend-api/generate-key',  generate_key_api , name='generate-key'),
     path('frontend-api/check-credit',  check_credit_api , name='check-key'),

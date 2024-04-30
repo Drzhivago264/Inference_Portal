@@ -4,20 +4,15 @@ import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
-import List from '@mui/material/List';
-import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
-import Link from '@mui/material/Link';
-import ApiIcon from '@mui/icons-material/Api';
-import ArticleIcon from '@mui/icons-material/Article';
-import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
-import LayersIcon from '@mui/icons-material/Layers';
-import ChatIcon from '@mui/icons-material/Chat';
-import KeyIcon from '@mui/icons-material/Key';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import EmailIcon from '@mui/icons-material/Email';
+import Prism from "prismjs";
+import "prismjs/themes/prism-okaidia.min.css";
+import "prismjs/plugins/toolbar/prism-toolbar.min.css";
+import "prismjs/plugins/toolbar/prism-toolbar.min";
+require("prismjs/components/prism-c");
+require("prismjs/components/prism-python");
+require("prismjs/components/prism-bash");
 import Box from '@mui/material/Box';
+
 import ResponsiveAppBar from './navbar';
 import VerticalNav from './component/vertical_nav';
 const Item = styled(Paper)(({ theme }) => ({
@@ -28,8 +23,10 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function Information() {
+    useEffect(() => {
+        Prism.highlightAll();
+    });
     const [intro, setMessage] = useState('');
-    const [link_list, setMessage_link] = useState('');
     useEffect(() => {
         axios.all([
             axios.get('/frontend-api/article/index/introduction'),
@@ -38,7 +35,6 @@ function Information() {
 
             .then(axios.spread((intro_object, link_list_object) => {
                 setMessage(intro_object.data.article.content);
-                setMessage_link(link_list_object.data.article.content);
             }))
             .catch(error => {
                 console.log(error);
