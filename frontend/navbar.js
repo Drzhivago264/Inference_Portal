@@ -90,7 +90,7 @@ const MenuButton = styled(BaseMenuButton)(
   cursor: pointer;
   background: transparent;
   border: 0px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
-  color: ${theme.palette.mode === 'dark' ? grey[100] : grey[100]};
+  color: ${theme.palette.mode === 'dark' ? grey[100] : grey[900]};
 
   &:hover {
     background: ${theme.palette.mode === 'dark' ? grey[800] : grey[100]};
@@ -138,7 +138,7 @@ const Button = styled(BaseButton)(
   cursor: pointer;
   border: 0px;
   background: transparent;
-  color: ${theme.palette.mode === 'dark' ? grey[100] : grey[100]};
+  color: ${theme.palette.mode === 'dark' ? grey[100] : grey[900]};
 
   &:hover {
     background: ${theme.palette.mode === 'dark' ? grey[800] : grey[100]};
@@ -174,7 +174,7 @@ function ResponsiveAppBar() {
   );
   return (
 
-    <AppBar position="sticky" >
+    <AppBar position="sticky"  color="default" >
       <Drawer open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
       </Drawer>

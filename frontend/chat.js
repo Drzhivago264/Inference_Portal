@@ -99,9 +99,6 @@ function Chat() {
     }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    const [searchParams] = useSearchParams();
-
-    const type = searchParams.get("type");
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
         websocket.current = new WebSocket(ws_scheme + '://127.0.0.1:8000/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/');
@@ -119,9 +116,7 @@ function Chat() {
                         ...chat_message,
                         dataFromServer,
                     ])
-
                 }
-
                 else {
                     console.log(dataFromServer)
                     thinking = document.getElementById("thinking");
@@ -129,14 +124,12 @@ function Chat() {
                         thinking.remove();
                     }
                     document.getElementById(dataFromServer.stream_id).innerHTML += dataFromServer.message
-
                 };
                 var logTa = document.getElementById("chat-log")
                 logTa.scrollTop = logTa.scrollHeight;
             }
         }
     }, []);
-
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
             submitChat()
@@ -173,9 +166,7 @@ function Chat() {
             setUserMessage("")
         }
     }
-
     return (
-
         <Container  maxWidth={false} disableGutters>
             <title>Chat</title>
             <ResponsiveAppBar />

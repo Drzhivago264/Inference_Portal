@@ -1,10 +1,16 @@
 from rest_framework import serializers
-from .models import Article, LLM, InferenceServer, Product
+from .models import Article, LLM, InferenceServer, Product, InstructionTree
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ('name', 'a_type','content')
+
+class InstructionTreeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InstructionTree
+        fields=('instruct', "name", "code", "default_editor_template")
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:

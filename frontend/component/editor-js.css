@@ -1,0 +1,44 @@
+#editorjs {
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    padding: 25px;
+    font-size: 16px;
+    max-height: 600px;
+    overflow: auto;
+}
+
+#editorjs h1 {
+    font-size: 28px;
+    color: black;
+}
+
+#editorjs h2 {
+    font-size: 24px;
+    color: black;
+}
+
+#editorjs h3 {
+    font-size: 20px;
+    color: black;
+}
+
+#editorjs h4 {
+    font-size: 18px;
+    color: black;
+}
+
+#editorjs h5 {
+    font-size: 16px;
+    color: black;
+}
+
+#editorjs h6 {
+    font-size: 14px;
+    color: black;
+}
+
+#editorjs small {
+    font-size: 12px;
+    color: black;
+}
