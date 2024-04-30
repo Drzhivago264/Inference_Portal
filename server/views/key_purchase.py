@@ -93,6 +93,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                 elif len(json.loads(payment_check.text)["result"]) == 0:
                     return Response({'detail': "No transaction detected"}, status=status.HTTP_204_NO_CONTENT)
                 else:
+                    return (Response({"detail": f"{payment_check.text}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE))
                     payment_id_response = json.loads(payment_check.text)[
                         "result"]['payments'][0]['payment_id']
                     address_response = json.loads(payment_check.text)[
