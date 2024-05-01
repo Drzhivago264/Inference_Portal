@@ -17,42 +17,23 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Slider from '@mui/material/Slider';
 import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
-import Switch from '@mui/material/Switch';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
-import { useSearchParams } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import Link from '@mui/material/Link';
-import ApiIcon from '@mui/icons-material/Api';
-import ArticleIcon from '@mui/icons-material/Article';
-import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
-import LayersIcon from '@mui/icons-material/Layers';
-import ChatIcon from '@mui/icons-material/Chat';
 import KeyIcon from '@mui/icons-material/Key';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import EmailIcon from '@mui/icons-material/Email';
-import InputBase from '@mui/material/InputBase';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import { useMatch } from "react-router-dom";
-import SearchIcon from '@mui/icons-material/Search';
-import DirectionsIcon from '@mui/icons-material/Directions';
+import LinearProgress from '@mui/material/LinearProgress';
 import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from './navbar';
 import SendIcon from '@mui/icons-material/Send';
 import EditorJS from "@editorjs/editorjs";
-import Paragraph from "@editorjs/paragraph";
+
 import Header from "@editorjs/header";
-import Delimiter from "@editorjs/delimiter";
-import CheckList from "@editorjs/checklist";
 import GetAppIcon from '@mui/icons-material/GetApp';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -71,6 +52,7 @@ function Agent() {
     const editorref = useRef();
     const websocket = useRef(null)
     const messagesEndRef = useRef(null)
+    const [shownthinking, setThinking] = useState(false);
     const [chat_message, setChatMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
     const [choosen_model, setChoosenModel] = useState("gpt-4");
@@ -186,6 +168,9 @@ function Agent() {
                         ...chat_message,
                         dataFromServer,
                     ])
+                    if (dataFromServer.holder){
+                        setThinking(true)
+                    }
                 }
                 else if (dataFromServer.hasOwnProperty("agent_action")) {
                     if (dataFromServer.agent_action == "STOP") {
@@ -199,11 +184,7 @@ function Agent() {
                     }
                 }
                 else {
-
-                    thinking = document.getElementById("thinking");
-                    if (thinking != null) {
-                        thinking.remove();
-                    }
+                    setThinking(false)
                     document.getElementById(dataFromServer.stream_id).innerHTML += dataFromServer.message
                 };
                 var logTa = document.getElementById("chat-log")
@@ -397,11 +378,9 @@ function Agent() {
                                         maxRows={8}
                                         value={default_parent_instruct}
                                         onChange={e => setParentInstruct(e.target.value)}
-
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
-
                                             startAdornment: <InputAdornment position="start">   </InputAdornment>,
 
                                         }}
@@ -449,7 +428,6 @@ function Agent() {
                                 />
                                 <Stack spacing={1}>
                                     {chat_message.map((mess) => {
-
                                         if (mess.role == 'Human') {
                                             return (
                                                 <Paper  ><Box sx={{ borderRight: 5,  borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
@@ -457,7 +435,7 @@ function Agent() {
                                         }
                                         else if (mess.holder) {
                                             return (
-                                                <Paper ><Box sx={{ borderLeft: 5, borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
+                                                <Paper ><Box sx={{ borderLeft: 5, borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: </span></Box></Paper>
                                             )
                                         }
                                         else if (mess.role == 'Server') {
@@ -465,12 +443,12 @@ function Agent() {
                                                 <Paper  ><Box  sx={{ borderLeft: 5, borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
                                             )
                                         }
-
                                     })}
-
                                 </Stack>
                                 <div ref={messagesEndRef}> </div>
+                                
                             </ChatPaper>
+                            {shownthinking && <LinearProgress />}
                             <Box mt={2}>
                                 <Paper
                                     component="form"

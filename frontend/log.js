@@ -23,7 +23,6 @@ function Log() {
         axios.all([
             axios.get('/frontend-api/model'),
         ])
-
             .then(axios.spread((server_object) => {
                 setMessage(server_object.data.servers);
                 setMessage_model(server_object.data.models);
@@ -52,7 +51,10 @@ function Log() {
                     { title: "Models" },
                     { title: "Created Time" },
                     { title: "Type" },
-                    { title: "Cost" }
+                    { title: "Input Cost" },
+                    { title: "Onput Cost" },
+                    { title: "Input Tokens" },
+                    { title: "Onput Tokens" }
                 ],
                 processing: true,
                 serverSide: true,
@@ -67,7 +69,6 @@ function Log() {
             table.destroy()
         }
     }, [])
-
 
     return (
         <Container maxWidth={false} disableGutters>

@@ -239,7 +239,6 @@ def Inference(unique: str,
             "length_penalty": float(length_penalty),
             "frequency_penalty": float(frequency_penalty),
             "early_stopping": early_stopping,
-
         }
         ''' Query a list of inference servers for a given model, pick a random one '''
         if url_list:

@@ -1,10 +1,10 @@
 from django.core.cache import cache
 from django.utils import timezone
 import requests
-from server.models import (InferenceServer, 
-                           LLM, 
-                           PromptResponse, 
-                           APIKEY, 
+from server.models import (InferenceServer,
+                           LLM,
+                           PromptResponse,
+                           APIKEY,
                            MemoryTree
                            )
 from . import constant
@@ -19,7 +19,7 @@ from django.db.models.query import QuerySet
 from celery.utils.log import get_task_logger
 import openai
 from channels.layers import get_channel_layer
-from vectordb import  vectordb
+from vectordb import vectordb
 from asgiref.sync import async_to_sync
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
@@ -63,9 +63,9 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
             template = constant.SHORTEN_TEMPLATE_TABLE[model]
             prompt_ = template.format(prompt, "")
             if include_memory:
-                chat_history = get_chat_context(model=model, 
+                chat_history = get_chat_context(model=model,
                                                 key_object=key_object,
-                                                raw_prompt=prompt, 
+                                                raw_prompt=prompt,
                                                 agent_availability=agent_availability)
                 prompt_ = chat_history + "\n" + prompt_
                 return prompt_
@@ -74,9 +74,9 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
         else:
             prompt_ = {"role": "user", "content": f"{prompt}"}
             if include_memory:
-                chat_history = get_chat_context(model=model, 
+                chat_history = get_chat_context(model=model,
                                                 key_object=key_object,
-                                                raw_prompt=prompt, 
+                                                raw_prompt=prompt,
                                                 agent_availability=agent_availability)
                 chat_history.append(prompt_)
                 return chat_history
@@ -104,8 +104,9 @@ def response_mode(mode: str, response: str, prompt: str) -> str:
     elif mode == "generate":
         return response
 
-def log_prompt_response(is_session_start_node:bool|None, key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
-    """This function store log into a db then build a memory tree 
+
+def log_prompt_response(is_session_start_node: bool | None, key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
+    """This function store log into a db then build a memory tree of chat history
     Args:
         is_session_start_node (bool | None): _description_
         key_object (object): _description_
@@ -115,8 +116,33 @@ def log_prompt_response(is_session_start_node:bool|None, key_object: object, mod
         type_ (str): _description_
     """
     llm = LLM.objects.get(name=model)
+    if llm.agent_availability:
+        try:
+            tokeniser = tiktoken.encoding_for_model(model)
+        except:
+            tokeniser = tiktoken.encoding_for_model("gpt-4")
+        number_input_token = len(tokeniser.encode(prompt))
+        number_output_token = len(tokeniser.encode(response))
+        input_cost = number_input_token*llm.input_price
+        output_cost = number_output_token*llm.output_price
+    else:
+        tokeniser = constant.TOKENIZER_TABLE[model]
+        number_input_token = len(AutoTokenizer.from_pretrained(tokeniser)(prompt)['input_ids'])
+        number_output_token = len(AutoTokenizer.from_pretrained(tokeniser)(response)['input_ids'])
+        input_cost = number_input_token*llm.input_price
+        output_cost = number_output_token*llm.output_price
+
     pair_save = PromptResponse(
-        prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)
+        prompt=prompt, 
+        response=response, 
+        key=key_object, 
+        model=llm, 
+        p_type=type_, 
+        number_input_tokens=number_input_token,
+        number_output_tokens=number_output_token,
+        input_cost=input_cost,
+        output_cost=output_cost
+        )
     pair_save.save()
     if is_session_start_node is not None:
         memory_tree_node_number = MemoryTree.objects.filter(key=key_object).count()

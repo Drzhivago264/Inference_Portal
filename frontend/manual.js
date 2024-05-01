@@ -83,8 +83,7 @@ function Manual() {
                                     <List dense={true}
                                         subheader={<Typography pl={2} pt={1} sx={{ color: 'white', }}>   Content</Typography>}>
                                         < Divider />
-                                        <ListItemButton component={Link} to='#1'> 1. Setting Up Your API Key </ListItemButton>
-                                       
+                                        <ListItemButton component={Link} to='#1'> 1. Setting Up Your API Key </ListItemButton>                                       
                                         <ListItemButton component={Link} to='#1.1' sx={{ pl: 4 }}>1.1 Creating a New API Key</ListItemButton>
                                         <ListItemButton component={Link} to='#1.2' sx={{ pl: 4 }}>1.2 Making API Request</ListItemButton>
                                         <ListItemButton component={Link} to='#1.3' sx={{ pl: 4 }}>1.3 Edit or Delete API Key</ListItemButton>

@@ -16,7 +16,6 @@ function ModelInfor() {
         axios.all([
             axios.get('/frontend-api/model'),
         ])
-
             .then(axios.spread((server_object) => {
                 setMessage(server_object.data.servers);
                 setMessage_model(server_object.data.models);
@@ -30,9 +29,9 @@ function ModelInfor() {
         { field: 'server', headerName: 'Server', width: 80 },
         { field: 'model', headerName: 'Model', width: 150 },
         { field: 'status', headerName: 'Status', width: 80 },
-        { field: 'availability', headerName: 'Availability', width: 130 },
-        { field: 'price_usd', headerName: 'USD', width: 60 },
-        { field: 'price_xmr', headerName: 'XMR', width: 60 },
+        { field: 'availability', headerName: 'Availability', width: 140 },
+        { field: 'input_price_usd', headerName: 'Input (USD)', width: 100 },
+        { field: 'output_price_usd', headerName: 'Output (USD)', width: 100 },
 
     ];
     let i = 0;
@@ -45,8 +44,8 @@ function ModelInfor() {
             model: server_objects[i].model_name,
             status: server_objects[i].status,
             availability: server_objects[i].availability,
-            price_usd: server_objects[i].model_price,
-            price_xmr: server_objects[i].model_price
+            input_price_usd: server_objects[i].model_price_input,
+            output_price_usd: server_objects[i].model_price_output,
         });
         i++;
     }
@@ -54,7 +53,7 @@ function ModelInfor() {
         <Container maxWidth={false} disableGutters>
             <title>Models</title>
             <ResponsiveAppBar />
-            <Container maxWidth="lg">
+            <Container maxWidth="xl">
                 <Box
                     my={4}
                     display="flex"

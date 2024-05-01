@@ -7,11 +7,8 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from rest_framework_api_key.models import AbstractAPIKey
 from tinymce.models import HTMLField
-
 from mptt.models import MPTTModel, TreeForeignKey
 User = settings.AUTH_USER_MODEL
-
-
 
 class Article(models.Model):
     name = models.CharField(max_length=200)
@@ -60,7 +57,8 @@ class LLM(models.Model):
     size =  models.IntegerField(default=1)
     desc = models.TextField()
     chat_template = models.TextField(default="")
-    price = models.FloatField(default=0.0)
+    input_price = models.FloatField(default=0.0)
+    output_price = models.FloatField(default=0.0)
     agent_availability = models.BooleanField(default=False)
     def __str__(self) -> str:
         return self.name
@@ -96,10 +94,12 @@ class PromptResponse(models.Model):
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     p_type = models.CharField(max_length=4096, default="prompt")
-    cost = models.FloatField(default=0.0)
+    input_cost = models.FloatField(default=0.0)
+    output_cost = models.FloatField(default=0.0)
+    number_input_tokens = models.IntegerField(default=0)
+    number_output_tokens = models.IntegerField(default=0)
     class Meta:
         ordering = ("-created_at",)
-        
     def __str__(self) -> str:
         return self.prompt
     def get_vectordb_text(self):
@@ -108,7 +108,8 @@ class PromptResponse(models.Model):
         return {"key":self.key.hashed_key,
                 "key_name": self.key.name,
                 "p_type": self.p_type, 
-                "cost": self.cost,
+                "input_cost": self.input_cost,
+                "output_cost":self.output_cost,
                 "model": self.model.name, 
                 "created_at": json.dumps(self.created_at, cls=DjangoJSONEncoder)}
 
@@ -117,7 +118,6 @@ class Product(models.Model):
     tags = models.ManyToManyField(ProductTag, blank=True)
     desc = models.TextField(_("Description"), blank=True)
     quantity = models.IntegerField(default=1)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:

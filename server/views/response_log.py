@@ -47,9 +47,9 @@ def response_log(request: HttpRequest,  key: str) -> HttpResponse:
 
 class LogListJson(BaseDatatableView):
     columns = ['id', 'prompt', 'response',
-               'model.name', 'created_at', 'p_type', 'cost']
+               'model.name', 'created_at', 'p_type', 'input_cost', 'output_cost', 'number_input_tokens', 'number_output_tokens']
     order_columns = ['id', 'prompt', 'response',
-                     'model.name', 'created_at', 'p_type', 'cost']
+                     'model.name', 'created_at', 'p_type', 'input_cost', 'output_cost', 'number_input_tokens', 'number_output_tokens']
     max_display_length = 500
 
     def get_initial_queryset(self):
