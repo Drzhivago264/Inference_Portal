@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Container from '@mui/material/Container';
-import Footer from './footer';
+import Footer from './component/footer.js';
 import Manual from './manual';
 import Information from './introduction';
 import ModelInfor from './model';
@@ -17,6 +17,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import * as ReactDOM from 'react-dom/client';
 import {
   BrowserRouter as Router,
   Routes,
@@ -77,3 +78,4 @@ function APIRedirect() {
   window.location.href = '/api/docs';
   return null;
 }
+

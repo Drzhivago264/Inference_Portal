@@ -21,7 +21,7 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import KeyIcon from '@mui/icons-material/Key';
 import LinearProgress from '@mui/material/LinearProgress';
-import ResponsiveAppBar from './navbar';
+import ResponsiveAppBar from './component/navbar';
 import SendIcon from '@mui/icons-material/Send';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,

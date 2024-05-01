@@ -27,7 +27,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
-import ResponsiveAppBar from './navbar';
+import ResponsiveAppBar from './component/navbar';
 import SendIcon from '@mui/icons-material/Send';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({

@@ -9,7 +9,7 @@ import TextField from '@mui/material/TextField';
 import { useNavigate } from "react-router-dom";
 import KeyIcon from '@mui/icons-material/Key';
 import InputAdornment from '@mui/material/InputAdornment';
-import ResponsiveAppBar from './navbar';
+import ResponsiveAppBar from './component/navbar';
 import Button from '@mui/material/Button';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';

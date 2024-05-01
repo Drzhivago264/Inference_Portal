@@ -42,7 +42,6 @@ def model_api(request: HttpRequest) -> Response:
                       })
 
 
-"""--------OLD VIEW FOR DJANGO TEMPLATE---------"""
 # @cache_page(60*15)
 def index(request: HttpRequest) -> HttpResponse:
     page_content = Article.objects.filter(name="index")
@@ -71,6 +70,7 @@ def model_infor(request: HttpRequest) -> HttpResponse:
 
 def frankenstein(request: HttpRequest) -> HttpResponse:
     return render(request, "html/frankenstein.html", {"title": "Frankenstein"})
+
 
 
 def handler_403(request: HttpRequest, exception: None = None) -> HttpResponse:

@@ -7,8 +7,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
 import Container from '@mui/material/Container';
-import ResponsiveAppBar from './navbar';
+import ResponsiveAppBar from './component/navbar';
+import { Stack } from '@mui/material';
 function ModelInfor() {
     const [server_objects, setMessage] = useState([]);
     const [model_objects, setMessage_model] = useState([]);
@@ -99,19 +101,28 @@ function ModelInfor() {
                             }
                         </Grid>
                         <Grid item md={6}>
-                            <div style={{ height: 400, width: '100%' }}>
-                                <DataGrid
-                                    rows={rows}
-                                    columns={columns}
-                                    initialState={{
-                                        pagination: {
-                                            paginationModel: { page: 0, pageSize: 5 },
-                                        },
-                                    }}
-                                    disableRowSelectionOnClick
-                                    pageSizeOptions={[5, 10]}
-                                />
-                            </div>
+                            <Stack spacing={1}>
+                                <div style={{ height: 400, width: '100%' }}>
+                                    <DataGrid
+                                        rows={rows}
+                                        columns={columns}
+                                        initialState={{
+                                            pagination: {
+                                                paginationModel: { page: 0, pageSize: 5 },
+                                            },
+                                        }}
+                                        disableRowSelectionOnClick
+                                        pageSizeOptions={[5, 10]}
+                                    />
+                                </div>
+                                <Alert variant="outlined" severity="info">
+                                    <li> &#x2022; Status can be "pending", "running", "stopping" and "stopped" which refers to the current stage of
+                                        the servers</li>
+                                    <li> &#x2022; Availability can be "availabe" and "not availabe" which refers to the ability of users to boot the
+                                        instance by themselves</li>
+                                    <li> &#x2022; Highly demanded models are load-balanced across multiple servers</li>
+                                </Alert>
+                            </Stack>
                         </Grid>
                     </Grid>
                 </Box>

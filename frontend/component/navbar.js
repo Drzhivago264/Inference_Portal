@@ -13,10 +13,10 @@ import { Menu } from '@mui/base/Menu';
 import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
 import { styled } from '@mui/system';
-import Constant_Colours from './component/color.js'
+import Constant_Colours from './color.js'
 import { useNavigate } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
-import VerticalNav from './component/vertical_nav.js';
+import VerticalNav from './vertical_nav.js';
 import {Link as HardLink} from '@mui/material/Link';
 const blue = Constant_Colours.blue;
 const grey = Constant_Colours.grey;
