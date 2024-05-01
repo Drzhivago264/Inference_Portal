@@ -45,7 +45,6 @@ def contact_api(request: HttpRequest) -> Response:
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
 def contact(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     form = CaptchaForm(request.POST)
     if request.method == 'POST':

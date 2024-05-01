@@ -29,7 +29,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import LinearProgress from '@mui/material/LinearProgress';
 import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
-import ResponsiveAppBar from './navbar';
+import ResponsiveAppBar from './component/navbar';
 import SendIcon from '@mui/icons-material/Send';
 import EditorJS from "@editorjs/editorjs";
 

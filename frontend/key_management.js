@@ -7,7 +7,7 @@ import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from './navbar';
+import ResponsiveAppBar from './component/navbar';
 import Alert from '@mui/material/Alert';
 import KeyIcon from '@mui/icons-material/Key';
 import Link from '@mui/material/Link';
@@ -36,6 +36,7 @@ import {
     responsiveFontSizes,
     ThemeProvider,
 } from '@mui/material/styles';
+
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
     padding: theme.spacing(4),
@@ -316,12 +317,12 @@ function KeyManagement() {
     const KeyCreateExport = ({ key_, key_name, integrated_wallet, payment_id }) => {
         return (
             <Box my={4}>
-                <Typography variant="body1"  >
+                <Alert severity="success">
                     Congrats! Here's your Key, before moving on, you may consider: <br></br>
                     - Export you Key into a text document <br></br>
                     - Before topping up your Key, use the check credit function below to ensure that you get it correctly <br></br>
                     - If you face any problems, please contact us <br></br>
-                </Typography>
+                </Alert>
                 <Box textAlign='center' my={4}>
                     <Textarea
                         defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`}
@@ -339,9 +340,9 @@ function KeyManagement() {
     const KeyCheckDisplay = ({ key_, key_name, monero_balance, fiat_balance }) => {
         return (
             <Box my={4}>
-                <Typography variant="body1"  >
-                    Congrats! Your Key is correct
-                </Typography>
+                <Alert severity="success">
+                    Your Key and Key Name are correct!
+                </Alert>
                 <Box textAlign='center' mt={4}>
                     <Textarea
                         defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nMonero Balance: ${monero_balance} \nFiat Balance: ${fiat_balance}`}
@@ -356,9 +357,9 @@ function KeyManagement() {
     const XMRWalletDisplay = ({ key_, key_name, integrated_wallet, payment_id }) => {
         return (
             <Box my={4}>
-                <Typography variant="body1"  >
+                <Alert severity="success">
                     Wallet Information:
-                </Typography>
+                </Alert>
                 <Box textAlign='center' mt={4}>
                     <Textarea
                         defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nIntergrated Wallet: ${integrated_wallet} \nPayment id: ${payment_id}`}
@@ -372,9 +373,9 @@ function KeyManagement() {
     const XMRWConfirmationDisplay = ({ detail }) => {
         return (
             <Box my={4}>
-                <Typography variant="body1"  >
+                <Alert severity="success">
                     Confirmation Status:
-                </Typography>
+                </Alert>
                 <Box textAlign='center' mt={4}>
                     <Textarea
                         defaultValue={`${detail}`}
@@ -388,9 +389,6 @@ function KeyManagement() {
     const ErrorAlert = ({ error }) => {
         return (
             <Box mt={4}>
-                <Typography variant="body1"  >
-                    Request Failed!
-                </Typography>
                 <Box textAlign='center' my={2}>
                     <Alert variant="filled" severity="error">
                         {error}
@@ -403,8 +401,7 @@ function KeyManagement() {
         <Container maxWidth={false} disableGutters>
             <title>Key Management</title>
             <ResponsiveAppBar />
-            <Container maxWidth="lg">
-
+            <Container maxWidth="md">
                 <Box
                     my={1}
                     alignItems="center"
@@ -423,7 +420,7 @@ function KeyManagement() {
                         <Typography variant="body1" >
                             Start by generating a random key by giving it a name.
                         </Typography>
-                        <Box my={4}>
+                        <Box my={4}  justifyContent="center"  alignItems="center" display="flex" >
                             <form autoComplete="off" onSubmit={handleCreateKey}>
                                 <FormControl defaultValue="" required>
                                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -455,16 +452,20 @@ function KeyManagement() {
                         <Typography variant="h5" >
                             <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>2. Add credit to your key</Box>
                         </Typography>
-                        <Typography variant="body1"  >
-                            We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
-                            - To pay by Stripe, include the Key and Key Name in the form below and click Stripe. <br></br>
-                            - To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file, then (after 10 confirmation blocks), click on confirm XMR payment.
-                            With XMR payment you don't need to matched the amount listed in the below form.
-                        </Typography>
-                        <Box my={4}>
+                        <Stack spacing={1}>
+                            <Alert  variant="outlined" severity="info">
+                                We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
+                                - To pay by Stripe, include the Key and Key Name in the form below and click Stripe. <br></br>
+                                - To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.).
+                            </Alert>
+                            <Alert variant="outlined" severity="warning">
+                                If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks.
+                            </Alert>
+                        </Stack>
+                        <Box my={4} >
                             <form autoComplete="off" >
 
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2}>
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2}  justifyContent="center"  alignItems="center" display="flex" >
                                     <TextField
                                         margin="normal" label="Key Name" type="text" size="small" onChange={e => setKeyNamePay(e.target.value)} value={keynamepay} error={keynamepayError} autoComplete="off"
                                         InputProps={{
@@ -557,7 +558,7 @@ function KeyManagement() {
                                         id="panel3-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.3 Retrieve XMR intergrated wallet
+                                            2.3 Retrieve XMR wallet
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -579,7 +580,7 @@ function KeyManagement() {
                                         id="panel4-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.4 Confirm your XMR Payment
+                                            2.4 Confirm XMR Payment
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -608,7 +609,7 @@ function KeyManagement() {
                     </StyledPaper>
                 </Box>
             </Container >
-        </Container>
+        </Container >
     );
 }
 export default KeyManagement;

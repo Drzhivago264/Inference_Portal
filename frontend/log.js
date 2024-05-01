@@ -2,7 +2,7 @@ import $ from 'jquery'
 import React, { useEffect, useRef, useState } from "react"
 import axios from 'axios';
 import Container from '@mui/material/Container';
-import ResponsiveAppBar from './navbar';
+import ResponsiveAppBar from './component/navbar';
 import DataTable from 'datatables.net-dt';
 import jszip from 'jszip';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
