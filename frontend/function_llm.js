@@ -20,6 +20,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import KeyIcon from '@mui/icons-material/Key';
+import LinearProgress from '@mui/material/LinearProgress';
 import ResponsiveAppBar from './navbar';
 import SendIcon from '@mui/icons-material/Send';
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -37,6 +38,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 function FunctionLLM() {
     const ref = useRef();
     const websocket = useRef(null)
+    const [shownthinking, setThinking] = useState(false);
     const messagesEndRef = useRef(null)
     const [chat_message, setChatMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
@@ -94,10 +96,13 @@ function FunctionLLM() {
                         ...chat_message,
                         dataFromServer,
                     ])
+                    if (dataFromServer.holder) {
+                        setThinking(true)
+                    }
                 }
                 else {
                     setStream(dataFromServer.message);
-                   setLastestSream(dataFromServer.stream_id)
+                    setLastestSream(dataFromServer.stream_id)
                 };
                 var logTa = document.getElementById("chat-log")
                 logTa.scrollTop = logTa.scrollHeight;
@@ -106,15 +111,12 @@ function FunctionLLM() {
     }, []);
     useEffect(() => {
         if (!streamtokens) {
-          return;
+            return;
         }
-        thinking = document.getElementById("thinking");
-        if (thinking != null) {
-            thinking.remove();
-        }
+        setThinking(false)
         document.getElementById(lasteststreamid).innerHTML += streamtokens
         setStream(null)
-      }, [streamtokens])
+    }, [streamtokens])
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
             submitChat()
@@ -149,17 +151,17 @@ function FunctionLLM() {
             setUserMessage("")
         }
     }
-    const swap_extra_instruction = (e) =>{
-        if (e=='restyle'){
+    const swap_extra_instruction = (e) => {
+        if (e == 'restyle') {
             setExtraInstruction("sad, serious")
         }
-        else if (e=='emotion'){
+        else if (e == 'emotion') {
             setExtraInstruction("sadness, joy, love, anger, fear, surprise, neutral")
         }
-        else if (e=='summary'){
+        else if (e == 'summary') {
             setExtraInstruction(100)
         }
-        else if (e=='topic' || 'paraphase' || 'sentiment'){
+        else if (e == 'topic' || 'paraphase' || 'sentiment') {
             setExtraInstruction("")
         }
     }
@@ -176,7 +178,7 @@ function FunctionLLM() {
                                 <RadioGroup
                                     defaultValue="emotion"
                                     name="radio-buttons-group"
-                                    onChange={e => {setLLMFunction(e.target.value); swap_extra_instruction(e.target.value)}}
+                                    onChange={e => { setLLMFunction(e.target.value); swap_extra_instruction(e.target.value) }}
                                     value={llmfunction}
                                 >
                                     {[{ 'label': 'Summary', 'value': 'summary' },
@@ -216,9 +218,7 @@ function FunctionLLM() {
                                     sx={{ p: '2px 4px', display: 'flex', minWidth: 200 }}
                                     onChange={e => setExtraInstruction(e.target.value)}
                                     minRows={4}
-                             />
-
-
+                                />
                             </Box>
                         </Grid>
 
@@ -246,12 +246,27 @@ function FunctionLLM() {
 
                                         if (mess.role == 'Human') {
                                             return (
-                                                <Paper  ><Box p={1} sx={{ borderRight: 5,  borderColor: 'primary.main', borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
+                                                <Paper>
+                                                    <Box p={1}
+                                                        sx={{
+                                                            borderRight: 5, borderColor: 'primary.main', borderRadius: 1, '&:hover': {
+                                                                borderColor: 'primary.dark',
+                                                            }
+                                                        }}
+                                                        className="message_log_container"
+                                                        style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>
+                                                        <span> ({mess.role} - {mess.time}) {mess.message} </span></Box>
+                                                </Paper>
                                             )
                                         }
                                         else if (mess.holder) {
                                             return (
-                                                <Paper ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }}  className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: <span id="thinking" aria-busy="true"> Thinking time...</span></span></Box></Paper>
+                                                <Paper ><Box p={1} sx={{
+                                                    borderLeft: 5, borderRadius: 1, '&:hover': {
+                                                        borderColor: 'primary.dark',
+                                                    }
+                                                }}
+                                                    className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: </span></Box></Paper>
                                             )
                                         }
                                         else if (mess.role == 'Server') {
@@ -265,6 +280,7 @@ function FunctionLLM() {
                                 </Stack>
                                 <div ref={messagesEndRef}> </div>
                             </ChatPaper>
+                            {shownthinking && <LinearProgress />}
                             <Box mt={2}>
                                 <Paper
                                     component="form"

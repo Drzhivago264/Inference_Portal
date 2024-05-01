@@ -57,7 +57,6 @@ class Consumer(AsyncWebsocketConsumer):
             elif key_object and validated.message.strip():
                 cache.set(f"{self.key}", key_object,
                           constant.CACHE_AUTHENTICATION)
-
                 message = validated.message
                 tool = validated.tool
                 top_p = validated.top_p
@@ -65,7 +64,6 @@ class Consumer(AsyncWebsocketConsumer):
                 frequency_penalty = validated.frequency_penalty
                 presence_penalty = validated.presence_penalty
                 temperature = validated.temperature
-
                 choosen_models = validated.choosen_models
                 role = validated.role
                 unique_response_id = str(uuid.uuid4())
@@ -95,8 +93,6 @@ class Consumer(AsyncWebsocketConsumer):
                                            "presence_penalty": presence_penalty,
                                            "frequency_penalty": frequency_penalty,
                                            "temperature": temperature
-
-
                                            }
                 )
         except ValidationError as e:

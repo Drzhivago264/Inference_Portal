@@ -28,9 +28,9 @@ class CheckKeySerializer(CreateKeySerializer):
     key = serializers.CharField()
 
 class SendMailSerializer(CheckKeySerializer):
-        message = serializers.CharField()
-        username = serializers.CharField()
-        mail = serializers.CharField()
+    message = serializers.CharField()
+    username = serializers.CharField()
+    mail = serializers.CharField()
         
 class StripePaymentSerializer(CheckKeySerializer):
     product_id = serializers.CharField()
@@ -38,15 +38,18 @@ class StripePaymentSerializer(CheckKeySerializer):
 class ModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LLM
-        fields = ('id', 'name', 'desc','price')
+        fields = ('id', 'name', 'desc','input_price', 'output_price')
 
 class ServerSerializer(serializers.ModelSerializer):
     model_name = serializers.SerializerMethodField()
-    model_price = serializers.SerializerMethodField()
+    model_price_input = serializers.SerializerMethodField()
+    model_price_output = serializers.SerializerMethodField()
     class Meta:
         model = InferenceServer
-        fields = ('id', 'status', 'availability', 'model_name', 'model_price')
+        fields = ('id', 'status', 'availability', 'model_name', 'model_price_input', 'model_price_output')
     def get_model_name(self, instance):
             return instance.hosted_model.name if instance.hosted_model else ''
-    def get_model_price(self, instance):
-            return instance.hosted_model.price if instance.hosted_model else ''
+    def get_model_price_input(self, instance):
+            return instance.hosted_model.input_price if instance.hosted_model else ''
+    def get_model_price_output(self, instance):
+            return instance.hosted_model.output_price if instance.hosted_model else ''

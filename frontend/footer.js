@@ -62,7 +62,6 @@ export default function Footer() {
                         >
                             Inference
                         </Typography>   
-                        
                     </Box>
                 </Box>
                 <Box
