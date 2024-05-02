@@ -34,6 +34,14 @@ import SendIcon from '@mui/icons-material/Send';
 import EditorJS from "@editorjs/editorjs";
 
 import Header from "@editorjs/header";
+import Quote from "@editorjs/quote"
+import Paragraph from "@editorjs/paragraph"
+import Underline from "@editorjs/underline"
+const EditorList = require("@editorjs/list");
+import InlineCode from '@editorjs/inline-code';
+const Table = require('editorjs-table');
+const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
+import editorjsCodecup from '@calumk/editorjs-codecup';
 import GetAppIcon from '@mui/icons-material/GetApp';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -80,9 +88,43 @@ function Agent() {
                 tools: {
                     header: {
                         class: Header,
+                        inlineToolbar: ['link']
+                    },
+                    list: {
+                        class: EditorList,
                         inlineToolbar: true
                     },
-                    // ...
+                    quote: {
+                        class: Quote,
+                        inlineToolbar: true,
+                    },
+                    paragraph: {
+                        class: Paragraph,
+                        config: {
+                            preserveBlank: true
+                        },
+                        inlineToolbar: true
+                    },
+                    underline: Underline,
+                    code: {
+                        class: editorjsCodecup,
+                        inlineToolbar: true,
+                    },
+                    inlineCode: {
+                        class: InlineCode,
+                        shortcut: 'CMD+SHIFT+M',
+                    },
+                    anyTuneName: {
+                        class:AlignmentTuneTool,
+                        config:{
+                          default: "right",
+                          blocks: {
+                            header: 'center',
+                            list: 'right'
+                          }
+                        },
+                      }
+             
                 },
                 data: default_editor_structure,
             });
@@ -168,7 +210,7 @@ function Agent() {
                         ...chat_message,
                         dataFromServer,
                     ])
-                    if (dataFromServer.holder){
+                    if (dataFromServer.holder) {
                         setThinking(true)
                     }
                 }
@@ -275,7 +317,7 @@ function Agent() {
 
     const download = (mimeType, filename) => {
         editorref.current.save().then((outputData) => {
-            
+
             let download_content = outputData
             if (mimeType == "application/json") {
                 console.log(mimeType)
@@ -430,7 +472,7 @@ function Agent() {
                                     {chat_message.map((mess) => {
                                         if (mess.role == 'Human') {
                                             return (
-                                                <Paper  ><Box sx={{ borderRight: 5,  borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
+                                                <Paper  ><Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
                                             )
                                         }
                                         else if (mess.holder) {
@@ -440,13 +482,13 @@ function Agent() {
                                         }
                                         else if (mess.role == 'Server') {
                                             return (
-                                                <Paper  ><Box  sx={{ borderLeft: 5, borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
+                                                <Paper  ><Box sx={{ borderLeft: 5, borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
                                             )
                                         }
                                     })}
                                 </Stack>
                                 <div ref={messagesEndRef}> </div>
-                                
+
                             </ChatPaper>
                             {shownthinking && <LinearProgress />}
                             <Box mt={2}>
