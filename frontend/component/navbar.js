@@ -202,7 +202,7 @@ function ResponsiveAppBar() {
             <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>Information</MenuButton>
             <Menu slots={{ listbox: Listbox }}>
               <MenuItem> <NavLink to="/">Introduction</NavLink></MenuItem>
-              <MenuItem> <NavLink to="/frontend/manual">Manual</NavLink></MenuItem>
+              <MenuItem> <NavLink to="/frontend/manual/key">Manual</NavLink></MenuItem>
               <MenuItem> <NavLink to="/frontend/model">Model</NavLink></MenuItem>
             </Menu>
           </Dropdown>
