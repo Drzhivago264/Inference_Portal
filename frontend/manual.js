@@ -17,7 +17,7 @@ import Typography from '@mui/material/Typography';
 require("prismjs/components/prism-python");
 require("prismjs/components/prism-bash");
 import Divider from '@mui/material/Divider';
-require("prismjs/plugins/normalize-whitespace/prism-normalize-whitespace");
+
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import "./component/editor-js.css"
