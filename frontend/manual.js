@@ -20,9 +20,12 @@ import inference_ from '../docs/Manual/inference.md'
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import { Highlight, themes } from 'prism-react-renderer';
 import { useParams } from 'react-router';
+import Prism from "prismjs";
 
 function Manual() {
-
+    useEffect(() => {
+        Prism.highlightAll();
+    });
     const { doc } = useParams();
 
     const [displaydoc, setDisplayDoc] = useState('')
