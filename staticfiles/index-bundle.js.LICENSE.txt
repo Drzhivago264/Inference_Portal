@@ -72,6 +72,19 @@ https://github.com/nodeca/pako/blob/main/LICENSE
  * Date: 2023-08-28T13:37Z
  */
 
+/*! Bundled license information:
+
+prismjs/prism.js:
+  (**
+   * Prism: Lightweight, robust, elegant syntax highlighting
+   *
+   * @license MIT <https://opensource.org/licenses/MIT>
+   * @author Lea Verou <https://lea.verou.me>
+   * @namespace
+   * @public
+   *)
+*/
+
 /*! Buttons for DataTables 3.0.2
  * © SpryMedia Ltd - datatables.net/license
  */
