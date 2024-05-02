@@ -416,12 +416,12 @@ function Hotpot() {
                                         }
                                         else if (mess.holder) {
                                             return (
-                                                <Paper ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: </span></Box></Paper>
+                                                <Paper ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: </span></Box></Paper>
                                             )
                                         }
                                         else if (mess.role == 'Server') {
                                             return (
-                                                <Paper  ><Box p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
+                                                <Paper  ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
                                             )
                                         }
                                     })}
