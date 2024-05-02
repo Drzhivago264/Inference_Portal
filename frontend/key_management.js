@@ -155,6 +155,7 @@ function KeyManagement() {
         setKeyCreateLoading(true);
         setKeyCreateResponse(null)
         setKeyNameError(false)
+        setRandomAnimation(false)
         if (keyname == '') {
             setKeyCreateLoading(false)
             setKeyNameError(true)

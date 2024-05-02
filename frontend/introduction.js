@@ -75,11 +75,7 @@ function Information() {
                                 repeat={Infinity}
                                 speed={120}
                                 deletionSpeed={90}
-                            
-    
                             />
-
-            
             </Box>
                 <Grid container spacing={1}>
                     <Grid item md={9}>
