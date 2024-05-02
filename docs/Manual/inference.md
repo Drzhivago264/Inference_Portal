@@ -7,7 +7,7 @@ Inference Modes
 
 - Python example for chat mode:
 
-```
+```python
 r = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
 json={"prompt": str,
       "model" : str,
@@ -28,7 +28,7 @@ print(r.json())
 
 - cURL example for text completion:
 
-```
+```bash
 curl "https://professorparakeet.com/api/completion" --request POST -H "Authorization: Bearer str" -H 'Content-Type: application/json' \
 --data-binary '{"prompt": str, 
                 "model" : str,
@@ -45,8 +45,9 @@ curl "https://professorparakeet.com/api/completion" --request POST -H "Authoriza
               }'
 ```
 - Streamming chat response.
-  
-```
+
+
+```python
 r = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"},  json={"prompt": "What is 1 + 1?", "model" : str, 'stream': True },  stream=True) 
 for chunk in response.iter_lines():
     if chunk:
@@ -54,8 +55,9 @@ for chunk in response.iter_lines():
 ```
 
 - Sample Stream Output:
-  
-```
+
+
+```python
 b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1']}, 'delta': '1'}"
 b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 +']}, 'delta': '1 +'}"
 b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1']}, 'delta': '1 + 1'}"

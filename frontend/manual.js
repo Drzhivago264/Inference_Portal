@@ -4,104 +4,101 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import ResponsiveAppBar from './component/navbar';
 import Container from '@mui/material/Container';
-import Prism from "prismjs";
-import Link from '@mui/material/Link';
-import "prismjs/themes/prism-okaidia.min.css";
-import "prismjs/plugins/toolbar/prism-toolbar.min.css";
-import "prismjs/plugins/toolbar/prism-toolbar.min";
 import Paper from '@mui/material/Paper';
-import "prismjs/plugins/copy-to-clipboard/prism-copy-to-clipboard.min";
 import { styled } from '@mui/system';
-require("prismjs/components/prism-c");
 import Typography from '@mui/material/Typography';
-require("prismjs/components/prism-python");
-require("prismjs/components/prism-bash");
+import { Link } from "react-router-dom";
 import Divider from '@mui/material/Divider';
-
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import "./component/editor-js.css"
+import authentication_ from '../docs/Manual/authentication.md'
+import behavior_ from '../docs/Manual/behavior.md'
+import key_ from '../docs/Manual/create_key.md'
+import errorlimit_ from '../docs/Manual/error_ratelimit.md'
+import inference_ from '../docs/Manual/inference.md'
+import { MuiMarkdown, getOverrides } from 'mui-markdown';
+import { Highlight, themes } from 'prism-react-renderer';
+import { useParams } from 'react-router';
+import { Padding } from '@mui/icons-material';
+
 function Manual() {
     useEffect(() => {
         Prism.highlightAll();
     });
+    const { doc } = useParams();
 
-    const StickyBox = styled(Box)`
-        position: -webkit-sticky;
-        position: sticky;
-        display: inline-block;
-        top: 100px;
-        `;
-    const [intro, setMessage] = useState('');
-    const [inference, setMessage_inference] = useState('');
-    const [behavior, setMessage_behavior] = useState('');
-    const [authentication, setMessage_authentication] = useState('');
+    const [displaydoc, setDisplayDoc] = useState('')
+    const destination_refs = {
+        key: key_,
+        errorlimit: errorlimit_,
+        authentication: authentication_,
+        behavior: behavior_,
+        inference: inference_
+    }
+
+
     useEffect(() => {
+        console.log(doc)
         axios.all([
-            axios.get('/frontend-api/article/manual/behavior'),
-            axios.get('/frontend-api/article/manual/inference'),
-            axios.get('/frontend-api/article/manual/introduction'),
-            axios.get('/frontend-api/article/manual/authentication'),
+            axios.get(destination_refs[doc]),
         ])
+            .then(axios.spread((display_doc_object) => {
 
-            .then(axios.spread((behavior_object, inference_object, introduction_object, authentication_object) => {
-                setMessage(introduction_object.data.article.content);
-                setMessage_inference(inference_object.data.article.content);
-                setMessage_behavior(behavior_object.data.article.content);
-                setMessage_authentication(authentication_object.data.article.content);
+                setDisplayDoc(display_doc_object.data);
+
             }))
             .catch(error => {
                 console.log(error);
             });
-    }, []);
+
+
+    }, [doc]);
 
     return (
         <Container maxWidth={false} disableGutters>
             <title>Manual</title>
             <ResponsiveAppBar />
-            <Container maxWidth="lg">
+            <Container maxWidth='xl'>
                 <Box
-                    my={1}
                     display="flex"
                     alignItems="center"
-                    gap={4}
-                    p={2}
                 >
-                    <Grid container spacing={3}>
-                        
-                        <Grid item md={8} lg={9}>
-                            <Box mt={5} mb={5}>
-                            <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
-                            <div dangerouslySetInnerHTML={{ __html: authentication }} ></div>
-                            <div dangerouslySetInnerHTML={{ __html: inference }} ></div>
-                            <div dangerouslySetInnerHTML={{ __html: behavior }} ></div>
+                    <Grid container spacing={1}>
+                        <Grid item md={2} lg={2}>
+                            <Box mt={3} mb={5}>
+                                <Typography variant="h6" component="h2">
+                                    <List dense={true}>
+                                        <ListItemButton component={Link} to='/frontend/manual/key'> <Typography> Setting Up Your API Key </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> Authentication </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography> Inference </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography> Common Errors and Ratelimits </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography>The behaviors of this website </Typography> </ListItemButton>
+                                    </List>
+                                </Typography>
                             </Box>
                         </Grid>
-                        <Grid item md={4} lg={3}>
-                            <StickyBox mt={5} sx={{ display: { xs: 'none', sm: 'none', md: 'block', p: 1 } }}>
-                                <Paper  elevation={5} square={false}>
-                                    <List dense={true}
-                                        subheader={<Typography pl={2} pt={1} sx={{ color: 'white', }}>   Content</Typography>}>
-                                        < Divider />
-                                        <ListItemButton component={Link} to='#1'> 1. Setting Up Your API Key </ListItemButton>                                       
-                                        <ListItemButton component={Link} to='#1.1' sx={{ pl: 4 }}>1.1 Creating a New API Key</ListItemButton>
-                                        <ListItemButton component={Link} to='#1.2' sx={{ pl: 4 }}>1.2 Making API Request</ListItemButton>
-                                        <ListItemButton component={Link} to='#1.3' sx={{ pl: 4 }}>1.3 Edit or Delete API Key</ListItemButton>
-                                        <ListItemButton component={Link} to='#1.4' sx={{ pl: 4 }}>1.4 API Usage Report</ListItemButton>
-                                        <ListItemButton component={Link} to='#2' >2. Credit & Authentication</ListItemButton>
-                                        <ListItemButton component={Link} to='#2.1' sx={{ pl: 4 }}>2.1 Payment Methods</ListItemButton>
-                                        <ListItemButton component={Link} to='#2.2' sx={{ pl: 4 }}>2.2 Cost Calculation</ListItemButton>
-                                        <ListItemButton component={Link} to='#2.3' sx={{ pl: 4 }}>2.3 Authentication</ListItemButton>
-                                        <ListItemButton component={Link} to='#3'>3. Inference Modes</ListItemButton>
-                                        <ListItemButton component={Link} to='#3.1' sx={{ pl: 4 }}>3.1 API Endpoints</ListItemButton>
-                                        <ListItemButton component={Link} to='#3.2' sx={{ pl: 4 }}>3.2 Chat Bot Mode</ListItemButton>
-                                        <ListItemButton component={Link} to='#3.3' sx={{ pl: 4 }}>3.3 Engineering Mode</ListItemButton>
-                                        <ListItemButton component={Link} to='#4'>4. Website Behaviors</ListItemButton>
-                                    </List>
-                                </Paper>
-                            </StickyBox>
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
+                        <Grid item md={8} lg={8}>
+                            <Box m={3}>
 
+                                <MuiMarkdown overrides={{
+                                    ...getOverrides({ Highlight,  themes, theme: themes.okaidia }), 
+                                    h1: {
+                                        component: 'h1',
+                                    },
+                                    h2: {
+                                        component: 'h2',
+                                    },
+                                    h3: {
+                                        component: 'h3',
+                                    },
+                  
+                                }}>{displaydoc}</MuiMarkdown>
+
+                            </Box>
                         </Grid>
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
 
                     </Grid>
                 </Box>
