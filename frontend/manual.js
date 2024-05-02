@@ -36,8 +36,6 @@ function Manual() {
         behavior: behavior_,
         inference: inference_
     }
-
-
     useEffect(() => {
         console.log(doc)
         axios.all([
@@ -51,10 +49,7 @@ function Manual() {
             .catch(error => {
                 console.log(error);
             });
-
-
     }, [doc]);
-
     return (
         <Container maxWidth={false} disableGutters>
             <title>Manual</title>
@@ -65,8 +60,8 @@ function Manual() {
                     alignItems="center"
                 >
                     <Grid container spacing={1}>
-                        <Grid item md={2} lg={2}>
-                            <Box mt={3} mb={5}>
+                        <Grid item md={4} lg={2}>
+                            <Box mt={3} mb={5} sx={{ display: { xs: 'none', sm: 'none ', md: 'block' } }} >
                                 <Typography variant="h6" component="h2">
                                     <List dense={true}>
                                         <ListItemButton component={Link} to='/frontend/manual/key'> <Typography> Setting Up Your API Key </Typography> </ListItemButton>
@@ -83,7 +78,7 @@ function Manual() {
                             <Box m={3}>
 
                                 <MuiMarkdown overrides={{
-                                    ...getOverrides({ Highlight,  themes, theme: themes.okaidia }), 
+                                    ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                     h1: {
                                         component: 'h1',
                                     },
@@ -93,7 +88,7 @@ function Manual() {
                                     h3: {
                                         component: 'h3',
                                     },
-                  
+
                                 }}>{displaydoc}</MuiMarkdown>
 
                             </Box>

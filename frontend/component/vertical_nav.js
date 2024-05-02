@@ -37,7 +37,7 @@ const VerticalNav = () => {
                 <ListItemText primary="Chatbots & Agents" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton button component={Link} href="/frontend/manual">
+            <ListItemButton button component={Link} href="/frontend/manual/key">
                 <ListItemIcon>
                     <ArticleIcon />
                 </ListItemIcon>

@@ -619,7 +619,7 @@ function KeyManagement() {
                             <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> 3. Check user manual </Box>
                         </Typography>
                         <Typography variant="body1" >
-                            Check the <Link href="/frontend/manual" variant="body1">
+                            Check the <Link href="/frontend/manual/key" variant="body1">
                                 {'User Manual'}
                             </Link> to learn more about how to pay and use our services.
                         </Typography>
