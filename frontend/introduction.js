@@ -59,7 +59,7 @@ function Information() {
                                 sequence={[
 
                                     `Newspaper, radio, television, the internet, social media and now large language models.`,
-                                    500,
+                                    1500,
                                     `Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices.`,
                                     1500,
                                     "Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices. \n Or the voice that you want to be heard.",

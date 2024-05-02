@@ -335,9 +335,9 @@ function KeyManagement() {
                 </Box>}
                 {randomanimation && <Alert severity="success">
                     Congrats! Here's your Key, before moving on, you may consider: <br></br>
-                    <li> &#x2022;  Export you Key into a text document </li>
-                    <li> &#x2022;  Before topping up your Key, use the check credit function below to ensure that you get it correctly </li>
-                    <li> &#x2022;  If you face any problems, please contact us </li>
+                    <li> Export you Key into a text document </li>
+                    <li> Before topping up your Key, use the check credit function below to ensure that you get it correctly </li>
+                    <li> If you face any problems, please contact us </li>
                 </Alert>}
                 {randomanimation && <Box textAlign='center' my={4}>
                     <Textarea
@@ -471,8 +471,8 @@ function KeyManagement() {
                         <Stack spacing={1}>
                             <Alert variant="outlined" severity="info">
                                 We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
-                                <li> &#x2022; To pay by Stripe, include the Key and Key Name in the form below and click Stripe. </li>
-                                <li> &#x2022; To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.) </li>
+                                <li> To pay by Stripe, include the Key and Key Name in the form below and click Stripe. </li>
+                                <li> To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.) </li>
                             </Alert>
                             <Alert variant="outlined" severity="warning">
                                 If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks.
