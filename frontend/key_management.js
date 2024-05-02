@@ -31,6 +31,8 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { saveAs } from "file-saver";
+import { RandomReveal } from 'react-random-reveal'
+
 import {
     createTheme,
     responsiveFontSizes,
@@ -131,7 +133,7 @@ function KeyManagement() {
     const [keycheckloading, setKeyCheckLoading] = useState(false);
     const [xmrretrieveloading, setXMRRetrieveLoading] = useState(false);
     const [xmrconfirmationloading, setXMRConfirmationLoading] = useState(false);
-
+    const [randomanimation, setRandomAnimation] = useState(false);
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
     const [keynamepay, setKeyNamePay] = useState("")
@@ -317,13 +319,27 @@ function KeyManagement() {
     const KeyCreateExport = ({ key_, key_name, integrated_wallet, payment_id }) => {
         return (
             <Box my={4}>
-                <Alert severity="success">
+                {!randomanimation && <Box style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }} textAlign='center' my={1}>
+                    <Alert severity="info"> Key: <RandomReveal
+                        isPlaying
+                        duration={4}
+                        revealDuration={1.6}
+                        characters={key_}
+                        onComplete={() => (setRandomAnimation(true))}
+
+                    /></Alert>
+                </Box>}
+                {randomanimation && <Alert severity="success">
                     Congrats! Here's your Key, before moving on, you may consider: <br></br>
-                    - Export you Key into a text document <br></br>
-                    - Before topping up your Key, use the check credit function below to ensure that you get it correctly <br></br>
-                    - If you face any problems, please contact us <br></br>
-                </Alert>
-                <Box textAlign='center' my={4}>
+                    <li> &#x2022;  Export you Key into a text document </li>
+                    <li> &#x2022;  Before topping up your Key, use the check credit function below to ensure that you get it correctly </li>
+                    <li> &#x2022;  If you face any problems, please contact us </li>
+                </Alert>}
+                {randomanimation && <Box textAlign='center' my={4}>
                     <Textarea
                         defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`}
                         minRows={4}
@@ -332,7 +348,7 @@ function KeyManagement() {
                     <Box textAlign='center' my={1}>
                         <Button size="small" variant="outlined" onClick={() => exportKey(`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`)}>Export Key</Button>
                     </Box>
-                </Box>
+                </Box>}
             </Box >
         );
     };
@@ -420,7 +436,7 @@ function KeyManagement() {
                         <Typography variant="body1" >
                             Start by generating a random key by giving it a name.
                         </Typography>
-                        <Box my={4}  justifyContent="center"  alignItems="center" display="flex" >
+                        <Box my={4} justifyContent="center" alignItems="center" display="flex" >
                             <form autoComplete="off" onSubmit={handleCreateKey}>
                                 <FormControl defaultValue="" required>
                                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -453,10 +469,10 @@ function KeyManagement() {
                             <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>2. Add credit to your key</Box>
                         </Typography>
                         <Stack spacing={1}>
-                            <Alert  variant="outlined" severity="info">
+                            <Alert variant="outlined" severity="info">
                                 We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
-                                - To pay by Stripe, include the Key and Key Name in the form below and click Stripe. <br></br>
-                                - To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.).
+                                <li> &#x2022; To pay by Stripe, include the Key and Key Name in the form below and click Stripe. </li>
+                                <li> &#x2022; To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.) </li>
                             </Alert>
                             <Alert variant="outlined" severity="warning">
                                 If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks.
@@ -465,7 +481,7 @@ function KeyManagement() {
                         <Box my={4} >
                             <form autoComplete="off" >
 
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2}  justifyContent="center"  alignItems="center" display="flex" >
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2} justifyContent="center" alignItems="center" display="flex" >
                                     <TextField
                                         margin="normal" label="Key Name" type="text" size="small" onChange={e => setKeyNamePay(e.target.value)} value={keynamepay} error={keynamepayError} autoComplete="off"
                                         InputProps={{
