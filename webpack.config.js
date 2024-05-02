@@ -1,5 +1,5 @@
 const path = require('path');
-
+const RemarkHTML = import("remark-html");
 
 
 module.exports = {
@@ -19,8 +19,17 @@ module.exports = {
       {
         test: /\.css$/,
         use: ["style-loader", "css-loader"]
-  
-      }
+
+      },
+      {
+        test: /\.(eot|md|svg|ttf|woff|woff2)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]',
+          },
+        },
+      },
     ]
   }
 };

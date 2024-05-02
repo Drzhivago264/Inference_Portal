@@ -54,7 +54,10 @@ export default function App() {
           <Routes>
             <Route exact path="/" element={<Information />} />
             <Route exact path="" element={<Information />} />
+
             <Route path="/frontend/manual" element={<Manual />} />
+            <Route path="/frontend/manual/:doc" element={<Manual />} />
+
             <Route path="/frontend/model" element={<ModelInfor />} />
             <Route path="/frontend/key-management" element={<KeyManagement />} />
             <Route path="/frontend/hub" element={<Hub />} />
