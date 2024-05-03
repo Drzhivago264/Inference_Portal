@@ -75,9 +75,11 @@ function Log() {
             <title>Models</title>
             <ResponsiveAppBar />
             <Container maxWidth="xl">
-                <Paper p={5}>
-                    <table className="display" width="100%" ref={tableRef}></table>
-                </Paper>
+                <Box m={5} sx={{ overflow: 'auto' }}>
+                    <Paper sx={{ overflow: 'auto' }} p={5}>
+                        <table className="display" width="100%" ref={tableRef}></table>
+                    </Paper>
+                </Box>
             </Container >
         </Container>
     );

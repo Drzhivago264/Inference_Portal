@@ -50,7 +50,7 @@ def hub_redirect_api(request):
                 key_hash = sha256(key.encode('utf-8')).hexdigest()
                 return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
             else:
-                return Response({"redirect_link": f"/frontend/{destination}/{signer.sign(key)}"}, status=status.HTTP_200_OK)
+                return Response({"redirect_link": f"/frontend/{destination}/{signer.sign_object(key)}"}, status=status.HTTP_200_OK)
         except APIKEY.DoesNotExist:
                 return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
     else:

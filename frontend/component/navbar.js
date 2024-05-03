@@ -210,7 +210,7 @@ function ResponsiveAppBar() {
             <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>Modes</MenuButton>
             <Menu slots={{ listbox: Listbox }}>
               <MenuItem ><NavLink to="/frontend/hub">Chat & Log</NavLink></MenuItem>
-              <MenuItem ><NavLink to="/api/docs">API Docs</NavLink></MenuItem>
+              <MenuItem ><NavLink to="/frontend/api/docs">API Docs</NavLink></MenuItem>
             </Menu>
           </Dropdown>
 

@@ -114,7 +114,7 @@ export default function Footer() {
                     <Link color="text.secondary" href="/frontend/hub">
                         Chat Bots & Agents
                     </Link>
-                    <Link color="text.secondary" href="/api/docs">
+                    <Link color="text.secondary" href="/frontend/api/docs">
                         API Docs
                     </Link>
                 </Box>

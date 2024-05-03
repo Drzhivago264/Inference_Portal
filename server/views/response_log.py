@@ -55,7 +55,7 @@ class LogListJson(BaseDatatableView):
     def get_initial_queryset(self):
         signer = Signer()
         filter_key = self.kwargs['key']
-        key_ = APIKEY.objects.get_from_key(signer.unsign(filter_key))
+        key_ = APIKEY.objects.get_from_key(signer.unsign_object(filter_key))
         return PromptResponse.objects.filter(key=key_).order_by('-id')
 
     def filter_queryset(self, qs):
