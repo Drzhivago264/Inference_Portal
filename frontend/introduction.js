@@ -16,9 +16,11 @@ import ResponsiveAppBar from './component/navbar';
 import VerticalNav from './component/vertical_nav';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import Typography from '@mui/material/Typography';
 import { TypeAnimation } from 'react-type-animation';
-
+import introduction_ from '../docs/PageContent/introduction.md'
+import { Highlight, themes } from 'prism-react-renderer';
 function Information() {
     useEffect(() => {
         Prism.highlightAll();
@@ -27,11 +29,11 @@ function Information() {
     const [introloading, setIntroLoading] = useState(true);
     useEffect(() => {
         axios.all([
-            axios.get('/frontend-api/article/index/introduction'),
+            axios.get(introduction_),
         ])
             .then(axios.spread((intro_object) => {
                 setIntroLoading(false)
-                setMessage(intro_object.data.article.content);
+                setMessage(intro_object.data);
             }))
             .catch(error => {
                 console.log(error);
@@ -42,56 +44,143 @@ function Information() {
             <title>Introduction</title>
             <ResponsiveAppBar />
 
-     
-            <Container maxWidth="lg">
-            <Box sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                '& > :not(style)': {
-                    width: 1,
-                    mt:5,
-                    height: { xs: "220px", sm: '150px' ,md: '120px' },
-                    fontSize: { xs: "1.3em", sm: '1.5em' ,md: '1.75em' }
-                },
-            }}>
-        
-                <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block',  padding: '10px', lineHeight: 1.7, }}
-                                sequence={[
 
-                                    `Newspaper, radio, television, the internet, social media and now large language models.`,
-                                    1500,
-                                    `Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices.`,
-                                    1500,
-                                    "Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices. \n Or the voice that you want to be heard.",
-                                    3000,
-                                    ''
-                                    , 
-                                    () => {
-                                        console.log('Sequence completed');
-                                    },
-                                ]}
-                                wrapper="span"
-                                cursor={true}
-                                repeat={Infinity}
-                                speed={120}
-                                deletionSpeed={90}
-                            />
-            </Box>
+            <Container maxWidth="lg">
+                <Box sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    '& > :not(style)': {
+                        width: 1,
+                        mt: 5,
+                        height: { xs: "150px", sm: '170px', md: '170px', lg: '120px' },
+                        fontSize: { xs: "1.3em", sm: '1.5em', md: '1.75em' }
+                    },
+                }}>
+
+                    <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+                        sequence={[
+
+                            `Newspaper, radio, television, the internet, social media and now large language models.`,
+                            1500,
+                            `Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices.`,
+                            1500,
+                            "Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices. \n Or the voice that you want to be heard.",
+                            3000,
+                            ''
+                            ,
+                            () => {
+                                console.log('Sequence completed');
+                            },
+                        ]}
+                        wrapper="span"
+                        cursor={true}
+                        repeat={Infinity}
+                        speed={120}
+                        deletionSpeed={90}
+                    />
+                </Box>
                 <Grid container spacing={1}>
                     <Grid item md={9}>
                         <Box mt={5} mb={5} p={1}>
-                            <Typography variant="h4" >
-                                <Box sx={{ mb: 2, fontWeight: 'bold' }}>About</Box>
-                            </Typography>
                             {introloading && <Stack spacing={1}>
                                 <Skeleton variant="rounded" animation="wave" height={150} />
                                 <Skeleton variant="rounded" animation="wave" height={150} />
                                 <Skeleton variant="rounded" animation="wave" height={100} />
                             </Stack>
                             }
-                            <div dangerouslySetInnerHTML={{ __html: intro }} ></div>
-                        </Box>
+                            <MuiMarkdown overrides={{
+                                ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
+                                h1: {
+                                    component: 'h1',
+                                },
+                                h2: {
+                                    component: 'h2',
+                                },
+                                h3: {
+                                    component: 'h3',
+                                },
 
+                            }}>{intro}</MuiMarkdown>
+                            <Typography mt={2}>
+                                The two examples below can be currently generated by a popular large language model. In fact, we just input the prompt into our chatbots.
+                                You can generate a key and try it by yourself.
+                            </Typography>
+                            <Box mt={1} mb={1} sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                '& > :not(style)': {
+                                    width: 1,
+                                    height: { xs: "250px" },
+                                    overflow: 'auto',
+                                    fontSize: { xs: "1em" }
+                                }
+                            }}>
+                                <Paper variant="outlined">
+                                    <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+                                        sequence={[
+
+                                            `Prompt: You are an educated man in your 20s, you believe in equality, freedom and justice.\nCommand: You must response to the following sentence based on what you believe in.`,
+                                            1500,
+                                            `Prompt: You are an educated man in your 20s, you believe in equality, freedom and justice.\nCommand: You must response to the following sentence based on what you believe in.\nSentence: The reality is deterministic, there is no freedom.`,
+                                            1500,
+                                            `Prompt: You are an educated man in your 20s, you believe in equality, freedom and justice.\nCommand: You must response to the following sentence based on what you believe in.\nSentence: The reality is deterministic, there is no freedom.\nAnswer: I respectfully disagree. The concept of determinism suggests that every event, including human cognition and behavior, decision and action, is causally determined by an unbroken chain of prior occurrences. While this view might hold some scientific grounding, it undermines the essence of human agency and free will. I believe in freedom - the ability to choose, to act, to shape our own destiny. This freedom is what allows us to learn, grow, and make decisions that can change the course of our lives. Even if some aspects of reality are deterministic, it doesn't negate the existence of personal freedom.`,
+                                            3000,
+                                            ''
+                                            ,
+                                            () => {
+                                                console.log('Sequence completed');
+                                            },
+                                        ]}
+                                        wrapper="span"
+                                        cursor={true}
+                                        repeat={Infinity}
+                                        speed={120}
+                                        deletionSpeed={90}
+                                    />
+                                </Paper>
+                            </Box>
+                            <Typography mt={2}>
+                                The current models are pretty smart, they have a great understanding of human society. At least, they understand Western society that generates the majority of their training datesets.
+                                Imagine we can train our own models (smaller and more versatile) on our (localised) data to speak up the voices that we want them to speak and at the scale that hardware can support.
+                            </Typography>
+                            <Box sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                '& > :not(style)': {
+                                    width: 1,
+                                    mt:2,
+                                    height: { xs: "250px" },
+                                    overflow: 'auto',
+                                    fontSize: { xs: "1em" }
+                                }
+                            }}>
+                                <Paper variant="outlined">
+                                    <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+                                        sequence={[
+
+                                            `Prompt: You are an man in your 30s, you come from a working class family who is tired of paying for your morgage.\nCommand: You must response to the following sentence based on who you are.`,
+                                            1500,
+                                            `Prompt: You are an man in your 30s, you come from a working class family who is tired of paying for your morgage.\nCommand: You must response to the following sentence based on who you are.\nSentence: It is important to raise interest rates and income taxes for education.`,
+                                            1500,
+                                            `Prompt: You are an man in your 30s, you come from a working class family who is tired of paying for your morgage.\nCommand: You must response to the following sentence based on who you are.\nSentence: It is important to raise interest rates and income taxes for education.\n Answer: While I understand the value of investing in education, I must say that the prospect of raising interest rates and income taxes is a tough pill to swallow for folks like me. Many of us are already struggling to make ends meet, paying mortgages and trying to secure a decent life for our families. It seems like we're always the ones shouldering the burden. I think it's important to find a balance and look at other ways to fund education, without putting the entire weight on the working class.`,
+                                            3000,
+                                            ''
+                                            ,
+                                            () => {
+                                                console.log('Sequence completed');
+                                            },
+                                        ]}
+                                        wrapper="span"
+                                        cursor={true}
+                                        repeat={Infinity}
+                                        speed={120}
+                                        deletionSpeed={90}
+                                    />
+
+                                </Paper>
+
+                            </Box>
+                        </Box>
                     </Grid>
                     <Grid item md={3}>
                         <Box m={7} sx={{ width: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
@@ -99,8 +188,8 @@ function Information() {
                         </Box>
                     </Grid>
                 </Grid>
-            </Container>
-        </Container>
+            </Container >
+        </Container >
     );
 }
 

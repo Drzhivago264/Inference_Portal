@@ -1,6 +1,8 @@
 Inference Modes
 =======================
 
+---
+
 ## 1 API endpoints
 
 - Visit [API Doc](https://professorparakeet.com/api/docs) to view specific request and response schemas of each endpoint.
@@ -71,6 +73,8 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
 
 > - Streamming is only available in chat mode.
 > - If the server is currently offline, you should send a warm up request to boot it up, otherwise you will get a lot a status reponses for your prompts.
+
+---
 
 ## 2 Chat Bot Mode
 - We offer standard chatbot mode with custom chat template. We use a vectorised database and query 3 previous model's responses what are the most relevant to answer your questions.
