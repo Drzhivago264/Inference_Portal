@@ -1,12 +1,16 @@
 Authentication
 =======================
 
+--- 
+
 ## 1. Authentication
 
 >You are recommended to store the API key securely in your own backend.
 
 - To use the API, you can supply API Key using `Bearer` header.
 - To inference the Webserver, you can supply API Key via Key textbox. 
+
+---
 
 ## 2. API Key Usage Credits
 

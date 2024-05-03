@@ -60,9 +60,23 @@ function Manual() {
                     alignItems="center"
                 >
                     <Grid container spacing={1}>
-                        <Grid item md={4} lg={2}>
+                        <Grid item md={3} lg={2}>
                             <Box mt={3} mb={5} sx={{ display: { xs: 'none', sm: 'none ', md: 'block' } }} >
-                                <Typography variant="h6" component="h2">
+                                <Typography variant="body1" component="body1">
+                                    <List dense={true}>
+                                        <ListItemButton component={Link} to='/frontend/manual/key'> <Typography variant="body2" component="body2"> Setting Up Your API Key </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography variant="body2" component="body2"> Authentication </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography variant="body2" component="body2"> Inference </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography variant="body2" component="body2"> Common Errors and Ratelimits </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography variant="body2" component="body2">The behaviors of this website </Typography> </ListItemButton>
+                                    </List>
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
+                        <Grid item md={8} lg={8}>
+                        <Box mt={3}  sx={{ display: { sm: 'block ', md: 'none' } }} >
+                                <Typography variant="body1" component="body1">
                                     <List dense={true}>
                                         <ListItemButton component={Link} to='/frontend/manual/key'> <Typography> Setting Up Your API Key </Typography> </ListItemButton>
                                         <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> Authentication </Typography> </ListItemButton>
@@ -72,9 +86,6 @@ function Manual() {
                                     </List>
                                 </Typography>
                             </Box>
-                        </Grid>
-                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
-                        <Grid item md={8} lg={8}>
                             <Box m={3}>
 
                                 <MuiMarkdown overrides={{

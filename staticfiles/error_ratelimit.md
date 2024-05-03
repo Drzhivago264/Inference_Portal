@@ -1,6 +1,8 @@
 Common Errors and Ratelimits
 =======================
 
+---
+
 ## 1.Common Errors
 
 The server responds to a user’s request by issuing status codes when the request is made to the server. Kindly refer to the table below to further understand the status codes when indicating the success or failure of an API call.
@@ -14,9 +16,13 @@ The server responds to a user’s request by issuing status codes when the reque
 | 500 (Internal Server Error) | This is a generic error response indicating that the server has encountered an unexpected issue that prevented it from fulfilling the request                                                        |
 | 503 (Service Unavailable)   | The service is currently unavailable.                                                                                                                                                                |
 
+
+---
+
 ## 2. Ratelimits
 
 There are multiple ratelimits applied for different endpoints
+
 
 ### 2.1 Frontend endpoints
 
