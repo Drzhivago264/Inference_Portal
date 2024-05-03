@@ -12,6 +12,7 @@ import Agent from './agent.js'
 import FunctionLLM from './function_llm.js';
 import Hotpot from './hotpot.js';
 import Log from './log.js';
+import APIDoc from './api_doc.js';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
@@ -57,7 +58,7 @@ export default function App() {
 
             <Route path="/frontend/manual" element={<Manual />} />
             <Route path="/frontend/manual/:doc" element={<Manual />} />
-
+            <Route path="/frontend/api/docs" element={<APIDoc />} />
             <Route path="/frontend/model" element={<ModelInfor />} />
             <Route path="/frontend/key-management" element={<KeyManagement />} />
             <Route path="/frontend/hub" element={<Hub />} />
@@ -66,7 +67,7 @@ export default function App() {
             <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLM />} />
             <Route path="/frontend/hotpot/:keyhash" element={<Hotpot />} />
             <Route path="/frontend/log/:keyhash" element={<Log />} />
-            <Route path="/api/docs" element={<APIRedirect />} />
+
             <Route path="/frontend/contact" element={<Contact />} />
           </Routes>
         </Router>
@@ -76,9 +77,5 @@ export default function App() {
       </ThemeProvider>
     </ColorModeContext.Provider>
   );
-}
-function APIRedirect() {
-  window.location.href = '/api/docs';
-  return null;
 }
 

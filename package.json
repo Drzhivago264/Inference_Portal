@@ -79,6 +79,8 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "remark-html": "^16.0.1",
+    "swagger-client": "^3.27.2",
+    "swagger-ui-react": "^5.17.2",
     "websocket": "^1.0.34"
   }
 }
