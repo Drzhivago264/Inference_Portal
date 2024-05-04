@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from "react-router-dom";
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import { FormControl, FormLabel } from '@mui/material';
@@ -60,6 +61,12 @@ function Chat() {
     const [usermessageError, setUserMessageError] = useState(false);
     const [key, setKey] = useState("");
     const [keyError, setKeyError] = useState(false);
+    const { state } = useLocation();
+    useEffect(() => {
+        if (state) {
+            setKey(state.credential)
+        }
+    }, []);
     useEffect(() => {
         axios.all([
             axios.get('/frontend-api/model'),
@@ -96,7 +103,7 @@ function Chat() {
                         ...chat_message,
                         dataFromServer,
                     ])
-                    if (dataFromServer.holder){
+                    if (dataFromServer.holder) {
                         setThinking(true)
                     }
                 }
@@ -154,7 +161,7 @@ function Chat() {
                     <Grid container spacing={2}>
                         <Grid item md={8}>
                             <ChatPaper id={'chat-log'} variant="outlined">
-                                <TextField
+                                {!state && <TextField
                                     margin="normal"
                                     label="Key"
                                     type="password"
@@ -170,13 +177,13 @@ function Chat() {
                                             </InputAdornment>
                                         ),
                                     }}
-                                />
+                                />}
                                 <Stack spacing={1}>
                                     {chat_message.map((mess) => {
 
                                         if (mess.role == 'Human') {
                                             return (
-                                                <Paper  ><Box sx={{ borderRight: 5,  borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
+                                                <Paper  ><Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
                                             )
                                         }
                                         else if (mess.holder) {

@@ -79,7 +79,7 @@ const Button = styled(BaseButton)(
   font-size: 14px;
   line-height: 1;
   padding-top: 8px;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
   padding-left: 8px;
   padding-right: 8px;
   border-radius: 8px;
@@ -237,6 +237,7 @@ function ResponsiveAppBar() {
           >
             Contact
           </Button>
+          
         </Toolbar>
       </Container>
     </AppBarColored>

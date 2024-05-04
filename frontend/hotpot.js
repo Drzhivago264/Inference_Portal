@@ -29,6 +29,7 @@ import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from './component/navbar';
 import SendIcon from '@mui/icons-material/Send';
+import { useLocation } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -80,6 +81,13 @@ function Hotpot() {
     const [default_parent_instruct, setParentInstruct] = useState("");
     const [default_child_instruct, setChildInstruct] = useState("");
     const [duplicatemessage, setDuplicateMessage] = useState(true);
+
+    const { state } = useLocation();
+    useEffect(() => {
+        if (state) {
+            setKey(state.credential)
+        }
+    }, []);
 
     useEffect(() => {
         axios.all([
@@ -134,7 +142,7 @@ function Hotpot() {
                         dataFromServer,
                     ])
                     if (dataFromServer.holder) {
-                            setThinkingChat(true)
+                        setThinkingChat(true)
                     }
                 }
                 else {
@@ -287,7 +295,7 @@ function Hotpot() {
                 <Box m={1}>
                     <Grid container spacing={2}>
                         <Grid item md={2}>
-                            <TextField
+                            {!state && <TextField
                                 margin="normal"
                                 label="Key"
                                 type="password"
@@ -303,7 +311,7 @@ function Hotpot() {
                                         </InputAdornment>
                                     ),
                                 }}
-                            />
+                            />}
                             <Divider />
                             <List subheader={
                                 <ListSubheader component="div" id="nested-list-subheader">

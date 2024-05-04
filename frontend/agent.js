@@ -32,7 +32,7 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from './component/navbar';
 import SendIcon from '@mui/icons-material/Send';
 import EditorJS from "@editorjs/editorjs";
-
+import { useLocation } from "react-router-dom";
 import Header from "@editorjs/header";
 import Quote from "@editorjs/quote"
 import Paragraph from "@editorjs/paragraph"
@@ -81,6 +81,14 @@ function Agent() {
     const [default_parent_instruct, setParentInstruct] = useState("");
     const [default_child_instruct, setChildInstruct] = useState("");
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
+
+    const { state } = useLocation();
+    useEffect(() => {
+        if (state) {
+            setKey(state.credential)
+        }
+    }, []);
+
     useEffect(() => {
         if (!ref.current) {
             const editor = new EditorJS({
@@ -115,16 +123,16 @@ function Agent() {
                         shortcut: 'CMD+SHIFT+M',
                     },
                     anyTuneName: {
-                        class:AlignmentTuneTool,
-                        config:{
-                          default: "right",
-                          blocks: {
-                            header: 'center',
-                            list: 'right'
-                          }
+                        class: AlignmentTuneTool,
+                        config: {
+                            default: "right",
+                            blocks: {
+                                header: 'center',
+                                list: 'right'
+                            }
                         },
-                      }
-             
+                    }
+
                 },
                 data: default_editor_structure,
             });
@@ -451,7 +459,7 @@ function Agent() {
                         </Grid>
                         <Grid item md={4}>
                             <ChatPaper id={'chat-log'} variant="outlined">
-                                <TextField
+                                {!state && <TextField
                                     margin="normal"
                                     label="Key"
                                     type="password"
@@ -467,7 +475,7 @@ function Agent() {
                                             </InputAdornment>
                                         ),
                                     }}
-                                />
+                                />}
                                 <Stack spacing={1}>
                                     {chat_message.map((mess) => {
                                         if (mess.role == 'Human') {

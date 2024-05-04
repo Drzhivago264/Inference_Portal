@@ -23,6 +23,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import LinearProgress from '@mui/material/LinearProgress';
 import ResponsiveAppBar from './component/navbar';
 import SendIcon from '@mui/icons-material/Send';
+import { useLocation } from "react-router-dom";
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -57,6 +58,14 @@ function FunctionLLM() {
     const [llmfunction, setLLMFunction] = useState("emotion");
     const [streamtokens, setStream] = useState(null)
     const [lasteststreamid, setLastestSream] = useState(null)
+
+    const { state } = useLocation();
+    useEffect(() => {
+        if (state) {
+            setKey(state.credential)
+        }
+    }, []);
+
     useEffect(() => {
         axios.all([
             axios.get('/frontend-api/model'),
@@ -101,8 +110,9 @@ function FunctionLLM() {
                     }
                 }
                 else {
-                    setStream(dataFromServer.message);
                     setLastestSream(dataFromServer.stream_id)
+                    setStream(dataFromServer.message);
+                  
                 };
                 var logTa = document.getElementById("chat-log")
                 logTa.scrollTop = logTa.scrollHeight;
@@ -224,7 +234,7 @@ function FunctionLLM() {
 
                         <Grid item md={6}>
                             <ChatPaper id={'chat-log'} variant="outlined">
-                                <TextField
+                                {!state && <TextField
                                     margin="normal"
                                     label="Key"
                                     type="password"
@@ -240,7 +250,7 @@ function FunctionLLM() {
                                             </InputAdornment>
                                         ),
                                     }}
-                                />
+                                />}
                                 <Stack spacing={1}>
                                     {chat_message.map((mess) => {
 
