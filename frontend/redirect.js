@@ -18,6 +18,10 @@ import Alert from '@mui/material/Alert';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
+import { MuiMarkdown, getOverrides } from 'mui-markdown';
+import explaination_ from '../docs/PageContent/mode_explaination.md'
+import { Highlight, themes } from 'prism-react-renderer';
+
 function Hub() {
 
     function getCookie(name) {
@@ -38,8 +42,9 @@ function Hub() {
 
     const [explaination, setMessage] = useState('');
     const navigate = useNavigate();
-    const [key, setKey] = useState("")
+
     const [destination, setDestination] = useState("engineer")
+    const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
     const [redirecterror, setRedirectError] = useState(null);
     const handleSubmit = (event) => {
@@ -63,22 +68,21 @@ function Hub() {
                 key: key,
                 destination: destination
             }
-            console.log(key, destination)
+
             axios.post("/frontend-api/hub-redirect", data, config)
                 .then((response) => {
-                    navigate(response.data.redirect_link, { replace: true });
+                    navigate(response.data.redirect_link, { replace: true,  state: { credential: key } });
                 }).catch(error => {
-                    console.log(error.response.data.detail)
                     setRedirectError(error.response.data.detail)
-                });;
+                });
         }
     }
     useEffect(() => {
         axios.all([
-            axios.get('/frontend-api/article/redirect/explaination'),
+            axios.get(explaination_),
         ])
             .then(axios.spread((explaination_object) => {
-                setMessage(explaination_object.data.article.content);
+                setMessage(explaination_object.data);
             }))
             .catch(error => {
                 console.log(error);
@@ -155,7 +159,19 @@ function Hub() {
                             {redirecterror && <ErrorAlert error={redirecterror} />}
                         </Grid>
                         <Grid item md={8} lg={9}>
-                            <div dangerouslySetInnerHTML={{ __html: explaination }} ></div>
+                        <MuiMarkdown overrides={{
+                                ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
+                                h1: {
+                                    component: 'h1',
+                                },
+                                h2: {
+                                    component: 'h2',
+                                },
+                                h3: {
+                                    component: 'h3',
+                                },
+
+                            }}>{explaination}</MuiMarkdown>
                         </Grid>
                     </Grid>
                 </Box>

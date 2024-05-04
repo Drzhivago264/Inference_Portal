@@ -183,7 +183,7 @@ function Information() {
                         </Box>
                     </Grid>
                     <Grid item md={3}>
-                        <Box m={7} sx={{ width: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
+                        <Box m={10} sx={{ width: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
                             <VerticalNav />
                         </Box>
                     </Grid>
