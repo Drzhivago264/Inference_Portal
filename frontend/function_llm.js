@@ -26,6 +26,8 @@ import SendIcon from '@mui/icons-material/Send';
 import { useLocation } from "react-router-dom";
 import { OpenAPIParameter } from './component/chatroom_parameters'
 import { ChatBox } from './component/chatbox';
+import { chatsocket } from './component/chatsocket';
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -91,52 +93,7 @@ function FunctionLLM() {
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/');
-        websocket.current.onopen = () => {
-            console.log("WebSocket  Connected");
-        };
-        websocket.current.onclose = () => {
-            console.log("WebSocket  Disconnected");
-        };
-        websocket.current.onmessage = (message) => {
-            const dataFromServer = JSON.parse(message.data);
-            if (dataFromServer) {
-                if (dataFromServer.role == "Human" || dataFromServer.role == "Server" || dataFromServer.holder) {
-
-                    if (dataFromServer.holder) {
-                        setThinking(true)
-                        dataFromServer.message = ""
-                    }
-                    setChatMessage(chat_message => [
-                        ...chat_message,
-                        {
-                            holder: dataFromServer.holder,
-                            holderid: dataFromServer.holderid,
-                            role: dataFromServer.role,
-                            time: dataFromServer.time,
-                            credit: dataFromServer.credit,
-                            message: dataFromServer.message
-                        },
-                    ])
-                }
-                else {
-                    setThinking(false)
-                    setChatMessage(chat_message => [
-                        ...chat_message.slice(0, -1),
-                        {
-                            holder: chat_message[chat_message.length - 1].holder,
-                            holderid: chat_message[chat_message.length - 1].holderid,
-                            role: chat_message[chat_message.length - 1].role,
-                            time: chat_message[chat_message.length - 1].time,
-                            credit: chat_message[chat_message.length - 1].credit,
-                            message: chat_message[chat_message.length - 1].message += dataFromServer.message
-                        }
-                    ])
-
-                };
-                var logTa = document.getElementById("chat-log")
-                logTa.scrollTop = logTa.scrollHeight;
-            }
-        }
+        chatsocket(websocket, setChatMessage, setThinking, document )
     }, []);
 
     const handleEnter = (e) => {
@@ -243,10 +200,9 @@ function FunctionLLM() {
                                 />
                             </Box>
                         </Grid>
-
+                        <Grid item md={6}>
                         <ChatBox
                             inputsize={660}
-                            size={6}
                             chat_message={chat_message}
                             usermessage={usermessage}
                             usermessageError={usermessageError}
@@ -262,8 +218,8 @@ function FunctionLLM() {
                             shownthinking={shownthinking}
                             handleEnter={handleEnter}
                         >
-
                         </ChatBox>
+                        </Grid>
                         <Grid item md={2}>
                             <OpenAPIParameter
                                 top_p={top_p}

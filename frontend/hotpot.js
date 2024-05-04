@@ -1,24 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
-import { FormControl, FormLabel } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
-import InputLabel from '@mui/material/InputLabel';
-import Radio from '@mui/material/Radio';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import RadioGroup from '@mui/material/RadioGroup';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import LinearProgress from '@mui/material/LinearProgress';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Slider from '@mui/material/Slider';
 import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
-import Switch from '@mui/material/Switch';
 import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
@@ -28,10 +17,11 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from './component/navbar';
-import SendIcon from '@mui/icons-material/Send';
 import { useLocation } from "react-router-dom";
+import { ChatBoxHotpot } from './component/chatbox';
+import { HotpotParameter } from './component/chatroom_parameters'
+import { chatsocket, agentsocket } from './component/chatsocket';
 
-import {HotpotParameter} from './component/chatroom_parameters'
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -128,77 +118,23 @@ function Hotpot() {
     useEffect(() => {
         agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/');
         chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/');
-        chat_websocket.current.onopen = () => {
-            console.log("WebSocket  Connected");
-        };
-        chat_websocket.current.onclose = () => {
-            console.log("WebSocket  Disconnected");
-        };
-        chat_websocket.current.onmessage = (message) => {
-            const dataFromServer = JSON.parse(message.data);
-            if (dataFromServer) {
-                if (dataFromServer.role == "Human" || dataFromServer.role == "Server" || dataFromServer.holder) {
-                    setChatMessage(chat_message => [
-                        ...chat_message,
-                        dataFromServer,
-                    ])
-                    if (dataFromServer.holder) {
-                        setThinkingChat(true)
-                    }
-                }
-                else {
-                    setThinkingChat(false)
-                    document.getElementById(dataFromServer.stream_id).innerHTML += dataFromServer.message
-                };
-                var logTa = document.getElementById("chat-log")
-                logTa.scrollTop = logTa.scrollHeight;
-            }
-        }
-        agent_websocket.current.onopen = () => {
-            console.log("Agent Socket  Connected");
-        };
-        agent_websocket.current.onclose = () => {
-            console.log("Agent Socket  Disconnected");
-        };
-        agent_websocket.current.onmessage = (message) => {
-            const dataFromServer = JSON.parse(message.data);
-            if (dataFromServer) {
-                if ((dataFromServer.hasOwnProperty("swap_template"))) {
-                    setParentInstruct(dataFromServer.swap_instruction)
-                    setChildInstruct(dataFromServer.default_child_instruct)
-                    let new_child_template_list = []
-                    for (var new_child in dataFromServer.child_template_name_list) {
-                        new_child_template_list.push({ 'name': dataFromServer.child_template_name_list[new_child] })
-                    }
-                    setDefaultChildTemplateList(new_child_template_list)
-                }
-                else if ((dataFromServer.hasOwnProperty("child_instruct"))) {
-                    setChildInstruct(dataFromServer.child_instruct)
-                }
-                else if (dataFromServer.hasOwnProperty("paragraph")) {
-                    setCurrentParagraph(dataFromServer.paragraph)
-                }
-                else if (dataFromServer.role == "Human" || dataFromServer.role == "Server" || dataFromServer.holder) {
-                    console.log(dataFromServer)
-                    setAgentMessage(agent_message => [
-                        ...agent_message,
-                        dataFromServer,
-                    ])
-                    if (dataFromServer.holder) {
-                        setThinkingAgent(true)
-                    }
-                }
-                else if (dataFromServer.hasOwnProperty("agent_action")) {
-                    return
-                }
-                else {
-                    setThinkingAgent(false)
-                    document.getElementById(dataFromServer.stream_id).innerHTML += dataFromServer.message
-                };
-                var logTa = document.getElementById("chat-log-agent")
-                logTa.scrollTop = logTa.scrollHeight;
-            }
-        }
+
+        chatsocket(
+            chat_websocket,
+            setChatMessage,
+            setThinkingChat,
+            document)
+        agentsocket(
+            agent_websocket,
+            setAgentMessage,
+            setThinkingAgent,
+            document,
+            setParentInstruct,
+            setChildInstruct,
+            setDefaultChildTemplateList,
+            null,
+            null,
+            null)
     }, []);
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
@@ -364,108 +300,45 @@ function Hotpot() {
                                 </Paper>
                             </Stack>
                         </Grid>
+
                         <Grid item md={4}>
-                            <ChatPaper id={'chat-log'} variant="outlined">
-                                <Stack spacing={1}>
-                                    {chat_message.map((mess) => {
-                                        if (mess.role == 'Human') {
-                                            return (
-                                                <Paper  ><Box p={1} sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
-                                            )
-                                        }
-                                        else if (mess.holder) {
-                                            return (
-                                                <Paper ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: </span></Box></Paper>
-                                            )
-                                        }
-                                        else if (mess.role == 'Server') {
-                                            return (
-                                                <Paper  ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
-                                            )
-                                        }
-                                    })}
-                                </Stack>
-                                <div ref={messagesEndRef}> </div>
-                            </ChatPaper>
-                            {shownthinkingchat && <LinearProgress />}
-                            <Box mt={2}>
-                                <Paper
-                                    component="form"
-                                    sx={{ p: '2px 4px', display: 'flex', }}
-                                >
-                                    <ChatInput
-                                        id="chat-input"
-                                        multiline
-                                        maxRows={6}
-                                        value={userchatmessage}
-                                        error={userchatmessageError}
-                                        onChange={e => { setUserChatMessage(e.target.value); check_duplicate_message(e.target.value) }}
-                                        onKeyUp={e => handleEnter(e)}
-                                        minRows={4}
-                                        variant="standard"
-                                        InputProps={{
-                                            endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end">
-                                                <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitChat} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                        }}
-                                    />
-                                </Paper>
-                            </Box>
+                            <ChatBoxHotpot
+                                id={'chat-log'}
+                                inputsize={660}
+                                chat_message={chat_message}
+                                usermessage={userchatmessage}
+                                usermessageError={userchatmessageError}
+                                ChatPaper={ChatPaper}
+                                ChatInput={ChatInput}
+                                setUserMessage={setUserChatMessage}
+                                submitChat={submitChat}
+                                messagesEndRef={messagesEndRef}
+                                shownthinking={shownthinkingchat}
+                                handleEnter={handleEnter}
+                                check_duplicate_message={check_duplicate_message}
+                            >
+                            </ChatBoxHotpot>
                         </Grid>
                         <Grid item md={4}>
-                            <ChatPaper id={'chat-log-agent'} variant="outlined">
-                                <Stack spacing={1}>
-                                    {agent_message.map((mess) => {
-
-                                        if (mess.role == 'Human') {
-                                            return (
-                                                <Paper  >
-                                                    <Box p={1} sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1, }} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
-                                            )
-                                        }
-                                        else if (mess.holder) {
-                                            return (
-                                                <Paper ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: </span></Box></Paper>
-                                            )
-                                        }
-                                        else if (mess.role == 'Server') {
-                                            return (
-                                                <Paper  ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
-                                            )
-                                        }
-                                    })}
-                                </Stack>
-                                <div ref={messagesEndRef}> </div>
-                            </ChatPaper>
-                            {shownthinkingagent && <LinearProgress />}
-                            <Box mt={2}>
-                                <Paper
-                                    component="form"
-                                    sx={{ p: '2px 4px', display: 'flex', minWidth: 300 }}
-                                >
-                                    <ChatInput
-                                        id="agent-input"
-                                        multiline
-                                        maxRows={6}
-                                        value={useragentmessage}
-                                        error={useragentmessageError}
-                                        onChange={e => { setUserAgentMessage(e.target.value); check_duplicate_message(e.target.value) }}
-                                        onKeyUp={e => handleEnter(e)}
-                                        minRows={4}
-                                        variant="standard"
-                                        InputProps={{
-                                            endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end">
-                                                <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitAgent} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                        }}
-                                    />
-                                </Paper>
-                            </Box>
+                            <ChatBoxHotpot
+                                id={'chat-log-agent'}
+                                inputsize={660}
+                                chat_message={agent_message}
+                                usermessage={useragentmessage}
+                                usermessageError={useragentmessageError}
+                                ChatPaper={ChatPaper}
+                                ChatInput={ChatInput}
+                                setUserMessage={setUserAgentMessage}
+                                submitChat={submitAgent}
+                                messagesEndRef={messagesEndRef}
+                                shownthinking={shownthinkingagent}
+                                handleEnter={handleEnter}
+                                check_duplicate_message={check_duplicate_message}
+                            >
+                            </ChatBoxHotpot>
 
                         </Grid>
                         <Grid item md={2}>
-                          
-
                             <HotpotParameter
                                 template_list={template_list}
                                 choosen_template={choosen_template}
@@ -498,6 +371,7 @@ function Hotpot() {
                                 setEarlyStopping={setEarlyStopping}
                                 setChoosenAgentModel={setChoosenAgentModel}
                                 setChoosenChatModel={setChoosenChatModel}
+                                setDuplicateMessage={setDuplicateMessage}
                             ></HotpotParameter>
 
                         </Grid>
