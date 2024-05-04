@@ -1,6 +1,4 @@
 const path = require('path');
-const RemarkHTML = import("remark-html");
-
 
 module.exports = {
   entry: './frontend/index.js',  // path to our input file
@@ -31,7 +29,8 @@ module.exports = {
         },
       },
     ]
-  }
+  },
+
 };
 
 

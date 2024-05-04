@@ -2,29 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from "react-router-dom";
 import axios from 'axios';
 import Box from '@mui/material/Box';
-import { FormControl, FormLabel } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
-import InputLabel from '@mui/material/InputLabel';
-import Radio from '@mui/material/Radio';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import RadioGroup from '@mui/material/RadioGroup';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Slider from '@mui/material/Slider';
 import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
-import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
-import Divider from '@mui/material/Divider';
 import KeyIcon from '@mui/icons-material/Key';
 import LinearProgress from '@mui/material/LinearProgress';
 import ResponsiveAppBar from './component/navbar';
 import SendIcon from '@mui/icons-material/Send';
+import { ChatParameter } from './component/chatroom_parameters';
+import { ChatBox } from './component/chatbox';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 660,
     height: 700,
@@ -61,6 +52,7 @@ function Chat() {
     const [usermessageError, setUserMessageError] = useState(false);
     const [key, setKey] = useState("");
     const [keyError, setKeyError] = useState(false);
+
     const { state } = useLocation();
     useEffect(() => {
         if (state) {
@@ -99,17 +91,37 @@ function Chat() {
             const dataFromServer = JSON.parse(message.data);
             if (dataFromServer) {
                 if (dataFromServer.role == "Human" || dataFromServer.role == "Server" || dataFromServer.holder) {
-                    setChatMessage(chat_message => [
-                        ...chat_message,
-                        dataFromServer,
-                    ])
+
                     if (dataFromServer.holder) {
                         setThinking(true)
+                        dataFromServer.message = ""
                     }
+                    setChatMessage(chat_message => [
+                        ...chat_message,
+                        {
+                            holder: dataFromServer.holder,
+                            holderid: dataFromServer.holderid,
+                            role: dataFromServer.role,
+                            time: dataFromServer.time,
+                            credit: dataFromServer.credit,
+                            message: dataFromServer.message
+                        },
+                    ])
                 }
                 else {
                     setThinking(false)
-                    document.getElementById(dataFromServer.stream_id).innerHTML += dataFromServer.message
+                    setChatMessage(chat_message => [
+                        ...chat_message.slice(0, -1),
+                        {
+                            holder: chat_message[chat_message.length - 1].holder,
+                            holderid: chat_message[chat_message.length - 1].holderid,
+                            role: chat_message[chat_message.length - 1].role,
+                            time: chat_message[chat_message.length - 1].time,
+                            credit: chat_message[chat_message.length - 1].credit,
+                            message: chat_message[chat_message.length - 1].message += dataFromServer.message
+                        }
+                    ])
+
                 };
                 var logTa = document.getElementById("chat-log")
                 logTa.scrollTop = logTa.scrollHeight;
@@ -159,207 +171,57 @@ function Chat() {
             <Container maxWidth="lg" sx={{ width: 1200 }}>
                 <Box m={2}>
                     <Grid container spacing={2}>
-                        <Grid item md={8}>
-                            <ChatPaper id={'chat-log'} variant="outlined">
-                                {!state && <TextField
-                                    margin="normal"
-                                    label="Key"
-                                    type="password"
-                                    size="small"
-                                    onChange={e => setKey(e.target.value)}
-                                    value={key}
-                                    error={keyError}
-                                    autoComplete="off"
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <KeyIcon />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />}
-                                <Stack spacing={1}>
-                                    {chat_message.map((mess) => {
 
-                                        if (mess.role == 'Human') {
-                                            return (
-                                                <Paper  ><Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
-                                            )
-                                        }
-                                        else if (mess.holder) {
-                                            return (
-                                                <Paper ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: </span></Box></Paper>
-                                            )
-                                        }
-                                        else if (mess.role == 'Server') {
-                                            return (
-                                                <Paper  ><Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
-                                            )
-                                        }
+                        <ChatBox
+                            inputsize={660}
+                            size={8}
+                            chat_message={chat_message}
+                            usermessage={usermessage}
+                            usermessageError={usermessageError}
+                            key={key}
+                            setKey={setKey}
+                            keyError={keyError}
+                            ChatPaper={ChatPaper}
+                            ChatInput={ChatInput}
+                            setUserMessage={setUserMessage}
+                            state={state}
+                            submitChat={submitChat}
+                            messagesEndRef={messagesEndRef}
+                            shownthinking={shownthinking}
+                            handleEnter={handleEnter}
+                        >
 
-                                    })}
+                        </ChatBox>
 
-                                </Stack>
-                                <div ref={messagesEndRef}> </div>
-                            </ChatPaper>
-                            {shownthinking && <LinearProgress />}
-                            <Box mt={2}>
-                                <Paper
-                                    component="form"
-                                    sx={{ p: '2px 4px', display: 'flex', minWidth: 660 }}
-                                >
-                                    <ChatInput
-                                        id="standard-multiline-flexible"
-                                        multiline
-                                        maxRows={6}
-                                        value={usermessage}
-                                        error={usermessageError}
-                                        onChange={e => setUserMessage(e.target.value)}
-                                        onKeyUp={e => handleEnter(e)}
-                                        minRows={4}
-                                        variant="standard"
-                                        InputProps={{
-                                            endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end">
-                                                <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitChat} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
-
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
-
-                                        }}
-                                    />
-
-                                </Paper>
-
-                            </Box>
-                        </Grid>
                         <Grid item md={4}>
-                            <FormControl defaultValue="">
-                                <Stack direction='column' spacing={1}>
-                                    <InputLabel id="demo-simple-select-label">Models</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        onChange={e => setChoosenModel(e.target.value)}
-                                        value={choosen_model}
-                                        label="Models"
-                                    >
-                                        {model_objects.map((model_object_) => {
-                                            return (
-                                                <MenuItem key={model_object_.name} value={model_object_.name}>{model_object_.name}</MenuItem>
-                                            )
-                                        })}
-                                        {agent_objects.map((agent_object_) => {
-                                            return (
-                                                <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
-                                            )
-                                        })}
-                                    </Select>
-                                    <Divider></Divider>
-                                    <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
-                                    <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
-                                    <RadioGroup
-                                        defaultValue="chat"
-                                        name="radio-buttons-group"
-                                        onChange={e => setMode(e.target.value)}
-                                        value={mode}
-                                    >
-                                        <FormControlLabel key="chat" value='chat' control={<Radio size="small" />} label="Chat Bot Mode" />
-                                        <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Sentence Completion" />
-                                        <Divider></Divider>
-
-                                    </RadioGroup>
-                                    <Typography gutterBottom>Top_p: {top_p}</Typography>
-                                    <Slider
-                                        step={0.01}
-                                        min={0}
-                                        max={1}
-                                        valueLabelDisplay="off"
-                                        onChange={e => setTopp(e.target.value)}
-                                        value={top_p}
-                                    />
-                                    <Typography gutterBottom>Top_k: {top_k}</Typography>
-                                    <Slider
-                                        defaultValue={-1}
-                                        step={1}
-                                        min={-1}
-                                        max={100}
-                                        valueLabelDisplay="off"
-                                        onChange={e => setTopk(e.target.value)}
-                                        value={top_k}
-                                    />
-                                    <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
-                                    <Slider
-                                        defaultValue={512}
-                                        step={1}
-                                        min={1}
-                                        max={4090}
-                                        onChange={e => setMaxToken(e.target.value)}
-                                        value={max_tokens}
-                                        valueLabelDisplay="off"
-                                    />
-                                    <Typography gutterBottom>Temperature: {temperature}</Typography>
-                                    <Slider
-                                        defaultValue={0.73}
-                                        step={0.01}
-                                        min={0}
-                                        max={1}
-                                        onChange={e => setTemperature(e.target.value)}
-                                        value={temperature}
-                                        valueLabelDisplay="off"
-                                    />
-                                    <Typography gutterBottom>Presence penalty: {presencepenalty}</Typography>
-                                    <Slider
-                                        aria-label="Small steps"
-                                        defaultValue={0}
-                                        step={0.01}
-                                        min={-2}
-                                        max={2}
-                                        onChange={e => setPresencePenalty(e.target.value)}
-                                        value={presencepenalty}
-                                        valueLabelDisplay="off"
-                                    />
-                                    <Typography gutterBottom>Frequency penalty: {frequencypenalty}</Typography>
-                                    <Slider
-                                        aria-label="Small steps"
-                                        defaultValue={0}
-                                        step={0.01}
-                                        min={-2}
-                                        max={2}
-                                        onChange={e => setFrequencyPenalty(e.target.value)}
-                                        value={frequencypenalty}
-                                        valueLabelDisplay="off"
-                                    />
-                                    <Divider></Divider>
-                                    <FormControlLabel control={<Switch
-                                        onChange={e => setBeam(e.target.checked)}
-                                        value={beam}
-                                    />} label="Beam Search: " />
-                                    <FormControlLabel control={<Switch
-                                        onChange={e => setEarlyStopping(e.target.checked)}
-                                        value={earlystopping}
-                                    />} label="Early Stopping: " />
-                                    <Typography gutterBottom>Best_of: {bestof}</Typography>
-                                    <Slider
-                                        onChange={e => setBestof(e.target.value)}
-                                        value={bestof}
-                                        defaultValue={2}
-                                        step={1}
-                                        min={1}
-                                        max={5}
-                                        valueLabelDisplay="off"
-                                    />
-
-                                    <Typography gutterBottom>Length penalty: {lengthpenalty}</Typography>
-                                    <Slider
-                                        onChange={e => setLengthPenalty(e.target.value)}
-                                        value={lengthpenalty}
-                                        defaultValue={0}
-                                        step={0.01}
-                                        min={-2}
-                                        max={2}
-                                        valueLabelDisplay="off"
-                                    />
-                                </Stack>
-                            </FormControl>
+                            <ChatParameter
+                                model_objects={model_objects}
+                                agent_objects={agent_objects}
+                                choosen_model={choosen_model}
+                                top_k={top_k}
+                                top_p={top_p}
+                                max_tokens={max_tokens}
+                                temperature={temperature}
+                                mode={mode}
+                                bestof={bestof}
+                                lengthpenalty={lengthpenalty}
+                                presencepenalty={presencepenalty}
+                                frequencypenalty={frequencypenalty}
+                                setBeam={setBeam}
+                                setMaxToken={setMaxToken}
+                                setBestof={setBestof}
+                                setChoosenModel={setChoosenModel}
+                                setTemperature={setTemperature}
+                                setMode={setMode}
+                                setLengthPenalty={setLengthPenalty}
+                                setPresencePenalty={setPresencePenalty}
+                                setFrequencyPenalty={setFrequencyPenalty}
+                                setTopk={setTopk}
+                                setTopp={setTopp}
+                                setUseMemory={setUseMemory}
+                                earlystopping={earlystopping}
+                                setEarlyStopping={setEarlyStopping}
+                            ></ChatParameter>
 
                         </Grid>
                     </Grid>

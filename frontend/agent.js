@@ -5,14 +5,11 @@ import { FormControl, FormLabel } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import InputLabel from '@mui/material/InputLabel';
-import Checkbox from '@mui/material/Checkbox';
 import edjsParser from "editorjs-parser"
-import Radio from '@mui/material/Radio';
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import RadioGroup from '@mui/material/RadioGroup';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
@@ -43,6 +40,8 @@ const Table = require('editorjs-table');
 const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
 import editorjsCodecup from '@calumk/editorjs-codecup';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import { OpenAPIParameter } from './component/chatroom_parameters';
+import { ChatBox } from './component/chatbox';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -212,15 +211,23 @@ function Agent() {
                 else if (dataFromServer.hasOwnProperty("paragraph")) {
                     setCurrentParagraph(dataFromServer.paragraph)
                 }
-                else if (dataFromServer.role == "Human" || dataFromServer.role == "Server" || dataFromServer.holder) {
+                if (dataFromServer.role == "Human" || dataFromServer.role == "Server" || dataFromServer.holder) {
 
-                    setChatMessage(chat_message => [
-                        ...chat_message,
-                        dataFromServer,
-                    ])
                     if (dataFromServer.holder) {
                         setThinking(true)
+                        dataFromServer.message = ""
                     }
+                    setChatMessage(chat_message => [
+                        ...chat_message,
+                        {
+                            holder: dataFromServer.holder,
+                            holderid: dataFromServer.holderid,
+                            role: dataFromServer.role,
+                            time: dataFromServer.time,
+                            credit: dataFromServer.credit,
+                            message: dataFromServer.message
+                        },
+                    ])
                 }
                 else if (dataFromServer.hasOwnProperty("agent_action")) {
                     if (dataFromServer.agent_action == "STOP") {
@@ -235,7 +242,18 @@ function Agent() {
                 }
                 else {
                     setThinking(false)
-                    document.getElementById(dataFromServer.stream_id).innerHTML += dataFromServer.message
+                    setChatMessage(chat_message => [
+                        ...chat_message.slice(0, -1),
+                        {
+                            holder: chat_message[chat_message.length - 1].holder,
+                            holderid: chat_message[chat_message.length - 1].holderid,
+                            role: chat_message[chat_message.length - 1].role,
+                            time: chat_message[chat_message.length - 1].time,
+                            credit: chat_message[chat_message.length - 1].credit,
+                            message: chat_message[chat_message.length - 1].message += dataFromServer.message
+                        }
+                    ])
+
                 };
                 var logTa = document.getElementById("chat-log")
                 logTa.scrollTop = logTa.scrollHeight;
@@ -457,164 +475,65 @@ function Agent() {
                                 <div id='editorjs' />
                             </Stack>
                         </Grid>
-                        <Grid item md={4}>
-                            <ChatPaper id={'chat-log'} variant="outlined">
-                                {!state && <TextField
-                                    margin="normal"
-                                    label="Key"
-                                    type="password"
-                                    size="small"
-                                    onChange={e => setKey(e.target.value)}
-                                    value={key}
-                                    error={keyError}
-                                    autoComplete="off"
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <KeyIcon />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />}
-                                <Stack spacing={1}>
-                                    {chat_message.map((mess) => {
-                                        if (mess.role == 'Human') {
-                                            return (
-                                                <Paper  ><Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>  <span> ({mess.role} - {mess.time}) {mess.message} </span></Box></Paper>
-                                            )
-                                        }
-                                        else if (mess.holder) {
-                                            return (
-                                                <Paper ><Box sx={{ borderLeft: 5, borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >  <span> {mess.role} - {mess.time}: </span></Box></Paper>
-                                            )
-                                        }
-                                        else if (mess.role == 'Server') {
-                                            return (
-                                                <Paper  ><Box sx={{ borderLeft: 5, borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>  <span> {mess.message} ({mess.role} - {mess.time}) </span></Box></Paper>
-                                            )
-                                        }
-                                    })}
-                                </Stack>
-                                <div ref={messagesEndRef}> </div>
+                        <ChatBox
+                            size={4}
+                            inputsize={300}
+                            chat_message={chat_message}
+                            usermessage={usermessage}
+                            usermessageError={usermessageError}
+                            key={key}
+                            setKey={setKey}
+                            keyError={keyError}
+                            ChatPaper={ChatPaper}
+                            ChatInput={ChatInput}
+                            setUserMessage={setUserMessage}
+                            state={state}
+                            submitChat={submitChat}
+                            messagesEndRef={messagesEndRef}
+                            shownthinking={shownthinking}
+                            handleEnter={handleEnter}
+                        >
 
-                            </ChatPaper>
-                            {shownthinking && <LinearProgress />}
-                            <Box mt={2}>
-                                <Paper
-                                    component="form"
-                                    sx={{ p: '2px 4px', display: 'flex', minWidth: 300 }}
-                                >
-                                    <ChatInput
-                                        id="standard-multiline-flexible"
-                                        multiline
-                                        maxRows={6}
-                                        value={usermessage}
-                                        error={usermessageError}
-                                        onChange={e => setUserMessage(e.target.value)}
-                                        onKeyUp={e => handleEnter(e)}
-                                        minRows={4}
-                                        variant="standard"
-                                        InputProps={{
-                                            endAdornment: <InputAdornment sx={{ position: 'absolute', bottom: 30, right: 10 }} position="end">
-                                                <  Button sx={{ height: 32, }} variant="contained" size="small" onClick={submitChat} endIcon={<SendIcon />}>Send</Button></InputAdornment>,
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                        }}
-                                    />
-                                </Paper>
-                            </Box>
-                        </Grid>
+                        </ChatBox>
                         <Grid item md={2}>
                             <Stack direction='column' spacing={1}>
-                                <Stack direction='row' spacing={1}>
-                                    <FormControl  >
-                                        <InputLabel id="model-label">Models</InputLabel>
-                                        <Select
-                                            labelId="model-label"
-                                            id="model-select"
-                                            onChange={e => setChoosenModel(e.target.value)}
-                                            value={choosen_model}
-                                            label="Models"
-                                            size="small"
-                                        >
-                                            {agent_objects.map((agent_object_) => {
-                                                return (
-                                                    <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
-                                                )
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                    <FormControl >
-                                        <InputLabel id="agent-label">Agents</InputLabel>
-                                        <Select
-                                            labelId="agent-label"
-                                            id="agent-select"
-                                            onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value) }}
-                                            value={choosen_template}
-                                            label="Agents"
-                                            size="small"
-                                        >
-                                            {template_list.map((template) => {
-                                                return (
-                                                    <MenuItem key={template.name} value={template.name}>{template.name}</MenuItem>
-                                                )
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                </Stack>
+                                <FormControl >
+                                    <InputLabel id="agent-label">Agents</InputLabel>
+                                    <Select
+                                        labelId="agent-label"
+                                        id="agent-select"
+                                        onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value) }}
+                                        value={choosen_template}
+                                        label="Agents"
+                                        size="small"
+                                    >
+                                        {template_list.map((template) => {
+                                            return (
+                                                <MenuItem key={template.name} value={template.name}>{template.name}</MenuItem>
+                                            )
+                                        })}
+                                    </Select>
+                                </FormControl>
+
                                 <Divider></Divider>
                                 <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
+                                <OpenAPIParameter
+                                    top_p={top_p}
+                                    agent_objects={agent_objects}
+                                    choosen_model={choosen_model}
+                                    setChoosenModel={setChoosenModel}
+                                    setTopp={setTopp}
+                                    temperature={temperature}
+                                    setTemperature={setTemperature}
+                                    max_tokens={max_tokens}
+                                    setMaxToken={setMaxToken}
+                                    presencepenalty={presencepenalty}
+                                    setPresencePenalty={setPresencePenalty}
+                                    frequencypenalty={frequencypenalty}
+                                    setFrequencyPenalty={setFrequencyPenalty}
+                                >
 
-                                <Typography gutterBottom>Top_p: {top_p}</Typography>
-                                <Slider
-                                    step={0.01}
-                                    min={0}
-                                    max={1}
-                                    valueLabelDisplay="off"
-                                    onChange={e => setTopp(e.target.value)}
-                                    value={top_p}
-                                />
-                                <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
-                                <Slider
-                                    defaultValue={512}
-                                    step={1}
-                                    min={1}
-                                    max={4090}
-                                    onChange={e => setMaxToken(e.target.value)}
-                                    value={max_tokens}
-                                    valueLabelDisplay="off"
-                                />
-                                <Typography gutterBottom>Temperature: {temperature}</Typography>
-                                <Slider
-                                    defaultValue={0.73}
-                                    step={0.01}
-                                    min={0}
-                                    max={1}
-                                    onChange={e => setTemperature(e.target.value)}
-                                    value={temperature}
-                                    valueLabelDisplay="off"
-                                />
-                                <Typography gutterBottom>Presence penalty: {presencepenalty}</Typography>
-                                <Slider
-                                    aria-label="Small steps"
-                                    defaultValue={0}
-                                    step={0.01}
-                                    min={-2}
-                                    max={2}
-                                    onChange={e => setPresencePenalty(e.target.value)}
-                                    value={presencepenalty}
-                                    valueLabelDisplay="off"
-                                />
-                                <Typography gutterBottom>Frequency penalty: {frequencypenalty}</Typography>
-                                <Slider
-                                    aria-label="Small steps"
-                                    defaultValue={0}
-                                    step={0.01}
-                                    min={-2}
-                                    max={2}
-                                    onChange={e => setFrequencyPenalty(e.target.value)}
-                                    value={frequencypenalty}
-                                    valueLabelDisplay="off"
-                                />
+                                </OpenAPIParameter>
                             </Stack>
 
 
