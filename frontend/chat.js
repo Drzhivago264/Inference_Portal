@@ -4,18 +4,14 @@ import axios from 'axios';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
-import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-import KeyIcon from '@mui/icons-material/Key';
-import LinearProgress from '@mui/material/LinearProgress';
 import ResponsiveAppBar from './component/navbar';
-import SendIcon from '@mui/icons-material/Send';
 import { ChatParameter } from './component/chatroom_parameters';
 import { ChatBox } from './component/chatbox';
+import { chatsocket } from './component/chatsocket';
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 660,
     height: 700,
@@ -81,53 +77,9 @@ function Chat() {
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/');
-        websocket.current.onopen = () => {
-            console.log("WebSocket  Connected");
-        };
-        websocket.current.onclose = () => {
-            console.log("WebSocket  Disconnected");
-        };
-        websocket.current.onmessage = (message) => {
-            const dataFromServer = JSON.parse(message.data);
-            if (dataFromServer) {
-                if (dataFromServer.role == "Human" || dataFromServer.role == "Server" || dataFromServer.holder) {
-
-                    if (dataFromServer.holder) {
-                        setThinking(true)
-                        dataFromServer.message = ""
-                    }
-                    setChatMessage(chat_message => [
-                        ...chat_message,
-                        {
-                            holder: dataFromServer.holder,
-                            holderid: dataFromServer.holderid,
-                            role: dataFromServer.role,
-                            time: dataFromServer.time,
-                            credit: dataFromServer.credit,
-                            message: dataFromServer.message
-                        },
-                    ])
-                }
-                else {
-                    setThinking(false)
-                    setChatMessage(chat_message => [
-                        ...chat_message.slice(0, -1),
-                        {
-                            holder: chat_message[chat_message.length - 1].holder,
-                            holderid: chat_message[chat_message.length - 1].holderid,
-                            role: chat_message[chat_message.length - 1].role,
-                            time: chat_message[chat_message.length - 1].time,
-                            credit: chat_message[chat_message.length - 1].credit,
-                            message: chat_message[chat_message.length - 1].message += dataFromServer.message
-                        }
-                    ])
-
-                };
-                var logTa = document.getElementById("chat-log")
-                logTa.scrollTop = logTa.scrollHeight;
-            }
-        }
+        chatsocket(websocket, setChatMessage, setThinking, document )
     }, []);
+
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
             submitChat()
@@ -171,28 +123,27 @@ function Chat() {
             <Container maxWidth="lg" sx={{ width: 1200 }}>
                 <Box m={2}>
                     <Grid container spacing={2}>
+                        <Grid item md={8}>
+                            <ChatBox
+                                inputsize={660}
+                                chat_message={chat_message}
+                                usermessage={usermessage}
+                                usermessageError={usermessageError}
+                                key={key}
+                                setKey={setKey}
+                                keyError={keyError}
+                                ChatPaper={ChatPaper}
+                                ChatInput={ChatInput}
+                                setUserMessage={setUserMessage}
+                                state={state}
+                                submitChat={submitChat}
+                                messagesEndRef={messagesEndRef}
+                                shownthinking={shownthinking}
+                                handleEnter={handleEnter}
+                            >
 
-                        <ChatBox
-                            inputsize={660}
-                            size={8}
-                            chat_message={chat_message}
-                            usermessage={usermessage}
-                            usermessageError={usermessageError}
-                            key={key}
-                            setKey={setKey}
-                            keyError={keyError}
-                            ChatPaper={ChatPaper}
-                            ChatInput={ChatInput}
-                            setUserMessage={setUserMessage}
-                            state={state}
-                            submitChat={submitChat}
-                            messagesEndRef={messagesEndRef}
-                            shownthinking={shownthinking}
-                            handleEnter={handleEnter}
-                        >
-
-                        </ChatBox>
-
+                            </ChatBox>
+                        </Grid>
                         <Grid item md={4}>
                             <ChatParameter
                                 model_objects={model_objects}

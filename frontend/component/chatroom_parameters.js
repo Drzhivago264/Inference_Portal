@@ -263,6 +263,7 @@ export const ChatParameter = ({
 export const HotpotParameter = ({
     template_list,
     setUseMemory,
+    setDuplicateMessage,
     choosen_chat_model,
     choosen_template,
     setChoosenTemplate,
