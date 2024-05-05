@@ -32,7 +32,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { saveAs } from "file-saver";
 import { RandomReveal } from 'react-random-reveal'
-
+import SvgIcon from '@mui/material/SvgIcon';
 import {
     createTheme,
     responsiveFontSizes,
@@ -310,7 +310,7 @@ function KeyManagement() {
                 }).catch(error => {
                     console.log(error.response.data.detail)
                     setStripeRedirectError(error.response.data.detai)
-                }); l
+                }); 
         }
     }
     function exportKey(keyfile) {
@@ -606,7 +606,7 @@ function KeyManagement() {
                                             Use sufficient fees so the transactions gets confirmed on time.
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={xmrconfirmationloading} variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<ConfirmationNumberIcon />}>Confirm XMR Payment</LoadingButton>
+                                            <LoadingButton loading={xmrconfirmationloading} variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z"/><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z"/></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
                                         </Box>
                                         {xmrconfirmationresponse && <XMRWConfirmationDisplay detail={xmrconfirmationresponse.detail} />}
                                         {xmrconfirmationerror && <ErrorAlert error={xmrconfirmationerror} />}

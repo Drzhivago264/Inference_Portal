@@ -21,7 +21,9 @@ import Typography from '@mui/material/Typography';
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import explaination_ from '../docs/PageContent/mode_explaination.md'
 import { Highlight, themes } from 'prism-react-renderer';
-
+import LogoutIcon from '@mui/icons-material/Logout';
+import Divider from '@mui/material/Divider';
+import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
 function Hub() {
 
     function getCookie(name) {
@@ -40,41 +42,72 @@ function Hub() {
         return cookieValue;
     }
 
+
+    const [checklogin, setLoginState] = useState(false);
+    useEffect(() => {
+        axios.all([
+            axios.get('/frontend-api/check-login'),
+        ])
+            .then(axios.spread((login_object) => {
+                if (login_object.status == '200') {
+                    setLoginState(true)
+                }
+
+            }))
+            .catch(error => {
+                if (error.response.status == '401') {
+                    setLoginState(false)
+                }
+            });
+    }, []);
     const [explaination, setMessage] = useState('');
     const navigate = useNavigate();
-
     const [destination, setDestination] = useState("engineer")
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
     const [redirecterror, setRedirectError] = useState(null);
+
+    const logout = (e) => {
+        axios.get("/frontend-api/logout")
+            .then((response) => {
+                setLoginState(false)
+            }).catch(error => {
+                console.log(error)
+            });
+    }
     const handleSubmit = (event) => {
-
         event.preventDefault()
-
         setKeyError(false)
-        if (key == '') {
+        if (!checklogin && key == '') {
             setKeyError(true)
         }
-
-        if (key && destination) {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
+        else {
+            if (destination) {
+                const csrftoken = getCookie('csrftoken');
+                const config = {
+                    headers: {
+                        'content-type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    }
                 }
-            }
-            const data = {
-                key: key,
-                destination: destination
-            }
 
-            axios.post("/frontend-api/hub-redirect", data, config)
-                .then((response) => {
-                    navigate(response.data.redirect_link, { replace: true,  state: { credential: key } });
-                }).catch(error => {
-                    setRedirectError(error.response.data.detail)
-                });
+                const data = {
+                    key: key,
+                    check_login: checklogin,
+                    destination: destination
+                }
+                console.log(data)
+                axios.post("/frontend-api/hub-redirect", data, config)
+                    .then((response) => {
+                        console.log(response)
+                        navigate(response.data.redirect_link, { replace: true, state: { credential: key } });
+                    }).catch(error => {
+                        setRedirectError(error.response.data.detail)
+                        if (error.response.status == "400") {
+                            setRedirectError("Your key is incorrect")
+                        }
+                    });
+            }
         }
     }
     useEffect(() => {
@@ -118,7 +151,7 @@ function Hub() {
                         <Grid item md={4} lg={3}>
                             <form autoComplete="off" onSubmit={handleSubmit}>
                                 <FormControl defaultValue="" required>
-                                    <Stack mt={3} direction="row" spacing={1}>
+                                    {!checklogin && <Stack mt={3} direction="row" spacing={1}>
                                         <TextField
                                             margin="normal"
                                             label="Key"
@@ -137,7 +170,16 @@ function Hub() {
                                             }}
                                         />
                                         <Button variant="contained" type="submit" endIcon={<LoginIcon />}>Login</Button>
+
+
                                     </Stack>
+                                    }
+                                    {checklogin && <Stack mt={3} direction="row" spacing={1}>
+                                        <Button variant="contained" type="submit" endIcon={<AssistantDirectionIcon />}>Redirect</Button>
+                                        <Divider orientation="vertical" flexItem />
+                                        <Button variant="outlined" onClick={(e) => { logout(e) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
+                                    </Stack>
+                                    }
                                     <FormLabel sx={{ m: 2 }}>Bring me to:</FormLabel>
                                     <RadioGroup
                                         aria-labelledby="demo-radio-buttons-group-label"
@@ -159,7 +201,7 @@ function Hub() {
                             {redirecterror && <ErrorAlert error={redirecterror} />}
                         </Grid>
                         <Grid item md={8} lg={9}>
-                        <MuiMarkdown overrides={{
+                            <MuiMarkdown overrides={{
                                 ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                 h1: {
                                     component: 'h1',
