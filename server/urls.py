@@ -4,7 +4,9 @@ from server.views.response_log import LogListJson
 from server.views.contact import  contact_api
 from server.views.information import (
                                       article_api,
-                                      model_api
+                                      model_api,
+                                      check_login,
+                                      log_out
                                       )
 from server.views.key_purchase import (StripeWebhookView,
                                        SuccessView,
@@ -52,8 +54,9 @@ urlpatterns = [
     path('frontend-api/confirm-xmr-payment', confirm_xmr_payment_api, name='confirm-xmr-payment'),
     path('frontend-api/stripe-redirect', stripe_redirect, name='stripe-payment'),
     path('frontend-api/products', product_list_api, name='product-list'),
-    path('frontend-api/send-mail', contact_api, name='product-list'),
-
+    path('frontend-api/send-mail', contact_api, name='contact'),
+    path('frontend-api/check-login', check_login, name='check-login'),
+    path('frontend-api/logout', log_out, name='logout'),
 
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
  

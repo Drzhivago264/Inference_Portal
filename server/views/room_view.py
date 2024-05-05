@@ -39,21 +39,30 @@ from django.contrib.auth import authenticate, login
 def hub_redirect_api(request):
     serializer = RedirectSerializer(data=request.data)
     if serializer.is_valid():
-        signer = Signer()
         key = serializer.data['key']
         destination = serializer.data['destination']
-        try:
-            api_key = APIKEY.objects.get_from_key(key)
-            user = authenticate(request, username=api_key.hashed_key, password=api_key.hashed_key) 
-            if user is not None:
-                login(request, user)
+        check_login = serializer.data['check_login']
+        print(check_login)
+        if not check_login:
+            try:
+                api_key = APIKEY.objects.get_from_key(key)
+                user = authenticate(request, username=api_key.hashed_key, password=api_key.hashed_key) 
+                if user is not None:
+                    login(request, user)
+                    key_hash = sha256(key.encode('utf-8')).hexdigest()
+                    return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+            except APIKEY.DoesNotExist:
+                    return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            if request.user.id is not None: 
+                print(request.user)
                 key_hash = sha256(key.encode('utf-8')).hexdigest()
                 return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
             else:
-                 return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
-  
-        except APIKEY.DoesNotExist:
-                return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'detail': 'Unknown Key error!, Login again'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

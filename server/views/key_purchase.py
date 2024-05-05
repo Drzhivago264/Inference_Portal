@@ -82,7 +82,6 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
     if serializer.is_valid():
         key_name = serializer.data['key_name']
         key_ = serializer.data['key']
-        
         try:
             key = APIKEY.objects.get_from_key(key_)
             if key.name == key_name:
