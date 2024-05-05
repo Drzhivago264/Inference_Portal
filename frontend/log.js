@@ -17,25 +17,9 @@ require('./component/dataTables.dataTables.css')
 function Log() {
     $.DataTable = require('datatables.net')
     const tableRef = useRef()
-    const [server_objects, setMessage] = useState([]);
-    const [model_objects, setMessage_model] = useState([]);
-    useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/model'),
-        ])
-            .then(axios.spread((server_object) => {
-                setMessage(server_object.data.servers);
-                setMessage_model(server_object.data.models);
-
-            }))
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
-
     useEffect(() => {
         var url = window.location.pathname.split("/").filter(path => path !== "")
-        console.log(tableRef.current)
+        $.fn.dataTable.ext.errMode = () => alert('You need to login before viewing log!');
         const table = $(tableRef.current).DataTable(
             {
                 layout: {
@@ -60,14 +44,14 @@ function Log() {
                 serverSide: true,
                 ajax: "/log/" + url[url.length - 1],
                 responsive: true,
-                destroy: true  // I think some clean up is happening here
+                destroy: true,
             }
         )
-        // Extra step to do extra clean-up.
+
         return function () {
-            console.log("Table destroyed")
             table.destroy()
         }
+
     }, [])
 
     return (

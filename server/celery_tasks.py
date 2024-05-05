@@ -208,7 +208,7 @@ def Inference(unique: str,
         include_memory (bool): _description_
     """
     channel_layer = get_channel_layer()
-    key_object = APIKEY.objects.get_from_key(key)
+    key_object = APIKEY.objects.get(hashed_key=key)
     if not beam:
         length_penalty = 1
         early_stopping = False
@@ -376,7 +376,7 @@ def Agent_Inference(key: str,
         presence_penalty (float): _description_
     """
     client = OpenAI(api_key=config("GPT_KEY"))
-    key_object = APIKEY.objects.get_from_key(key)
+    key_object = APIKEY.objects.get(hashed_key=key)
     clean_response = ""
     if current_turn_inner >= 0 and current_turn_inner <= (max_turns-1):
         if current_turn_inner == 0:

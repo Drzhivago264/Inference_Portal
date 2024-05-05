@@ -64,6 +64,7 @@
     "file-saver": "^2.0.5",
     "html-loader": "^5.0.0",
     "html-to-pdfmake": "^2.5.7",
+    "js-cookie": "^3.0.5",
     "jszip": "^3.10.1",
     "mui-markdown": "^1.1.13",
     "pdfmake": "^0.2.10",

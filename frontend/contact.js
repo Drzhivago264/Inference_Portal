@@ -133,7 +133,7 @@ function Contact() {
         <Container maxWidth={false} disableGutters>
             <title>Contact</title>
             <ResponsiveAppBar />
-            <Container maxWidth="lg">
+            <Container maxWidth="md">
                 <Box
                     my={1}
                     alignItems="center"

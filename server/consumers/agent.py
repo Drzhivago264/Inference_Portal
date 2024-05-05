@@ -20,13 +20,10 @@ from pydantic import ValidationError
 
 
 class Consumer(AsyncWebsocketConsumer):
+
     @database_sync_to_async
-    def check_key(self):
-        try:
-            key = APIKEY.objects.get_from_key(self.key)
-            return key
-        except APIKEY.DoesNotExist:
-            return False
+    def get_api_key(self):
+        return self.user.apikey
 
     async def get_template(self, name):
         try:
@@ -56,6 +53,8 @@ class Consumer(AsyncWebsocketConsumer):
         self.session_history = []
         self.working_paragraph = str()
         self.is_session_start_node = True
+        self.user = self.scope['user']
+        self.key_object = await self.get_api_key()
         self.model_type = ""
         self.room_group_name = "agent_%s" % self.url
         # Join room group
@@ -116,18 +115,13 @@ class Consumer(AsyncWebsocketConsumer):
         elif 'message' in text_data_json:
             try:
                 validated = AgentSchemaMessage.model_validate_json(text_data)
-                self.key = validated.key
-                key_object = cache.get(f"{self.key}")
-                if key_object is None:
-                    key_object = await self.check_key()
-                if not key_object:
-                    await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
+
+                if not self.key_object:
+                    await self.send(text_data=json.dumps({"message": "Cannot find your key, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
                     await self.disconnect(self)
                 elif not text_data_json["message"].strip():
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
-                elif key_object and text_data_json["message"].strip():
-                    cache.set(f"{self.key}", key_object,
-                              constant.CACHE_AUTHENTICATION)
+                elif self.key_object and text_data_json["message"].strip():
                     agent_instruction = validated.agent_instruction
                     child_instruction = validated.child_instruction
                     current_turn_inner = self.current_turn
@@ -147,10 +141,10 @@ class Consumer(AsyncWebsocketConsumer):
                     Agent_Inference.delay(
                         is_session_start_node=self.is_session_start_node, 
                         unique=unique_response_id,
-                        key=self.key,
+                        key=self.key_object.hashed_key,
                         stream=True,
                         message=message,
-                        credit=key_object.credit,
+                        credit=self.key_object.credit,
                         room_group_name=self.room_group_name,
                         model=choosen_template,
                         max_turns=self.max_turns,
@@ -169,7 +163,7 @@ class Consumer(AsyncWebsocketConsumer):
                         self.room_group_name, {"type": "chat_message",
                                                "role": role,
                                                "message": message,
-                                               "credit": key_object.credit,
+                                               "credit": self.key_object.credit,
                                                "unique": unique_response_id,
                                                "choosen_model":  choosen_template,
                                                "current_turn": current_turn_inner

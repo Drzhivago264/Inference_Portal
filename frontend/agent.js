@@ -73,8 +73,7 @@ function Agent() {
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-    const [key, setKey] = useState("");
-    const [keyError, setKeyError] = useState(false);
+
     const [default_editor_structure, setEditor] = useState(null);
     const [currentparagraph, setCurrentParagraph] = useState(1);
     const [template_list, setTemplateList] = useState([]);
@@ -83,12 +82,6 @@ function Agent() {
     const [default_child_instruct, setChildInstruct] = useState("");
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
 
-    const { state } = useLocation();
-    useEffect(() => {
-        if (state) {
-            setKey(state.credential)
-        }
-    }, []);
 
     useEffect(() => {
         if (!ref.current) {
@@ -205,10 +198,6 @@ function Agent() {
         }
     }
     const submitChat = () => {
-
-        if (key == '') {
-            setKeyError(true)
-        }
         if (usermessage == '') {
             setUserMessageError(true)
         }
@@ -216,7 +205,6 @@ function Agent() {
             var data = {
                 'currentParagraph': currentparagraph,
                 'message': usermessage,
-                'key': key,
                 'choosen_models': choosen_model,
                 'choosen_template': choosen_template,
                 'role': 'Human',
@@ -420,13 +408,9 @@ function Agent() {
                             chat_message={chat_message}
                             usermessage={usermessage}
                             usermessageError={usermessageError}
-                            key={key}
-                            setKey={setKey}
-                            keyError={keyError}
                             ChatPaper={ChatPaper}
                             ChatInput={ChatInput}
                             setUserMessage={setUserMessage}
-                            state={state}
                             submitChat={submitChat}
                             messagesEndRef={messagesEndRef}
                             shownthinking={shownthinking}

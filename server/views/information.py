@@ -18,7 +18,7 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-"""--------REACT FRONTEND API---------"""
+
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
 def article_api(request: HttpRequest, name: str, a_type: str) -> Response:
@@ -40,38 +40,6 @@ def model_api(request: HttpRequest) -> Response:
                       "models": serializer_model_display.data, 
                       'models_agent': serializer_model_agent.data
                       })
-
-
-# @cache_page(60*15)
-def index(request: HttpRequest) -> HttpResponse:
-    page_content = Article.objects.filter(name="index")
-    context = {"title": "Inference",
-               "content_list": page_content, }
-    return render(request, "html/index.html", context=context)
-
-
-# @cache_page(60*15)
-def manual(request: HttpRequest) -> HttpResponse:
-    page_content = Article.objects.filter(name='manual')
-    context = {
-        "content_list": page_content,
-        "title": "Manual"
-    }
-    return render(request, "html/manual.html", context=context)
-
-
-# @cache_page(60)
-def model_infor(request: HttpRequest) -> HttpResponse:
-    llm = LLM.objects.filter(agent_availability=False)
-    servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
-    context = {'llms': llm, 'servers': servers, 'title': 'Model Detail'}
-    return render(request, "html/model_infor.html", context)
-
-
-def frankenstein(request: HttpRequest) -> HttpResponse:
-    return render(request, "html/frankenstein.html", {"title": "Frankenstein"})
-
-
 
 def handler_403(request: HttpRequest, exception: None = None) -> HttpResponse:
     return render(request, 'error_html/403.html', status=403)
