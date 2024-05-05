@@ -118,7 +118,7 @@ function Hub() {
                         <Grid item md={4} lg={3}>
                             <form autoComplete="off" onSubmit={handleSubmit}>
                                 <FormControl defaultValue="" required>
-                                    <Stack direction="row" spacing={1}>
+                                    <Stack mt={3} direction="row" spacing={1}>
                                         <TextField
                                             margin="normal"
                                             label="Key"
@@ -136,7 +136,7 @@ function Hub() {
                                                 ),
                                             }}
                                         />
-                                        <Button variant="contained" type="submit" endIcon={<LoginIcon />}>Go</Button>
+                                        <Button variant="contained" type="submit" endIcon={<LoginIcon />}>Login</Button>
                                     </Stack>
                                     <FormLabel sx={{ m: 2 }}>Bring me to:</FormLabel>
                                     <RadioGroup

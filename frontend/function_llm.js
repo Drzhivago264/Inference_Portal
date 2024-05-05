@@ -48,7 +48,6 @@ function FunctionLLM() {
     const [chat_message, setChatMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
     const [choosen_model, setChoosenModel] = useState("gpt-4");
-    const [choosen_template, setChoosenTemplate] = useState("Assignment Agent");
     const [top_p, setTopp] = useState(0.72);
     const [max_tokens, setMaxToken] = useState(null);
     const [temperature, setTemperature] = useState(0.73);
@@ -56,19 +55,9 @@ function FunctionLLM() {
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-    const [key, setKey] = useState("");
-    const [keyError, setKeyError] = useState(false);
     const [extrainstruction, setExtraInstruction] = useState("sadness, joy, love, anger, fear, surprise, neutral");
     const [llmfunction, setLLMFunction] = useState("emotion");
-    const [streamtokens, setStream] = useState(null)
-    const [lasteststreamid, setLastestSream] = useState(null)
 
-    const { state } = useLocation();
-    useEffect(() => {
-        if (state) {
-            setKey(state.credential)
-        }
-    }, []);
 
     useEffect(() => {
         axios.all([
@@ -103,9 +92,6 @@ function FunctionLLM() {
     }
     const submitChat = () => {
 
-        if (key == '') {
-            setKeyError(true)
-        }
         if (usermessage == '') {
             setUserMessageError(true)
         }
@@ -113,7 +99,6 @@ function FunctionLLM() {
             var data = {
                 'message': usermessage,
                 'tool': llmfunction,
-                'key': key,
                 'choosen_models': choosen_model,
                 'role': 'Human',
                 'top_p': top_p,
@@ -206,13 +191,9 @@ function FunctionLLM() {
                             chat_message={chat_message}
                             usermessage={usermessage}
                             usermessageError={usermessageError}
-                            key={key}
-                            setKey={setKey}
-                            keyError={keyError}
                             ChatPaper={ChatPaper}
                             ChatInput={ChatInput}
                             setUserMessage={setUserMessage}
-                            state={state}
                             submitChat={submitChat}
                             messagesEndRef={messagesEndRef}
                             shownthinking={shownthinking}

@@ -19,19 +19,19 @@ from server.pydantic_validator import ToolSchema
 from pydantic import ValidationError
 
 class Consumer(AsyncWebsocketConsumer):
+
     @database_sync_to_async
-    def check_key(self):
-        try:
-            key = APIKEY.objects.get_from_key(self.key)
-            return key
-        except APIKEY.DoesNotExist:
-            return False
+    def get_api_key(self):
+        return self.user.apikey
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
+        self.user = self.scope['user']
+        self.key_object = await self.get_api_key()
+
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -45,19 +45,13 @@ class Consumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             validated = ToolSchema.model_validate_json(text_data)
-            self.key = validated.key
-            key_object = cache.get(f"{self.key}")
-            if key_object is None:
-                key_object = await self.check_key()
-            if not key_object:
-                await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
+
+            if not self.key_object:
+                await self.send(text_data=json.dumps({"message": "Key is incorrect, disconnected! You need to log in first", "role": "Server", "time": self.time}))
                 await self.disconnect(self)
             elif not validated.message.strip():
                 await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
-            elif key_object and validated.message.strip():
-                cache.set(f"{self.key}", key_object,
-                          constant.CACHE_AUTHENTICATION)
-
+            elif self.key_object and validated.message.strip():
                 message = validated.message
                 tool = validated.tool
                 top_p = validated.top_p
@@ -65,7 +59,6 @@ class Consumer(AsyncWebsocketConsumer):
                 frequency_penalty = validated.frequency_penalty
                 presence_penalty = validated.presence_penalty
                 temperature = validated.temperature
-
                 choosen_models = validated.choosen_models
                 role = validated.role
                 unique_response_id = str(uuid.uuid4())
@@ -74,7 +67,7 @@ class Consumer(AsyncWebsocketConsumer):
                     self.room_group_name, {"type": "chat_message",
                                            "role": role,
                                            "message": message,
-                                           "credit": key_object.credit,
+                                           "credit": self.key_object.credit,
                                            "unique": unique_response_id,
                                            "choosen_model": choosen_models
                                            }
@@ -83,7 +76,7 @@ class Consumer(AsyncWebsocketConsumer):
                     self.room_group_name, {"type": "chat_message",
                                            "role": tool,
                                            "message": message,
-                                           "credit": key_object.credit,
+                                           "credit": self.key_object.credit,
                                            "unique": unique_response_id,
                                            "choosen_models": choosen_models,
                                            "max_tokens": max_tokens,

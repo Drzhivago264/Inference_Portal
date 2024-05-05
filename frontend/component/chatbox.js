@@ -13,10 +13,6 @@ export const ChatBox = ({
     inputsize,
     ChatPaper,
     ChatInput,
-    state,
-    key,
-    keyError,
-    setKey,
     chat_message,
     shownthinking,
     usermessage,
@@ -29,23 +25,6 @@ export const ChatBox = ({
     return (
         <Box>
             <ChatPaper id={'chat-log'} variant="outlined">
-                {!state && <TextField
-                    margin="normal"
-                    label="Key"
-                    type="password"
-                    size="small"
-                    onChange={e => setKey(e.target.value)}
-                    value={key}
-                    error={keyError}
-                    autoComplete="off"
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <KeyIcon />
-                            </InputAdornment>
-                        ),
-                    }}
-                />}
                 <Stack spacing={1}>
                     {chat_message.map((mess) => {
 

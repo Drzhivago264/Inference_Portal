@@ -46,15 +46,8 @@ function Chat() {
     const [lengthpenalty, setLengthPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-    const [key, setKey] = useState("");
-    const [keyError, setKeyError] = useState(false);
 
-    const { state } = useLocation();
-    useEffect(() => {
-        if (state) {
-            setKey(state.credential)
-        }
-    }, []);
+
     useEffect(() => {
         axios.all([
             axios.get('/frontend-api/model'),
@@ -87,9 +80,6 @@ function Chat() {
     }
     const submitChat = () => {
 
-        if (key == '') {
-            setKeyError(true)
-        }
         if (usermessage == '') {
             setUserMessageError(true)
         }
@@ -97,7 +87,6 @@ function Chat() {
             var data = {
                 'mode': mode,
                 'message': usermessage,
-                'key': key,
                 'choosen_models': choosen_model,
                 'role': 'Human',
                 'top_k': top_k,
@@ -129,19 +118,14 @@ function Chat() {
                                 chat_message={chat_message}
                                 usermessage={usermessage}
                                 usermessageError={usermessageError}
-                                key={key}
-                                setKey={setKey}
-                                keyError={keyError}
                                 ChatPaper={ChatPaper}
                                 ChatInput={ChatInput}
                                 setUserMessage={setUserMessage}
-                                state={state}
                                 submitChat={submitChat}
                                 messagesEndRef={messagesEndRef}
                                 shownthinking={shownthinking}
                                 handleEnter={handleEnter}
                             >
-
                             </ChatBox>
                         </Grid>
                         <Grid item md={4}>

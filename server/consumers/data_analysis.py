@@ -8,30 +8,31 @@ from channels.db import database_sync_to_async
 from decouple import config
 import dspy
 from channels.generic.websocket import AsyncWebsocketConsumer
-from server.util.llm_toolbox import (Emotion, 
-                               TopicClassification, 
-                               SummarizeDocument, 
-                               ParaphaseDocument, 
-                               ChangeWrittingStyle
-                               )
+from server.util.llm_toolbox import (Emotion,
+                                     TopicClassification,
+                                     SummarizeDocument,
+                                     ParaphaseDocument,
+                                     ChangeWrittingStyle
+                                     )
 from server.util import constant
 from server.pydantic_validator import ToolSchema
 from pydantic import ValidationError
 
+
 class Consumer(AsyncWebsocketConsumer):
+
     @database_sync_to_async
-    def check_key(self):
-        try:
-            key = APIKEY.objects.get_from_key(self.key)
-            return key
-        except APIKEY.DoesNotExist:
-            return False
+    def get_api_key(self):
+        return self.user.apikey
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
+        self.user = self.scope['user']
+        self.key_object = await self.get_api_key()
+
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -45,18 +46,13 @@ class Consumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             validated = ToolSchema.model_validate_json(text_data)
-            self.key = validated.key
-            key_object = cache.get(f"{self.key}")
-            if key_object is None:
-                key_object = await self.check_key()
-            if not key_object:
-                await self.send(text_data=json.dumps({"message": "Your key or key name is wrong, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
+
+            if not self.key_object:
+                await self.send(text_data=json.dumps({"message": "Cannot find your key, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
                 await self.disconnect(self)
             elif not validated.message.strip():
                 await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
-            elif key_object and validated.message.strip():
-                cache.set(f"{self.key}", key_object,
-                          constant.CACHE_AUTHENTICATION)
+            elif self.key_object and validated.message.strip():
                 message = validated.message
                 tool = validated.tool
                 top_p = validated.top_p
@@ -72,7 +68,7 @@ class Consumer(AsyncWebsocketConsumer):
                     self.room_group_name, {"type": "chat_message",
                                            "role": role,
                                            "message": message,
-                                           "credit": key_object.credit,
+                                           "credit": self.key_object.credit,
                                            "unique": unique_response_id,
                                            "choosen_model": choosen_models
                                            }
@@ -81,7 +77,7 @@ class Consumer(AsyncWebsocketConsumer):
                     self.room_group_name, {"type": "chat_message",
                                            "role": tool,
                                            "message": message,
-                                           "credit": key_object.credit,
+                                           "credit": self.key_object.credit,
                                            "unique": unique_response_id,
                                            "choosen_models": choosen_models,
                                            "max_tokens": max_tokens,
@@ -114,13 +110,13 @@ class Consumer(AsyncWebsocketConsumer):
 
         else:
             try:
-                client = dspy.OpenAI(model=event['choosen_models'], 
-                                    max_tokens=event['max_tokens'],
-                                    top_p = event['top_p'],
-                                    presence_penalty = event['presence_penalty'],
-                                    frequency_penalty = event['frequency_penalty'],
-                                    temperature = event['temperature'],
-                                    api_key=config("GPT_KEY"))
+                client = dspy.OpenAI(model=event['choosen_models'],
+                                     max_tokens=event['max_tokens'],
+                                     top_p=event['top_p'],
+                                     presence_penalty=event['presence_penalty'],
+                                     frequency_penalty=event['frequency_penalty'],
+                                     temperature=event['temperature'],
+                                     api_key=config("GPT_KEY"))
                 dspy.configure(lm=client)
 
                 if role == "summary":
@@ -158,7 +154,7 @@ class Consumer(AsyncWebsocketConsumer):
                         Topic_ = TopicClassification
                     predict = dspy.Predict(Topic_)
                     response = predict(document=message)
-                    await self.send(text_data=json.dumps({"message": response.topic, "stream_id":  unique_response_id, "credit": credit}))      
+                    await self.send(text_data=json.dumps({"message": response.topic, "stream_id":  unique_response_id, "credit": credit}))
                 elif role == "paraphrase":
                     paraphaser = dspy.ChainOfThought(ParaphaseDocument)
                     response = paraphaser(document=message)

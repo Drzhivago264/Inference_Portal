@@ -10,7 +10,6 @@ class AgentSchemaMessage(BaseModel):
     message: str
     choosen_models: str
     choosen_template: str
-    key: str
     top_p: float  = constant.DEFAULT_TOP_P
     frequency_penalty: float  = constant.DEFAULT_FREQUENCY_PENALTY
     presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
@@ -52,7 +51,6 @@ class ChatSchema(BaseModel):
     message: str
     choosen_models: str
     mode: str
-    key: str
     best_of: int = constant.DEFAULT_BEST_OF
     beam: bool = constant.DEFAULT_BEAM
     early_stopping: bool = constant.DEFAULT_EARLY_STOPPING
@@ -93,7 +91,6 @@ class ChatSchema(BaseModel):
 class ToolSchema(BaseModel):
     message: str
     choosen_models: str
-    key: str
     tool: str
     emotion_list: str | None = None
     topic_list: str | None = None

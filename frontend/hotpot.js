@@ -64,8 +64,7 @@ function Hotpot() {
     const [userchatmessageError, setUserChatMessageError] = useState(false);
     const [useragentmessage, setUserAgentMessage] = useState("");
     const [useragentmessageError, setUserAgentMessageError] = useState(false);
-    const [key, setKey] = useState("");
-    const [keyError, setKeyError] = useState(false);
+
     const [currentparagraph, setCurrentParagraph] = useState(1);
     const [template_list, setTemplateList] = useState([]);
     const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
@@ -73,12 +72,7 @@ function Hotpot() {
     const [default_child_instruct, setChildInstruct] = useState("");
     const [duplicatemessage, setDuplicateMessage] = useState(true);
 
-    const { state } = useLocation();
-    useEffect(() => {
-        if (state) {
-            setKey(state.credential)
-        }
-    }, []);
+
 
     useEffect(() => {
         axios.all([
@@ -157,10 +151,6 @@ function Hotpot() {
         }
     }
     const submitAgent = () => {
-
-        if (key == '') {
-            setKeyError(true)
-        }
         if (useragentmessage == '') {
             setUserAgentMessageError(true)
         }
@@ -168,7 +158,6 @@ function Hotpot() {
             var data = {
                 'currentParagraph': currentparagraph,
                 'message': useragentmessage,
-                'key': key,
                 'choosen_models': choosen_agent_model,
                 'choosen_template': choosen_template,
                 'role': 'Human',
@@ -185,9 +174,6 @@ function Hotpot() {
         }
     }
     const submitChat = () => {
-        if (key == '') {
-            setKeyError(true)
-        }
         if (userchatmessage == '') {
             setUserChatMessageError(true)
         }
@@ -195,7 +181,6 @@ function Hotpot() {
             var data = {
                 'mode': mode,
                 'message': userchatmessage,
-                'key': key,
                 'choosen_models': choosen_chat_model,
                 'role': 'Human',
                 'top_k': top_k,
@@ -232,24 +217,6 @@ function Hotpot() {
                 <Box m={1}>
                     <Grid container spacing={2}>
                         <Grid item md={2}>
-                            {!state && <TextField
-                                margin="normal"
-                                label="Key"
-                                type="password"
-                                size="small"
-                                onChange={e => setKey(e.target.value)}
-                                value={key}
-                                error={keyError}
-                                autoComplete="off"
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <KeyIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />}
-                            <Divider />
                             <List subheader={
                                 <ListSubheader component="div" id="nested-list-subheader">
                                     Template Structure

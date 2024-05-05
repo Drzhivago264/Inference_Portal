@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework_api_key.models import AbstractAPIKey
 from tinymce.models import HTMLField
 from mptt.models import MPTTModel, TreeForeignKey
+from django.contrib.auth.models import User
 User = settings.AUTH_USER_MODEL
 
 class Article(models.Model):
@@ -25,6 +26,7 @@ def get_image_filename(instance, filename):
     return f"products/{slug}-{filename}"
     
 class APIKEY(AbstractAPIKey):
+    user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
     credit = models.FloatField(default=0.0) 
     monero_credit = models.FloatField(default=0.0) 
     created_at = models.DateTimeField(auto_now_add=True)
