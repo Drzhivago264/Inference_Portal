@@ -179,7 +179,7 @@ function KeyManagement() {
                     setKeyCreateError(error.response.data.detail)
                 });
         }
-        setKeyCreateLoading(false)
+ 
     }
     const handleCheckKey = (event) => {
         event.preventDefault()
@@ -330,7 +330,7 @@ function KeyManagement() {
                         duration={4}
                         revealDuration={1.6}
                         characters={key_}
-                        onComplete={() => (setRandomAnimation(true))}
+                        onComplete={() => (setRandomAnimation(true), setKeyCreateLoading(false))}
 
                     /></Alert>
                 </Box>}

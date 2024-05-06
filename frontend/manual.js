@@ -74,7 +74,7 @@ function Manual() {
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
-                        <Grid item md={8} lg={8}>
+                        <Grid item xs={12} md={8} lg={8}>
                         <Box mt={3}  sx={{ display: { sm: 'block ', md: 'none' } }} >
                                 <Typography variant="body1" component="body1">
                                     <List dense={true}>
@@ -87,7 +87,7 @@ function Manual() {
                                 </Typography>
                             </Box>
                             <Box m={3}>
-
+                                
                                 <MuiMarkdown overrides={{
                                     ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                     h1: {
