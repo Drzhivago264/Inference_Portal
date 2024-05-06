@@ -80,7 +80,7 @@ function Information() {
                     />
                 </Box>
                 <Grid container spacing={1}>
-                    <Grid item md={9}>
+                    <Grid item sm={12} md={9}>
                         <Box mt={5} mb={5} p={1}>
                             {introloading && <Stack spacing={1}>
                                 <Skeleton variant="rounded" animation="wave" height={150} />
@@ -182,7 +182,7 @@ function Information() {
                             </Box>
                         </Box>
                     </Grid>
-                    <Grid item md={3}>
+                    <Grid item sm={3}>
                         <Box m={10} sx={{ width: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
                             <VerticalNav />
                         </Box>

@@ -316,7 +316,7 @@ function Agent() {
             <Container maxWidth={false} sx={{ minWidth: 1500 }}>
                 <Box m={1}>
                     <Grid container spacing={2}>
-                        <Grid item md={2}>
+                        <Grid item xs={2}>
                             <List subheader={
                                 <ListSubheader component="div" id="nested-list-subheader">
                                     Template Structure
@@ -333,7 +333,7 @@ function Agent() {
                                 })}
                             </List>
                             <Divider ></Divider>
-                            <Box ml={5} mr={5} mt={2}>
+                            <Box  mt={2}>
                                 <form onSubmit={handleExport}>
                                     <FormControl  >
                                         <Stack direction={'row'} spacing={1}>
@@ -358,7 +358,7 @@ function Agent() {
                                 </form>
                             </Box>
                         </Grid>
-                        <Grid item md={4}>
+                        <Grid item xs={4}>
                             <Stack spacing={1}>
                                 <Typography variant="h4" gutterBottom>Parent Instruction</Typography>
                                 <Paper>
@@ -397,7 +397,7 @@ function Agent() {
                                 <div id='editorjs' />
                             </Stack>
                         </Grid>
-                        <Grid item md={4}>
+                        <Grid item xs={4}>
                         <ChatBox
                             inputsize={300}
                             chat_message={chat_message}
@@ -413,7 +413,7 @@ function Agent() {
                         >
                         </ChatBox>
                         </Grid>
-                        <Grid item md={2}>
+                        <Grid item xs={2}>
                             <Stack direction='column' spacing={1}>
                                 <FormControl >
                                     <InputLabel id="agent-label">Agents</InputLabel>

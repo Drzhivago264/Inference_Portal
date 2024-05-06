@@ -214,7 +214,7 @@ function Hotpot() {
             <Container maxWidth={false} sx={{ minWidth: 1500 }}>
                 <Box m={1}>
                     <Grid container spacing={2}>
-                        <Grid item md={2}>
+                        <Grid item xs={2}>
                             <List subheader={
                                 <ListSubheader component="div" id="nested-list-subheader">
                                     Template Structure
@@ -266,7 +266,7 @@ function Hotpot() {
                             </Stack>
                         </Grid>
 
-                        <Grid item md={4}>
+                        <Grid item xs={4}>
                             <ChatBoxHotpot
                                 id={'chat-log'}
                                 inputsize={660}
@@ -284,7 +284,7 @@ function Hotpot() {
                             >
                             </ChatBoxHotpot>
                         </Grid>
-                        <Grid item md={4}>
+                        <Grid item xs={4}>
                             <ChatBoxHotpot
                                 id={'chat-log-agent'}
                                 inputsize={660}
@@ -303,7 +303,7 @@ function Hotpot() {
                             </ChatBoxHotpot>
 
                         </Grid>
-                        <Grid item md={2}>
+                        <Grid item xs={2}>
                             <HotpotParameter
                                 template_list={template_list}
                                 choosen_template={choosen_template}
