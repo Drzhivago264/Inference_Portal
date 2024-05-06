@@ -35,4 +35,10 @@ app.conf.beat_schedule = {
         'options': {'queue': 'periodic'}
 
     },
+    'periodically_delete_unused_key': {
+        'task': 'server.celery_tasks.periodically_delete_unused_key',      
+        'schedule': DELETE_KEY_INTERVAL,
+        'options': {'queue': 'periodic'}
+
+    },
 }

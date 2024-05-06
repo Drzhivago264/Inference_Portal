@@ -24,6 +24,8 @@ import { Highlight, themes } from 'prism-react-renderer';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Divider from '@mui/material/Divider';
 import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
+import { check_login, logout } from './component/check_login';
+
 function Hub() {
 
     function getCookie(name) {
@@ -44,22 +46,11 @@ function Hub() {
 
 
     const [checklogin, setLoginState] = useState(false);
-    useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/check-login'),
-        ])
-            .then(axios.spread((login_object) => {
-                if (login_object.status == '200') {
-                    setLoginState(true)
-                }
 
-            }))
-            .catch(error => {
-                if (error.response.status == '401') {
-                    setLoginState(false)
-                }
-            });
+    useEffect(() => {
+        check_login(setLoginState)
     }, []);
+
     const [explaination, setMessage] = useState('');
     const navigate = useNavigate();
     const [destination, setDestination] = useState("engineer")
@@ -67,14 +58,7 @@ function Hub() {
     const [keyError, setKeyError] = useState(false)
     const [redirecterror, setRedirectError] = useState(null);
 
-    const logout = (e) => {
-        axios.get("/frontend-api/logout")
-            .then((response) => {
-                setLoginState(false)
-            }).catch(error => {
-                console.log(error)
-            });
-    }
+
     const handleSubmit = (event) => {
         event.preventDefault()
         setKeyError(false)
@@ -177,7 +161,7 @@ function Hub() {
                                     {checklogin && <Stack mt={3} direction="row" spacing={1}>
                                         <Button variant="contained" type="submit" endIcon={<AssistantDirectionIcon />}>Redirect</Button>
                                         <Divider orientation="vertical" flexItem />
-                                        <Button variant="outlined" onClick={(e) => { logout(e) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
+                                        <Button variant="outlined" onClick={() => { logout(setLoginState) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
                                     </Stack>
                                     }
                                     <FormLabel sx={{ m: 2 }}>Bring me to:</FormLabel>
