@@ -14,22 +14,17 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import Slider from '@mui/material/Slider';
 import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import KeyIcon from '@mui/icons-material/Key';
 import ListItemButton from '@mui/material/ListItemButton';
-import LinearProgress from '@mui/material/LinearProgress';
 import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from './component/navbar';
-import SendIcon from '@mui/icons-material/Send';
 import EditorJS from "@editorjs/editorjs";
-import { useLocation } from "react-router-dom";
 import Header from "@editorjs/header";
 import Quote from "@editorjs/quote"
 import Paragraph from "@editorjs/paragraph"
@@ -43,7 +38,7 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import { OpenAPIParameter } from './component/chatroom_parameters';
 import { ChatBox } from './component/chatbox';
 import { agentsocket } from './component/chatsocket';
-
+import './component/editor-js.css';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
