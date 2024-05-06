@@ -12,12 +12,10 @@ import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import KeyIcon from '@mui/icons-material/Key';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from './component/navbar';
-import { useLocation } from "react-router-dom";
 import { ChatBoxHotpot } from './component/chatbox';
 import { HotpotParameter } from './component/chatroom_parameters'
 import { chatsocket, agentsocket } from './component/chatsocket';

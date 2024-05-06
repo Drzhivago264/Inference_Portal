@@ -1,4 +1,5 @@
 const path = require('path');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
   entry: './frontend/index.js',  // path to our input file
@@ -30,6 +31,9 @@ module.exports = {
       },
     ]
   },
+  plugins: [
+    new BundleAnalyzerPlugin()
+  ]
 
 };
 
