@@ -15,6 +15,7 @@ import ResponsiveAppBar from './component/navbar';
 import { OpenAPIParameter } from './component/chatroom_parameters'
 import { ChatBox } from './component/chatbox';
 import { chatsocket } from './component/chatsocket';
+import { ChatExport } from './component/chat_export';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -45,6 +46,7 @@ function FunctionLLM() {
     const [usermessageError, setUserMessageError] = useState(false);
     const [extrainstruction, setExtraInstruction] = useState("sadness, joy, love, anger, fear, surprise, neutral");
     const [llmfunction, setLLMFunction] = useState("emotion");
+    const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
 
 
     useEffect(() => {
@@ -160,7 +162,7 @@ function FunctionLLM() {
                                 </RadioGroup>
                             </FormControl>
                             <Divider ></Divider>
-                            <Box mt={2}>
+                            <Box mt={2} mb={2}>
 
                                 <FormLabel id="Extral Instructions">Extra Instructions</FormLabel>
                                 <ChatInput
@@ -170,8 +172,18 @@ function FunctionLLM() {
                                     sx={{ p: '2px 4px', display: 'flex', minWidth: 200 }}
                                     onChange={e => setExtraInstruction(e.target.value)}
                                     minRows={4}
+                              
                                 />
                             </Box>
+                            <Divider></Divider>
+                            <ChatExport
+                            chat_message={chat_message}
+                            choosen_export_format_chatlog={choosen_export_format_chatlog}
+                            setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
+                            number_of_remove_message = {1}
+                            >
+
+                            </ChatExport>
                         </Grid>
                         <Grid item md={6}>
                         <ChatBox
