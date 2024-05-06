@@ -10,6 +10,8 @@ import ResponsiveAppBar from './component/navbar';
 import { ChatParameter } from './component/chatroom_parameters';
 import { ChatBox } from './component/chatbox';
 import { chatsocket } from './component/chatsocket';
+import { ChatExport } from './component/chat_export';
+import { Divider } from '@mui/material';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 660,
@@ -45,7 +47,7 @@ function Chat() {
     const [lengthpenalty, setLengthPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-
+    const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
 
     useEffect(() => {
         axios.all([
@@ -69,7 +71,7 @@ function Chat() {
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/');
-        chatsocket(websocket, setChatMessage, setThinking, document )
+        chatsocket(websocket, setChatMessage, setThinking, document)
     }, []);
 
     const handleEnter = (e) => {
@@ -111,7 +113,7 @@ function Chat() {
             <Container maxWidth="lg" sx={{ width: 1200 }}>
                 <Box m={2}>
                     <Grid container spacing={2}>
-                        <Grid item md={8}>
+                        <Grid item xs={8}>
                             <ChatBox
                                 inputsize={660}
                                 chat_message={chat_message}
@@ -127,36 +129,46 @@ function Chat() {
                             >
                             </ChatBox>
                         </Grid>
-                        <Grid item md={4}>
-                            <ChatParameter
-                                model_objects={model_objects}
-                                agent_objects={agent_objects}
-                                choosen_model={choosen_model}
-                                top_k={top_k}
-                                top_p={top_p}
-                                max_tokens={max_tokens}
-                                temperature={temperature}
-                                mode={mode}
-                                bestof={bestof}
-                                lengthpenalty={lengthpenalty}
-                                presencepenalty={presencepenalty}
-                                frequencypenalty={frequencypenalty}
-                                setBeam={setBeam}
-                                setMaxToken={setMaxToken}
-                                setBestof={setBestof}
-                                setChoosenModel={setChoosenModel}
-                                setTemperature={setTemperature}
-                                setMode={setMode}
-                                setLengthPenalty={setLengthPenalty}
-                                setPresencePenalty={setPresencePenalty}
-                                setFrequencyPenalty={setFrequencyPenalty}
-                                setTopk={setTopk}
-                                setTopp={setTopp}
-                                setUseMemory={setUseMemory}
-                                earlystopping={earlystopping}
-                                setEarlyStopping={setEarlyStopping}
-                            ></ChatParameter>
-
+                        <Grid item xs={4}>
+                            <Box mb={3}>
+                            <ChatExport
+                                chat_message={chat_message}
+                                choosen_export_format_chatlog={choosen_export_format_chatlog}
+                                setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
+                                number_of_remove_message={1}
+                            >
+                            </ChatExport>
+                            </Box>
+                 
+                                <ChatParameter
+                                    model_objects={model_objects}
+                                    agent_objects={agent_objects}
+                                    choosen_model={choosen_model}
+                                    top_k={top_k}
+                                    top_p={top_p}
+                                    max_tokens={max_tokens}
+                                    temperature={temperature}
+                                    mode={mode}
+                                    bestof={bestof}
+                                    lengthpenalty={lengthpenalty}
+                                    presencepenalty={presencepenalty}
+                                    frequencypenalty={frequencypenalty}
+                                    setBeam={setBeam}
+                                    setMaxToken={setMaxToken}
+                                    setBestof={setBestof}
+                                    setChoosenModel={setChoosenModel}
+                                    setTemperature={setTemperature}
+                                    setMode={setMode}
+                                    setLengthPenalty={setLengthPenalty}
+                                    setPresencePenalty={setPresencePenalty}
+                                    setFrequencyPenalty={setFrequencyPenalty}
+                                    setTopk={setTopk}
+                                    setTopp={setTopp}
+                                    setUseMemory={setUseMemory}
+                                    earlystopping={earlystopping}
+                                    setEarlyStopping={setEarlyStopping}
+                                ></ChatParameter>
+                         
                         </Grid>
                     </Grid>
                 </Box>

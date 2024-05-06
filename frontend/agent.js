@@ -39,6 +39,8 @@ import { OpenAPIParameter } from './component/chatroom_parameters';
 import { ChatBox } from './component/chatbox';
 import { agentsocket } from './component/chatsocket';
 import './component/editor-js.css';
+import { ChatExport } from './component/chat_export';
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -76,7 +78,7 @@ function Agent() {
     const [default_parent_instruct, setParentInstruct] = useState("");
     const [default_child_instruct, setChildInstruct] = useState("");
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
-
+    const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
 
     useEffect(() => {
         if (!ref.current) {
@@ -185,7 +187,7 @@ function Agent() {
             setEditor,
             setCurrentParagraph,
             editorref)
-        
+
     }, []);
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
@@ -333,9 +335,11 @@ function Agent() {
                                 })}
                             </List>
                             <Divider ></Divider>
-                            <Box  mt={2}>
+                            <Box mt={2}>
                                 <form onSubmit={handleExport}>
+                                    <Typography pb={2}>Editor Export</Typography>
                                     <FormControl  >
+
                                         <Stack direction={'row'} spacing={1}>
                                             <InputLabel id="export-label">Formats</InputLabel>
                                             <Select
@@ -356,11 +360,19 @@ function Agent() {
                                         </Stack>
                                     </FormControl>
                                 </form>
+                                <ChatExport
+                                    chat_message={chat_message}
+                                    choosen_export_format_chatlog={choosen_export_format_chatlog}
+                                    setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
+                                    number_of_remove_message = {2}
+                                    setChatMessage={setChatMessage}
+                                >
+                                </ChatExport>
                             </Box>
                         </Grid>
                         <Grid item xs={4}>
                             <Stack spacing={1}>
-                                <Typography variant="h4" gutterBottom>Parent Instruction</Typography>
+                                <Typography variant="h5" gutterBottom>Parent Instruction</Typography>
                                 <Paper>
                                     <ChatInput
                                         id="parent-instruct"
@@ -377,7 +389,7 @@ function Agent() {
                                     />
                                 </Paper>
                                 <Divider />
-                                <Typography variant="h4" gutterBottom>Child Instruction</Typography>
+                                <Typography variant="h5" gutterBottom>Child Instruction</Typography>
                                 <Paper>
                                     <ChatInput
                                         id="child-instruct"
@@ -393,25 +405,25 @@ function Agent() {
                                     />
                                 </Paper>
                                 <Divider />
-                                <Typography variant="h4" gutterBottom>Editor</Typography>
+                                <Typography variant="h5" gutterBottom>Editor</Typography>
                                 <div id='editorjs' />
                             </Stack>
                         </Grid>
                         <Grid item xs={4}>
-                        <ChatBox
-                            inputsize={300}
-                            chat_message={chat_message}
-                            usermessage={usermessage}
-                            usermessageError={usermessageError}
-                            ChatPaper={ChatPaper}
-                            ChatInput={ChatInput}
-                            setUserMessage={setUserMessage}
-                            submitChat={submitChat}
-                            messagesEndRef={messagesEndRef}
-                            shownthinking={shownthinking}
-                            handleEnter={handleEnter}
-                        >
-                        </ChatBox>
+                            <ChatBox
+                                inputsize={300}
+                                chat_message={chat_message}
+                                usermessage={usermessage}
+                                usermessageError={usermessageError}
+                                ChatPaper={ChatPaper}
+                                ChatInput={ChatInput}
+                                setUserMessage={setUserMessage}
+                                submitChat={submitChat}
+                                messagesEndRef={messagesEndRef}
+                                shownthinking={shownthinking}
+                                handleEnter={handleEnter}
+                            >
+                            </ChatBox>
                         </Grid>
                         <Grid item xs={2}>
                             <Stack direction='column' spacing={1}>
