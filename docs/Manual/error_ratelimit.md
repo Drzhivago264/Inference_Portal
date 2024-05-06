@@ -28,16 +28,27 @@ There are multiple ratelimits applied for different endpoints
 
 >Frontend endpoints are intended to be used by frontend server. However, if you insist, you can supply the cookie taken from browser to programmatically generate and manage your Key(s).
 
-| Endpoint                          | Description                                                          | Ratelimit |
-| --------------------------------- | :------------------------------------------------------------------- | :-------- |
-| frontend-api/model/               | Retrieve information for the hosted models and pricing               | 20/s      |
-| frontend-api/generate-key         | Generate a new API Key                                               | 100/day   |
-| frontend-api/check-credit         | Check the credit of an API Key                                       | 100/hour  |
-| frontend-api/get-xmr-wallet'      | Retrieve information for the XMR integrated wallet with each API Key | 100/day   |
-| 'frontend-api/confirm-xmr-payment | Confirm payment sent to the XMR integrated wallet                    | 100/day   |
-| 'frontend-api/send-mail'          | Contact us email                                                     | 1/day     |
+| Endpoint                         | Description                                                          | Ratelimit |
+| -------------------------------- | :------------------------------------------------------------------- | :-------- |
+| frontend-api/model/              | Retrieve information for the hosted models and pricing               | 20/s      |
+| frontend-api/generate-key        | Generate a new API Key                                               | 100/day   |
+| frontend-api/check-credit        | Check the credit of an API Key                                       | 100/hour  |
+| frontend-api/get-xmr-wallet      | Retrieve information for the XMR integrated wallet with each API Key | 100/day   |
+| frontend-api/confirm-xmr-payment | Confirm payment sent to the XMR integrated wallet                    | 100/day   |
+| frontend-api/send-mail           | Contact us email                                                     | 1/day     |
 
 ### 2.2 Inference endpoints
 
 > Currently there is no ratelimits applied for inference endpoint
 
+| Endpoint               | Description                                                 | Ratelimit |
+| ---------------------- | :---------------------------------------------------------- | :-------- |
+| /api/completion        | Complete a given sentence                                   | 5/s       |
+| /api/chat              | Answer a given sentence                                     | 5/s       |
+| /api/predict/sentiment | Predict sentiment of a given sentence                       | 5/s       |
+| /api/predict/emotion   | Predict emotion of a given sentence from a list of emotions | 5/s       |
+| /api/predict/paraphase | Paraphase a given sentence                                  | 5/s       |
+| /api/tasks/summarize   | Summarise a given sentence                                  | 5/s       |
+| /api/tasks/classify    | Classify a given sentence with a list of categories         | 5/s       |
+| /api/tasks/restyle     | Restyle a given sentence according to a list of style       | 5/s       |
+| /api/responselog       | Retrieve log                                                | 10/m      |
