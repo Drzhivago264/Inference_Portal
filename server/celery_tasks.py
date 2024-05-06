@@ -29,6 +29,7 @@ from .util.commond_func import (get_model_url,
                                 )
 from .util.constant import *
 from celery.utils.log import get_task_logger
+from django.utils.timezone import datetime, timedelta
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
@@ -71,6 +72,9 @@ def update_crypto_rate(coin: str):
             except KeyError:
                 pass
 
+@shared_task
+def periodically_delete_unused_key():
+    APIKEY.objects.filter(created_at__lte=datetime.now()-timedelta(days=KEY_TTL), credit=0.0, monero_credit=0.0).delete()
 
 @shared_task()
 def periodically_monitor_EC2_instance() -> str:

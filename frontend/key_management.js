@@ -26,6 +26,7 @@ import Typography from '@mui/material/Typography';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import Divider from '@mui/material/Divider';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -38,6 +39,7 @@ import {
     responsiveFontSizes,
     ThemeProvider,
 } from '@mui/material/styles';
+import { check_login, logout } from './component/check_login';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
@@ -49,6 +51,11 @@ function KeyManagement() {
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
     const [product_objects, setProduct] = useState([]);
+
+    const [checklogin, setLoginState] = useState(false);
+    useEffect(() => {
+        check_login(setLoginState)
+    }, []);
 
     useEffect(() => {
         axios.all([
@@ -179,7 +186,7 @@ function KeyManagement() {
                     setKeyCreateError(error.response.data.detail)
                 });
         }
- 
+
     }
     const handleCheckKey = (event) => {
         event.preventDefault()
@@ -310,7 +317,7 @@ function KeyManagement() {
                 }).catch(error => {
                     console.log(error.response.data.detail)
                     setStripeRedirectError(error.response.data.detai)
-                }); 
+                });
         }
     }
     function exportKey(keyfile) {
@@ -438,7 +445,7 @@ function KeyManagement() {
                             Start by generating a random key by giving it a name.
                         </Typography>
                         <Box my={4} justifyContent="center" alignItems="center" display="flex" >
-                            <form autoComplete="off" onSubmit={handleCreateKey}>
+                            {!checklogin && <form autoComplete="off" onSubmit={handleCreateKey}>
                                 <FormControl defaultValue="" required>
                                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                                         <TextField
@@ -462,6 +469,31 @@ function KeyManagement() {
                                     </Stack>
                                 </FormControl>
                             </form>
+                            }
+                            {checklogin && <form autoComplete="off" onSubmit={handleCreateKey}>
+                                <FormControl defaultValue="" required>
+                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                        <TextField
+                                            disabled
+                                            margin="normal"
+                                            label="Key Name"
+                                            type="text"
+                                            size="small"
+                                            defaultValue="You are logged in"
+                                            autoComplete="off"
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <CreateIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                        <Button variant="outlined" onClick={() => { logout(setLoginState) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
+                                    </Stack>
+                                </FormControl>
+                            </form>
+                            }
                         </Box>
                         {keycreateresponse && <KeyCreateExport key_={keycreateresponse.key} key_name={keycreateresponse.key_name} payment_id={keycreateresponse.payment_id} integrated_wallet={keycreateresponse.integrated_wallet} />}
                         {keycreateerror && <ErrorAlert error={keycreateerror} />}
@@ -476,7 +508,8 @@ function KeyManagement() {
                                 <li> To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.) </li>
                             </Alert>
                             <Alert variant="outlined" severity="warning">
-                                If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks.
+                                <li> If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks. </li>
+                                <li> To ensure that people with access to your computer or session cannot retrieve your wallet information, you are required to fill up the credit-related forms, even if you are logged in. </li>
                             </Alert>
                         </Stack>
                         <Box my={4} >
@@ -606,7 +639,7 @@ function KeyManagement() {
                                             Use sufficient fees so the transactions gets confirmed on time.
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={xmrconfirmationloading} variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z"/><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z"/></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
+                                            <LoadingButton loading={xmrconfirmationloading} variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
                                         </Box>
                                         {xmrconfirmationresponse && <XMRWConfirmationDisplay detail={xmrconfirmationresponse.detail} />}
                                         {xmrconfirmationerror && <ErrorAlert error={xmrconfirmationerror} />}
