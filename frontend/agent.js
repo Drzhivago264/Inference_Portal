@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import InputLabel from '@mui/material/InputLabel';
 import edjsParser from "editorjs-parser"
-import pdfMake from "pdfmake/build/pdfmake";
+import * as pdfMake from 'pdfmake/build/pdfmake.min';
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -38,7 +38,7 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import { OpenAPIParameter } from './component/chatroom_parameters';
 import { ChatBox } from './component/chatbox';
 import { agentsocket } from './component/chatsocket';
-import './component/editor-js.css';
+import './component/css/editor-js.css';
 import { ChatExport } from './component/chat_export';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -295,7 +295,7 @@ function Agent() {
                 var htmlToPdfmake = require("html-to-pdfmake");
                 var html_to_pdf = htmlToPdfmake(html);
                 var pdf = { content: html_to_pdf };
-                var pdfMake = require('pdfmake');
+
                 pdfMake.vfs = pdfFonts.pdfMake.vfs;
                 pdfMake.createPdf(pdf).download('Written_By_Professor_Parakeet.pdf')
             }

@@ -4,14 +4,11 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import ResponsiveAppBar from './component/navbar';
 import Container from '@mui/material/Container';
-import Paper from '@mui/material/Paper';
-import { styled } from '@mui/system';
 import Typography from '@mui/material/Typography';
 import { Link } from "react-router-dom";
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import "./component/editor-js.css"
 import authentication_ from '../docs/Manual/authentication.md'
 import behavior_ from '../docs/Manual/behavior.md'
 import key_ from '../docs/Manual/create_key.md'
