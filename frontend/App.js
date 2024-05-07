@@ -2,14 +2,6 @@ import * as React from 'react';
 import { lazy, Suspense } from "react";
 import Container from '@mui/material/Container';
 import Footer from './component/footer.js';
-import Information from './introduction';
-import ModelInfor from './model';
-import Hub from './redirect';
-import KeyManagement from './key_management';
-import Contact from './contact';
-import Chat from './chat';
-import FunctionLLM from './function_llm.js';
-import Hotpot from './hotpot.js';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
@@ -22,8 +14,15 @@ import {
   Route,
 } from "react-router-dom";
 
-
+const ModelInfor = lazy(() => import("./model.js"));
+const Hub = lazy(() => import("./redirect.js"));
+const Information = lazy(() => import("./introduction.js"));
 const Agent = lazy(() => import("./agent.js"));
+const Chat = lazy(() => import("./chat.js"));
+const Contact = lazy(() => import("./contact.js"));
+const KeyManagement = lazy(() => import("./key_management.js"));
+const Hotpot = lazy(() => import("./hotpot.js"));
+const FunctionLLM = lazy(() => import("./function_llm.js"));
 const Manual = lazy(() => import("./manual.js"));
 const APIDoc = lazy(() => import("./api_doc.js"));
 const Log = lazy(() => import("./log.js"));
@@ -57,22 +56,22 @@ export default function App() {
         <CssBaseline />
         <Router>
           <Routes>
-            <Route exact path="/" element={<Information />} />
-            <Route exact path="" element={<Information />} />
+            <Route exact path="/" element={<InformationPage />} />
+            <Route exact path="" element={<InformationPage />} />
 
             <Route path="/frontend/manual" element={<ManualPage />} />
             <Route path="/frontend/manual/:doc" element={<ManualPage />} />
             <Route path="/frontend/api/docs" element={<APIDocPage />} />
-            <Route path="/frontend/model" element={<ModelInfor />} />
-            <Route path="/frontend/key-management" element={<KeyManagement />} />
-            <Route path="/frontend/hub" element={<Hub />} />
-            <Route path="/frontend/chat/:keyhash" element={<Chat />} />
+            <Route path="/frontend/model" element={<ModelInforPage />} />
+            <Route path="/frontend/key-management" element={<KeyManagementPage />} />
+            <Route path="/frontend/hub" element={<HubPage />} />
+            <Route path="/frontend/chat/:keyhash" element={<ChatPage />} />
             <Route path="/frontend/engineer/:keyhash" element={<AgentPage />} />
-            <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLM />} />
-            <Route path="/frontend/hotpot/:keyhash" element={<Hotpot />} />
+            <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLMPage />} />
+            <Route path="/frontend/hotpot/:keyhash" element={<HotpotPage />} />
             <Route path="/frontend/log/:keyhash" element={<LogPage />} />
 
-            <Route path="/frontend/contact" element={<Contact />} />
+            <Route path="/frontend/contact" element={<ContactPage />} />
           </Routes>
         </Router>
         <Container maxWidth={false} disableGutters>
@@ -104,5 +103,53 @@ const APIDocPage = () => (
 const LogPage = () => (
   <Suspense fallback={<LinearProgress />}>
     <Log />
+  </Suspense>
+);
+
+const ChatPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <Chat />
+  </Suspense>
+);
+
+const ContactPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <Contact />
+  </Suspense>
+);
+
+const HotpotPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <Hotpot />
+  </Suspense>
+);
+
+const KeyManagementPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <KeyManagement />
+  </Suspense>
+);
+
+const FunctionLLMPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <FunctionLLM />
+  </Suspense>
+);
+
+const InformationPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <Information />
+  </Suspense>
+);
+
+const ModelInforPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <ModelInfor />
+  </Suspense>
+);
+
+const HubPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <Hub />
   </Suspense>
 );
