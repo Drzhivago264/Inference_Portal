@@ -89,6 +89,7 @@ export function agentsocket(
             }
             else if ((dataFromServer.hasOwnProperty("child_instruct"))) {
                 setChildInstruct(dataFromServer.child_instruct)
+                dataFromServer.message = ""
             }
             else if (dataFromServer.hasOwnProperty("paragraph")) {
                 if (setCurrentParagraph) {

@@ -4,7 +4,7 @@ from pydantic import (
     field_validator,
 )
 
-from .util import constant
+from .utils import constant
 
 class AgentSchemaMessage(BaseModel):
     message: str

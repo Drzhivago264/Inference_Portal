@@ -16,7 +16,7 @@ class Consumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_api_key(self):
         return self.user.apikey
-    
+
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -73,27 +73,30 @@ class Consumer(AsyncWebsocketConsumer):
                                            "choosen_model": choosen_models
                                            }
                 )
-                Inference.delay(unique=unique_response_id,
-                                is_session_start_node=self.is_session_start_node,
-                                mode=mode,
-                                type_="chatroom",
-                                stream=True,
-                                key=self.key_object.hashed_key,
-                                credit= self.key_object.credit,
-                                room_group_name=self.room_group_name,
-                                model=choosen_models,
-                                top_k=top_k,
-                                top_p=top_p,
-                                best_of=best_of,
-                                temperature=temperature,
-                                max_tokens=max_tokens,
-                                presence_penalty=presence_penalty,
-                                frequency_penalty=frequency_penalty,
-                                length_penalty=length_penalty,
-                                early_stopping=early_stopping,
-                                beam=beam,
-                                prompt=message,
-                                include_memory=include_memory)
+                await self.channel_layer.group_send(
+                    self.room_group_name, {'unique':  unique_response_id,
+                                           'is_session_start_node': self.is_session_start_node,
+                                           'mode': mode,
+                                           'type_': "chatroom",
+                                           'stream': True,
+                                           'key': self.key_object.hashed_key,
+                                           'credit': self.key_object.credit,
+                                           'room_group_name': self.room_group_name,
+                                           'model': choosen_models,
+                                           'top_k': top_k,
+                                           'top_p': top_p,
+                                           'best_of': best_of,
+                                           'temperature': temperature,
+                                           'max_tokens': max_tokens,
+                                           'presence_penalty': presence_penalty,
+                                           'frequency_penalty': frequency_penalty,
+                                           'length_penalty': length_penalty,
+                                           'early_stopping': early_stopping,
+                                           'beam': beam,
+                                           'prompt': message,
+                                           'include_memory': include_memory
+                                           }
+                )
         except ValidationError as e:
             await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
     # Receive message from room group

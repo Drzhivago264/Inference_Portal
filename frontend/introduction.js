@@ -79,7 +79,7 @@ function Information() {
                         deletionSpeed={90}
                     />
                 </Box>
-                <Grid container spacing={1}>
+                <Grid container spacing={0}>
                     <Grid item sm={12} md={9}>
                         <Box mt={5} mb={5} p={1}>
                             {introloading && <Stack spacing={1}>
@@ -183,7 +183,7 @@ function Information() {
                         </Box>
                     </Grid>
                     <Grid item sm={3}>
-                        <Box m={10} sx={{ width: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
+                        <Box mt={10.32} sx={{ width: 225,  display: { xs: 'none', sm: 'none ', md: 'block' } }}>
                             <VerticalNav />
                         </Box>
                     </Grid>

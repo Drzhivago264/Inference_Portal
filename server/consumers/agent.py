@@ -7,7 +7,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server.celery_tasks import Agent_Inference
 
-from server.util import constant
+from server.utils import constant
 from server.pydantic_validator import (
                                  AgentSchemaInstruct,
                                  AgentSchemaMessage,

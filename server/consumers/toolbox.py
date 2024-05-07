@@ -8,13 +8,13 @@ from channels.db import database_sync_to_async
 from decouple import config
 import dspy
 from channels.generic.websocket import AsyncWebsocketConsumer
-from server.util.llm_toolbox import (Emotion, 
+from server.utils.llm_toolbox import (Emotion, 
                                TopicClassification, 
                                SummarizeDocument, 
                                ParaphaseDocument, 
                                ChangeWrittingStyle
                                )
-from server.util import constant
+from server.utils import constant
 from server.pydantic_validator import ToolSchema
 from pydantic import ValidationError
 

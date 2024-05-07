@@ -1,6 +1,6 @@
 from ninja import Schema
 import datetime
-from server.util import constant
+from server.utils import constant
 from pydantic import (
     ValidationInfo,
     field_validator,
