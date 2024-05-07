@@ -21,7 +21,7 @@ from django.contrib import messages
 from django.views import View
 from django.urls import reverse
 from django.views.generic import TemplateView
-from server.util.commond_func import manage_monero
+from server.utils.common_func import manage_monero
 from django.core.cache import cache
 from server.forms import CaptchaForm
 from django.core.signing import Signer

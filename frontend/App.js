@@ -15,7 +15,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-
+import LinearProgress from '@mui/material/LinearProgress';
 import {
   BrowserRouter as Router,
   Routes,
@@ -84,25 +84,25 @@ export default function App() {
 }
 
 const AgentPage = () => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense fallback={<LinearProgress />}>
     <Agent />
   </Suspense>
 );
 
 const ManualPage = () => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense fallback={<LinearProgress />}>
     <Manual />
   </Suspense>
 );
 
 const APIDocPage = () => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense fallback={<LinearProgress />}>
     <APIDoc />
   </Suspense>
 );
 
 const LogPage = () => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense fallback={<LinearProgress />}>
     <Log />
   </Suspense>
 );

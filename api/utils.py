@@ -1,4 +1,4 @@
-from server.util import constant
+from server.utils import constant
 from server.models import InferenceServer, LLM, PromptResponse, APIKEY
 from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async

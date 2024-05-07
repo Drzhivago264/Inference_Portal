@@ -1,6 +1,6 @@
 from django import forms
 from captcha.fields import CaptchaField, CaptchaTextInput
-from server.util import constant
+from server.utils import constant
 
 class CustomCaptchaTextInput(CaptchaTextInput):
     template_name = 'component_html/captcha.html'

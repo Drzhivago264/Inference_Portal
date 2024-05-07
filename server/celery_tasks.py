@@ -18,7 +18,7 @@ from decouple import config
 from botocore.exceptions import ClientError
 import boto3
 from openai import OpenAI
-from .util.commond_func import (get_model_url,
+from .utils.common_func import (get_model_url,
                                 update_server_status_in_db,
                                 send_request,
                                 inference_mode,
@@ -27,7 +27,7 @@ from .util.commond_func import (get_model_url,
                                 send_chat_request_openai,
                                 log_prompt_response
                                 )
-from .util.constant import *
+from .utils.constant import *
 from celery.utils.log import get_task_logger
 from django.utils.timezone import datetime, timedelta
 logger = get_task_logger(__name__)

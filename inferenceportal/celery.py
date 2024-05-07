@@ -4,7 +4,7 @@ from celery import Celery
 from django.conf import settings
 import json
 import server
-from server.util.constant import *
+from server.utils.constant import *
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inferenceportal.settings')
 

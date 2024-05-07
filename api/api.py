@@ -1,9 +1,9 @@
 from ninja import NinjaAPI, Schema
 from decouple import config
-from server.util import constant
+from server.utils import constant
 from ninja.security import HttpBearer
 from server.models import APIKEY
-from server.util.llm_toolbox import (Emotion,
+from server.utils.llm_toolbox import (Emotion,
                                      TopicClassification,
                                      ParaphaseDocument,
                                      SummarizeDocument,

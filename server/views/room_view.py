@@ -11,13 +11,10 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.contrib import messages
 from server.celery_tasks import Inference
-from server.util.commond_func import get_key
+from server.utils.common_func import get_key
 from django.core.cache import cache
-from server.util import constant
-from server.forms import (
-    RoomRedirectForm,
-)
-from django.core.signing import Signer
+from server.utils import constant
+
 from hashlib import sha256
 from django.http import (
     HttpRequest,
@@ -36,7 +33,7 @@ from django.contrib.auth import authenticate, login
 
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
-def hub_redirect_api(request):
+def hub_redirect_api(request: HttpRequest) -> Response:
     serializer = RedirectSerializer(data=request.data)
     if serializer.is_valid():
         key = serializer.data['key']

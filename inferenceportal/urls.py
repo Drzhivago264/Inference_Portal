@@ -7,7 +7,7 @@ from server.views.information import (handler_403,
                                       handler_404, 
                                       handler_429, 
                                       handler_500)
-from .api import api
+from api.api import api
 
 urlpatterns = [
     path("", include("server.urls")),
