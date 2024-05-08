@@ -2,7 +2,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from celery import shared_task
 from django.core.mail import send_mail
-from vectordb import  vectordb
+from vectordb import vectordb
 from django.utils import timezone
 import random
 import requests
@@ -72,9 +72,12 @@ def update_crypto_rate(coin: str):
             except KeyError:
                 pass
 
+
 @shared_task
 def periodically_delete_unused_key():
-    APIKEY.objects.filter(created_at__lte=datetime.now()-timedelta(days=KEY_TTL), credit=0.0, monero_credit=0.0).delete()
+    APIKEY.objects.filter(created_at__lte=datetime.now(
+    )-timedelta(days=KEY_TTL), credit=0.0, monero_credit=0.0).delete()
+
 
 @shared_task()
 def periodically_monitor_EC2_instance() -> str:
@@ -167,7 +170,7 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
 
 @shared_task
 def Inference(unique: str,
-              is_session_start_node: bool|None,
+              is_session_start_node: bool | None,
               mode: str,
               type_: str,
               key: str,
@@ -253,43 +256,34 @@ def Inference(unique: str,
             update_server_status_in_db(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
-                if not stream:
-                    response = send_request(
-                        stream=False, url=url, instance_id=instance_id, context=context)
-                    response = response_mode(
-                        response=response, mode=mode, prompt=processed_prompt)
+                response = send_request(
+                    stream=True, url=url, instance_id=instance_id, context=context)
+                if not isinstance(response, str):
+                    previous_output = str()
+                    full_response = str()
+                    for chunk in response.iter_lines(chunk_size=8192,
+                                                     decode_unicode=False,
+                                                     delimiter=b"\0"):
+                        if chunk:
+                            data = json.loads(chunk.decode("utf-8"))
+                            output = data["text"][0]
+                            output = response_mode(
+                                response=output, mode=mode, prompt=processed_prompt)
+                            re = output.replace(previous_output, "")
+                            full_response += re
+                            previous_output = output
+                            async_to_sync(channel_layer.group_send)(
+                                room_group_name,
+                                {
+                                    "type": "chat_message",
+                                    "role": model,
+                                    "message": re,
+                                    'credit': credit,
+                                    'unique': unique
+                                }
+                            )
                     log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                        response=response, type_=type_)
-                else:
-                    response = send_request(
-                        stream=True, url=url, instance_id=instance_id, context=context)
-
-                    if not isinstance(response, str):
-                        previous_output = str()
-                        full_response = str()
-                        for chunk in response.iter_lines(chunk_size=8192,
-                                                         decode_unicode=False,
-                                                         delimiter=b"\0"):
-                            if chunk:
-                                data = json.loads(chunk.decode("utf-8"))
-                                output = data["text"][0]
-                                output = response_mode(
-                                    response=output, mode=mode, prompt=processed_prompt)
-                                re = output.replace(previous_output, "")
-                                full_response += re
-                                previous_output = output
-                                async_to_sync(channel_layer.group_send)(
-                                    room_group_name,
-                                    {
-                                        "type": "chat_message",
-                                        "role": model,
-                                        "message": re,
-                                        'credit': credit,
-                                        'unique': unique
-                                    }
-                                )
-                        log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                                  response=full_response, type_=type_)
+                                        response=full_response, type_=type_)
 
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=region, action="on")
@@ -302,8 +296,7 @@ def Inference(unique: str,
                 response = "Unknown Server state, wait 5 seconds"
         else:
             response = "Model is currently offline"
-
-        if type_ == "chatroom" and isinstance(response, str):
+        if  isinstance(response, str):
             async_to_sync(channel_layer.group_send)(
                 room_group_name,
                 {
@@ -313,10 +306,7 @@ def Inference(unique: str,
                     'credit': credit,
                     'unique': unique
                 }
-            )            
-        elif type_ == "prompt" or type_ == "prompt_room":
-            log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                      response=response, type_="prompt")
+            )
     else:
         client = OpenAI(api_key=config("GPT_KEY"))
         clean_response = ""
@@ -335,12 +325,12 @@ def Inference(unique: str,
                                                   temperature=temperature,
                                                   presence_penalty=presence_penalty)
         log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                  response=clean_response, type_="open_ai")
+                            response=clean_response, type_="open_ai")
 
 
 @shared_task
 def Agent_Inference(key: str,
-                    is_session_start_node: bool|None,
+                    is_session_start_node: bool | None,
                     current_turn_inner: int,
                     stream: bool,
                     model: str,
@@ -413,8 +403,8 @@ def Agent_Inference(key: str,
                                                    max_tokens=max_tokens,
                                                    temperature=temperature,
                                                    presence_penalty=presence_penalty)
-        log_prompt_response(is_session_start_node=is_session_start_node,key_object=key_object, model=model_type, prompt=message,
-                                  response=clean_response, type_="open_ai")
+        log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model_type, prompt=message,
+                            response=clean_response, type_="open_ai")
     else:
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(

@@ -4,8 +4,7 @@ import $ from 'jquery'
 import React, { useEffect, useRef, useState } from "react"
 import Container from '@mui/material/Container';
 import ResponsiveAppBar from './component/navbar';
-
-
+import Footer from './component/footer';
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import * as pdfMake from 'pdfmake/build/pdfmake.min';
 import JSZip from 'jszip';
@@ -72,6 +71,7 @@ function Log() {
                     </Paper>
                 </Box>
             </Container >
+            <Footer />
         </Container>
     );
 }

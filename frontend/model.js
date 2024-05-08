@@ -11,6 +11,7 @@ import Alert from '@mui/material/Alert';
 import Container from '@mui/material/Container';
 import ResponsiveAppBar from './component/navbar';
 import { Stack } from '@mui/material';
+import Footer from './component/footer';
 function ModelInfor() {
     const [server_objects, setMessage] = useState([]);
     const [model_objects, setMessage_model] = useState([]);
@@ -127,6 +128,7 @@ function ModelInfor() {
                     </Grid>
                 </Box>
             </Container >
+            <Footer />
         </Container>
     );
 }

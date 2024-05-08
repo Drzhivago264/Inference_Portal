@@ -17,6 +17,7 @@ import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import ResponsiveAppBar from './component/navbar';
 import LoadingButton from '@mui/lab/LoadingButton';
+import Footer from './component/footer';
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
     padding: theme.spacing(4),
@@ -240,6 +241,7 @@ function Contact() {
                     </StyledPaper>
                 </Box>
             </Container >
+            <Footer />
         </Container>
     );
 }

@@ -11,8 +11,7 @@ import { ChatParameter } from './component/chatroom_parameters';
 import { ChatBox } from './component/chatbox';
 import { chatsocket } from './component/chatsocket';
 import { ChatExport } from './component/chat_export';
-import { Divider } from '@mui/material';
-
+import Footer from './component/footer';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 660,
     height: 700,
@@ -182,6 +181,7 @@ function Chat() {
                     </Grid>
                 </Box>
             </Container>
+            <Footer />
         </Container>
     );
 }

@@ -18,7 +18,7 @@ import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import { Highlight, themes } from 'prism-react-renderer';
 import { useParams } from 'react-router';
 import Prism from "prismjs";
-
+import Footer from './component/footer';
 function Manual() {
     useEffect(() => {
         Prism.highlightAll();
@@ -106,6 +106,7 @@ function Manual() {
                     </Grid>
                 </Box>
             </Container>
+            <Footer />
         </Container>
     );
 }

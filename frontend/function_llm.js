@@ -16,7 +16,7 @@ import { OpenAPIParameter } from './component/chatroom_parameters'
 import { ChatBox } from './component/chatbox';
 import { chatsocket } from './component/chatsocket';
 import { ChatExport } from './component/chat_export';
-
+import Footer from './component/footer';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -223,6 +223,7 @@ function FunctionLLM() {
                     </Grid>
                 </Box>
             </Container>
+            <Footer />
         </Container >
     );
 }

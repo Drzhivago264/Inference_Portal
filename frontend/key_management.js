@@ -34,6 +34,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import { saveAs } from "file-saver";
 import { RandomReveal } from 'react-random-reveal'
 import SvgIcon from '@mui/material/SvgIcon';
+import Footer from './component/footer';
 import {
     createTheme,
     responsiveFontSizes,
@@ -659,6 +660,7 @@ function KeyManagement() {
                     </StyledPaper>
                 </Box>
             </Container >
+            <Footer />
         </Container >
     );
 }
