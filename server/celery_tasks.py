@@ -258,6 +258,8 @@ def Inference(unique: str,
                         stream=False, url=url, instance_id=instance_id, context=context)
                     response = response_mode(
                         response=response, mode=mode, prompt=processed_prompt)
+                    log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+                                        response=response, type_=type_)
                 else:
                     response = send_request(
                         stream=True, url=url, instance_id=instance_id, context=context)
@@ -311,10 +313,7 @@ def Inference(unique: str,
                     'credit': credit,
                     'unique': unique
                 }
-            )
-            log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                        response=response, type_=type_)
-            
+            )            
         elif type_ == "prompt" or type_ == "prompt_room":
             log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
                                       response=response, type_="prompt")

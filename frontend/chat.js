@@ -73,7 +73,7 @@ function Chat() {
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/');
         chatsocket(websocket, setChatMessage, setThinking, document)
     }, []);
-    
+
     useEffect(() => {
         websocket.current.close()
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/');
@@ -113,10 +113,10 @@ function Chat() {
         }
     }
     return (
-        <Container maxWidth={false} disableGutters>
+        <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Chat</title>
             <ResponsiveAppBar />
-            <Container maxWidth="lg" sx={{ width: 1200 }}>
+            <Container maxWidth="lg" sx={{ minWidth: 1200 }}>
                 <Box m={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={8}>
