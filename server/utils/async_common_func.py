@@ -331,6 +331,8 @@ async def async_inference(
                         stream=False, url=url, instance_id=instance_id, context=context)
                     response = await response_mode_async(
                         response=response, mode=mode, prompt=processed_prompt)
+                    await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+                                        response=response, type_=type_)
                 else:
                     response = await send_stream_request_async(self, url=url, context=context, unique=unique, credit=credit, 
                                                         processed_prompt=processed_prompt, key_object=key_object, model=model, prompt=prompt,is_session_start_node=is_session_start_node)
@@ -349,8 +351,7 @@ async def async_inference(
             response = "Model is currently offline"
         if type_ == "chatroom" and isinstance(response, str):
             await self.send(text_data=json.dumps({"message": response, "stream_id":  unique, "credit": credit}))
-            await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                            response=response, type_=type_)
+  
         elif type_ == "prompt" or type_ == "prompt_room":
             await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
                                             response=response, type_="prompt")
