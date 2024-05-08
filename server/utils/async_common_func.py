@@ -151,7 +151,7 @@ async def send_request_async(url, context):
         return response
 
 
-async def send_stream_request_async(url: str, context: object, processed_prompt: str, request: object, data: object):
+async def send_stream_request_async(self, url: str, context: object, processed_prompt: str, unique, credit, key_object: object, model, prompt, is_session_start_node):
     client = httpx.AsyncClient()
     full_response = ""
     try:
@@ -161,11 +161,11 @@ async def send_stream_request_async(url: str, context: object, processed_prompt:
                     chunk = chunk[:-1]
                     c = json.loads(chunk)
                     output = c['text'][0].replace(processed_prompt, "")
-                    yield str({"response": c, "delta": output.replace(full_response, "")}) + "\n"
+                    await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  unique, "credit": credit}))
                     full_response = output
                 except:
                     pass
-        await log_prompt_response_async(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chatroom")
+            return full_response
     except httpx.ReadTimeout:
         raise httpx.ReadTimeout
 
@@ -190,7 +190,7 @@ async def response_mode_async(mode: str, response: str, prompt: str) -> str:
         response_ = response.replace(prompt, "")
         return response_
     elif mode == "generate":
-        return response
+        return prompt + response
 
 
 async def send_agent_request_openai_async(
@@ -332,26 +332,10 @@ async def async_inference(
                     response = await response_mode_async(
                         response=response, mode=mode, prompt=processed_prompt)
                 else:
-                    response = await send_request_async(
-                        stream=True, url=url, instance_id=instance_id, context=context)
-
-                    if not isinstance(response, str):
-                        previous_output = str()
-                        full_response = str()
-                        for chunk in response.iter_lines(chunk_size=8192,
-                                                         decode_unicode=False,
-                                                         delimiter=b"\0"):
-                            if chunk:
-                                data = json.loads(chunk.decode("utf-8"))
-                                output = data["text"][0]
-                                output = await response_mode_async(
-                                    response=output, mode=mode, prompt=processed_prompt)
-                                re = output.replace(previous_output, "")
-                                full_response += re
-                                previous_output = output
-                                await self.send(text_data=json.dumps({"message": re, "stream_id":  unique, "credit": credit}))
-                        await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                                        response=full_response, type_=type_)
+                    response = await send_stream_request_async(self, url=url, context=context, unique=unique, credit=credit, 
+                                                        processed_prompt=processed_prompt, key_object=key_object, model=model, prompt=prompt,is_session_start_node=is_session_start_node)
+                    await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+                                            response=response, type_=type_)
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
                 response = "Server is starting up, try again in 400 seconds"
