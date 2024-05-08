@@ -70,7 +70,7 @@ function Agent() {
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-
+    const [socket_destination, setSocketDestination] = useState("/ws/engineer/");
     const [default_editor_structure, setEditor] = useState(null);
     const [currentparagraph, setCurrentParagraph] = useState(1);
     const [template_list, setTemplateList] = useState([]);
@@ -175,7 +175,7 @@ function Agent() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + + url[url.length - 1] + '/');
         agentsocket(
             websocket,
             setChatMessage,
@@ -186,9 +186,28 @@ function Agent() {
             setDefaultChildTemplateList,
             setEditor,
             setCurrentParagraph,
-            editorref)
+            editorref
+        )
 
     }, []);
+
+    useEffect(() => {
+        websocket.current.close()
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/');
+        agentsocket(
+            websocket,
+            setChatMessage,
+            setThinking,
+            document,
+            setParentInstruct,
+            setChildInstruct,
+            setDefaultChildTemplateList,
+            setEditor,
+            setCurrentParagraph,
+            editorref
+        )
+    }, [socket_destination]);
+
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
             submitChat()
@@ -364,7 +383,7 @@ function Agent() {
                                     chat_message={chat_message}
                                     choosen_export_format_chatlog={choosen_export_format_chatlog}
                                     setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
-                                    number_of_remove_message = {2}
+                                    number_of_remove_message={2}
                                     setChatMessage={setChatMessage}
                                 >
                                 </ChatExport>
@@ -445,6 +464,21 @@ function Agent() {
                                     </Select>
                                 </FormControl>
 
+                                <Divider></Divider>
+                                <FormControl defaultValue="">
+                                    <InputLabel id="model-label">Backends</InputLabel>
+                                    <Select
+                                        labelId="socket-label"
+                                        id="socket-select"
+                                        onChange={e => setSocketDestination(e.target.value)}
+                                        value={socket_destination}
+                                        label="Backends"
+                                        size="small"
+                                    >
+                                        <MenuItem key={"/ws/engineer/"} value={"/ws/engineer/"}>Celery Backend</MenuItem>
+                                        <MenuItem key={"/ws/engineer-async/"} value={"/ws/engineer-async/"}>Async Backend</MenuItem>
+                                    </Select>
+                                </FormControl>
                                 <Divider></Divider>
                                 <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
                                 <OpenAPIParameter

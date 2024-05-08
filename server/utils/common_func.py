@@ -259,27 +259,7 @@ def send_chat_request_openai(stream: bool,
                         temperature: float, 
                         top_p: float, 
                         presence_penalty: float) -> str:
-    """_summary_
 
-    Args:
-        stream (bool): True to use stream chat esle False
-        session_history (list): _description_
-        model_type (str): _description_
-        model (str): _description_
-        unique (str): _description_
-        credit (float): _description_
-        room_group_name (str): _description_
-        client (object): _description_
-        clean_response (str): _description_
-        max_tokens (int): _description_
-        frequency_penalty (float): _description_
-        temperature (float): _description_
-        top_p (float): _description_
-        presence_penalty (float): _description_
-
-    Returns:
-        str: _description_
-    """
     try:
         channel_layer = get_channel_layer()
         raw_response = client.chat.completions.create(model=model_type,

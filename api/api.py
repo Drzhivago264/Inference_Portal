@@ -79,7 +79,6 @@ async def textcompletion(request, data: PromptSchema):
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
             available_server_list = await get_model_url(data.model)
-            print(available_server_list)
             if not available_server_list:
                 raise HttpError(442, "Server is currently offline")
             else:
