@@ -48,7 +48,7 @@ function Chat() {
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
-
+    const [socket_destination, setSocketDestination] = useState("/ws/chat/");
     useEffect(() => {
         axios.all([
             axios.get('/frontend-api/model'),
@@ -70,9 +70,15 @@ function Chat() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/');
         chatsocket(websocket, setChatMessage, setThinking, document)
     }, []);
+    
+    useEffect(() => {
+        websocket.current.close()
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/');
+        chatsocket(websocket, setChatMessage, setThinking, document)
+    }, [socket_destination]);
 
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
@@ -141,6 +147,9 @@ function Chat() {
                             </Box>
                  
                                 <ChatParameter
+                                    socket_destination={socket_destination}
+                                    setSocketDestination={setSocketDestination}
+                                    
                                     model_objects={model_objects}
                                     agent_objects={agent_objects}
                                     choosen_model={choosen_model}

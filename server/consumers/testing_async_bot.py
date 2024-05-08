@@ -9,6 +9,7 @@ from server.celery_tasks import Inference
 from server.utils import constant
 from server.pydantic_validator import ChatSchema
 from pydantic import ValidationError
+from server.utils.async_common_func import async_inference
 
 
 class Consumer(AsyncWebsocketConsumer):
@@ -74,14 +75,12 @@ class Consumer(AsyncWebsocketConsumer):
                                            }
                 )
                 await self.channel_layer.group_send(
-                    self.room_group_name, {'unique':  unique_response_id,
-                                           'is_session_start_node': self.is_session_start_node,
+                    self.room_group_name, {"type": "chat_message",
+                                           "message": message,
+                                           "role": choosen_models,
+                                           'unique':  unique_response_id,
                                            'mode': mode,
                                            'type_': "chatroom",
-                                           'stream': True,
-                                           'key': self.key_object.hashed_key,
-                                           'credit': self.key_object.credit,
-                                           'room_group_name': self.room_group_name,
                                            'model': choosen_models,
                                            'top_k': top_k,
                                            'top_p': top_p,
@@ -104,10 +103,11 @@ class Consumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event["message"]
         role = event["role"]
-        credit = event["credit"]
+  
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
+            credit = event["credit"]
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
             if role == "Human":
                 self.is_session_start_node = False
@@ -116,4 +116,25 @@ class Consumer(AsyncWebsocketConsumer):
 
         else:
             unique_response_id = event['unique']
-            await self.send(text_data=json.dumps({"message": message, "stream_id":  unique_response_id, "credit": credit}))
+            await async_inference(
+                self,
+                unique=unique_response_id,
+                is_session_start_node=self.is_session_start_node,
+                mode=event['mode'],
+                type_="chatroom",
+                stream=True,
+                key_object=self.key_object,
+                model=event['model'],
+                top_k=event['top_k'],
+                top_p=event['top_p'],
+                best_of=event['best_of'],
+                temperature=event['temperature'],
+                max_tokens=event['max_tokens'],
+                presence_penalty=event['presence_penalty'],
+                frequency_penalty=event['frequency_penalty'],
+                length_penalty=event['length_penalty'],
+                early_stopping=event['early_stopping'],
+                beam=event['beam'],
+                prompt=event['message'],
+                include_memory=event['include_memory']
+            )

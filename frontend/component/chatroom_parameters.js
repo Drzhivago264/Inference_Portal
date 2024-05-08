@@ -102,6 +102,8 @@ export const OpenAPIParameter = ({
 }
 
 export const ChatParameter = ({
+    setSocketDestination,
+    socket_destination,
     setUseMemory,
     choosen_model,
     setChoosenModel,
@@ -131,13 +133,14 @@ export const ChatParameter = ({
     return (
         <FormControl defaultValue="">
             <Stack direction='column' spacing={1}>
-                <InputLabel id="demo-simple-select-label">Models</InputLabel>
+                <InputLabel id="model-label">Models</InputLabel>
                 <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
+                    labelId="model-label"
+                    id="model-select"
                     onChange={e => setChoosenModel(e.target.value)}
                     value={choosen_model}
                     label="Models"
+                    size="small"
                 >
                     {model_objects.map((model_object_) => {
                         return (
@@ -150,6 +153,21 @@ export const ChatParameter = ({
                         )
                     })}
                 </Select>
+                <Divider></Divider>
+                <FormControl defaultValue="">
+                    <InputLabel id="model-label">Backends</InputLabel>
+                    <Select
+                        labelId="socket-label"
+                        id="socket-select"
+                        onChange={e => setSocketDestination(e.target.value)}
+                        value={socket_destination}
+                        label="Backends"
+                        size="small"
+                    >
+                        <MenuItem key={"/ws/chat/"} value={"/ws/chat/"}>Celery Backend</MenuItem>
+                        <MenuItem key={"/ws/chat-async/"} value={"/ws/chat-async/"}>Async Backend</MenuItem>
+                    </Select>
+                </FormControl>
                 <Divider></Divider>
                 <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
                 <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
