@@ -25,7 +25,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import Divider from '@mui/material/Divider';
 import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
 import { check_login, logout } from './component/check_login';
-
+import Footer from './component/footer';
 function Hub() {
 
     function getCookie(name) {
@@ -202,6 +202,7 @@ function Hub() {
                     </Grid>
                 </Box>
             </Container>
+            <Footer />
         </Container>
     );
 }

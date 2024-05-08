@@ -21,6 +21,7 @@ import Typography from '@mui/material/Typography';
 import { TypeAnimation } from 'react-type-animation';
 import introduction_ from '../docs/PageContent/introduction.md'
 import { Highlight, themes } from 'prism-react-renderer';
+import Footer from './component/footer';
 function Information() {
     useEffect(() => {
         Prism.highlightAll();
@@ -189,6 +190,7 @@ function Information() {
                     </Grid>
                 </Grid>
             </Container >
+            <Footer />
         </Container >
     );
 }

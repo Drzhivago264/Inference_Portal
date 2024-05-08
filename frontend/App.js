@@ -1,7 +1,5 @@
 import * as React from 'react';
 import { lazy, Suspense } from "react";
-import Container from '@mui/material/Container';
-import Footer from './component/footer.js';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
@@ -74,9 +72,7 @@ export default function App() {
             <Route path="/frontend/contact" element={<ContactPage />} />
           </Routes>
         </Router>
-        <Container maxWidth={false} disableGutters>
-          <Footer />
-        </Container>
+  
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

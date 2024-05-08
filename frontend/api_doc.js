@@ -4,7 +4,7 @@ import ResponsiveAppBar from './component/navbar';
 import Container from '@mui/material/Container';
 import SwaggerUI from "swagger-ui-react"
 import "swagger-ui-react/swagger-ui.css"
-
+import Footer from './component/footer';
 function APIDoc() {
     const ui = SwaggerUI({
         dom_id: '#swaggerContainer',
@@ -22,6 +22,7 @@ function APIDoc() {
                     </Box>
                 </Box>
             </Container>
+            <Footer/>
         </Container>
     );
 }

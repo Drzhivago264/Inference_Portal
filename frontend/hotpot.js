@@ -19,7 +19,7 @@ import ResponsiveAppBar from './component/navbar';
 import { ChatBoxHotpot } from './component/chatbox';
 import { HotpotParameter } from './component/chatroom_parameters'
 import { chatsocket, agentsocket } from './component/chatsocket';
-
+import Footer from './component/footer';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -343,6 +343,7 @@ function Hotpot() {
                     </Grid>
                 </Box>
             </Container>
+            <Footer />
         </Container>
     );
 }

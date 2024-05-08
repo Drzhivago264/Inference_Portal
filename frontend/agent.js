@@ -40,7 +40,7 @@ import { ChatBox } from './component/chatbox';
 import { agentsocket } from './component/chatsocket';
 import './component/css/editor-js.css';
 import { ChatExport } from './component/chat_export';
-
+import Footer from './component/footer';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -499,12 +499,11 @@ function Agent() {
 
                                 </OpenAPIParameter>
                             </Stack>
-
-
                         </Grid>
                     </Grid>
                 </Box>
             </Container>
+            <Footer/>
         </Container>
     );
 }

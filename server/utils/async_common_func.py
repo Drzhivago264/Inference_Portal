@@ -18,6 +18,7 @@ from .common_func import inference_mode, action_parse_json
 from server.celery_tasks import command_EC2
 import regex as re
 
+
 async def get_model(model: str) -> QuerySet[LLM] | bool:
     try:
         return await LLM.objects.aget(name=model)
@@ -151,7 +152,7 @@ async def send_request_async(url, context):
         return response
 
 
-async def send_stream_request_async(self, url: str, context: object, processed_prompt: str, unique, credit, key_object: object, model, prompt, is_session_start_node):
+async def send_stream_request_async(self: object, url: str, context: object, processed_prompt: str, unique: str, credit: float):
     client = httpx.AsyncClient()
     full_response = ""
     try:
@@ -297,7 +298,6 @@ async def async_inference(
     credit = key_object.credit
     llm = await LLM.objects.aget(name=model)
     url_list = await get_model_url_async(llm)
-
     processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
         model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
 
@@ -326,18 +326,10 @@ async def async_inference(
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
-                if not stream:
-                    response = await send_request_async(
-                        stream=False, url=url, instance_id=instance_id, context=context)
-                    response = await response_mode_async(
-                        response=response, mode=mode, prompt=processed_prompt)
-                    await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                        response=response, type_=type_)
-                else:
-                    response = await send_stream_request_async(self, url=url, context=context, unique=unique, credit=credit, 
-                                                        processed_prompt=processed_prompt, key_object=key_object, model=model, prompt=prompt,is_session_start_node=is_session_start_node)
-                    await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                            response=response, type_=type_)
+                response_stream = await send_stream_request_async(self, url=url, context=context, unique=unique, credit=credit,
+                                                           processed_prompt=processed_prompt)
+                await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+                                                response=response_stream, type_=type_)
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
                 response = "Server is starting up, try again in 400 seconds"
@@ -349,16 +341,11 @@ async def async_inference(
                 response = "Unknown Server state, wait 5 seconds"
         else:
             response = "Model is currently offline"
-        if type_ == "chatroom" and isinstance(response, str):
+        if isinstance(response, str):
             await self.send(text_data=json.dumps({"message": response, "stream_id":  unique, "credit": credit}))
-  
-        elif type_ == "prompt" or type_ == "prompt_room":
-            await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                            response=response, type_="prompt")
     else:
         clean_response = ""
         clean_response = await send_chat_request_openai_async(self=self,
-
                                                               session_history=processed_prompt,
                                                               model=model,
                                                               model_type=model,
@@ -375,24 +362,23 @@ async def async_inference(
         await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
                                         response=clean_response, type_="open_ai")
 
-
 async def async_agent_inference(self,
-                          key_object: object,
-                          is_session_start_node: bool | None,
-                          current_turn_inner: int,
-                          stream: bool,
-                          model: str,
-                          unique: str,
-                          agent_instruction: str,
-                          message: str,
-                          session_history: list,
-                          model_type: str,
-                          max_turns: int,
-                          temperature: float,
-                          max_tokens: int,
-                          top_p: float,
-                          frequency_penalty: float,
-                          presence_penalty: float) -> None:
+                                key_object: object,
+                                is_session_start_node: bool | None,
+                                current_turn_inner: int,
+                                stream: bool,
+                                model: str,
+                                unique: str,
+                                agent_instruction: str,
+                                message: str,
+                                session_history: list,
+                                model_type: str,
+                                max_turns: int,
+                                temperature: float,
+                                max_tokens: int,
+                                top_p: float,
+                                frequency_penalty: float,
+                                presence_penalty: float) -> None:
     credit = key_object.credit
     clean_response = ""
     if current_turn_inner >= 0 and current_turn_inner <= (max_turns-1):
