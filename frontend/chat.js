@@ -144,11 +144,9 @@ function Chat() {
                             >
                             </ChatExport>
                             </Box>
-                 
                                 <ChatParameter
                                     socket_destination={socket_destination}
                                     setSocketDestination={setSocketDestination}
-                                    
                                     model_objects={model_objects}
                                     agent_objects={agent_objects}
                                     choosen_model={choosen_model}

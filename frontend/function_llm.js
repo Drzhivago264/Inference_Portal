@@ -143,12 +143,12 @@ function FunctionLLM() {
                                     { 'label': 'Restyle', 'value': 'restyle' }].map((func) => {
                                         if (func.value == 'paraphase' || 'setiment') {
                                             return (
-                                                <FormControlLabel value={func.value} control={<Radio />} label={func.label} />
+                                                <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
                                             )
                                         }
                                         else if (func.value == 'summary') {
                                             return (
-                                                <FormControlLabel value={func.value} control={<Radio />} label={func.label} />
+                                                <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
                                             )
                                         }
                                         else {

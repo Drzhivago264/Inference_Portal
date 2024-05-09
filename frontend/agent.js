@@ -345,7 +345,7 @@ function Agent() {
                             }>
                                 {default_child_template_list.map((instruct) => {
                                     return (
-                                        <ListItem disablePadding>
+                                        <ListItem key={instruct.name} disablePadding>
                                             <ListItemButton  >
                                                 <ListItemText onClick={() => swap_child_instruction(instruct.name)} primary={instruct.name} />
                                             </ListItemButton>
