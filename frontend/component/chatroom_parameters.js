@@ -309,10 +309,26 @@ export const HotpotParameter = ({
     model_objects,
     agent_objects,
     earlystopping,
-    setEarlyStopping
+    setEarlyStopping,
+    socket_destination,
+    setSocketDestination
 }) => {
     return (
         <Stack direction='column' spacing={1}>
+            <FormControl defaultValue="">
+                <InputLabel id="model-label">Backends</InputLabel>
+                <Select
+                    labelId="socket-label"
+                    id="socket-select"
+                    onChange={e => setSocketDestination(e.target.value)}
+                    value={socket_destination}
+                    label="Backends"
+                    size="small"
+                >
+                    <MenuItem key={"none_async"} value={"none_async"}>Celery Backend</MenuItem>
+                    <MenuItem key={"async"} value={"async"}>Async Backend</MenuItem>
+                </Select>
+            </FormControl>
             <FormControl  >
                 <InputLabel id="model-label">Chat Models</InputLabel>
                 <Select

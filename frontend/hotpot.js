@@ -19,7 +19,11 @@ import ResponsiveAppBar from './component/navbar';
 import { ChatBoxHotpot } from './component/chatbox';
 import { HotpotParameter } from './component/chatroom_parameters'
 import { chatsocket, agentsocket } from './component/chatsocket';
+import { FormControl, FormLabel } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
 import Footer from './component/footer';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -70,6 +74,7 @@ function Hotpot() {
     const [default_child_instruct, setChildInstruct] = useState("");
     const [duplicatemessage, setDuplicateMessage] = useState(true);
 
+    const [socket_destination, setSocketDestination] = useState("none_async");
 
 
     useEffect(() => {
@@ -128,6 +133,35 @@ function Hotpot() {
             null,
             null)
     }, []);
+    useEffect(() => {
+        agent_websocket.current.close()
+        chat_websocket.current.close()
+        if (socket_destination == 'async') {
+            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer-async/' + url[url.length - 1] + '/');
+            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat-async/' + url[url.length - 1] + '/');
+        }
+        else {
+            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/');
+            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/');
+        }
+        chatsocket(
+            chat_websocket,
+            setChatMessage,
+            setThinkingChat,
+            document)
+        agentsocket(
+            agent_websocket,
+            setAgentMessage,
+            setThinkingAgent,
+            document,
+            setParentInstruct,
+            setChildInstruct,
+            setDefaultChildTemplateList,
+            null,
+            null,
+            null)
+
+    }, [socket_destination]);
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
             if (duplicatemessage) {
@@ -222,7 +256,7 @@ function Hotpot() {
                             }>
                                 {default_child_template_list.map((instruct) => {
                                     return (
-                                        <ListItem disablePadding>
+                                        <ListItem key={instruct.name} disablePadding>
                                             <ListItemButton  >
                                                 <ListItemText onClick={() => swap_child_instruction(instruct.name)} primary={instruct.name} />
                                             </ListItemButton>
@@ -304,7 +338,10 @@ function Hotpot() {
 
                         </Grid>
                         <Grid item xs={2}>
+
                             <HotpotParameter
+                                socket_destination={socket_destination}
+                                setSocketDestination={setSocketDestination}
                                 template_list={template_list}
                                 choosen_template={choosen_template}
                                 setChoosenTemplate={setChoosenTemplate}

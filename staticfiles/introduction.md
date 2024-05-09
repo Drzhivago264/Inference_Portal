@@ -10,7 +10,7 @@ This website is trying to sell you the access to several finetuned/base language
 - Journalists/Marketers/Communicators who want to make argurments like their audiences
 - Reasonable people who need to reason like the unreasonable
 
-Unlike mainstream language models trained by other businesses, our models are bended either by finetuning or prompt-engineering until they sound like specific groups of people. Compared to other businesses that want their models to be unbiased, helpful, logical and reasonable, we want our models to sound like a normal human with all of their emotions, biases, preferences, hatred, fears, and so on.
+Unlike mainstream language models trained by other businesses, our models are bent either by finetuning or prompt-engineering until they sound like specific groups of people. Compared to other businesses that want their models to be unbiased, helpful, logical and reasonable, we want our models to sound like a normal human with all of their emotions, biases, preferences, hatred, fears, and so on.
 
 &nbsp;
 
