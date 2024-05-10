@@ -18,12 +18,9 @@ from server.utils import constant
 from server.pydantic_validator import ToolSchema
 from pydantic import ValidationError
 import pytz
+from asgiref.sync import sync_to_async
 from django.utils import timezone
 class Consumer(AsyncWebsocketConsumer):
-
-    @database_sync_to_async
-    def get_api_key(self):
-        return self.user.apikey
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
@@ -32,7 +29,7 @@ class Consumer(AsyncWebsocketConsumer):
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
         self.user = self.scope['user']
-        self.key_object = await self.get_api_key()
+        self.key_object = await sync_to_async(lambda: self.user.apikey)()
 
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)

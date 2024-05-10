@@ -84,7 +84,7 @@ async def log_prompt_response_async(key_object: object, model: str, prompt: str,
     if llm.agent_availability:
         try:
             tokeniser = tiktoken.encoding_for_model(model)
-        except:
+        except KeyError:
             tokeniser = tiktoken.encoding_for_model("gpt-4")
         number_input_token = len(tokeniser.encode(prompt))
         number_output_token = len(tokeniser.encode(response))

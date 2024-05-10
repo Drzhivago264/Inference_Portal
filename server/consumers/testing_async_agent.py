@@ -6,7 +6,7 @@ from server.models import APIKEY, InstructionTree
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server.celery_tasks import Agent_Inference
-
+from asgiref.sync import sync_to_async
 from server.utils import constant
 from server.pydantic_validator import (
     AgentSchemaInstruct,
@@ -22,10 +22,6 @@ import pytz
 from django.utils import timezone
 
 class Consumer(AsyncWebsocketConsumer):
-
-    @database_sync_to_async
-    def get_api_key(self):
-        return self.user.apikey
 
     async def get_template(self, name):
         try:
@@ -57,18 +53,18 @@ class Consumer(AsyncWebsocketConsumer):
         self.working_paragraph = str()
         self.is_session_start_node = True
         self.user = self.scope['user']
-        self.key_object = await self.get_api_key()
+        self.key_object =  await sync_to_async(lambda: self.user.apikey)()
         self.model_type = ""
         self.room_group_name = "agent_%s" % self.url
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        await self.send(text_data=json.dumps({"message": "Default to GPT4 or choose model on the left", "role": "Server", "time": self.time}))
+        await self.send(text_data=json.dumps({"message": "You are currently using async backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
         await self.send(text_data=json.dumps({"message": "Instruction to the user:\n\
                                               1. Click on the paragraph that you want to work on, then give the agent instructions to write \n\
                                               2. If you face any bug, refresh and retry.\n\
                                               3. Shift-Enter to drop line in chatbox.\n\
-                                              4. You can export all paragraphs by clicking on [Export] on the right.",
+                                              4. You can export all paragraphs by clicking on [Export] on the left.",
                                               "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
