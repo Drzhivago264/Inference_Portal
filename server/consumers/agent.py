@@ -17,7 +17,8 @@ from server.pydantic_validator import (
 import regex as re
 from pydantic import ValidationError
 
-
+import pytz
+from django.utils import timezone
 
 class Consumer(AsyncWebsocketConsumer):
 
@@ -47,7 +48,8 @@ class Consumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
-        self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.timezone = self.scope["url_route"]["kwargs"]["tz"]
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.max_turns = constant.DEFAULT_AGENT_TURN
         self.current_turn = 0
         self.session_history = []
@@ -181,8 +183,8 @@ class Consumer(AsyncWebsocketConsumer):
         if "message" in event:
             message = event["message"]
             role = event["role"]
-            credit = event["credit"]
-            self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            credit = event["credit"]        
+            self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
             # Send message to WebSocket
             if role == "Human" or role == "Server":
                 await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))

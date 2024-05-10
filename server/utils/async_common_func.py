@@ -155,7 +155,7 @@ async def send_stream_request_async(self: object, url: str, context: object, pro
                     pass
             return full_response
     except httpx.ReadTimeout:
-        raise httpx.ReadTimeout
+        return httpx.ReadTimeout
 
 
 async def query_response_log(key_object: str,  order: str, quantity: int, type_: list) -> object:
@@ -270,7 +270,10 @@ async def async_inference(self) -> None:
             if server_status == "running":
                 response_stream = await send_stream_request_async(self, url=url, context=context, 
                                                            processed_prompt=processed_prompt)
-                await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+                if response_stream == httpx.ReadTimeout:
+                    await self.send(text_data=json.dumps({"message": "Model timeout! try again later.", "stream_id":  self.unique_response_id, "credit": credit}))
+                else:    
+                    await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
                                                 response=response_stream, type_="chatroom")
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
