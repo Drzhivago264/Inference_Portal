@@ -46,54 +46,35 @@ class Consumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
             elif self.key_object and validated.message.strip():
 
-                mode = validated.mode
-                message = validated.message
-                top_p = validated.top_p
-                best_of = validated.best_of
-                top_k = validated.top_k
-                if top_k <= 0:
-                    top_k = -1
-                max_tokens = validated.max_tokens
-                frequency_penalty = validated.frequency_penalty
-                presence_penalty = validated.presence_penalty
-                temperature = validated.temperature
-                beam = validated.beam
-                early_stopping = validated.early_stopping
-                length_penalty = validated.length_penalty
-                choosen_models = validated.choosen_models
-                include_memory = validated.include_memory
-                role = validated.role
-                unique_response_id = str(uuid.uuid4())
+                self.mode = validated.mode
+                self.message = validated.message
+                self.top_p = validated.top_p
+                self.best_of = validated.best_of
+                self.top_k = validated.top_k
+                if self.top_k <= 0:
+                    self.top_k = -1
+                self.max_tokens = validated.max_tokens
+                self.frequency_penalty = validated.frequency_penalty
+                self.presence_penalty = validated.presence_penalty
+                self.temperature = validated.temperature
+                self.beam = validated.beam
+                self.early_stopping = validated.early_stopping
+                self.length_penalty = validated.length_penalty
+                self.choosen_models = validated.choosen_models
+                self.include_memory = validated.include_memory
+                self.role = validated.role
+                self.unique_response_id = str(uuid.uuid4())
                 # Send message to room group
                 await self.channel_layer.group_send(
                     self.room_group_name, {"type": "chat_message",
-                                           "role": role,
-                                           "message": message,
-                                           "credit": self.key_object.credit,
-                                           "unique": unique_response_id,
-                                           "choosen_model": choosen_models
+                                           "role": self.role,
+                                           "message": self.message,
                                            }
                 )
                 await self.channel_layer.group_send(
                     self.room_group_name, {"type": "chat_message",
-                                           "message": message,
-                                           "role": choosen_models,
-                                           'unique':  unique_response_id,
-                                           'mode': mode,
-                                           'type_': "chatroom",
-                                           'model': choosen_models,
-                                           'top_k': top_k,
-                                           'top_p': top_p,
-                                           'best_of': best_of,
-                                           'temperature': temperature,
-                                           'max_tokens': max_tokens,
-                                           'presence_penalty': presence_penalty,
-                                           'frequency_penalty': frequency_penalty,
-                                           'length_penalty': length_penalty,
-                                           'early_stopping': early_stopping,
-                                           'beam': beam,
-                                           'prompt': message,
-                                           'include_memory': include_memory
+                                           "message": self.message,
+                                           "role": self.choosen_models,
                                            }
                 )
         except ValidationError as e:
@@ -103,38 +84,14 @@ class Consumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event["message"]
         role = event["role"]
-  
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
-            credit = event["credit"]
+            credit = self.key_object.credit
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
             if role == "Human":
                 self.is_session_start_node = False
-                unique_response_id = event['unique']
-                await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
-
+                unique_response_id = self.unique_response_id
+                await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": self.choosen_models, "time": self.time, "credit": credit}))
         else:
-            unique_response_id = event['unique']
-            await async_inference(
-                self,
-                unique=unique_response_id,
-                is_session_start_node=self.is_session_start_node,
-                mode=event['mode'],
-                type_="chatroom",
-                stream=True,
-                key_object=self.key_object,
-                model=event['model'],
-                top_k=event['top_k'],
-                top_p=event['top_p'],
-                best_of=event['best_of'],
-                temperature=event['temperature'],
-                max_tokens=event['max_tokens'],
-                presence_penalty=event['presence_penalty'],
-                frequency_penalty=event['frequency_penalty'],
-                length_penalty=event['length_penalty'],
-                early_stopping=event['early_stopping'],
-                beam=event['beam'],
-                prompt=event['message'],
-                include_memory=event['include_memory']
-            )
+            await async_inference(self)
