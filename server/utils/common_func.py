@@ -83,7 +83,19 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
             else:
                 return prompt_
     elif mode == "generate":
-        return prompt
+        if not agent_availability:
+            return prompt
+        else:
+            prompt_ = {"role": "user", "content": f"Complete the following text, keep the original text in the answer: {prompt}"}
+            if include_memory:
+                chat_history = get_chat_context(model=model,
+                                                key_object=key_object,
+                                                raw_prompt=prompt,
+                                                agent_availability=agent_availability)
+                chat_history.append(prompt_)
+                return chat_history
+            else:
+                return prompt_
 
 
 def response_mode(mode: str, response: str, prompt: str) -> str:

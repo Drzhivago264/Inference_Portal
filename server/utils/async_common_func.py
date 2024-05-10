@@ -1,5 +1,5 @@
 from server.utils import constant
-from server.models import InferenceServer, LLM, PromptResponse, APIKEY, MemoryTree
+from server.models import InferenceServer, LLM, PromptResponse, MemoryTree
 from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async
 from decouple import config
@@ -171,15 +171,6 @@ async def query_response_log(key_object: str,  order: str, quantity: int, type_:
             "model": await sync_to_async(lambda: l.model.name)()
         })
     return response
-
-
-async def response_mode_async(mode: str, response: str, prompt: str) -> str:
-    if mode == "chat":
-        response_ = response.replace(prompt, "")
-        return response_
-    elif mode == "generate":
-        return prompt + response
-
 
 async def send_agent_request_openai_async(self) -> str:
     clean_response = ""
