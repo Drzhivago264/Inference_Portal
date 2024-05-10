@@ -280,20 +280,23 @@ async def async_inference(self) -> None:
                 response_stream = await send_stream_request_async(self, url=url, context=context, 
                                                            processed_prompt=processed_prompt)
                 await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
-                                                response=response_stream, type_=self.type_)
+                                                response=response_stream, type_="chatroom")
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
                 response = "Server is starting up, try again in 400 seconds"
                 await update_server_status_in_db_async(
                     instance_id=instance_id, update_type="status")
+                await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
             elif server_status == "pending":
                 response = "Server is setting up, try again in 30 seconds"
+                await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
             else:
                 response = "Unknown Server state, wait 5 seconds"
+                await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
         else:
             response = "Model is currently offline"
-        if isinstance(response, str):
             await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
+            
     else: 
         clean_response = await send_chat_request_openai_async(self, processed_prompt)
         await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
