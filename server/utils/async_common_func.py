@@ -26,47 +26,34 @@ async def get_model(model: str) -> QuerySet[LLM] | bool:
         return False
 
 
-async def send_chat_request_openai_async(
-        self: object,
-        stream: bool,
-        session_history: list,
-        model_type: str,
-        model: str,
-        unique: str,
-        credit: float,
-        clean_response: str,
-        max_tokens: int,
-        frequency_penalty: float,
-        temperature: float,
-        top_p: float,
-        presence_penalty: float) -> str:
-
+async def send_chat_request_openai_async(self, processed_prompt) -> str:
+    clean_response = ""
     try:
         client = AsyncOpenAI(api_key=config("GPT_KEY"))
-        raw_response = await client.chat.completions.create(model=model_type,
-                                                            messages=session_history,
-                                                            stream=stream,
-                                                            max_tokens=max_tokens,
-                                                            temperature=temperature,
-                                                            top_p=top_p,
-                                                            frequency_penalty=frequency_penalty,
-                                                            presence_penalty=presence_penalty
+        raw_response = await client.chat.completions.create(model=self.choosen_models,
+                                                            messages=processed_prompt,
+                                                            stream=True,
+                                                            max_tokens=self.max_tokens,
+                                                            temperature=self.temperature,
+                                                            top_p=self.top_p,
+                                                            frequency_penalty=self.frequency_penalty,
+                                                            presence_penalty=self.presence_penalty
                                                             )
         async for chunk in raw_response:
             if chunk:
                 data = chunk.choices[0].delta.content
                 if data != None:
                     clean_response += data
-                    await self.send(text_data=json.dumps({"message": data, "role": model, "stream_id":  unique, "credit": credit}))
+                    await self.send(text_data=json.dumps({"message": data, "role":self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return clean_response
     except openai.APIConnectionError as e:
-        await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": model, "stream_id":  unique, "credit": credit}))
+        await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return e
     except openai.RateLimitError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": model, "stream_id":  unique, "credit": credit}))
+        await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return e
     except openai.APIError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": model, "stream_id":  unique, "credit": credit}))
+        await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role":self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return e
 
 
@@ -152,7 +139,7 @@ async def send_request_async(url, context):
         return response
 
 
-async def send_stream_request_async(self: object, url: str, context: object, processed_prompt: str, unique: str, credit: float):
+async def send_stream_request_async(self: object, url: str, context: object, processed_prompt: str):
     client = httpx.AsyncClient()
     full_response = ""
     try:
@@ -162,7 +149,7 @@ async def send_stream_request_async(self: object, url: str, context: object, pro
                     chunk = chunk[:-1]
                     c = json.loads(chunk)
                     output = c['text'][0].replace(processed_prompt, "")
-                    await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  unique, "credit": credit}))
+                    await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
                     full_response = output
                 except:
                     pass
@@ -194,34 +181,20 @@ async def response_mode_async(mode: str, response: str, prompt: str) -> str:
         return prompt + response
 
 
-async def send_agent_request_openai_async(
-        self: object,
-        stream: bool,
-        session_history: list,
-        model_type: str,
-        current_turn_inner: int,
-        model: str,
-        unique: str,
-        credit: float,
-        clean_response: str,
-        max_tokens: int,
-        frequency_penalty: float,
-        temperature: float,
-        top_p: float,
-        presence_penalty: float) -> str:
-
+async def send_agent_request_openai_async(self) -> str:
+    clean_response = ""
     try:
         client = AsyncOpenAI(api_key=config("GPT_KEY"))
-        raw_response = await client.chat.completions.create(model=model_type,
-                                                            messages=session_history,
-                                                            stream=stream,
-                                                            max_tokens=max_tokens,
-                                                            temperature=temperature,
-                                                            top_p=top_p,
-                                                            frequency_penalty=frequency_penalty,
-                                                            presence_penalty=presence_penalty
+        raw_response = await client.chat.completions.create(model=self.model_type,
+                                                            messages=self.session_history,
+                                                            stream=True,
+                                                            max_tokens=self.max_tokens,
+                                                            temperature=self.temperature,
+                                                            top_p=self.top_p,
+                                                            frequency_penalty=self.frequency_penalty,
+                                                            presence_penalty=self.presence_penalty
                                                             )
-        current_turn_inner += 1
+        self.current_turn_inner += 1
         async for chunk in raw_response:
             if chunk:
                 data = chunk.choices[0].delta.content
@@ -230,13 +203,12 @@ async def send_agent_request_openai_async(
                     response_json = [
                         {'role': 'assistant', 'content': f'{clean_response}'}
                     ]
-                    session_history.pop()
-                    session_history.extend(response_json)
-                    self.session_history = session_history
-                    self.current_turn = current_turn_inner
-                    await self.send(text_data=json.dumps({"message": data,  "stream_id":  unique, "credit": credit}))
+                    self.session_history.pop()
+                    self.session_history.extend(response_json)
+                    self.current_turn = self.current_turn_inner
+                    await self.send(text_data=json.dumps({"message": data,  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
-        action_list = action_parse_json(session_history[-1]['content'])
+        action_list = action_parse_json(self.session_history[-1]['content'])
         if action_list:
             for act in action_list:
                 action = json.loads(act)['Action']
@@ -254,68 +226,47 @@ async def send_agent_request_openai_async(
                     self.current_turn = 0
         return clean_response
     except openai.APIConnectionError as e:
-        await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": model, "stream_id":  unique, "credit": credit}))
+        await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": self.model_type, "stream_id": self.unique_response_id, "credit": self.key_object.credit}))
         return e
     except openai.RateLimitError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": model, "stream_id":  unique, "credit": credit}))
+        await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": self.model_type, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return e
     except openai.APIError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": model, "stream_id":  unique, "credit": credit}))
+        await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.model_type, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return e
 
 
-async def async_inference(
-        self: object,
-        unique: str,
-        is_session_start_node: bool | None,
-        mode: str,
-        type_: str,
-        key_object: object,
-        model: str,
-        stream: bool,
-        top_k: int,
-        top_p: float,
-        best_of: int,
-        temperature: float,
-        max_tokens: int,
-        presence_penalty: float,
-        frequency_penalty: float,
-        length_penalty: float,
-        early_stopping: bool,
-        beam: bool,
-        prompt: str,
-        include_memory: bool) -> None:
-
-    if not beam:
-        length_penalty = 1
-        early_stopping = False
-        best_of = int(1)
+async def async_inference(self) -> None:
+    if not self.beam:
+        self.length_penalty = 1
+        self.early_stopping = False
+        self.best_of = int(1)
     else:
-        best_of = int(best_of)
-        if best_of == 1:
-            best_of += 1
-        length_penalty = float(length_penalty)
-    credit = key_object.credit
-    llm = await LLM.objects.aget(name=model)
+        self.best_of = int(self.best_of)
+        if self.best_of == 1:
+            self.best_of += 1
+        self.length_penalty = float(self.length_penalty)
+    credit = self.key_object.credit
+    llm = await LLM.objects.aget(name=self.choosen_models)
     url_list = await get_model_url_async(llm)
     processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
-        model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
+        model=self.choosen_models, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
 
     if not llm.agent_availability:
         context = {
             "prompt": processed_prompt,
             "n": 1,
-            'best_of': best_of,
-            'presence_penalty': float(presence_penalty),
-            "use_beam_search": beam,
-            "temperature": float(temperature),
-            "max_tokens": int(max_tokens),
-            "stream": stream,
-            "top_k": int(top_k),
-            "top_p": float(top_p),
-            "length_penalty": float(length_penalty),
-            "frequency_penalty": float(frequency_penalty),
-            "early_stopping": early_stopping,
+            'best_of': self.best_of,
+            'presence_penalty': float(self.presence_penalty),
+            "use_beam_search": self.beam,
+            "temperature": float(self.temperature),
+            "max_tokens": int(self.max_tokens),
+            "stream": True,
+            "top_k": int(self.top_k),
+            "top_p": float(self.top_p),
+            "length_penalty": float(self.length_penalty),
+            "frequency_penalty": float(self.frequency_penalty),
+            "early_stopping": self.early_stopping,
         }
         ''' Query a list of inference servers for a given model, pick a random one '''
         if url_list:
@@ -326,10 +277,10 @@ async def async_inference(
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
-                response_stream = await send_stream_request_async(self, url=url, context=context, unique=unique, credit=credit,
+                response_stream = await send_stream_request_async(self, url=url, context=context, 
                                                            processed_prompt=processed_prompt)
-                await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
-                                                response=response_stream, type_=type_)
+                await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+                                                response=response_stream, type_=self.type_)
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
                 response = "Server is starting up, try again in 400 seconds"
@@ -342,77 +293,32 @@ async def async_inference(
         else:
             response = "Model is currently offline"
         if isinstance(response, str):
-            await self.send(text_data=json.dumps({"message": response, "stream_id":  unique, "credit": credit}))
-    else:
-        clean_response = ""
-        clean_response = await send_chat_request_openai_async(self=self,
-                                                              session_history=processed_prompt,
-                                                              model=model,
-                                                              model_type=model,
-                                                              credit=credit,
-                                                              unique=unique,
-                                                              stream=stream,
-                                                              clean_response=clean_response,
-                                                              frequency_penalty=frequency_penalty,
-                                                              top_p=top_p,
-                                                              max_tokens=max_tokens,
-                                                              temperature=temperature,
-                                                              presence_penalty=presence_penalty
-                                                              )
-        await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model, prompt=prompt,
+            await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
+    else: 
+        clean_response = await send_chat_request_openai_async(self, processed_prompt)
+        await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
                                         response=clean_response, type_="open_ai")
 
-async def async_agent_inference(self,
-                                key_object: object,
-                                is_session_start_node: bool | None,
-                                current_turn_inner: int,
-                                stream: bool,
-                                model: str,
-                                unique: str,
-                                agent_instruction: str,
-                                message: str,
-                                session_history: list,
-                                model_type: str,
-                                max_turns: int,
-                                temperature: float,
-                                max_tokens: int,
-                                top_p: float,
-                                frequency_penalty: float,
-                                presence_penalty: float) -> None:
-    credit = key_object.credit
-    clean_response = ""
-    if current_turn_inner >= 0 and current_turn_inner <= (max_turns-1):
-        if current_turn_inner == 0:
+async def async_agent_inference(self) -> None:
+    if self.current_turn_inner >= 0 and self.current_turn_inner <= (self.max_turns-1):
+        if self.current_turn_inner == 0:
             prompt = [
-                {'role': 'system', 'content': f"{agent_instruction}"}, {
-                    'role': 'user', 'content': f'{message}'}
+                {'role': 'system', 'content': f"{self.agent_instruction}"}, {
+                    'role': 'user', 'content': f'{self.message}'}
             ]
-        elif current_turn_inner > 0 and current_turn_inner < (max_turns-1):
+        elif self.current_turn_inner > 0 and self.current_turn_inner < (self.max_turns-1):
             prompt = [
-                {'role': 'system', 'content': f'Response:{message}\n'}
+                {'role': 'system', 'content': f'Response:{self.message}\n'}
             ]
 
-        elif current_turn_inner == (max_turns-1):
+        elif self.current_turn_inner == (self.max_turns-1):
             force_stop = "You should directly give results based on history information."
             prompt = [
                 {'role': 'system', 'content': f'Response:{force_stop}\n'}
             ]
-        session_history.extend(prompt)
-        clean_response = await send_agent_request_openai_async(self,
-                                                               session_history=session_history,
-                                                               model=model,
-                                                               model_type=model_type,
-                                                               credit=credit,
-                                                               unique=unique,
-                                                               current_turn_inner=current_turn_inner,
-                                                               stream=stream,
-                                                               clean_response=clean_response,
-                                                               frequency_penalty=frequency_penalty,
-                                                               top_p=top_p,
-                                                               max_tokens=max_tokens,
-                                                               temperature=temperature,
-                                                               presence_penalty=presence_penalty)
-        await log_prompt_response_async(is_session_start_node=is_session_start_node, key_object=key_object, model=model_type, prompt=message,
+        self.session_history.extend(prompt)
+        clean_response = await send_agent_request_openai_async(self)
+        await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message,
                                         response=clean_response, type_="open_ai")
     else:
         await self.send(text_data=json.dumps({"message": f"Max Turns reached, click on the paragraphs on the left to write again", "role": "Server", "time": self.time}))

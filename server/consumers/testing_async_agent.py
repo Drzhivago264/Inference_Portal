@@ -72,7 +72,6 @@ class Consumer(AsyncWebsocketConsumer):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     # Receive message from WebSocket
-
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         if 'paragraph' in text_data_json:
@@ -115,52 +114,37 @@ class Consumer(AsyncWebsocketConsumer):
         elif 'message' in text_data_json:
             try:
                 validated = AgentSchemaMessage.model_validate_json(text_data)
-
                 if not self.key_object:
                     await self.send(text_data=json.dumps({"message": "Cannot find your key, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
                     await self.disconnect(self)
                 elif not text_data_json["message"].strip():
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
                 elif self.key_object and text_data_json["message"].strip():
-                    agent_instruction = validated.agent_instruction
-                    child_instruction = validated.child_instruction
-                    current_turn_inner = self.current_turn
-                    currentParagraph = validated.currentParagraph
-                    self.working_paragraph = currentParagraph
-                    message = validated.message
+                    self.agent_instruction = validated.agent_instruction
+                    self.child_instruction = validated.child_instruction
+                    self.current_turn_inner = self.current_turn
+                    self.working_paragraph = validated.currentParagraph
+                    self.message = validated.message
                     self.model_type = validated.choosen_models
-                    choosen_template = validated.choosen_template
-                    role = validated.role
-                    unique_response_id = str(uuid.uuid4())
-                    top_p = validated.top_p
-                    max_tokens = validated.max_tokens
-                    frequency_penalty = validated.frequency_penalty
-                    presence_penalty = validated.presence_penalty
-                    temperature = validated.temperature
-                    agent_instruction += child_instruction
+                    self.choosen_template = validated.choosen_template
+                    self.role = validated.role
+                    self.unique_response_id = str(uuid.uuid4())
+                    self.top_p = validated.top_p
+                    self.max_tokens = validated.max_tokens
+                    self.frequency_penalty = validated.frequency_penalty
+                    self.presence_penalty = validated.presence_penalty
+                    self.temperature = validated.temperature
+                    self.agent_instruction += self.child_instruction
                     await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message",
-                                               "role": role,
-                                               "message": message,
-                                               "credit": self.key_object.credit,
-                                               "unique": unique_response_id,
-                                               "choosen_model":  choosen_template,
-                                               "current_turn": current_turn_inner
+                                               "role": self.role,
+                                               "message": self.message,
                                                }
                     )
                     await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message",
-                                               'unique': unique_response_id,
-                                               'message': message,
-                                               'model': choosen_template,
+                                               'message': self.message,
                                                'role': self.model_type,
-                                               'current_turn_inner': current_turn_inner,
-                                               'agent_instruction': agent_instruction,
-                                               'frequency_penalty': frequency_penalty,
-                                               'top_p': top_p,
-                                               'max_tokens': max_tokens,
-                                               'temperature': temperature,
-                                               'presence_penalty': presence_penalty,
                                                }
                     )
             except ValidationError as e:
@@ -174,30 +158,12 @@ class Consumer(AsyncWebsocketConsumer):
         self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
-            credit = event["credit"]
+            credit = self.key_object.credit
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
             if role == "Human":
                 self.is_session_start_node = False
-                unique_response_id = event['unique']
-                await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
+                unique_response_id = self.unique_response_id
+                await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": self.choosen_template, "time": self.time, "credit": credit}))
         else:
-            await async_agent_inference(
-                self,
-                is_session_start_node=self.is_session_start_node,
-                unique=event['unique'],
-                key_object=self.key_object,
-                stream=True,
-                message=message,
-                model=event['model'],
-                max_turns=self.max_turns,
-                current_turn_inner=event['current_turn_inner'],
-                agent_instruction=event['agent_instruction'],
-                session_history=self.session_history,
-                model_type=self.model_type,
-                frequency_penalty=event['frequency_penalty'],
-                top_p=event['top_p'],
-                max_tokens=event['max_tokens'],
-                temperature=event['temperature'],
-                presence_penalty=event['presence_penalty'],
-            )
+            await async_agent_inference(self)
        

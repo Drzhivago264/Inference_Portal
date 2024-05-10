@@ -167,7 +167,6 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
             return e
         return
 
-
 @shared_task
 def Inference(unique: str,
               is_session_start_node: bool | None,
