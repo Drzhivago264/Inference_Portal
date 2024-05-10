@@ -48,6 +48,7 @@ function Chat() {
     const [usermessageError, setUserMessageError] = useState(false);
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const [socket_destination, setSocketDestination] = useState("/ws/chat/");
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     useEffect(() => {
         axios.all([
             axios.get('/frontend-api/model'),
@@ -69,13 +70,13 @@ function Chat() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         chatsocket(websocket, setChatMessage, setThinking, document)
     }, []);
 
     useEffect(() => {
         websocket.current.close()
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         chatsocket(websocket, setChatMessage, setThinking, document)
     }, [socket_destination]);
 

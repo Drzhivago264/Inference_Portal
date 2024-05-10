@@ -75,7 +75,7 @@ function Hotpot() {
     const [duplicatemessage, setDuplicateMessage] = useState(true);
 
     const [socket_destination, setSocketDestination] = useState("none_async");
-
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     useEffect(() => {
         axios.all([
@@ -113,8 +113,8 @@ function Hotpot() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/');
-        chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/');
+        agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/' + timeZone + '/');
+        chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/' + timeZone + '/');
 
         chatsocket(
             chat_websocket,
@@ -137,12 +137,12 @@ function Hotpot() {
         agent_websocket.current.close()
         chat_websocket.current.close()
         if (socket_destination == 'async') {
-            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer-async/' + url[url.length - 1] + '/');
-            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat-async/' + url[url.length - 1] + '/');
+            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer-async/' + url[url.length - 1] + '/' + timeZone + '/');
+            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat-async/' + url[url.length - 1] + '/' + timeZone + '/');
         }
         else {
-            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/');
-            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/');
+            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/' + timeZone + '/');
+            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/' + timeZone + '/');
         }
         chatsocket(
             chat_websocket,

@@ -79,6 +79,7 @@ function Agent() {
     const [default_child_instruct, setChildInstruct] = useState("");
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     useEffect(() => {
         if (!ref.current) {
@@ -175,7 +176,7 @@ function Agent() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + + url[url.length - 1] + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + + url[url.length - 1] + '/' + timeZone + '/');
         agentsocket(
             websocket,
             setChatMessage,
@@ -193,7 +194,7 @@ function Agent() {
 
     useEffect(() => {
         websocket.current.close()
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         agentsocket(
             websocket,
             setChatMessage,

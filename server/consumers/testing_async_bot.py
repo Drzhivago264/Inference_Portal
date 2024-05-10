@@ -10,7 +10,8 @@ from server.utils import constant
 from server.pydantic_validator import ChatSchema
 from pydantic import ValidationError
 from server.utils.async_common_func import async_inference
-
+import pytz
+from django.utils import timezone
 
 class Consumer(AsyncWebsocketConsumer):
 
@@ -20,7 +21,8 @@ class Consumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
-        self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.timezone = self.scope["url_route"]["kwargs"]["tz"]
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
         self.user = self.scope['user']
@@ -84,7 +86,7 @@ class Consumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event["message"]
         role = event["role"]
-        self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
             credit = self.key_object.credit

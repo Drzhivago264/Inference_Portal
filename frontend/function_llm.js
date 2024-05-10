@@ -47,7 +47,7 @@ function FunctionLLM() {
     const [extrainstruction, setExtraInstruction] = useState("sadness, joy, love, anger, fear, surprise, neutral");
     const [llmfunction, setLLMFunction] = useState("emotion");
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
-
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     useEffect(() => {
         axios.all([
@@ -71,7 +71,7 @@ function FunctionLLM() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
         chatsocket(websocket, setChatMessage, setThinking, document )
     }, []);
 

@@ -18,6 +18,8 @@ import regex as re
 from pydantic import ValidationError
 from server.utils.async_common_func import async_agent_inference
 
+import pytz
+from django.utils import timezone
 
 class Consumer(AsyncWebsocketConsumer):
 
@@ -47,7 +49,8 @@ class Consumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
-        self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.timezone = self.scope["url_route"]["kwargs"]["tz"]
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.max_turns = constant.DEFAULT_AGENT_TURN
         self.current_turn = 0
         self.session_history = []
@@ -155,7 +158,7 @@ class Consumer(AsyncWebsocketConsumer):
         message = event["message"]
         role = event["role"]
 
-        self.time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
             credit = self.key_object.credit
