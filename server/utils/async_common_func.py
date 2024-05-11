@@ -1,20 +1,16 @@
 from server.utils import constant
-from server.models import InferenceServer, LLM, PromptResponse, MemoryTree
+from server.models import InferenceServer, LLM, PromptResponse
 from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async
 from decouple import config
 import json
 import httpx
-from vectordb import vectordb
 from django.utils import timezone
 from .constant import REGION
 import random
-import tiktoken
-from transformers import AutoTokenizer
 from openai import AsyncOpenAI
 import openai
-from vectordb import vectordb
-from .common_func import inference_mode, action_parse_json
+from .common_func import inference_mode, action_parse_json, log_prompt_response
 from server.celery_tasks import command_EC2
 import regex as re
 
@@ -77,58 +73,6 @@ async def update_server_status_in_db_async(instance_id: str, update_type: str) -
         ser_obj.last_message_time = timezone.now()
         await ser_obj.asave()
     return
-
-
-async def log_prompt_response_async(key_object: object, model: str, prompt: str, response: str, type_: str, is_session_start_node: bool) -> None:
-    llm = await LLM.objects.aget(name=model)
-    if llm.agent_availability:
-        try:
-            tokeniser = tiktoken.encoding_for_model(model)
-        except KeyError:
-            tokeniser = tiktoken.encoding_for_model("gpt-4")
-        number_input_token = len(tokeniser.encode(prompt))
-        number_output_token = len(tokeniser.encode(response))
-        input_cost = number_input_token*llm.input_price
-        output_cost = number_output_token*llm.output_price
-    else:
-        tokeniser = constant.TOKENIZER_TABLE[model]
-        number_input_token = len(AutoTokenizer.from_pretrained(
-            tokeniser)(prompt)['input_ids'])
-        number_output_token = len(AutoTokenizer.from_pretrained(
-            tokeniser)(response)['input_ids'])
-        input_cost = number_input_token*llm.input_price
-        output_cost = number_output_token*llm.output_price
-
-    pair_save = PromptResponse(
-        prompt=prompt,
-        response=response,
-        key=key_object,
-        model=llm,
-        p_type=type_,
-        number_input_tokens=number_input_token,
-        number_output_tokens=number_output_token,
-        input_cost=input_cost,
-        output_cost=output_cost
-    )
-    await pair_save.asave()
-    try:
-        if is_session_start_node is not None:
-            memory_tree_node_number = await MemoryTree.objects.filter(key=key_object).acount()
-            if memory_tree_node_number == 0:
-                await MemoryTree.objects.acreate(name=key_object.hashed_key, key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
-            elif memory_tree_node_number > 0 and is_session_start_node:
-                most_similar_vector = vectordb.filter(
-                    metadata__key=key_object.hashed_key, metadata__model=model).search(prompt, k=1)
-                most_similar_prompt = most_similar_vector[0].content_object.prompt
-                most_similar_response = most_similar_vector[0].content_object.response
-                most_similar_node = MemoryTree.objects.filter(
-                    key=key_object, prompt=most_similar_prompt, response=most_similar_response).earliest('created_at')
-                await MemoryTree.objects.acreate(name=f"{prompt} -- session_start_at {timezone.now()}", parent=most_similar_node, key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
-            elif memory_tree_node_number > 0 and not is_session_start_node:
-                parent_node = await MemoryTree.objects.filter(key=key_object, is_session_start_node=True).alatest('created_at')
-                await MemoryTree.objects.acreate(name=f"{prompt} -- child_node_added_at {timezone.now()}", parent=parent_node, key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)
-    except Exception as e:
-        print(e)
 
 
 async def send_request_async(url, context):
@@ -273,7 +217,7 @@ async def async_inference(self) -> None:
                 if response_stream == httpx.ReadTimeout:
                     await self.send(text_data=json.dumps({"message": "Model timeout! try again later.", "stream_id":  self.unique_response_id, "credit": credit}))
                 else:    
-                    await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+                    await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
                                                 response=response_stream, type_="chatroom")
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
@@ -293,7 +237,7 @@ async def async_inference(self) -> None:
             
     else: 
         clean_response = await send_chat_request_openai_async(self, processed_prompt)
-        await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
                                         response=clean_response, type_="open_ai")
 
 async def async_agent_inference(self) -> None:
@@ -315,7 +259,7 @@ async def async_agent_inference(self) -> None:
             ]
         self.session_history.extend(prompt)
         clean_response = await send_agent_request_openai_async(self)
-        await log_prompt_response_async(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message,
+        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message,
                                         response=clean_response, type_="open_ai")
     else:
         await self.send(text_data=json.dumps({"message": f"Max Turns reached, click on the paragraphs on the left to write again", "role": "Server", "time": self.time}))

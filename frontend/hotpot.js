@@ -113,53 +113,64 @@ function Hotpot() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/' + timeZone + '/');
-        chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/' + timeZone + '/');
-
-        chatsocket(
-            chat_websocket,
-            setChatMessage,
-            setThinkingChat,
-            document)
-        agentsocket(
-            agent_websocket,
-            setAgentMessage,
-            setThinkingAgent,
-            document,
-            setParentInstruct,
-            setChildInstruct,
-            setDefaultChildTemplateList,
-            null,
-            null,
-            null)
+        Promise.all([
+            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/' + timeZone + '/'),
+            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/' + timeZone + '/')
+        ])
+        Promise.all([
+            chatsocket(
+                chat_websocket,
+                setChatMessage,
+                setThinkingChat,
+                document),
+            agentsocket(
+                agent_websocket,
+                setAgentMessage,
+                setThinkingAgent,
+                document,
+                setParentInstruct,
+                setChildInstruct,
+                setDefaultChildTemplateList,
+                null,
+                null,
+                null)
+        ])
     }, []);
     useEffect(() => {
-        agent_websocket.current.close()
-        chat_websocket.current.close()
+        Promise.all([
+            agent_websocket.current.close(),
+            chat_websocket.current.close()
+        ])
         if (socket_destination == 'async') {
-            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer-async/' + url[url.length - 1] + '/' + timeZone + '/');
-            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat-async/' + url[url.length - 1] + '/' + timeZone + '/');
+            Promise.all([
+                agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer-async/' + url[url.length - 1] + '/' + timeZone + '/'),
+                chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat-async/' + url[url.length - 1] + '/' + timeZone + '/')
+            ])
         }
         else {
-            agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/' + timeZone + '/');
-            chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/' + timeZone + '/');
+            Promise.all([
+                agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/' + timeZone + '/'),
+                chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/' + timeZone + '/')
+            ])
         }
-        chatsocket(
-            chat_websocket,
-            setChatMessage,
-            setThinkingChat,
-            document)
-        agentsocket(
-            agent_websocket,
-            setAgentMessage,
-            setThinkingAgent,
-            document,
-            setParentInstruct,
-            setChildInstruct,
-            setDefaultChildTemplateList,
-            null,
-            null,
-            null)
+        Promise.all([
+            chatsocket(
+                chat_websocket,
+                setChatMessage,
+                setThinkingChat,
+                document),
+            agentsocket(
+                agent_websocket,
+                setAgentMessage,
+                setThinkingAgent,
+                document,
+                setParentInstruct,
+                setChildInstruct,
+                setDefaultChildTemplateList,
+                null,
+                null,
+                null)
+        ])
 
     }, [socket_destination]);
     const handleEnter = (e) => {

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Article, LLM, InferenceServer, Product, InstructionTree
+from .models import Article, LLM, InferenceServer, Product, InstructionTree, MemoryTree
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -13,6 +13,15 @@ class InstructionTreeSerializer(serializers.ModelSerializer):
         model = InstructionTree
         fields = ('instruct', "name", "code", "default_editor_template")
 
+class MemoryTreeSerializer(serializers.ModelSerializer):
+    is_leaf_node = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MemoryTree
+        fields = ('prompt', 'response', 'p_type', 'created_at', 'parent','is_leaf_node')
+
+    def get_is_leaf_node(self, instance):
+        return instance.is_leaf_node() if instance else False
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:

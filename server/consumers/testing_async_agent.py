@@ -150,19 +150,18 @@ class Consumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
 
     async def chat_message(self, event):
-
         message = event["message"]
         role = event["role"]
-
         self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
             credit = self.key_object.credit
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
             if role == "Human":
-                self.is_session_start_node = False
+            
                 unique_response_id = self.unique_response_id
                 await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": self.choosen_template, "time": self.time, "credit": credit}))
         else:
             await async_agent_inference(self)
+            self.is_session_start_node = False
        
