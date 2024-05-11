@@ -86,7 +86,8 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
         if not agent_availability:
             return prompt
         else:
-            prompt_ = {"role": "user", "content": f"Complete the following text, keep the original text in the answer: {prompt}"}
+            prompt_ = {
+                "role": "user", "content": f"Complete the following text, keep the original text in the answer: {prompt}"}
             if include_memory:
                 chat_history = get_chat_context(model=model,
                                                 key_object=key_object,
@@ -139,38 +140,47 @@ def log_prompt_response(is_session_start_node: bool | None, key_object: object, 
         output_cost = number_output_token*llm.output_price
     else:
         tokeniser = constant.TOKENIZER_TABLE[model]
-        number_input_token = len(AutoTokenizer.from_pretrained(tokeniser)(prompt)['input_ids'])
-        number_output_token = len(AutoTokenizer.from_pretrained(tokeniser)(response)['input_ids'])
+        number_input_token = len(AutoTokenizer.from_pretrained(
+            tokeniser)(prompt)['input_ids'])
+        number_output_token = len(AutoTokenizer.from_pretrained(
+            tokeniser)(response)['input_ids'])
         input_cost = number_input_token*llm.input_price
         output_cost = number_output_token*llm.output_price
 
     pair_save = PromptResponse(
-        prompt=prompt, 
-        response=response, 
-        key=key_object, 
-        model=llm, 
-        p_type=type_, 
+        prompt=prompt,
+        response=response,
+        key=key_object,
+        model=llm,
+        p_type=type_,
         number_input_tokens=number_input_token,
         number_output_tokens=number_output_token,
         input_cost=input_cost,
         output_cost=output_cost
-        )
+    )
     pair_save.save()
-    print(is_session_start_node)
     if is_session_start_node is not None:
-        memory_tree_node_number = MemoryTree.objects.filter(key=key_object).count()
+        memory_tree_node_number = MemoryTree.objects.filter(
+            key=key_object).count()
         if memory_tree_node_number == 0:
-            MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt, response=response.lstrip(), model=llm, p_type=type_, is_session_start_node=True)
-        elif memory_tree_node_number > 0 and is_session_start_node:
-            most_similar_vector = vectordb.filter(metadata__key=key_object.hashed_key, metadata__model=model).search(prompt, k=1)
-            most_similar_prompt = most_similar_vector[0].content_object.prompt
-            most_similar_response = most_similar_vector[0].content_object.response
-            most_similar_node = MemoryTree.objects.filter(key=key_object, prompt=most_similar_prompt, response=most_similar_response.lstrip()).order_by("-created_at")[0]
+            MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt,
+                                      response=response, model=llm, p_type=type_, is_session_start_node=True)
 
-            MemoryTree.objects.create(name=f"{prompt} -- session_start_at {timezone.now()}", parent=most_similar_node, key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
+        elif memory_tree_node_number > 0 and is_session_start_node:
+            most_similar_vector = vectordb.filter(
+                metadata__key=key_object.hashed_key).search(prompt+response, k=2)
+            most_similar_prompt = most_similar_vector[1].content_object.prompt
+            most_similar_response = most_similar_vector[1].content_object.response
+            most_similar_node = MemoryTree.objects.filter(
+                key=key_object, prompt=most_similar_prompt, response=most_similar_response).order_by("-created_at")[0]
+            MemoryTree.objects.create(name=f"{prompt} -- session_start_at {timezone.now()}", parent=most_similar_node,
+                                      key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
+
         elif memory_tree_node_number > 0 and not is_session_start_node:
-            parent_node = MemoryTree.objects.filter(key=key_object, is_session_start_node=True).latest('created_at')
-            MemoryTree.objects.create(name=f"{prompt} -- child_node_added_at {timezone.now()}", parent=parent_node, key=key_object, prompt=prompt, response=response.lstrip(), model=llm, p_type=type_, is_session_start_node=False)
+            parent_node = MemoryTree.objects.filter(
+                key=key_object, is_session_start_node=True).latest('created_at')
+            MemoryTree.objects.create(name=f"{prompt} -- child_node_added_at {timezone.now()}", parent=parent_node,
+                                      key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)
 
 
 def get_model_url(model: object) -> list | bool:
@@ -194,7 +204,7 @@ def get_model_url(model: object) -> list | bool:
         return False
 
 
-def update_server_status_in_db(instance_id: str, update_type:str) -> None:
+def update_server_status_in_db(instance_id: str, update_type: str) -> None:
     """_summary_
 
     Args:
@@ -242,6 +252,7 @@ def send_request(stream: bool, url: str, instance_id: str, context) -> str:
         response = "Server is setting up, wait."
     return response
 
+
 def action_parse_json(context: str) -> list | bool:
     """_summary_
 
@@ -259,32 +270,32 @@ def action_parse_json(context: str) -> list | bool:
         return action_match
 
 
-def send_chat_request_openai(stream: bool, 
-                        session_history: list, 
-                        model_type: str, 
-                        model: str, 
-                        unique: str, 
-                        credit: float, 
-                        room_group_name: str, 
-                        client: object, 
-                        clean_response: str, 
-                        max_tokens: int, 
-                        frequency_penalty: float, 
-                        temperature: float, 
-                        top_p: float, 
-                        presence_penalty: float) -> str:
+def send_chat_request_openai(stream: bool,
+                             session_history: list,
+                             model_type: str,
+                             model: str,
+                             unique: str,
+                             credit: float,
+                             room_group_name: str,
+                             client: object,
+                             clean_response: str,
+                             max_tokens: int,
+                             frequency_penalty: float,
+                             temperature: float,
+                             top_p: float,
+                             presence_penalty: float) -> str:
 
     try:
         channel_layer = get_channel_layer()
         raw_response = client.chat.completions.create(model=model_type,
-                                                        messages=session_history,
-                                                        stream=stream,
-                                                        max_tokens=max_tokens,
-                                                        temperature=temperature,
-                                                        top_p=top_p,
-                                                        frequency_penalty=frequency_penalty,
-                                                        presence_penalty=presence_penalty
-                                                        )
+                                                      messages=session_history,
+                                                      stream=stream,
+                                                      max_tokens=max_tokens,
+                                                      temperature=temperature,
+                                                      top_p=top_p,
+                                                      frequency_penalty=frequency_penalty,
+                                                      presence_penalty=presence_penalty
+                                                      )
         for chunk in raw_response:
             if chunk:
                 data = chunk.choices[0].delta.content
@@ -299,9 +310,9 @@ def send_chat_request_openai(stream: bool,
                             'credit': credit,
                             'unique': unique
                         }
-                    )       
+                    )
         return clean_response
-    
+
     except openai.APIConnectionError as e:
         async_to_sync(channel_layer.group_send)(
             room_group_name,
@@ -338,21 +349,23 @@ def send_chat_request_openai(stream: bool,
             }
         )
         return e
-def send_agent_request_openai(stream: bool, 
-                        session_history: list, 
-                        model_type: str, 
-                        current_turn_inner: int, 
-                        model: str, 
-                        unique: str, 
-                        credit: float, 
-                        room_group_name: str, 
-                        client: object, 
-                        clean_response: str, 
-                        max_tokens: int, 
-                        frequency_penalty: float, 
-                        temperature: float, 
-                        top_p: float, 
-                        presence_penalty: float) -> str:
+
+
+def send_agent_request_openai(stream: bool,
+                              session_history: list,
+                              model_type: str,
+                              current_turn_inner: int,
+                              model: str,
+                              unique: str,
+                              credit: float,
+                              room_group_name: str,
+                              client: object,
+                              clean_response: str,
+                              max_tokens: int,
+                              frequency_penalty: float,
+                              temperature: float,
+                              top_p: float,
+                              presence_penalty: float) -> str:
     """_summary_
 
     Args:
@@ -414,7 +427,7 @@ def send_agent_request_openai(stream: bool,
         action_list = action_parse_json(session_history[-1]['content'])
         if action_list:
             for act in action_list:
-                action = json.loads(act)['Action']   
+                action = json.loads(act)['Action']
                 if "STOP" == action:
                     async_to_sync(channel_layer.group_send)(
                         room_group_name,
@@ -496,8 +509,9 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
     """
     try:
         return LLM.objects.get(name=model)
-    except  LLM.DoesNotExist:
+    except LLM.DoesNotExist:
         return False
+
 
 def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool) -> str | list:
     """_summary_
@@ -511,14 +525,16 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
     """
 
     hashed_key = key_object.hashed_key
-    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(raw_prompt, k= constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT) 
+    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(
+        raw_prompt, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT)
     if not agent_availability:
         shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
         full_instruct = ""
         max_history_length = constant.MAX_HISTORY_LENGTH[model]
         tokeniser = constant.TOKENIZER_TABLE[model]
         for mess in message_list_vector:
-            template = shorten_template.format(mess.content_object.prompt, mess.content_object.response)
+            template = shorten_template.format(
+                mess.content_object.prompt, mess.content_object.response)
             full_instruct += "\n\n"
             full_instruct += template
             inputs = AutoTokenizer.from_pretrained(tokeniser)(full_instruct)
@@ -530,7 +546,7 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
         return full_instruct
     else:
         try:
-            tokeniser= tiktoken.encoding_for_model(model)
+            tokeniser = tiktoken.encoding_for_model(model)
         except:
             tokeniser = tiktoken.encoding_for_model("gpt-4")
         max_history_length = constant.MAX_HISTORY_LENGTH["openai"]
@@ -541,11 +557,12 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
                 {'role': 'user', 'content': f'{mess.content_object.prompt}'},
                 {'role': 'assistant', 'content': f'{mess.content_object.response}'}
             ]
-            current_history_length += len(tokeniser.encode(mess.content_object.prompt +" "+ mess.content_object.response))
+            current_history_length += len(tokeniser.encode(
+                mess.content_object.prompt + " " + mess.content_object.response))
             if current_history_length > int(max_history_length):
                 full_instruct_list = full_instruct_list[:-2 or None]
         return full_instruct_list
-    
+
 
 def manage_monero(command, params=None):
     rpc_input = {
@@ -553,6 +570,7 @@ def manage_monero(command, params=None):
     }
     if params is not None:
         rpc_input.update({'params': params})
-    rpc_input.update({"jsonrpc": "2.0", "id": "0"})        
-    response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
+    rpc_input.update({"jsonrpc": "2.0", "id": "0"})
+    response = requests.post("http://127.0.0.1:18082/json_rpc",
+                             json=rpc_input, headers={"content-type": "application/json"})
     return response
