@@ -42,7 +42,7 @@ export const ChatBox = ({
                                                 </IconButton>
                                             </Box>
                                             <Box pt={0.8} align="right">
-                                                <span dir="rtl"> {mess.role} ({mess.time})  <br /><br /> {mess.message} </span>
+                                                <span > {mess.role} ({mess.time})  <br /><br /> {mess.message} </span>
                                             </Box>
                                         </Grid>
                                     </Box>
@@ -152,7 +152,7 @@ export const ChatBoxHotpot = ({
                                                 </IconButton>
                                             </Box>
                                             <Box pt={0.8} align="right">
-                                                <span dir="rtl"> {mess.role} ({mess.time})  <br /><br /> {mess.message} </span>
+                                                <span > {mess.role} ({mess.time})  <br /><br /> {mess.message} </span>
                                             </Box>
                                         </Grid>
                                     </Box>
