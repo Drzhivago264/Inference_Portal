@@ -6,6 +6,8 @@ from server.models import (
     LLM,
     InstructionTree,
     Article,
+    APIKEY,
+    MemoryTree
 )
 from django.http import HttpResponse
 from django.conf import settings
@@ -21,13 +23,12 @@ from django.http import (
     HttpResponse,
     HttpResponseRedirect
 )
-from server.models import APIKEY
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.decorators import api_view, throttle_classes
-from server.serializer import RedirectSerializer, InstructionTreeSerializer
+from server.serializer import RedirectSerializer, InstructionTreeSerializer, MemoryTreeSerializer
 from django.contrib.auth import authenticate, login
 
 
@@ -39,7 +40,6 @@ def hub_redirect_api(request: HttpRequest) -> Response:
         key = serializer.data['key']
         destination = serializer.data['destination']
         check_login = serializer.data['check_login']
-        print(check_login)
         if not check_login:
             try:
                 api_key = APIKEY.objects.get_from_key(key)
@@ -74,5 +74,18 @@ def instruction_tree_api(request):
             default_child_template = root.get_children()
             serializer_childrend = InstructionTreeSerializer(default_child_template, many=True)
     return Response({'root_nodes': serializer.data, 'default_children': serializer_childrend.data})
+
+
+@api_view(['GET'])
+@throttle_classes([AnonRateThrottle])
+def memory_tree_api(request):
+    current_user = request.user
+    if current_user.id == None:
+        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        root_node = MemoryTree.objects.filter(level=0, key=current_user.apikey)
+        childrens = root_node.get_descendants(include_self=True)
+        serializer = MemoryTreeSerializer(childrens, many=True)
+        return Response({'root_nodes': serializer.data}, status=status.HTTP_200_OK)
 
 

@@ -268,11 +268,6 @@ def stripe_redirect(request: HttpRequest) -> Response:
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
-
-
-
-
 class SuccessView(TemplateView):
     template_name = "html/success.html"
 

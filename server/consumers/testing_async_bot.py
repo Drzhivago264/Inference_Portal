@@ -89,8 +89,8 @@ class Consumer(AsyncWebsocketConsumer):
             credit = self.key_object.credit
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
             if role == "Human":
-                self.is_session_start_node = False
                 unique_response_id = self.unique_response_id
                 await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": self.choosen_models, "time": self.time, "credit": credit}))
         else:
             await async_inference(self)
+            self.is_session_start_node = False
