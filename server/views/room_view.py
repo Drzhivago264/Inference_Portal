@@ -30,7 +30,7 @@ from rest_framework.throttling import AnonRateThrottle
 from rest_framework.decorators import api_view, throttle_classes
 from server.serializer import RedirectSerializer, InstructionTreeSerializer, MemoryTreeSerializer
 from django.contrib.auth import authenticate, login
-
+from rest_framework.pagination import PageNumberPagination
 
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
@@ -43,18 +43,19 @@ def hub_redirect_api(request: HttpRequest) -> Response:
         if not check_login:
             try:
                 api_key = APIKEY.objects.get_from_key(key)
-                user = authenticate(request, username=api_key.hashed_key, password=api_key.hashed_key) 
+                user = authenticate(
+                    request, username=api_key.hashed_key, password=api_key.hashed_key)
                 if user is not None:
                     login(request, user)
                     key_hash = sha256(key.encode('utf-8')).hexdigest()
                     return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
                 else:
                     return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
-    
+
             except APIKEY.DoesNotExist:
-                    return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            if request.user.id is not None: 
+            if request.user.id is not None:
                 print(request.user)
                 key_hash = sha256(key.encode('utf-8')).hexdigest()
                 return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
@@ -72,8 +73,10 @@ def instruction_tree_api(request):
     for root in root_nodes:
         if root.name == "Assignment Agent":
             default_child_template = root.get_children()
-            serializer_childrend = InstructionTreeSerializer(default_child_template, many=True)
+            serializer_childrend = InstructionTreeSerializer(
+                default_child_template, many=True)
     return Response({'root_nodes': serializer.data, 'default_children': serializer_childrend.data})
+
 
 
 @api_view(['GET'])
@@ -83,9 +86,15 @@ def memory_tree_api(request):
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        root_node = MemoryTree.objects.filter(level=0, key=current_user.apikey)
-        childrens = root_node.get_descendants(include_self=True)
-        serializer = MemoryTreeSerializer(childrens, many=True)
-        return Response({'root_nodes': serializer.data}, status=status.HTTP_200_OK)
 
-
+        paginator = PageNumberPagination()
+        paginator.page_size = 1
+        memory_object = MemoryTree.objects.filter(key=current_user.apikey).order_by('-id')
+        result_page = paginator.paginate_queryset(memory_object, request)
+        try:
+            result_page = result_page[0].get_ancestors(include_self=True)
+            serializer = MemoryTreeSerializer(result_page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        except IndexError:
+            return Response({'detail': "no memory"}, status=status.HTTP_204_NO_CONTENT)
+        

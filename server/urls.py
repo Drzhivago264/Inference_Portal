@@ -22,7 +22,8 @@ from server.views.key_purchase import (StripeWebhookView,
 
 from server.views.room_view import (hub_redirect_api,
                                     instruction_tree_api,
-                                    memory_tree_api)
+                                    memory_tree_api
+                                    )
 
 app_name = "server"
 
@@ -76,7 +77,9 @@ urlpatterns = [
     path('frontend-api/send-mail', contact_api, name='contact'),
     path('frontend-api/check-login', check_login, name='check-login'),
     path('frontend-api/logout', log_out, name='logout'),
-    path('frontend-api/memory-tree', memory_tree_api, name='memory-tree'),
+
+     path('frontend-api/memory-tree', memory_tree_api, name='memory-tree'),
+
 
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
 
