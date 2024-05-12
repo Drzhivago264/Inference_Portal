@@ -41,7 +41,7 @@ export const ChatBox = ({
                                                     <ContentCopyIcon fontSize="small" />
                                                 </IconButton>
                                             </Box>
-                                            <Box pt={0.8} align="right">
+                                            <Box pt={0.8} align="right" style={{ whiteSpace: "pre-wrap" }}>
                                                 <span > {mess.role} ({mess.time})  <br /><br /> {mess.message} </span>
                                             </Box>
                                         </Grid>
@@ -54,7 +54,7 @@ export const ChatBox = ({
                                 <Paper key={mess.holderid}>
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Box pt={0.8} align="left">
+                                            <Box pt={0.8} align="left" style={{ whiteSpace: "pre-wrap" }}>
                                                 <span> {mess.role} - {mess.time}: <br /><br /> {mess.message}</span>
                                             </Box>
                                             <Box align="right">
@@ -72,7 +72,7 @@ export const ChatBox = ({
                                 <Paper key={mess.message + mess.time} >
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Box pt={0.8} align="left">
+                                            <Box pt={0.8} align="left" style={{ whiteSpace: "pre-wrap" }}>
                                                 <span> {mess.message} ({mess.role} - {mess.time}) </span>
                                             </Box>
                                             <Box align="right">
@@ -151,7 +151,7 @@ export const ChatBoxHotpot = ({
                                                     <ContentCopyIcon fontSize="small" />
                                                 </IconButton>
                                             </Box>
-                                            <Box pt={0.8} align="right">
+                                            <Box pt={0.8} align="right" style={{ whiteSpace: "pre-wrap" }}>
                                                 <span > {mess.role} ({mess.time})  <br /><br /> {mess.message} </span>
                                             </Box>
                                         </Grid>
@@ -164,7 +164,7 @@ export const ChatBoxHotpot = ({
                                 <Paper key={mess.holderid}>
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Box pt={0.8} align="left">
+                                            <Box pt={0.8} align="left" style={{ whiteSpace: "pre-wrap" }}>
                                                 <span> {mess.role} - {mess.time}: <br /><br /> {mess.message}</span>
                                             </Box>
                                             <Box align="right">
@@ -182,7 +182,7 @@ export const ChatBoxHotpot = ({
                                 <Paper key={mess.message}  >
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Box pt={0.8} align="left">
+                                            <Box pt={0.8} align="left" style={{ whiteSpace: "pre-wrap" }}>
                                                 <span> {mess.message} ({mess.role} - {mess.time}) </span>
                                             </Box>
                                             <Box align="right">

@@ -14,14 +14,13 @@ class InstructionTreeSerializer(serializers.ModelSerializer):
         fields = ('instruct', "name", "code", "default_editor_template")
 
 class MemoryTreeSerializer(serializers.ModelSerializer):
-    is_leaf_node = serializers.SerializerMethodField()
-
+    children = serializers.SerializerMethodField()
     class Meta:
         model = MemoryTree
-        fields = ('prompt', 'response', 'p_type', 'created_at', 'parent','is_leaf_node')
-
-    def get_is_leaf_node(self, instance):
-        return instance.is_leaf_node() if instance else False
+        fields=('id', 'prompt', 'response', 'p_type', 'created_at', 'level', 'children', 'parent')
+    #Return None for lazy loading from the frontend
+    def get_children(self, instance):
+        return None
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
