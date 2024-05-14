@@ -24,6 +24,7 @@ const FunctionLLM = lazy(() => import("./function_llm.js"));
 const Manual = lazy(() => import("./manual.js"));
 const APIDoc = lazy(() => import("./api_doc.js"));
 const Log = lazy(() => import("./log.js"));
+const PaymentSuccess = lazy(() => import("./payment_success.js"));
 
 const ColorModeContext = React.createContext({ toggleColorMode: () => { } });
 export default function App() {
@@ -63,6 +64,7 @@ export default function App() {
             <Route path="/frontend/model" element={<ModelInforPage />} />
             <Route path="/frontend/key-management" element={<KeyManagementPage />} />
             <Route path="/frontend/hub" element={<HubPage />} />
+            <Route path="/frontend/payment-success" element={<PaymentSuccessPage />} />
             <Route path="/frontend/chat/:keyhash" element={<ChatPage />} />
             <Route path="/frontend/engineer/:keyhash" element={<AgentPage />} />
             <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLMPage />} />
@@ -147,5 +149,11 @@ const ModelInforPage = () => (
 const HubPage = () => (
   <Suspense fallback={<LinearProgress />}>
     <Hub />
+  </Suspense>
+);
+
+const PaymentSuccessPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <PaymentSuccess />
   </Suspense>
 );

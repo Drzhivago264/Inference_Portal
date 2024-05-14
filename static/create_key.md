@@ -8,7 +8,7 @@ Setting Up Your API Key
 > - The ratelimit for key creation is 20 key per IP address per day.
 > - Unused Keys with no credit are expired in 30 days. 
 
-- Navigate to [Key & Credit](https://professorparakeet.com/frontend/key-management) tab on Appbar
+- Navigate to [Key & Credit](/frontend/key-management) tab on Appbar
 - Fill and submit the Create a Key form. 
 - Export key file and keep it secure.
 
@@ -16,9 +16,9 @@ Setting Up Your API Key
 
 ## 2. Make API request
 
-- Visit [API Docs](https://professorparakeet.com/api/docs) to test out the APIs
+- Visit [API Docs](/frontend/api/docs) to test out the APIs
 - The root URL for the Professor Parakeet API is https://professorparakeet.com/api/
-- Feel free to experiment with available endpoints in the documentation by entering your API Key in the Authorize section and clicking the `Authorize` button
+- Feel free to experiment with available endpoints in the documentation by entering your API Key in the Authorize section and clicking the ```Authorize``` button
 
 ---
 

@@ -59,6 +59,8 @@ urlpatterns = [
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/api/docs/',
          TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/payment-success/',
+         TemplateView.as_view(template_name='frontend_index.html')),
 
     path('frontend-api/article/<str:name>/<str:a_type>',
          article_api, name='information'),

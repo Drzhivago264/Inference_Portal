@@ -5,7 +5,7 @@ Inference Modes
 
 ## 1 API endpoints
 
-- Visit [API Doc](https://professorparakeet.com/api/docs) to view specific request and response schemas of each endpoint.
+- Visit [API Doc](https://professorparakeet.com/frontend/api/docs) to view specific request and response schemas of each endpoint.
 
 - Python example for chat mode:
 
@@ -79,7 +79,7 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
 ## 2 Chat Bot Mode
 - We offer standard chatbot mode with custom chat template. We use a vectorised database and query 3 previous model's responses what are the most relevant to answer your questions.
 - The maximum context length is 4096 tokens, please do not input a 10000-page book into the chatroom, the model will give you nothing.
-- Visit [Chat & Log](https://professorparakeet.com/chat/) and choose `Chat Bots` to talk to our bots.
+- Visit [Chat & Log](https://professorparakeet.com/frontend/hub) and choose `Chat Bots` to talk to our bots.
 - Users can configure multiple interence parameters in `Chatbots`, including:
   - Top_p
   - Top_k
@@ -95,10 +95,10 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
 
 ## 3 Hard Core Prompt Engineering Mode
 
-> To test both Chatbots and Agents user can choose `Hotpot Mode` in [Chat & Log](https://professorparakeet.com/chat/)
+> To test both Chatbots and Agents user can choose `Hotpot Mode` in [Chat & Log](https://professorparakeet.com/frontend/hub)
 
-We convert large language models into agents which are able to initiate predefined actions and have a working memory of multiple reasoning steps.
-- Visit [Chat & Log](https://professorparakeet.com/chat/) and choose `Agents` to talk to our agents.
+- We convert large language models into agents which are able to initiate predefined actions and have a working memory of multiple reasoning steps.
+- Visit [Chat & Log](https://professorparakeet.com/frontend/hub) and choose `Agents` to talk to our agents.
 - Users can choose among different agents and different engines for the agents
 - Users can create their own template for their specific project.
 - Users can configure multiple interence parameters in `Chatbots`, including:
@@ -109,6 +109,7 @@ We convert large language models into agents which are able to initiate predefin
   - Presence Penalty
   - Frequency Penalty
   
+
 ## 4 Backend LLM functions
 
 We offer multiple language functions, including:
