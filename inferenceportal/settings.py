@@ -37,12 +37,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'server',
     'django_bleach',
-    'captcha',
     "rest_framework_api_key",
     'vectordb',
     'ninja',
     'tinymce',
-    'mptt', #tree graph in sql
+    'mptt', 
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 CHANNEL_LAYERS = {

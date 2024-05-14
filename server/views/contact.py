@@ -5,7 +5,6 @@ import bleach
 from server.models import APIKEY
 from django.contrib import messages
 from server.celery_tasks import send_email_
-from server.forms import CaptchaForm
 from django.http import (HttpRequest, 
                          HttpResponse, 
                          HttpResponseRedirect

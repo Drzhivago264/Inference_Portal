@@ -22,8 +22,7 @@ from django.views import View
 from django.urls import reverse
 from django.views.generic import TemplateView
 from server.utils.common_func import manage_monero
-from django.core.cache import cache
-from server.forms import CaptchaForm
+from django.contrib.auth import authenticate, login
 from django.core.signing import Signer
 import json
 from django.http import (HttpRequest,
@@ -170,7 +169,7 @@ def generate_key_api(request: HttpRequest) -> Response:
         user = User.objects.create_user(hashed_key, '', hashed_key)
         created_key.user = user
         created_key.save()
-        print(hashed_key)
+        login(request, user)
         return Response({"key_name": str(name),
                          'key': str(key),
                          'payment_id': payment_id,

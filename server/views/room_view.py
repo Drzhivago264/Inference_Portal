@@ -56,7 +56,6 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                 return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             if request.user.id is not None:
-                print(request.user)
                 key_hash = sha256(key.encode('utf-8')).hexdigest()
                 return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
             else:

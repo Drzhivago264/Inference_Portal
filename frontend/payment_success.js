@@ -23,16 +23,11 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
 import Divider from '@mui/material/Divider';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import { saveAs } from "file-saver";
-import { RandomReveal } from 'react-random-reveal'
 import SvgIcon from '@mui/material/SvgIcon';
 import Footer from './component/footer';
 import {
@@ -52,11 +47,6 @@ function KeyManagement() {
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
     const [product_objects, setProduct] = useState([]);
-
-    const [checklogin, setLoginState] = useState(false);
-    useEffect(() => {
-        check_login(setLoginState)
-    }, []);
 
     useEffect(() => {
         axios.all([
@@ -138,20 +128,17 @@ function KeyManagement() {
         }
         return cookieValue;
     }
-    const [keycreateloading, setKeyCreateLoading] = useState(false);
     const [keycheckloading, setKeyCheckLoading] = useState(false);
     const [xmrretrieveloading, setXMRRetrieveLoading] = useState(false);
     const [xmrconfirmationloading, setXMRConfirmationLoading] = useState(false);
-    const [randomanimation, setRandomAnimation] = useState(false);
+
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
     const [keynamepay, setKeyNamePay] = useState("")
     const [keynamepayError, setKeyNamePayError] = useState(false)
-    const [keyname, setKeyName] = useState("")
-    const [keynameError, setKeyNameError] = useState(false)
+
     const [amount, setAmount] = useState(1)
-    const [keycreateresponse, setKeyCreateResponse] = useState(null);
-    const [keycreateerror, setKeyCreateError] = useState(null);
+
     const [keycheckerror, setKeyCheckError] = useState(null);
     const [keycheckresponse, setKeyCheckResponse] = useState(null);
     const [xmrwalleterror, setXMRWalletError] = useState(null);
@@ -159,38 +146,7 @@ function KeyManagement() {
     const [xmrconfirmationerror, setXMRConfirmationError] = useState(null);
     const [xmrconfirmationresponse, setXMRConfirmationResponse] = useState(null);
     const [striperedirecterror, setStripeRedirectError] = useState(null);
-    const handleCreateKey = (event) => {
-        event.preventDefault()
-        setKeyCreateLoading(true);
-        setKeyCreateResponse(null)
-        setKeyNameError(false)
-        setRandomAnimation(false)
-        if (keyname == '') {
-            setKeyCreateLoading(false)
-            setKeyNameError(true)
-        }
-        if (keyname) {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }
-            }
-            const data = {
-                key_name: keyname,
-            }
-            axios.post("/frontend-api/generate-key", data, config)
-                .then((response) => {
-                    setKeyCreateResponse(response.data)
 
-                }).catch(error => {
-
-                    setKeyCreateError(error.response.data.detail)
-                });
-        }
-
-    }
     const handleCheckKey = (event) => {
         event.preventDefault()
         setKeyCheckError(null)
@@ -328,47 +284,6 @@ function KeyManagement() {
                 });
         }
     }
-    function exportKey(keyfile) {
-        var blob = new Blob([keyfile], { type: "text/plain;charset=utf-8" });
-        saveAs(blob, "Key_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
-    }
-    const KeyCreateExport = ({ key_, key_name, integrated_wallet, payment_id }) => {
-
-        return (
-            <Box my={4}>
-                {!randomanimation && <Box style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }} textAlign='center' my={1}>
-                    <Alert severity="info"> Key: <RandomReveal
-                        isPlaying
-                        duration={4}
-                        revealDuration={1.6}
-                        characters={key_}
-                        onComplete={() => (setRandomAnimation(true), setKeyCreateLoading(false), setLoginState(true))}
-
-                    /></Alert>
-                </Box>}
-                {randomanimation && <Alert severity="success">
-                    Congrats! Here's your Key, before moving on, you may consider: <br></br>
-                    <li> Export you Key into a text document </li>
-                    <li> Before topping up your Key, use the check credit function below to ensure that you get it correctly </li>
-                    <li> If you face any problems, please contact us </li>
-                </Alert>}
-                {randomanimation && <Box textAlign='center' my={4}>
-                    <Textarea
-                        defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`}
-                        minRows={4}
-                        maxRows={10}
-                    />
-                    <Box textAlign='center' my={1}>
-                        <Button size="small" variant="outlined" onClick={() => exportKey(`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`)}>Export Key</Button>
-                    </Box>
-                </Box>}
-            </Box >
-        );
-    };
 
     const KeyCheckDisplay = ({ key_, key_name, monero_balance, fiat_balance }) => {
         return (
@@ -444,71 +359,13 @@ function KeyManagement() {
                     <StyledPaper variant="outlined">
                         <ThemeProvider theme={fontsizetheme}>
                             <Typography variant="h4" >
-                                <Box sx={{ mb: 2, fontWeight: 'bold' }}>  Get started with Professor Parakeet</Box>
+                                <Box sx={{ mb: 2, fontWeight: 'bold' }}> Congrats! You Payment is Successful</Box>
                             </Typography>
                         </ThemeProvider>
-                        <Typography variant="h5" >
-                            <Box sx={{ lineHeight: 2, fontWeight: '700' }}> 1. Create a Key </Box>
-                        </Typography>
-                        <Typography variant="body1" >
-                            Start by generating a random key by giving it a name.
-                        </Typography>
-                        <Box my={4} justifyContent="center" alignItems="center" display="flex" >
-                            {!checklogin && <form autoComplete="off" onSubmit={handleCreateKey}>
-                                <FormControl defaultValue="" required>
-                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                                        <TextField
-                                            margin="normal"
-                                            label="Key Name"
-                                            type="text"
-                                            size="small"
-                                            onChange={e => setKeyName(e.target.value)}
-                                            value={keyname}
-                                            error={keynameError}
-                                            autoComplete="off"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <CreateIcon />
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                        />
-                                        <LoadingButton size="small" loading={keycreateloading} loadingPosition="end" variant="contained" type="submit" endIcon={<LockOpenIcon />}>Generate</LoadingButton>
-                                    </Stack>
-                                </FormControl>
-                            </form>
-                            }
-                            {checklogin && <form autoComplete="off" onSubmit={handleCreateKey}>
-                                <FormControl defaultValue="" required>
-                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                                        <TextField
-                                            disabled
-                                            margin="normal"
-                                            label="Key Name"
-                                            type="text"
-                                            size="small"
-                                            defaultValue="You are logged in"
-                                            autoComplete="off"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <CreateIcon />
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                        />
-                                        <Button variant="outlined" onClick={() => { logout(setLoginState) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
-                                    </Stack>
-                                </FormControl>
-                            </form>
-                            }
-                        </Box>
-                        {keycreateresponse && <KeyCreateExport key_={keycreateresponse.key} key_name={keycreateresponse.key_name} payment_id={keycreateresponse.payment_id} integrated_wallet={keycreateresponse.integrated_wallet} />}
-                        {keycreateerror && <ErrorAlert error={keycreateerror} />}
+
                         <Divider></Divider>
                         <Typography variant="h5" >
-                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>2. Add credit to your key</Box>
+                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>1. Check credit of your key</Box>
                         </Typography>
                         <Stack spacing={1}>
                             <Alert variant="outlined" severity="info">
@@ -576,7 +433,7 @@ function KeyManagement() {
                                         id="panel1-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.1 Check credit balance
+                                            1.1 Check credit balance
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -597,7 +454,7 @@ function KeyManagement() {
                                         id="panel2-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.2 Pay by Stripe
+                                            1.2 Pay by Stripe
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -617,7 +474,7 @@ function KeyManagement() {
                                         id="panel3-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.3 Retrieve XMR wallet
+                                            1.3 Retrieve XMR wallet
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -639,7 +496,7 @@ function KeyManagement() {
                                         id="panel4-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.4 Confirm XMR Payment
+                                            1.4 Confirm XMR Payment
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -658,7 +515,7 @@ function KeyManagement() {
                         </Box>
                         <Divider></Divider>
                         <Typography variant="h5" >
-                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> 3. Check user manual </Box>
+                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> 2. Check user manual </Box>
                         </Typography>
                         <Typography variant="body1" >
                             Check the <Link href="/frontend/manual/key" variant="body1">

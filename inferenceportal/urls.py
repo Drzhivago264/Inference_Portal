@@ -12,7 +12,6 @@ from api.api import api
 urlpatterns = [
     path("", include("server.urls")),
     path(f"{config('ADMIN_PATH')}/", admin.site.urls),
-    path('captcha/', include('captcha.urls')),
     path("api/", api.urls),
     path('tinymce/', include('tinymce.urls')),
 ]

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import Prism from "prismjs";
@@ -22,6 +21,7 @@ import { TypeAnimation } from 'react-type-animation';
 import introduction_ from '../docs/PageContent/introduction.md'
 import { Highlight, themes } from 'prism-react-renderer';
 import Footer from './component/footer';
+import { Divider } from '@mui/material';
 function Information() {
     useEffect(() => {
         Prism.highlightAll();
@@ -116,15 +116,17 @@ function Information() {
                                     fontSize: { xs: "1em" }
                                 }
                             }}>
+
                                 <Paper variant="outlined">
+                                    <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                                        Prompt: You are an educated man in your 20s, you believe in equality, freedom and justice. You must response to the following sentence based on what you believe in. <br></br>
+                                        Sentence: The reality is deterministic, there is no freedom.
+                                    </Typography>
+                                    <Divider></Divider>
                                     <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
                                         sequence={[
 
-                                            `Prompt: You are an educated man in your 20s, you believe in equality, freedom and justice.\nCommand: You must response to the following sentence based on what you believe in.`,
-                                            1500,
-                                            `Prompt: You are an educated man in your 20s, you believe in equality, freedom and justice.\nCommand: You must response to the following sentence based on what you believe in.\nSentence: The reality is deterministic, there is no freedom.`,
-                                            1500,
-                                            `Prompt: You are an educated man in your 20s, you believe in equality, freedom and justice.\nCommand: You must response to the following sentence based on what you believe in.\nSentence: The reality is deterministic, there is no freedom.\nAnswer: I respectfully disagree. The concept of determinism suggests that every event, including human cognition and behavior, decision and action, is causally determined by an unbroken chain of prior occurrences. While this view might hold some scientific grounding, it undermines the essence of human agency and free will. I believe in freedom - the ability to choose, to act, to shape our own destiny. This freedom is what allows us to learn, grow, and make decisions that can change the course of our lives. Even if some aspects of reality are deterministic, it doesn't negate the existence of personal freedom.`,
+                                            `Answer: I respectfully disagree. The concept of determinism suggests that every event, including human cognition and behavior, decision and action, is causally determined by an unbroken chain of prior occurrences. While this view might hold some scientific grounding, it undermines the essence of human agency and free will. I believe in freedom - the ability to choose, to act, to shape our own destiny. This freedom is what allows us to learn, grow, and make decisions that can change the course of our lives. Even if some aspects of reality are deterministic, it doesn't negate the existence of personal freedom.`,
                                             3000,
                                             ''
                                             ,
@@ -142,28 +144,28 @@ function Information() {
                             </Box>
                             <Typography mt={2}>
                                 The current models are pretty smart, they have a great understanding of human society. At least, they understand Western society that generates the majority of their training datesets.
-                                Imagine we can train our own models (smaller and more versatile) on our (localised) data to speak up the voices that we want them to speak and at the scale that hardware can support.
+                                Imagine we can train our own models (smaller, cheaper, and quicker) on our (localised) data to speak up the voices that we want them to speak and at the scale that hardware can support.
                             </Typography>
                             <Box sx={{
                                 display: 'flex',
                                 flexWrap: 'wrap',
                                 '& > :not(style)': {
                                     width: 1,
-                                    mt:2,
+                                    mt: 2,
                                     height: { xs: "250px" },
                                     overflow: 'auto',
                                     fontSize: { xs: "1em" }
                                 }
                             }}>
                                 <Paper variant="outlined">
+                                    <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                                        Prompt: You are a man in your 30s, you come from a working class family, you are tired of paying for your mortgage. You must response to the following sentence based on who you are. <br></br>
+                                        Sentence: It is important to raise income taxes for education.
+                                    </Typography>
+                                    <Divider></Divider>
                                     <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
                                         sequence={[
-
-                                            `Prompt: You are an man in your 30s, you come from a working class family, you are tired of paying for your mortgage.\nCommand: You must response to the following sentence based on who you are.`,
-                                            1500,
-                                            `Prompt: You are an man in your 30s, you come from a working class family, you are tired of paying for your mortgage.\nCommand: You must response to the following sentence based on who you are.\nSentence: It is important to raise interest rates and income taxes for education.`,
-                                            1500,
-                                            `Prompt: You are an man in your 30s, you come from a working class family, you are tired of paying for your mortgage.\nCommand: You must response to the following sentence based on who you are.\nSentence: It is important to raise interest rates and income taxes for education.\n Answer: While I understand the value of investing in education, I must say that the prospect of raising interest rates and income taxes is a tough pill to swallow for folks like me. Many of us are already struggling to make ends meet, paying mortgages and trying to secure a decent life for our families. It seems like we're always the ones shouldering the burden. I think it's important to find a balance and look at other ways to fund education, without putting the entire weight on the working class.`,
+                                            `Answer: While I understand the value of investing in education, I must say that the prospect of raising interest rates and income taxes is a tough pill to swallow for folks like me. Many of us are already struggling to make ends meet, paying mortgages and trying to secure a decent life for our families. It seems like we're always the ones shouldering the burden. I think it's important to find a balance and look at other ways to fund education, without putting the entire weight on the working class.`,
                                             3000,
                                             ''
                                             ,
@@ -184,7 +186,7 @@ function Information() {
                         </Box>
                     </Grid>
                     <Grid item sm={3}>
-                        <Box mt={10.32} sx={{ width: 225,  display: { xs: 'none', sm: 'none ', md: 'block' } }}>
+                        <Box mt={10.32} sx={{ width: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
                             <VerticalNav />
                         </Box>
                     </Grid>
