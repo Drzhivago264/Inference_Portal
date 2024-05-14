@@ -40,7 +40,7 @@ async def send_chat_request_openai_async(self, processed_prompt) -> str:
                 data = chunk.choices[0].delta.content
                 if data != None:
                     clean_response += data
-                    await self.send(text_data=json.dumps({"message": data, "role":self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+                    await self.send(text_data=json.dumps({"message": data, "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return clean_response
     except openai.APIConnectionError as e:
         await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
@@ -49,7 +49,7 @@ async def send_chat_request_openai_async(self, processed_prompt) -> str:
         await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return e
     except openai.APIError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role":self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+        await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return e
 
 
@@ -116,6 +116,7 @@ async def query_response_log(key_object: str,  order: str, quantity: int, type_:
         })
     return response
 
+
 async def send_agent_request_openai_async(self) -> str:
     clean_response = ""
     try:
@@ -159,6 +160,20 @@ async def send_agent_request_openai_async(self) -> str:
                     await self.send(text_data=json.dumps({"agent_action": action, "result_id": self.working_paragraph, "full_result": full_result}))
                     self.session_history = []
                     self.current_turn = 0
+                elif "NEXT" == action:
+                    full_result = str()
+                    for log in self.session_history:
+                        if log['role'] == "user" or log['role'] ==  "assistant":
+                            full_result += f"{log['role']}:\n{log['content']}\n\n"
+                    full_result = full_result.replace('{"Action": "NEXT"}', "")
+                    self.session_history = []
+                    self.current_turn = 0
+                    self.agent_instruction += clean_response
+                    prompt = [
+                        {'role': 'system', 'content': f"{self.agent_instruction}"}
+                    ]
+                    self.session_history.extend(prompt)
+                    await self.send(text_data=json.dumps({"agent_action": action, "result_id": self.working_paragraph, "full_result": full_result}))
         return clean_response
     except openai.APIConnectionError as e:
         await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": self.model_type, "stream_id": self.unique_response_id, "credit": self.key_object.credit}))
@@ -212,13 +227,13 @@ async def async_inference(self) -> None:
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
-                response_stream = await send_stream_request_async(self, url=url, context=context, 
-                                                           processed_prompt=processed_prompt)
+                response_stream = await send_stream_request_async(self, url=url, context=context,
+                                                                  processed_prompt=processed_prompt)
                 if response_stream == httpx.ReadTimeout:
                     await self.send(text_data=json.dumps({"message": "Model timeout! try again later.", "stream_id":  self.unique_response_id, "credit": credit}))
-                else:    
+                else:
                     await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
-                                                response=response_stream, type_="chatroom")
+                                                                                    response=response_stream, type_="chatroom")
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
                 response = "Server is starting up, try again in 400 seconds"
@@ -234,11 +249,12 @@ async def async_inference(self) -> None:
         else:
             response = "Model is currently offline"
             await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
-            
-    else: 
+
+    else:
         clean_response = await send_chat_request_openai_async(self, processed_prompt)
         await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
-                                        response=clean_response, type_="open_ai")
+                                                                        response=clean_response, type_="open_ai")
+
 
 async def async_agent_inference(self) -> None:
     if self.current_turn_inner >= 0 and self.current_turn_inner <= (self.max_turns-1):
@@ -249,17 +265,45 @@ async def async_agent_inference(self) -> None:
             ]
         elif self.current_turn_inner > 0 and self.current_turn_inner < (self.max_turns-1):
             prompt = [
-                {'role': 'system', 'content': f'Response:{self.message}\n'}
+                {'role': 'user', 'content': f'Response: {self.message}\n'}
             ]
 
         elif self.current_turn_inner == (self.max_turns-1):
             force_stop = "You should directly give results based on history information."
             prompt = [
-                {'role': 'system', 'content': f'Response:{force_stop}\n'}
+                {'role': 'system', 'content': f'Response: {force_stop}\n'}
             ]
         self.session_history.extend(prompt)
         clean_response = await send_agent_request_openai_async(self)
         await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message,
-                                        response=clean_response, type_="open_ai")
+                                                                        response=clean_response, type_="open_ai")
+    else:
+        await self.send(text_data=json.dumps({"message": f"Max Turns reached, click on the paragraphs on the left to write again", "role": "Server", "time": self.time}))
+
+
+async def async_agent_inference_with_summary(self) -> None:
+    if self.current_turn_inner >= 0 and self.current_turn_inner <= self.max_turns:
+        if self.current_turn_inner == 0:
+            prompt = [
+                {'role': 'system', 'content': f"{self.agent_instruction}"}, {
+                    'role': 'user', 'content': f'{self.message}'}
+            ]
+        elif self.current_turn_inner > 0 and self.current_turn_inner < (self.max_turns-1):
+            prompt = [
+                {'role': 'user', 'content': f'Response: {self.message}\n'}
+            ]
+
+        elif self.current_turn_inner == (self.max_turns-1):
+            force_stop = "You should directly give results based on history information. You must summary the interview log for the question with no more than 100 words."
+            prompt = [
+                {'role': 'system', 'content': f'Response: {force_stop}\n'}
+            ]
+
+        self.session_history.extend(prompt)
+
+        clean_response = await send_agent_request_openai_async(self)
+        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message,
+                                                                        response=clean_response, type_="open_ai")
+
     else:
         await self.send(text_data=json.dumps({"message": f"Max Turns reached, click on the paragraphs on the left to write again", "role": "Server", "time": self.time}))

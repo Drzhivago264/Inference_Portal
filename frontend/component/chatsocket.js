@@ -116,7 +116,7 @@ export function agentsocket(
                 ])
             }
             else if (dataFromServer.hasOwnProperty("agent_action")) {
-                if (dataFromServer.agent_action == "STOP") {
+                if (dataFromServer.agent_action == "STOP" || dataFromServer.agent_action == "NEXT") {
                     var blockToAdd = {
                         type: 'paragraph',
                         data: {

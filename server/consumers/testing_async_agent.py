@@ -16,7 +16,7 @@ from server.pydantic_validator import (
 )
 import regex as re
 from pydantic import ValidationError
-from server.utils.async_common_func import async_agent_inference
+from server.utils.async_common_func import async_agent_inference, async_agent_inference_with_summary
 
 import pytz
 from django.utils import timezone
@@ -56,15 +56,12 @@ class Consumer(AsyncWebsocketConsumer):
         self.key_object =  await sync_to_async(lambda: self.user.apikey)()
         self.model_type = ""
         self.room_group_name = "agent_%s" % self.url
+        self.use_summary = False
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         await self.send(text_data=json.dumps({"message": "You are currently using async backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
-        await self.send(text_data=json.dumps({"message": "Instruction to the user:\n\
-                                              1. Click on the paragraph that you want to work on, then give the agent instructions to write \n\
-                                              2. If you face any bug, refresh and retry.\n\
-                                              3. Shift-Enter to drop line in chatbox.\n\
-                                              4. You can export all paragraphs by clicking on [Export] on the left.",
+        await self.send(text_data=json.dumps({"message": "Instruction to the user:\n1. Click on the paragraph that you want to work on, then give the agent instructions to write \n2. If you face any bug, refresh and retry.\n3. Shift-Enter to drop line in chatbox.\n4. You can export all paragraphs by clicking on [Export] on the left.",
                                               "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
@@ -79,9 +76,12 @@ class Consumer(AsyncWebsocketConsumer):
                     text_data).paragraph
                 if self.working_paragraph != paragraph:
                     self.working_paragraph = paragraph
-                    self.current_turn = 0
-                    self.session_history = []
-                    await self.send(text_data=json.dumps({"message": f"Working on block {paragraph}, what do you want me to write?", "role": "Server", "time": self.time}))
+                    if not self.use_summary:
+                        self.current_turn = 0
+                        self.session_history = []
+                        await self.send(text_data=json.dumps({"message": f"Working on block {paragraph}, what do you want me to write?", "role": "Server", "time": self.time}))
+                    else:
+                        await self.send(text_data=json.dumps({"message": f"Working on block {paragraph}", "role": "Server", "time": self.time}))    
                     await self.send(text_data=json.dumps({"paragraph": paragraph}))
 
             except ValidationError as e:
@@ -134,6 +134,7 @@ class Consumer(AsyncWebsocketConsumer):
                     self.presence_penalty = validated.presence_penalty
                     self.temperature = validated.temperature
                     self.agent_instruction += self.child_instruction
+                    self.use_summary = True if self.choosen_template == "Interview Agent" else False                       
                     await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message",
                                                "role": self.role,
@@ -158,10 +159,12 @@ class Consumer(AsyncWebsocketConsumer):
             credit = self.key_object.credit
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
             if role == "Human":
-            
                 unique_response_id = self.unique_response_id
                 await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": self.choosen_template, "time": self.time, "credit": credit}))
         else:
-            await async_agent_inference(self)
+            if not self.use_summary:
+                await async_agent_inference(self)
+            else:
+                await async_agent_inference_with_summary(self)
             self.is_session_start_node = False
        

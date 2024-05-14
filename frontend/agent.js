@@ -41,6 +41,7 @@ import { agentsocket } from './component/chatsocket';
 import './component/css/editor-js.css';
 import { ChatExport } from './component/chat_export';
 import Footer from './component/footer';
+import Alert from '@mui/material/Alert';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -70,7 +71,7 @@ function Agent() {
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-    const [socket_destination, setSocketDestination] = useState("/ws/engineer/");
+    const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
     const [default_editor_structure, setEditor] = useState(null);
     const [currentparagraph, setCurrentParagraph] = useState(1);
     const [template_list, setTemplateList] = useState([]);
@@ -499,12 +500,16 @@ function Agent() {
                                 >
 
                                 </OpenAPIParameter>
+                                <Alert severity="info">
+                                    Async Backend is the preferred backend that supports newest features. <br></br>
+                                    Interview Agent only works on Async Backend.<br></br>
+                                </Alert>
                             </Stack>
                         </Grid>
                     </Grid>
                 </Box>
             </Container>
-            <Footer/>
+            <Footer />
         </Container>
     );
 }
