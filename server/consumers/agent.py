@@ -57,11 +57,7 @@ class Consumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         await self.send(text_data=json.dumps({"message": "You are currently using Celery backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
-        await self.send(text_data=json.dumps({"message": "Instruction to the user:\n\
-                                              1. Click on the paragraph that you want to work on, then give the agent instructions to write \n\
-                                              2. If you face any bug, refresh and retry.\n\
-                                              3. Shift-Enter to drop line in chatbox.\n\
-                                              4. You can export all paragraphs by clicking on [Export] on the left.",
+        await self.send(text_data=json.dumps({"message": """Instruction to the user:\n1. Click on the paragraph that you want to work on, then give the agent instructions to write \n2. If you face any bug, refresh and retry.\n3. Shift-Enter to drop line in chatbox.\n4. You can export all paragraphs by clicking on [Export] on the left.""",
                                               "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
