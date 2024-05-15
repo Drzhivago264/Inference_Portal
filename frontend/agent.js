@@ -42,6 +42,8 @@ import './component/css/editor-js.css';
 import { ChatExport } from './component/chat_export';
 import Footer from './component/footer';
 import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -336,8 +338,8 @@ function Agent() {
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
             <title>Agent</title>
             <ResponsiveAppBar />
-            <Container maxWidth={false} sx={{ minWidth: 1500 }}>
-                <Box m={1}>
+            <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
+                <Box mt={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={2}>
                             <List subheader={
@@ -356,7 +358,7 @@ function Agent() {
                                 })}
                             </List>
                             <Divider ></Divider>
-                            <Box mt={2}>
+                            <Box m={2}>
                                 <form onSubmit={handleExport}>
                                     <Typography pb={2}>Editor Export</Typography>
                                     <FormControl  >
@@ -391,6 +393,7 @@ function Agent() {
                                 </ChatExport>
                             </Box>
                         </Grid>
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={4}>
                             <Stack spacing={1}>
                                 <Typography variant="h5" gutterBottom>Parent Instruction</Typography>
@@ -446,8 +449,9 @@ function Agent() {
                             >
                             </ChatBox>
                         </Grid>
+ 
                         <Grid item xs={2}>
-                            <Stack direction='column' spacing={1}>
+                            <Stack direction='column' mr={2} spacing={1}>
                                 <FormControl >
                                     <InputLabel id="agent-label">Agents</InputLabel>
                                     <Select
@@ -500,9 +504,10 @@ function Agent() {
                                 >
 
                                 </OpenAPIParameter>
-                                <Alert severity="info">
-                                    Async Backend is the preferred backend that supports newest features. <br></br>
-                                    Interview Agent only works on Async Backend.<br></br>
+                                <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
+                                <AlertTitle>Note: </AlertTitle>
+                                    {`Async Backend is the preferred backend that supports newest features. \n
+                                    Interview Agent only works on Async Backend.`}
                                 </Alert>
                             </Stack>
                         </Grid>

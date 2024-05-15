@@ -44,8 +44,6 @@ function Information() {
         <Container maxWidth={false} disableGutters>
             <title>Introduction</title>
             <ResponsiveAppBar />
-
-
             <Container maxWidth="lg">
                 <Box sx={{
                     display: 'flex',
@@ -81,7 +79,7 @@ function Information() {
                     />
                 </Box>
                 <Grid container spacing={0}>
-                    <Grid item sm={12} md={9}>
+                    <Grid item sm={12} md={10}>
                         <Box mt={5} mb={5} p={1}>
                             {introloading && <Stack spacing={1}>
                                 <Skeleton variant="rounded" animation="wave" height={150} />
@@ -185,7 +183,7 @@ function Information() {
                             </Box>
                         </Box>
                     </Grid>
-                    <Grid item sm={3}>
+                    <Grid item sm={2}>
                         <Box mt={10.32} sx={{ width: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
                             <VerticalNav />
                         </Box>

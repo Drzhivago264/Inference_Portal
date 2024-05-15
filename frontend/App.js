@@ -26,7 +26,7 @@ const APIDoc = lazy(() => import("./api_doc.js"));
 const Log = lazy(() => import("./log.js"));
 const PaymentSuccess = lazy(() => import("./payment_success.js"));
 
-const ColorModeContext = React.createContext({ toggleColorMode: () => { } });
+export const ColorModeContext = React.createContext({ toggleColorMode: () => { } });
 export default function App() {
   const [mode, setMode] = React.useState('dark');
   const colorMode = React.useMemo(
@@ -47,10 +47,8 @@ export default function App() {
     [mode],
   );
   return (
-    <ColorModeContext.Provider value={colorMode}>
-      <IconButton sx={{ position: "fixed", top: 10, right: 10, zIndex: 2000 }} onClick={colorMode.toggleColorMode} color="inherit">
-        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-      </IconButton>
+    <ColorModeContext.Provider value={{colorMode, mode, theme}}>
+
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>

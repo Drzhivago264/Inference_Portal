@@ -21,6 +21,7 @@ from server.utils.async_common_func import async_agent_inference, async_agent_in
 import pytz
 from django.utils import timezone
 
+
 class Consumer(AsyncWebsocketConsumer):
 
     async def get_template(self, name):
@@ -46,14 +47,15 @@ class Consumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(
+            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.max_turns = constant.DEFAULT_AGENT_TURN
         self.current_turn = 0
         self.session_history = []
-        self.working_paragraph = str()
+        self.working_paragraph = ""
         self.is_session_start_node = True
         self.user = self.scope['user']
-        self.key_object =  await sync_to_async(lambda: self.user.apikey)()
+        self.key_object = await sync_to_async(lambda: self.user.apikey)()
         self.model_type = ""
         self.room_group_name = "agent_%s" % self.url
         self.use_summary = False
@@ -68,6 +70,7 @@ class Consumer(AsyncWebsocketConsumer):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     # Receive message from WebSocket
+
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         if 'paragraph' in text_data_json:
@@ -81,7 +84,7 @@ class Consumer(AsyncWebsocketConsumer):
                         self.session_history = []
                         await self.send(text_data=json.dumps({"message": f"Working on block {paragraph}, what do you want me to write?", "role": "Server", "time": self.time}))
                     else:
-                        await self.send(text_data=json.dumps({"message": f"Working on block {paragraph}", "role": "Server", "time": self.time}))    
+                        await self.send(text_data=json.dumps({"message": f"Working on block {paragraph}", "role": "Server", "time": self.time}))
                     await self.send(text_data=json.dumps({"paragraph": paragraph}))
 
             except ValidationError as e:
@@ -94,6 +97,8 @@ class Consumer(AsyncWebsocketConsumer):
                 child_template = await self.get_child_tempalte_name(swap_template, None)
                 swap_instruction = swap_template.instruct
                 swap_template_ = swap_template.default_editor_template
+                self.current_turn = 0
+                self.session_history = []
                 await self.send(text_data=json.dumps({"message": f"Swap to {text_data_json['swap_template']}, what do you want me to write?", "role": "Server", "time": self.time}))
                 await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
                                                       "swap_template": swap_template_,
@@ -107,6 +112,8 @@ class Consumer(AsyncWebsocketConsumer):
                 swap_child_instruct = AgentSchemaInstruct.model_validate_json(
                     text_data).swap_child_instruct
                 child_instruct = await self.get_child_tempalte_name(None, swap_child_instruct)
+                self.current_turn = 0
+                self.session_history = []
                 await self.send(text_data=json.dumps({"child_instruct": child_instruct}))
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
@@ -121,7 +128,6 @@ class Consumer(AsyncWebsocketConsumer):
                 elif self.key_object and text_data_json["message"].strip():
                     self.agent_instruction = validated.agent_instruction
                     self.child_instruction = validated.child_instruction
-                    self.current_turn_inner = self.current_turn
                     self.working_paragraph = validated.currentParagraph
                     self.message = validated.message
                     self.model_type = validated.choosen_models
@@ -134,7 +140,7 @@ class Consumer(AsyncWebsocketConsumer):
                     self.presence_penalty = validated.presence_penalty
                     self.temperature = validated.temperature
                     self.agent_instruction += self.child_instruction
-                    self.use_summary = True if self.choosen_template == "Interview Agent" else False                       
+                    self.use_summary = True if self.choosen_template == "Interview Agent" else False
                     await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message",
                                                "role": self.role,
@@ -153,7 +159,8 @@ class Consumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event["message"]
         role = event["role"]
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(
+            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
             credit = self.key_object.credit
@@ -167,4 +174,3 @@ class Consumer(AsyncWebsocketConsumer):
             else:
                 await async_agent_inference_with_summary(self)
             self.is_session_start_node = False
-       
