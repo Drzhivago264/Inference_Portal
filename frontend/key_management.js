@@ -40,6 +40,7 @@ import {
     responsiveFontSizes,
     ThemeProvider,
 } from '@mui/material/styles';
+import AlertTitle from '@mui/material/AlertTitle';
 import { check_login, logout } from './component/check_login';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -350,11 +351,12 @@ function KeyManagement() {
 
                     /></Alert>
                 </Box>}
-                {randomanimation && <Alert severity="success">
-                    Congrats! Here's your Key, before moving on, you may consider: <br></br>
-                    <li> Export you Key into a text document </li>
-                    <li> Before topping up your Key, use the check credit function below to ensure that you get it correctly </li>
-                    <li> If you face any problems, please contact us </li>
+                {randomanimation && <Alert severity="success" sx={{ whiteSpace: 'pre-line' }}>
+                    <AlertTitle>Success</AlertTitle>
+                    {`Congrats! Here's your Key, before moving on, you may consider:\n 
+                     - Export you Key into a text document.\n 
+                     - Before topping up your Key, use the check credit function below to ensure that you get it correctly.\n 
+                     - If you face any problems, please contact us.\n`} 
                 </Alert>}
                 {randomanimation && <Box textAlign='center' my={4}>
                     <Textarea
@@ -374,6 +376,7 @@ function KeyManagement() {
         return (
             <Box my={4}>
                 <Alert severity="success">
+                <AlertTitle>Success</AlertTitle>
                     Your Key and Key Name are correct!
                 </Alert>
                 <Box textAlign='center' mt={4}>
@@ -391,6 +394,7 @@ function KeyManagement() {
         return (
             <Box my={4}>
                 <Alert severity="success">
+                <AlertTitle>Success</AlertTitle>
                     Wallet Information:
                 </Alert>
                 <Box textAlign='center' mt={4}>
@@ -407,6 +411,7 @@ function KeyManagement() {
         return (
             <Box my={4}>
                 <Alert severity="success">
+                <AlertTitle>Success</AlertTitle>
                     Confirmation Status:
                 </Alert>
                 <Box textAlign='center' mt={4}>
@@ -421,8 +426,8 @@ function KeyManagement() {
     };
     const ErrorAlert = ({ error }) => {
         return (
-            <Box mt={4}>
-                <Box textAlign='center' my={2}>
+            <Box mt={2}>
+                <Box textAlign='center'>
                     <Alert variant="filled" severity="error">
                         {error}
                     </Alert>
@@ -511,14 +516,16 @@ function KeyManagement() {
                             <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>2. Add credit to your key</Box>
                         </Typography>
                         <Stack spacing={1}>
-                            <Alert variant="outlined" severity="info">
-                                We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
-                                <li> To pay by Stripe, include the Key and Key Name in the form below and click Stripe. </li>
-                                <li> To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.) </li>
+                            <Alert variant="outlined" severity="info" sx={{ whiteSpace: 'pre-line' }} >
+                            <AlertTitle>Info</AlertTitle>
+                                {`We offer 2 payment methods via Stripe or XMR transfer:\n  
+                                 To pay by Stripe, include the Key and Key Name in the form below and click Stripe.\n
+                                 To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.)`} 
                             </Alert>
-                            <Alert variant="outlined" severity="warning">
-                                <li> If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks. </li>
-                                <li> To ensure that people with access to your computer or session cannot retrieve your wallet information, you are required to fill up the credit-related forms, even if you are logged in. </li>
+                            <Alert variant="outlined" severity="warning" sx={{ whiteSpace: 'pre-line' }}>
+                            <AlertTitle>Warning</AlertTitle>
+                                {` If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks.\n 
+                                   To ensure that people with access to your computer or session cannot retrieve your wallet information, you are required to fill up the credit-related forms, even if you are logged in.`} 
                             </Alert>
                         </Stack>
                         <Box my={4} >

@@ -7,16 +7,17 @@ from server.celery_tasks import Agent_Inference
 
 from server.utils import constant
 from server.pydantic_validator import (
-                                 AgentSchemaInstruct,
-                                 AgentSchemaMessage,
-                                 AgentSchemaParagraph,
-                                 AgentSchemaTemplate,
-                                 )
+    AgentSchemaInstruct,
+    AgentSchemaMessage,
+    AgentSchemaParagraph,
+    AgentSchemaTemplate,
+)
 import regex as re
 from pydantic import ValidationError
 from asgiref.sync import sync_to_async
 import pytz
 from django.utils import timezone
+
 
 class Consumer(AsyncWebsocketConsumer):
 
@@ -26,7 +27,7 @@ class Consumer(AsyncWebsocketConsumer):
             return template
         except InstructionTree.DoesNotExist:
             return False
-        
+
     @database_sync_to_async
     def get_child_tempalte_name(self, template, name=None):
         try:
@@ -43,11 +44,12 @@ class Consumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(
+            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.max_turns = constant.DEFAULT_AGENT_TURN
         self.current_turn = 0
         self.session_history = []
-        self.working_paragraph = str()
+        self.working_paragraph = ""
         self.is_session_start_node = True
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
@@ -88,6 +90,8 @@ class Consumer(AsyncWebsocketConsumer):
                 child_template = await self.get_child_tempalte_name(swap_template, None)
                 swap_instruction = swap_template.instruct
                 swap_template_ = swap_template.default_editor_template
+                self.current_turn = 0
+                self.session_history = []
                 await self.send(text_data=json.dumps({"message": f"Swap to {text_data_json['swap_template']}, what do you want me to write?", "role": "Server", "time": self.time}))
                 await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
                                                       "swap_template": swap_template_,
@@ -101,6 +105,8 @@ class Consumer(AsyncWebsocketConsumer):
                 swap_child_instruct = AgentSchemaInstruct.model_validate_json(
                     text_data).swap_child_instruct
                 child_instruct = await self.get_child_tempalte_name(None, swap_child_instruct)
+                self.current_turn = 0
+                self.session_history = []
                 await self.send(text_data=json.dumps({"child_instruct": child_instruct}))
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
@@ -116,7 +122,6 @@ class Consumer(AsyncWebsocketConsumer):
                 elif self.key_object and text_data_json["message"].strip():
                     agent_instruction = validated.agent_instruction
                     child_instruction = validated.child_instruction
-                    current_turn_inner = self.current_turn
                     currentParagraph = validated.currentParagraph
                     self.working_paragraph = currentParagraph
                     message = validated.message
@@ -131,7 +136,7 @@ class Consumer(AsyncWebsocketConsumer):
                     temperature = validated.temperature
                     agent_instruction += child_instruction
                     Agent_Inference.delay(
-                        is_session_start_node=self.is_session_start_node, 
+                        is_session_start_node=self.is_session_start_node,
                         unique=unique_response_id,
                         key=self.key_object.hashed_key,
                         stream=True,
@@ -140,7 +145,7 @@ class Consumer(AsyncWebsocketConsumer):
                         room_group_name=self.room_group_name,
                         model=choosen_template,
                         max_turns=self.max_turns,
-                        current_turn_inner=current_turn_inner,
+                        current_turn_inner=self.current_turn,
                         agent_instruction=agent_instruction,
                         session_history=self.session_history,
                         model_type=self.model_type,
@@ -158,7 +163,7 @@ class Consumer(AsyncWebsocketConsumer):
                                                "credit": self.key_object.credit,
                                                "unique": unique_response_id,
                                                "choosen_model":  choosen_template,
-                                               "current_turn": current_turn_inner
+                                               "current_turn": self.current_turn
                                                }
                     )
             except ValidationError as e:
@@ -173,8 +178,9 @@ class Consumer(AsyncWebsocketConsumer):
         if "message" in event:
             message = event["message"]
             role = event["role"]
-            credit = event["credit"]        
-            self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            credit = event["credit"]
+            self.time = timezone.localtime(timezone.now(), pytz.timezone(
+                self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
             # Send message to WebSocket
             if role == "Human" or role == "Server":
                 await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))

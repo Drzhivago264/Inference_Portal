@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useContext } from "react";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -19,6 +20,10 @@ import Drawer from '@mui/material/Drawer';
 import VerticalNav from './vertical_nav.js';
 const blue = Constant_Colours.blue;
 const grey = Constant_Colours.grey;
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { ColorModeContext } from '../App.js'
 const Listbox = styled('ul')(
   ({ theme }) => `
   font-family: 'IBM Plex Sans', sans-serif;
@@ -165,9 +170,13 @@ function ResponsiveAppBar() {
       <VerticalNav />
     </Box>
   );
+
+  const { colorMode, mode, theme } = useContext(ColorModeContext);
+
   return (
 
-    <AppBarColored position="sticky" >
+    <AppBarColored position="sticky" elevation={0}>
+
       <Drawer open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
       </Drawer>
@@ -228,7 +237,7 @@ function ResponsiveAppBar() {
           </Button>
           <Button
             key='contact'
-            value ='contact'
+            value='contact'
             onClick={(e) => redirect(e)}
             sx={{
               textDecoration: 'none',
@@ -237,7 +246,9 @@ function ResponsiveAppBar() {
           >
             Contact
           </Button>
-          
+          <IconButton sx={{ marginLeft: "auto" }} onClick={colorMode.toggleColorMode} color="inherit">
+            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
         </Toolbar>
       </Container>
     </AppBarColored>

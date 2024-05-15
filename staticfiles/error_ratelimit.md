@@ -3,7 +3,7 @@ Common Errors and Ratelimits
 
 ---
 
-## 1.Common Errors
+## 1. Common Errors
 
 The server responds to a user’s request by issuing status codes when the request is made to the server. Kindly refer to the table below to further understand the status codes when indicating the success or failure of an API call.
 

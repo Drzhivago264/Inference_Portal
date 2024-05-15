@@ -130,7 +130,7 @@ async def send_agent_request_openai_async(self) -> str:
                                                             frequency_penalty=self.frequency_penalty,
                                                             presence_penalty=self.presence_penalty
                                                             )
-        self.current_turn_inner += 1
+        self.current_turn += 1
         async for chunk in raw_response:
             if chunk:
                 data = chunk.choices[0].delta.content
@@ -141,7 +141,7 @@ async def send_agent_request_openai_async(self) -> str:
                     ]
                     self.session_history.pop()
                     self.session_history.extend(response_json)
-                    self.current_turn = self.current_turn_inner
+                    self.current_turn = self.current_turn
                     await self.send(text_data=json.dumps({"message": data,  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
         action_list = action_parse_json(self.session_history[-1]['content'])
@@ -163,7 +163,7 @@ async def send_agent_request_openai_async(self) -> str:
                 elif "NEXT" == action:
                     full_result = str()
                     for log in self.session_history:
-                        if log['role'] == "user" or log['role'] ==  "assistant":
+                        if log['role'] == "user" or log['role'] == "assistant":
                             full_result += f"{log['role']}:\n{log['content']}\n\n"
                     full_result = full_result.replace('{"Action": "NEXT"}', "")
                     self.session_history = []
@@ -257,18 +257,18 @@ async def async_inference(self) -> None:
 
 
 async def async_agent_inference(self) -> None:
-    if self.current_turn_inner >= 0 and self.current_turn_inner <= (self.max_turns-1):
-        if self.current_turn_inner == 0:
+    if self.current_turn >= 0 and self.current_turn <= (self.max_turns-1):
+        if self.current_turn == 0:
             prompt = [
                 {'role': 'system', 'content': f"{self.agent_instruction}"}, {
                     'role': 'user', 'content': f'{self.message}'}
             ]
-        elif self.current_turn_inner > 0 and self.current_turn_inner < (self.max_turns-1):
+        elif self.current_turn > 0 and self.current_turn < (self.max_turns-1):
             prompt = [
                 {'role': 'user', 'content': f'Response: {self.message}\n'}
             ]
 
-        elif self.current_turn_inner == (self.max_turns-1):
+        elif self.current_turn == (self.max_turns-1):
             force_stop = "You should directly give results based on history information."
             prompt = [
                 {'role': 'system', 'content': f'Response: {force_stop}\n'}
@@ -282,18 +282,20 @@ async def async_agent_inference(self) -> None:
 
 
 async def async_agent_inference_with_summary(self) -> None:
-    if self.current_turn_inner >= 0 and self.current_turn_inner <= self.max_turns:
-        if self.current_turn_inner == 0:
+    if self.current_turn >= 0 and self.current_turn <= self.max_turns:
+        if self.current_turn == 0:
             prompt = [
                 {'role': 'system', 'content': f"{self.agent_instruction}"}, {
-                    'role': 'user', 'content': f'{self.message}'}
+                    'role': 'user', 'content': f'{self.message}'},
             ]
-        elif self.current_turn_inner > 0 and self.current_turn_inner < (self.max_turns-1):
+        elif self.current_turn > 0 and self.current_turn < (self.max_turns-1):
+            print(self.message)
             prompt = [
-                {'role': 'user', 'content': f'Response: {self.message}\n'}
+                {'role': 'user', 'content': f'Response: {self.message}\n'},
             ]
 
-        elif self.current_turn_inner == (self.max_turns-1):
+        elif self.current_turn == (self.max_turns-1):
+            print(self.message)
             force_stop = "You should directly give results based on history information. You must summary the interview log for the question with no more than 100 words."
             prompt = [
                 {'role': 'system', 'content': f'Response: {force_stop}\n'}
