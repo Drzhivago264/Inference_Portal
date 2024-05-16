@@ -21,6 +21,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from './App.js'
 import Divider from '@mui/material/Divider';
+import { getCookie } from './component/getCookie.js';
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
     padding: theme.spacing(4),
@@ -35,21 +36,6 @@ function Contact() {
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
     const [loading, setLoading] = useState(false);
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
