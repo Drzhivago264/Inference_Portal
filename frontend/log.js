@@ -63,8 +63,8 @@ function Log() {
             <title>Models</title>
             <ResponsiveAppBar />
             <Container maxWidth="xl">
-                <Box sx={{ overflow: 'auto' }}>
-                    <Paper variant="outlined" sx={{ overflow: 'auto' }} >
+                <Box mt={4} sx={{ overflow: 'auto' }}>
+                    <Paper pt={2} variant="outlined" sx={{ overflow: 'auto' }} >
                         <Box p={5}>
                         <table  className="display" width="100%" ref={tableRef}></table>
                         </Box>
