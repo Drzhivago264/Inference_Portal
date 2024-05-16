@@ -12,7 +12,7 @@ require("prismjs/components/prism-python");
 require("prismjs/components/prism-bash");
 import Box from '@mui/material/Box';
 import ResponsiveAppBar from './component/navbar';
-import VerticalNav from './component/vertical_nav';
+import { VerticalNav } from './component/vertical_nav';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
@@ -68,7 +68,7 @@ function Information() {
                             ''
                             ,
                             () => {
-                                console.log('Sequence completed');
+
                             },
                         ]}
                         wrapper="span"
@@ -129,7 +129,7 @@ function Information() {
                                             ''
                                             ,
                                             () => {
-                                                console.log('Sequence completed');
+
                                             },
                                         ]}
                                         wrapper="span"
@@ -168,7 +168,7 @@ function Information() {
                                             ''
                                             ,
                                             () => {
-                                                console.log('Sequence completed');
+
                                             },
                                         ]}
                                         wrapper="span"

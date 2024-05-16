@@ -18,6 +18,9 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import ResponsiveAppBar from './component/navbar';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Footer from './component/footer';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import IconButton from '@mui/material/IconButton';
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
     padding: theme.spacing(4),
@@ -25,6 +28,11 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function Contact() {
+    const [showPassword, setShowPassword] = React.useState(false);
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -54,15 +62,12 @@ function Contact() {
     const [mailsentresponse, setMailResponse] = useState(null);
     const [mailsenterror, setMailError] = useState(false);
 
-    const handleCreateKey = (event) => {
+    const handleSendMail = (event) => {
         event.preventDefault()
         setKeyNameError(false)
         setSendLoading(true)
         if (keyname == '') {
             setKeyNameError(true)
-        }
-        if (keyname == '') {
-            setKeyError(true)
         }
         if (username == '') {
             setUserNameError(true)
@@ -145,7 +150,7 @@ function Contact() {
                             <Typography variant="h4" >
                                 <Box sx={{ mb: 2, fontWeight: 'bold' }}>Contact Us</Box>
                             </Typography>
-                            <form autoComplete="off" onSubmit={handleCreateKey}>
+                            <form autoComplete="off" onSubmit={handleSendMail}>
                                 <FormControl defaultValue="" margin='normal' required>
                                     <Stack direction={{ xs: 'column' }} spacing={1}>
                                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -168,8 +173,9 @@ function Contact() {
                                             />
                                             <TextField
                                                 margin="normal"
+                                                fullWidth
                                                 label="Key"
-                                                type="password"
+                                                type={showPassword ? 'text' : 'password'}
                                                 size="small"
                                                 onChange={e => setKey(e.target.value)}
                                                 value={key}
@@ -181,6 +187,18 @@ function Contact() {
                                                             <KeyIcon />
                                                         </InputAdornment>
                                                     ),
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <IconButton
+                                                                aria-label="toggle password visibility"
+                                                                onClick={handleClickShowPassword}
+                                                                onMouseDown={handleMouseDownPassword}
+                                                                edge="end"
+                                                            >
+                                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    )
                                                 }}
                                             />
                                         </Stack>
@@ -205,6 +223,7 @@ function Contact() {
                                             <TextField
                                                 m={1}
                                                 margin="normal"
+                                                fullWidth
                                                 label="Email"
                                                 type="text"
                                                 size="small"
@@ -231,7 +250,7 @@ function Contact() {
                                             value={message}
                                             error={messageError}
                                         />
-                                        <LoadingButton size="small" loading={sendloading}  variant="contained" type="submit" endIcon={<ForwardToInboxIcon />}>Send</LoadingButton>
+                                        <LoadingButton size="small" loading={sendloading} variant="contained" type="submit" endIcon={<ForwardToInboxIcon />}>Send</LoadingButton>
                                     </Stack>
                                 </FormControl>
                             </form>

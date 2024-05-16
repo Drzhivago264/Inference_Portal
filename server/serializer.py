@@ -27,8 +27,10 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('name', 'id')
 
+class LoginSerializer(serializers.Serializer):
+    key = serializers.CharField()
 
-class RedirectSerializer(serializers.Serializer):
+class RedirectSerializer(LoginSerializer):
     check_login = serializers.BooleanField()
     key = serializers.CharField(required=False, allow_blank=True )
     destination = serializers.CharField()

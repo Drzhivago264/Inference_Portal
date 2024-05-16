@@ -29,6 +29,16 @@ eval("\n\"use client\";\n\nvar _interopRequireDefault = __webpack_require__(/*! 
 
 /***/ }),
 
+/***/ "./node_modules/@mui/icons-material/Create.js":
+/*!****************************************************!*\
+  !*** ./node_modules/@mui/icons-material/Create.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+eval("\n\"use client\";\n\nvar _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ \"./node_modules/@babel/runtime/helpers/interopRequireDefault.js\");\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}));\nexports[\"default\"] = void 0;\nvar _createSvgIcon = _interopRequireDefault(__webpack_require__(/*! ./utils/createSvgIcon */ \"./node_modules/@mui/icons-material/utils/createSvgIcon.js\"));\nvar _jsxRuntime = __webpack_require__(/*! react/jsx-runtime */ \"./node_modules/react/jsx-runtime.js\");\nvar _default = exports[\"default\"] = (0, _createSvgIcon.default)( /*#__PURE__*/(0, _jsxRuntime.jsx)(\"path\", {\n  d: \"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75z\"\n}), 'Create');\n\n//# sourceURL=webpack://inference_portal/./node_modules/@mui/icons-material/Create.js?");
+
+/***/ }),
+
 /***/ "./node_modules/@mui/icons-material/LocalAtm.js":
 /*!******************************************************!*\
   !*** ./node_modules/@mui/icons-material/LocalAtm.js ***!
@@ -46,16 +56,6 @@ eval("\n\"use client\";\n\nvar _interopRequireDefault = __webpack_require__(/*! 
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ responsiveFontSizes)\n/* harmony export */ });\n/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ \"./node_modules/@babel/runtime/helpers/esm/extends.js\");\n/* harmony import */ var _cssUtils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./cssUtils */ \"./node_modules/@mui/material/styles/cssUtils.js\");\n\n\n\nfunction responsiveFontSizes(themeInput, options = {}) {\n  const {\n    breakpoints = ['sm', 'md', 'lg'],\n    disableAlign = false,\n    factor = 2,\n    variants = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'subtitle1', 'subtitle2', 'body1', 'body2', 'caption', 'button', 'overline']\n  } = options;\n  const theme = (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__[\"default\"])({}, themeInput);\n  theme.typography = (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__[\"default\"])({}, theme.typography);\n  const typography = theme.typography;\n\n  // Convert between CSS lengths e.g. em->px or px->rem\n  // Set the baseFontSize for your project. Defaults to 16px (also the browser default).\n  const convert = (0,_cssUtils__WEBPACK_IMPORTED_MODULE_1__.convertLength)(typography.htmlFontSize);\n  const breakpointValues = breakpoints.map(x => theme.breakpoints.values[x]);\n  variants.forEach(variant => {\n    const style = typography[variant];\n    const remFontSize = parseFloat(convert(style.fontSize, 'rem'));\n    if (remFontSize <= 1) {\n      return;\n    }\n    const maxFontSize = remFontSize;\n    const minFontSize = 1 + (maxFontSize - 1) / factor;\n    let {\n      lineHeight\n    } = style;\n    if (!(0,_cssUtils__WEBPACK_IMPORTED_MODULE_1__.isUnitless)(lineHeight) && !disableAlign) {\n      throw new Error( true ? `MUI: Unsupported non-unitless line height with grid alignment.\nUse unitless line heights instead.` : 0);\n    }\n    if (!(0,_cssUtils__WEBPACK_IMPORTED_MODULE_1__.isUnitless)(lineHeight)) {\n      // make it unitless\n      lineHeight = parseFloat(convert(lineHeight, 'rem')) / parseFloat(remFontSize);\n    }\n    let transform = null;\n    if (!disableAlign) {\n      transform = value => (0,_cssUtils__WEBPACK_IMPORTED_MODULE_1__.alignProperty)({\n        size: value,\n        grid: (0,_cssUtils__WEBPACK_IMPORTED_MODULE_1__.fontGrid)({\n          pixels: 4,\n          lineHeight,\n          htmlFontSize: typography.htmlFontSize\n        })\n      });\n    }\n    typography[variant] = (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__[\"default\"])({}, style, (0,_cssUtils__WEBPACK_IMPORTED_MODULE_1__.responsiveProperty)({\n      cssProperty: 'fontSize',\n      min: minFontSize,\n      max: maxFontSize,\n      unit: 'rem',\n      breakpoints: breakpointValues,\n      transform\n    }));\n  });\n  return theme;\n}\n\n//# sourceURL=webpack://inference_portal/./node_modules/@mui/material/styles/responsiveFontSizes.js?");
-
-/***/ }),
-
-/***/ "./frontend/component/check_login.js":
-/*!*******************************************!*\
-  !*** ./frontend/component/check_login.js ***!
-  \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   check_login: () => (/* binding */ check_login),\n/* harmony export */   logout: () => (/* binding */ logout)\n/* harmony export */ });\n/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ \"./node_modules/axios/lib/axios.js\");\n\nfunction check_login(setLoginState) {\n  axios__WEBPACK_IMPORTED_MODULE_0__[\"default\"].all([axios__WEBPACK_IMPORTED_MODULE_0__[\"default\"].get('/frontend-api/check-login')]).then(axios__WEBPACK_IMPORTED_MODULE_0__[\"default\"].spread(function (login_object) {\n    if (login_object.status == '200') {\n      setLoginState(true);\n    }\n  }))[\"catch\"](function (error) {\n    if (error.response.status == '401') {\n      setLoginState(false);\n    }\n  });\n}\nfunction logout(setLoginState) {\n  axios__WEBPACK_IMPORTED_MODULE_0__[\"default\"].get(\"/frontend-api/logout\").then(function (response) {\n    setLoginState(false);\n  })[\"catch\"](function (error) {\n    console.log(error);\n  });\n}\n\n//# sourceURL=webpack://inference_portal/./frontend/component/check_login.js?");
 
 /***/ }),
 
