@@ -9,6 +9,7 @@ import {
   Route,
 } from "react-router-dom";
 import { check_login, logout } from './component/check_login';
+
 const ModelInfor = lazy(() => import("./model.js"));
 const Hub = lazy(() => import("./redirect.js"));
 const Information = lazy(() => import("./introduction.js"));
@@ -30,7 +31,7 @@ export default function App() {
   const [mode, setMode] = React.useState('dark');
   const [is_authenticated, setIsAuthenticated] = React.useState(false)
   const [user_hashed_key, setUserHashKey] = React.useState(null)
-  
+
   React.useEffect(() => {
     check_login(setIsAuthenticated, setUserHashKey)
   }, [is_authenticated, user_hashed_key]);

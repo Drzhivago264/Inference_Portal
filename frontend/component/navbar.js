@@ -205,6 +205,13 @@ const MenuButton = styled(BaseMenuButton)(
 );
 function ResponsiveAppBar() {
   const navigate = useNavigate();
+  const [destination, setDestination] = React.useState(null)
+  React.useEffect(() => {
+    if (destination) {
+      navigate(destination, { replace: true })
+    }
+  }, [destination]);
+
   const redirect = (e) => {
     navigate(`/frontend/${e.target.value}`);
   };
@@ -223,7 +230,7 @@ function ResponsiveAppBar() {
   );
   const UserDrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleUserDrawer(false)}>
-      <UserVeticalNav />
+      <UserVeticalNav navigate={setDestination} />
     </Box>
   );
   const { colorMode, mode, theme } = useContext(ColorModeContext);
@@ -236,7 +243,8 @@ function ResponsiveAppBar() {
 
     <AppBarColored position="sticky" elevation={0}>
 
-      <Drawer open={open} onClose={toggleDrawer(false)}>
+      <Drawer size="md"
+        variant="outlined" open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
       </Drawer>
       <Container maxWidth="xl">
@@ -307,17 +315,17 @@ function ResponsiveAppBar() {
           {!is_authenticated &&
             <Stack direction='row' sx={{ marginLeft: "auto" }}>
               <Box mt={0.5}>
-              <Button
-                key='login'
-                value='login'
-                onClick={(e) => redirect(e)}
-                sx={{
-                  textDecoration: 'none',
-                  display: { xs: 'none', sm: 'block' },
-                }}
-              >
-                Login
-              </Button>
+                <Button
+                  key='login'
+                  value='login'
+                  onClick={(e) => redirect(e)}
+                  sx={{
+                    textDecoration: 'none',
+                    display: { xs: 'none', sm: 'block' },
+                  }}
+                >
+                  Login
+                </Button>
               </Box>
               <Box>
                 <IconButton onClick={colorMode.toggleColorMode} color="inherit">
@@ -333,7 +341,7 @@ function ResponsiveAppBar() {
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 variant="dot"
               >
-                <AvatarWithHover src={getUserAvatarURL(user_hashed_key)} sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)}  style={{border: '1px solid lightgray'}} >
+                <AvatarWithHover src={getUserAvatarURL(user_hashed_key)} sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
                 </AvatarWithHover>
               </StyledBadge>
               <Box>
@@ -343,7 +351,9 @@ function ResponsiveAppBar() {
               </Box>
             </Stack>
           }
-          <Drawer anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
+          <Drawer size="md"
+            variant="outlined"
+            anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
             {UserDrawerList}
           </Drawer>
 
