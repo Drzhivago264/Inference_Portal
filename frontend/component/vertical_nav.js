@@ -12,8 +12,25 @@ import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import Link from '@mui/material/Link';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { UserContext } from '../App.js'
+import { logout } from './check_login';
+export const UserVeticalNav = () => {
+    const { is_authenticated, setIsAuthenticated, user_hashed_key } = React.useContext(UserContext);
+    return (
+        <List>
+            {is_authenticated && <ListItemButton onClick={() => { logout(setIsAuthenticated) }}>
+                <ListItemIcon>
+                    <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText primary="Log Out" />
+            </ListItemButton>
+            }
+        </List>
+    )
+}
 
-const VerticalNav = () => {
+export const VerticalNav = () => {
     return (
         <List>
             <ListItemButton component={Link} href="/frontend/key-management">
@@ -51,7 +68,7 @@ const VerticalNav = () => {
                 <ListItemText primary="Available Models" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton  button component={Link} href="https://construction.professorparakeet.com/"> 
+            <ListItemButton button component={Link} href="https://construction.professorparakeet.com/">
                 <ListItemIcon>
                     <PrecisionManufacturingIcon />
                 </ListItemIcon>
@@ -68,4 +85,3 @@ const VerticalNav = () => {
     )
 };
 
-export default VerticalNav;

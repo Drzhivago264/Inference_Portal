@@ -2,16 +2,13 @@ import * as React from 'react';
 import { lazy, Suspense } from "react";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import IconButton from '@mui/material/IconButton';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
 import LinearProgress from '@mui/material/LinearProgress';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
 } from "react-router-dom";
-
+import { check_login, logout } from './component/check_login';
 const ModelInfor = lazy(() => import("./model.js"));
 const Hub = lazy(() => import("./redirect.js"));
 const Information = lazy(() => import("./introduction.js"));
@@ -25,10 +22,19 @@ const Manual = lazy(() => import("./manual.js"));
 const APIDoc = lazy(() => import("./api_doc.js"));
 const Log = lazy(() => import("./log.js"));
 const PaymentSuccess = lazy(() => import("./payment_success.js"));
-
+const Login = lazy(() => import("./login.js"))
 export const ColorModeContext = React.createContext({ toggleColorMode: () => { } });
+export const UserContext = React.createContext();
+
 export default function App() {
   const [mode, setMode] = React.useState('dark');
+  const [is_authenticated, setIsAuthenticated] = React.useState(false)
+  const [user_hashed_key, setUserHashKey] = React.useState(null)
+  
+  React.useEffect(() => {
+    check_login(setIsAuthenticated, setUserHashKey)
+  }, [is_authenticated, user_hashed_key]);
+
   const colorMode = React.useMemo(
     () => ({
       toggleColorMode: () => {
@@ -47,34 +53,35 @@ export default function App() {
     [mode],
   );
   return (
-    <ColorModeContext.Provider value={{colorMode, mode, theme}}>
+    <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key }}>
+      <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
 
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <Routes>
-            <Route exact path="/" element={<InformationPage />} />
-            <Route exact path="" element={<InformationPage />} />
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Router>
+            <Routes>
+              <Route exact path="/" element={<InformationPage />} />
+              <Route exact path="" element={<InformationPage />} />
 
-            <Route path="/frontend/manual" element={<ManualPage />} />
-            <Route path="/frontend/manual/:doc" element={<ManualPage />} />
-            <Route path="/frontend/api/docs" element={<APIDocPage />} />
-            <Route path="/frontend/model" element={<ModelInforPage />} />
-            <Route path="/frontend/key-management" element={<KeyManagementPage />} />
-            <Route path="/frontend/hub" element={<HubPage />} />
-            <Route path="/frontend/payment-success" element={<PaymentSuccessPage />} />
-            <Route path="/frontend/chat/:keyhash" element={<ChatPage />} />
-            <Route path="/frontend/engineer/:keyhash" element={<AgentPage />} />
-            <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLMPage />} />
-            <Route path="/frontend/hotpot/:keyhash" element={<HotpotPage />} />
-            <Route path="/frontend/log/:keyhash" element={<LogPage />} />
-
-            <Route path="/frontend/contact" element={<ContactPage />} />
-          </Routes>
-        </Router>
-  
-      </ThemeProvider>
-    </ColorModeContext.Provider>
+              <Route path="/frontend/manual" element={<ManualPage />} />
+              <Route path="/frontend/manual/:doc" element={<ManualPage />} />
+              <Route path="/frontend/api/docs" element={<APIDocPage />} />
+              <Route path="/frontend/model" element={<ModelInforPage />} />
+              <Route path="/frontend/key-management" element={<KeyManagementPage />} />
+              <Route path="/frontend/hub" element={<HubPage />} />
+              <Route path="/frontend/payment-success" element={<PaymentSuccessPage />} />
+              <Route path="/frontend/chat/:keyhash" element={<ChatPage />} />
+              <Route path="/frontend/engineer/:keyhash" element={<AgentPage />} />
+              <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLMPage />} />
+              <Route path="/frontend/hotpot/:keyhash" element={<HotpotPage />} />
+              <Route path="/frontend/log/:keyhash" element={<LogPage />} />
+              <Route path="/frontend/contact" element={<ContactPage />} />
+              <Route path="/frontend/login" element={<LoginPage />} />
+            </Routes>
+          </Router>
+        </ThemeProvider>
+      </ColorModeContext.Provider>
+    </UserContext.Provider>
   );
 }
 
@@ -153,5 +160,12 @@ const HubPage = () => (
 const PaymentSuccessPage = () => (
   <Suspense fallback={<LinearProgress />}>
     <PaymentSuccess />
+  </Suspense>
+);
+
+
+const LoginPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <Login />
   </Suspense>
 );

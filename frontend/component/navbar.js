@@ -17,13 +17,17 @@ import { styled } from '@mui/system';
 import Constant_Colours from './color.js'
 import { useNavigate } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
-import VerticalNav from './vertical_nav.js';
+import { VerticalNav, UserVeticalNav } from './vertical_nav.js';
 const blue = Constant_Colours.blue;
 const grey = Constant_Colours.grey;
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { ColorModeContext } from '../App.js'
+import Avatar from '@mui/material/Avatar';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import { ColorModeContext, UserContext } from '../App.js'
+import { Stack } from '@mui/material';
+import Badge from '@mui/material/Badge';
+
 const Listbox = styled('ul')(
   ({ theme }) => `
   font-family: 'IBM Plex Sans', sans-serif;
@@ -87,6 +91,7 @@ const Button = styled(BaseButton)(
   padding-bottom: 10px;
   padding-left: 8px;
   padding-right: 8px;
+  max-height: 40px;
   border-radius: 8px;
   transition: all 150ms ease;
   cursor: pointer;
@@ -111,6 +116,23 @@ const Button = styled(BaseButton)(
   }
   `,
 );
+
+const AvatarWithHover = styled(Avatar)(
+  ({ theme }) => `
+
+  &:hover {
+    -webkit-filter: brightness(70%);
+    -webkit-transition: all 0.1s ease;
+    -moz-transition: all 0.1s ease;
+    -o-transition: all 0.1s ease;
+    -ms-transition: all 0.1s ease;
+    transition: all 0.1s ease;
+    
+  }
+
+  `,
+);
+
 const AppBarColored = styled(AppBar)(
   ({ theme }) => `
   background: ${theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.55)' : 'rgba(0, 0, 0, 0.04)'};
@@ -119,6 +141,35 @@ const AppBarColored = styled(AppBar)(
   backdrop-filter: blur(20px); 
   `,
 );
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    backgroundColor: '#44b700',
+    color: '#44b700',
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    '&::after': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: '50%',
+      animation: 'ripple 1.2s infinite ease-in-out',
+      border: '1px solid currentColor',
+      content: '""',
+    },
+  },
+  '@keyframes ripple': {
+    '0%': {
+      transform: 'scale(.8)',
+      opacity: 1,
+    },
+    '100%': {
+      transform: 'scale(2.4)',
+      opacity: 0,
+    },
+  },
+}));
 const MenuButton = styled(BaseMenuButton)(
   ({ theme }) => `
   font-family: 'IBM Plex Sans', sans-serif;
@@ -130,6 +181,7 @@ const MenuButton = styled(BaseMenuButton)(
   border-radius: 8px;
   color: white;
   transition: all 150ms ease;
+
   cursor: pointer;
   background: ${theme.palette.mode === 'dark' ? grey[900] : '#fff'};
   border: 1px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
@@ -154,25 +206,32 @@ const MenuButton = styled(BaseMenuButton)(
 function ResponsiveAppBar() {
   const navigate = useNavigate();
   const redirect = (e) => {
-    if (e.target.value == "key-management") {
-      navigate('/frontend/key-management');
-    }
-    else if (e.target.value == "contact") {
-      navigate('/frontend/contact');
-    }
+    navigate(`/frontend/${e.target.value}`);
   };
   const [open, setOpen] = React.useState(false);
+  const [useropen, setUserOpen] = React.useState(false);
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
+  };
+  const toggleUserDrawer = (newOpen) => () => {
+    setUserOpen(newOpen);
   };
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <VerticalNav />
     </Box>
   );
-
+  const UserDrawerList = (
+    <Box sx={{ width: 250 }} role="presentation" onClick={toggleUserDrawer(false)}>
+      <UserVeticalNav />
+    </Box>
+  );
   const { colorMode, mode, theme } = useContext(ColorModeContext);
-
+  const { is_authenticated, setIsAuthenticated, user_hashed_key } = useContext(UserContext);
+  const getUserAvatarURL = (user_hashed_key) => {
+    if (!user_hashed_key) return '';
+    return `https://www.gravatar.com/avatar/${user_hashed_key}?s=256&d=identicon&r=PG&f=y&so-version=2`;
+  };
   return (
 
     <AppBarColored position="sticky" elevation={0}>
@@ -222,8 +281,6 @@ function ResponsiveAppBar() {
               <MenuItem ><NavLink to="/frontend/api/docs">API Docs</NavLink></MenuItem>
             </Menu>
           </Dropdown>
-
-
           <Button
             key='key-management'
             value='key-management'
@@ -246,9 +303,51 @@ function ResponsiveAppBar() {
           >
             Contact
           </Button>
-          <IconButton sx={{ marginLeft: "auto" }} onClick={colorMode.toggleColorMode} color="inherit">
-            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
+
+          {!is_authenticated &&
+            <Stack direction='row' sx={{ marginLeft: "auto" }}>
+              <Box mt={0.5}>
+              <Button
+                key='login'
+                value='login'
+                onClick={(e) => redirect(e)}
+                sx={{
+                  textDecoration: 'none',
+                  display: { xs: 'none', sm: 'block' },
+                }}
+              >
+                Login
+              </Button>
+              </Box>
+              <Box>
+                <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+                  {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                </IconButton>
+              </Box>
+            </Stack>
+          }
+          {is_authenticated &&
+            <Stack direction='row' spacing={1} sx={{ marginLeft: "auto" }}>
+              <StyledBadge
+                overlap="circular"
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                variant="dot"
+              >
+                <AvatarWithHover src={getUserAvatarURL(user_hashed_key)} sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)}  style={{border: '1px solid lightgray'}} >
+                </AvatarWithHover>
+              </StyledBadge>
+              <Box>
+                <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+                  {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                </IconButton>
+              </Box>
+            </Stack>
+          }
+          <Drawer anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
+            {UserDrawerList}
+          </Drawer>
+
+
         </Toolbar>
       </Container>
     </AppBarColored>

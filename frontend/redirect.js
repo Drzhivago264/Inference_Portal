@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -24,8 +24,9 @@ import { Highlight, themes } from 'prism-react-renderer';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Divider from '@mui/material/Divider';
 import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
-import { check_login, logout } from './component/check_login';
+import { logout } from './component/check_login';
 import Footer from './component/footer';
+import { UserContext } from './App.js'
 function Hub() {
 
     function getCookie(name) {
@@ -44,12 +45,7 @@ function Hub() {
         return cookieValue;
     }
 
-
-    const [checklogin, setLoginState] = useState(false);
-
-    useEffect(() => {
-        check_login(setLoginState)
-    }, []);
+    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
 
     const [explaination, setMessage] = useState('');
     const navigate = useNavigate();
@@ -58,11 +54,10 @@ function Hub() {
     const [keyError, setKeyError] = useState(false)
     const [redirecterror, setRedirectError] = useState(null);
 
-
     const handleSubmit = (event) => {
         event.preventDefault()
         setKeyError(false)
-        if (!checklogin && key == '') {
+        if (!is_authenticated && key == '') {
             setKeyError(true)
         }
         else {
@@ -74,16 +69,15 @@ function Hub() {
                         'X-CSRFToken': csrftoken,
                     }
                 }
-
                 const data = {
                     key: key,
-                    check_login: checklogin,
+                    check_login: is_authenticated,
                     destination: destination
                 }
-                console.log(data)
+          
                 axios.post("/frontend-api/hub-redirect", data, config)
                     .then((response) => {
-                        console.log(response)
+                        setIsAuthenticated(true)
                         navigate(response.data.redirect_link, { replace: true, state: { credential: key } });
                     }).catch(error => {
                         setRedirectError(error.response.data.detail)
@@ -135,7 +129,7 @@ function Hub() {
                         <Grid item md={4} lg={3}>
                             <form autoComplete="off" onSubmit={handleSubmit}>
                                 <FormControl defaultValue="" required>
-                                    {!checklogin && <Stack mt={3} direction="row" spacing={1}>
+                                    {!is_authenticated && <Stack mt={3} direction="row" spacing={1}>
                                         <TextField
                                             margin="normal"
                                             label="Key"
@@ -155,13 +149,12 @@ function Hub() {
                                         />
                                         <Button variant="contained" type="submit" endIcon={<LoginIcon />}>Login</Button>
 
-
                                     </Stack>
                                     }
-                                    {checklogin && <Stack mt={3} direction="row" spacing={1}>
+                                    {is_authenticated && <Stack mt={3} direction="row" spacing={1}>
                                         <Button variant="contained" type="submit" endIcon={<AssistantDirectionIcon />}>Redirect</Button>
                                         <Divider orientation="vertical" flexItem />
-                                        <Button variant="outlined" onClick={() => { logout(setLoginState) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
+                                        <Button variant="outlined" onClick={() => { logout(setIsAuthenticated) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
                                     </Stack>
                                     }
                                     <FormLabel sx={{ m: 2 }}>Bring me to:</FormLabel>
@@ -171,7 +164,6 @@ function Hub() {
                                         onChange={e => setDestination(e.target.value)}
                                         value={destination}
                                         sx={{ ml: 2 }}
-
                                     >
                                         <FormControlLabel value="chat" control={<Radio />} label="Chatbots" />
                                         <FormControlLabel value="engineer" control={<Radio />} label="Agents" />
@@ -179,7 +171,6 @@ function Hub() {
                                         <FormControlLabel value="toolbox" control={<Radio />} label="LLM Functions" />
                                         <FormControlLabel value="log" control={<Radio />} label="Retrieve Log" />
                                     </RadioGroup>
-
                                 </FormControl>
                             </form>
                             {redirecterror && <ErrorAlert error={redirecterror} />}
@@ -196,7 +187,6 @@ function Hub() {
                                 h3: {
                                     component: 'h3',
                                 },
-
                             }}>{explaination}</MuiMarkdown>
                         </Grid>
                     </Grid>

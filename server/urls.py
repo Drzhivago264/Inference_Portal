@@ -6,7 +6,8 @@ from server.views.information import (
     article_api,
     model_api,
     check_login,
-    log_out
+    log_out,
+    log_in
 )
 from server.views.key_purchase import (StripeWebhookView,
                                        SuccessView,
@@ -61,7 +62,9 @@ urlpatterns = [
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/payment-success/',
          TemplateView.as_view(template_name='frontend_index.html')),
-
+    path('frontend/login/',
+         TemplateView.as_view(template_name='frontend_index.html')),
+         
     path('frontend-api/article/<str:name>/<str:a_type>',
          article_api, name='information'),
     path('frontend-api/model/',  model_api, name='model'),
@@ -79,8 +82,8 @@ urlpatterns = [
     path('frontend-api/send-mail', contact_api, name='contact'),
     path('frontend-api/check-login', check_login, name='check-login'),
     path('frontend-api/logout', log_out, name='logout'),
-
-     path('frontend-api/memory-tree', memory_tree_api, name='memory-tree'),
+    path('frontend-api/login', log_in, name='login'),
+    path('frontend-api/memory-tree', memory_tree_api, name='memory-tree'),
 
 
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import axios from 'axios';
 import { TextareaAutosize as BaseTextareaAutosize } from '@mui/base/TextareaAutosize';
@@ -41,8 +41,11 @@ import {
     ThemeProvider,
 } from '@mui/material/styles';
 import AlertTitle from '@mui/material/AlertTitle';
-import { check_login, logout } from './component/check_login';
-
+import { logout } from './component/check_login';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import IconButton from '@mui/material/IconButton';
+import { UserContext } from './App.js'
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
     padding: theme.spacing(4),
@@ -53,11 +56,12 @@ function KeyManagement() {
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
     const [product_objects, setProduct] = useState([]);
-
-    const [checklogin, setLoginState] = useState(false);
-    useEffect(() => {
-        check_login(setLoginState)
-    }, []);
+    const [showPassword, setShowPassword] = React.useState(false);
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
 
     useEffect(() => {
         axios.all([
@@ -65,8 +69,6 @@ function KeyManagement() {
         ])
             .then(axios.spread((server_object) => {
                 setProduct(server_object.data.products);
-
-
             }))
             .catch(error => {
                 console.log(error);
@@ -109,17 +111,13 @@ function KeyManagement() {
         background: ${theme.palette.mode === 'dark' ? grey[900] : '#fff'};
         border: 1px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
         box-shadow: 0px 2px 2px ${theme.palette.mode === 'dark' ? grey[900] : grey[50]};
-    
         &:hover {
           border-color: ${blue[400]};
         }
-    
         &:focus {
           border-color: ${blue[400]};
           box-shadow: 0 0 0 3px ${theme.palette.mode === 'dark' ? blue[600] : blue[200]};
         }
-    
-        // firefox
         &:focus-visible {
           outline: 0;
         }
@@ -184,13 +182,10 @@ function KeyManagement() {
             axios.post("/frontend-api/generate-key", data, config)
                 .then((response) => {
                     setKeyCreateResponse(response.data)
-
                 }).catch(error => {
-
                     setKeyCreateError(error.response.data.detail)
                 });
         }
-
     }
     const handleCheckKey = (event) => {
         event.preventDefault()
@@ -262,7 +257,6 @@ function KeyManagement() {
                     setXMRRetrieveLoading(false)
                 });
         }
-
     }
     const handleXMRConfirmation = (event) => {
         event.preventDefault()
@@ -347,7 +341,7 @@ function KeyManagement() {
                         duration={4}
                         revealDuration={1.6}
                         characters={key_}
-                        onComplete={() => (setRandomAnimation(true), setKeyCreateLoading(false), setLoginState(true))}
+                        onComplete={() => (setRandomAnimation(true), setKeyCreateLoading(false), setIsAuthenticated(true))}
 
                     /></Alert>
                 </Box>}
@@ -356,7 +350,7 @@ function KeyManagement() {
                     {`Congrats! Here's your Key, before moving on, you may consider:\n 
                      - Export you Key into a text document.\n 
                      - Before topping up your Key, use the check credit function below to ensure that you get it correctly.\n 
-                     - If you face any problems, please contact us.\n`} 
+                     - If you face any problems, please contact us.\n`}
                 </Alert>}
                 {randomanimation && <Box textAlign='center' my={4}>
                     <Textarea
@@ -376,7 +370,7 @@ function KeyManagement() {
         return (
             <Box my={4}>
                 <Alert severity="success">
-                <AlertTitle>Success</AlertTitle>
+                    <AlertTitle>Success</AlertTitle>
                     Your Key and Key Name are correct!
                 </Alert>
                 <Box textAlign='center' mt={4}>
@@ -394,7 +388,7 @@ function KeyManagement() {
         return (
             <Box my={4}>
                 <Alert severity="success">
-                <AlertTitle>Success</AlertTitle>
+                    <AlertTitle>Success</AlertTitle>
                     Wallet Information:
                 </Alert>
                 <Box textAlign='center' mt={4}>
@@ -411,7 +405,7 @@ function KeyManagement() {
         return (
             <Box my={4}>
                 <Alert severity="success">
-                <AlertTitle>Success</AlertTitle>
+                    <AlertTitle>Success</AlertTitle>
                     Confirmation Status:
                 </Alert>
                 <Box textAlign='center' mt={4}>
@@ -459,7 +453,7 @@ function KeyManagement() {
                             Start by generating a random key by giving it a name.
                         </Typography>
                         <Box my={4} justifyContent="center" alignItems="center" display="flex" >
-                            {!checklogin && <form autoComplete="off" onSubmit={handleCreateKey}>
+                            {!is_authenticated && <form autoComplete="off" onSubmit={handleCreateKey}>
                                 <FormControl defaultValue="" required>
                                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                                         <TextField
@@ -484,7 +478,7 @@ function KeyManagement() {
                                 </FormControl>
                             </form>
                             }
-                            {checklogin && <form autoComplete="off" onSubmit={handleCreateKey}>
+                            {is_authenticated && <form autoComplete="off" onSubmit={handleCreateKey}>
                                 <FormControl defaultValue="" required>
                                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                                         <TextField
@@ -503,7 +497,7 @@ function KeyManagement() {
                                                 ),
                                             }}
                                         />
-                                        <Button variant="outlined" onClick={() => { logout(setLoginState) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
+                                        <Button variant="outlined" onClick={() => { logout(setIsAuthenticated) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
                                     </Stack>
                                 </FormControl>
                             </form>
@@ -517,15 +511,15 @@ function KeyManagement() {
                         </Typography>
                         <Stack spacing={1}>
                             <Alert variant="outlined" severity="info" sx={{ whiteSpace: 'pre-line' }} >
-                            <AlertTitle>Info</AlertTitle>
+                                <AlertTitle>Info</AlertTitle>
                                 {`We offer 2 payment methods via Stripe or XMR transfer:\n  
                                  To pay by Stripe, include the Key and Key Name in the form below and click Stripe.\n
-                                 To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.)`} 
+                                 To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.)`}
                             </Alert>
                             <Alert variant="outlined" severity="warning" sx={{ whiteSpace: 'pre-line' }}>
-                            <AlertTitle>Warning</AlertTitle>
+                                <AlertTitle>Warning</AlertTitle>
                                 {` If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks.\n 
-                                   To ensure that people with access to your computer or session cannot retrieve your wallet information, you are required to fill up the credit-related forms, even if you are logged in.`} 
+                                   To ensure that people with access to your computer or session cannot retrieve your wallet information, you are required to fill up the credit-related forms, even if you are logged in.`}
                             </Alert>
                         </Stack>
                         <Box my={4} >
@@ -544,7 +538,7 @@ function KeyManagement() {
                                     <TextField
                                         margin="normal"
                                         label="Key"
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         size="small"
                                         onChange={e => setKey(e.target.value)}
                                         value={key}
@@ -555,7 +549,20 @@ function KeyManagement() {
                                                 <InputAdornment position="start">
                                                     <KeyIcon />
                                                 </InputAdornment>
+
                                             ),
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        aria-label="toggle password visibility"
+                                                        onClick={handleClickShowPassword}
+                                                        onMouseDown={handleMouseDownPassword}
+                                                        edge="end"
+                                                    >
+                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            )
                                         }}
                                     />
                                     <FormControl defaultValue="" required size="small">
