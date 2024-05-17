@@ -120,7 +120,6 @@ const Button = styled(BaseButton)(
 
 const AvatarWithHover = styled(Avatar)(
   ({ theme }) => `
-
   &:hover {
     -webkit-filter: brightness(70%);
     -webkit-transition: all 0.1s ease;
@@ -128,9 +127,7 @@ const AvatarWithHover = styled(Avatar)(
     -o-transition: all 0.1s ease;
     -ms-transition: all 0.1s ease;
     transition: all 0.1s ease;
-    
   }
-
   `,
 );
 

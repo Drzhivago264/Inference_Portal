@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Article, LLM, InferenceServer, Product, InstructionTree, MemoryTree
+from .models import Article, LLM, InferenceServer, Product, InstructionTree, MemoryTree, UserInstructionTree
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -26,6 +26,24 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('name', 'id')
+
+class UserInstructionCRUDSerializer(serializers.Serializer):
+    default_child = serializers.BooleanField()
+    displayed_name = serializers.CharField()
+    instruct = serializers.CharField()
+    parent = serializers.CharField()
+    code = serializers.CharField()
+    default_editor_template = serializers.CharField()
+    id = serializers.IntegerField()
+
+class UserInstructionGetSerializer(serializers.ModelSerializer):
+    children = serializers.SerializerMethodField()
+    class Meta:
+        model = UserInstructionTree
+        fields=('id', 'name', 'displayed_name', 'code', 'parent', 'level', 'children', 'default_child')
+    #Return None for lazy loading from the frontend
+    def get_children(self, instance):
+        return None
 
 class LoginSerializer(serializers.Serializer):
     key = serializers.CharField()

@@ -13,6 +13,7 @@ from .models import (Price,
                      PaymentHistory,
                      MemoryTree,
                      InstructionTree,
+                     UserInstructionTree,
                      Article)
 from mptt.admin import DraggableMPTTAdmin
 
@@ -52,6 +53,15 @@ admin.site.register(MemoryTree, DraggableMPTTAdmin, list_display=(
     ),
 )
 admin.site.register(InstructionTree, DraggableMPTTAdmin, list_display=(
+    'tree_actions',
+    'indented_title',
+    ),
+        list_display_links=(
+            'indented_title',
+    ),
+)
+
+admin.site.register(UserInstructionTree, DraggableMPTTAdmin, list_display=(
     'tree_actions',
     'indented_title',
     ),

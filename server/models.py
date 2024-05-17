@@ -164,3 +164,17 @@ class InstructionTree(MPTTModel):
     class MPTTMeta:
         order_insertion_by = ['code']
     
+class UserInstructionTree(MPTTModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200, unique=True)
+    displayed_name = models.TextField(max_length=200, default="")
+    code = models.TextField(max_length=10, default="")
+    instruct = models.TextField(default="")
+    default_child = models.BooleanField(default=False)
+    default_editor_template = models.TextField(default="")
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    def __str__(self) -> str:
+        return f"{self.name}"
+    class MPTTMeta:
+        order_insertion_by = ['code']
+    
