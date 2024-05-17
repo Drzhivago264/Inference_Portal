@@ -25,9 +25,10 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Avatar from '@mui/material/Avatar';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import { ColorModeContext, UserContext } from '../App.js'
-import { Stack } from '@mui/material';
+import { Divider, Stack } from '@mui/material';
 import Badge from '@mui/material/Badge';
-
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import CloseIcon from '@mui/icons-material/Close';
 const Listbox = styled('ul')(
   ({ theme }) => `
   font-family: 'IBM Plex Sans', sans-serif;
@@ -203,6 +204,14 @@ const MenuButton = styled(BaseMenuButton)(
   }
   `,
 );
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  ...theme.mixins.toolbar,
+  justifyContent: 'flex-end',
+}));
+
 function ResponsiveAppBar() {
   const navigate = useNavigate();
   const [destination, setDestination] = React.useState(null)
@@ -229,20 +238,18 @@ function ResponsiveAppBar() {
     </Box>
   );
   const UserDrawerList = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={toggleUserDrawer(false)}>
+    <Box sx={{ width: 320 }} role="presentation" onClick={toggleUserDrawer(false)}>
       <UserVeticalNav navigate={setDestination} />
     </Box>
   );
   const { colorMode, mode, theme } = useContext(ColorModeContext);
-  const { is_authenticated, setIsAuthenticated, user_hashed_key } = useContext(UserContext);
+  const { is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name } = useContext(UserContext);
   const getUserAvatarURL = (user_hashed_key) => {
     if (!user_hashed_key) return '';
     return `https://www.gravatar.com/avatar/${user_hashed_key}?s=256&d=identicon&r=PG&f=y&so-version=2`;
   };
   return (
-
     <AppBarColored position="sticky" elevation={0}>
-
       <Drawer size="md"
         variant="outlined" open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
@@ -354,13 +361,30 @@ function ResponsiveAppBar() {
           <Drawer size="md"
             variant="outlined"
             anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
+            <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }} mt={1.5} ml={1.5} mr={1.5} >
+                <AvatarWithHover src={getUserAvatarURL(user_hashed_key)} sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
+                </AvatarWithHover>
+                <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '11rem' }}>
+                  <Typography m={1.2} sx={{ fontWeight: 'bold' }} noWrap variant='body1'>
+                    Parent Key: {user_key_name}
+                  </Typography>
+                </div>
+              </Stack>
+              <DrawerHeader>
+                <IconButton onClick={toggleUserDrawer(false)}>
+                  <CloseIcon />
+                </IconButton>
+              </DrawerHeader>
+            </Stack>
+            <Divider />
             {UserDrawerList}
           </Drawer>
 
 
         </Toolbar>
       </Container>
-    </AppBarColored>
+    </AppBarColored >
   );
 }
 export default ResponsiveAppBar;

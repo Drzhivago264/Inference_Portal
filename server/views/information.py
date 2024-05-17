@@ -32,7 +32,7 @@ def check_login(request: HttpRequest) -> Response:
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        return Response({'detail': sha256(current_user.apikey.id.encode('utf-8')).hexdigest()}, status=status.HTTP_200_OK)
+        return Response({'detail': sha256(current_user.apikey.id.encode('utf-8')).hexdigest(), 'key_name': current_user.apikey.name}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

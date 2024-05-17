@@ -31,10 +31,11 @@ export default function App() {
   const [mode, setMode] = React.useState('dark');
   const [is_authenticated, setIsAuthenticated] = React.useState(false)
   const [user_hashed_key, setUserHashKey] = React.useState(null)
+  const [user_key_name, setUserKeyName] = React.useState(null)
 
   React.useEffect(() => {
-    check_login(setIsAuthenticated, setUserHashKey)
-  }, [is_authenticated, user_hashed_key]);
+    check_login(setIsAuthenticated, setUserHashKey, setUserKeyName)
+  }, [is_authenticated, user_hashed_key, user_key_name]);
 
   const colorMode = React.useMemo(
     () => ({
@@ -54,7 +55,7 @@ export default function App() {
     [mode],
   );
   return (
-    <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key }}>
+    <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name }}>
       <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
 
         <ThemeProvider theme={theme}>

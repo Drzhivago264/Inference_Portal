@@ -48,6 +48,7 @@
     "@emotion/styled": "^11.11.5",
     "@fontsource/roboto": "^5.0.13",
     "@mui/icons-material": "^5.15.15",
+    "@mui/joy": "^5.0.0-beta.36",
     "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "^5.15.15",
     "@mui/x-data-grid": "^7.3.1",

@@ -23,7 +23,7 @@ import SavingsIcon from '@mui/icons-material/Savings';
 import { getCookie } from './getCookie.js'
 import axios from 'axios';
 
-export const UserVeticalNav = ({navigate}) => {
+export const UserVeticalNav = ({ navigate }) => {
 
     const { is_authenticated, setIsAuthenticated, user_hashed_key } = React.useContext(UserContext);
     const log_out_ = (setIsAuthenticaed) => {
@@ -47,7 +47,7 @@ export const UserVeticalNav = ({navigate}) => {
         axios.post("/frontend-api/hub-redirect", data, config)
             .then((response) => {
                 console.log(response.data.redirect_link)
-                navigate(response.data.redirect_link );
+                navigate(response.data.redirect_link);
             }).catch(error => {
 
             });
@@ -56,43 +56,63 @@ export const UserVeticalNav = ({navigate}) => {
     }
     return (
         <List>
-            <ListItemButton disabled onClick={() => { }}>
+            <ListItemButton disabled sx={{ height: 38 }} onClick={() => { }}>
                 <ListItemIcon>
                     <HistoryEduIcon />
                 </ListItemIcon>
-                <ListItemText primary="Your Templates" />
+                <ListItemText primaryTypographyProps={{
+                    fontWeight: 'medium',
+                    variant: 'body2',
+                }} primary="Your Templates" />
             </ListItemButton>
-            <ListItemButton disabled onClick={() => { }}>
+            <ListItemButton sx={{ height: 38 }} disabled onClick={() => { }}>
                 <ListItemIcon>
                     <RuleIcon />
                 </ListItemIcon>
-                <ListItemText primary="Your Access Token(s)" />
+                <ListItemText primaryTypographyProps={{
+                    fontWeight: 'medium',
+                    variant: 'body2',
+                }} primary="Your Oauth 2 Access Token(s)" />
             </ListItemButton>
-            <ListItemButton onClick={() => {logredirect()}}>
+            <ListItemButton sx={{ height: 38 }} onClick={() => { logredirect() }}>
                 <ListItemIcon>
                     <StorageIcon />
                 </ListItemIcon>
-                <ListItemText primary="Your Logs" />
+                <ListItemText
+                    primaryTypographyProps={{
+                        fontWeight: 'medium',
+                        variant: 'body2',
+                    }}
+                    primary="Your Logs" />
             </ListItemButton>
-            <ListItemButton disabled >
+            <ListItemButton sx={{ height: 38 }} disabled >
                 <ListItemIcon>
                     <ReceiptIcon />
                 </ListItemIcon>
-                <ListItemText primary="Your Payment History" />
+                <ListItemText primaryTypographyProps={{
+                    fontWeight: 'medium',
+                    variant: 'body2',
+                }} primary="Your Payment History" />
             </ListItemButton>
-            <ListItemButton disabled onClick={() => { }}>
+            <ListItemButton sx={{ height: 38 }} disabled onClick={() => { }}>
                 <ListItemIcon>
                     <SavingsIcon />
                 </ListItemIcon>
-                <ListItemText primary="Cost Monitoring" />
+                <ListItemText primaryTypographyProps={{
+                    fontWeight: 'medium',
+                    variant: 'body2',
+                }} primary="Cost Monitoring" />
             </ListItemButton>
-            <ListItemButton onClick={() => { log_out_(setIsAuthenticated) }}>
+            <ListItemButton sx={{ height: 38 }} onClick={() => { log_out_(setIsAuthenticated) }}>
                 <ListItemIcon>
                     <LogoutIcon color="error" />
                 </ListItemIcon>
                 <ListItemText primaryTypographyProps={{
+                    fontWeight: 'medium',
+                    variant: 'body2',
                     style: {
-                        color: "#f44336"
+                        color: "#f44336",
+
                     }
                 }} primary="Log Out" />
             </ListItemButton>
