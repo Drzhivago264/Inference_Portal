@@ -23,7 +23,10 @@ from server.views.key_purchase import (StripeWebhookView,
 
 from server.views.room_view import (hub_redirect_api,
                                     instruction_tree_api,
-                                    memory_tree_api
+                                    memory_tree_api,
+                                    user_instruction_tree_api,
+                                    crud_user_instruction_tree_api
+
                                     )
 
 app_name = "server"
@@ -31,6 +34,7 @@ app_name = "server"
 urlpatterns = [
     path('', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/user-instruction', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual/key',
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual/inference',
@@ -64,7 +68,7 @@ urlpatterns = [
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/login/',
          TemplateView.as_view(template_name='frontend_index.html')),
-         
+
     path('frontend-api/article/<str:name>/<str:a_type>',
          article_api, name='information'),
     path('frontend-api/model/',  model_api, name='model'),
@@ -85,6 +89,11 @@ urlpatterns = [
     path('frontend-api/login', log_in, name='login'),
     path('frontend-api/memory-tree', memory_tree_api, name='memory-tree'),
 
+
+    path('frontend-api/get-user-instruction',
+         user_instruction_tree_api, name='user-instruction'),
+    path('frontend-api/crud-user-instruction',
+         crud_user_instruction_tree_api, name='crud-user-instruction'),
 
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
 

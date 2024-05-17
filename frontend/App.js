@@ -24,6 +24,8 @@ const APIDoc = lazy(() => import("./api_doc.js"));
 const Log = lazy(() => import("./log.js"));
 const PaymentSuccess = lazy(() => import("./payment_success.js"));
 const Login = lazy(() => import("./login.js"))
+const UserInstruction = lazy(() => import("./user_instruction.js"))
+
 export const ColorModeContext = React.createContext({ toggleColorMode: () => { } });
 export const UserContext = React.createContext();
 
@@ -66,6 +68,7 @@ export default function App() {
               <Route exact path="" element={<InformationPage />} />
 
               <Route path="/frontend/manual" element={<ManualPage />} />
+              <Route path="/frontend/user-instruction" element={<UserInstructionPage />} />
               <Route path="/frontend/manual/:doc" element={<ManualPage />} />
               <Route path="/frontend/api/docs" element={<APIDocPage />} />
               <Route path="/frontend/model" element={<ModelInforPage />} />
@@ -169,5 +172,11 @@ const PaymentSuccessPage = () => (
 const LoginPage = () => (
   <Suspense fallback={<LinearProgress />}>
     <Login />
+  </Suspense>
+);
+
+const UserInstructionPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <UserInstruction />
   </Suspense>
 );
