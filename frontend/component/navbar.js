@@ -121,7 +121,7 @@ const Button = styled(BaseButton)(
 
 const AvatarWithHover = styled(Avatar)(
   ({ theme }) => `
-
+  background: rgba(60, 60, 60, 0.90);
   &:hover {
     -webkit-filter: brightness(70%);
     -webkit-transition: all 0.1s ease;

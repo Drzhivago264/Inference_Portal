@@ -66,6 +66,7 @@
     "file-saver": "^2.0.5",
     "html-loader": "^5.0.0",
     "html-to-pdfmake": "^2.5.7",
+    "jdenticon": "^3.3.0",
     "js-cookie": "^3.0.5",
     "jszip": "^3.10.1",
     "mui-markdown": "^1.1.13",
