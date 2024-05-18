@@ -76,6 +76,7 @@
     "react-dom": "^18.2.0",
     "react-editor-js": "^2.1.0",
     "react-highlight": "^0.15.0",
+    "react-jdenticon": "^1.1.0",
     "react-markdown": "^9.0.1",
     "react-random-reveal": "^2.0.0",
     "react-router-dom": "^6.23.0",
