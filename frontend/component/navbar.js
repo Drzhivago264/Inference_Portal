@@ -29,6 +29,7 @@ import { Divider, Stack } from '@mui/material';
 import Badge from '@mui/material/Badge';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import CloseIcon from '@mui/icons-material/Close';
+import Jdenticon from 'react-jdenticon';
 const Listbox = styled('ul')(
   ({ theme }) => `
   font-family: 'IBM Plex Sans', sans-serif;
@@ -120,6 +121,7 @@ const Button = styled(BaseButton)(
 
 const AvatarWithHover = styled(Avatar)(
   ({ theme }) => `
+
   &:hover {
     -webkit-filter: brightness(70%);
     -webkit-transition: all 0.1s ease;
@@ -241,10 +243,7 @@ function ResponsiveAppBar() {
   );
   const { colorMode, mode, theme } = useContext(ColorModeContext);
   const { is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name } = useContext(UserContext);
-  const getUserAvatarURL = (user_hashed_key) => {
-    if (!user_hashed_key) return '';
-    return `https://www.gravatar.com/avatar/${user_hashed_key}?s=256&d=identicon&r=PG&f=y&so-version=2`;
-  };
+
   return (
     <AppBarColored position="sticky" elevation={0}>
       <Drawer size="md"
@@ -345,7 +344,8 @@ function ResponsiveAppBar() {
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 variant="dot"
               >
-                <AvatarWithHover src={getUserAvatarURL(user_hashed_key)} sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
+                <AvatarWithHover  sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
+                <Jdenticon size="38" value={user_hashed_key} />
                 </AvatarWithHover>
               </StyledBadge>
               <Box>
@@ -360,7 +360,8 @@ function ResponsiveAppBar() {
             anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
             <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}>
               <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }} mt={1.5} ml={1.5} mr={1.5} >
-                <AvatarWithHover src={getUserAvatarURL(user_hashed_key)} sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
+                <AvatarWithHover  sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
+                <Jdenticon size="38" value={user_hashed_key} />
                 </AvatarWithHover>
                 <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '11rem' }}>
                   <Typography m={1.2} sx={{ fontWeight: 'bold' }} noWrap variant='body1'>
