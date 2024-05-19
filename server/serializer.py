@@ -27,24 +27,15 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('name', 'id')
 
-class UserInstructionCRUDSerializer(serializers.Serializer):
-    default_child = serializers.BooleanField()
-    displayed_name = serializers.CharField()
-    instruct = serializers.CharField()
-    parent = serializers.CharField()
-    code = serializers.CharField()
-    default_editor_template = serializers.CharField()
-    id = serializers.IntegerField()
 
 class UserInstructionGetSerializer(serializers.ModelSerializer):
-    children = serializers.SerializerMethodField()
     class Meta:
         model = UserInstructionTree
-        fields=('id', 'name', 'displayed_name', 'code', 'parent', 'level', 'children', 'default_child')
-    #Return None for lazy loading from the frontend
-    def get_children(self, instance):
-        return None
-
+        fields=('id', 'name', 'displayed_name', 'code', 'parent', 'level', 'children', 'instruct')
+    def get_fields(self):
+            fields = super(UserInstructionGetSerializer, self).get_fields()
+            fields['children'] = UserInstructionGetSerializer(many=True, required=False)
+            return fields
 class LoginSerializer(serializers.Serializer):
     key = serializers.CharField()
 
@@ -96,3 +87,13 @@ class ServerSerializer(serializers.ModelSerializer):
 
     def get_model_price_output(self, instance):
         return instance.hosted_model.output_price if instance.hosted_model else ''
+
+
+class UserInstructionCRUDSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False, allow_null=True)
+    name = serializers.CharField(required=False, allow_null=True)
+    instruction = serializers.CharField(required=False, allow_null=True)
+
+class NestedUserInstructionCRUDSerializer(serializers.Serializer):
+    parent_instruction =  UserInstructionCRUDSerializer(required=False, allow_null=True)
+    childrens = UserInstructionCRUDSerializer(many=True, required=False, allow_null=True)

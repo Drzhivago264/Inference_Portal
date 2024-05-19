@@ -345,7 +345,7 @@ function ResponsiveAppBar() {
                 variant="dot"
               >
                 <AvatarWithHover  sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
-                <Jdenticon size="38" value={user_hashed_key} />
+                {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />} 
                 </AvatarWithHover>
               </StyledBadge>
               <Box>
@@ -361,7 +361,7 @@ function ResponsiveAppBar() {
             <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}>
               <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }} mt={1.5} ml={1.5} mr={1.5} >
                 <AvatarWithHover  sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
-                <Jdenticon size="38" value={user_hashed_key} />
+                {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />} 
                 </AvatarWithHover>
                 <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '11rem' }}>
                   <Typography m={1.2} sx={{ fontWeight: 'bold' }} noWrap variant='body1'>

@@ -9,16 +9,6 @@
  */
 (self["webpackChunkinference_portal"] = self["webpackChunkinference_portal"] || []).push([["frontend_rooms_chat_js"],{
 
-/***/ "./node_modules/@mui/icons-material/GetApp.js":
-/*!****************************************************!*\
-  !*** ./node_modules/@mui/icons-material/GetApp.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-eval("\n\"use client\";\n\nvar _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ \"./node_modules/@babel/runtime/helpers/interopRequireDefault.js\");\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}));\nexports[\"default\"] = void 0;\nvar _createSvgIcon = _interopRequireDefault(__webpack_require__(/*! ./utils/createSvgIcon */ \"./node_modules/@mui/icons-material/utils/createSvgIcon.js\"));\nvar _jsxRuntime = __webpack_require__(/*! react/jsx-runtime */ \"./node_modules/react/jsx-runtime.js\");\nvar _default = exports[\"default\"] = (0, _createSvgIcon.default)( /*#__PURE__*/(0, _jsxRuntime.jsx)(\"path\", {\n  d: \"M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z\"\n}), 'GetApp');\n\n//# sourceURL=webpack://inference_portal/./node_modules/@mui/icons-material/GetApp.js?");
-
-/***/ }),
-
 /***/ "./frontend/component/chat_export.js":
 /*!*******************************************!*\
   !*** ./frontend/component/chat_export.js ***!

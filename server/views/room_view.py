@@ -12,7 +12,7 @@ from server.utils import constant
 
 from hashlib import sha256
 from django.http import HttpRequest
-
+import uuid
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -21,6 +21,7 @@ from rest_framework.decorators import api_view, throttle_classes
 from server.serializer import (RedirectSerializer,
                                InstructionTreeSerializer,
                                MemoryTreeSerializer,
+                               NestedUserInstructionCRUDSerializer,
                                UserInstructionCRUDSerializer,
                                UserInstructionGetSerializer
 
@@ -82,7 +83,8 @@ def user_instruction_tree_api(request):
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         try:
-            root_nodes = UserInstructionTree.objects.filter(user=current_user)
+            root_nodes = UserInstructionTree.objects.filter(
+                user=current_user, level=1)
             serializer = UserInstructionGetSerializer(root_nodes, many=True)
             return Response({'root_nodes': serializer.data}, status=status.HTTP_200_OK)
         except IndexError:
@@ -97,69 +99,67 @@ def crud_user_instruction_tree_api(request):
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         try:
-            serializer = UserInstructionCRUDSerializer(data=request.data)
+            serializer = NestedUserInstructionCRUDSerializer(data=request.data)
             if serializer.is_valid():
-                displayed_name = serializer.data['displayed_name']
-                instruct = serializer.data['instruct']
-                code = serializer.data['code']
-                parent = serializer.data['parent']
-                default_child = serializer.data['default_child']
-                default_editor_template = serializer.data['default_editor_template']
-                id = serializer.data['id']
+                parent_instruction = serializer.data['parent_instruction']
+                childrens = serializer.data['childrens']
+                parent_instruction = UserInstructionCRUDSerializer(
+                    parent_instruction)
+                childrens = UserInstructionCRUDSerializer(childrens, many=True)
                 if request.method == 'POST':
-                    number_root_nodes = UserInstructionTree.objects.filter(
-                        level=0, user=current_user).count()
-                    if number_root_nodes == 0:
-                        root_node = UserInstructionTree.objects.create(name=current_user.apikey.hashed_key,
-                                                                       displayed_name=f"Template of {current_user.apikey.name}",
-                                                                       user=current_user,
-                                                                       default_child=False,
-                                                                       code=""
-                                                                       )
-                        UserInstructionTree.objects.create(name=current_user.apikey.hashed_key+displayed_name,
-                                                           displayed_name=displayed_name,
-                                                           user=current_user,
-                                                           default_child=False,
-                                                           code="",
-                                                           instruct=instruct,
-                                                           default_editor_template=default_editor_template,
-                                                           parent=root_node
-                                                           )
+                    if parent_instruction.data['id'] is not None:
+                        node = UserInstructionTree.objects.get(
+                            id=parent_instruction.data['id'], user=current_user)
+                        node.instruct = parent_instruction.data['instruction']
+                        node.displayed_name = parent_instruction.data['name']
+                        node.save()
+                        for index, c in enumerate(childrens.data):
+                            if index < 4:
+                                if c['id'] is not None:
+                                    child_node = UserInstructionTree.objects.get(
+                                    id=c['id'], user=current_user)
+                                    child_node.instruct = c['instruction']
+                                    child_node.displayed_name = c['name']
+                                    child_node.code = index
+                                    child_node.save()
+                                else:
+                                    UserInstructionTree.objects.create(
+                                    instruct = c['instruction'],
+                                    displayed_name = c['name'],
+                                    name=current_user.apikey.hashed_key + str(uuid.uuid4()),
+                                    parent = node,
+                                    user=current_user,
+                                    code=index)
+                            else:
+                                return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
                     else:
-                        if parent != 'null':
-                            parent_node = UserInstructionTree.get(
-                                user=current_user, displayed_name=parent)
-                            UserInstructionTree.objects.create(name=current_user.apikey.hashed_key+displayed_name,
-                                                               displayed_name=displayed_name,
-                                                               user=current_user,
-                                                               default_child=default_child,
-                                                               code=code,
-                                                               instruct=instruct,
-                                                               default_editor_template=default_editor_template,
-                                                               parent=parent_node
-                                                               )
-                        else:
-                            root_node = UserInstructionTree.objects.get(name=current_user.apikey.hashed_key,
-                                                                        user=current_user,
-                                                                        )
-                            UserInstructionTree.objects.create(name=current_user.apikey.hashed_key+displayed_name,
-                                                               displayed_name=displayed_name,
-                                                               user=current_user,
-                                                               default_child=default_child,
-                                                               code=code,
-                                                               instruct=instruct,
-                                                               default_editor_template=default_editor_template,
-                                                               parent=root_node
-                                                               )
-                elif request.method == 'PUT':
-                    node = UserInstructionTree.objects.get(
-                        id=id, user=current_user)
-                    node.instruct = instruct
-                    node.code = code
-                    node.parent = parent
-                    node.default_child = default_child
-                    node.default_editor_template = default_editor_template
-                    node.save()
+                        try:
+                            grandparent_node = UserInstructionTree.objects.get(user=current_user, level = 0)
+                        except UserInstructionTree.DoesNotExist:
+                            grandparent_node = UserInstructionTree.objects.create(user=current_user, name=current_user.apikey.hashed_key)
+                            
+                        parent_node = UserInstructionTree.objects.create(user=current_user, parent=grandparent_node,
+                                                                         name=current_user.apikey.hashed_key + parent_instruction.data['name'],
+                                                                         displayed_name = parent_instruction.data['name'],
+                                                                         instruct = parent_instruction.data['instruction']
+                                                                         )
+                        for index, c in enumerate(childrens.data):
+                            if index < 4:
+                                node = UserInstructionTree.objects.create(
+                                    user=current_user, 
+                                    parent=parent_node, 
+                                    name=current_user.apikey.hashed_key + str(uuid.uuid4()),
+                                    displayed_name = c['name'],
+                                    instruct= c['instruction'],
+                                    code = index
+                                    )
+                            else:
+                                return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
+
+                             
+                    return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
+          
+
                 elif request.method == 'DELETE':
                     try:
                         node = UserInstructionTree.objects.get(
