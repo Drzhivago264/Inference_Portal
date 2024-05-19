@@ -7,24 +7,23 @@ import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import ResponsiveAppBar from './component/navbar';
-import { ChatParameter } from './component/chatroom_parameters';
-import { ChatBox } from './component/chatbox';
-import { chatsocket } from './component/chatsocket';
-import { ChatExport } from './component/chat_export';
 import Footer from './component/footer';
-import { Typography } from '@mui/material';
+import { Divider, Typography } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import Pagination from '@mui/material/Pagination';
 import Alert from '@mui/material/Alert';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import IconButton from '@mui/material/IconButton';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-
+import FormHelperText from '@mui/material/FormHelperText';
+import FormControl from '@mui/material/FormControl';
 function UserInstruction() {
     const [root_node, setRootNode] = useState(null);
     const [default_expand_node, setDefaultExpandNode] = useState([])
     const [total_node, setTotalNode] = useState(null)
+    const [children_instruction_list, setChildInstructionList] = useState([])
     const treeify = (list, idAttr, parentAttr, childrenAttr) => {
         if (!idAttr) idAttr = 'id';
         if (!parentAttr) parentAttr = 'parent';
@@ -166,10 +165,42 @@ function UserInstruction() {
                                 </Box>}
                         </Grid>
                         <Grid item xs={6}>
+                            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                                <TextField
+                                    id="outlined-multiline-flexible"
+                                    label="Parent Instruction"
+                                    multiline
+                                    rows={4}
+                                    maxRows={8}
+                                />
+                                <Divider />
+                                <DragDropContext>
+                                    <Droppable droppableId="childrens">
+                                        {(provided) => (
+                                            <ul className="childrens"  {...provided.droppableProps} ref={provided.innerRef}>
+                                                <Draggable key="0" draggableId="0" index={0}>
+                                                    {(provided) => (
+                                                        <Box p={1}  className="childrens"
+                                                            ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                                            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                                                                <TextField
+                                                                    label="Children Instruction 1"
+                                                                    multiline
+                                                                    rows={4}
+                                                                    maxRows={8}
+                                                                />
+                                                            </FormControl>
+                                                        </Box>
+                                                    )}
+                                                </Draggable>
 
-                            <Grid item xs={2}>
+                                                {provided.placeholder}
+                                            </ul>
+                                        )}
+                                    </Droppable>
+                                </DragDropContext>
 
-                            </Grid>
+                            </FormControl>
                         </Grid>
                     </Grid>
                 </Box>

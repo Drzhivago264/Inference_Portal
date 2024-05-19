@@ -9,7 +9,7 @@ import TextField from '@mui/material/TextField';
 import { useNavigate } from "react-router-dom";
 import KeyIcon from '@mui/icons-material/Key';
 import InputAdornment from '@mui/material/InputAdornment';
-import ResponsiveAppBar from './component/navbar';
+import ResponsiveAppBar from '../component/navbar.js';
 import Button from '@mui/material/Button';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
@@ -19,15 +19,15 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
-import explaination_ from '../docs/PageContent/mode_explaination.md'
+import explaination_ from '../../docs/PageContent/mode_explaination.md'
 import { Highlight, themes } from 'prism-react-renderer';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Divider from '@mui/material/Divider';
 import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
-import { logout } from './component/check_login';
-import Footer from './component/footer';
-import { UserContext } from './App.js'
-import { getCookie } from './component/getCookie.js';
+import { logout } from '../component/check_login.js';
+import Footer from '../component/footer.js';
+import { UserContext } from '../App.js'
+import { getCookie } from '../component/getCookie.js';
 function Hub() {
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     const [explaination, setMessage] = useState('');
@@ -56,8 +56,7 @@ function Hub() {
                     key: key,
                     check_login: is_authenticated,
                     destination: destination
-                }
-          
+                }          
                 axios.post("/frontend-api/hub-redirect", data, config)
                     .then((response) => {
                         setIsAuthenticated(true)

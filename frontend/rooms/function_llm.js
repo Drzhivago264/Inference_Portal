@@ -11,12 +11,12 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import ResponsiveAppBar from './component/navbar';
-import { OpenAPIParameter } from './component/chatroom_parameters'
-import { ChatBox } from './component/chatbox';
-import { chatsocket } from './component/chatsocket';
-import { ChatExport } from './component/chat_export';
-import Footer from './component/footer';
+import ResponsiveAppBar from '../component/navbar';
+import { OpenAPIParameter } from '../component/chatroom_parameters'
+import { ChatBox } from '../component/chatbox';
+import { chatsocket } from '../component/chatsocket';
+import { ChatExport } from '../component/chat_export';
+import Footer from '../component/footer';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,

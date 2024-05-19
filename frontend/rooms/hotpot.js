@@ -15,15 +15,12 @@ import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
-import ResponsiveAppBar from './component/navbar';
-import { ChatBoxHotpot } from './component/chatbox';
-import { HotpotParameter } from './component/chatroom_parameters'
-import { chatsocket, agentsocket } from './component/chatsocket';
-import { FormControl, FormLabel } from '@mui/material';
-import InputLabel from '@mui/material/InputLabel';
-import Footer from './component/footer';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import ResponsiveAppBar from '../component/navbar';
+import { ChatBoxHotpot } from '../component/chatbox';
+import { HotpotParameter } from '../component/chatroom_parameters'
+import { chatsocket, agentsocket } from '../component/chatsocket';
+import Footer from '../component/footer';
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,

@@ -11,17 +11,17 @@ import { styled } from '@mui/system';
 import { FormControl } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import ResponsiveAppBar from './component/navbar';
+import ResponsiveAppBar from '../component/navbar.js';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Footer from './component/footer';
+import Footer from '../component/footer.js';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';
 import LoginIcon from '@mui/icons-material/Login';
 import { Link, useNavigate } from "react-router-dom";
-import { UserContext } from './App.js'
+import { UserContext } from '../App.js'
 import Divider from '@mui/material/Divider';
-import { getCookie } from './component/getCookie.js';
+import { getCookie } from '../component/getCookie.js';
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
     padding: theme.spacing(4),

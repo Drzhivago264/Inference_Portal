@@ -9,9 +9,9 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Container from '@mui/material/Container';
-import ResponsiveAppBar from './component/navbar';
+import ResponsiveAppBar from '../component/navbar';
 import { Stack } from '@mui/material';
-import Footer from './component/footer';
+import Footer from '../component/footer';
 function ModelInfor() {
     const [server_objects, setMessage] = useState([]);
     const [model_objects, setMessage_model] = useState([]);

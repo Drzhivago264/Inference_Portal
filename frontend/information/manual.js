@@ -2,28 +2,28 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import ResponsiveAppBar from './component/navbar';
+import ResponsiveAppBar from '../component/navbar';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import { Link } from "react-router-dom";
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import authentication_ from '../docs/Manual/authentication.md'
-import behavior_ from '../docs/Manual/behavior.md'
-import behavior_toc from '../docs/Manual/behavior_toc.md'
-import key_ from '../docs/Manual/create_key.md'
-import key_toc from '../docs/Manual/create_key_toc.md'
-import errorlimit_ from '../docs/Manual/error_ratelimit.md'
-import errorlimit_toc from '../docs/Manual/error_ratelimit_toc.md'
-import inference_ from '../docs/Manual/inference.md'
-import inference_toc from '../docs/Manual/inference_toc.md'
-import authentication_toc from '../docs/Manual/authentication_toc.md'
+import authentication_ from '../../docs/Manual/authentication.md'
+import behavior_ from '../../docs/Manual/behavior.md'
+import behavior_toc from '../../docs/Manual/behavior_toc.md'
+import key_ from '../../docs/Manual/create_key.md'
+import key_toc from '../../docs/Manual/create_key_toc.md'
+import errorlimit_ from '../../docs/Manual/error_ratelimit.md'
+import errorlimit_toc from '../../docs/Manual/error_ratelimit_toc.md'
+import inference_ from '../../docs/Manual/inference.md'
+import inference_toc from '../../docs/Manual/inference_toc.md'
+import authentication_toc from '../../docs/Manual/authentication_toc.md'
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import { Highlight, themes } from 'prism-react-renderer';
 import { useParams } from 'react-router';
 import Prism from "prismjs";
-import Footer from './component/footer';
+import Footer from '../component/footer';
 function Manual() {
     useEffect(() => {
         Prism.highlightAll();

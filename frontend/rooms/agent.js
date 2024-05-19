@@ -23,7 +23,7 @@ import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
 import ListSubheader from '@mui/material/ListSubheader';
-import ResponsiveAppBar from './component/navbar';
+import ResponsiveAppBar from '../component/navbar';
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import Quote from "@editorjs/quote"
@@ -35,12 +35,12 @@ const Table = require('editorjs-table');
 const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
 import editorjsCodecup from '@calumk/editorjs-codecup';
 import GetAppIcon from '@mui/icons-material/GetApp';
-import { OpenAPIParameter } from './component/chatroom_parameters';
-import { ChatBox } from './component/chatbox';
-import { agentsocket } from './component/chatsocket';
-import './component/css/editor-js.css';
-import { ChatExport } from './component/chat_export';
-import Footer from './component/footer';
+import { OpenAPIParameter } from '../component/chatroom_parameters';
+import { ChatBox } from '../component/chatbox';
+import { agentsocket } from '../component/chatsocket';
+import '../component/css/editor-js.css';
+import { ChatExport } from '../component/chat_export';
+import Footer from '../component/footer';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 

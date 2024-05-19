@@ -11,16 +11,16 @@ require("prismjs/components/prism-c");
 require("prismjs/components/prism-python");
 require("prismjs/components/prism-bash");
 import Box from '@mui/material/Box';
-import ResponsiveAppBar from './component/navbar';
-import { VerticalNav } from './component/vertical_nav';
+import ResponsiveAppBar from '../component/navbar';
+import { VerticalNav } from '../component/vertical_nav';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import Typography from '@mui/material/Typography';
 import { TypeAnimation } from 'react-type-animation';
-import introduction_ from '../docs/PageContent/introduction.md'
+import introduction_ from '../../docs/PageContent/introduction.md'
 import { Highlight, themes } from 'prism-react-renderer';
-import Footer from './component/footer';
+import Footer from '../component/footer';
 import { Divider } from '@mui/material';
 function Information() {
     useEffect(() => {

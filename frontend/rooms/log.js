@@ -3,8 +3,8 @@ import $ from 'jquery'
 
 import React, { useEffect, useRef, useState } from "react"
 import Container from '@mui/material/Container';
-import ResponsiveAppBar from './component/navbar';
-import Footer from './component/footer';
+import ResponsiveAppBar from '../component/navbar';
+import Footer from '../component/footer';
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import * as pdfMake from 'pdfmake/build/pdfmake.min';
 import JSZip from 'jszip';
@@ -15,8 +15,8 @@ import 'datatables.net-buttons/js/buttons.colVis.mjs';
 import Paper from '@mui/material/Paper';
 import 'datatables.net-buttons/js/buttons.html5.mjs';
 import 'datatables.net-buttons/js/buttons.print.mjs';
-require('./component/css/dataTables.dataTables.css')
-require('./component/css/buttons.dataTables.css')
+require('../component/css/dataTables.dataTables.css')
+require('../component/css/buttons.dataTables.css')
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 function Log() {
     $.DataTable = require('datatables.net')
@@ -51,13 +51,10 @@ function Log() {
                 destroy: true,
             }
         )
-
         return function () {
             table.destroy()
         }
-
     }, [])
-
     return (
         <Container maxWidth={false} disableGutters>
             <title>Models</title>

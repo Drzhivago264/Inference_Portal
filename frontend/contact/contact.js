@@ -15,13 +15,13 @@ import Typography from '@mui/material/Typography';
 import EmailIcon from '@mui/icons-material/Email';
 import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import ResponsiveAppBar from './component/navbar';
+import ResponsiveAppBar from '../component/navbar.js';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Footer from './component/footer';
+import Footer from '../component/footer.js';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';
-import { getCookie } from './component/getCookie.js';
+import { getCookie } from '../component/getCookie.js';
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
     padding: theme.spacing(4),
