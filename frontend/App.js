@@ -10,20 +10,20 @@ import {
 } from "react-router-dom";
 import { check_login, logout } from './component/check_login';
 
-const ModelInfor = lazy(() => import("./model.js"));
-const Hub = lazy(() => import("./redirect.js"));
-const Information = lazy(() => import("./introduction.js"));
-const Agent = lazy(() => import("./agent.js"));
-const Chat = lazy(() => import("./chat.js"));
-const Contact = lazy(() => import("./contact.js"));
-const KeyManagement = lazy(() => import("./key_management.js"));
-const Hotpot = lazy(() => import("./hotpot.js"));
-const FunctionLLM = lazy(() => import("./function_llm.js"));
-const Manual = lazy(() => import("./manual.js"));
-const APIDoc = lazy(() => import("./api_doc.js"));
-const Log = lazy(() => import("./log.js"));
-const PaymentSuccess = lazy(() => import("./payment_success.js"));
-const Login = lazy(() => import("./login.js"))
+const ModelInfor = lazy(() => import("./information/model.js"));
+const Hub = lazy(() => import("./rooms/redirect.js"));
+const Information = lazy(() => import("./introduction/introduction.js"));
+const Agent = lazy(() => import("./rooms/agent.js"));
+const Chat = lazy(() => import("./rooms/chat.js"));
+const Contact = lazy(() => import("./contact/contact.js"));
+const KeyManagement = lazy(() => import("./key_management/key_management.js"));
+const Hotpot = lazy(() => import("./rooms/hotpot.js"));
+const FunctionLLM = lazy(() => import("./rooms/function_llm.js"));
+const Manual = lazy(() => import("./information/manual.js"));
+const APIDoc = lazy(() => import("./information/api_doc.js"));
+const Log = lazy(() => import("./rooms/log.js"));
+const PaymentSuccess = lazy(() => import("./key_management/payment_success.js"));
+const Login = lazy(() => import("./key_management/login.js"))
 const UserInstruction = lazy(() => import("./user_instruction.js"))
 
 export const ColorModeContext = React.createContext({ toggleColorMode: () => { } });
