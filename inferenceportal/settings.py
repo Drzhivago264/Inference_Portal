@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '34.198.186.123',
                  "professorparakeet.com", "www.professorparakeet.com"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://34.198.186.123:443",
