@@ -30,8 +30,10 @@ import FolderIcon from '@mui/icons-material/Folder';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { getCookie } from './component/getCookie';
 import LoadingButton from '@mui/lab/LoadingButton';
+import Snackbar from '@mui/material/Snackbar';
 function UserInstruction() {
     const [loading, setLoading] = useState(false);
+    const [savesuccess, setSaveSuccess] = useState(false);
     const [template_list, setTemplateList] = useState([])
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [add_child_error, setAddChildError] = useState(false)
@@ -41,30 +43,28 @@ function UserInstruction() {
     ])
     const [default_parent_instruction, setDefaultParentInstruction] = useState({ id: null, name: "", instruction: "" });
     const handleOnDragEnd = (result) => {
-        const items = children_instruction_list;
+        const items = Array.from(children_instruction_list);
+
         const [reorderedItem] = items.splice(result.source.index, 1);
         items.splice(result.destination.index, 0, reorderedItem);
+        console.log(items)
         setChildInstructionList(items);
 
     }
 
-    const updateTemplateName = (v) => {
+    const updateParentTemplate = (v, property) => {
         const new_parent_instruction = default_parent_instruction
-        new_parent_instruction['name'] = v
+        new_parent_instruction[property] = v
         setDefaultParentInstruction(new_parent_instruction)
 
         const new_template_list = [...template_list]
         const new_template = { ...template_list[default_parent_instruction['template_list_index']] }
-        new_template['name'] = v
+        new_template[property] = v
         new_template_list[default_parent_instruction['template_list_index']] = new_template
         setTemplateList(new_template_list)
     }
 
-    const updateParentInstruction = (v) => {
-        const new_parent_instruction = default_parent_instruction
-        new_parent_instruction['instruction'] = v
-        setDefaultParentInstruction(new_parent_instruction)
-    }
+
 
     const submitTemplate = () => {
         setLoading(true)
@@ -79,13 +79,13 @@ function UserInstruction() {
             "parent_instruction": default_parent_instruction,
             "childrens": children_instruction_list
         }
-        console.log(data)
-        console.log(data)
+
         axios.post("/frontend-api/crud-user-instruction", data, config)
             .then((response) => {
-                console.log(response)
-                request_instruction()
+                setSaveSuccess(true)
                 setLoading(false)
+
+
             }).catch(error => {
                 setLoading(false)
             });
@@ -139,7 +139,7 @@ function UserInstruction() {
             }
         }
     }
-    function addChild(operation) {
+    const addChild = (operation) => {
         let length = children_instruction_list.length
 
         if (length < 3) {
@@ -176,33 +176,49 @@ function UserInstruction() {
                     if (template_object.data.root_nodes.length >= 5) {
                         setAddParentError(true)
                     }
-                    for (let template in template_object.data.root_nodes) {
-                        if (template == 0) {
-                            setDefaultParentInstruction({
-                                'template_list_index': template,
+                    if (template_object.data.root_nodes.length == 0) {
+
+                        setTemplateList([{
+                            'template_list_index': 0,
+                            'id': null,
+                            'name': "Empty template",
+                            'instruction': "",
+                            'children': [{
+                                'id': null,
+                                'name': "",
+                                'instruction': "",
+                            }],
+                        }])
+
+                    }
+                    else {
+                        for (let template in template_object.data.root_nodes) {
+                            if (template == 0) {
+                                setDefaultParentInstruction({
+                                    'template_list_index': template,
+                                    'id': template_object.data.root_nodes[template]['id'],
+                                    'name': template_object.data.root_nodes[template]['displayed_name'],
+                                    'instruction': template_object.data.root_nodes[template]['instruct']
+                                })
+                                let default_child_instruction = []
+                                for (let c in template_object.data.root_nodes[template].children) {
+                                    default_child_instruction.push({
+                                        'id': template_object.data.root_nodes[0].children[c]['id'],
+                                        'name': template_object.data.root_nodes[0].children[c]['displayed_name'],
+                                        'instruction': template_object.data.root_nodes[0].children[c]['instruct']
+                                    })
+                                }
+                                setChildInstructionList(default_child_instruction)
+                            }
+                            template_list.push({
                                 'id': template_object.data.root_nodes[template]['id'],
                                 'name': template_object.data.root_nodes[template]['displayed_name'],
-                                'instruction': template_object.data.root_nodes[template]['instruct']
+                                'instruction': template_object.data.root_nodes[template]['instruct'],
+                                'children': template_object.data.root_nodes[template]['children']
                             })
-                            let default_child_instruction = []
-                            for (let c in template_object.data.root_nodes[template].children) {
-          
-                                default_child_instruction.push({
-                                    'id': template_object.data.root_nodes[0].children[c]['id'],
-                                    'name': template_object.data.root_nodes[0].children[c]['displayed_name'],
-                                    'instruction': template_object.data.root_nodes[0].children[c]['instruct']
-                                })
-                            }
-                            setChildInstructionList(default_child_instruction)
                         }
-                        template_list.push({
-                            'id': template_object.data.root_nodes[template]['id'],
-                            'name': template_object.data.root_nodes[template]['displayed_name'],
-                            'instruction': template_object.data.root_nodes[template]['instruct'],
-                            'children': template_object.data.root_nodes[template]['children']
-                        })
+                        setTemplateList(template_list)
                     }
-                    setTemplateList(template_list)
                 }
             }))
             .catch(error => {
@@ -221,10 +237,8 @@ function UserInstruction() {
                 <Box m={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={4}>
-
                             <Typography mt={1} mb={1} variant='body1'>
                                 Instruction Template
-
                             </Typography>
                             <List>
                                 {template_list.map((t, index) => {
@@ -245,43 +259,56 @@ function UserInstruction() {
                                         </ListItemButton>
                                     )
                                 })}
-
                                 {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent (5).</Alert>}
 
-                                {!add_parent_error && <IconButton aria-label="add" onClick={() => { addParent("add") }}>
-                                    <AddCircleOutlineIcon />
-                                </IconButton>
+                                {!add_parent_error &&
+                                    <Box display="flex"
+                                        justifyContent="center"
+                                        alignItems="center">
+                                        <IconButton aria-label="add" onClick={() => { addParent("add") }}>
+                                            <AddCircleOutlineIcon />
+                                        </IconButton>
+                                    </Box>
                                 }
-
                             </List>
-
                         </Grid>
                         <Grid item xs={8}>
                             <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                                <TextField
-                                    label="Template Name"
-                                    multiline
-                                    maxRows={1}
-                                    InputLabelProps={{ shrink: true }}
-                                    defaultValue={default_parent_instruction['name']}
-                                    onChange={(e) => { updateTemplateName(e.target.value) }}
-                                    inputProps={{ maxLength: 35 }}
-                                />
+                                {template_list.map((t, index) => {
 
-                                <Box mt={1} mb={1} display="flex">
-                                    <FormControl fullWidth variant="standard">
-                                        <TextField
-                                            label="Parent Instruction"
-                                            multiline
-                                            minRows={4}
-                                            maxRows={8}
-                                            InputLabelProps={{ shrink: true }}
-                                            onChange={(e) => { updateParentInstruction(e.target.value) }}
-                                            defaultValue={default_parent_instruction['instruction']}
-                                            inputProps={{ maxLength: 2500 }}
-                                        />
-                                    </FormControl>
-                                </Box>
+                                    if (selectedIndex == index) {
+                                        return (
+                                            <Box key={index} display="flex">
+                                                <FormControl fullWidth variant="standard">
+                                                    <Stack direction="column" spacing={1} mb={1} style={{ width: '100%' }}>
+                                                        <TextField
+                                                            label="Template Name"
+                                                            multiline
+                                                            maxRows={1}
+                                                            InputLabelProps={{ shrink: true }}
+                                                            defaultValue={t['name']}
+                                                            onChange={(e) => { updateParentTemplate(e.target.value, 'name') }}
+                                                            inputProps={{ maxLength: 35 }}
+                                                        />
+
+                                                        <TextField
+                                                            label="Parent Instruction"
+                                                            multiline
+                                                            minRows={4}
+                                                            maxRows={8}
+                                                            InputLabelProps={{ shrink: true }}
+                                                            onChange={(e) => { updateParentTemplate(e.target.value, 'instruction') }}
+                                                            defaultValue={t['instruction']}
+                                                            inputProps={{ maxLength: 2500 }}
+                                                        />
+                                                    </Stack>
+                                                </FormControl>
+
+                                            </Box>
+                                        )
+                                    }
+                                })}
+
                                 <Divider />
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="childrens">
@@ -289,50 +316,45 @@ function UserInstruction() {
                                             <Box className="childrens"  {...provided.droppableProps} ref={provided.innerRef}>
                                                 {children_instruction_list && children_instruction_list.map((child, index) => {
                                                     return (
-
-                                                        <Draggable key={index} draggableId={child.name + index} index={index}>
+                                                        <Draggable key={child.id} draggableId={`${child.id}`} index={index}>
                                                             {(provided) => (
-                                                                <Box mt={1} className="childrens"
-                                                                    ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                                                    <Stack direction="row" spacing={2}>
+                                                                <Box mt={1} mb={1} display='flex' ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                                                    <Stack direction="row" spacing={2} style={{ width: '100%' }}>
                                                                         <Box>
                                                                             <IconButton aria-label="delete" >
                                                                                 <DragHandleIcon />
                                                                             </IconButton>
                                                                         </Box>
-                                                                        <FormControl fullWidth variant="standard">
-                                                                            <Box mt={1} display='flex'>
-                                                                                <FormControl fullWidth variant="standard">
-                                                                                    <TextField
-                                                                                        label={`Children No.${index} Name`}
-                                                                                        inputProps={{ maxLength: 35 }}
-                                                                                        maxRows={1}
-                                                                
-                                                                                        defaultValue={child.name}
-                                                                                        InputLabelProps={{ shrink: true }}
-                                                                                        onChange={(e) => handleTextFieldChange(index, "name", e.target.value)}
-                                                                                    />
-                                                                                </FormControl>
-                                                                            </Box>
-                                                                            <Box mt={1} display='flex'>
-                                                                                <FormControl fullWidth variant="standard">
-                                                                                    <TextField
-                                                                                        label={`Child No.${index} Instruction`}
-                                                                                        multiline
-                                                                                        minRows={4}
-                                                                                        inputProps={{ maxLength: 2500 }}
-                                                                                        InputLabelProps={{ shrink: true }}
-                                                                                        maxRows={8}
-                                                                                        defaultValue={child.instruction}
-                                                                                        onChange={(e) => handleTextFieldChange(index, "instruction", e.target.value)}
-                                                                                    />
-                                                                                </FormControl>
+                                                                        <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                                                                            <TextField
+                                                                                label={`Children No.${index} Name`}
+                                                                                inputProps={{ maxLength: 35 }}
+                                                                                maxRows={1}
+                                                                                defaultValue={child.name}
+                                                                                InputLabelProps={{ shrink: true }}
+                                                                                onChange={(e) => handleTextFieldChange(index, "name", e.target.value)}
+                                                                            />
+                                                                            <Box mt={1} mb={1}>
+                                                                                <TextField
+                                                                                    label={`Child No.${index} Instruction`}
+                                                                                    multiline
+                                                                                    minRows={4}
+                                                                                    inputProps={{ maxLength: 2500 }}
+                                                                                    InputLabelProps={{ shrink: true }}
+                                                                                    fullWidth
+                                                                                    maxRows={8}
+                                                                                    defaultValue={child.instruction}
+                                                                                    onChange={(e) => handleTextFieldChange(index, "instruction", e.target.value)}
+                                                                                />
                                                                             </Box>
                                                                         </FormControl>
+
                                                                     </Stack>
                                                                 </Box>
                                                             )}
                                                         </Draggable>
+
+
                                                     )
                                                 })}
                                                 {provided.placeholder}
@@ -354,7 +376,12 @@ function UserInstruction() {
                                     <IconButton aria-label="delete" onClick={() => { addChild("delete") }}>
                                         <DeleteIcon />
                                     </IconButton>
-
+                                    <Snackbar
+                                        open={savesuccess}
+                                        autoHideDuration={3000}
+                                        onClose={() => { setSaveSuccess(false) }}
+                                        message="Saved !"
+                                    />
                                 </Box>
                             </FormControl>
                         </Grid>
