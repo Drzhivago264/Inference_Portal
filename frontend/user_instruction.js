@@ -34,17 +34,23 @@ import Snackbar from '@mui/material/Snackbar';
 function UserInstruction() {
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
+    const [saveerror, setSaveError] = useState(false);
+    const [saveerrormessage, setSaveErrorMessage] = useState('');
+    const [deletesuccess, setDeleteSuccess] = useState(false);
+    const [deleteerror, setDeleteError] = useState(false);
+    const [deleteerrormessage, setDeleteErrorMessage] = useState('');
     const [template_list, setTemplateList] = useState([])
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [add_child_error, setAddChildError] = useState(false)
     const [add_parent_error, setAddParentError] = useState(false)
+    const [is_save, setIsSaved] = useState(true)
+    const [reload, setReload] = useState(false)
     const [children_instruction_list, setChildInstructionList] = useState([
         { id: null, name: "", instruction: "" },
     ])
-    const [default_parent_instruction, setDefaultParentInstruction] = useState({ id: null, name: "", instruction: "" });
+    const [default_parent_instruction, setDefaultParentInstruction] = useState({ id: null, name: "Empty Template", instruction: "", template_list_index: 0 });
     const handleOnDragEnd = (result) => {
         const items = Array.from(children_instruction_list);
-
         const [reorderedItem] = items.splice(result.source.index, 1);
         items.splice(result.destination.index, 0, reorderedItem);
         console.log(items)
@@ -56,16 +62,13 @@ function UserInstruction() {
         const new_parent_instruction = default_parent_instruction
         new_parent_instruction[property] = v
         setDefaultParentInstruction(new_parent_instruction)
-
         const new_template_list = [...template_list]
         const new_template = { ...template_list[default_parent_instruction['template_list_index']] }
         new_template[property] = v
         new_template_list[default_parent_instruction['template_list_index']] = new_template
         setTemplateList(new_template_list)
     }
-
-
-
+    
     const submitTemplate = () => {
         setLoading(true)
         const csrftoken = getCookie('csrftoken');
@@ -79,23 +82,44 @@ function UserInstruction() {
             "parent_instruction": default_parent_instruction,
             "childrens": children_instruction_list
         }
-
-        axios.post("/frontend-api/crud-user-instruction", data, config)
+        axios.post("/frontend-api/post-user-instruction", data, config)
             .then((response) => {
+                setReload(true)
                 setSaveSuccess(true)
                 setLoading(false)
-
-
+                setIsSaved(true)
+                
             }).catch(error => {
                 setLoading(false)
+                setSaveError(true)
+                setSaveErrorMessage(error.response.data.detail)
             });
     }
+
+    const deleteTemplate = (id) => {
+        const csrftoken = getCookie('csrftoken');
+        axios.delete("/frontend-api/delete-user-instruction", {
+            data: {
+                'id': id
+            },
+            headers: {
+                'content-type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            }
+        })
+            .then((response) => {
+                setDeleteSuccess(true)
+            }).catch(error => {
+                setDeleteError(true)
+                setDeleteErrorMessage(error.response.data.detail)
+            });
+    }
+
     const handleTextFieldChange = (index, property, value) => {
         const new_children_instruction_list = [...children_instruction_list];
         const new_instruction = { ...children_instruction_list[index] };
         new_instruction[property] = value;
         new_children_instruction_list[index] = new_instruction;
-        console.log(new_children_instruction_list)
         setChildInstructionList(new_children_instruction_list)
     }
 
@@ -106,8 +130,8 @@ function UserInstruction() {
             'name': template_list[index]['name'],
             'instruction': template_list[index]['instruction']
         }
+
         setDefaultParentInstruction(new_parent)
-        console.log(default_parent_instruction)
         let default_child_instruction = []
         if (template_list[index]['children'] === null) {
             setChildInstructionList([{ id: null, name: "", instruction: "" }])
@@ -122,7 +146,6 @@ function UserInstruction() {
             }
             setChildInstructionList(default_child_instruction)
         }
-
         setSelectedIndex(index);
     };
 
@@ -130,26 +153,71 @@ function UserInstruction() {
         let length = template_list.length
         if (length < 5) {
             if (operation == "add") {
+                setIsSaved(false)
                 const new_template_list = [...template_list, { id: null, name: "Empty Template", instruction: "", children: null }];
                 setTemplateList(new_template_list)
                 setChildInstructionList([
                     { id: null, name: "", instruction: "" },
                 ])
-                setDefaultParentInstruction({ 'id': null, 'name': "", 'instruction': "", 'template_list_index': null })
+                setDefaultParentInstruction({ 'id': null, 'name': "Empty Template", 'instruction': "", 'template_list_index': template_list.length -1})
+                setSelectedIndex(template_list.length )
+            }
+            else if (operation == "delete") {
+                const new_template_list = [...template_list];
+                const node_to_delete = template_list[selectedIndex]
+                if (node_to_delete.id !== null) {
+                    deleteTemplate(node_to_delete.id)
+                    setDeleteSuccess(true)
+                }
+                new_template_list.splice(selectedIndex, 1);
+                setTemplateList(new_template_list)
+                if (new_template_list.length > 0) {
+                    handleListItemClick(null, 0)
+                    setDeleteSuccess(true)
+                }
+                else {
+                    handleListItemClick(null, 0)
+                    const new_template_list = [{ id: null, name: "Empty Template", instruction: "", children: null }];
+                    setTemplateList(new_template_list)
+                    setChildInstructionList([
+                        { id: null, name: "", instruction: "" },
+                    ])
+                    setDefaultParentInstruction({ 'id': null, 'name': "Empty template", 'instruction': "", 'template_list_index': null })
+                }
+            }
+        }
+        else {
+            setAddParentError(true)
+            if (operation == "delete") {
+                const new_template_list = [...template_list];
+                const node_to_delete = template_list[selectedIndex]
+                if (node_to_delete.id !== null) {
+                    deleteTemplate(node_to_delete.id)
+                    setDeleteSuccess(true)
+                }
+                new_template_list.splice(selectedIndex, 1);
+                setTemplateList(new_template_list)
+                setAddParentError(false)
+                handleListItemClick(null, 0)
             }
         }
     }
     const addChild = (operation) => {
         let length = children_instruction_list.length
-
         if (length < 3) {
             setAddChildError(false)
             if (operation == "add") {
                 const new_children_instruction_list = [...children_instruction_list, { id: null, name: "", instruction: "" }];
                 setChildInstructionList(new_children_instruction_list)
             }
-            else {
+            else if (operation == "delete") {
                 const new_children_instruction_list = [...children_instruction_list];
+                const node_to_delete = children_instruction_list[children_instruction_list.length - 1]
+                console.log(node_to_delete.id)
+                if (node_to_delete.id !== null) {
+                    deleteTemplate(node_to_delete.id)
+                    setDeleteSuccess(true)
+                }
                 new_children_instruction_list.splice(-1);
                 setChildInstructionList(new_children_instruction_list)
             }
@@ -158,26 +226,28 @@ function UserInstruction() {
             setAddChildError(true)
             if (operation == "delete") {
                 const new_children_instruction_list = [...children_instruction_list];
+                const node_to_delete = children_instruction_list[children_instruction_list.length - 1]
+                if (node_to_delete.id !== null) {
+                    deleteTemplate(node_to_delete.id)
+                    setDeleteSuccess(true)
+                }
                 new_children_instruction_list.splice(-1);
                 setChildInstructionList(new_children_instruction_list)
                 setAddChildError(false)
             }
-
         }
     }
-    const request_instruction = () => {
+    const request_instruction = (index) => {
         axios.all([
             axios.get('/frontend-api/get-user-instruction'),
         ])
             .then(axios.spread((template_object) => {
-
                 if (template_object.status != 204) {
                     let template_list = []
                     if (template_object.data.root_nodes.length >= 5) {
                         setAddParentError(true)
                     }
                     if (template_object.data.root_nodes.length == 0) {
-
                         setTemplateList([{
                             'template_list_index': 0,
                             'id': null,
@@ -193,7 +263,7 @@ function UserInstruction() {
                     }
                     else {
                         for (let template in template_object.data.root_nodes) {
-                            if (template == 0) {
+                            if (template == index) {
                                 setDefaultParentInstruction({
                                     'template_list_index': template,
                                     'id': template_object.data.root_nodes[template]['id'],
@@ -203,11 +273,12 @@ function UserInstruction() {
                                 let default_child_instruction = []
                                 for (let c in template_object.data.root_nodes[template].children) {
                                     default_child_instruction.push({
-                                        'id': template_object.data.root_nodes[0].children[c]['id'],
-                                        'name': template_object.data.root_nodes[0].children[c]['displayed_name'],
-                                        'instruction': template_object.data.root_nodes[0].children[c]['instruct']
+                                        'id': template_object.data.root_nodes[template].children[c]['id'],
+                                        'name': template_object.data.root_nodes[template].children[c]['displayed_name'],
+                                        'instruction': template_object.data.root_nodes[template].children[c]['instruct']
                                     })
                                 }
+                                
                                 setChildInstructionList(default_child_instruction)
                             }
                             template_list.push({
@@ -226,8 +297,13 @@ function UserInstruction() {
             });
     }
     useEffect(() => {
-        request_instruction()
-    }, []);
+        if (!reload) {
+            request_instruction(0)
+        }
+        else {
+            request_instruction(selectedIndex)
+        }
+    }, [reload]);
 
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
@@ -259,23 +335,25 @@ function UserInstruction() {
                                         </ListItemButton>
                                     )
                                 })}
-                                {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent (5).</Alert>}
-
-                                {!add_parent_error &&
-                                    <Box display="flex"
-                                        justifyContent="center"
-                                        alignItems="center">
+                                <Box display="flex" justifyContent="center"
+                                    alignItems="center">
+                                    {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent (5).</Alert>}
+                                    {!add_parent_error && is_save &&
                                         <IconButton aria-label="add" onClick={() => { addParent("add") }}>
                                             <AddCircleOutlineIcon />
                                         </IconButton>
-                                    </Box>
-                                }
+                                    }
+
+                                    <IconButton aria-label="delete" onClick={() => { addParent("delete") }}>
+                                        <DeleteIcon />
+                                    </IconButton>
+
+                                </Box>
                             </List>
                         </Grid>
                         <Grid item xs={8}>
                             <FormControl fullWidth sx={{ m: 1 }} variant="standard">
                                 {template_list.map((t, index) => {
-
                                     if (selectedIndex == index) {
                                         return (
                                             <Box key={index} display="flex">
@@ -290,7 +368,6 @@ function UserInstruction() {
                                                             onChange={(e) => { updateParentTemplate(e.target.value, 'name') }}
                                                             inputProps={{ maxLength: 35 }}
                                                         />
-
                                                         <TextField
                                                             label="Parent Instruction"
                                                             multiline
@@ -309,7 +386,6 @@ function UserInstruction() {
                                     }
                                 })}
 
-                                <Divider />
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="childrens">
                                         {(provided) => (
@@ -348,13 +424,10 @@ function UserInstruction() {
                                                                                 />
                                                                             </Box>
                                                                         </FormControl>
-
                                                                     </Stack>
                                                                 </Box>
                                                             )}
                                                         </Draggable>
-
-
                                                     )
                                                 })}
                                                 {provided.placeholder}
@@ -365,8 +438,9 @@ function UserInstruction() {
                                 <Box display="flex"
                                     justifyContent="center"
                                     alignItems="center">
-                                    <LoadingButton size="small" loading={loading} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
-
+                                    <Box mr={1}>
+                                        <LoadingButton size="small" loading={loading} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
+                                    </Box>
                                     {add_child_error && <Alert severity="warning">Reaching the maximum number of child (3).</Alert>}
 
                                     {!add_child_error && <IconButton aria-label="add" onClick={() => { addChild("add") }}>
@@ -381,6 +455,24 @@ function UserInstruction() {
                                         autoHideDuration={3000}
                                         onClose={() => { setSaveSuccess(false) }}
                                         message="Saved !"
+                                    />
+                                    <Snackbar
+                                        open={saveerror}
+                                        autoHideDuration={6000}
+                                        onClose={() => { setSaveError(false) }}
+                                        message={saveerrormessage}
+                                    />
+                                    <Snackbar
+                                        open={deletesuccess}
+                                        autoHideDuration={3000}
+                                        onClose={() => { setDeleteSuccess(false) }}
+                                        message="Deleted !"
+                                    />
+                                    <Snackbar
+                                        open={deleteerror}
+                                        autoHideDuration={6000}
+                                        onClose={() => { setDeleteError(false) }}
+                                        message={deleteerrormessage}
                                     />
                                 </Box>
                             </FormControl>
