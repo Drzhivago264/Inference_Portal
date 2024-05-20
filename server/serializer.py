@@ -89,11 +89,15 @@ class ServerSerializer(serializers.ModelSerializer):
         return instance.hosted_model.output_price if instance.hosted_model else ''
 
 
-class UserInstructionCRUDSerializer(serializers.Serializer):
+class UserInstructionCreateSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False, allow_null=True)
     name = serializers.CharField(required=False, allow_null=True)
     instruction = serializers.CharField(required=False, allow_null=True)
 
-class NestedUserInstructionCRUDSerializer(serializers.Serializer):
-    parent_instruction =  UserInstructionCRUDSerializer(required=False, allow_null=True)
-    childrens = UserInstructionCRUDSerializer(many=True, required=False, allow_null=True)
+class NestedUserInstructionCreateSerializer(serializers.Serializer):
+    parent_instruction =  UserInstructionCreateSerializer(required=False, allow_null=True)
+    childrens = UserInstructionCreateSerializer(many=True, required=False, allow_null=True)
+
+
+class UserInstructionDeleteCreateSerializer(serializers.Serializer):
+    id =  serializers.IntegerField()

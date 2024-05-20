@@ -21,8 +21,9 @@ from rest_framework.decorators import api_view, throttle_classes
 from server.serializer import (RedirectSerializer,
                                InstructionTreeSerializer,
                                MemoryTreeSerializer,
-                               NestedUserInstructionCRUDSerializer,
-                               UserInstructionCRUDSerializer,
+                               NestedUserInstructionCreateSerializer,
+                               UserInstructionCreateSerializer,
+                               UserInstructionDeleteCreateSerializer,
                                UserInstructionGetSerializer
 
                                )
@@ -91,22 +92,24 @@ def user_instruction_tree_api(request):
             return Response({'detail': "no instruction"}, status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST', 'PUT', "DELETE"])
+@api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
-def crud_user_instruction_tree_api(request):
+def post_user_instruction_tree_api(request):
     current_user = request.user
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        try:
-            serializer = NestedUserInstructionCRUDSerializer(data=request.data)
+        if request.method == 'POST':
+            serializer = NestedUserInstructionCreateSerializer(
+                data=request.data)
             if serializer.is_valid():
                 parent_instruction = serializer.data['parent_instruction']
                 childrens = serializer.data['childrens']
-                parent_instruction = UserInstructionCRUDSerializer(
+                parent_instruction = UserInstructionCreateSerializer(
                     parent_instruction)
-                childrens = UserInstructionCRUDSerializer(childrens, many=True)
-                if request.method == 'POST':
+                childrens = UserInstructionCreateSerializer(
+                    childrens, many=True)
+                if UserInstructionTree.objects.filter(user=current_user).count() <= 15:
                     if parent_instruction.data['id'] is not None:
                         node = UserInstructionTree.objects.get(
                             id=parent_instruction.data['id'], user=current_user)
@@ -117,59 +120,76 @@ def crud_user_instruction_tree_api(request):
                             if index < 4:
                                 if c['id'] is not None:
                                     child_node = UserInstructionTree.objects.get(
-                                    id=c['id'], user=current_user)
+                                        id=c['id'], user=current_user)
                                     child_node.instruct = c['instruction']
                                     child_node.displayed_name = c['name']
                                     child_node.code = index
                                     child_node.save()
                                 else:
                                     UserInstructionTree.objects.create(
-                                    instruct = c['instruction'],
-                                    displayed_name = c['name'],
-                                    name=current_user.apikey.hashed_key + str(uuid.uuid4()),
-                                    parent = node,
-                                    user=current_user,
-                                    code=index)
+                                        instruct=c['instruction'],
+                                        displayed_name=c['name'],
+                                        name=current_user.apikey.hashed_key +
+                                        str(uuid.uuid4()),
+                                        parent=node,
+                                        user=current_user,
+                                        code=index)
                             else:
                                 return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
                     else:
                         try:
-                            grandparent_node = UserInstructionTree.objects.get(user=current_user, level = 0)
+                            grandparent_node = UserInstructionTree.objects.get(
+                                user=current_user, level=0)
                         except UserInstructionTree.DoesNotExist:
-                            grandparent_node = UserInstructionTree.objects.create(user=current_user, name=current_user.apikey.hashed_key)
-                            
+                            grandparent_node = UserInstructionTree.objects.create(
+                                user=current_user, name=current_user.apikey.hashed_key)
+
                         parent_node = UserInstructionTree.objects.create(user=current_user, parent=grandparent_node,
-                                                                         name=current_user.apikey.hashed_key + parent_instruction.data['name'],
-                                                                         displayed_name = parent_instruction.data['name'],
-                                                                         instruct = parent_instruction.data['instruction']
-                                                                         )
+                                                                        name=current_user.apikey.hashed_key +
+                                                                        str(uuid.uuid4()),
+                                                                        displayed_name=parent_instruction.data['name'],
+                                                                        instruct=parent_instruction.data['instruction']
+                                                                        )
                         for index, c in enumerate(childrens.data):
                             if index < 4:
                                 node = UserInstructionTree.objects.create(
-                                    user=current_user, 
-                                    parent=parent_node, 
-                                    name=current_user.apikey.hashed_key + str(uuid.uuid4()),
-                                    displayed_name = c['name'],
-                                    instruct= c['instruction'],
-                                    code = index
-                                    )
+                                    user=current_user,
+                                    parent=parent_node,
+                                    name=current_user.apikey.hashed_key +
+                                    str(uuid.uuid4()),
+                                    displayed_name=c['name'],
+                                    instruct=c['instruction'],
+                                    code=index
+                                )
                             else:
                                 return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
-
-                             
+                    
                     return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
-          
+                else:
+                    return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
 
-                elif request.method == 'DELETE':
-                    try:
-                        node = UserInstructionTree.objects.get(
-                            id=id, user=current_user)
-                        node.delete()
-                        return Response({'detail': "deleted"}, status=status.HTTP_200_OK)
-                    except UserInstructionTree.DoesNotExist:
-                        return Response({'detail': "instruction does not exist"}, status=status.HTTP_204_NO_CONTENT)
-        except IndexError:
-            return Response({'detail': "no instruction"}, status=status.HTTP_204_NO_CONTENT)
+@api_view(['DELETE'])
+@throttle_classes([AnonRateThrottle])
+def delete_user_instruction_tree_api(request):
+    current_user = request.user
+    if current_user.id == None:
+        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        serializer = UserInstructionDeleteCreateSerializer(
+        data=request.data)
+        if serializer.is_valid():
+            id = serializer.data['id']
+            try:
+                node = UserInstructionTree.objects.get(
+                    id=id, user=current_user)
+                node.delete()
+                return Response({'detail': "Deleted"}, status=status.HTTP_200_OK)
+            except UserInstructionTree.DoesNotExist:
+                return Response({'detail': "Instruction does not exist"}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'detail': "Wrong Post Data, Failed!"}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
