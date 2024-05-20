@@ -51,12 +51,10 @@ export const UserVeticalNav = ({ navigate }) => {
             }).catch(error => {
 
             });
-
-
     }
     return (
         <List>
-            <ListItemButton disabled sx={{ height: 38 }} component={Link} href="/frontend/user-instruction">
+            <ListItemButton sx={{ height: 38 }} component={Link} href="/frontend/user-instruction">
                 <ListItemIcon>
                     <HistoryEduIcon />
                 </ListItemIcon>
