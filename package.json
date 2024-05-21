@@ -70,6 +70,7 @@
     "js-cookie": "^3.0.5",
     "jszip": "^3.10.1",
     "mui-markdown": "^1.1.13",
+    "nanoid": "^5.0.7",
     "pdfmake": "^0.2.10",
     "prism-react-renderer": "^2.3.1",
     "prismjs": "^1.29.0",

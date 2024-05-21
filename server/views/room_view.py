@@ -87,9 +87,16 @@ def user_instruction_tree_api(request):
             root_nodes = UserInstructionTree.objects.filter(
                 user=current_user, level=1)
             serializer = UserInstructionGetSerializer(root_nodes, many=True)
-            return Response({'root_nodes': serializer.data}, status=status.HTTP_200_OK)
+            return Response({'root_nodes': serializer.data,
+                              'max_child_num': constant.MAX_CHILD_TEMPLATE_PER_USER,
+                              'max_parent_num': constant.MAX_PARENT_TEMPLATE_PER_USER
+                              }, status=status.HTTP_200_OK)
         except IndexError:
-            return Response({'detail': "no instruction"}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'detail': "no instruction",
+                              'max_child_num': constant.MAX_CHILD_TEMPLATE_PER_USER,
+                              'max_parent_num': constant.MAX_PARENT_TEMPLATE_PER_USER
+                              },
+                            status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['POST'])
@@ -109,26 +116,26 @@ def post_user_instruction_tree_api(request):
                     parent_instruction)
                 childrens = UserInstructionCreateSerializer(
                     childrens, many=True)
-                if UserInstructionTree.objects.filter(user=current_user).count() <= 15:
+                if UserInstructionTree.objects.filter(user=current_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
                     if parent_instruction.data['id'] is not None:
                         node = UserInstructionTree.objects.get(
                             id=parent_instruction.data['id'], user=current_user)
-                        node.instruct = parent_instruction.data['instruction']
-                        node.displayed_name = parent_instruction.data['name']
+                        node.instruct = parent_instruction.data['instruct']
+                        node.displayed_name = parent_instruction.data['displayed_name']
                         node.save()
                         for index, c in enumerate(childrens.data):
                             if index < 4:
                                 if c['id'] is not None:
                                     child_node = UserInstructionTree.objects.get(
                                         id=c['id'], user=current_user)
-                                    child_node.instruct = c['instruction']
-                                    child_node.displayed_name = c['name']
+                                    child_node.instruct = c['instruct']
+                                    child_node.displayed_name = c['displayed_name']
                                     child_node.code = index
                                     child_node.save()
                                 else:
                                     UserInstructionTree.objects.create(
-                                        instruct=c['instruction'],
-                                        displayed_name=c['name'],
+                                        instruct=c['instruct'],
+                                        displayed_name=c['displayed_name'],
                                         name=current_user.apikey.hashed_key +
                                         str(uuid.uuid4()),
                                         parent=node,
@@ -147,8 +154,8 @@ def post_user_instruction_tree_api(request):
                         parent_node = UserInstructionTree.objects.create(user=current_user, parent=grandparent_node,
                                                                         name=current_user.apikey.hashed_key +
                                                                         str(uuid.uuid4()),
-                                                                        displayed_name=parent_instruction.data['name'],
-                                                                        instruct=parent_instruction.data['instruction']
+                                                                        displayed_name=parent_instruction.data['displayed_name'],
+                                                                        instruct=parent_instruction.data['instruct']
                                                                         )
                         for index, c in enumerate(childrens.data):
                             if index < 4:
@@ -157,8 +164,8 @@ def post_user_instruction_tree_api(request):
                                     parent=parent_node,
                                     name=current_user.apikey.hashed_key +
                                     str(uuid.uuid4()),
-                                    displayed_name=c['name'],
-                                    instruct=c['instruction'],
+                                    displayed_name=c['displayed_name'],
+                                    instruct=c['instruct'],
                                     code=index
                                 )
                             else:

@@ -31,6 +31,7 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { getCookie } from './component/getCookie';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Snackbar from '@mui/material/Snackbar';
+import { nanoid } from 'nanoid'
 function UserInstruction() {
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
@@ -45,30 +46,26 @@ function UserInstruction() {
     const [add_parent_error, setAddParentError] = useState(false)
     const [is_save, setIsSaved] = useState(true)
     const [reload, setReload] = useState(false)
+
+    const [max_parent_num, setMaxParentNum] = useState(null)
+    const [max_child_num, setMaxChildNum] = useState(null)
     const [children_instruction_list, setChildInstructionList] = useState([
-        { id: null, name: "", instruction: "" },
+        { id: null, dislayed_name: "", instruct: "", unique: nanoid() },
     ])
-    const [default_parent_instruction, setDefaultParentInstruction] = useState({ id: null, name: "Empty Template", instruction: "", template_list_index: 0 });
+
     const handleOnDragEnd = (result) => {
         const items = Array.from(children_instruction_list);
         const [reorderedItem] = items.splice(result.source.index, 1);
         items.splice(result.destination.index, 0, reorderedItem);
-        console.log(items)
         setChildInstructionList(items);
-
     }
-
     const updateParentTemplate = (v, property) => {
-        const new_parent_instruction = default_parent_instruction
-        new_parent_instruction[property] = v
-        setDefaultParentInstruction(new_parent_instruction)
         const new_template_list = [...template_list]
-        const new_template = { ...template_list[default_parent_instruction['template_list_index']] }
+        const new_template = { ...template_list[selectedIndex] }
         new_template[property] = v
-        new_template_list[default_parent_instruction['template_list_index']] = new_template
+        new_template_list[selectedIndex] = new_template
         setTemplateList(new_template_list)
     }
-    
     const submitTemplate = () => {
         setLoading(true)
         const csrftoken = getCookie('csrftoken');
@@ -79,7 +76,7 @@ function UserInstruction() {
             }
         }
         const data = {
-            "parent_instruction": default_parent_instruction,
+            "parent_instruction": template_list[selectedIndex],
             "childrens": children_instruction_list
         }
         axios.post("/frontend-api/post-user-instruction", data, config)
@@ -88,14 +85,13 @@ function UserInstruction() {
                 setSaveSuccess(true)
                 setLoading(false)
                 setIsSaved(true)
-                
+                setReload(false)
             }).catch(error => {
                 setLoading(false)
                 setSaveError(true)
                 setSaveErrorMessage(error.response.data.detail)
             });
     }
-
     const deleteTemplate = (id) => {
         const csrftoken = getCookie('csrftoken');
         axios.delete("/frontend-api/delete-user-instruction", {
@@ -121,27 +117,20 @@ function UserInstruction() {
         new_instruction[property] = value;
         new_children_instruction_list[index] = new_instruction;
         setChildInstructionList(new_children_instruction_list)
+        updateParentTemplate(new_children_instruction_list, 'children')
     }
 
     const handleListItemClick = (event, index) => {
-        const new_parent = {
-            'template_list_index': index,
-            'id': template_list[index]['id'],
-            'name': template_list[index]['name'],
-            'instruction': template_list[index]['instruction']
-        }
-
-        setDefaultParentInstruction(new_parent)
         let default_child_instruction = []
         if (template_list[index]['children'] === null) {
-            setChildInstructionList([{ id: null, name: "", instruction: "" }])
+            setChildInstructionList([{ id: null, displayed_name: "", instruct: "", unique: nanoid() }])
         }
         else {
             for (let c in template_list[index]['children']) {
                 default_child_instruction.push({
                     'id': template_list[index]['children'][c]['id'],
-                    'name': template_list[index]['children'][c]['displayed_name'],
-                    'instruction': template_list[index]['children'][c]['instruct']
+                    'displayed_name': template_list[index]['children'][c]['displayed_name'],
+                    'instruct': template_list[index]['children'][c]['instruct']
                 })
             }
             setChildInstructionList(default_child_instruction)
@@ -151,18 +140,17 @@ function UserInstruction() {
 
     const addParent = (operation) => {
         let length = template_list.length
-        if (length < 5) {
+        if (length < max_parent_num) {
             if (operation == "add") {
                 setIsSaved(false)
-                const new_template_list = [...template_list, { id: null, name: "Empty Template", instruction: "", children: null }];
+                const new_template_list = [...template_list, { id: null, displayed_name: "Empty Template", instruct: "", children: [{ id: null, displayed_name: "", instruct: "", unique:nanoid() }] }];
                 setTemplateList(new_template_list)
-                setChildInstructionList([
-                    { id: null, name: "", instruction: "" },
-                ])
-                setDefaultParentInstruction({ 'id': null, 'name': "Empty Template", 'instruction': "", 'template_list_index': template_list.length -1})
+
+                setChildInstructionList([])
                 setSelectedIndex(template_list.length )
             }
             else if (operation == "delete") {
+                setIsSaved(true)
                 const new_template_list = [...template_list];
                 const node_to_delete = template_list[selectedIndex]
                 if (node_to_delete.id !== null) {
@@ -171,24 +159,24 @@ function UserInstruction() {
                 }
                 new_template_list.splice(selectedIndex, 1);
                 setTemplateList(new_template_list)
-                if (new_template_list.length > 0) {
+                if (new_template_list.length > 1) {
                     handleListItemClick(null, 0)
                     setDeleteSuccess(true)
                 }
                 else {
                     handleListItemClick(null, 0)
-                    const new_template_list = [{ id: null, name: "Empty Template", instruction: "", children: null }];
+                    const new_template_list = [{ id: null, displayed_name: "Empty Template", instruct: "", children: null }];
                     setTemplateList(new_template_list)
                     setChildInstructionList([
-                        { id: null, name: "", instruction: "" },
+                        { id: null, displayed_name: "", instruct: "", unique: nanoid() },
                     ])
-                    setDefaultParentInstruction({ 'id': null, 'name': "Empty template", 'instruction': "", 'template_list_index': null })
                 }
             }
         }
         else {
             setAddParentError(true)
             if (operation == "delete") {
+                setIsSaved(true)
                 const new_template_list = [...template_list];
                 const node_to_delete = template_list[selectedIndex]
                 if (node_to_delete.id !== null) {
@@ -204,16 +192,15 @@ function UserInstruction() {
     }
     const addChild = (operation) => {
         let length = children_instruction_list.length
-        if (length < 3) {
+        if (length < max_child_num) {
             setAddChildError(false)
             if (operation == "add") {
-                const new_children_instruction_list = [...children_instruction_list, { id: null, name: "", instruction: "" }];
+                const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: "", instruct: "", unique: nanoid() }];
                 setChildInstructionList(new_children_instruction_list)
             }
             else if (operation == "delete") {
                 const new_children_instruction_list = [...children_instruction_list];
                 const node_to_delete = children_instruction_list[children_instruction_list.length - 1]
-                console.log(node_to_delete.id)
                 if (node_to_delete.id !== null) {
                     deleteTemplate(node_to_delete.id)
                     setDeleteSuccess(true)
@@ -243,20 +230,24 @@ function UserInstruction() {
         ])
             .then(axios.spread((template_object) => {
                 if (template_object.status != 204) {
+                  
+                    setMaxChildNum(template_object.data.max_child_num)
+                    setMaxParentNum(template_object.data.max_parent_num)
                     let template_list = []
-                    if (template_object.data.root_nodes.length >= 5) {
+                    if (template_object.data.root_nodes.length >= 10) {
                         setAddParentError(true)
                     }
                     if (template_object.data.root_nodes.length == 0) {
                         setTemplateList([{
                             'template_list_index': 0,
                             'id': null,
-                            'name': "Empty template",
-                            'instruction': "",
+                            'displayed_name': "Empty template",
+                            'instruct': "",
                             'children': [{
                                 'id': null,
-                                'name': "",
-                                'instruction': "",
+                                'displayed_name': "",
+                                'instruct': "",
+                                'unique': nanoid()
                             }],
                         }])
 
@@ -264,18 +255,12 @@ function UserInstruction() {
                     else {
                         for (let template in template_object.data.root_nodes) {
                             if (template == index) {
-                                setDefaultParentInstruction({
-                                    'template_list_index': template,
-                                    'id': template_object.data.root_nodes[template]['id'],
-                                    'name': template_object.data.root_nodes[template]['displayed_name'],
-                                    'instruction': template_object.data.root_nodes[template]['instruct']
-                                })
                                 let default_child_instruction = []
                                 for (let c in template_object.data.root_nodes[template].children) {
                                     default_child_instruction.push({
                                         'id': template_object.data.root_nodes[template].children[c]['id'],
-                                        'name': template_object.data.root_nodes[template].children[c]['displayed_name'],
-                                        'instruction': template_object.data.root_nodes[template].children[c]['instruct']
+                                        'displayed_name': template_object.data.root_nodes[template].children[c]['displayed_name'],
+                                        'instruct': template_object.data.root_nodes[template].children[c]['instruct']
                                     })
                                 }
                                 
@@ -283,8 +268,8 @@ function UserInstruction() {
                             }
                             template_list.push({
                                 'id': template_object.data.root_nodes[template]['id'],
-                                'name': template_object.data.root_nodes[template]['displayed_name'],
-                                'instruction': template_object.data.root_nodes[template]['instruct'],
+                                'displayed_name': template_object.data.root_nodes[template]['displayed_name'],
+                                'instruct': template_object.data.root_nodes[template]['instruct'],
                                 'children': template_object.data.root_nodes[template]['children']
                             })
                         }
@@ -293,18 +278,19 @@ function UserInstruction() {
                 }
             }))
             .catch(error => {
-                console.log(error);
+                setMaxChildNum(error.response.data.max_child_num)
+                setMaxParentNum(error.response.data.max_parent_num)
             });
     }
     useEffect(() => {
-        if (!reload) {
-            request_instruction(0)
-        }
-        else {
+        if (reload) {
             request_instruction(selectedIndex)
         }
     }, [reload]);
 
+    useEffect(() => {
+        request_instruction(0)
+    }, []);
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
@@ -331,22 +317,21 @@ function UserInstruction() {
                                             <ListItemText primaryTypographyProps={{
                                                 fontWeight: 'medium',
                                                 variant: 'body2',
-                                            }} primary={t.name} />
+                                            }} primary={t.displayed_name} />
                                         </ListItemButton>
                                     )
                                 })}
                                 <Box display="flex" justifyContent="center"
                                     alignItems="center">
-                                    {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent (5).</Alert>}
+                                    {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent ({max_parent_num}).</Alert>}
                                     {!add_parent_error && is_save &&
                                         <IconButton aria-label="add" onClick={() => { addParent("add") }}>
                                             <AddCircleOutlineIcon />
                                         </IconButton>
                                     }
-
-                                    <IconButton aria-label="delete" onClick={() => { addParent("delete") }}>
+                                    {template_list.length > 1 && <IconButton aria-label="delete" onClick={() => { addParent("delete") }}>
                                         <DeleteIcon />
-                                    </IconButton>
+                                    </IconButton>}
 
                                 </Box>
                             </List>
@@ -364,8 +349,8 @@ function UserInstruction() {
                                                             multiline
                                                             maxRows={1}
                                                             InputLabelProps={{ shrink: true }}
-                                                            defaultValue={t['name']}
-                                                            onChange={(e) => { updateParentTemplate(e.target.value, 'name') }}
+                                                            defaultValue={t['displayed_name']}
+                                                            onChange={(e) => { updateParentTemplate(e.target.value, 'displayed_name') }}
                                                             inputProps={{ maxLength: 35 }}
                                                         />
                                                         <TextField
@@ -374,8 +359,8 @@ function UserInstruction() {
                                                             minRows={4}
                                                             maxRows={8}
                                                             InputLabelProps={{ shrink: true }}
-                                                            onChange={(e) => { updateParentTemplate(e.target.value, 'instruction') }}
-                                                            defaultValue={t['instruction']}
+                                                            onChange={(e) => { updateParentTemplate(e.target.value, 'instruct') }}
+                                                            defaultValue={t['instruct']}
                                                             inputProps={{ maxLength: 2500 }}
                                                         />
                                                     </Stack>
@@ -392,7 +377,7 @@ function UserInstruction() {
                                             <Box className="childrens"  {...provided.droppableProps} ref={provided.innerRef}>
                                                 {children_instruction_list && children_instruction_list.map((child, index) => {
                                                     return (
-                                                        <Draggable key={child.id} draggableId={`${child.id}`} index={index}>
+                                                        <Draggable key={ child.id !== null ? child.id : child.unique} draggableId={`${ child.id !== null ? child.id : child.unique}`} index={index}>
                                                             {(provided) => (
                                                                 <Box mt={1} mb={1} display='flex' ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                                                                     <Stack direction="row" spacing={2} style={{ width: '100%' }}>
@@ -406,9 +391,9 @@ function UserInstruction() {
                                                                                 label={`Children No.${index} Name`}
                                                                                 inputProps={{ maxLength: 35 }}
                                                                                 maxRows={1}
-                                                                                defaultValue={child.name}
+                                                                                defaultValue={child.displayed_name}
                                                                                 InputLabelProps={{ shrink: true }}
-                                                                                onChange={(e) => handleTextFieldChange(index, "name", e.target.value)}
+                                                                                onChange={(e) => handleTextFieldChange(index, "displayed_name", e.target.value)}
                                                                             />
                                                                             <Box mt={1} mb={1}>
                                                                                 <TextField
@@ -419,8 +404,8 @@ function UserInstruction() {
                                                                                     InputLabelProps={{ shrink: true }}
                                                                                     fullWidth
                                                                                     maxRows={8}
-                                                                                    defaultValue={child.instruction}
-                                                                                    onChange={(e) => handleTextFieldChange(index, "instruction", e.target.value)}
+                                                                                    defaultValue={child.instruct}
+                                                                                    onChange={(e) => handleTextFieldChange(index, "instruct", e.target.value)}
                                                                                 />
                                                                             </Box>
                                                                         </FormControl>
@@ -441,7 +426,7 @@ function UserInstruction() {
                                     <Box mr={1}>
                                         <LoadingButton size="small" loading={loading} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
                                     </Box>
-                                    {add_child_error && <Alert severity="warning">Reaching the maximum number of child (3).</Alert>}
+                                    {add_child_error && <Alert severity="warning">Reaching the maximum number of child ({max_child_num}).</Alert>}
 
                                     {!add_child_error && <IconButton aria-label="add" onClick={() => { addChild("add") }}>
                                         <AddCircleOutlineIcon />
