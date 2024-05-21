@@ -91,8 +91,8 @@ class ServerSerializer(serializers.ModelSerializer):
 
 class UserInstructionCreateSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False, allow_null=True)
-    name = serializers.CharField(required=False, allow_null=True)
-    instruction = serializers.CharField(required=False, allow_null=True)
+    displayed_name = serializers.CharField(required=False, allow_null=True)
+    instruct= serializers.CharField(required=False, allow_null=True)
 
 class NestedUserInstructionCreateSerializer(serializers.Serializer):
     parent_instruction =  UserInstructionCreateSerializer(required=False, allow_null=True)

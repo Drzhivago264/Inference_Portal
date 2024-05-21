@@ -4,6 +4,9 @@ SHUTDOWN_INTERVAL = 60
 XMR_PRICE_INTERVAL = 600
 DELETE_KEY_INTERVAL = 86400
 KEY_TTL = 7 #day
+MAX_PARENT_TEMPLATE_PER_USER = 10 #10 Parent templates x 3 Child templates
+MAX_CHILD_TEMPLATE_PER_USER = 3
+
 
 REGION =  "us-east-1"
 MODEL_TEMPLATE_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{}\n\n### Response:\n", 
