@@ -14,7 +14,7 @@ from .models import (Price,
                      MemoryTree,
                      InstructionTree,
                      UserInstructionTree,
-                     Article)
+                     )
 from mptt.admin import DraggableMPTTAdmin
 
 
@@ -42,7 +42,6 @@ admin.site.register(PaymentHistory)
 admin.site.register(LLM)
 admin.site.register(InferenceServer)
 admin.site.register(PromptResponse)
-admin.site.register(Article)
 
 admin.site.register(MemoryTree, DraggableMPTTAdmin, list_display=(
     'tree_actions',

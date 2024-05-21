@@ -2,11 +2,10 @@ from django.shortcuts import render
 from server.models import (
     LLM,
     InferenceServer,
-    Article,
     APIKEY
 )
 from rest_framework import viewsets
-from server.serializer import (ArticleSerializer,
+from server.serializer import (
                                ModelSerializer,
                                ServerSerializer,
                                LoginSerializer
@@ -40,14 +39,6 @@ def check_login(request: HttpRequest) -> Response:
 def log_out(request: HttpRequest) -> Response:
     logout(request)
     return Response({'detail': 'logout'}, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-@throttle_classes([AnonRateThrottle])
-def article_api(request: HttpRequest, name: str, a_type: str) -> Response:
-    page_content = Article.objects.get(name=name, a_type=a_type)
-    serializer = ArticleSerializer(page_content)
-    return Response({'article': serializer.data}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

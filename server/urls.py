@@ -3,7 +3,6 @@ from django.views.generic import TemplateView
 from server.views.response_log import LogListJson
 from server.views.contact import contact_api
 from server.views.information import (
-    article_api,
     model_api,
     check_login,
     log_out,
@@ -69,8 +68,6 @@ urlpatterns = [
     path('frontend/login/',
          TemplateView.as_view(template_name='frontend_index.html')),
 
-    path('frontend-api/article/<str:name>/<str:a_type>',
-         article_api, name='information'),
     path('frontend-api/model/',  model_api, name='model'),
     path('frontend-api/hub-redirect',  hub_redirect_api, name='hub-redirect'),
     path('frontend-api/instruction-tree',
