@@ -22,6 +22,7 @@ import introduction_ from '../../docs/PageContent/introduction.md'
 import { Highlight, themes } from 'prism-react-renderer';
 import Footer from '../component/footer';
 import { Divider } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 function Information() {
     useEffect(() => {
         Prism.highlightAll();
@@ -40,6 +41,13 @@ function Information() {
                 console.log(error);
             });
     }, []);
+    const [destination, setDestination] = React.useState(null)
+    const navigate = useNavigate();
+    React.useEffect(() => {
+      if (destination) {
+        navigate(destination, { replace: true })
+      }
+    }, [destination]);
     return (
         <Container maxWidth={false} disableGutters>
             <title>Introduction</title>
@@ -185,7 +193,7 @@ function Information() {
                     </Grid>
                     <Grid item md={3} lg={2}>
                         <Box mt={10.32} sx={{ minWidth: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
-                            <VerticalNav />
+                            <VerticalNav navigate={setDestination}/>
                         </Box>
                     </Grid>
                 </Grid>

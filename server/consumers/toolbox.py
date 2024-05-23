@@ -111,9 +111,10 @@ class Consumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
 
         else:
+            print(event['max_tokens'])
             try:
                 client = dspy.OpenAI(model=event['choosen_models'], 
-                                    max_tokens=event['max_tokens'],
+                                    max_tokens=event['max_tokens'] ,
                                     top_p = event['top_p'],
                                     presence_penalty = event['presence_penalty'],
                                     frequency_penalty = event['frequency_penalty'],
@@ -128,7 +129,7 @@ class Consumer(AsyncWebsocketConsumer):
                         Summarizer_.__doc__ = f"Compress document in {number_of_word} words."
                     else:
                         Summarizer_ = SummarizeDocument
-                    summarize = dspy.ChainOfThought(Summarizer_)
+                    summarize = dspy.Predict(Summarizer_)
 
                     response = summarize(document=message)
                     await self.send(text_data=json.dumps({"message": response.summary, "stream_id":  unique_response_id, "credit": credit}))
@@ -158,7 +159,7 @@ class Consumer(AsyncWebsocketConsumer):
                     response = predict(document=message)
                     await self.send(text_data=json.dumps({"message": response.topic, "stream_id":  unique_response_id, "credit": credit}))      
                 elif role == "paraphrase":
-                    paraphaser = dspy.ChainOfThought(ParaphaseDocument)
+                    paraphaser = dspy.Predict(ParaphaseDocument)
                     response = paraphaser(document=message)
                     await self.send(text_data=json.dumps({"message": response.paraphased, "stream_id":  unique_response_id, "credit": credit}))
                 elif role == "restyle":
@@ -168,12 +169,11 @@ class Consumer(AsyncWebsocketConsumer):
                         Restyler_.__doc__ = f"""Writing document in {new_style} style."""
                     else:
                         Restyler_ = ChangeWrittingStyle
-                    restyler = dspy.ChainOfThought(Restyler_)
+                    restyler = dspy.Predict(Restyler_)
                     response = restyler(document=message)
                     await self.send(text_data=json.dumps({"message": response.styled, "stream_id":  unique_response_id, "credit": credit}))
                 else:
                     await self.send(text_data=json.dumps({"message": message, "stream_id":  unique_response_id, "credit": credit}))
 
             except Exception as e:
-                print(e)
-                await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
+                await self.send(text_data=json.dumps({"message": f"Error: {e}", "role": "Server", "time": self.time}))

@@ -66,15 +66,25 @@ def hub_redirect_api(request: HttpRequest) -> Response:
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
 def instruction_tree_api(request):
-    root_nodes = InstructionTree.objects.filter(level=0)
-    serializer = InstructionTreeSerializer(root_nodes, many=True)
-    for root in root_nodes:
-        if root.name == "Assignment Agent":
-            default_child_template = root.get_children()
-            serializer_childrend = InstructionTreeSerializer(
-                default_child_template, many=True)
-    return Response({'root_nodes': serializer.data, 'default_children': serializer_childrend.data}, status=status.HTTP_200_OK)
-
+    current_user = request.user
+    if current_user.id == None:
+        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        root_nodes = InstructionTree.objects.filter(level=0)
+        user_root_nodes = UserInstructionTree.objects.filter(level=1, user=current_user)
+        serializer = InstructionTreeSerializer(root_nodes, many=True)
+        user_serializer = InstructionTreeSerializer(user_root_nodes, many=True)
+        for root in root_nodes:
+            if root.name == "Assignment Agent":
+                default_child_template = root.get_children()
+                serializer_children = InstructionTreeSerializer(
+                    default_child_template, many=True)
+                
+        if user_root_nodes.count() > 0:
+            user_serializer_children = InstructionTreeSerializer(user_root_nodes[0].get_children(), many=True)
+            return Response({'root_nodes': serializer.data,'user_root_nodes': user_serializer.data ,'default_children': serializer_children.data, 'default_user_children': user_serializer_children.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({'root_nodes': serializer.data,'user_root_nodes': user_serializer.data ,'default_children': serializer_children.data, 'default_user_children': []}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])

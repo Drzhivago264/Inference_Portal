@@ -115,7 +115,7 @@ function FunctionLLM() {
         else if (e == 'summary') {
             setExtraInstruction(100)
         }
-        else if (e == 'topic' || 'paraphase' || 'sentiment') {
+        else if (e == 'topic' || 'paraphrase' || 'sentiment') {
             setExtraInstruction("")
         }
     }
@@ -136,12 +136,12 @@ function FunctionLLM() {
                                     value={llmfunction}
                                 >
                                     {[{ 'label': 'Summary', 'value': 'summary' },
-                                    { 'label': 'Paraphase', 'value': 'paraphase' },
+                                    { 'label': 'Paraphrase', 'value': 'paraphrase' },
                                     { 'label': 'Predict Emotion', 'value': 'emotion' },
                                     { 'label': 'Predict Sentiment', 'value': 'sentiment' },
                                     { 'label': 'Topic Classification', 'value': 'topic' },
                                     { 'label': 'Restyle', 'value': 'restyle' }].map((func) => {
-                                        if (func.value == 'paraphase' || 'setiment') {
+                                        if (func.value == 'paraphrase' || 'setiment') {
                                             return (
                                                 <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
                                             )
