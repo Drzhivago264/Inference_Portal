@@ -12,7 +12,7 @@ import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import Divider from '@mui/material/Divider';
-import Link from '@mui/material/Link';
+import { Link } from "react-router-dom";
 import LogoutIcon from '@mui/icons-material/Logout';
 import RuleIcon from '@mui/icons-material/Rule';
 import { UserContext } from '../App.js'
@@ -23,12 +23,17 @@ import SavingsIcon from '@mui/icons-material/Savings';
 import { getCookie } from './getCookie.js'
 import axios from 'axios';
 
+
+
 export const UserVeticalNav = ({ navigate }) => {
 
     const { is_authenticated, setIsAuthenticated, user_hashed_key } = React.useContext(UserContext);
     const log_out_ = (setIsAuthenticaed) => {
         logout(setIsAuthenticaed)
         navigate("/");
+    }
+    const other_redirect = (destination) => {
+        navigate(destination)
     }
     const logredirect = () => {
         const csrftoken = getCookie('csrftoken');
@@ -43,18 +48,17 @@ export const UserVeticalNav = ({ navigate }) => {
             check_login: is_authenticated,
             destination: 'log'
         }
-
         axios.post("/frontend-api/hub-redirect", data, config)
             .then((response) => {
-                console.log(response.data.redirect_link)
                 navigate(response.data.redirect_link);
             }).catch(error => {
 
             });
     }
+
     return (
         <List>
-            <ListItemButton sx={{ height: 38 }} component={Link} href="/frontend/user-instruction">
+            <ListItemButton sx={{ height: 38 }} onClick={() => {other_redirect("/frontend/user-instruction")}} >
                 <ListItemIcon>
                     <HistoryEduIcon />
                 </ListItemIcon>
@@ -63,7 +67,7 @@ export const UserVeticalNav = ({ navigate }) => {
                     variant: 'body2',
                 }} primary="Your Templates" />
             </ListItemButton>
-            <ListItemButton sx={{ height: 38 }} disabled onClick={() => { }}>
+            <ListItemButton sx={{ height: 38 }} disabled onClick={() => {other_redirect("")}}>
                 <ListItemIcon>
                     <RuleIcon />
                 </ListItemIcon>
@@ -119,38 +123,41 @@ export const UserVeticalNav = ({ navigate }) => {
     )
 }
 
-export const VerticalNav = () => {
+export const VerticalNav = ({ navigate }) => {
+    const other_redirect = (destination) => {
+        navigate(destination)
+    }
     return (
         <List>
-            <ListItemButton component={Link} href="/frontend/key-management">
+            <ListItemButton onClick={() => {other_redirect("/frontend/key-management")}} >
                 <ListItemIcon>
                     <KeyIcon />
                 </ListItemIcon>
                 <ListItemText primary="Key & Credit" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton button component={Link} href="/frontend/api/docs">
+            <ListItemButton button onClick={() => {other_redirect("/frontend/api/docs")}}>
                 <ListItemIcon>
                     <ApiIcon />
                 </ListItemIcon>
                 <ListItemText primary="APIs" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton button component={Link} href="/frontend/hub">
+            <ListItemButton button onClick={() => {other_redirect("/frontend/hub")}} >
                 <ListItemIcon>
                     <ChatIcon />
                 </ListItemIcon>
                 <ListItemText primary="Chatbots & Agents" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton button component={Link} href="/frontend/manual/key">
+            <ListItemButton button onClick={() => {other_redirect("/frontend/manual/key")}} >
                 <ListItemIcon>
                     <ArticleIcon />
                 </ListItemIcon>
                 <ListItemText primary="Manual" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton button component={Link} href="/frontend/model">
+            <ListItemButton button onClick={() => {other_redirect("/frontend/model")}}>
                 <ListItemIcon>
                     <LayersIcon />
                 </ListItemIcon>
@@ -164,7 +171,7 @@ export const VerticalNav = () => {
                 <ListItemText primary="Construction Zone" />
             </ListItemButton>
             <Divider component="li" />
-            <ListItemButton button component={Link} href="/frontend/contact">
+            <ListItemButton button onClick={() => {other_redirect("/frontend/contact")}}>
                 <ListItemIcon>
                     <EmailIcon />
                 </ListItemIcon>
