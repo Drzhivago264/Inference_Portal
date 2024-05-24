@@ -15,7 +15,7 @@ from server.utils.llm_toolbox import (Emotion,
                                      ChangeWrittingStyle
                                      )
 from server.utils import constant
-from server.pydantic_validator import ToolSchema
+from server.consumers.pydantic_validator import ToolSchema
 from pydantic import ValidationError
 import pytz
 from asgiref.sync import sync_to_async

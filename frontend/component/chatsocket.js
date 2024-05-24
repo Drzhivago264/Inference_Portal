@@ -58,6 +58,10 @@ export function agentsocket(
     setParentInstruct,
     setChildInstruct,
     setDefaultChildTemplateList,
+    use_user_template,
+    setUserParentInstruct,
+    setUserChildInstruct,
+    setDefaultUserChildTemplateList,
     setEditor,
     setCurrentParagraph,
     editorref) {
@@ -72,23 +76,47 @@ export function agentsocket(
         const dataFromServer = JSON.parse(message.data);
         if (dataFromServer) {
             if ((dataFromServer.hasOwnProperty("swap_template"))) {
-                setParentInstruct(dataFromServer.swap_instruction)
-                setChildInstruct(dataFromServer.default_child_instruct)
-                let new_child_template_list = []
-                for (var new_child in dataFromServer.child_template_name_list) {
-                    new_child_template_list.push({ 'name': dataFromServer.child_template_name_list[new_child] })
+
+                if (!use_user_template){
+                    let new_child_template_list = []
+                    for (var new_child in dataFromServer.child_template_name_list) {
+                        new_child_template_list.push({ 'name': dataFromServer.child_template_name_list[new_child] })
+                    }
+                    setParentInstruct(dataFromServer.swap_instruction)
+                    setChildInstruct(dataFromServer.default_child_instruct)     
+                    setDefaultChildTemplateList(new_child_template_list)
+                    if (setEditor) {
+                        setEditor(JSON.parse(dataFromServer.swap_template))
+                    }
+                    if (editorref) {
+                        editorref.current.render(JSON.parse(dataFromServer.swap_template))
+                    }
                 }
-                setDefaultChildTemplateList(new_child_template_list)
-                if (setEditor) {
-                    setEditor(JSON.parse(dataFromServer.swap_template))
-                }
-                if (editorref) {
-                    editorref.current.render(JSON.parse(dataFromServer.swap_template))
+                else {
+                    let new_child_template_list = []
+                    for (var new_child in dataFromServer.child_template_name_list) {
+                        new_child_template_list.push({ 'displayed_name': dataFromServer.child_template_name_list[new_child] })
+                    }
+                    setUserParentInstruct(dataFromServer.swap_instruction)
+                    setUserChildInstruct(dataFromServer.default_child_instruct)
+                    setDefaultUserChildTemplateList(new_child_template_list)
+                    let default_editor = { "time": 1709749130861, "blocks": [{ "id": "1hYKvu7PTO", "type": "header", "data": { "text": "Response", "level": 2 } }, { "id": "SrV68agaen", "type": "paragraph", "data": { "text": "" } }], "version": "2.29.1" }
+                    if (setEditor) {
+                        setEditor(default_editor)
+                    }
+                    if (editorref) {
+                        editorref.current.render(default_editor)
+                    }
                 }
                 dataFromServer.message = ""
             }
             else if ((dataFromServer.hasOwnProperty("child_instruct"))) {
-                setChildInstruct(dataFromServer.child_instruct)
+                if (!use_user_template){
+                    setChildInstruct(dataFromServer.child_instruct)
+                }
+                else {
+                    setUserChildInstruct(dataFromServer.child_instruct)
+                }
                 dataFromServer.message = ""
             }
             else if (dataFromServer.hasOwnProperty("paragraph")) {

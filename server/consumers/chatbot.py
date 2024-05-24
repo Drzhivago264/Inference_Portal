@@ -3,7 +3,7 @@ import uuid
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server.celery_tasks import Inference
 from server.utils import constant
-from server.pydantic_validator import ChatSchema
+from server.consumers.pydantic_validator import ChatSchema
 from pydantic import ValidationError
 import pytz
 from django.utils import timezone

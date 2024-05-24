@@ -5,7 +5,7 @@ from server.models import (
     APIKEY
 )
 from rest_framework import viewsets
-from server.serializer import (
+from server.views.serializer import (
                                ModelSerializer,
                                ServerSerializer,
                                LoginSerializer
