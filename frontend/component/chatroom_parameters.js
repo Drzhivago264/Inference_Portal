@@ -311,7 +311,8 @@ export const HotpotParameter = ({
     earlystopping,
     setEarlyStopping,
     socket_destination,
-    setSocketDestination
+    setSocketDestination,
+    swap_template
 }) => {
     return (
         <Stack direction='column' spacing={1}>
