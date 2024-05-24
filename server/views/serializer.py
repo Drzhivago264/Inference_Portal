@@ -1,11 +1,22 @@
 from rest_framework import serializers
-from .models import LLM, InferenceServer, Product, InstructionTree, MemoryTree, UserInstructionTree
+from server.models import (LLM, 
+                     InferenceServer, 
+                     Product, 
+                     InstructionTree, 
+                     MemoryTree, 
+                     UserInstructionTree
+                     )
 
 
 class InstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstructionTree
         fields = ('instruct', "name", "code", "default_editor_template")
+
+class UserInstructionTreeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInstructionTree
+        fields = ('instruct', "displayed_name", "code", "default_editor_template")
 
 class MemoryTreeSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
@@ -21,7 +32,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('name', 'id')
 
-
+#Recursive Serializer
 class UserInstructionGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInstructionTree
@@ -30,6 +41,7 @@ class UserInstructionGetSerializer(serializers.ModelSerializer):
             fields = super(UserInstructionGetSerializer, self).get_fields()
             fields['children'] = UserInstructionGetSerializer(many=True, required=False)
             return fields
+    
 class LoginSerializer(serializers.Serializer):
     key = serializers.CharField()
 

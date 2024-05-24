@@ -18,8 +18,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.decorators import api_view, throttle_classes
-from server.serializer import (RedirectSerializer,
+from server.views.serializer import (RedirectSerializer,
                                InstructionTreeSerializer,
+                               UserInstructionTreeSerializer,
                                MemoryTreeSerializer,
                                NestedUserInstructionCreateSerializer,
                                UserInstructionCreateSerializer,
@@ -73,7 +74,7 @@ def instruction_tree_api(request):
         root_nodes = InstructionTree.objects.filter(level=0)
         user_root_nodes = UserInstructionTree.objects.filter(level=1, user=current_user)
         serializer = InstructionTreeSerializer(root_nodes, many=True)
-        user_serializer = InstructionTreeSerializer(user_root_nodes, many=True)
+        user_serializer = UserInstructionTreeSerializer(user_root_nodes, many=True)
         for root in root_nodes:
             if root.name == "Assignment Agent":
                 default_child_template = root.get_children()
@@ -81,7 +82,7 @@ def instruction_tree_api(request):
                     default_child_template, many=True)
                 
         if user_root_nodes.count() > 0:
-            user_serializer_children = InstructionTreeSerializer(user_root_nodes[0].get_children(), many=True)
+            user_serializer_children = UserInstructionTreeSerializer(user_root_nodes[0].get_children(), many=True)
             return Response({'root_nodes': serializer.data,'user_root_nodes': user_serializer.data ,'default_children': serializer_children.data, 'default_user_children': user_serializer_children.data}, status=status.HTTP_200_OK)
         else:
             return Response({'root_nodes': serializer.data,'user_root_nodes': user_serializer.data ,'default_children': serializer_children.data, 'default_user_children': []}, status=status.HTTP_200_OK)

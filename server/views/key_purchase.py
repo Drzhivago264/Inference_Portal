@@ -35,7 +35,7 @@ from rest_framework.response import Response
 
 from rest_framework.throttling import AnonRateThrottle
 
-from server.serializer import (CreateKeySerializer, 
+from server.views.serializer import (CreateKeySerializer, 
                                CheckKeySerializer, 
                                ProductSerializer, 
                                StripePaymentSerializer

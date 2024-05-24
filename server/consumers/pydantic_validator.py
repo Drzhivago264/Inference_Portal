@@ -4,7 +4,7 @@ from pydantic import (
     field_validator,
 )
 
-from .utils import constant
+from server.utils import constant
 
 class AgentSchemaMessage(BaseModel):
     message: str
@@ -43,9 +43,11 @@ class AgentSchemaParagraph(BaseModel):
 
 class AgentSchemaInstruct(BaseModel):
     swap_child_instruct: str
+    template_type: str
 
 class AgentSchemaTemplate(BaseModel):
     swap_template: str
+    template_type: str
 
 class ChatSchema(BaseModel):
     message: str

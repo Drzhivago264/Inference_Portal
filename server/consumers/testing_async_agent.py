@@ -2,13 +2,15 @@ import json
 import uuid
 from datetime import datetime
 from django.core.cache import cache
-from server.models import APIKEY, InstructionTree
+from server.models import (APIKEY, 
+                           InstructionTree, 
+                           UserInstructionTree)
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server.celery_tasks import Agent_Inference
 from asgiref.sync import sync_to_async
 from server.utils import constant
-from server.pydantic_validator import (
+from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
     AgentSchemaMessage,
     AgentSchemaParagraph,
@@ -24,23 +26,30 @@ from django.utils import timezone
 
 class Consumer(AsyncWebsocketConsumer):
 
-    async def get_template(self, name):
+    async def get_template(self, name, template_type):
         try:
-            template = await InstructionTree.objects.aget(name=name)
+            if template_type == 'system':
+                template = await InstructionTree.objects.aget(name=name)
+            elif template_type == 'user_template':
+                template = await UserInstructionTree.objects.aget(displayed_name=name, user=self.user)
             return template
-        except InstructionTree.DoesNotExist:
+        except InstructionTree.DoesNotExist or UserInstructionTree.DoesNotExist:
             return False
 
     @database_sync_to_async
-    def get_child_tempalte_name(self, template, name=None):
+    def get_child_template_list(self, template, template_type="system"):
         try:
-            if name is None:
+            if template_type == 'system':
                 child_template = InstructionTree.objects.get(
                     name=template).get_leafnodes()
                 return {"name_list": [c.name for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
-            else:
-                child_template = InstructionTree.objects.get(name=name)
-                return child_template.instruct
+            elif template_type == 'user_template':
+                child_template = UserInstructionTree.objects.get(
+                    displayed_name=template.displayed_name).get_leafnodes()
+                if len(child_template) > 0: 
+                    return {"name_list": [c.displayed_name for c in child_template], "default_child": child_template[0].displayed_name, "default_instruct": child_template[0].instruct}
+                else:
+                    return {"name_list": [], "default_child": "", "default_instruct": ""}
         except Exception as e:
             return e
 
@@ -91,10 +100,12 @@ class Consumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
         elif 'swap_template' in text_data_json:
             try:
-                swap = AgentSchemaTemplate.model_validate_json(
-                    text_data).swap_template
-                swap_template = await self.get_template(swap)
-                child_template = await self.get_child_tempalte_name(swap_template, None)
+                data = AgentSchemaTemplate.model_validate_json(
+                    text_data)
+                swap = data.swap_template
+                template_type = data.template_type
+                swap_template = await self.get_template(swap, template_type)
+                child_template = await self.get_child_template_list(swap_template, template_type)
                 swap_instruction = swap_template.instruct
                 swap_template_ = swap_template.default_editor_template
                 self.current_turn = 0
@@ -107,11 +118,13 @@ class Consumer(AsyncWebsocketConsumer):
                                                       "default_child_instruct": child_template['default_instruct']}))
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
-        elif 'swap_child_instruct' in text_data_json:
+        elif 'swap_child_instruct' in text_data_json:         
             try:
-                swap_child_instruct = AgentSchemaInstruct.model_validate_json(
-                    text_data).swap_child_instruct
-                child_instruct = await self.get_child_tempalte_name(None, swap_child_instruct)
+                data = AgentSchemaInstruct.model_validate_json(text_data)
+                swap_child_instruct = data.swap_child_instruct
+                template_type = data.template_type
+                child_instruct = await self.get_template(swap_child_instruct, template_type)
+                child_instruct = child_instruct.instruct
                 self.current_turn = 0
                 self.session_history = []
                 await self.send(text_data=json.dumps({"child_instruct": child_instruct}))
