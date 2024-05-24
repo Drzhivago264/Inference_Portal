@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -27,7 +27,46 @@ import { getCookie } from './component/getCookie';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Snackbar from '@mui/material/Snackbar';
 import { nanoid } from 'nanoid'
+import { ChatBox } from './component/chatbox';
+import { styled } from '@mui/material/styles';
+import { agentsocket } from './component/chatsocket';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+
+const ChatPaper = styled(Paper)(({ theme }) => ({
+    minWidth: 300,
+    height: 500,
+    overflow: 'auto',
+    padding: theme.spacing(2),
+    ...theme.typography.body2,
+}));
+const ChatInput = styled(TextField)(({ theme }) => ({
+    width: '100%',
+    ...theme.typography.body2,
+}));
+
 function UserInstruction() {
+    const websocket = useRef(null)
+    const messagesEndRef = useRef(null)
+
+    const [choosen_model, setChoosenModel] = useState("gpt-4");
+    const [choosen_template, setChoosenTemplate] = useState("Empty Template");
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+    const [chat_message, setChatMessage] = useState([]);
+    const [usermessage, setUserMessage] = useState("");
+    const [usermessageError, setUserMessageError] = useState(false);
+    const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
+    const [top_p, setTopp] = useState(0.72);
+    const [max_tokens, setMaxToken] = useState(null);
+    const [temperature, setTemperature] = useState(0.73);
+    const [presencepenalty, setPresencePenalty] = useState(0);
+    const [frequencypenalty, setFrequencyPenalty] = useState(0);
+    const [shownthinking, setThinking] = useState(false);
+
+    const [currentparagraph, setCurrentParagraph] = useState(1);
+
+    const [default_user_parent_instruct, setUserParentInstruct] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
     const [saveerror, setSaveError] = useState(false);
@@ -44,7 +83,7 @@ function UserInstruction() {
     const [max_parent_num, setMaxParentNum] = useState(null)
     const [max_child_num, setMaxChildNum] = useState(null)
     const [children_instruction_list, setChildInstructionList] = useState([
-        { id: null, dislayed_name: "", instruct: "", unique: nanoid() },
+        { id: null, dislayed_name: "", instruct: "", unique: nanoid(), add: false },
     ])
 
     const handleOnDragEnd = (result) => {
@@ -60,6 +99,9 @@ function UserInstruction() {
         new_template[property] = v
         new_template_list[selectedIndex] = new_template
         setTemplateList(new_template_list)
+        if (property == "displayed_name") {
+            setChoosenTemplate(v)
+        }
     }
 
     const submitTemplate = () => {
@@ -120,17 +162,19 @@ function UserInstruction() {
     const handleListItemClick = (event, index) => {
         let default_child_instruction = []
         if (template_list[index]['children'] === null) {
-            setChildInstructionList([{ id: null, displayed_name: "", instruct: "", unique: nanoid() }])
+            setChildInstructionList([{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }])
         }
         else {
             for (let c in template_list[index]['children']) {
                 default_child_instruction.push({
                     'id': template_list[index]['children'][c]['id'],
                     'displayed_name': template_list[index]['children'][c]['displayed_name'],
-                    'instruct': template_list[index]['children'][c]['instruct']
+                    'instruct': template_list[index]['children'][c]['instruct'],
+                    'add': false
                 })
             }
             setChildInstructionList(default_child_instruction)
+            setUserParentInstruct(template_list[index]['instruct'])
         }
         setSelectedIndex(index);
     };
@@ -140,7 +184,7 @@ function UserInstruction() {
         if (length < max_parent_num) {
             if (operation == "add") {
                 setIsSaved(false)
-                const new_template_list = [...template_list, { id: null, displayed_name: "Empty Template", instruct: "", children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid() }] }];
+                const new_template_list = [...template_list, { id: null, displayed_name: "Empty Template", instruct: "", children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] }];
                 setTemplateList(new_template_list)
                 setChildInstructionList([])
                 setSelectedIndex(template_list.length)
@@ -164,7 +208,7 @@ function UserInstruction() {
                     const new_template_list = [{ id: null, displayed_name: "Empty Template", instruct: "", children: null }];
                     setTemplateList(new_template_list)
                     setChildInstructionList([
-                        { id: null, displayed_name: "", instruct: "", unique: nanoid() },
+                        { id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false },
                     ])
                 }
             }
@@ -193,7 +237,7 @@ function UserInstruction() {
         if (length < max_child_num) {
             setAddChildError(false)
             if (operation == "add") {
-                const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: "", instruct: "", unique: nanoid() }];
+                const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }];
                 setChildInstructionList(new_children_instruction_list)
             }
             else if (operation == "delete") {
@@ -244,7 +288,8 @@ function UserInstruction() {
                                 'id': null,
                                 'displayed_name': "",
                                 'instruct': "",
-                                'unique': nanoid()
+                                'unique': nanoid(),
+                                'add': false
                             }],
                         }])
                     }
@@ -256,10 +301,11 @@ function UserInstruction() {
                                     default_child_instruction.push({
                                         'id': template_object.data.root_nodes[template].children[c]['id'],
                                         'displayed_name': template_object.data.root_nodes[template].children[c]['displayed_name'],
-                                        'instruct': template_object.data.root_nodes[template].children[c]['instruct']
+                                        'instruct': template_object.data.root_nodes[template].children[c]['instruct'],
+                                        'add': false
                                     })
                                 }
-
+                                setUserParentInstruct(template_object.data.root_nodes[template]['instruct'])
                                 setChildInstructionList(default_child_instruction)
                             }
                             template_list.push({
@@ -278,6 +324,26 @@ function UserInstruction() {
                 setMaxParentNum(error.response.data.max_parent_num)
             });
     }
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
+    }
+
+    useEffect(() => {
+        scrollToBottom()
+    }, [chat_message]);
+
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    var url = window.location.pathname.split("/").filter(path => path !== "")
+    useEffect(() => {
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
+        agentsocket(
+            websocket,
+            setChatMessage,
+            setThinking,
+            document,
+        )
+    }, []);
+
     useEffect(() => {
         if (reload) {
             request_instruction(selectedIndex)
@@ -286,14 +352,50 @@ function UserInstruction() {
     useEffect(() => {
         request_instruction(0)
     }, []);
+    const handleEnter = (e) => {
+        if (e.key == "Enter" && !e.shiftKey) {
+            submitChat()
+        }
+    }
+    const submitChat = () => {
+        if (usermessage == '') {
+            setUserMessageError(true)
+        }
+        else {
+            let user_child_instruct = ''
+            for (let i in children_instruction_list) {
+                if (children_instruction_list[i]['add']) {
+                    user_child_instruct = user_child_instruct + "\n" + children_instruction_list[i]['instruct']
+                }
+            }
+            var data = {
+                'currentParagraph': currentparagraph,
+                'message': usermessage,
+                'choosen_models': choosen_model,
+                'choosen_template': choosen_template,
+                'role': 'Human',
+                'top_p': top_p,
+                'max_tokens': max_tokens,
+                'frequency_penalty': frequencypenalty,
+                'presence_penalty': presencepenalty,
+                'temperature': temperature,
+                'agent_instruction': default_user_parent_instruct,
+                'child_instruction': user_child_instruct
+            }
+            console.log(default_user_parent_instruct)
+            websocket.current.send(JSON.stringify(data))
+            setUserMessage("")
+        }
+    }
+
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
             <ResponsiveAppBar />
-            <Container maxWidth="lg" >
+            <Container maxWidth="xl" >
                 <Box m={2}>
                     <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid item xs={2}>
                             <Typography mt={1} mb={1} variant='body1'>
                                 Instruction Template
                             </Typography>
@@ -312,6 +414,7 @@ function UserInstruction() {
                                             <ListItemText primaryTypographyProps={{
                                                 fontWeight: 'medium',
                                                 variant: 'body2',
+                                                style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
                                             }} primary={t.displayed_name} />
                                         </ListItemButton>
                                     )
@@ -331,148 +434,172 @@ function UserInstruction() {
                             </List>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
-                        <Grid item xs={8}>
-                            <Typography ml={2} mb={1} mt={1} variant='body1'>
-                                Template
-                            </Typography>
-                            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                                {template_list.map((t, index) => {
-                                    if (selectedIndex == index) {
-                                        return (
-                                            <Box key={index} display="flex">
-                                                <Paper elevation={5} style={{ width: '100%' }}>
-                                                    <Box p={2} style={{ width: '100%' }}>
-                                                        <TextField
-                                                            label="Template Name"
-                                                            multiline
-                                                            maxRows={1}
-                                                            InputLabelProps={{ shrink: true }}
-                                                            size="small"
-                                                            defaultValue={t['displayed_name']}
-                                                            onChange={(e) => { updateParentTemplate(e.target.value, 'displayed_name') }}
-                                                            inputProps={{ maxLength: 35 }}
-                                                        />
-                                                        <FormControl fullWidth sx={{ mt: 1 }} variant="standard">
-                                                            <TextField
-                                                                label="Parent Instruction"
-                                                                multiline
-                                                                minRows={6}
-                                                                maxRows={8}
-                                                                InputLabelProps={{ shrink: true }}
-                                                                onChange={(e) => { updateParentTemplate(e.target.value, 'instruct') }}
-                                                                defaultValue={t['instruct']}
-                                                                inputProps={{ maxLength: 2500 }}
-                                                            />
-                                                        </FormControl>
-                                                    </Box>
-                                                </Paper>
-                                            </Box>
-                                        )
-                                    }
-                                })}
-                                <DragDropContext onDragEnd={handleOnDragEnd}>
-                                    <Droppable droppableId="childrens">
-                                        {(provided) => (
-                                            <Box className="childrens"  {...provided.droppableProps} ref={provided.innerRef}>
-                                                {children_instruction_list && children_instruction_list.map((child, index) => {
-                                                    return (
-                                                        <Draggable key={child.id !== null ? child.id : child.unique} draggableId={`${child.id !== null ? child.id : child.unique}`} index={index}>
-                                                            {(provided) => (
-                                                                <Box mt={1} mb={1} display='flex' ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                                                    <Box mr={2} >
-                                                                        <Divider orientation="vertical"  />
+                        <Grid item xs={6}>
+                            <Box mr={4}>
+                                <Typography ml={1} mb={1} mt={1}  variant='body1'>
+                                    Template
+                                </Typography>
+                                <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                                    {template_list.map((t, index) => {
+                                        if (selectedIndex == index) {
+                                            return (
+                                                <Box key={index} display="flex">
+                                                    <Paper elevation={5} style={{ width: '100%' }}>
+                                                        <Box p={2} style={{ width: '100%' }}>
+                                                            <Stack direction="row" justifyContent="space-between">
+                                                                <TextField
+                                                                    label="Template Name"
+                                                                    multiline
+                                                                    maxRows={1}
+                                                                    InputLabelProps={{ shrink: true }}
+                                                                    size="small"
+                                                                    defaultValue={t['displayed_name']}
+                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'displayed_name') }}
+                                                                    inputProps={{ maxLength: 35 }}
+                                                                />
+                                                                <FormControlLabel disabled control={<Checkbox defaultChecked />} label="Added" />
+                                                            </Stack>
+                                                            <FormControl fullWidth sx={{ mt: 1 }} variant="standard">
+                                                                <TextField
+                                                                    label="Parent Instruction"
+                                                                    multiline
+                                                                    minRows={6}
+                                                                    maxRows={8}
+                                                                    InputLabelProps={{ shrink: true }}
+                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'instruct'), setUserParentInstruct(e.target.value) }}
+                                                                    defaultValue={t['instruct']}
+                                                                    inputProps={{ maxLength: 2500 }}
+                                                                />
+
+                                                            </FormControl>
+                                                        </Box>
+                                                    </Paper>
+                                                </Box>
+                                            )
+                                        }
+                                    })}
+                                    <DragDropContext onDragEnd={handleOnDragEnd}>
+                                        <Droppable droppableId="childrens">
+                                            {(provided) => (
+                                                <Box className="childrens"  {...provided.droppableProps} ref={provided.innerRef}>
+                                                    {children_instruction_list && children_instruction_list.map((child, index) => {
+                                                        return (
+                                                            <Draggable key={child.id !== null ? child.id : child.unique} draggableId={`${child.id !== null ? child.id : child.unique}`} index={index}>
+                                                                {(provided) => (
+                                                                    <Box mt={1} mb={1} display='flex' ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                                                        <Box mr={2} >
+                                                                            <Divider orientation="vertical" />
+                                                                        </Box>
+                                                                        <Paper elevation={2} style={{ width: '100%' }}>
+                                                                            <Stack direction="row" p={2} spacing={2} style={{ width: '100%' }}>
+                                                                                <Box>
+                                                                                    <IconButton aria-label="delete" >
+                                                                                        <DragHandleIcon />
+                                                                                    </IconButton>
+                                                                                </Box>
+                                                                                <Box mt={1} mb={1} style={{ width: '100%' }}>
+                                                                                    <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}  >
+                                                                                        <TextField
+                                                                                            label={`Children No.${index} Name`}
+                                                                                            inputProps={{ maxLength: 35 }}
+                                                                                            maxRows={1}
+                                                                                            defaultValue={child.displayed_name}
+                                                                                            size="small"
+                                                                                            InputLabelProps={{ shrink: true }}
+                                                                                            onChange={(e) => handleTextFieldChange(index, "displayed_name", e.target.value)}
+                                                                                        />
+                                                                                        <Box>
+                                                                                            <FormControlLabel control={<Checkbox onChange={(e) => { handleTextFieldChange(index, 'add', e.target.checked) }} />} label="Add" />
+                                                                                            <IconButton aria-label="delete" onClick={() => { addChild("delete", index) }}>
+                                                                                                <DeleteIcon />
+                                                                                            </IconButton>
+                                                                                        </Box>
+                                                                                    </Stack>
+                                                                                    <FormControl fullWidth sx={{ mt: 1 }} variant="standard">
+                                                                                        <TextField
+                                                                                            label={`Child No.${index} Instruction`}
+                                                                                            multiline
+                                                                                            minRows={6}
+                                                                                            inputProps={{ maxLength: 2500 }}
+                                                                                            InputLabelProps={{ shrink: true }}
+                                                                                            fullWidth
+                                                                                            maxRows={8}
+                                                                                            defaultValue={child.instruct}
+                                                                                            onChange={(e) => handleTextFieldChange(index, "instruct", e.target.value)}
+                                                                                        />
+
+                                                                                    </FormControl>
+                                                                                </Box>
+                                                                            </Stack>
+                                                                        </Paper>
                                                                     </Box>
-                                                                    <Paper elevation={2} style={{ width: '100%' }}>
-                                                                        <Stack direction="row" p={2} spacing={2} style={{ width: '100%' }}>
-                                                                            <Box>
-                                                                                <IconButton aria-label="delete" >
-                                                                                    <DragHandleIcon />
-                                                                                </IconButton>
-                                                                            </Box>
-                                                                            <Box mt={1} mb={1} style={{ width: '100%' }}>
-                                                                                <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}  >
-                                                                                    <TextField
-                                                                                        label={`Children No.${index} Name`}
-                                                                                        inputProps={{ maxLength: 35 }}
-                                                                                        maxRows={1}
-                                                                                        defaultValue={child.displayed_name}
-                                                                                        size="small"
-                                                                                        InputLabelProps={{ shrink: true }}
-                                                                                        onChange={(e) => handleTextFieldChange(index, "displayed_name", e.target.value)}
-                                                                                    />
-                                                                                    <Box>
-                                                                                        <IconButton aria-label="delete" onClick={() => { addChild("delete", index) }}>
-                                                                                            <DeleteIcon />
-                                                                                        </IconButton>
-                                                                                    </Box>
-                                                                                </Stack>
-                                                                                <FormControl fullWidth sx={{ mt: 1 }} variant="standard">
-
-                                                                                    <TextField
-                                                                                        label={`Child No.${index} Instruction`}
-                                                                                        multiline
-                                                                                        minRows={6}
-                                                                                        inputProps={{ maxLength: 2500 }}
-                                                                                        InputLabelProps={{ shrink: true }}
-                                                                                        fullWidth
-                                                                                        maxRows={8}
-                                                                                        defaultValue={child.instruct}
-                                                                                        onChange={(e) => handleTextFieldChange(index, "instruct", e.target.value)}
-                                                                                    />
-
-                                                                                </FormControl>
-                                                                            </Box>
-
-                                                                        </Stack>
-                                                                    </Paper>
-                                                                </Box>
-                                                            )}
-                                                        </Draggable>
-                                                    )
-                                                })}
-                                                {provided.placeholder}
-                                            </Box>
-                                        )}
-                                    </Droppable>
-                                </DragDropContext>
-                                <Box display="flex"
-                                    justifyContent="center"
-                                    alignItems="center">
-                                    <Box mr={1}>
-                                        <LoadingButton size="small" loading={loading} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
+                                                                )}
+                                                            </Draggable>
+                                                        )
+                                                    })}
+                                                    {provided.placeholder}
+                                                </Box>
+                                            )}
+                                        </Droppable>
+                                    </DragDropContext>
+                                    <Box display="flex"
+                                        justifyContent="center"
+                                        alignItems="center">
+                                        <Box mr={1}>
+                                            <LoadingButton size="small" loading={loading} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
+                                        </Box>
+                                        {add_child_error && <Alert severity="warning">Reaching the maximum number of child ({max_child_num}).</Alert>}
+                                        {!add_child_error && <IconButton aria-label="add" onClick={() => { addChild("add", null) }}>
+                                            <AddCircleOutlineIcon />
+                                        </IconButton>
+                                        }
+                                        <Snackbar
+                                            open={savesuccess}
+                                            autoHideDuration={3000}
+                                            onClose={() => { setSaveSuccess(false) }}
+                                            message="Saved !"
+                                        />
+                                        <Snackbar
+                                            open={saveerror}
+                                            autoHideDuration={6000}
+                                            onClose={() => { setSaveError(false) }}
+                                            message={saveerrormessage}
+                                        />
+                                        <Snackbar
+                                            open={deletesuccess}
+                                            autoHideDuration={3000}
+                                            onClose={() => { setDeleteSuccess(false) }}
+                                            message="Deleted !"
+                                        />
+                                        <Snackbar
+                                            open={deleteerror}
+                                            autoHideDuration={6000}
+                                            onClose={() => { setDeleteError(false) }}
+                                            message={deleteerrormessage}
+                                        />
                                     </Box>
-                                    {add_child_error && <Alert severity="warning">Reaching the maximum number of child ({max_child_num}).</Alert>}
-
-                                    {!add_child_error && <IconButton aria-label="add" onClick={() => { addChild("add", null) }}>
-                                        <AddCircleOutlineIcon />
-                                    </IconButton>
-                                    }
-                                    <Snackbar
-                                        open={savesuccess}
-                                        autoHideDuration={3000}
-                                        onClose={() => { setSaveSuccess(false) }}
-                                        message="Saved !"
-                                    />
-                                    <Snackbar
-                                        open={saveerror}
-                                        autoHideDuration={6000}
-                                        onClose={() => { setSaveError(false) }}
-                                        message={saveerrormessage}
-                                    />
-                                    <Snackbar
-                                        open={deletesuccess}
-                                        autoHideDuration={3000}
-                                        onClose={() => { setDeleteSuccess(false) }}
-                                        message="Deleted !"
-                                    />
-                                    <Snackbar
-                                        open={deleteerror}
-                                        autoHideDuration={6000}
-                                        onClose={() => { setDeleteError(false) }}
-                                        message={deleteerrormessage}
-                                    />
-                                </Box>
-                            </FormControl>
+                                </FormControl>
+                            </Box>
+                        </Grid>
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
+                        <Grid item xs={4}>
+                            <Typography mt={1} mb={1} variant='body1'>
+                                Testbed
+                            </Typography>
+                            <ChatBox
+                                inputsize={300}
+                                chat_message={chat_message}
+                                usermessage={usermessage}
+                                usermessageError={usermessageError}
+                                ChatPaper={ChatPaper}
+                                ChatInput={ChatInput}
+                                setUserMessage={setUserMessage}
+                                submitChat={submitChat}
+                                messagesEndRef={messagesEndRef}
+                                shownthinking={shownthinking}
+                                handleEnter={handleEnter}
+                            >
+                            </ChatBox>
                         </Grid>
                     </Grid>
                 </Box>

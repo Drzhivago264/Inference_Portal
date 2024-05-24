@@ -184,7 +184,6 @@ function Agent() {
                     .catch((reason) => {
                         console.log(`Editor.js initialization failed because of ${reason}`)
                     });
-
             }))
             .catch(error => {
                 console.log(error);
@@ -218,7 +217,6 @@ function Agent() {
             setCurrentParagraph,
             editorref
         )
-
     }, []);
 
     useEffect(() => {
@@ -243,7 +241,6 @@ function Agent() {
     }, [socket_destination]);
 
     useEffect(() => {
-
         agentsocket(
             websocket,
             setChatMessage,
@@ -420,7 +417,6 @@ function Agent() {
                                 <form onSubmit={handleExport}>
                                     <Typography pb={2}>Editor Export</Typography>
                                     <FormControl  >
-
                                         <Stack direction={'row'} spacing={1}>
                                             <InputLabel id="export-label">Formats</InputLabel>
                                             <Select

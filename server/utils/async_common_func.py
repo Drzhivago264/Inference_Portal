@@ -278,7 +278,10 @@ async def async_agent_inference(self) -> None:
         await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message,
                                                                         response=clean_response, type_="open_ai")
     else:
-        await self.send(text_data=json.dumps({"message": f"Max Turns reached, click on the paragraphs on the left to write again", "role": "Server", "time": self.time}))
+        self.session_history = []
+        self.current_turn = 0
+        await self.send(text_data=json.dumps({"message": "Max Turns reached",  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+        await self.send(text_data=json.dumps({"message": f"Reseting working memory", "role": "Server", "time": self.time}))
 
 
 async def async_agent_inference_with_summary(self) -> None:
@@ -289,13 +292,11 @@ async def async_agent_inference_with_summary(self) -> None:
                     'role': 'user', 'content': f'{self.message}'},
             ]
         elif self.current_turn > 0 and self.current_turn < (self.max_turns-1):
-            print(self.message)
             prompt = [
                 {'role': 'user', 'content': f'Response: {self.message}\n'},
             ]
 
         elif self.current_turn == (self.max_turns-1):
-            print(self.message)
             force_stop = "You should directly give results based on history information. You must summary the interview log for the question with no more than 100 words."
             prompt = [
                 {'role': 'system', 'content': f'Response: {force_stop}\n'}

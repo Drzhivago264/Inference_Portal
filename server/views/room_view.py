@@ -184,9 +184,9 @@ def post_user_instruction_tree_api(request):
                     
                     return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
             else:
-                return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['DELETE'])
 @throttle_classes([AnonRateThrottle])

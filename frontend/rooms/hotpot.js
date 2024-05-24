@@ -127,10 +127,7 @@ function Hotpot() {
                 document,
                 setParentInstruct,
                 setChildInstruct,
-                setDefaultChildTemplateList,
-                null,
-                null,
-                null)
+                setDefaultChildTemplateList,)
         ])
     }, []);
     useEffect(() => {
@@ -163,10 +160,7 @@ function Hotpot() {
                 document,
                 setParentInstruct,
                 setChildInstruct,
-                setDefaultChildTemplateList,
-                null,
-                null,
-                null)
+                setDefaultChildTemplateList,)
         ])
 
     }, [socket_destination]);
@@ -242,11 +236,13 @@ function Hotpot() {
     const swap_template = (template) => {
         agent_websocket.current.send(JSON.stringify({
             'swap_template': template,
+            'template_type': 'system'
         }));
     }
     const swap_child_instruction = (child) => {
         agent_websocket.current.send(JSON.stringify({
             'swap_child_instruct': child,
+            'template_type': 'system'
         }));
     }
     return (
@@ -382,6 +378,7 @@ function Hotpot() {
                                 setChoosenAgentModel={setChoosenAgentModel}
                                 setChoosenChatModel={setChoosenChatModel}
                                 setDuplicateMessage={setDuplicateMessage}
+                                swap_template={swap_template}
                             ></HotpotParameter>
 
                         </Grid>
