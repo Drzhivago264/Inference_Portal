@@ -572,9 +572,9 @@ function Agent() {
                                 </FormControl>}
                                 <Divider></Divider>
                                 {user_template_list.length == 0 && <FormControl disabled>
-                                    <InputLabel id="use-agent-label">Users' Agents</InputLabel>
+                                    <InputLabel id="use-agent-label" shrink>Users' Agents</InputLabel>
                                     <Stack direction='column' spacing={1}>
-                                        {!use_user_template && <Select
+                                        {!use_user_template && <Select notched
                                             labelId="user-agent-label"
                                             id="user-agent-select"
                                             onChange={e => { setChoosenUserTemplate(e.target.value); swap_template(e.target.value, 'user_template') }}
@@ -589,7 +589,7 @@ function Agent() {
                                                 )
                                             })}
                                         </Select>}
-                                        {use_user_template && <Select
+                                        {use_user_template && <Select notched
                                             labelId="user-agent-label"
                                             id="user-agent-select"
                                             onChange={e => { setChoosenUserTemplate(e.target.value); swap_template(e.target.value, 'user_template') }}
