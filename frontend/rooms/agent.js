@@ -162,6 +162,7 @@ function Agent() {
                 setUserTemplateList(instruction_object.data.user_root_nodes)
                 if (instruction_object.data.user_root_nodes.length > 0) {
                     setChoosenUserTemplate(instruction_object.data.user_root_nodes[0].displayed_name)
+                    setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
                 }
                 setChildInstruct(instruction_object.data.default_children[0].instruct)
                 if (instruction_object.data.default_user_children.length > 0) {
@@ -169,7 +170,7 @@ function Agent() {
                 }
                 setDefaultChildTemplateList(instruction_object.data.default_children)
                 setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
-                setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
+               
                 editorref.current.isReady
                     .then(() => {
                         for (var node in instruction_object.data.root_nodes) {
@@ -200,7 +201,7 @@ function Agent() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + + url[url.length - 1] + '/' + timeZone + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination  + url[url.length - 1] + '/' + timeZone + '/');
         agentsocket(
             websocket,
             setChatMessage,
@@ -242,6 +243,7 @@ function Agent() {
     }, [socket_destination]);
 
     useEffect(() => {
+
         agentsocket(
             websocket,
             setChatMessage,
