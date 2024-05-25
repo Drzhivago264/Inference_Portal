@@ -60,7 +60,7 @@ export default function Footer() {
                                 textDecoration: 'none',
                             }}
                         >
-                            Inference
+                            Prof. Parakeet
                         </Typography>   
                     </Box>
                 </Box>

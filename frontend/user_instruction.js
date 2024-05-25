@@ -65,8 +65,6 @@ function UserInstruction() {
 
     const [currentparagraph, setCurrentParagraph] = useState(1);
 
-    const [default_user_parent_instruct, setUserParentInstruct] = useState("");
-
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
     const [saveerror, setSaveError] = useState(false);
@@ -174,7 +172,6 @@ function UserInstruction() {
                 })
             }
             setChildInstructionList(default_child_instruction)
-            setUserParentInstruct(template_list[index]['instruct'])
         }
         setSelectedIndex(index);
     };
@@ -305,7 +302,6 @@ function UserInstruction() {
                                         'add': false
                                     })
                                 }
-                                setUserParentInstruct(template_object.data.root_nodes[template]['instruct'])
                                 setChildInstructionList(default_child_instruction)
                             }
                             template_list.push({
@@ -368,6 +364,7 @@ function UserInstruction() {
                     user_child_instruct = user_child_instruct + "\n" + children_instruction_list[i]['instruct']
                 }
             }
+            let user_parent_instruct = template_list[selectedIndex]['instruct']
             var data = {
                 'currentParagraph': currentparagraph,
                 'message': usermessage,
@@ -379,10 +376,10 @@ function UserInstruction() {
                 'frequency_penalty': frequencypenalty,
                 'presence_penalty': presencepenalty,
                 'temperature': temperature,
-                'agent_instruction': default_user_parent_instruct,
+                'agent_instruction': user_parent_instruct,
                 'child_instruction': user_child_instruct
             }
-            console.log(default_user_parent_instruct)
+
             websocket.current.send(JSON.stringify(data))
             setUserMessage("")
         }
@@ -466,7 +463,7 @@ function UserInstruction() {
                                                                     minRows={6}
                                                                     maxRows={8}
                                                                     InputLabelProps={{ shrink: true }}
-                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'instruct'), setUserParentInstruct(e.target.value) }}
+                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'instruct') }}
                                                                     defaultValue={t['instruct']}
                                                                     inputProps={{ maxLength: 2500 }}
                                                                 />

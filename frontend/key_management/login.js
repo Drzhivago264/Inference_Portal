@@ -104,7 +104,7 @@ function Contact() {
                             <Box sx={{ p: 2 }}>
                                 <form autoComplete="off" onSubmit={handleLogin}>
                                     <FormControl defaultValue="" margin='normal' required>
-                                        <Stack direction={{ xs: 'row' }} spacing={1}>
+                                        <Stack direction={{ xs: 'column' }} spacing={1}>
 
                                             <TextField
                                                 margin="normal"
@@ -137,7 +137,7 @@ function Contact() {
                                                 }}
                                             />
 
-                                            <LoadingButton size="small" loading={loading} variant="contained" type="submit" endIcon={<LoginIcon />}>Login</LoadingButton>
+                                            <LoadingButton loading={loading} variant="contained" type="submit" endIcon={<LoginIcon />}>Login</LoadingButton>
                                         </Stack>
 
                                     </FormControl>
