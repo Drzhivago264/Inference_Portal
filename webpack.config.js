@@ -2,10 +2,11 @@ const path = require('path');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
-  entry: './frontend/index.js',  // path to our input file
+  entry: './frontend/index.js',  
   output: {
-    filename: 'index-bundle.js',  // output bundle file name
-    path: path.resolve(__dirname, './static'),  // path to our Django static directory
+    filename: 'index-bundle.js',  
+    chunkFilename: "[id]-[chunkhash].js",
+    path: path.resolve(__dirname, './static'),  
   },
   module: {
     rules: [

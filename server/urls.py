@@ -1,6 +1,6 @@
 from django.urls import path
 from django.views.generic import TemplateView
-from server.views.response_log import LogListJson
+from server.views.response_log import LogListJson, cost_api
 from server.views.contact import contact_api
 from server.views.information import (
     model_api,
@@ -8,7 +8,7 @@ from server.views.information import (
     log_out,
     log_in
 )
-from server.views.key_purchase import (StripeWebhookView,
+from server.views.key_management import (StripeWebhookView,
                                        SuccessView,
                                        CancelView,
                                        CreateStripeCheckoutSessionView,
@@ -70,6 +70,7 @@ urlpatterns = [
     path('frontend/cost-monitoring/',
          TemplateView.as_view(template_name='frontend_index.html')),
 
+    path('frontend-api/cost/<int:day>/', cost_api, name='cost'),
     path('frontend-api/model/',  model_api, name='model'),
     path('frontend-api/hub-redirect',  hub_redirect_api, name='hub-redirect'),
     path('frontend-api/instruction-tree',
