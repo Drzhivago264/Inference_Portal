@@ -67,7 +67,6 @@ DJANGO_VECTOR_DB = {
     "DEFAULT_MAX_BRUTEFORCE_N": 10_000,
 }
 
-CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -77,9 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 ROOT_URLCONF = 'inferenceportal.urls'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -95,7 +92,6 @@ TEMPLATES = [
         },
     },
 ]
-
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -103,11 +99,9 @@ CACHES = {
     }
 
 }
-
 ASGI_APPLICATION = "inferenceportal.asgi.application"
-
 STATICFILES_DIRS = [BASE_DIR / "static"]
-
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -117,8 +111,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -137,16 +129,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
 STATIC_URL = 'static/'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 

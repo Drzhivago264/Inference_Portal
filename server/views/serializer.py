@@ -4,8 +4,19 @@ from server.models import (LLM,
                      Product, 
                      InstructionTree, 
                      MemoryTree, 
-                     UserInstructionTree
+                     UserInstructionTree,
+                     PromptResponse,
+                    
                      )
+
+class CostSerializer(serializers.ModelSerializer):
+    model = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='name'
+     )
+    class Meta:
+        model = PromptResponse
+        fields = ("number_input_tokens", "number_output_tokens", "created_at", "model", "p_type")
 
 
 class InstructionTreeSerializer(serializers.ModelSerializer):

@@ -379,7 +379,6 @@ function UserInstruction() {
                 'agent_instruction': user_parent_instruct,
                 'child_instruction': user_child_instruct
             }
-
             websocket.current.send(JSON.stringify(data))
             setUserMessage("")
         }
