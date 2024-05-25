@@ -2,8 +2,8 @@ import json
 import uuid
 from datetime import datetime
 from django.core.cache import cache
-from server.models import (APIKEY, 
-                           InstructionTree, 
+from server.models import (APIKEY,
+                           InstructionTree,
                            UserInstructionTree)
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -46,7 +46,7 @@ class Consumer(AsyncWebsocketConsumer):
             elif template_type == 'user_template':
                 child_template = UserInstructionTree.objects.get(
                     displayed_name=template.displayed_name).get_leafnodes()
-                if len(child_template) > 0: 
+                if len(child_template) > 0:
                     return {"name_list": [c.displayed_name for c in child_template], "default_child": child_template[0].displayed_name, "default_instruct": child_template[0].instruct}
                 else:
                     return {"name_list": [], "default_child": "", "default_instruct": ""}
@@ -68,6 +68,8 @@ class Consumer(AsyncWebsocketConsumer):
         self.model_type = ""
         self.room_group_name = "agent_%s" % self.url
         self.use_summary = False
+        self.agent_instruction = ""
+        self.child_instruction = ""
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -110,6 +112,7 @@ class Consumer(AsyncWebsocketConsumer):
                 swap_template_ = swap_template.default_editor_template
                 self.current_turn = 0
                 self.session_history = []
+
                 await self.send(text_data=json.dumps({"message": f"Swap to {text_data_json['swap_template']}, what do you want me to write?", "role": "Server", "time": self.time}))
                 await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
                                                       "swap_template": swap_template_,
@@ -139,6 +142,10 @@ class Consumer(AsyncWebsocketConsumer):
                 elif not text_data_json["message"].strip():
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
                 elif self.key_object and text_data_json["message"].strip():
+                    #Reset the working memory if the instruction(s) change
+                    if (validated.agent_instruction != self.agent_instruction or validated.child_instruction != self.child_instruction) and self.current_turn > 0:
+                        self.current_turn = 0
+                        self.session_history = []
                     self.agent_instruction = validated.agent_instruction
                     self.child_instruction = validated.child_instruction
                     self.working_paragraph = validated.currentParagraph

@@ -63,6 +63,8 @@ class Consumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
         self.model_type = ""
+        self.agent_instruction = ""
+        self.child_instruction = ""        
         self.room_group_name = "agent_%s" % self.url
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -132,6 +134,9 @@ class Consumer(AsyncWebsocketConsumer):
                 elif not text_data_json["message"].strip():
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
                 elif self.key_object and text_data_json["message"].strip():
+                    if (validated.agent_instruction != self.agent_instruction or validated.child_instruction != self.child_instruction) and self.current_turn > 0:
+                        self.current_turn = 0
+                        self.session_history = []
                     agent_instruction = validated.agent_instruction
                     child_instruction = validated.child_instruction
                     currentParagraph = validated.currentParagraph

@@ -96,7 +96,7 @@ export const UserVeticalNav = ({ navigate }) => {
                     variant: 'body2',
                 }} primary="Your Payment History" />
             </ListItemButton>
-            <ListItemButton sx={{ height: 38 }} disabled onClick={() => { }}>
+            <ListItemButton sx={{ height: 38 }} onClick={() => {other_redirect("/frontend/cost-monitoring")}}>
                 <ListItemIcon>
                     <SavingsIcon />
                 </ListItemIcon>

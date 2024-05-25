@@ -67,6 +67,8 @@ urlpatterns = [
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/login/',
          TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/cost-monitoring/',
+         TemplateView.as_view(template_name='frontend_index.html')),
 
     path('frontend-api/model/',  model_api, name='model'),
     path('frontend-api/hub-redirect',  hub_redirect_api, name='hub-redirect'),

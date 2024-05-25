@@ -25,6 +25,7 @@ const Log = lazy(() => import("./rooms/log.js"));
 const PaymentSuccess = lazy(() => import("./key_management/payment_success.js"));
 const Login = lazy(() => import("./key_management/login.js"))
 const UserInstruction = lazy(() => import("./user_instruction.js"))
+const CostMonitoring = lazy(() => import("./key_management/cost_monitoring.js"))
 
 export const ColorModeContext = React.createContext({ toggleColorMode: () => { } });
 export const UserContext = React.createContext();
@@ -68,6 +69,7 @@ export default function App() {
               <Route exact path="" element={<InformationPage />} />
 
               <Route path="/frontend/manual" element={<ManualPage />} />
+              <Route path="/frontend/cost-monitoring" element={<CostMonitoringPage />} />
               <Route path="/frontend/user-instruction" element={<UserInstructionPage />} />
               <Route path="/frontend/manual/:doc" element={<ManualPage />} />
               <Route path="/frontend/api/docs" element={<APIDocPage />} />
@@ -178,5 +180,11 @@ const LoginPage = () => (
 const UserInstructionPage = () => (
   <Suspense fallback={<LinearProgress />}>
     <UserInstruction />
+  </Suspense>
+);
+
+const CostMonitoringPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <CostMonitoring />
   </Suspense>
 );

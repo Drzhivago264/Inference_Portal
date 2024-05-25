@@ -274,7 +274,7 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            Inference
+            Prof. Parakeet
           </Typography>
 
           <Dropdown>
@@ -301,7 +301,7 @@ function ResponsiveAppBar() {
               display: { xs: 'none', sm: 'block' }
             }}
           >
-            Key & Credit
+            Manage Key
           </Button>
           <Button
             key='contact'
