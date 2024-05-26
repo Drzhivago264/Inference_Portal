@@ -78,8 +78,6 @@ def model_api(request: HttpRequest) -> Response:
                      }, status=status.HTTP_200_OK)
 
 
-
-
 def handler_403(request: HttpRequest, exception: None = None) -> HttpResponse:
     return render(request, 'error_html/403.html', status=403)
 

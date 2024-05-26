@@ -1,6 +1,4 @@
-
-import $ from 'jquery'
-
+import axios from 'axios';
 import React, { useEffect, useRef, useState } from "react"
 import Container from '@mui/material/Container';
 import ResponsiveAppBar from '../component/navbar';
@@ -17,80 +15,279 @@ import 'datatables.net-buttons/js/buttons.html5.mjs';
 import 'datatables.net-buttons/js/buttons.print.mjs';
 require('../component/css/dataTables.dataTables.css')
 require('../component/css/buttons.dataTables.css')
-import faker from 'faker';
+import dayjs from 'dayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+import Grid from '@mui/material/Grid';
+import moment from 'moment';
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-  } from 'chart.js';
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-  );
-  
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+
 function CostMonitoring() {
-    $.DataTable = require('datatables.net')
-    const tableRef = useRef()
-    const options = {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-          title: {
-            display: true,
-            text: 'Work in Progress, Stay Tuned!!!',
-          },
-        },
-      };
-      
-      const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-      
-      const data = {
-        labels,
-        datasets: [
-          {
-            label: 'Dataset 1',
-            data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-          },
-          {
-            label: 'Dataset 2',
-            data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
-          },
-        ],
-      };
-      
-   
-    return (
-        <Container maxWidth={false} disableGutters>
-            <title>Cost Monitoring</title>
-            <ResponsiveAppBar />
-            <Container maxWidth="xl">
-                <Box mt={4} sx={{ overflow: 'auto' }}>
-                    <Paper pt={2} variant="outlined" sx={{ overflow: 'auto' }} >
-                        <Box p={5}>
-                        <Bar options={options} data={data} />
-                        </Box>
-                    </Paper>
+  const format_to_hour = "YYYY-MM-DD HH:mm"
+
+  const [data_by_date, setDataByDate] = useState(null);
+  const [data_total, setDataTotal] = useState(null);
+  const [enddate, setEnddate] = useState(moment().format(format_to_hour));
+  const [startdate, setStartDate] = useState(moment().subtract(7, 'days').format(format_to_hour));
+  const [enddate_total, setEnddateTotal] = useState(moment().format(format_to_hour));
+  const [startdate_total, setStartDateTotal] = useState(moment().subtract(7, 'days').format(format_to_hour));
+  function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+  useEffect(() => {
+    axios.all([
+      axios.get(`/frontend-api/cost/${startdate}/${enddate}`),
+    ])
+      .then(axios.spread((log_object) => {
+        let labels = []
+        let model_list = []
+        let datasets = []
+        for (let l in log_object.data.cost_by_model) {
+          if (!labels.includes(log_object.data.cost_by_model[l]['created_at__date'])) {
+            labels.push(log_object.data.cost_by_model[l]['created_at__date'])
+          }
+          if (!model_list.includes(log_object.data.cost_by_model[l]['model__name'])) {
+            model_list.push(log_object.data.cost_by_model[l]['model__name'])
+          }
+        }
+        for (let m in model_list) {
+          let sum_input_tokens_list = []
+          let sum_output_tokens_list = []
+          for (let l in labels) {
+            var result = log_object.data.cost_by_model.filter(
+              function (data) { return data.model__name == model_list[m] && data.created_at__date == labels[l] }
+            )
+            if (result.length > 0) {
+              sum_input_tokens_list.push(result[0].sum_input_tokens)
+              sum_output_tokens_list.push(result[0].sum_output_tokens)
+            }
+          }
+          datasets.push(
+            {
+              label: `Input Tokens ${model_list[m]}`,
+              data: sum_input_tokens_list,
+              backgroundColor: getRandomColor(),
+              stack: 'Stack 0',
+            },
+            {
+              label: `Output Tokens ${model_list[m]}`,
+              data: sum_output_tokens_list,
+              backgroundColor: getRandomColor(),
+              stack: 'Stack 1',
+            },
+          )
+        }
+        let data_ = {
+          labels,
+          datasets
+        };
+        setDataByDate(data_)
+      }))
+      .catch(error => {
+        console.log(error);
+      });
+  }, [startdate, enddate]);
+
+  useEffect(() => {
+    axios.all([
+      axios.get(`/frontend-api/cost/${startdate_total}/${enddate_total}`),
+    ])
+      .then(axios.spread((log_object) => {
+        let labels = ["Total"]
+        let model_list = []
+        let datasets = []
+        for (let l in log_object.data.cost_by_model) {
+          if (!model_list.includes(log_object.data.cost_by_model[l]['model__name'])) {
+            model_list.push(log_object.data.cost_by_model[l]['model__name'])
+          }
+        }
+        for (let m in model_list) {
+          let sum_input_tokens = 0
+          let sum_output_tokens = 0
+          for (let l in labels) {
+            var result = log_object.data.cost_by_model.filter(
+              function (data) { return data.model__name == model_list[m] }
+            )
+            if (result.length > 0) {
+              sum_input_tokens += result[0].sum_input_tokens
+              sum_output_tokens += result[0].sum_output_tokens
+            }
+          }
+          datasets.push(
+            {
+              label: `Input Tokens ${model_list[m]}`,
+              data: [sum_input_tokens],
+              backgroundColor: getRandomColor(),
+            },
+            {
+              label: `Output Tokens ${model_list[m]}`,
+              data: [sum_output_tokens],
+              backgroundColor: getRandomColor(),
+            },
+          )
+
+        }
+        console.log(datasets)
+        let data_ = {
+          labels,
+          datasets
+        };
+        setDataTotal(data_)
+      }))
+      .catch(error => {
+        console.log(error);
+      });
+  }, [startdate_total, enddate_total]);
+
+  const options_by_date = {
+    maintainAspectRatio: false,
+    responsive: true,
+    scales: {
+      x: {
+        stacked: true,
+      },
+      y: {
+        stacked: true,
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+
+      },
+      title: {
+        display: true,
+        text: 'Token Consumption By Day',
+      },
+      tooltip: {
+
+        callbacks: {
+          footer: function (context) {
+            return `Cost: ${context[0].raw} (tokens) × 0 (USD) = 0 (USD)`;
+          }
+        }
+      }
+    }
+  };
+  const options_total = {
+    maintainAspectRatio: false,
+    responsive: true,
+    scales: {
+      x: {
+        stacked: true,
+      },
+      y: {
+        stacked: true,
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',       
+      },
+      title: {
+        display: true,
+        text: 'Token Consumption Total',
+      },
+      tooltip: {
+        callbacks: {
+          footer: function (context) {
+            return `Cost: ${context[0].raw} (tokens) × 0 (USD) = 0 (USD)`;
+          }
+        }
+      }
+    }
+  };
+  return (
+    <Container maxWidth={false} disableGutters>
+      <title>Cost Monitoring</title>
+      <ResponsiveAppBar />
+      <Container maxWidth="xl">
+        <Box mt={4} sx={{ overflow: 'auto' }}>
+          <Grid container spacing={1}>
+            <Grid item sm={12} md={8} >
+              <Paper pt={2} variant="outlined" sx={{ overflow: 'auto' }} >
+                <Box p={1}>
+                  <Box display="flex" justifyContent="flex-end">
+                    {startdate && enddate && <LocalizationProvider dateAdapter={AdapterDayjs} >
+                      <DemoContainer components={['DatePicker', 'DatePicker']}>
+                        <DesktopDatePicker label="Start Date"
+                          value={dayjs(startdate)}
+                          onChange={(newValue) => setStartDate(newValue.format(format_to_hour))}
+                          slotProps={{ textField: { size: 'small' } }}
+                        />
+                        <DesktopDatePicker label="End Date"
+                          value={dayjs(enddate)}
+                          onChange={(newValue) => setEnddate(newValue.format(format_to_hour))}
+                          slotProps={{ textField: { size: 'small' } }}
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>}
+                  </Box>
+                  <Box height={600}>
+                    {data_by_date && <Bar options={options_by_date} data={data_by_date} />}
+                  </Box>
                 </Box>
-            </Container >
-            <Footer />
-        </Container>
-    );
+              </Paper>
+            </Grid>
+            <Grid item sm={12} md={4}>
+              <Paper pt={2} variant="outlined" sx={{ overflow: 'auto' }} >
+                <Box p={1}>
+                  <Box display="flex" justifyContent="flex-end">
+                    {startdate_total && enddate_total && <LocalizationProvider dateAdapter={AdapterDayjs} >
+                      <DemoContainer components={['DatePicker', 'DatePicker']}>
+                        <DesktopDatePicker label="Start Date"
+                          value={dayjs(startdate_total)}
+                          onChange={(newValue) => setStartDate(newValue.format(format_to_hour))}
+                          slotProps={{ textField: { size: 'small' } }}
+                        />
+                        <DesktopDatePicker label="End Date"
+                          value={dayjs(enddate_total)}
+                          onChange={(newValue) => setEnddate(newValue.format(format_to_hour))}
+                          slotProps={{ textField: { size: 'small' } }}
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>}
+                  </Box>
+                  <Box height={600}>
+                    {data_total && <Bar options={options_total} data={data_total} />}
+                  </Box>
+                </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Box>
+      </Container >
+      <Footer />
+    </Container>
+  );
 }
 
 export default CostMonitoring;

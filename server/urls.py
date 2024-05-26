@@ -70,7 +70,7 @@ urlpatterns = [
     path('frontend/cost-monitoring/',
          TemplateView.as_view(template_name='frontend_index.html')),
 
-    path('frontend-api/cost/<int:day>/', cost_api, name='cost'),
+    path('frontend-api/cost/<str:startdate>/<str:enddate>/', cost_api, name='cost'),
     path('frontend-api/model/',  model_api, name='model'),
     path('frontend-api/hub-redirect',  hub_redirect_api, name='hub-redirect'),
     path('frontend-api/instruction-tree',

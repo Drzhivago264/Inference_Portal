@@ -149,7 +149,7 @@ function Information() {
                                 </Paper>
                             </Box>
                             <Typography mt={2}>
-                                The current models are pretty smart, they have a great understanding of human society. At least, they understand Western society that generates the majority of their training datesets.
+                                The current models are pretty smart, they have a great understanding of human society. At least, they understand Western society that generates the majority of their training datasets.
                                 Imagine we can train our own models (smaller, cheaper, and quicker) on our (localised) data to speak up the voices that we want them to speak and at the scale that hardware can support.
                             </Typography>
                             <Box sx={{
