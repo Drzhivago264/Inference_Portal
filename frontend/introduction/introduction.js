@@ -23,6 +23,7 @@ import { Highlight, themes } from 'prism-react-renderer';
 import Footer from '../component/footer';
 import { Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import '../component/css/background_video.css'
 function Information() {
     useEffect(() => {
         Prism.highlightAll();
@@ -44,49 +45,58 @@ function Information() {
     const [destination, setDestination] = React.useState(null)
     const navigate = useNavigate();
     React.useEffect(() => {
-      if (destination) {
-        navigate(destination, { replace: true })
-      }
+        if (destination) {
+            navigate(destination, { replace: true })
+        }
     }, [destination]);
     return (
         <Container maxWidth={false} disableGutters>
+            <div class="video-container">
+                <video className='videoTag' autoPlay loop muted disablePictureInPicture controlsList="nodownload">
+                    <source src="/static/video/06_09_19_14.webm" type='video/webm' />
+                </video>
+            </div>
             <title>Introduction</title>
             <ResponsiveAppBar />
+
             <Container maxWidth="lg">
                 <Box sx={{
                     display: 'flex',
+
                     flexWrap: 'wrap',
                     '& > :not(style)': {
                         width: 1,
-                        mt: 5,
-                        height: { xs: "150px", sm: '170px', md: '170px', lg: '120px' },
-                        fontSize: { xs: "1.3em", sm: '1.5em', md: '1.75em' }
+                        mt: { xs: 12, sm: 12 , md: 15, lg: 17 },
+                        height: { xs: "245px", sm: '270px', md: '220px', lg: '180px' },
+                        fontSize: { xs: "1.3em", sm: '1.5em', md: '1.75em' },
+
                     },
                 }}>
+                    <Box sx={{ backgroundColor: (theme) =>  theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, .25)': 'rgba(255, 255, 255, .25)', borderRadius: '12px' }} >
+                        <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'inline-block', padding: '20px', lineHeight: 1.7, }}
+                            sequence={[
 
-                    <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
-                        sequence={[
+                                `Newspaper, radio, television, the internet, social media and now large language models.`,
+                                1500,
+                                `Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices.`,
+                                1500,
+                                "Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices. \n Or the voice that you want to be heard.",
+                                3000,
+                                ''
+                                ,
+                                () => {
 
-                            `Newspaper, radio, television, the internet, social media and now large language models.`,
-                            1500,
-                            `Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices.`,
-                            1500,
-                            "Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices. \n Or the voice that you want to be heard.",
-                            3000,
-                            ''
-                            ,
-                            () => {
-
-                            },
-                        ]}
-                        wrapper="span"
-                        cursor={true}
-                        repeat={Infinity}
-                        speed={120}
-                        deletionSpeed={90}
-                    />
+                                },
+                            ]}
+                            wrapper="span"
+                            cursor={true}
+                            repeat={Infinity}
+                            speed={120}
+                            deletionSpeed={90}
+                        />
+                    </Box>
                 </Box>
-                <Grid container spacing={0}>
+                <Grid mt={{xs: 15, sm: 15 , md: 18, lg: 20}} container spacing={0}>
                     <Grid item sm={12} md={8} lg={10}>
                         <Box mt={5} mb={5} p={1}>
                             {introloading && <Stack spacing={1}>
@@ -193,7 +203,7 @@ function Information() {
                     </Grid>
                     <Grid item md={3} lg={2}>
                         <Box mt={10.32} sx={{ minWidth: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
-                            <VerticalNav navigate={setDestination}/>
+                            <VerticalNav navigate={setDestination} />
                         </Box>
                     </Grid>
                 </Grid>
