@@ -3,7 +3,7 @@ from server.models import (
     APIKEY,
 )
 from django_datatables_view.base_datatable_view import BaseDatatableView
-from django.db.models import Q
+from django.db.models import Q, Sum
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -37,13 +37,11 @@ class LogListJson(BaseDatatableView):
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
-def cost_api(request: HttpRequest, day: int) -> Response:
+def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
     current_user = request.user
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        enddate = timezone.now().today()
-        startdate = enddate - timezone.timedelta(days=day)
-        log = PromptResponse.objects.filter(key=current_user.apikey, created_at__range=[startdate, enddate])
-        serializer = CostSerializer(log, many=True)
-        return Response({'cost': serializer.data}, status=status.HTTP_200_OK)
+        log_by_date = PromptResponse.objects.filter(key=current_user.apikey, created_at__range=[startdate, enddate]).values('created_at__date', 'model__name').order_by(
+            'created_at__date').annotate(sum_input_tokens = Sum('number_input_tokens'),sum_output_tokens = Sum('number_output_tokens'))
+        return Response({'cost_by_model': log_by_date}, status=status.HTTP_200_OK)

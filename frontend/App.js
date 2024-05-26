@@ -24,7 +24,7 @@ const APIDoc = lazy(() => import("./information/api_doc.js"));
 const Log = lazy(() => import("./rooms/log.js"));
 const PaymentSuccess = lazy(() => import("./key_management/payment_success.js"));
 const Login = lazy(() => import("./key_management/login.js"))
-const UserInstruction = lazy(() => import("./user_instruction.js"))
+const UserInstruction = lazy(() => import("./rooms/user_instruction.js"))
 const CostMonitoring = lazy(() => import("./key_management/cost_monitoring.js"))
 
 export const ColorModeContext = React.createContext({ toggleColorMode: () => { } });

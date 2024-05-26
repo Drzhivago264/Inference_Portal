@@ -5,8 +5,8 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from './component/navbar';
-import Footer from './component/footer';
+import ResponsiveAppBar from '../component/navbar';
+import Footer from '../component/footer';
 import { Divider, List, Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -23,13 +23,13 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import FolderIcon from '@mui/icons-material/Folder';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import { getCookie } from './component/getCookie';
+import { getCookie } from '../component/getCookie';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Snackbar from '@mui/material/Snackbar';
 import { nanoid } from 'nanoid'
-import { ChatBox } from './component/chatbox';
+import { ChatBox } from '../component/chatbox';
 import { styled } from '@mui/material/styles';
-import { agentsocket } from './component/chatsocket';
+import { agentsocket } from '../component/chatsocket';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 
