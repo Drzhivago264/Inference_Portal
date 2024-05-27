@@ -15,16 +15,21 @@ Unlike mainstream language models trained by other businesses, our models are be
 &nbsp;
 
 This website is kept as simple as possible, partly because we do not have the resources to be fancy. This is a privacy feature rather than a drawback actually. In fact, we do not ask you to register an account with us.
+ 
+Tools
+=====
+
+---
 
 &nbsp; 
 
-Regarding the tools incoporated in this website, we offer API endpoints and sandboxs to support:
+Regarding the tools incoporated in this website, we offer API endpoints and sandboxs to:
 
-- Researchers who need to label  and or modify their datasets quickly and efficiently (e.g., predict/convert towards emotions).
-- Researchers who want to automatically interview people
-- Students who need to write or paraphase their assignments 
-- Developers who want to build or test their own agents or chatbots (explore Construction Zone)
-- People who want to bend the language models according to their wills. 
+- Dataset labelling and/or modifying with large language models.
+- Qualitative interview automating with Interview Agent.
+- Assignment/Document writing and paraphrasing with Assignment Agent and LLM functions.
+- Agents building or testing with Construction Zone and Your Template
+ 
 
 There is no sophisticated agenda or argument to be made here, we are playing the role of a parakeet, repeating other people voices.
 
