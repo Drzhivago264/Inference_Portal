@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -28,20 +28,24 @@ function Information() {
     useEffect(() => {
         Prism.highlightAll();
     });
+    const videoRef = useRef(null);
     const [intro, setMessage] = useState('');
-    const [introloading, setIntroLoading] = useState(true);
-    const [videoloaded, setVideoLoaded] = useState(false)
+    const [videoloaded, setVideoLoaded] = useState(false);
+
     useEffect(() => {
         axios.all([
             axios.get(introduction_),
         ])
             .then(axios.spread((intro_object) => {
-                setIntroLoading(false)
                 setMessage(intro_object.data);
             }))
             .catch(error => {
                 console.log(error);
             });
+        if (videoRef) {
+            videoRef.current.play();
+            setVideoLoaded(true)
+        }
     }, []);
     const [destination, setDestination] = React.useState(null)
     const navigate = useNavigate();
@@ -52,18 +56,23 @@ function Information() {
     }, [destination]);
     return (
         <Container maxWidth={false} disableGutters>
-            <div class="video-container">
-                <video className='videoTag' autoPlay loop muted disablePictureInPicture controlsList="nodownload" onLoadedData={() => { setVideoLoaded(true) }}>
+            <div className="video-container">
+                <video ref={videoRef} className='videoTag' autoPlay loop muted playsinline disablePictureInPicture controlsList="nodownload" onPlay={() => { console.log('yeet'); setVideoLoaded(true) }}>
                     <source src="/static/video/introduction_background.mp4" type='video/mp4' />
                 </video>
             </div>
             <title>Introduction</title>
             <ResponsiveAppBar />
-
-            <Container maxWidth="lg">
+            {!videoloaded && <Container maxWidth="lg" ><Stack mt={{ xs: 75 }} spacing={1}>
+                <Skeleton variant="rounded" animation="wave" height={350} />
+                <Skeleton variant="rounded" animation="wave" height={350} />
+                <Skeleton variant="rounded" animation="wave" height={300} />
+            </Stack>
+            </Container>
+            }
+            {videoloaded && <Container maxWidth="lg">
                 <Box sx={{
                     display: 'flex',
-
                     flexWrap: 'wrap',
                     '& > :not(style)': {
                         width: 1,
@@ -76,7 +85,6 @@ function Information() {
                     <Box sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, .25)' : 'rgba(255, 255, 255, .25)', borderRadius: '12px' }} >
                         <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'inline-block', padding: '20px', lineHeight: 1.7, }}
                             sequence={[
-
                                 `Newspaper, radio, television, the internet, social media and now large language models.`,
                                 1500,
                                 `Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices.`,
@@ -86,7 +94,6 @@ function Information() {
                                 ''
                                 ,
                                 () => {
-
                                 },
                             ]}
                             wrapper="span"
@@ -97,14 +104,7 @@ function Information() {
                         />
                     </Box>
                 </Box>
-
                 <Grid mt={{ xs: 15, sm: 15, md: 18, lg: 20 }} container spacing={0}>
-                    {introloading && <Stack spacing={1}>
-                        <Skeleton variant="rounded" animation="wave" height={150} />
-                        <Skeleton variant="rounded" animation="wave" height={150} />
-                        <Skeleton variant="rounded" animation="wave" height={100} />
-                    </Stack>
-                    }
                     <Grid item sm={12} md={8} lg={10}>
                         <Box mt={5} mb={5} p={1}>
                             <MuiMarkdown overrides={{
@@ -209,8 +209,8 @@ function Information() {
                         </Box>
                     </Grid>
                 </Grid>
-            </Container >
-            <Footer />
+            </Container >}
+            {videoloaded && <Footer />}
         </Container >
     );
 }
