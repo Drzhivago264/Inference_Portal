@@ -53,14 +53,14 @@ function Information() {
     return (
         <Container maxWidth={false} disableGutters>
             <div class="video-container">
-                <video className='videoTag' autoPlay loop muted disablePictureInPicture controlsList="nodownload" onLoadedData={() => {setVideoLoaded(true)}}>
-                    <source src="/static/video/06_09_19_14 .webm" type='video/webm' />
+                <video className='videoTag' autoPlay loop muted disablePictureInPicture controlsList="nodownload" onLoadedData={() => { setVideoLoaded(true) }}>
+                    <source src="/static/video/introduction_background.mp4" type='video/mp4' />
                 </video>
             </div>
             <title>Introduction</title>
             <ResponsiveAppBar />
 
-            {videoloaded && <Container maxWidth="lg">
+            <Container maxWidth="lg">
                 <Box sx={{
                     display: 'flex',
 
@@ -68,7 +68,7 @@ function Information() {
                     '& > :not(style)': {
                         width: 1,
                         mt: { xs: 12, sm: 12, md: 15, lg: 17 },
-                        height: { xs: "245px", sm: '270px', md: '220px', lg: '180px' },
+                        height: { xs: "240px", sm: '270px', md: '220px', lg: '180px' },
                         fontSize: { xs: "1.3em", sm: '1.5em', md: '1.75em' },
 
                     },
@@ -97,15 +97,16 @@ function Information() {
                         />
                     </Box>
                 </Box>
+
                 <Grid mt={{ xs: 15, sm: 15, md: 18, lg: 20 }} container spacing={0}>
+                    {introloading && <Stack spacing={1}>
+                        <Skeleton variant="rounded" animation="wave" height={150} />
+                        <Skeleton variant="rounded" animation="wave" height={150} />
+                        <Skeleton variant="rounded" animation="wave" height={100} />
+                    </Stack>
+                    }
                     <Grid item sm={12} md={8} lg={10}>
                         <Box mt={5} mb={5} p={1}>
-                            {introloading && <Stack spacing={1}>
-                                <Skeleton variant="rounded" animation="wave" height={150} />
-                                <Skeleton variant="rounded" animation="wave" height={150} />
-                                <Skeleton variant="rounded" animation="wave" height={100} />
-                            </Stack>
-                            }
                             <MuiMarkdown overrides={{
                                 ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                 h1: {
@@ -208,8 +209,8 @@ function Information() {
                         </Box>
                     </Grid>
                 </Grid>
-            </Container >}
-            {videoloaded && <Footer />}
+            </Container >
+            <Footer />
         </Container >
     );
 }
