@@ -1,33 +1,35 @@
 {
     "introduction_animation": [
         "Báo chí, radio, truyền hình, internet, mạng xã hội và bây giờ là các mô hình ngôn ngữ.",
-        "Báo chí, radio, truyền hình, internet, mạng xã hội và bây giờ là các mô hình ngôn ngữ.\nChúng tôi đang xây dựng một phương tiện mới cho giọng nói của bạn.",
-        "Báo chí, radio, truyền hình, internet, mạng xã hội và bây giờ là các mô hình ngôn ngữ.\nChúng tôi đang xây dựng một phương tiện mới cho giọng nói của bạn. \n Hoặc giọng nói mà bạn muốn được nghe."
+        "Báo chí, radio, truyền hình, internet, mạng xã hội và bây giờ là các mô hình ngôn ngữ.\nChúng tôi đang xây dựng một phương tiện truyền đạt mới cho tiếng nói của bạn.",
+        "Báo chí, radio, truyền hình, internet, mạng xã hội và bây giờ là các mô hình ngôn ngữ.\nChúng tôi đang xây dựng một phương tiện truyền đạt mới cho tiếng nói của bạn. \n Hoặc tiếng nói mà bạn muốn được nghe."
     ],
-    "about_chunk_1": "Trang web này đang cố gắng bán cho bạn quyền truy cập vào một số mô hình ngôn ngữ cơ bản/được tinh chỉnh và các công cụ để tương tác với chúng. Những mô hình ngôn ngữ này nhằm hỗ trợ:",
+    "about_title": "Giới thiệu",
+    "about_chunk_1": "Trang web này buôn quyền truy cập vào một số mô hình ngôn ngữ và các công cụ để tương tác với chúng. Những mô hình ngôn ngữ này nhằm hỗ trợ:",
     "user_list": [
-        "Các nhà khoa học xã hội không thể đủ của ý kiến của người phỏng vấn",
-        "Nhà báo/Marketer/Người truyền thông muốn đưa ra lập luận giống như khán giả của họ",
-        "Những người hợp lý cần lý giải như những người không hợp lý"
+        "Công nhân nghiên cứu đang tìm kiếm ý kiến của người họ cần phỏng vấn",
+        "Nhà báo/Nhà truyền thông muốn đưa ra lập luận giống như khán giả của họ",
+        "Những người cần dùng tiếng nói của người khác"
     ],
-    "about_chunk_2": "Khác với các mô hình ngôn ngữ phổ biến được đào tạo bởi các doanh nghiệp khác, mô hình của chúng tôi được tinh chỉnh hoặc kỹ thuật đề xuất cho đến khi chúng nghe giống như các nhóm người cụ thể. So với các doanh nghiệp khác muốn mô hình của họ không thiên vị, hữu ích, hợp lý và lô-gíc, chúng tôi muốn mô hình của chúng tôi nghe giống như một con người bình thường với tất cả cảm xúc, thiên vị, sở thích, sự thù hận, nỗi sợ, v.v.\n\nTrang web này được giữ đơn giản nhất có thể, một phần vì chúng tôi không có nguồn lực để trở nên phức tạp. Đây thực sự là một tính năng bảo mật hơn là một nhược điểm. Thực tế, chúng tôi không yêu cầu bạn đăng ký tài khoản với chúng tôi.",
-    "tool_chunk_1": "Về các công cụ được tích hợp trong trang web này, chúng tôi cung cấp các điểm cuối API và sandbox để:",
+    "about_chunk_2": "Khác với các mô hình ngôn ngữ phổ biến được đào tạo bởi các doanh nghiệp khác, mô hình của chúng tôi được tinh chỉnh thông qua huấn luyện hoặc hiệu lệnh cho đến khi chúng nói giống như các nhóm người cụ thể. Trong khi các doanh nghiệp khác muốn mô hình của họ không thiên vị, hữu ích, hợp lý và lô-gíc, chúng tôi muốn mô hình ngôn ngữ nói như một con người bình thường với tất cả cảm xúc, thiên vị, sở thích, sự thù hận, nỗi sợ, v.v. của họ\n\nTrang web này được viết đơn giản nhất có thể, một phần vì chúng tôi không có nguồn lực để trở nên phức tạp. Đây thực ra là một tính năng bảo mật hơn là một nhược điểm. Thực tế, chúng tôi không yêu cầu bạn đăng ký tài khoản với chúng tôi.",
+    "tool_chunk_1": "Về các công cụ được tích hợp trong trang web này, chúng tôi cung cấp các API và sandbox để:",
     "tool_list": [
         "Gán nhãn và/hoặc chỉnh sửa bộ dữ liệu với các mô hình ngôn ngữ lớn.",
-        "Tự động hóa phỏng vấn chất lượng và thu thập dữ liệu với Interview Agent.",
-        "Sinh viên cần viết hoặc diễn đạt lại bài tập với Assignment Agent và các chức năng LLM.",
-        "Xây dựng hoặc kiểm tra với Construction Zone và Your Template."
+        "Tự động hóa phỏng vấn và thu thập dữ liệu với Interview Agent.",
+        "Viết hoặc diễn đạt lại bài tập với Assignment Agent và các chức năng LLM.",
+        "Xây dựng hoặc thử nghiệm Bots với Construction Zone và Your Template."
     ],
-    "tool_chunk_2": "Không có chương trình phức tạp hoặc lập luận nào được đưa ra ở đây, chúng tôi đang đóng vai trò của một con vẹt, lặp lại giọng nói của người khác.",
+    "tool_chunk_2": "Không có kế  hoạch hoặc lập luận phức tạp nào được đưa ra ở đây, chúng tôi đang đóng vai trò của một con vẹt, lặp lại giọng nói của người khác.",
     "call_to_act_list": [
         "Nếu bạn muốn giúp đỡ, vui lòng liên hệ với chúng tôi.",
-        "Nếu bạn có dữ liệu được tạo ra bởi một nhóm người cụ thể, chúng tôi có thể hợp tác.",
+        "Nếu bạn có dữ liệu được tạo ra bởi một nhóm người cụ thể, chúng ta có thể hợp tác.",
         "Nếu bạn có ý tưởng đào tạo một mô hình mới và sẵn lòng trả tiền cho nó, vui lòng cho chúng tôi biết."
     ],
-    "example_chunk_1": "Hai ví dụ dưới đây có thể được tạo ra bởi một mô hình ngôn ngữ lớn phổ biến hiện nay. Thực tế, chúng tôi chỉ nhập các lệnh vào chatbot của mình. Bạn có thể tạo một khóa và thử nó bằng chính bạn.",
-    "example_1": "Lệnh: Bạn là một người đàn ông được học thức ở độ tuổi 20, bạn tin vào sự bình đẳng, tự do và công lý. Bạn phải phản hồi câu sau dựa trên những gì bạn tin tưởng.\nCâu: Thực tế là quyết định, không có tự do.",
-    "example_1_answer": "Trả lời: Tôi không đồng ý. Khái niệm quyết định cho rằng mọi sự kiện, bao gồm cả nhận thức và hành vi con người, quyết định và hành động, đều được xác định nguyên nhân bởi một chuỗi sự kiện trước đó không bị đứt đoạn. Mặc dù quan điểm này có thể có một số nền tảng khoa học, nhưng nó phá vỡ bản chất của khả năng hành động và tự do của con người. Tôi tin vào tự do - khả năng lựa chọn, hành động, tạo dựng số phận của chính mình. Tự do này cho phép chúng ta học hỏi, phát triển và đưa ra những quyết định có thể thay đổi cuộc đời chúng ta. Ngay cả khi một số khía cạnh của thực tế là quyết định, nó không phủ nhận sự tồn tại của tự do cá nhân.",
-    "example_chunk_2": "Các mô hình hiện tại khá thông minh, chúng có một sự hiểu biết tốt về xã hội con người. Ít nhất, chúng hiểu về xã hội phương Tây mà tạo ra phần lớn bộ dữ liệu đào tạo của họ. Hãy tưởng tượng chúng ta có thể đào tạo các mô hình của riêng chúng ta (nhỏ hơn, rẻ hơn, và nhanh hơn) trên dữ liệu của chúng ta (địa phương hóa) để nói lên những giọng nói mà chúng ta muốn họ nói và ở quy mô mà phần cứng có thể hỗ trợ.",
+    "example_title": "Ví dụ",
+    "example_chunk_1": "Hai ví dụ dưới đây có thể được tạo ra bởi một mô hình ngôn ngữ lớn phổ biến hiện nay. Thực tế, chúng tôi chỉ nhập các lệnh vào chatbot của mình. Bạn có thể tạo một khóa và thử 2 câu lệnh dưới đây.",
+    "example_1": "Lệnh: Bạn là một thanh niên khoảng tuổi 20 được giáo dục, bạn tin vào sự bình đẳng, tự do và công lý. Bạn phải phản hồi câu sau dựa trên những gì bạn tin tưởng.\nCâu đầu vào: Thực tế là tất định, không có tự do.",
+    "example_1_answer": "Trả lời: Tôi không đồng ý. Khái niệm tất định cho rằng mọi sự kiện, bao gồm cả nhận thức và hành vi con người, quyết định và hành động, đều được xác định nguyên nhân bởi một chuỗi sự kiện trước. Mặc dù quan điểm này có thể có một số nền tảng khoa học, nhưng nó phá vỡ bản chất của khả năng hành động và tự do của con người. Tôi tin vào tự do - khả năng lựa chọn, hành động, tạo dựng số phận của chính mình. Tự do này cho phép chúng ta học hỏi, phát triển và đưa ra những quyết định có thể thay đổi cuộc đời chúng ta. Ngay cả khi một số khía cạnh của thực tế là tất định, nó không phủ nhận sự tồn tại của tự do cá nhân.",
+    "example_chunk_2": "Các mô hình hiện tại khá thông minh, chúng có một sự hiểu biết tốt về xã hội con người. Ít nhất, chúng hiểu về xã hội phương Tây vì họ tạo ra phần lớn bộ dữ liệu đào tạo cho chúng. Hãy tưởng tượng chúng ta có thể đào tạo các mô hình của riêng mình (nhỏ hơn, rẻ hơn, và nhanh hơn) trên dữ liệu của chúng ta (địa phương hóa) để nói lên những tiếng nói mà chúng ta muốn chúng nói và ở quy mô mà phần cứng có thể hỗ trợ.",
     "example_2": "Lệnh: Bạn là một người đàn ông ở độ tuổi 30, bạn đến từ một gia đình lao động, bạn mệt mỏi vì việc trả tiền thế chấp. Bạn phải phản hồi câu sau dựa trên ai bạn là.\nCâu: Việc tăng thuế thu nhập để dành cho giáo dục là quan trọng.",
-    "example_2_answer": "Trả lời: Mặc dù tôi hiểu giá trị của việc đầu tư vào giáo dục, tôi phải nói rằng việc tăng lãi suất và thuế thu nhập là một việc khó khăn đối với những người như tôi. Nhiều người trong chúng tôi đã phải vất vả để kiếm sống, trả tiền thế chấp và cố gắng đảm bảo một cuộc sống tốt đẹp cho gia đình của mình. Dường như chúng tôi luôn là những người gánh chịu gánh nặng. Tôi nghĩ rằng việc tìm ra một sự cân bằng và xem xét các cách khác để tài trợ cho giáo dục, mà không đặt toàn bộ trọng lượng lên tầng lớp lao động, là quan trọng."
+    "example_2_answer": "Trả lời: Mặc dù tôi hiểu giá trị của việc đầu tư vào giáo dục, tôi phải nói rằng việc tăng lãi suất và thuế thu nhập là một việc khó khăn đối với những người như tôi. Nhiều người trong chúng tôi đã phải vất vả để kiếm sống, trả tiền thế chấp và cố gắng đảm bảo một cuộc sống tốt đẹp cho gia đình của mình. Dường như chúng tôi luôn là những người gánh chịu gánh nặng. Tôi nghĩ rằng cần có một sự cân bằng và xem xét lại các cách khác để tài trợ cho giáo dục, mà không đặt toàn bộ gánh nặng lên tầng lớp lao động."
 }
