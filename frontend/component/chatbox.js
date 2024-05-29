@@ -9,6 +9,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import SendIcon from '@mui/icons-material/Send';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { Divider } from '@mui/material';
 export const ChatBox = ({
     inputsize,
     ChatPaper,
@@ -34,15 +35,20 @@ export const ChatBox = ({
                         if (mess.role == 'Human') {
                             return (
                                 <Paper key={mess.time} >
-                                    <Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>
+                                    <Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-wrap' }}>
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Box align="left">
                                                 <IconButton onClick={() => copyToClipboard(`${mess.role} (${mess.time})\n\n${mess.message}`)} aria-label="copy" size="small">
                                                     <ContentCopyIcon fontSize="small" />
                                                 </IconButton>
                                             </Box>
-                                            <Box pt={0.8} align="right" style={{ whiteSpace: "pre-wrap" }}>
-                                                <span > {mess.role} ({mess.time})  <br /><br /> {mess.message} </span>
+                                            <Box pt={0.8}>
+                                                <Box textAlign="right">
+                                                    {mess.role} ({mess.time})
+                                                </Box>
+                                                <Box  display="flex" justifyContent="flex-end" style={{ whiteSpace: "pre-wrap" }}>
+                                                    {mess.message}
+                                                </Box>
                                             </Box>
                                         </Grid>
                                     </Box>
@@ -140,19 +146,23 @@ export const ChatBoxHotpot = ({
             <ChatPaper id={id} variant="outlined">
                 <Stack spacing={1}>
                     {chat_message.map((mess) => {
-
                         if (mess.role == 'Human') {
                             return (
-                                <Paper  key={mess.time + mess.message}>
-                                    <Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-line', textAlign: 'right' }}>
+                                <Paper key={mess.time + mess.message}>
+                                    <Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-wrap' }}>
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Box align="left">
                                                 <IconButton onClick={() => copyToClipboard(`${mess.role} (${mess.time})\n\n${mess.message}`)} aria-label="copy" size="small">
                                                     <ContentCopyIcon fontSize="small" />
                                                 </IconButton>
                                             </Box>
-                                            <Box pt={0.8} align="right" style={{ whiteSpace: "pre-wrap" }}>
-                                                <span > {mess.role} ({mess.time})  <br /><br /> {mess.message} </span>
+                                            <Box pt={0.8}>
+                                                <Box textAlign="right">
+                                                    {mess.role} ({mess.time})
+                                                </Box>
+                                                <Box  display="flex" justifyContent="flex-end" style={{ whiteSpace: "pre-wrap" }}>
+                                                    {mess.message}
+                                                </Box>
                                             </Box>
                                         </Grid>
                                     </Box>
