@@ -29,7 +29,6 @@ import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import { ColorModeContext, UserContext } from '../App.js'
 import { Divider, Stack } from '@mui/material';
 import Badge from '@mui/material/Badge';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import CloseIcon from '@mui/icons-material/Close';
 import Jdenticon from 'react-jdenticon';
 import { useTranslation } from 'react-i18next';
@@ -220,7 +219,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 function ResponsiveAppBar() {
   const navigate = useNavigate();
   const [destination, setDestination] = useState(null)
-  const [default_language, setDedaultLanguage] = useState(i18next.language)
+  const [default_language, setDedaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi'? i18next.language : 'en' )
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -287,7 +286,7 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-             {t('navbar.Prof_Parakeet')}
+            {t('navbar.Prof_Parakeet')}
           </Typography>
 
           <Dropdown>
@@ -330,6 +329,20 @@ function ResponsiveAppBar() {
 
           {!is_authenticated &&
             <Stack direction='row' sx={{ marginLeft: "auto" }}>
+              <FormControl>
+                <InputLabel id="select-language-label">{t('navbar.Language')}</InputLabel>
+                <Select
+                  labelId="select-language-label"
+                  id="select-language-id"
+                  value={default_language}
+                  label={t('navbar.Language')}
+                  onChange={(e) => { handleChangeLanguage(e.target.value) }}
+                  size="small"
+                >
+                  <MenuItem value="vi"> Tiếng Việt </MenuItem>
+                  <MenuItem value="en">English</MenuItem>
+                </Select>
+              </FormControl>
               <Box mt={0.5}>
                 <Button
                   key='login'
