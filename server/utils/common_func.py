@@ -47,37 +47,38 @@ def get_EC2_status(instance_id: str, region: str) -> str:
 
 
 def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str:
-    """_summary_
-
-    Args:
-        model (_type_): _description_
-        key (_type_): _description_
-        mode (_type_): _description_
-        prompt (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
+    
     if mode == "chat":
         if not agent_availability:
             template = constant.SHORTEN_TEMPLATE_TABLE[model]
             prompt_ = template.format(prompt, "")
+            tokeniser = constant.TOKENIZER_TABLE[model]
+            inputs = AutoTokenizer.from_pretrained(tokeniser)(prompt)
+            current_history_length = len(inputs['input_ids'])
             if include_memory:
                 chat_history = get_chat_context(model=model,
                                                 key_object=key_object,
                                                 raw_prompt=prompt,
-                                                agent_availability=agent_availability)
-                prompt_ = chat_history + "\n" + prompt_
+                                                agent_availability=agent_availability,
+                                                current_history_length=current_history_length,
+                                                tokeniser=tokeniser)
                 return prompt_
             else:
                 return prompt_
         else:
             prompt_ = {"role": "user", "content": f"{prompt}"}
             if include_memory:
+                try:
+                    tokeniser = tiktoken.encoding_for_model(model)
+                except:
+                    tokeniser = tiktoken.encoding_for_model("gpt-4")
+                current_history_length = len(tokeniser.encode(prompt))
                 chat_history = get_chat_context(model=model,
                                                 key_object=key_object,
                                                 raw_prompt=prompt,
-                                                agent_availability=agent_availability)
+                                                agent_availability=agent_availability,
+                                                current_history_length=current_history_length,
+                                                tokeniser=tokeniser)
                 chat_history.append(prompt_)
                 return chat_history
             else:
@@ -88,15 +89,7 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
         else:
             prompt_ = {
                 "role": "user", "content": f"Complete the following text, keep the original text in the answer: {prompt}"}
-            if include_memory:
-                chat_history = get_chat_context(model=model,
-                                                key_object=key_object,
-                                                raw_prompt=prompt,
-                                                agent_availability=agent_availability)
-                chat_history.append(prompt_)
-                return chat_history
-            else:
-                return [prompt_]
+            return [prompt_]
 
 
 def response_mode(mode: str, response: str, prompt: str) -> str:
@@ -513,7 +506,7 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
         return False
 
 
-def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool) -> str | list:
+def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser:object) -> str | list:
     """_summary_
 
     Args:
@@ -531,26 +524,20 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
         shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
         full_instruct = ""
         max_history_length = constant.MAX_HISTORY_LENGTH[model]
-        tokeniser = constant.TOKENIZER_TABLE[model]
         for mess in message_list_vector:
             template = shorten_template.format(
                 mess.content_object.prompt, mess.content_object.response)
             full_instruct += "\n\n"
             full_instruct += template
             inputs = AutoTokenizer.from_pretrained(tokeniser)(full_instruct)
-            current_history_length = len(inputs['input_ids'])
+            current_history_length += len(inputs['input_ids'])
             if current_history_length > int(max_history_length):
                 full_instruct = full_instruct[:-(
                     current_history_length-max_history_length)]
         full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
         return full_instruct
     else:
-        try:
-            tokeniser = tiktoken.encoding_for_model(model)
-        except:
-            tokeniser = tiktoken.encoding_for_model("gpt-4")
         max_history_length = constant.MAX_HISTORY_LENGTH["openai"]
-        current_history_length = 0
         full_instruct_list = []
         for mess in message_list_vector:
             full_instruct_list += [

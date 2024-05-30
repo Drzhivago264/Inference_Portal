@@ -134,12 +134,10 @@ function Chat() {
                     var make_tree = treeify(memory_object.data.results)
                     setRootNode(make_tree[0])
                     setDefaultExpandNode(make_tree[1])
-
                     if (memory_object.data.count) {
                         setTotalNode(memory_object.data.count)
                     }
                 }
-
             }))
             .catch(error => {
                 console.log(error);
@@ -208,8 +206,8 @@ function Chat() {
                     return (
                         <TreeItem key={parent.id.toString()} itemId={parent.id.toString()} label={new Date(parent.created_at).toString()}>
                             <Paper>
-                                <Typography pl={1} pr={1} pt={1} variant='body2'> {"Prompt: " + parent.prompt} </Typography>
-                                <Typography pl={1} pr={1} pb={1} variant='body2'>{"Response: " + parent.response} </Typography>
+                                <Typography sx={{ wordBreak: "break-word" }} pl={1} pr={1} pt={1} variant='body2'> {"Prompt: " + parent.prompt} </Typography>
+                                <Typography sx={{ wordBreak: "break-word" }} pl={1} pr={1} pb={1} variant='body2'>{"Response: " + parent.response} </Typography>
                             </Paper>
                             {parent.children && <RecursiveMemoryTree data={parent.children} />}
                         </TreeItem>
