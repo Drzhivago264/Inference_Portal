@@ -19,7 +19,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
-import explaination_ from '../../docs/PageContent/mode_explaination.md'
+import explaination_en from '../../docs/PageContent/mode_explaination_en.md'
+import explaination_vi from '../../docs/PageContent/mode_explaination_vi.md'
+import { useTranslation } from 'react-i18next';
 import { Highlight, themes } from 'prism-react-renderer';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Divider from '@mui/material/Divider';
@@ -28,7 +30,18 @@ import { logout } from '../component/check_login.js';
 import Footer from '../component/footer.js';
 import { UserContext } from '../App.js'
 import { getCookie } from '../component/getCookie.js';
+import i18next from "i18next";
+
 function Hub() {
+    const [default_language, setDefaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi' ? i18next.language : 'en')
+    const { t, i18n } = useTranslation();
+    useEffect(() => {
+        setDefaultLanguage(i18n.language)
+    }, [i18n.language]);
+    const explaination_refs = {
+            "en": explaination_en,
+            "vi": explaination_vi
+    }
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     const [explaination, setMessage] = useState('');
     const navigate = useNavigate();
@@ -72,7 +85,7 @@ function Hub() {
     }
     useEffect(() => {
         axios.all([
-            axios.get(explaination_),
+            axios.get(explaination_refs[default_language]),
         ])
             .then(axios.spread((explaination_object) => {
                 setMessage(explaination_object.data);
@@ -80,7 +93,7 @@ function Hub() {
             .catch(error => {
                 console.log(error);
             });
-    }, []);
+    }, [default_language]);
     const ErrorAlert = ({ error }) => {
         return (
             <Box mt={4}>

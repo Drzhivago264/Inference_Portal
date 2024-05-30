@@ -7,17 +7,21 @@ import introJsonEN from './public/locales/en/introduction.json'
 import introJsonVI from './public/locales/vi/introduction.json'
 import navbarEN from './public/locales/en/navbar.json'
 import navbarVI from './public/locales/vi/navbar.json'
+import keymanagementEN from './public/locales/en/key_management.json'
+import keymanagementVI from './public/locales/vi/key_management.json'
 const resources = {
   en: {
     translation: {
       'introduction': introJsonEN,
-      'navbar': navbarEN
+      'navbar': navbarEN,
+      'key_management': keymanagementEN
     }
   },
   vi: {
     translation:  {
       'introduction': introJsonVI,
-      'navbar': navbarVI
+      'navbar': navbarVI,
+      'key_management': keymanagementVI
     }
   }
 };

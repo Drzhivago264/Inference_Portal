@@ -1,0 +1,23 @@
+
+{
+    "Get_started_with_Professor_Parakeet": "Bắt đầu với Giáo Sư Vẹt",
+    "1_Create_a_Key": "1. Tạo khóa",
+    "Start_by_generating_a_random_key_by_giving_it_a_name": "Bắt đầu bằng đặt tên cho khóa của bạn.",
+    "2_Add_credit_to_your_key": "2. Nạp tiền vào khóa của bạn",
+    "Info_1": "Chúng tôi cung cấp 2 phương thức thanh toán thông qua Stripe hoặc chuyển khoản XMR:\n - Để thanh toán bằng Stripe, điền Khóa và Tên khóa trong biểu mẫu dưới đây và nhấp vào Stripe.\n - Để thanh toán bằng XMR, chuyển khoản số tiền mong muốn vào địa chỉ được tích hợp trong tệp Khóa của bạn (bạn không cần phải khớp số tiền trong biểu mẫu).",
+    "Warning_1": "Nếu bạn thanh toán bằng XMR, bạn cần nhấp vào xác nhận thanh toán XMR sau 10 khối xác nhận của XMR.\n\nĐể đảm bảo rằng những người có quyền truy cập vào máy tính hoặc phiên làm việc của bạn không thể lấy thông tin ví của bạn, bạn cần phải điền vào các biểu mẫu mỗi lần nạp tiền, ngay cả khi bạn đã đăng nhập.",
+    "3_Check_user_manual": "3. Kiểm tra hướng dẫn sử dụng",
+    "21_Check_credit_balance": "2.1 Kiểm tra số dư tín dụng",
+    "22_Pay_by_Stripe": "2.2 Thanh toán bằng Stripe",
+    "23_Retrieve_XMR_wallet": "2.3 Lấy lại ví XMR",
+    "24_Confirm_XMR_Payment": "2.4 Xác nhận thanh toán XMR",
+    "21_info": "Trước khi thanh toán, bạn có thể kiểm tra số dư hiện tại (và Khóa và Tên khóa) để tránh tai nạn.",
+    "22_info": "Bạn sẽ được chuyển hướng đến cổng thanh toán Stripe bằng cách chọn phương thức thanh toán này.",
+    "23_info": "Nếu (do vấn đề với node XMR của chúng tôi) Khóa của bạn không được liên kết với một ví XMR khi khởi tạo, bạn có thể liên kết Khóa của bạn với một Ví ở đây. Bạn cũng có thể sử dụng chức năng này để kiểm tra Ví của bạn trước khi thanh toán.",
+    "24_info": "Việc xử lý thanh toán XMR có thể mất đến 30 phút sau khi nó đã được xác nhận trên blockchain. Sử dụng phí giao dịch đủ để giao dịch được xác nhận kịp thời.",
+    "3_infor": "Kiểm tra <Link> Hướng Dẫn </Link> để tìm hiểu thêm về cách thanh toán và sử dụng dịch vụ của chúng tôi.",
+    "key_create_success":"Đây là chìa của bạn, trước khi sử dụng nó, bạn có thể:\n - Xuất chìa của bạn vào 1 tệp text.\n - Trước khi nạp tiền, kiểm tra lại Ví và số dư.\n - Nếu bạn gặp vấn đề, liên lạc với chúng tôi.\n",
+    "key_check_success": "Khóa và Tên của Khóa Khớp!", 
+    "xmr_check_success": "Thông Tin Ví",
+    "xmr_confirmation_success": "Thông Tin Xác Nhận XMR"
+}
