@@ -32,7 +32,7 @@ import { styled } from '@mui/material/styles';
 import { agentsocket } from '../component/chatsocket';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-
+import Slider from '@mui/material/Slider';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 500,
@@ -48,7 +48,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 function UserInstruction() {
     const websocket = useRef(null)
     const messagesEndRef = useRef(null)
-
+    const [instruct_change, setInstructChange] = useState(false)
     const [choosen_model, setChoosenModel] = useState("gpt-4");
     const [choosen_template, setChoosenTemplate] = useState("Empty Template");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
@@ -62,7 +62,7 @@ function UserInstruction() {
     const [presencepenalty, setPresencePenalty] = useState(0);
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [shownthinking, setThinking] = useState(false);
-
+    const [max_turn, setMaxTurn] = useState(4)
     const [currentparagraph, setCurrentParagraph] = useState(1);
 
     const [loading, setLoading] = useState(false);
@@ -92,6 +92,7 @@ function UserInstruction() {
     }
 
     const updateParentTemplate = (v, property) => {
+        setInstructChange(true)
         const new_template_list = [...template_list]
         const new_template = { ...template_list[selectedIndex] }
         new_template[property] = v
@@ -366,6 +367,8 @@ function UserInstruction() {
             }
             let user_parent_instruct = template_list[selectedIndex]['instruct']
             var data = {
+                'instruct_change': instruct_change,
+                'max_turn': max_turn,
                 'currentParagraph': currentparagraph,
                 'message': usermessage,
                 'choosen_models': choosen_model,
@@ -381,6 +384,7 @@ function UserInstruction() {
             }
             websocket.current.send(JSON.stringify(data))
             setUserMessage("")
+            setInstructChange(false)
         }
     }
 
@@ -432,7 +436,7 @@ function UserInstruction() {
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={6}>
                             <Box mr={4}>
-                                <Typography ml={1} mb={1} mt={1}  variant='body1'>
+                                <Typography ml={1} mb={1} mt={1} variant='body1'>
                                     Template
                                 </Typography>
                                 <FormControl fullWidth sx={{ m: 1 }} variant="standard">
@@ -582,6 +586,17 @@ function UserInstruction() {
                             <Typography mt={1} mb={1} variant='body1'>
                                 Testbed
                             </Typography>
+                            <Typography gutterBottom>Max_turns: {max_turn}</Typography>
+                            <Slider
+                                step={1}
+                                min={1}
+                                max={10}
+                                marks
+                                valueLabelDisplay="off"
+                                onChange={e => setMaxTurn(e.target.value)}
+                                value={max_turn}
+                            />
+
                             <ChatBox
                                 inputsize={300}
                                 chat_message={chat_message}

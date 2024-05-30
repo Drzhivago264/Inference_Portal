@@ -46,6 +46,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 import FormHelperText from '@mui/material/FormHelperText';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -75,6 +76,8 @@ function Agent() {
     const [presencepenalty, setPresencePenalty] = useState(0);
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
+    const [max_turn, setMaxTurn] = useState(4)
+    const [instruct_change, setInstructChange] = useState(false)
     const [usermessageError, setUserMessageError] = useState(false);
     const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
     const [default_editor_structure, setEditor] = useState(null);
@@ -86,7 +89,6 @@ function Agent() {
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-
     const [user_template_list, setUserTemplateList] = useState([]);
     const [use_user_template, setUseUserTemplate] = useState(false)
     const [default_user_child_template_list, setDefaultUserChildTemplateList] = useState([]);
@@ -270,6 +272,8 @@ function Agent() {
         }
         else {
             var data = {
+                'max_turn': max_turn,
+                'instruct_change': instruct_change,
                 'currentParagraph': currentparagraph,
                 'message': usermessage,
                 'choosen_models': choosen_model,
@@ -285,6 +289,7 @@ function Agent() {
             }
             websocket.current.send(JSON.stringify(data))
             setUserMessage("")
+            setInstructChange(false)
         }
     }
     const swap_template = (template, type) => {
@@ -457,7 +462,7 @@ function Agent() {
                                         multiline
                                         maxRows={8}
                                         value={default_parent_instruct}
-                                        onChange={e => setParentInstruct(e.target.value)}
+                                        onChange={e => {setParentInstruct(e.target.value), setInstructChange(true)}}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -470,7 +475,7 @@ function Agent() {
                                         multiline
                                         maxRows={8}
                                         value={default_user_parent_instruct}
-                                        onChange={e => setUserParentInstruct(e.target.value)}
+                                        onChange={e => {setUserParentInstruct(e.target.value), setInstructChange(true)}}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -487,7 +492,7 @@ function Agent() {
                                         multiline
                                         maxRows={8}
                                         value={default_child_instruct}
-                                        onChange={e => setChildInstruct(e.target.value)}
+                                        onChange={e => {setChildInstruct(e.target.value), setInstructChange(true)}}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -499,7 +504,7 @@ function Agent() {
                                         multiline
                                         maxRows={8}
                                         value={default_user_child_instruct}
-                                        onChange={e => setUserChildInstruct(e.target.value)}
+                                        onChange={e => {setUserChildInstruct(e.target.value), setInstructChange(true)}}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -669,6 +674,9 @@ function Agent() {
                                     setPresencePenalty={setPresencePenalty}
                                     frequencypenalty={frequencypenalty}
                                     setFrequencyPenalty={setFrequencyPenalty}
+                                    max_turn={max_turn}
+                                    setMaxTurn={setMaxTurn}
+                                    
                                 >
                                 </OpenAPIParameter>
                                 <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>

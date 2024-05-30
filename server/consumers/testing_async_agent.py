@@ -58,7 +58,6 @@ class Consumer(AsyncWebsocketConsumer):
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
         self.time = timezone.localtime(timezone.now(), pytz.timezone(
             self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        self.max_turns = constant.DEFAULT_AGENT_TURN
         self.current_turn = 0
         self.session_history = []
         self.working_paragraph = ""
@@ -143,7 +142,7 @@ class Consumer(AsyncWebsocketConsumer):
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
                 elif self.key_object and text_data_json["message"].strip():
                     #Reset the working memory if the instruction(s) change
-                    if (validated.agent_instruction != self.agent_instruction or validated.child_instruction != self.child_instruction) and self.current_turn > 0:
+                    if validated.instruct_change and self.current_turn > 0:
                         self.current_turn = 0
                         self.session_history = []
                     self.agent_instruction = validated.agent_instruction
@@ -160,6 +159,7 @@ class Consumer(AsyncWebsocketConsumer):
                     self.presence_penalty = validated.presence_penalty
                     self.temperature = validated.temperature
                     self.agent_instruction += self.child_instruction
+                    self.max_turns = validated.max_turn
                     self.use_summary = True if self.choosen_template == "Interview Agent" else False
                     await self.channel_layer.group_send(
                         self.room_group_name, {"type": "chat_message",

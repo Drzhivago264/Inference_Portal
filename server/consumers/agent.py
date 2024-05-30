@@ -55,7 +55,6 @@ class Consumer(AsyncWebsocketConsumer):
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
         self.time = timezone.localtime(timezone.now(), pytz.timezone(
             self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        self.max_turns = constant.DEFAULT_AGENT_TURN
         self.current_turn = 0
         self.session_history = []
         self.working_paragraph = ""
@@ -134,7 +133,7 @@ class Consumer(AsyncWebsocketConsumer):
                 elif not text_data_json["message"].strip():
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
                 elif self.key_object and text_data_json["message"].strip():
-                    if (validated.agent_instruction != self.agent_instruction or validated.child_instruction != self.child_instruction) and self.current_turn > 0:
+                    if validated.instruct_change and self.current_turn > 0:
                         self.current_turn = 0
                         self.session_history = []
                     agent_instruction = validated.agent_instruction
@@ -148,6 +147,7 @@ class Consumer(AsyncWebsocketConsumer):
                     unique_response_id = str(uuid.uuid4())
                     top_p = validated.top_p
                     max_tokens = validated.max_tokens
+                    self.max_turns = validated.max_turn
                     frequency_penalty = validated.frequency_penalty
                     presence_penalty = validated.presence_penalty
                     temperature = validated.temperature
