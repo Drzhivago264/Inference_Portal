@@ -63,14 +63,14 @@ function Hotpot() {
     const [userchatmessageError, setUserChatMessageError] = useState(false);
     const [useragentmessage, setUserAgentMessage] = useState("");
     const [useragentmessageError, setUserAgentMessageError] = useState(false);
-
+    const [max_turn, setMaxTurn] = useState(4)
     const [currentparagraph, setCurrentParagraph] = useState(1);
     const [template_list, setTemplateList] = useState([]);
     const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
     const [default_parent_instruct, setParentInstruct] = useState("");
     const [default_child_instruct, setChildInstruct] = useState("");
     const [duplicatemessage, setDuplicateMessage] = useState(true);
-
+    const [instruct_change, setInstructChange] = useState(false)
     const [socket_destination, setSocketDestination] = useState("none_async");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
@@ -190,6 +190,8 @@ function Hotpot() {
         }
         else {
             var data = {
+                'max_turn': max_turn,
+                'instruct_change': instruct_change,
                 'currentParagraph': currentparagraph,
                 'message': useragentmessage,
                 'choosen_models': choosen_agent_model,
@@ -205,6 +207,7 @@ function Hotpot() {
             }
             agent_websocket.current.send(JSON.stringify(data))
             setUserAgentMessage("")
+            setInstructChange(false)
         }
     }
     const submitChat = () => {
@@ -277,7 +280,7 @@ function Hotpot() {
                                         multiline
                                         maxRows={8}
                                         value={default_parent_instruct}
-                                        onChange={e => setParentInstruct(e.target.value)}
+                                        onChange={e => {setParentInstruct(e.target.value), setInstructChange(true)}}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -293,7 +296,7 @@ function Hotpot() {
                                         multiline
                                         maxRows={8}
                                         value={default_child_instruct}
-                                        onChange={e => setChildInstruct(e.target.value)}
+                                        onChange={e => {setChildInstruct(e.target.value), setInstructChange(true)}}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -362,6 +365,8 @@ function Hotpot() {
                                 lengthpenalty={lengthpenalty}
                                 presencepenalty={presencepenalty}
                                 frequencypenalty={frequencypenalty}
+                                max_turn = {max_turn}
+                                setMaxTurn = {setMaxTurn}
                                 setBeam={setBeam}
                                 setMaxToken={setMaxToken}
                                 setBestof={setBestof}

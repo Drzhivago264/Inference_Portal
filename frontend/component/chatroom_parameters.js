@@ -25,7 +25,9 @@ export const OpenAPIParameter = ({
     temperature,
     setTemperature,
     max_tokens,
-    setMaxToken }) => {
+    setMaxToken,
+    max_turn,
+    setMaxTurn }) => {
     return (
         <Stack direction='column' spacing={1}>
             <FormControl  >
@@ -47,6 +49,17 @@ export const OpenAPIParameter = ({
             </FormControl>
             <Divider></Divider>
             <FormLabel >Parameters</FormLabel>
+            
+            <Typography gutterBottom>Max_turns: {max_turn}</Typography>
+            <Slider
+                step={1}
+                min={1}
+                max={10}
+                marks
+                valueLabelDisplay="off"
+                onChange={e => setMaxTurn(e.target.value)}
+                value={max_turn}
+            />
 
             <Typography gutterBottom>Top_p: {top_p}</Typography>
             <Slider
@@ -312,7 +325,9 @@ export const HotpotParameter = ({
     setEarlyStopping,
     socket_destination,
     setSocketDestination,
-    swap_template
+    swap_template,
+    max_turn,
+    setMaxTurn 
 }) => {
     return (
         <Stack direction='column' spacing={1}>
@@ -402,6 +417,17 @@ export const HotpotParameter = ({
                 <Divider></Divider>
 
             </RadioGroup>
+            <Typography gutterBottom>Max_turns: {max_turn}</Typography>
+            <Slider
+                step={1}
+                min={1}
+                max={10}
+                marks
+                valueLabelDisplay="off"
+                onChange={e => setMaxTurn(e.target.value)}
+                value={max_turn}
+            />
+
             <Typography gutterBottom>Top_p: {top_p}</Typography>
             <Slider
                 step={0.01}

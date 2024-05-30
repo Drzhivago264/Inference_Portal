@@ -9,6 +9,8 @@ from server.utils import constant
 class AgentSchemaMessage(BaseModel):
     message: str
     choosen_models: str
+    instruct_change: bool 
+    max_turn: int
     choosen_template: str
     top_p: float  = constant.DEFAULT_TOP_P
     frequency_penalty: float  = constant.DEFAULT_FREQUENCY_PENALTY
@@ -36,6 +38,12 @@ class AgentSchemaMessage(BaseModel):
     def check_range_tokens(cls, v: int | None, info: ValidationInfo):
         if v is not None:
             if not (0 <= v <= 8192): raise ValueError(f'{v} is not a valid {info.field_name}.')
+        return v
+    
+    @field_validator('max_turn')
+    @classmethod
+    def check_max_turn(cls, v: float, info: ValidationInfo):
+        if not (0 < v <= 10): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
     
 class AgentSchemaParagraph(BaseModel):
