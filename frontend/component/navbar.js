@@ -1,5 +1,6 @@
-import * as React from 'react';
-import { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
+import { FormControl, FormLabel } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -13,6 +14,7 @@ import { Dropdown } from '@mui/base/Dropdown';
 import { Menu } from '@mui/base/Menu';
 import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
+import { MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
 import Constant_Colours from './color.js'
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +32,10 @@ import Badge from '@mui/material/Badge';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import CloseIcon from '@mui/icons-material/Close';
 import Jdenticon from 'react-jdenticon';
+import { useTranslation } from 'react-i18next';
+import Select from '@mui/material/Select';
+import i18next from "i18next";
+
 const Listbox = styled('ul')(
   ({ theme }) => `
   font-family: 'IBM Plex Sans', sans-serif;
@@ -49,7 +55,7 @@ const Listbox = styled('ul')(
   z-index: 1;
   `,
 );
-const MenuItem = styled(BaseMenuItem)(
+const MenuItem_DropBox = styled(BaseMenuItem)(
   ({ theme }) => `
   list-style: none;
   padding: 8px;
@@ -213,8 +219,11 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 function ResponsiveAppBar() {
   const navigate = useNavigate();
-  const [destination, setDestination] = React.useState(null)
-  React.useEffect(() => {
+  const [destination, setDestination] = useState(null)
+  const [default_language, setDedaultLanguage] = useState(i18next.language)
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
     if (destination) {
       navigate(destination, { replace: true })
     }
@@ -223,8 +232,12 @@ function ResponsiveAppBar() {
   const redirect = (e) => {
     navigate(`/frontend/${e.target.value}`);
   };
-  const [open, setOpen] = React.useState(false);
-  const [useropen, setUserOpen] = React.useState(false);
+  const handleChangeLanguage = (lang) => {
+    setDedaultLanguage(lang)
+    i18n.changeLanguage(lang)
+  }
+  const [open, setOpen] = useState(false);
+  const [useropen, setUserOpen] = useState(false);
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
@@ -233,7 +246,7 @@ function ResponsiveAppBar() {
   };
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
-      <VerticalNav navigate={setDestination}/>
+      <VerticalNav navigate={setDestination} />
     </Box>
   );
   const UserDrawerList = (
@@ -274,22 +287,22 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            Prof. Parakeet
+             {t('navbar.Prof_Parakeet')}
           </Typography>
 
           <Dropdown>
-            <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>Information</MenuButton>
+            <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>{t('navbar.Information')}</MenuButton>
             <Menu slots={{ listbox: Listbox }}>
-              <MenuItem> <NavLink to="/">Introduction</NavLink></MenuItem>
-              <MenuItem> <NavLink to="/frontend/manual/key">Manual</NavLink></MenuItem>
-              <MenuItem> <NavLink to="/frontend/model">Model</NavLink></MenuItem>
+              <MenuItem_DropBox> <NavLink to="/">{t('navbar.Introduction')}</NavLink></MenuItem_DropBox>
+              <MenuItem_DropBox> <NavLink to="/frontend/manual/key">{t('navbar.Manual')}</NavLink></MenuItem_DropBox>
+              <MenuItem_DropBox> <NavLink to="/frontend/model">{t('navbar.Model')}</NavLink></MenuItem_DropBox>
             </Menu>
           </Dropdown>
           <Dropdown>
-            <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>Modes</MenuButton>
+            <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>{t('navbar.Modes')}</MenuButton>
             <Menu slots={{ listbox: Listbox }}>
-              <MenuItem ><NavLink to="/frontend/hub">Chat & Log</NavLink></MenuItem>
-              <MenuItem ><NavLink to="/frontend/api/docs">API Docs</NavLink></MenuItem>
+              <MenuItem_DropBox ><NavLink to="/frontend/hub">{t('navbar.Bots_Agents')}</NavLink></MenuItem_DropBox>
+              <MenuItem_DropBox ><NavLink to="/frontend/api/docs">{t('navbar.API_Docs')}</NavLink></MenuItem_DropBox>
             </Menu>
           </Dropdown>
           <Button
@@ -301,7 +314,7 @@ function ResponsiveAppBar() {
               display: { xs: 'none', sm: 'block' }
             }}
           >
-            Manage Key
+            {t('navbar.Manage_Key')}
           </Button>
           <Button
             key='contact'
@@ -312,7 +325,7 @@ function ResponsiveAppBar() {
               display: { xs: 'none', sm: 'block' }
             }}
           >
-            Contact
+            {t('navbar.Contact')}
           </Button>
 
           {!is_authenticated &&
@@ -327,7 +340,7 @@ function ResponsiveAppBar() {
                     display: { xs: 'none', sm: 'block' },
                   }}
                 >
-                  Login
+                  {t('navbar.Login')}
                 </Button>
               </Box>
               <Box>
@@ -339,15 +352,30 @@ function ResponsiveAppBar() {
           }
           {is_authenticated &&
             <Stack direction='row' spacing={1} sx={{ marginLeft: "auto" }}>
+              <FormControl>
+                <InputLabel id="select-language-label">{t('navbar.Language')}</InputLabel>
+                <Select
+                  labelId="select-language-label"
+                  id="select-language-id"
+                  value={default_language}
+                  label={t('navbar.Language')}
+                  onChange={(e) => { handleChangeLanguage(e.target.value) }}
+                  size="small"
+                >
+                  <MenuItem value="vi"> Tiếng Việt </MenuItem>
+                  <MenuItem value="en">English</MenuItem>
+                </Select>
+              </FormControl>
               <StyledBadge
                 overlap="circular"
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 variant="dot"
               >
-                <AvatarWithHover  sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
-                {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />} 
+                <AvatarWithHover sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
+                  {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
                 </AvatarWithHover>
               </StyledBadge>
+
               <Box>
                 <IconButton onClick={colorMode.toggleColorMode} color="inherit">
                   {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
@@ -360,8 +388,8 @@ function ResponsiveAppBar() {
             anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
             <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}>
               <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }} mt={1.5} ml={1.5} mr={1.5} >
-                <AvatarWithHover  sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
-                {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />} 
+                <AvatarWithHover sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
+                  {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
                 </AvatarWithHover>
                 <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '11rem' }}>
                   <Typography m={1.2} sx={{ fontWeight: 'bold' }} noWrap variant='body1'>
