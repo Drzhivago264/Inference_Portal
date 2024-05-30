@@ -25,7 +25,7 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import Divider from '@mui/material/Divider';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import { useTranslation, Trans } from 'react-i18next';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Accordion from '@mui/material/Accordion';
@@ -54,6 +54,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function KeyManagement() {
+    const { t, i18n } = useTranslation();
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
     const [product_objects, setProduct] = useState([]);
@@ -335,10 +336,7 @@ function KeyManagement() {
                 </Box>}
                 {randomanimation && <Alert severity="success" sx={{ whiteSpace: 'pre-line' }}>
                     <AlertTitle>Success</AlertTitle>
-                    {`Congrats! Here's your Key, before moving on, you may consider:\n 
-                     - Export you Key into a text document.\n 
-                     - Before topping up your Key, use the check credit function below to ensure that you get it correctly.\n 
-                     - If you face any problems, please contact us.\n`}
+                    {t('key_management.key_create_success')}
                 </Alert>}
                 {randomanimation && <Box textAlign='center' my={4}>
                     <Textarea
@@ -359,7 +357,7 @@ function KeyManagement() {
             <Box my={4}>
                 <Alert severity="success">
                     <AlertTitle>Success</AlertTitle>
-                    Your Key and Key Name are correct!
+                    {t('key_management.key_check_success')}
                 </Alert>
                 <Box textAlign='center' mt={4}>
                     <Textarea
@@ -377,7 +375,7 @@ function KeyManagement() {
             <Box my={4}>
                 <Alert severity="success">
                     <AlertTitle>Success</AlertTitle>
-                    Wallet Information:
+                    {t('key_management.xmr_check_success')}
                 </Alert>
                 <Box textAlign='center' mt={4}>
                     <Textarea
@@ -394,7 +392,7 @@ function KeyManagement() {
             <Box my={4}>
                 <Alert severity="success">
                     <AlertTitle>Success</AlertTitle>
-                    Confirmation Status:
+                    {t('key_management.xmr_confirmation_success')}
                 </Alert>
                 <Box textAlign='center' mt={4}>
                     <Textarea
@@ -431,14 +429,14 @@ function KeyManagement() {
                     <StyledPaper variant="outlined">
                         <ThemeProvider theme={fontsizetheme}>
                             <Typography variant="h4" >
-                                <Box sx={{ mb: 2, fontWeight: 'bold' }}>  Get started with Professor Parakeet</Box>
+                                <Box sx={{ mb: 2, fontWeight: 'bold' }}> {t('key_management.Get_started_with_Professor_Parakeet')}</Box>
                             </Typography>
                         </ThemeProvider>
                         <Typography variant="h5" >
-                            <Box sx={{ lineHeight: 2, fontWeight: '700' }}> 1. Create a Key </Box>
+                            <Box sx={{ lineHeight: 2, fontWeight: '700' }}> {t('key_management.1_Create_a_Key')} </Box>
                         </Typography>
                         <Typography variant="body1" >
-                            Start by generating a random key by giving it a name.
+                        {t('key_management.Start_by_generating_a_random_key_by_giving_it_a_name')}
                         </Typography>
                         <Box my={4} justifyContent="center" alignItems="center" display="flex" >
                             {!is_authenticated && <form autoComplete="off" onSubmit={handleCreateKey}>
@@ -495,19 +493,16 @@ function KeyManagement() {
                         {keycreateerror && <ErrorAlert error={keycreateerror} />}
                         <Divider></Divider>
                         <Typography variant="h5" >
-                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>2. Add credit to your key</Box>
+                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> {t('key_management.2_Add_credit_to_your_key')}</Box>
                         </Typography>
                         <Stack spacing={1}>
                             <Alert variant="outlined" severity="info" sx={{ whiteSpace: 'pre-line' }} >
                                 <AlertTitle>Info</AlertTitle>
-                                {`We offer 2 payment methods via Stripe or XMR transfer:\n  
-                                 To pay by Stripe, include the Key and Key Name in the form below and click Stripe.\n
-                                 To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.)`}
+                                {t('key_management.Info_1')}
                             </Alert>
                             <Alert variant="outlined" severity="warning" sx={{ whiteSpace: 'pre-line' }}>
                                 <AlertTitle>Warning</AlertTitle>
-                                {` If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks.\n 
-                                   To ensure that people with access to your computer or session cannot retrieve your wallet information, you are required to fill up the credit-related forms, even if you are logged in.`}
+                                {t('key_management.Warning_1')}
                             </Alert>
                         </Stack>
                         <Box my={4} >
@@ -578,12 +573,12 @@ function KeyManagement() {
                                         id="panel1-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.1 Check credit balance
+                                        {t('key_management.21_Check_credit_balance')} 
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                            Before paying, you may check your current balance (and Key and Key Name) to avoid undesirable accidents.
+                                        {t('key_management.21_info')}
                                         </Typography>
                                         <Box mt={2}>
                                             <LoadingButton loading={keycheckloading} variant="contained" name="checkcredit" onClick={handleCheckKey.bind(this)} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
@@ -599,12 +594,12 @@ function KeyManagement() {
                                         id="panel2-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.2 Pay by Stripe
+                                        {t('key_management.22_Pay_by_Stripe')}                                     
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                            You will be redirected to Stripe Payment portal by choosing this payment option.
+                                        {t('key_management.22_info')}
                                         </Typography>
                                         <Box mt={2}>
                                             <Button variant="contained" onClick={handleStripeRedirect.bind(this)} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
@@ -619,13 +614,12 @@ function KeyManagement() {
                                         id="panel3-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.3 Retrieve XMR wallet
+                                        {t('key_management.23_Retrieve_XMR_wallet')}            
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                            If (for issues with our XMR node) your Key is not associated with a XMR intergrated wallet, you can associate your Key with a Wallet here.
-                                            You can also use this function to retrieve your Wallet before payment.
+                                        {t('key_management.23_info')}
                                         </Typography>
                                         <Box mt={2}>
                                             <LoadingButton loading={xmrretrieveloading} variant="contained" type="submit" onClick={handleXMRRetrive.bind(this)} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
@@ -641,13 +635,13 @@ function KeyManagement() {
                                         id="panel4-header"
                                     >
                                         <Typography variant="h6" >
-                                            2.4 Confirm XMR Payment
+                                        {t('key_management.24_Confirm_XMR_Payment')}
+                                            
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                            Processing the XMR payment may take up to 30 minutes after it has been confirmed on the blockchain.
-                                            Use sufficient fees so the transactions gets confirmed on time.
+                                        {t('key_management.24_info')}
                                         </Typography>
                                         <Box mt={2}>
                                             <LoadingButton loading={xmrconfirmationloading} variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
@@ -660,12 +654,15 @@ function KeyManagement() {
                         </Box>
                         <Divider></Divider>
                         <Typography variant="h5" >
-                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> 3. Check user manual </Box>
+                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> {t('key_management.3_Check_user_manual')} </Box>
                         </Typography>
                         <Typography variant="body1" >
-                            Check the <Link href="/frontend/manual/key" variant="body1">
-                                {'User Manual'}
-                            </Link> to learn more about how to pay and use our services.
+                        <Trans
+                            i18nKey="key_management.3_infor"
+                                 t={t}
+                                components={{ Link: <Link href="/frontend/manual/key" /> }}>
+                            </Trans>
+
                         </Typography>
                     </StyledPaper>
                 </Box>

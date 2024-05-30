@@ -1,0 +1,23 @@
+{
+    "Get_started_with_Professor_Parakeet": " Get started with Professor Parakeet",
+    "1_Create_a_Key": "1. Create a Key ",
+    "Start_by_generating_a_random_key_by_giving_it_a_name": "Start by generating a random key by giving it a name.",
+    "2_Add_credit_to_your_key": "2. Add credit to your key",
+    "Info_1": "We offer 2 payment methods via Stripe or XMR transfer:\n - To pay by Stripe, include the Key and Key Name in the form below and click Stripe.\n - To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.)",
+    "Warning_1": "If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks.\n\nTo ensure that people with access to your computer or session cannot retrieve your wallet information, you are required to fill up the credit-related forms, even if you are logged in.",
+    "3_Check_user_manual": "3. Check user manual",
+    "21_Check_credit_balance": "2.1 Check credit balance",
+    "22_Pay_by_Stripe": "2.2 Pay by Stripe",
+    "23_Retrieve_XMR_wallet": "2.3 Retrieve XMR wallet",
+    "24_Confirm_XMR_Payment": "2.4 Confirm XMR Payment",
+    "21_info": "Before paying, you may check your current balance (and Key and Key Name) to avoid undesirable accidents.",
+    "22_info": "You will be redirected to Stripe Payment portal by choosing this payment option.",
+    "23_info": "If (for issues with our XMR node) your Key is not associated with a XMR intergrated wallet, you can associate your Key with a Wallet here. You can also use this function to retrieve your Wallet before payment.",
+    "24_info": "Processing the XMR payment may take up to 30 minutes after it has been confirmed on the blockchain. Use sufficient fees so the transactions gets confirmed on time.",
+    "3_infor": "Check the <Link> User Manual </Link> to learn more about how to pay and use our services.",
+    "key_create_success":"Congrats! Here's your Key, before moving on, you may consider:\n - Export you Key into a text document.\n - Before topping up your Key, use the check credit function below to ensure that you get it correctly.\n - If you face any problems, please contact us.\n",
+    "key_check_success": "Your Key and Key Name are correct!", 
+    "xmr_check_success": "Wallet Information",
+    "xmr_confirmation_success": "Confirmation Status"
+
+}
