@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import Prism from "prismjs";
@@ -12,14 +10,9 @@ require("prismjs/components/prism-python");
 require("prismjs/components/prism-bash");
 import Box from '@mui/material/Box';
 import ResponsiveAppBar from '../component/navbar';
-import { VerticalNav } from '../component/vertical_nav';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import Typography from '@mui/material/Typography';
-import { TypeAnimation } from 'react-type-animation';
-import introduction_ from '../../docs/PageContent/introduction.md'
-import { Highlight, themes } from 'prism-react-renderer';
 import Footer from '../component/footer';
 import { Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +20,7 @@ import '../component/css/background_video.css'
 import { useTranslation } from 'react-i18next';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import { TypeWriterText } from '../component/animation_text_change'
 
 function Information() {
     useEffect(() => {
@@ -34,24 +28,15 @@ function Information() {
     });
     const videoRef = useRef(null);
     const { t, i18n } = useTranslation();
-    const [intro, setMessage] = useState('');
     const [videoloaded, setVideoLoaded] = useState(false);
 
     useEffect(() => {
-        axios.all([
-            axios.get(introduction_),
-        ])
-            .then(axios.spread((intro_object) => {
-                setMessage(intro_object.data);
-            }))
-            .catch(error => {
-                console.log(error);
-            });
+
         if (videoRef) {
             videoRef.current.play();
             setVideoLoaded(true)
         }
-    }, []);
+    }, [videoRef]);
     const [destination, setDestination] = useState(null)
     const navigate = useNavigate();
     useEffect(() => {
@@ -90,7 +75,7 @@ function Information() {
                     },
                 }}>
                     <Box sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, .25)' : 'rgba(255, 255, 255, .25)', borderRadius: '12px' }} >
-                        <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'inline-block', padding: '20px', lineHeight: 1.7, }}
+                    <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '20px', lineHeight: 1.7, }}
                             sequence={[
                                 t('introduction.introduction_animation', { returnObjects: true })[0],
                                 1500,
@@ -109,6 +94,7 @@ function Information() {
                             speed={120}
                             deletionSpeed={90}
                         />
+                       
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -196,7 +182,8 @@ function Information() {
                                         {t('introduction.example_1')}
                                     </Typography>
                                     <Divider></Divider>
-                                    <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+
+                                     <TypeWriterText  style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
                                         sequence={[
                                             t('introduction.example_1_answer'),
                                             3000,
@@ -211,6 +198,7 @@ function Information() {
                                         speed={120}
                                         deletionSpeed={90}
                                     />
+                                    
                                 </Paper>
                             </Box>
                             <Typography mt={2}>
@@ -232,7 +220,7 @@ function Information() {
                                         {t('introduction.example_2')}
                                     </Typography>
                                     <Divider></Divider>
-                                    <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+                                    <TypeWriterText  style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
                                         sequence={[
                                             t('introduction.example_2_answer'),
                                             3000,
@@ -247,6 +235,7 @@ function Information() {
                                         speed={120}
                                         deletionSpeed={90}
                                     />
+
                                 </Paper>
                             </Box>
                         </Box>

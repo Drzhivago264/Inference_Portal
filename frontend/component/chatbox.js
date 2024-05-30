@@ -35,18 +35,18 @@ export const ChatBox = ({
                         if (mess.role == 'Human') {
                             return (
                                 <Paper key={mess.time} >
-                                    <Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" style={{ whiteSpace: 'pre-wrap' }}>
+                                    <Box sx={{ borderRight: 5, borderColor: 'primary.main', borderRadius: 1 }} p={1} className="message_log_container" >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Box align="left">
                                                 <IconButton onClick={() => copyToClipboard(`${mess.role} (${mess.time})\n\n${mess.message}`)} aria-label="copy" size="small">
                                                     <ContentCopyIcon fontSize="small" />
                                                 </IconButton>
                                             </Box>
-                                            <Box pt={0.8}>
+                                            <Box pt={0.8} >
                                                 <Box textAlign="right">
                                                     {mess.role} ({mess.time})
                                                 </Box>
-                                                <Box  display="flex" justifyContent="flex-end" style={{ whiteSpace: "pre-wrap" }}>
+                                                <Box  display="flex" sx={{wordBreak: "break-word"}} justifyContent="flex-end" style={{ whiteSpace: "pre-wrap", width:'100%' }}>
                                                     {mess.message}
                                                 </Box>
                                             </Box>
@@ -60,7 +60,7 @@ export const ChatBox = ({
                                 <Paper key={mess.holderid}>
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Box pt={0.8} align="left" style={{ whiteSpace: "pre-wrap" }}>
+                                            <Box pt={0.8} align="left" sx={{wordBreak: "break-word"}} style={{ whiteSpace: "pre-wrap" }}>
                                                 <span> {mess.role} - {mess.time}: <br /><br /> {mess.message}</span>
                                             </Box>
                                             <Box align="right">
@@ -160,7 +160,7 @@ export const ChatBoxHotpot = ({
                                                 <Box textAlign="right">
                                                     {mess.role} ({mess.time})
                                                 </Box>
-                                                <Box  display="flex" justifyContent="flex-end" style={{ whiteSpace: "pre-wrap" }}>
+                                                <Box  display="flex" sx={{wordBreak: "break-word"}}  justifyContent="flex-end" style={{ whiteSpace: "pre-wrap"}}>
                                                     {mess.message}
                                                 </Box>
                                             </Box>
@@ -174,7 +174,7 @@ export const ChatBoxHotpot = ({
                                 <Paper key={mess.holderid}>
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Box pt={0.8} align="left" style={{ whiteSpace: "pre-wrap" }}>
+                                            <Box pt={0.8} align="left" sx={{wordBreak: "break-word"}} style={{ whiteSpace: "pre-wrap" }}>
                                                 <span> {mess.role} - {mess.time}: <br /><br /> {mess.message}</span>
                                             </Box>
                                             <Box align="right">
