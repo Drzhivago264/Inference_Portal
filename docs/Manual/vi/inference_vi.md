@@ -1,13 +1,13 @@
-Inference Modes
+ Chế độ suy diễn
 =======================
 
 ---
 
-## 1. API Endpoints
+## 1. Điểm cuối API
 
-- Visit [API Doc](https://professorparakeet.com/frontend/api/docs) to view specific request and response schemas of each endpoint.
+- Truy cập [API Doc](https://professorparakeet.com/frontend/api/docs) để xem các lược đồ yêu cầu và phản hồi cụ thể của mỗi điểm cuối.
 
-- Python example for chat mode:
+- Ví dụ Python cho chế độ chat:
 
 ```python
 r = requests.post("https://professorparakeet.com/api/chat", headers={"Authorization": "Bearer str"}, 
@@ -28,7 +28,7 @@ json={"prompt": str,
 print(r.json())
 ```
 
-- cURL example for text completion:
+- Ví dụ cURL cho hoàn thành văn bản:
 
 ```bash
 curl "https://professorparakeet.com/api/completion" --request POST -H "Authorization: Bearer str" -H 'Content-Type: application/json' \
@@ -46,7 +46,7 @@ curl "https://professorparakeet.com/api/completion" --request POST -H "Authoriza
                 "length_penalty": float
               }'
 ```
-- Streamming chat response.
+- Phản hồi chat trực tuyến.
 
 
 ```python
@@ -56,7 +56,7 @@ for chunk in response.iter_lines():
         print(chunk)
 ```
 
-- Sample Stream Output:
+- Mẫu đầu ra trực tuyến:
 
 
 ```python
@@ -71,16 +71,16 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
 b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to 2.']}, 'delta': '1 + 1 is equal to 2.'}"
 ```
 
-> - Streamming is only available in chat mode.
-> - If the server is currently offline, you should send a warm up request to boot it up, otherwise you will get a lot a status reponses for your prompts.
+> - Trực tuyến chỉ có sẵn trong chế độ chat.
+> - Nếu máy chủ hiện đang ngoại tuyến, bạn nên gửi một yêu cầu khởi động để khởi động nó, nếu không, bạn sẽ nhận được rất nhiều phản hồi trạng thái cho các lời nhắc của bạn.
 
 ---
 
-## 2. Chat Bot Mode
-- We offer standard chatbot mode with custom chat template. We use a vectorised database and query 3 previous model's responses what are the most relevant to answer your questions.
-- The maximum context length is 4096 tokens, please do not input a 10000-page book into the chatroom, the model will give you nothing.
-- Visit [Chat & Log](https://professorparakeet.com/frontend/hub) and choose `Chat Bots` to talk to our bots.
-- Users can configure multiple interence parameters in `Chatbots`, including:
+## 2. Chế độ Chat Bot
+- Chúng tôi cung cấp chế độ chatbot tiêu chuẩn với mẫu chat tùy chỉnh. Chúng tôi sử dụng cơ sở dữ liệu vector hóa và truy vấn 3 phản hồi của mô hình trước đó là phù hợp nhất để trả lời câu hỏi của bạn.
+- Độ dài ngữ cảnh tối đa là 4096 token, vui lòng không nhập một cuốn sách dày 10000 trang vào phòng chat, mô hình sẽ không cho bạn bất cứ điều gì.
+- Truy cập [Chat & Log](https://professorparakeet.com/frontend/hub) và chọn `Chat Bots` để trò chuyện với bot của chúng tôi.
+- Người dùng có thể cấu hình nhiều tham số suy diễn trong `Chatbots`, bao gồm:
   - Top_p
   - Top_k
   - Temperature
@@ -93,15 +93,15 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
   - Early Stopping
   - Length Penalty
 
-## 3. Hard Core Prompt Engineering Mode
+## 3. Chế độ Agent
 
-> To test both Chatbots and Agents user can choose `Hotpot Mode` in [Chat & Log](https://professorparakeet.com/frontend/hub)
+> Để kiểm tra cả Chatbots và Agents, người dùng có thể chọn `Hotpot Mode` trong [Bots & Agents](https://professorparakeet.com/frontend/hub)
 
-- We convert large language models into agents which are able to initiate predefined actions and have a working memory of multiple reasoning steps.
-- Visit [Chat & Log](https://professorparakeet.com/frontend/hub) and choose `Agents` to talk to our agents.
-- Users can choose among different agents and different engines for the agents
-- Users can create their own template for their specific project.
-- Users can configure multiple interence parameters in `Chatbots`, including:
+- Chúng tôi chuyển đổi các mô hình ngôn ngữ lớn thành các đại lý có khả năng khởi tạo các hành động được định trước và có bộ nhớ làm việc của nhiều bước suy luận.
+- Truy cập [Bots & Agents](https://professorparakeet.com/frontend/hub) và chọn `Agents` để trò chuyện với các đại lý của chúng tôi.
+- Người dùng có thể chọn giữa các đại lý khác nhau và các động cơ khác nhau cho các đại lý
+- Người dùng có thể tạo mẫu của riêng mình cho dự án cụ thể của họ.
+- Người dùng có thể cấu hình nhiều tham số suy diễn trong `Chatbots`, bao gồm:
   - Top_p
   - Top_k
   - Temperature
@@ -110,17 +110,17 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
   - Frequency Penalty
   
 
-## 4. Backend LLM Functions
+## 4. Chức năng LLM Backend
 
-We offer multiple language functions, including:
-- Emotion prediction: predict the emotion of the users' prompts among the configurable list of emotions.
-- Sentiment prediction: predict the sentiment of the users' prompts.
-- Restyle: restyle the user prompts with a configurable variable (e.g., convert to scientific, novel, creative, emotional writting)
-- Summary: summary the users' prompts with a configurable number of word.
-- Topic Classification: classify the topic of the users' prompts among the configurable list of topics.
-- Paraphase: paraphse users' prompts.
+Chúng tôi cung cấp nhiều chức năng ngôn ngữ, bao gồm:
+- Dự đoán cảm xúc: dự đoán cảm xúc của các lời nhắc của người dùng trong danh sách cảm xúc có thể cấu hình.
+- Dự đoán tình cảm: dự đoán tình cảm của các lời nhắc của người dùng.
+- Phong cách lại: phong cách lại các lời nhắc của người dùng với một biến có thể cấu hình (ví dụ: chuyển đổi thành viết khoa học, tiểu thuyết, sáng tạo, cảm xúc)
+- Tóm tắt: tóm tắt các lời nhắc của người dùng với một số lượng từ có thể cấu hình.
+- Phân loại chủ đề: phân loại chủ đề của các lời nhắc của người dùng trong danh sách chủ đề có thể cấu hình.
+- Paraphase: paraphase các lời nhắc của người dùng.
 
-Users can configure multiple interence parameters in `Chatbots`, including:
+Người dùng có thể cấu hình nhiều tham số suy diễn trong `Chatbots`, bao gồm:
   - Top_p
   - Top_k
   - Temperature
