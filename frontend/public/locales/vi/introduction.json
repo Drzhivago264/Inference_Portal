@@ -11,22 +11,23 @@
         "Nhà báo/Nhà truyền thông muốn đưa ra lập luận giống như khán giả của họ",
         "Những người cần dùng tiếng nói của người khác"
     ],
-    "about_chunk_2": "Khác với các mô hình ngôn ngữ phổ biến được đào tạo bởi các doanh nghiệp khác, mô hình của chúng tôi được tinh chỉnh thông qua huấn luyện hoặc hiệu lệnh cho đến khi chúng nói giống như các nhóm người cụ thể. Trong khi các doanh nghiệp khác muốn mô hình của họ không thiên vị, hữu ích, hợp lý và lô-gíc, chúng tôi muốn mô hình ngôn ngữ nói như một con người bình thường với tất cả cảm xúc, thiên vị, sở thích, sự thù hận, nỗi sợ, v.v. của họ\n\nTrang web này được viết đơn giản nhất có thể, một phần vì chúng tôi không có nguồn lực để trở nên phức tạp. Đây thực ra là một tính năng bảo mật hơn là một nhược điểm. Thực tế, chúng tôi không yêu cầu bạn đăng ký tài khoản với chúng tôi.",
+    "about_chunk_2": "Khác với các mô hình ngôn ngữ phổ biến được đào tạo bởi các doanh nghiệp khác, mô hình của chúng tôi được tinh chỉnh thông qua huấn luyện hoặc hiệu lệnh cho đến khi chúng nói giống như các nhóm người cụ thể. Trong khi các doanh nghiệp khác muốn mô hình của họ không thiên vị, hữu ích, hợp lý và lô-gíc, chúng tôi muốn mô hình ngôn ngữ nói như một con người bình thường với tất cả cảm xúc, sở thích, thù hận, sợ hãi, v.v.. của họ.\n\nTrang web này được viết đơn giản nhất có thể, một phần vì chúng tôi không có nguồn lực để làm phức tạp hơn. Đây thực ra là một tính năng bảo mật hơn là một nhược điểm. Thực tế, chúng tôi không yêu cầu bạn đăng ký tài khoản với chúng tôi.",
+    "tool_title": "Tính năng",
     "tool_chunk_1": "Về các công cụ được tích hợp trong trang web này, chúng tôi cung cấp các API và sandbox để:",
     "tool_list": [
-        "Gán nhãn và/hoặc chỉnh sửa bộ dữ liệu với các mô hình ngôn ngữ lớn.",
+        "Gán nhãn và/hoặc chỉnh sửa bộ dữ liệu.",
         "Tự động hóa phỏng vấn và thu thập dữ liệu với Interview Agent.",
         "Viết hoặc diễn đạt lại bài tập với Assignment Agent và các chức năng LLM.",
         "Xây dựng hoặc thử nghiệm Bots với Construction Zone và Your Template."
     ],
-    "tool_chunk_2": "Không có kế  hoạch hoặc lập luận phức tạp nào được đưa ra ở đây, chúng tôi đang đóng vai trò của một con vẹt, lặp lại giọng nói của người khác.",
+    "tool_chunk_2": "Không có ý kiến hoặc lập luận phức tạp nào được đưa ra ở đây, chúng tôi đang đóng vai trò của một con vẹt, lặp lại giọng nói của người khác.",
     "call_to_act_list": [
         "Nếu bạn muốn giúp đỡ, vui lòng liên hệ với chúng tôi.",
         "Nếu bạn có dữ liệu được tạo ra bởi một nhóm người cụ thể, chúng ta có thể hợp tác.",
         "Nếu bạn có ý tưởng đào tạo một mô hình mới và sẵn lòng trả tiền cho nó, vui lòng cho chúng tôi biết."
     ],
     "example_title": "Ví dụ",
-    "example_chunk_1": "Hai ví dụ dưới đây có thể được tạo ra bởi một mô hình ngôn ngữ lớn phổ biến hiện nay. Thực tế, chúng tôi chỉ nhập các lệnh vào chatbot của mình. Bạn có thể tạo một khóa và thử 2 câu lệnh dưới đây.",
+    "example_chunk_1": "Hai ví dụ dưới đây có thể được tạo ra bởi mô hình ngôn ngữ phổ biến hiện nay. Thực tế, chúng tôi chỉ nhập các lệnh vào chatbot của mình. Dựa trên hai ví dụ dưới đây, chúng ta có thể thiết kế những chỉ dẫn và logic phức tạp hợn cho agents.",
     "example_1": "Lệnh: Bạn là một thanh niên khoảng tuổi 20 được giáo dục, bạn tin vào sự bình đẳng, tự do và công lý. Bạn phải phản hồi câu sau dựa trên những gì bạn tin tưởng.\nCâu đầu vào: Thực tế là tất định, không có tự do.",
     "example_1_answer": "Trả lời: Tôi không đồng ý. Khái niệm tất định cho rằng mọi sự kiện, bao gồm cả nhận thức và hành vi con người, quyết định và hành động, đều được xác định nguyên nhân bởi một chuỗi sự kiện trước. Mặc dù quan điểm này có thể có một số nền tảng khoa học, nhưng nó phá vỡ bản chất của khả năng hành động và tự do của con người. Tôi tin vào tự do - khả năng lựa chọn, hành động, tạo dựng số phận của chính mình. Tự do này cho phép chúng ta học hỏi, phát triển và đưa ra những quyết định có thể thay đổi cuộc đời chúng ta. Ngay cả khi một số khía cạnh của thực tế là tất định, nó không phủ nhận sự tồn tại của tự do cá nhân.",
     "example_chunk_2": "Các mô hình hiện tại khá thông minh, chúng có một sự hiểu biết tốt về xã hội con người. Ít nhất, chúng hiểu về xã hội phương Tây vì họ tạo ra phần lớn bộ dữ liệu đào tạo cho chúng. Hãy tưởng tượng chúng ta có thể đào tạo các mô hình của riêng mình (nhỏ hơn, rẻ hơn, và nhanh hơn) trên dữ liệu của chúng ta (địa phương hóa) để nói lên những tiếng nói mà chúng ta muốn chúng nói và ở quy mô mà phần cứng có thể hỗ trợ.",

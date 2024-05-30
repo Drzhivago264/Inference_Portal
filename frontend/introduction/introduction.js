@@ -24,11 +24,16 @@ import Footer from '../component/footer';
 import { Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import '../component/css/background_video.css'
+import { useTranslation } from 'react-i18next';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+
 function Information() {
     useEffect(() => {
         Prism.highlightAll();
     });
     const videoRef = useRef(null);
+    const { t, i18n } = useTranslation();
     const [intro, setMessage] = useState('');
     const [videoloaded, setVideoLoaded] = useState(false);
 
@@ -47,9 +52,9 @@ function Information() {
             setVideoLoaded(true)
         }
     }, []);
-    const [destination, setDestination] = React.useState(null)
+    const [destination, setDestination] = useState(null)
     const navigate = useNavigate();
-    React.useEffect(() => {
+    useEffect(() => {
         if (destination) {
             navigate(destination, { replace: true })
         }
@@ -57,7 +62,7 @@ function Information() {
     return (
         <Container maxWidth={false} disableGutters>
             <div className="video-container">
-                <video ref={videoRef} className='videoTag' autoPlay loop muted playsinline disablePictureInPicture controlsList="nodownload" onPlay={() => { console.log('yeet'); setVideoLoaded(true) }}>
+                <video ref={videoRef} className='videoTag' autoPlay loop muted playsInline disablePictureInPicture controlsList="nodownload" onPlay={() => { setVideoLoaded(true) }}>
                     <source src="/static/video/introduction_background.mp4" type='video/mp4' />
                 </video>
             </div>
@@ -70,7 +75,9 @@ function Information() {
             </Stack>
             </Container>
             }
-            {videoloaded && <Container maxWidth="lg">
+            {videoloaded && <Container maxWidth="lg"
+
+            >
                 <Box sx={{
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -85,11 +92,11 @@ function Information() {
                     <Box sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, .25)' : 'rgba(255, 255, 255, .25)', borderRadius: '12px' }} >
                         <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'inline-block', padding: '20px', lineHeight: 1.7, }}
                             sequence={[
-                                `Newspaper, radio, television, the internet, social media and now large language models.`,
+                                t('introduction.introduction_animation', { returnObjects: true })[0],
                                 1500,
-                                `Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices.`,
+                                t('introduction.introduction_animation', { returnObjects: true })[1],
                                 1500,
-                                "Newspaper, radio, television, the internet, social media and now large language models.\nWe are building a new medium for your voices. \n Or the voice that you want to be heard.",
+                                t('introduction.introduction_animation', { returnObjects: true })[2],
                                 3000,
                                 ''
                                 ,
@@ -104,25 +111,74 @@ function Information() {
                         />
                     </Box>
                 </Box>
-                <Grid mt={{ xs: 15, sm: 15, md: 18, lg: 20 }} container spacing={0}>
-                    <Grid item sm={12} md={8} lg={10}>
-                        <Box mt={5} mb={5} p={1}>
-                            <MuiMarkdown overrides={{
-                                ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
-                                h1: {
-                                    component: 'h1',
-                                },
-                                h2: {
-                                    component: 'h2',
-                                },
-                                h3: {
-                                    component: 'h3',
-                                },
-
-                            }}>{intro}</MuiMarkdown>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Box maxWidth="md"
+                        mt={{ xs: 18, sm: 20, md: 20, lg: 22 }}
+                    >
+                        <Box mt={5} mb={5} p={1} >
+                            <Box mt={2} mb={2}>
+                                <Typography variant='h4'>
+                                    {t('introduction.about_title')}
+                                </Typography>
+                            </Box>
+                            <Divider />
+                            <Box mt={2} mb={8}>
+                                <Typography >
+                                    {t('introduction.about_chunk_1')}
+                                </Typography>
+                                <Box ml={4}>
+                                    <List sx={{ listStyleType: 'disc' }}>
+                                        {t('introduction.user_list', { returnObjects: true }).map(l => (
+                                            < ListItem sx={{ display: 'list-item' }} >{l}</ListItem>
+                                        )
+                                        )
+                                        }
+                                    </List>
+                                </Box>
+                                <Typography style={{ whiteSpace: 'pre-line' }}>
+                                    {t('introduction.about_chunk_2')}
+                                </Typography>
+                            </Box>
+                            <Box mt={2} mb={2}>
+                                <Typography variant='h4'>
+                                    {t('introduction.tool_title')}
+                                </Typography>
+                            </Box>
+                            <Divider />
+                            <Box mt={2} mb={6}>
+                                <Typography >
+                                    {t('introduction.tool_chunk_1')}
+                                </Typography>
+                                <Box ml={4}>
+                                    <List sx={{ listStyleType: 'disc' }}>
+                                        {t('introduction.tool_list', { returnObjects: true }).map(l => (
+                                            < ListItem sx={{ display: 'list-item' }} >{l}</ListItem>
+                                        )
+                                        )
+                                        }
+                                    </List>
+                                </Box>
+                                <Typography >
+                                    {t('introduction.tool_chunk_2')}
+                                </Typography>
+                                <Box ml={4}>
+                                    <List sx={{ listStyleType: 'disc' }}>
+                                        {t('introduction.call_to_act_list', { returnObjects: true }).map(l => (
+                                            < ListItem sx={{ display: 'list-item' }} >{l}</ListItem>
+                                        )
+                                        )
+                                        }
+                                    </List>
+                                </Box>
+                            </Box>
+                            <Box mt={2} mb={2}>
+                                <Typography variant='h4'>
+                                    {t('introduction.example_title')}
+                                </Typography>
+                            </Box>
+                            <Divider />
                             <Typography mt={2}>
-                                The two examples below can be currently generated by a popular large language model. In fact, we just input the prompts into our chatbots.
-                                You can generate a key and try it by yourself.
+                                {t('introduction.example_chunk_1')}
                             </Typography>
                             <Box mt={1} mb={1} sx={{
                                 display: 'flex',
@@ -137,19 +193,16 @@ function Information() {
 
                                 <Paper variant="outlined">
                                     <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
-                                        Prompt: You are an educated man in your 20s, you believe in equality, freedom and justice. You must response to the following sentence based on what you believe in. <br></br>
-                                        Sentence: The reality is deterministic, there is no freedom.
+                                        {t('introduction.example_1')}
                                     </Typography>
                                     <Divider></Divider>
                                     <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
                                         sequence={[
-
-                                            `Answer: I respectfully disagree. The concept of determinism suggests that every event, including human cognition and behavior, decision and action, is causally determined by an unbroken chain of prior occurrences. While this view might hold some scientific grounding, it undermines the essence of human agency and free will. I believe in freedom - the ability to choose, to act, to shape our own destiny. This freedom is what allows us to learn, grow, and make decisions that can change the course of our lives. Even if some aspects of reality are deterministic, it doesn't negate the existence of personal freedom.`,
+                                            t('introduction.example_1_answer'),
                                             3000,
                                             ''
                                             ,
                                             () => {
-
                                             },
                                         ]}
                                         wrapper="span"
@@ -161,8 +214,7 @@ function Information() {
                                 </Paper>
                             </Box>
                             <Typography mt={2}>
-                                The current models are pretty smart, they have a great understanding of human society. At least, they understand Western society that generates the majority of their training datasets.
-                                Imagine we can train our own models (smaller, cheaper, and quicker) on our (localised) data to speak up the voices that we want them to speak and at the scale that hardware can support.
+                                {t('introduction.example_chunk_2')}
                             </Typography>
                             <Box sx={{
                                 display: 'flex',
@@ -177,18 +229,16 @@ function Information() {
                             }}>
                                 <Paper variant="outlined">
                                     <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
-                                        Prompt: You are a man in your 30s, you come from a working class family, you are tired of paying for your mortgage. You must response to the following sentence based on who you are. <br></br>
-                                        Sentence: It is important to raise income taxes for education.
+                                        {t('introduction.example_2')}
                                     </Typography>
                                     <Divider></Divider>
                                     <TypeAnimation style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
                                         sequence={[
-                                            `Answer: While I understand the value of investing in education, I must say that the prospect of raising interest rates and income taxes is a tough pill to swallow for folks like me. Many of us are already struggling to make ends meet, paying mortgages and trying to secure a decent life for our families. It seems like we're always the ones shouldering the burden. I think it's important to find a balance and look at other ways to fund education, without putting the entire weight on the working class.`,
+                                            t('introduction.example_2_answer'),
                                             3000,
                                             ''
                                             ,
                                             () => {
-
                                             },
                                         ]}
                                         wrapper="span"
@@ -197,18 +247,11 @@ function Information() {
                                         speed={120}
                                         deletionSpeed={90}
                                     />
-
                                 </Paper>
-
                             </Box>
                         </Box>
-                    </Grid>
-                    <Grid item md={3} lg={2}>
-                        <Box mt={10.32} sx={{ minWidth: 225, display: { xs: 'none', sm: 'none ', md: 'block' } }}>
-                            <VerticalNav navigate={setDestination} />
-                        </Box>
-                    </Grid>
-                </Grid>
+                    </Box>
+                </Box>
             </Container >}
             {videoloaded && <Footer />}
         </Container >

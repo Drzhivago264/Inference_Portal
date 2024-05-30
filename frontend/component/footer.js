@@ -8,8 +8,10 @@ import Typography from '@mui/material/Typography';
 import FacebookIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TwitterIcon from '@mui/icons-material/X';
-
+import { useTranslation } from 'react-i18next';
+import i18next from "i18next";
 function Copyright() {
+  
     return (
         <Typography variant="body2" color="text.secondary" mt={1}>
             {'Copyright © '}
@@ -19,6 +21,7 @@ function Copyright() {
     );
 }
 export default function Footer() {
+    const { t, i18n } = useTranslation();
     return (
         <Container maxWidth="xl"
             sx={{
@@ -60,7 +63,7 @@ export default function Footer() {
                                 textDecoration: 'none',
                             }}
                         >
-                            Prof. Parakeet
+                            {t('navbar.Prof_Parakeet')}
                         </Typography>   
                     </Box>
                 </Box>
@@ -72,16 +75,16 @@ export default function Footer() {
                     }}
                 >
                     <Typography variant="body2" fontWeight={600}>
-                        Information
+                    {t('navbar.Information')}
                     </Typography>
                     <Link color="text.secondary" href="/">
-                        Introduction
+                    {t('navbar.Introduction')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/model">
-                        Model
+                    {t('navbar.Model')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/manual/key">
-                        User Manual
+                    {t('navbar.Manual')}
                     </Link>
                 </Box>
                 <Box
@@ -95,7 +98,7 @@ export default function Footer() {
                         Money Talks
                     </Typography>
                     <Link color="text.secondary" href="/frontend/key-management">
-                        Get Key
+                    {t('navbar.Manage_Key')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/model">
                         Pricing
@@ -109,13 +112,13 @@ export default function Footer() {
                     }}
                 >
                     <Typography variant="body2" fontWeight={600}>
-                        Inference Mode
+                    {t('navbar.Modes')}
                     </Typography>
                     <Link color="text.secondary" href="/frontend/hub">
-                        Chat Bots & Agents
+                    {t('navbar.Bots_Agents')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/api/docs">
-                        API Docs
+                    {t('navbar.API_Docs')}
                     </Link>
                 </Box>
                 <Box
@@ -129,7 +132,7 @@ export default function Footer() {
                         Great Minds Think Alike
                     </Typography>
                     <Link color="text.secondary" href="/frontend/contact">
-                        Contact Us
+                    {t('navbar.Contact')}
                     </Link>
                     <Link color="text.secondary" href="#">
                         Frankensteining Experiments
