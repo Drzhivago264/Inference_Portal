@@ -9,50 +9,89 @@ import { Link } from "react-router-dom";
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import authentication_ from '../../docs/Manual/authentication.md'
-import behavior_ from '../../docs/Manual/behavior.md'
-import behavior_toc from '../../docs/Manual/behavior_toc.md'
-import key_ from '../../docs/Manual/create_key.md'
-import key_toc from '../../docs/Manual/create_key_toc.md'
-import errorlimit_ from '../../docs/Manual/error_ratelimit.md'
-import errorlimit_toc from '../../docs/Manual/error_ratelimit_toc.md'
-import inference_ from '../../docs/Manual/inference.md'
-import inference_toc from '../../docs/Manual/inference_toc.md'
-import authentication_toc from '../../docs/Manual/authentication_toc.md'
+import authentication_en from '../../docs/Manual/en/authentication.md'
+import behavior_en from '../../docs/Manual/en/behavior.md'
+import behavior_toc_en from '../../docs/Manual/en/behavior_toc.md'
+import key_en from '../../docs/Manual/en/create_key.md'
+import key_toc_en from '../../docs/Manual/en/create_key_toc.md'
+import errorlimit_en from '../../docs/Manual/en/error_ratelimit.md'
+import errorlimit_toc_en from '../../docs/Manual/en/error_ratelimit_toc.md'
+import inference_en from '../../docs/Manual/en/inference.md'
+import inference_toc_en from '../../docs/Manual/en/inference_toc.md'
+import authentication_toc_en from '../../docs/Manual/en/authentication_toc.md'
+
+import authentication_vi from '../../docs/Manual/vi/authentication_vi.md'
+import behavior_vi from '../../docs/Manual/vi/behavior_vi.md'
+import behavior_toc_vi from '../../docs/Manual/vi/behavior_toc_vi.md'
+import key_vi from '../../docs/Manual/vi/create_key_vi.md'
+import key_toc_vi from '../../docs/Manual/vi/create_key_toc_vi.md'
+import errorlimit_vi from '../../docs/Manual/vi/error_ratelimit_vi.md'
+import errorlimit_toc_vi from '../../docs/Manual/vi/error_ratelimit_toc_vi.md'
+import inference_vi from '../../docs/Manual/vi/inference_vi.md'
+import inference_toc_vi from '../../docs/Manual/vi/inference_toc_vi.md'
+import authentication_toc_vi from '../../docs/Manual/vi/authentication_toc_vi.md'
+import { useTranslation } from 'react-i18next';
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import { Highlight, themes } from 'prism-react-renderer';
 import { useParams } from 'react-router';
 import Prism from "prismjs";
 import Footer from '../component/footer';
+import i18next from "i18next";
+
+
 function Manual() {
     useEffect(() => {
         Prism.highlightAll();
     });
     const { doc } = useParams();
+    const [default_language, setDefaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi' ? i18next.language : 'en')
 
     const [displaydoc, setDisplayDoc] = useState('')
     const [displaytoc, setDisplayToc] = useState('')
     const destination_refs = {
-        key: [key_, key_toc],
-        errorlimit: [errorlimit_, errorlimit_toc],
-        authentication: [authentication_, authentication_toc],
-        behavior: [behavior_, behavior_toc],
-        inference: [inference_, inference_toc]
+        key: {
+            "en": [key_en, key_toc_en],
+            "vi": [key_vi, key_toc_vi]
+        },
+        errorlimit: {
+            "en": [errorlimit_en, errorlimit_toc_en],
+            "vi": [errorlimit_vi, errorlimit_toc_vi]
+        },
+        authentication: {
+            "en": [authentication_en, authentication_toc_en],
+            "vi": [authentication_vi, authentication_toc_vi]
+        },
+        behavior: {
+            "en": [behavior_en, behavior_toc_en],
+            "vi": [behavior_vi, behavior_toc_vi]
+        },
+        inference: {
+            "en": [inference_en, inference_toc_en],
+            "vi": [inference_vi, inference_toc_vi]
+        }
     }
-    useEffect(() => {
-        axios.all([
-            axios.get(destination_refs[doc][0]),
-            axios.get(destination_refs[doc][1]),
-        ])
-            .then(axios.spread((display_doc_object, display_toc_object) => {
-                setDisplayDoc(display_doc_object.data);
-                setDisplayToc(display_toc_object.data)
+    const { t, i18n } = useTranslation();
 
-            }))
-            .catch(error => {
-                console.log(error);
-            });
-    }, [doc]);
+    useEffect(() => {
+        setDefaultLanguage(i18n.language)
+    }, [i18n.language]);
+    
+    useEffect(() => {
+     
+            axios.all([
+                axios.get(destination_refs[doc][default_language][0]),
+                axios.get(destination_refs[doc][default_language][1]),
+            ])
+                .then(axios.spread((display_doc_object, display_toc_object) => {
+                    setDisplayDoc(display_doc_object.data);
+                    setDisplayToc(display_toc_object.data)
+
+                }))
+                .catch(error => {
+                    console.log(error);
+                });
+        
+    }, [doc, default_language]);
     return (
         <Container maxWidth={false} disableGutters>
             <title>Manual</title>
@@ -76,7 +115,7 @@ function Manual() {
                                 </Typography>
                             </Box>
                         </Grid>
-                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm:'block' }  }} />
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'block' } }} />
                         <Grid item xs={12} md={8} lg={8}>
                             <Box mt={3} sx={{ display: { sm: 'block ', md: 'none' } }} >
                                 <Typography variant="body1" component="body1">
@@ -108,9 +147,9 @@ function Manual() {
 
                             </Box>
                         </Grid>
-                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: {  xs:'none', sm: 'none', md: 'none',  lg:'block' } }} />
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }} />
                         <Grid item xs={0} sm={2}>
-                            <Box m={2}  	sx={{ display: { xs:'none', sm: 'none', md: 'none', lg:'block' } }}>
+                            <Box m={2} sx={{ display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }}>
                                 <MuiMarkdown overrides={{
                                     ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                     h1: {

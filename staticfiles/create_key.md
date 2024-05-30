@@ -6,7 +6,7 @@ Setting Up Your API Key
 ## 1. Creating a New API Key
 
 > - The ratelimit for key creation is 20 key per IP address per day.
-> - Unused Keys with no credit are expired in 30 days. 
+> - Unused Keys with no credit are expired in 7 days. 
 
 - Navigate to [Key & Credit](/frontend/key-management) tab on Appbar
 - Fill and submit the Create a Key form. 

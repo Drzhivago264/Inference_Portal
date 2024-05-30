@@ -219,7 +219,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 function ResponsiveAppBar() {
   const navigate = useNavigate();
   const [destination, setDestination] = useState(null)
-  const [default_language, setDedaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi'? i18next.language : 'en' )
+  const [default_language, setDefaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi'? i18next.language : 'en' )
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -232,7 +232,7 @@ function ResponsiveAppBar() {
     navigate(`/frontend/${e.target.value}`);
   };
   const handleChangeLanguage = (lang) => {
-    setDedaultLanguage(lang)
+    setDefaultLanguage(lang)
     i18n.changeLanguage(lang)
   }
   const [open, setOpen] = useState(false);

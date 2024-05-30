@@ -11,7 +11,7 @@ import TwitterIcon from '@mui/icons-material/X';
 import { useTranslation } from 'react-i18next';
 import i18next from "i18next";
 function Copyright() {
-  
+
     return (
         <Typography variant="body2" color="text.secondary" mt={1}>
             {'Copyright © '}
@@ -64,7 +64,7 @@ export default function Footer() {
                             }}
                         >
                             {t('navbar.Prof_Parakeet')}
-                        </Typography>   
+                        </Typography>
                     </Box>
                 </Box>
                 <Box
@@ -75,16 +75,16 @@ export default function Footer() {
                     }}
                 >
                     <Typography variant="body2" fontWeight={600}>
-                    {t('navbar.Information')}
+                        {t('navbar.Information')}
                     </Typography>
                     <Link color="text.secondary" href="/">
-                    {t('navbar.Introduction')}
+                        {t('navbar.Introduction')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/model">
-                    {t('navbar.Model')}
+                        {t('navbar.Model')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/manual/key">
-                    {t('navbar.Manual')}
+                        {t('navbar.Manual')}
                     </Link>
                 </Box>
                 <Box
@@ -95,13 +95,13 @@ export default function Footer() {
                     }}
                 >
                     <Typography variant="body2" fontWeight={600}>
-                        Money Talks
+                    {t('navbar.Money_Talks')}
                     </Typography>
                     <Link color="text.secondary" href="/frontend/key-management">
-                    {t('navbar.Manage_Key')}
+                        {t('navbar.Manage_Key')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/model">
-                        Pricing
+                    {t('navbar.Pricing')}
                     </Link>
                 </Box>
                 <Box
@@ -112,13 +112,13 @@ export default function Footer() {
                     }}
                 >
                     <Typography variant="body2" fontWeight={600}>
-                    {t('navbar.Modes')}
+                        {t('navbar.Modes')}
                     </Typography>
                     <Link color="text.secondary" href="/frontend/hub">
-                    {t('navbar.Bots_Agents')}
+                        {t('navbar.Bots_Agents')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/api/docs">
-                    {t('navbar.API_Docs')}
+                        {t('navbar.API_Docs')}
                     </Link>
                 </Box>
                 <Box
@@ -129,13 +129,14 @@ export default function Footer() {
                     }}
                 >
                     <Typography variant="body2" fontWeight={600}>
-                        Great Minds Think Alike
+                        {t('navbar.Great_Minds_Think_Alike')}
+
                     </Typography>
                     <Link color="text.secondary" href="/frontend/contact">
-                    {t('navbar.Contact')}
+                        {t('navbar.Contact')}
                     </Link>
                     <Link color="text.secondary" href="#">
-                        Frankensteining Experiments
+                        {t('navbar.Frankensteining_Experiments')}
                     </Link>
                 </Box>
             </Box>

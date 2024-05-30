@@ -81,7 +81,7 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
                 chat_history.append(prompt_)
                 return chat_history
             else:
-                return prompt_
+                return [prompt_]
     elif mode == "generate":
         if not agent_availability:
             return prompt
@@ -96,7 +96,7 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
                 chat_history.append(prompt_)
                 return chat_history
             else:
-                return prompt_
+                return [prompt_]
 
 
 def response_mode(mode: str, response: str, prompt: str) -> str:
