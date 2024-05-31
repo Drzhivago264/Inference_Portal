@@ -172,7 +172,7 @@ function Agent() {
                 }
                 setDefaultChildTemplateList(instruction_object.data.default_children)
                 setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
-               
+
                 editorref.current.isReady
                     .then(() => {
                         for (var node in instruction_object.data.root_nodes) {
@@ -202,7 +202,7 @@ function Agent() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination  + url[url.length - 1] + '/' + timeZone + '/');
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         agentsocket(
             websocket,
             setChatMessage,
@@ -388,21 +388,22 @@ function Agent() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
             <title>Agent</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width={false} />
             <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
                 <Box mt={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={2}>
-                            <List subheader={
-                                <ListSubheader component="div" id="nested-list-subheader">
+                            <Box ml={2}>
+                                <Typography variant="h5" id="nested-list-subheader">
                                     Template Structure
-                                </ListSubheader>
-                            }>
+                                </Typography>
+                            </Box>
+                            <List >
                                 {!use_user_template && default_child_template_list.map((instruct) => {
                                     return (
                                         <ListItem key={instruct.name} disablePadding>
-                                            <ListItemButton  onClick={() => swap_child_instruction(instruct.name, 'system')}   >
-                                                <ListItemText primary={instruct.name}/>
+                                            <ListItemButton onClick={() => swap_child_instruction(instruct.name, 'system')}   >
+                                                <ListItemText primary={instruct.name} />
                                             </ListItemButton>
                                         </ListItem>
                                     )
@@ -411,7 +412,7 @@ function Agent() {
                                     return (
                                         <ListItem key={instruct.displayed_name} disablePadding>
                                             <ListItemButton onClick={() => swap_child_instruction(instruct.displayed_name, 'user_template')} >
-                                                <ListItemText  primary={instruct.displayed_name} />
+                                                <ListItemText primary={instruct.displayed_name} />
                                             </ListItemButton>
                                         </ListItem>
                                     )
@@ -462,7 +463,7 @@ function Agent() {
                                         multiline
                                         maxRows={8}
                                         value={default_parent_instruct}
-                                        onChange={e => {setParentInstruct(e.target.value), setInstructChange(true)}}
+                                        onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -475,7 +476,7 @@ function Agent() {
                                         multiline
                                         maxRows={8}
                                         value={default_user_parent_instruct}
-                                        onChange={e => {setUserParentInstruct(e.target.value), setInstructChange(true)}}
+                                        onChange={e => { setUserParentInstruct(e.target.value), setInstructChange(true) }}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -492,7 +493,7 @@ function Agent() {
                                         multiline
                                         maxRows={8}
                                         value={default_child_instruct}
-                                        onChange={e => {setChildInstruct(e.target.value), setInstructChange(true)}}
+                                        onChange={e => { setChildInstruct(e.target.value), setInstructChange(true) }}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -504,7 +505,7 @@ function Agent() {
                                         multiline
                                         maxRows={8}
                                         value={default_user_child_instruct}
-                                        onChange={e => {setUserChildInstruct(e.target.value), setInstructChange(true)}}
+                                        onChange={e => { setUserChildInstruct(e.target.value), setInstructChange(true) }}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -676,7 +677,7 @@ function Agent() {
                                     setFrequencyPenalty={setFrequencyPenalty}
                                     max_turn={max_turn}
                                     setMaxTurn={setMaxTurn}
-                                    
+
                                 >
                                 </OpenAPIParameter>
                                 <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>

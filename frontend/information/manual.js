@@ -9,16 +9,16 @@ import { Link } from "react-router-dom";
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import authentication_en from '../../docs/Manual/en/authentication.md'
-import behavior_en from '../../docs/Manual/en/behavior.md'
-import behavior_toc_en from '../../docs/Manual/en/behavior_toc.md'
-import key_en from '../../docs/Manual/en/create_key.md'
-import key_toc_en from '../../docs/Manual/en/create_key_toc.md'
-import errorlimit_en from '../../docs/Manual/en/error_ratelimit.md'
-import errorlimit_toc_en from '../../docs/Manual/en/error_ratelimit_toc.md'
-import inference_en from '../../docs/Manual/en/inference.md'
-import inference_toc_en from '../../docs/Manual/en/inference_toc.md'
-import authentication_toc_en from '../../docs/Manual/en/authentication_toc.md'
+import authentication_en from '../../docs/Manual/en/authentication_en.md'
+import behavior_en from '../../docs/Manual/en/behavior_en.md'
+import behavior_toc_en from '../../docs/Manual/en/behavior_toc_en.md'
+import key_en from '../../docs/Manual/en/create_key_en.md'
+import key_toc_en from '../../docs/Manual/en/create_key_toc_en.md'
+import errorlimit_en from '../../docs/Manual/en/error_ratelimit_en.md'
+import errorlimit_toc_en from '../../docs/Manual/en/error_ratelimit_toc_en.md'
+import inference_en from '../../docs/Manual/en/inference_en.md'
+import inference_toc_en from '../../docs/Manual/en/inference_toc_en.md'
+import authentication_toc_en from '../../docs/Manual/en/authentication_toc_en.md'
 import authentication_vi from '../../docs/Manual/vi/authentication_vi.md'
 import behavior_vi from '../../docs/Manual/vi/behavior_vi.md'
 import behavior_toc_vi from '../../docs/Manual/vi/behavior_toc_vi.md'
@@ -94,7 +94,7 @@ function Manual() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>Manual</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl" />
             <Container maxWidth='xl'>
                 <Box
                     display="flex"

@@ -251,7 +251,7 @@ function Hotpot() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
             <title>Agent</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width={false} />
             <Container maxWidth={false} sx={{ minWidth: 1500 }}>
                 <Box m={1}>
                     <Grid container spacing={2}>

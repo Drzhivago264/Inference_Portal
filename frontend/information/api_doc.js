@@ -14,7 +14,7 @@ function APIDoc() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>API Doc</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl" />
             <Container maxWidth='xl'>
                 <Box>
                     <Box p={1} m={5} sx={{ bgcolor: 'white', borderRadius: 2 }}>

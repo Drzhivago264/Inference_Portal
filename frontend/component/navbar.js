@@ -65,7 +65,7 @@ const MenuItem_DropBox = styled(BaseMenuItem)(
   &:last-of-type {
     border-bottom: none;
   }
-
+  z-index: 999;
   &:focus {
     outline: 3px solid ${theme.palette.mode === 'dark' ? blue[600] : blue[200]};
     background-color: ${theme.palette.mode === 'dark' ? grey[800] : grey[100]};
@@ -216,7 +216,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-function ResponsiveAppBar() {
+function ResponsiveAppBar({max_width}) {
   const navigate = useNavigate();
   const [destination, setDestination] = useState(null)
   const [default_language, setDefaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi'? i18next.language : 'en' )
@@ -262,7 +262,7 @@ function ResponsiveAppBar() {
         variant="outlined" open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
       </Drawer>
-      <Container maxWidth="xl">
+      <Container maxWidth={max_width}>
         <Toolbar disableGutters>
           <IconButton
             size="large"

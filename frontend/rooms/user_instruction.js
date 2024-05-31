@@ -391,7 +391,7 @@ function UserInstruction() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl"  />
             <Container maxWidth="xl" >
                 <Box m={2}>
                     <Grid container spacing={2}>

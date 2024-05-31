@@ -55,7 +55,7 @@ function ModelInfor() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>Models</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl"  />
             <Container maxWidth="xl">
                 <Box
                     my={4}
