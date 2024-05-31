@@ -4,55 +4,101 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
-import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
-import { useNavigate } from "react-router-dom";
 import KeyIcon from '@mui/icons-material/Key';
 import InputAdornment from '@mui/material/InputAdornment';
 import ResponsiveAppBar from '../component/navbar.js';
-import Button from '@mui/material/Button';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
+import { Link, useNavigate } from "react-router-dom";
 import { FormControl, FormLabel } from '@mui/material';
 import Alert from '@mui/material/Alert';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
-import { MuiMarkdown, getOverrides } from 'mui-markdown';
-import explaination_en from '../../docs/PageContent/mode_explaination_en.md'
-import explaination_vi from '../../docs/PageContent/mode_explaination_vi.md'
 import { useTranslation } from 'react-i18next';
-import { Highlight, themes } from 'prism-react-renderer';
-import LogoutIcon from '@mui/icons-material/Logout';
 import Divider from '@mui/material/Divider';
-import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
-import { logout } from '../component/check_login.js';
 import Footer from '../component/footer.js';
 import { UserContext } from '../App.js'
 import { getCookie } from '../component/getCookie.js';
 import i18next from "i18next";
-
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import { CardActionArea , CardActions, Button} from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 function Hub() {
-    const [default_language, setDefaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi' ? i18next.language : 'en')
+
     const { t, i18n } = useTranslation();
-    useEffect(() => {
-        setDefaultLanguage(i18n.language)
-    }, [i18n.language]);
-    const explaination_refs = {
-            "en": explaination_en,
-            "vi": explaination_vi
-    }
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
-    const [explaination, setMessage] = useState('');
     const navigate = useNavigate();
-    const [destination, setDestination] = useState("engineer")
+    const [loading, setLoading] = useState(false);
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
+
+    const [loginerror, setLoginError] = useState(false);
     const [redirecterror, setRedirectError] = useState(null);
 
-    const handleSubmit = (event) => {
+    const handleLogin = (event) => {
         event.preventDefault()
+        setLoading(true)
         setKeyError(false)
+        setLoginError(false)
+        if (key == '') {
+            setKeyError(true)
+        }
+        if (key) {
+            const csrftoken = getCookie('csrftoken');
+            const config = {
+                headers: {
+                    'content-type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                }
+            }
+            const data = {
+                key: key,
+            }
+            axios.post("/frontend-api/login", data, config)
+                .then((response) => {
+                    setIsAuthenticated(true)
+                    navigate('/frontend/hub');
+                }).catch(error => {
+                    setLoginError(error.response.data.detail)
+                    setKeyError(false)
+                    setRedirectError(false)
+                });
+        }
+        setLoading(false)
+    }
+    const LoginErrorAlert = ({ error }) => {
+        return (
+            <Box mt={4}>
+                <Typography variant="body1"  >
+                    Request Failed!
+                </Typography>
+                <Box textAlign='center'>
+                    <Alert variant="filled" severity="error">
+                        {error}
+                    </Alert>
+                </Box>
+            </Box >
+        );
+    };
+
+    const ErrorAlert = ({ error }) => {
+        return (
+            <Box mt={4}>
+                <Typography variant="body1"  >
+                    Request Failed!
+                </Typography>
+                <Box textAlign='center'>
+                    <Alert variant="filled" severity="error">
+                        {error}
+                    </Alert>
+                </Box>
+            </Box >
+        );
+    };
+    const redirect = (destination) => {
+        setKeyError(false)
+        setLoginError(false)
         if (!is_authenticated && key == '') {
             setKeyError(true)
         }
@@ -69,7 +115,7 @@ function Hub() {
                     key: key,
                     check_login: is_authenticated,
                     destination: destination
-                }          
+                }
                 axios.post("/frontend-api/hub-redirect", data, config)
                     .then((response) => {
                         setIsAuthenticated(true)
@@ -83,35 +129,10 @@ function Hub() {
             }
         }
     }
-    useEffect(() => {
-        axios.all([
-            axios.get(explaination_refs[default_language]),
-        ])
-            .then(axios.spread((explaination_object) => {
-                setMessage(explaination_object.data);
-            }))
-            .catch(error => {
-                console.log(error);
-            });
-    }, [default_language]);
-    const ErrorAlert = ({ error }) => {
-        return (
-            <Box mt={4}>
-                <Typography variant="body1"  >
-                    Request Failed!
-                </Typography>
-                <Box textAlign='center' my={2}>
-                    <Alert variant="filled" severity="error">
-                        {error}
-                    </Alert>
-                </Box>
-            </Box >
-        );
-    };
     return (
         <Container maxWidth={false} disableGutters>
             <title>Hub</title>
-            <ResponsiveAppBar max_width="xl"  />
+            <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="lg">
                 <Box
                     my={1}
@@ -121,10 +142,10 @@ function Hub() {
                     p={2}
                 >
                     <Grid container spacing={2}>
-                        <Grid item md={4} lg={3}>
-                            <form autoComplete="off" onSubmit={handleSubmit}>
+                        {!is_authenticated && <Grid item md={12} lg={12}>
+                            <form autoComplete="off" onSubmit={handleLogin}>
                                 <FormControl defaultValue="" required>
-                                    {!is_authenticated && <Stack mt={3} direction="row" spacing={1}>
+                                    <Stack ml={1} mt={3} direction="row" spacing={1}>
                                         <TextField
                                             margin="normal"
                                             label="Key"
@@ -142,47 +163,124 @@ function Hub() {
                                                 ),
                                             }}
                                         />
-                                        <Button variant="contained" type="submit" endIcon={<LoginIcon />}>Login</Button>
-
-                                    </Stack>
-                                    }
-                                    {is_authenticated && <Stack mt={3} direction="row" spacing={1}>
-                                        <Button variant="contained" type="submit" endIcon={<AssistantDirectionIcon />}>Redirect</Button>
+                                        <LoadingButton loading={loading} variant="contained" type="submit" endIcon={<LoginIcon />}>Login</LoadingButton>
                                         <Divider orientation="vertical" flexItem />
-                                        <Button variant="outlined" onClick={() => { logout(setIsAuthenticated) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>
+
+                                        <LoadingButton size="medium" variant="contained" component={Link} to='/frontend/key-management'>  Create New Key </LoadingButton>
                                     </Stack>
-                                    }
-                                    <FormLabel sx={{ m: 2 }}>Bring me to:</FormLabel>
-                                    <RadioGroup
-                                        aria-labelledby="demo-radio-buttons-group-label"
-                                        name="radio-buttons-group"
-                                        onChange={e => setDestination(e.target.value)}
-                                        value={destination}
-                                        sx={{ ml: 2 }}
-                                    >
-                                        <FormControlLabel value="chat" control={<Radio />} label="Chatbots" />
-                                        <FormControlLabel value="engineer" control={<Radio />} label="Agents" />
-                                        <FormControlLabel value="hotpot" control={<Radio />} label="Hotpot Mode" />
-                                        <FormControlLabel value="toolbox" control={<Radio />} label="LLM Functions" />
-                                        <FormControlLabel value="log" control={<Radio />} label="Retrieve Log" />
-                                    </RadioGroup>
+                                    {loginerror && <LoginErrorAlert error={loginerror} />}
+                                    {redirecterror && <ErrorAlert error={redirecterror} />}
                                 </FormControl>
                             </form>
-                            {redirecterror && <ErrorAlert error={redirecterror} />}
                         </Grid>
-                        <Grid item md={8} lg={9}>
-                            <MuiMarkdown overrides={{
-                                ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
-                                h1: {
-                                    component: 'h1',
-                                },
-                                h2: {
-                                    component: 'h2',
-                                },
-                                h3: {
-                                    component: 'h3',
-                                },
-                            }}>{explaination}</MuiMarkdown>
+                        }
+                        <Grid item md={12} lg={12}>
+                            <Box m={1}>
+                                <CardActionArea onClick={() => { redirect('chat') }}>
+                                    <Card sx={{ display: 'flex' }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                            <CardContent sx={{ flex: '1 0 auto' }}>
+                                                <Typography component="div" variant="h5">
+                                                    {t('redirect.Chatbot_Mode')}
+                                                </Typography>
+                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                    {t('redirect.Chatbot_Mode_Content')}
+                                                </Typography>
+                                            </CardContent>
+                                            <CardActions>
+                                            <Button size="small" color="primary">
+                                            {t('redirect.Redirect')}
+                                            </Button>
+                                        </CardActions>
+                                        </Box>
+                                        <CardMedia
+                                            component="img"
+                                            sx={{ width: 250 }}
+                                            image="/static/image/robot_line.jpg"
+                                        />
+                                    </Card>
+                                </CardActionArea>
+                            </Box>
+                            <Box m={1}>
+                                <CardActionArea onClick={() => { redirect('engineer') }}>
+                                    <Card sx={{ display: 'flex' }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                            <CardContent sx={{ flex: '1 0 auto' }}>
+                                                <Typography component="div" variant="h5">
+                                                    {t('redirect.Agent_Mode')}
+                                                </Typography>
+                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                    {t('redirect.Agent_Mode_Content')}
+                                                </Typography>
+                                            </CardContent>
+                                            <CardActions>
+                                            <Button size="small" color="primary">
+                                            {t('redirect.Redirect')}
+                                            </Button>
+                                        </CardActions>
+                                        </Box>
+                                        <CardMedia
+                                            component="img"
+                                            sx={{ width: 250 }}
+                                            image="/static/image/Robot_folow_instruct.jpg"
+                                        />
+                                    </Card>
+                                </CardActionArea>
+                            </Box>
+                            <Box m={1}>
+                                <CardActionArea onClick={() => { redirect('toolbox') }}>
+                                    <Card sx={{ display: 'flex' }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                            <CardContent sx={{ flex: '1 0 auto' }}>
+                                                <Typography component="div" variant="h5">
+                                                    {t('redirect.LLM_Functions')}
+                                                </Typography>
+                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                    {t('redirect.LLM_Functions_Content')}
+                                                </Typography>
+                                            </CardContent>
+                                            <CardActions>
+                                            <Button size="small" color="primary">
+                                            {t('redirect.Redirect')}
+                                            </Button>
+                                        </CardActions>
+                                        </Box>
+                                        <CardMedia
+                                            component="img"
+                                            sx={{ width: 250 }}
+                                            image="/static/image/Robot_label.jpg"
+                                        />
+                             
+                                    </Card>
+                                </CardActionArea>
+                            </Box>
+                            <Box m={1}>
+                                <CardActionArea onClick={() => { redirect('hotpot') }}>
+                                    <Card sx={{ display: 'flex' }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                            <CardContent sx={{ flex: '1 0 auto' }}>
+                                                <Typography component="div" variant="h5">
+                                                    {t('redirect.Hotpot_Mode')}
+                                                </Typography>
+                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                    {t('redirect.Hotpot_Mode_Content')}
+                                                </Typography>
+                                            </CardContent>
+                                            <CardActions>
+                                            <Button size="small" color="primary">
+                                            {t('redirect.Redirect')}
+                                            </Button>
+                                        </CardActions>
+                                        </Box>
+                                        <CardMedia
+                                            component="img"
+                                            sx={{ width: 250 }}
+                                            image="/static/image/face_to_face.jpeg"
+                                        />
+                                    </Card>
+                                </CardActionArea>
+                            </Box>
+
                         </Grid>
                     </Grid>
                 </Box>

@@ -1,0 +1,12 @@
+
+{
+    "Redirect": "Điều hướng",
+    "Chatbot_Mode": "Chế độ Chat Bot",
+    "Chatbot_Mode_Content": "Chế độ này định dạng lời nhắc của người dùng thành mẫu chat của mô hình đã chọn và truy vấn lịch sử chat trong vectordb để tạo ra, hy vọng, các phản hồi tốt hơn.",
+    "Agent_Mode": "Chế độ Agent",
+    "Agent_Mode_Content": "Một triển khai của React agent có khả năng suy luận và hành động trong nhiều vòng lặp lời nhắc-phản hồi (mặc định là 4). Các agent được giao nhiệm vụ với các mẫu đã xác định trước (ví dụ: viết bài tập, viết tài liệu quảng cáo, hoặc bảo vệ mèo). Người dùng có thể thiết kế mẫu của riêng họ cho các agent của họ. Sau khi vòng lặp lời nhắc-phản hồi kết thúc, agent xuất kết quả cuối cùng vào trình soạn thảo văn bản để chỉnh sửa thêm.",
+    "Hotpot_Mode": "Chế độ Hotpot",
+    "Hotpot_Mode_Content": "Chế độ này đặt agent và chatbot vào 1 trang cho mục đích kiểm tra. Người dùng có thể cùng lúc gửi và lệnh đến bots và agents.",
+    "LLM_Functions": "Chức năng LLM",
+    "LLM_Functions_Content": "Chế độ này hiển thị các chức năng backend được sử dụng cho nhiều nhiệm vụ (ví dụ: phân loại, dự đoán tình cảm). Các chức năng backend được sử dụng trong cả chế độ chatbot và agent để cải thiện ngữ cảnh của lời nhắc của người dùng."
+  }
