@@ -43,7 +43,7 @@ function Information() {
                 </video>
             </div>
             <title>Introduction</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl"  />
             {!videoloaded && <Container maxWidth="lg" ><Stack mt={{ xs: 75 }} spacing={1}>
                 <Skeleton variant="rounded" animation="wave" height={350} />
                 <Skeleton variant="rounded" animation="wave" height={350} />
@@ -107,7 +107,7 @@ function Information() {
                                 <Box ml={4}>
                                     <List sx={{ listStyleType: 'disc' }}>
                                         {t('introduction.user_list', { returnObjects: true }).map(l => (
-                                            < ListItem sx={{ display: 'list-item' }} >{l}</ListItem>
+                                            < ListItem key={l} sx={{ display: 'list-item' }} >{l}</ListItem>
                                         )
                                         )
                                         }
@@ -130,7 +130,7 @@ function Information() {
                                 <Box ml={4}>
                                     <List sx={{ listStyleType: 'disc' }}>
                                         {t('introduction.tool_list', { returnObjects: true }).map(l => (
-                                            < ListItem sx={{ display: 'list-item' }} >{l}</ListItem>
+                                            < ListItem key={l} sx={{ display: 'list-item' }} >{l}</ListItem>
                                         )
                                         )
                                         }
@@ -142,7 +142,7 @@ function Information() {
                                 <Box ml={4}>
                                     <List sx={{ listStyleType: 'disc' }}>
                                         {t('introduction.call_to_act_list', { returnObjects: true }).map(l => (
-                                            < ListItem sx={{ display: 'list-item' }} >{l}</ListItem>
+                                            < ListItem key={l} sx={{ display: 'list-item' }} >{l}</ListItem>
                                         )
                                         )
                                         }

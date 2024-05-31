@@ -127,7 +127,7 @@ function Contact() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>{t('contact.Contact')}</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl"  />
             <Container maxWidth="md">
                 <Box
                     my={1}

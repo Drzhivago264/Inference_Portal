@@ -122,7 +122,7 @@ function FunctionLLM() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Agent</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="xl" sx={{ minWidth: 1200 }}>
                 <Box m={1}>
                     <Grid container spacing={2}>

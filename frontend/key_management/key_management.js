@@ -418,7 +418,7 @@ function KeyManagement() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>Key Management</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="md">
                 <Box
                     my={1}

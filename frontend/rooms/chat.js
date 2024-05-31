@@ -20,7 +20,7 @@ import Alert from '@mui/material/Alert';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import IconButton from '@mui/material/IconButton';
 const ChatPaper = styled(Paper)(({ theme }) => ({
-    minWidth: 660,
+    minWidth: 550,
     height: 700,
     overflow: 'auto',
     padding: theme.spacing(2),
@@ -219,7 +219,7 @@ function Chat() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Chat</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width={false}  />
             <Container maxWidth="xl" sx={{ minWidth: 1200 }}>
                 <Box m={2}>
                     <Grid container spacing={2}>
@@ -255,7 +255,7 @@ function Chat() {
                         </Grid>
                         <Grid item xs={6}>
                             <ChatBox
-                                inputsize={660}
+                                inputsize={550}
                                 chat_message={chat_message}
                                 usermessage={usermessage}
                                 usermessageError={usermessageError}

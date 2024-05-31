@@ -111,7 +111,7 @@ function Hub() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>Hub</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl"  />
             <Container maxWidth="lg">
                 <Box
                     my={1}

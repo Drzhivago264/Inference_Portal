@@ -88,7 +88,7 @@ function Contact() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>Login</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="sm">
                 <Box
                     my={1}

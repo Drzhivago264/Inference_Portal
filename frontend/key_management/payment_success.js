@@ -35,7 +35,7 @@ import {
     responsiveFontSizes,
     ThemeProvider,
 } from '@mui/material/styles';
-import { check_login, logout } from '../component/check_login';
+
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
@@ -348,7 +348,7 @@ function KeyManagement() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>Key Management</title>
-            <ResponsiveAppBar />
+            <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="md">
                 <Box
                     my={1}

@@ -9,7 +9,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import SendIcon from '@mui/icons-material/Send';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { Divider } from '@mui/material';
+
 export const ChatBox = ({
     inputsize,
     ChatPaper,
@@ -46,7 +46,7 @@ export const ChatBox = ({
                                                 <Box textAlign="right">
                                                     {mess.role} ({mess.time})
                                                 </Box>
-                                                <Box  display="flex" sx={{wordBreak: "break-word"}} justifyContent="flex-end" style={{ whiteSpace: "pre-wrap", width:'100%' }}>
+                                                <Box display="flex" sx={{ wordBreak: "break-word" }} justifyContent="flex-end" style={{ whiteSpace: "pre-wrap", width: '100%' }}>
                                                     {mess.message}
                                                 </Box>
                                             </Box>
@@ -60,7 +60,7 @@ export const ChatBox = ({
                                 <Paper key={mess.holderid}>
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Box pt={0.8} align="left" sx={{wordBreak: "break-word"}} style={{ whiteSpace: "pre-wrap" }}>
+                                            <Box pt={0.8} align="left" sx={{ wordBreak: "break-word" }} style={{ whiteSpace: "pre-wrap" }}>
                                                 <span> {mess.role} - {mess.time}: <br /><br /> {mess.message}</span>
                                             </Box>
                                             <Box align="right">
@@ -92,8 +92,9 @@ export const ChatBox = ({
                             )
                         }
                     })}
+                    <div ref={messagesEndRef}> </div>
                 </Stack>
-                <div ref={messagesEndRef}> </div>
+
             </ChatPaper>
             {shownthinking && <LinearProgress />}
             <Box mt={2}>
@@ -160,7 +161,7 @@ export const ChatBoxHotpot = ({
                                                 <Box textAlign="right">
                                                     {mess.role} ({mess.time})
                                                 </Box>
-                                                <Box  display="flex" sx={{wordBreak: "break-word"}}  justifyContent="flex-end" style={{ whiteSpace: "pre-wrap"}}>
+                                                <Box display="flex" sx={{ wordBreak: "break-word" }} justifyContent="flex-end" style={{ whiteSpace: "pre-wrap" }}>
                                                     {mess.message}
                                                 </Box>
                                             </Box>
@@ -174,7 +175,7 @@ export const ChatBoxHotpot = ({
                                 <Paper key={mess.holderid}>
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Box pt={0.8} align="left" sx={{wordBreak: "break-word"}} style={{ whiteSpace: "pre-wrap" }}>
+                                            <Box pt={0.8} align="left" sx={{ wordBreak: "break-word" }} style={{ whiteSpace: "pre-wrap" }}>
                                                 <span> {mess.role} - {mess.time}: <br /><br /> {mess.message}</span>
                                             </Box>
                                             <Box align="right">
@@ -206,9 +207,9 @@ export const ChatBoxHotpot = ({
                             )
                         }
                     })}
-
+                    <div ref={messagesEndRef}> </div>
                 </Stack>
-                <div ref={messagesEndRef}> </div>
+                
             </ChatPaper>
             {shownthinking && <LinearProgress />}
             <Box mt={2}>
