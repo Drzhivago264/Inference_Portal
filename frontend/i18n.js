@@ -13,7 +13,8 @@ import manualEN from './public/locales/en/manual.json'
 import manualVI from './public/locales/vi/manual.json'
 import contactEN from './public/locales/en/contact.json'
 import contactVI from './public/locales/vi/contact.json'
-
+import redirectEN from './public/locales/en/redirect.json'
+import redirectVI from './public/locales/vi/redirect.json'
 const resources = {
   en: {
     translation: {
@@ -21,7 +22,8 @@ const resources = {
       'navbar': navbarEN,
       'key_management': keymanagementEN,
       'manual': manualEN,
-      'contact': contactEN
+      'contact': contactEN,
+      'redirect': redirectEN
     }
   },
   vi: {
@@ -30,7 +32,8 @@ const resources = {
       'navbar': navbarVI,
       'key_management': keymanagementVI,
       'manual': manualVI,
-      'contact': contactVI
+      'contact': contactVI,
+      'redirect': redirectVI
     }
   }
 };
