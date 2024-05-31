@@ -22,6 +22,8 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';
 import { getCookie } from '../component/getCookie.js';
+import { useTranslation } from 'react-i18next';
+
 const StyledPaper = styled(Paper)(({ theme }) => ({
 
     padding: theme.spacing(4),
@@ -29,6 +31,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function Contact() {
+    const { t, i18n } = useTranslation();
     const [showPassword, setShowPassword] = React.useState(false);
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
@@ -123,7 +126,7 @@ function Contact() {
     };
     return (
         <Container maxWidth={false} disableGutters>
-            <title>Contact</title>
+            <title>{t('contact.Contact')}</title>
             <ResponsiveAppBar />
             <Container maxWidth="md">
                 <Box
@@ -135,7 +138,7 @@ function Contact() {
                     <StyledPaper variant="outlined">
                         <Box textAlign='center' my={4}>
                             <Typography variant="h4" >
-                                <Box sx={{ mb: 2, fontWeight: 'bold' }}>Contact Us</Box>
+                                <Box sx={{ mb: 2, fontWeight: 'bold' }}>{t('contact.Contact')}</Box>
                             </Typography>
                             <form autoComplete="off" onSubmit={handleSendMail}>
                                 <FormControl defaultValue="" margin='normal' required>

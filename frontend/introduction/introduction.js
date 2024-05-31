@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
-import Prism from "prismjs";
-import "prismjs/themes/prism-okaidia.min.css";
-import "prismjs/plugins/toolbar/prism-toolbar.min.css";
-import "prismjs/plugins/toolbar/prism-toolbar.min";
-require("prismjs/components/prism-c");
-require("prismjs/components/prism-python");
-require("prismjs/components/prism-bash");
 import Box from '@mui/material/Box';
 import ResponsiveAppBar from '../component/navbar';
 import Skeleton from '@mui/material/Skeleton';
@@ -23,9 +16,7 @@ import ListItem from '@mui/material/ListItem';
 import { TypeWriterText } from '../component/animation_text_change'
 
 function Information() {
-    useEffect(() => {
-        Prism.highlightAll();
-    });
+
     const videoRef = useRef(null);
     const { t, i18n } = useTranslation();
     const [videoloaded, setVideoLoaded] = useState(false);
@@ -63,18 +54,19 @@ function Information() {
             {videoloaded && <Container maxWidth="lg"
 
             >
-                <Box sx={{
+                <Box   alignItems="center" justifyContent='center' sx={{
                     display: 'flex',
                     flexWrap: 'wrap',
+                    
                     '& > :not(style)': {
                         width: 1,
                         mt: { xs: 12, sm: 12, md: 15, lg: 17 },
-                        height: { xs: "240px", sm: '270px', md: '220px', lg: '180px' },
-                        fontSize: { xs: "1.3em", sm: '1.5em', md: '1.75em' },
+                        height: { xs: "220px", sm: '230px', md: '270px', lg: '180px' },
+                        fontSize: { xs: "1.25em", sm: '1.5em', md: '1.75em' },
 
                     },
                 }}>
-                    <Box sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, .25)' : 'rgba(255, 255, 255, .25)', borderRadius: '12px' }} >
+                    <Box  display="flex" alignItems="center"  sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, .25)' : 'rgba(255, 255, 255, .25)', borderRadius: '12px' }} >
                     <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '20px', lineHeight: 1.7, }}
                             sequence={[
                                 t('introduction.introduction_animation', { returnObjects: true })[0],

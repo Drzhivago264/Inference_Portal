@@ -19,7 +19,6 @@ import errorlimit_toc_en from '../../docs/Manual/en/error_ratelimit_toc.md'
 import inference_en from '../../docs/Manual/en/inference.md'
 import inference_toc_en from '../../docs/Manual/en/inference_toc.md'
 import authentication_toc_en from '../../docs/Manual/en/authentication_toc.md'
-
 import authentication_vi from '../../docs/Manual/vi/authentication_vi.md'
 import behavior_vi from '../../docs/Manual/vi/behavior_vi.md'
 import behavior_toc_vi from '../../docs/Manual/vi/behavior_toc_vi.md'
@@ -104,13 +103,13 @@ function Manual() {
                     <Grid container spacing={1}>
                         <Grid item md={3} lg={2}>
                             <Box mt={3} mb={5} sx={{ display: { xs: 'none', sm: 'none ', md: 'block' } }} >
-                                <Typography variant="body1" component="body1">
+                                <Typography >
                                     <List dense={true}>
-                                        <ListItemButton component={Link} to='/frontend/manual/key'> <Typography variant="body2" component="body2"> Setting Up Your API Key </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography variant="body2" component="body2"> Authentication </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography variant="body2" component="body2"> Inference </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography variant="body2" component="body2"> Common Errors and Ratelimits </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography variant="body2" component="body2">The behaviors of this website </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/key'> <Typography variant="body2" component="body2"> {t('manual.Setting_Up_Your_API_Key')} </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography variant="body2" component="body2"> {t('manual.Authentication')} </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography variant="body2" component="body2">{t('manual.Inference')} </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography variant="body2" component="body2"> {t('manual.Common_Errors_and_Ratelimits')} </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography variant="body2" component="body2">{t('manual.The_Behaviors_of_This_Website')} </Typography> </ListItemButton>
                                     </List>
                                 </Typography>
                             </Box>
@@ -118,13 +117,13 @@ function Manual() {
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'block' } }} />
                         <Grid item xs={12} md={8} lg={8}>
                             <Box mt={3} sx={{ display: { sm: 'block ', md: 'none' } }} >
-                                <Typography variant="body1" component="body1">
+                                <Typography >
                                     <List dense={true}>
-                                        <ListItemButton component={Link} to='/frontend/manual/key'> <Typography> Setting Up Your API Key </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> Authentication </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography> Inference </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography> Common Errors and Ratelimits </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography>The behaviors of this website </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/key'> <Typography>{t('manual.Setting_Up_Your_API_Key')}  </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> {t('manual.Authentication')} </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography> {t('manual.Inference')} </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography> {t('manual.Common_Errors_and_Ratelimits')}  </Typography> </ListItemButton>
+                                        <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography> {t('manual.The_Behaviors_of_This_Website')} </Typography> </ListItemButton>
                                     </List>
                                 </Typography>
                             </Box>

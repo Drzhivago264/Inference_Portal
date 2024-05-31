@@ -9,7 +9,7 @@ import multiprocessing as mp
 from decouple import config
 import boto3
 from botocore.exceptions import ClientError
-from util import constant
+
 
 """Test monero"""
 

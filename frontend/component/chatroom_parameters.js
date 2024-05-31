@@ -11,7 +11,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Slider from '@mui/material/Slider';
 import Switch from '@mui/material/Switch';
 import Divider from '@mui/material/Divider';
-
+import Box from '@mui/material/Box';
 export const OpenAPIParameter = ({
     choosen_model,
     setChoosenModel,
@@ -49,7 +49,7 @@ export const OpenAPIParameter = ({
             </FormControl>
             <Divider></Divider>
             <FormLabel >Parameters</FormLabel>
-            
+
             <Typography gutterBottom>Max_turns: {max_turn}</Typography>
             <Slider
                 step={1}
@@ -70,16 +70,25 @@ export const OpenAPIParameter = ({
                 onChange={e => setTopp(e.target.value)}
                 value={top_p}
             />
-            <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
-            <Slider
-                defaultValue={512}
-                step={1}
-                min={1}
-                max={4090}
-                onChange={e => setMaxToken(e.target.value)}
-                value={max_tokens}
-                valueLabelDisplay="off"
-            />
+            {agent_objects.map((agent_object_) => {
+                if (agent_object_.name == choosen_model) {
+                    return (
+                        <Box>
+                            <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
+                            <Slider
+                                defaultValue={512}
+                                step={1}
+                                min={1}
+                                max={agent_object_.context_length}
+                                onChange={e => setMaxToken(e.target.value)}
+                                value={max_tokens}
+                                valueLabelDisplay="off"
+                            />
+                        </Box>
+                    )
+                }
+            })}
+
             <Typography gutterBottom>Temperature: {temperature}</Typography>
             <Slider
                 defaultValue={0.73}
@@ -214,16 +223,42 @@ export const ChatParameter = ({
                     onChange={e => setTopk(e.target.value)}
                     value={top_k}
                 />
-                <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
-                <Slider
-                    defaultValue={512}
-                    step={1}
-                    min={1}
-                    max={4090}
-                    onChange={e => setMaxToken(e.target.value)}
-                    value={max_tokens}
-                    valueLabelDisplay="off"
-                />
+                {agent_objects.map((agent_object_) => {
+                    if (agent_object_.name == choosen_model) {
+                        return (
+                            <Box>
+                                <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
+                                <Slider
+                                    defaultValue={1024}
+                                    step={1}
+                                    min={1}
+                                    max={agent_object_.context_length}
+                                    onChange={e => setMaxToken(e.target.value)}
+                                    value={max_tokens}
+                                    valueLabelDisplay="off"
+                                />
+                            </Box>
+                        )
+                    }
+                })}
+                {model_objects.map((model_object_) => {
+                    if (model_object_.name == choosen_model) {
+                        return (
+                            <Box>
+                                <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
+                                <Slider
+                                    defaultValue={1024}
+                                    step={1}
+                                    min={1}
+                                    max={model_object_.context_length}
+                                    onChange={e => setMaxToken(e.target.value)}
+                                    value={max_tokens}
+                                    valueLabelDisplay="off"
+                                />
+                            </Box>
+                        )
+                    }
+                })}
                 <Typography gutterBottom>Temperature: {temperature}</Typography>
                 <Slider
                     defaultValue={0.73}
@@ -327,7 +362,7 @@ export const HotpotParameter = ({
     setSocketDestination,
     swap_template,
     max_turn,
-    setMaxTurn 
+    setMaxTurn
 }) => {
     return (
         <Stack direction='column' spacing={1}>
@@ -447,16 +482,42 @@ export const HotpotParameter = ({
                 onChange={e => setTopk(e.target.value)}
                 value={top_k}
             />
-            <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
-            <Slider
-                defaultValue={512}
-                step={1}
-                min={1}
-                max={4090}
-                onChange={e => setMaxToken(e.target.value)}
-                value={max_tokens}
-                valueLabelDisplay="off"
-            />
+                {agent_objects.map((agent_object_) => {
+                    if (agent_object_.name == choosen_chat_model) {
+                        return (
+                            <Box>
+                                <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
+                                <Slider
+                                    defaultValue={1024}
+                                    step={1}
+                                    min={1}
+                                    max={agent_object_.context_length}
+                                    onChange={e => setMaxToken(e.target.value)}
+                                    value={max_tokens}
+                                    valueLabelDisplay="off"
+                                />
+                            </Box>
+                        )
+                    }
+                })}
+                {model_objects.map((model_object_) => {
+                    if (model_object_.name == choosen_chat_model) {
+                        return (
+                            <Box>
+                                <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
+                                <Slider
+                                    defaultValue={1024}
+                                    step={1}
+                                    min={1}
+                                    max={model_object_.context_length}
+                                    onChange={e => setMaxToken(e.target.value)}
+                                    value={max_tokens}
+                                    valueLabelDisplay="off"
+                                />
+                            </Box>
+                        )
+                    }
+                })}
             <Typography gutterBottom>Temperature: {temperature}</Typography>
             <Slider
                 defaultValue={0.73}
