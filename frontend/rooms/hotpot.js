@@ -50,7 +50,7 @@ function Hotpot() {
     const [top_p, setTopp] = useState(0.72);
     const [top_k, setTopk] = useState(-1);
     const [mode, setMode] = useState("chat");
-    const [max_tokens, setMaxToken] = useState(512);
+    const [max_tokens, setMaxToken] = useState(null);
     const [usememory, setUseMemory] = useState(true);
     const [temperature, setTemperature] = useState(0.73);
     const [beam, setBeam] = useState(false);
@@ -71,7 +71,7 @@ function Hotpot() {
     const [default_child_instruct, setChildInstruct] = useState("");
     const [duplicatemessage, setDuplicateMessage] = useState(true);
     const [instruct_change, setInstructChange] = useState(false)
-    const [socket_destination, setSocketDestination] = useState("none_async");
+    const [socket_destination, setSocketDestination] = useState("async");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     useEffect(() => {

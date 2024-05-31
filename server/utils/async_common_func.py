@@ -35,6 +35,32 @@ async def send_chat_request_openai_async(self, processed_prompt) -> str:
                                                             frequency_penalty=self.frequency_penalty,
                                                             presence_penalty=self.presence_penalty
                                                             )
+
+    except openai.APIConnectionError as e:
+        await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+        raise e
+    except openai.RateLimitError as e:
+        await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+        raise e
+    except openai.APIError as e:
+        if e.code == 'context_length_exceeded':
+            try:
+                raw_response = await client.chat.completions.create(model=self.choosen_models,
+                                                                    messages=processed_prompt,
+                                                                    stream=True,
+                                                                    max_tokens=None,
+                                                                    temperature=self.temperature,
+                                                                    top_p=self.top_p,
+                                                                    frequency_penalty=self.frequency_penalty,
+                                                                    presence_penalty=self.presence_penalty
+                                                                    )
+            except Exception as e:
+                await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+                raise e
+        else:
+            await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+            raise e
+    if raw_response:
         async for chunk in raw_response:
             if chunk:
                 data = chunk.choices[0].delta.content
@@ -42,16 +68,6 @@ async def send_chat_request_openai_async(self, processed_prompt) -> str:
                     clean_response += data
                     await self.send(text_data=json.dumps({"message": data, "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return clean_response
-    except openai.APIConnectionError as e:
-        await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-        return e
-    except openai.RateLimitError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-        return e
-    except openai.APIError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-        return e
-
 
 async def get_model_url_async(model: str) -> list | bool:
     model_list = []
@@ -130,6 +146,31 @@ async def send_agent_request_openai_async(self) -> str:
                                                             frequency_penalty=self.frequency_penalty,
                                                             presence_penalty=self.presence_penalty
                                                             )
+    except openai.APIConnectionError as e:
+        await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": self.model_type, "stream_id": self.unique_response_id, "credit": self.key_object.credit}))
+        raise e
+    except openai.RateLimitError as e:
+        await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": self.model_type, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+        raise e
+    except openai.APIError as e:
+        if e.code == 'context_length_exceeded':
+            try:
+                raw_response = await client.chat.completions.create(model=self.model_type,
+                                                                    messages=self.session_history,
+                                                                    stream=True,
+                                                                    max_tokens=None,
+                                                                    temperature=self.temperature,
+                                                                    top_p=self.top_p,
+                                                                    frequency_penalty=self.frequency_penalty,
+                                                                    presence_penalty=self.presence_penalty
+                                                                    )
+            except Exception as e:
+                await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.model_type, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+                raise e
+        else:
+            await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.model_type, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+            raise e
+    if raw_response:
         self.current_turn += 1
         async for chunk in raw_response:
             if chunk:
@@ -175,15 +216,6 @@ async def send_agent_request_openai_async(self) -> str:
                     self.session_history.extend(prompt)
                     await self.send(text_data=json.dumps({"agent_action": action, "result_id": self.working_paragraph, "full_result": full_result}))
         return clean_response
-    except openai.APIConnectionError as e:
-        await self.send(text_data=json.dumps({"message": f"Failed to connect to OpenAI API: {e}", "role": self.model_type, "stream_id": self.unique_response_id, "credit": self.key_object.credit}))
-        return e
-    except openai.RateLimitError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API request exceeded rate limit: {e}", "role": self.model_type, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-        return e
-    except openai.APIError as e:
-        await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.model_type, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-        return e
 
 
 async def async_inference(self) -> None:
@@ -275,8 +307,7 @@ async def async_agent_inference(self) -> None:
             ]
         self.session_history.extend(prompt)
         clean_response = await send_agent_request_openai_async(self)
-        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message,
-                                                                        response=clean_response, type_="open_ai")
+        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=clean_response, type_="open_ai")
     else:
         self.session_history = []
         self.current_turn = 0
@@ -303,10 +334,8 @@ async def async_agent_inference_with_summary(self) -> None:
             ]
 
         self.session_history.extend(prompt)
-
         clean_response = await send_agent_request_openai_async(self)
-        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message,
-                                                                        response=clean_response, type_="open_ai")
+        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=clean_response, type_="open_ai")
 
     else:
         await self.send(text_data=json.dumps({"message": f"Max Turns reached, click on the paragraphs on the left to write again", "role": "Server", "time": self.time}))

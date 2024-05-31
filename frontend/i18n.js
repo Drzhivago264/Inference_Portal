@@ -9,19 +9,28 @@ import navbarEN from './public/locales/en/navbar.json'
 import navbarVI from './public/locales/vi/navbar.json'
 import keymanagementEN from './public/locales/en/key_management.json'
 import keymanagementVI from './public/locales/vi/key_management.json'
+import manualEN from './public/locales/en/manual.json'
+import manualVI from './public/locales/vi/manual.json'
+import contactEN from './public/locales/en/contact.json'
+import contactVI from './public/locales/vi/contact.json'
+
 const resources = {
   en: {
     translation: {
       'introduction': introJsonEN,
       'navbar': navbarEN,
-      'key_management': keymanagementEN
+      'key_management': keymanagementEN,
+      'manual': manualEN,
+      'contact': contactEN
     }
   },
   vi: {
     translation:  {
       'introduction': introJsonVI,
       'navbar': navbarVI,
-      'key_management': keymanagementVI
+      'key_management': keymanagementVI,
+      'manual': manualVI,
+      'contact': contactVI
     }
   }
 };

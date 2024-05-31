@@ -83,7 +83,7 @@ class StripePaymentSerializer(CheckKeySerializer):
 class ModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LLM
-        fields = ('id', 'name', 'desc', 'input_price', 'output_price')
+        fields = ('id', 'name', 'desc', 'input_price', 'output_price', 'context_length')
 
 
 class ServerSerializer(serializers.ModelSerializer):

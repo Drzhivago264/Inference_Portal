@@ -32,14 +32,7 @@ class AgentSchemaMessage(BaseModel):
     def check_range_top_p_tem(cls, v: float, info: ValidationInfo):
         if not (0 <= v <= 1): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
-    
-    @field_validator('max_tokens')
-    @classmethod
-    def check_range_tokens(cls, v: int | None, info: ValidationInfo):
-        if v is not None:
-            if not (0 <= v <= 8192): raise ValueError(f'{v} is not a valid {info.field_name}.')
-        return v
-    
+        
     @field_validator('max_turn')
     @classmethod
     def check_max_turn(cls, v: float, info: ValidationInfo):
@@ -70,7 +63,7 @@ class ChatSchema(BaseModel):
     presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
     length_penalty: float = constant.DEFAULT_LENGTH_PENALTY
     temperature:float = constant.DEFAULT_TEMPERATURE
-    max_tokens: int = constant.DEFAULT_MAX_TOKENS
+    max_tokens: int | None
     include_memory: bool = True
     role: str
     @field_validator('frequency_penalty','length_penalty','presence_penalty')
@@ -90,13 +83,7 @@ class ChatSchema(BaseModel):
     def check_range_top_p_tem(cls, v: float, info: ValidationInfo):
         if not (0 <= v <= 1): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
-    
-    @field_validator('max_tokens')
-    @classmethod
-    def check_range_tokens(cls, v: int | None, info: ValidationInfo):
-        if v is not None:
-            if not (0 <= v <= 4096): raise ValueError(f'{v} is not a valid {info.field_name}.')
-        return v
+
 
 class ToolSchema(BaseModel):
     message: str
