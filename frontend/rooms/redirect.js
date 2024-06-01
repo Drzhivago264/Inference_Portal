@@ -22,7 +22,7 @@ import i18next from "i18next";
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
-import { CardActionArea , CardActions, Button} from '@mui/material';
+import { CardActionArea, CardActions, Button } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 function Hub() {
 
@@ -141,7 +141,8 @@ function Hub() {
                     gap={4}
                     p={2}
                 >
-                    <Grid container spacing={2}>
+                    <Grid container alignItems="center"
+                        justify="center" direction="column" spacing={2}>
                         {!is_authenticated && <Grid item md={12} lg={12}>
                             <form autoComplete="off" onSubmit={handleLogin}>
                                 <FormControl defaultValue="" required>
@@ -183,19 +184,25 @@ function Hub() {
                                                 <Typography component="div" variant="h5">
                                                     {t('redirect.Chatbot_Mode')}
                                                 </Typography>
-                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                <Typography variant="subtitle1"
+                                                    sx={{
+                                                        display: '-webkit-box',
+                                                        overflow: 'hidden',
+                                                        WebkitBoxOrient: 'vertical',
+                                                        WebkitLineClamp: 5,
+                                                    }} color="text.secondary" component="div">
                                                     {t('redirect.Chatbot_Mode_Content')}
                                                 </Typography>
                                             </CardContent>
                                             <CardActions>
-                                            <Button size="small" color="primary">
-                                            {t('redirect.Redirect')}
-                                            </Button>
-                                        </CardActions>
+                                                <Button size="small" color="primary">
+                                                    {t('redirect.Redirect')}
+                                                </Button>
+                                            </CardActions>
                                         </Box>
                                         <CardMedia
                                             component="img"
-                                            sx={{ width: 250 }}
+                                            sx={{ minWidth: 150, maxWidth: 250 }}
                                             image="/static/image/robot_line.jpg"
                                         />
                                     </Card>
@@ -209,19 +216,26 @@ function Hub() {
                                                 <Typography component="div" variant="h5">
                                                     {t('redirect.Agent_Mode')}
                                                 </Typography>
-                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                <Typography variant="subtitle1"
+                                                    sx={{
+                                                        display: '-webkit-box',
+                                                        overflow: 'hidden',
+                                                        WebkitBoxOrient: 'vertical',
+                                                        WebkitLineClamp: 5,
+                                                    }}
+                                                    color="text.secondary" component="div">
                                                     {t('redirect.Agent_Mode_Content')}
                                                 </Typography>
                                             </CardContent>
                                             <CardActions>
-                                            <Button size="small" color="primary">
-                                            {t('redirect.Redirect')}
-                                            </Button>
-                                        </CardActions>
+                                                <Button size="small" color="primary">
+                                                    {t('redirect.Redirect')}
+                                                </Button>
+                                            </CardActions>
                                         </Box>
                                         <CardMedia
                                             component="img"
-                                            sx={{ width: 250 }}
+                                            sx={{ minWidth: 150, maxWidth: 250 }}
                                             image="/static/image/Robot_folow_instruct.jpg"
                                         />
                                     </Card>
@@ -235,22 +249,28 @@ function Hub() {
                                                 <Typography component="div" variant="h5">
                                                     {t('redirect.LLM_Functions')}
                                                 </Typography>
-                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                <Typography variant="subtitle1" sx={{
+                                                    display: '-webkit-box',
+                                                    overflow: 'hidden',
+                                                    WebkitBoxOrient: 'vertical',
+                                                    WebkitLineClamp: 5,
+                                                }}
+                                                    color="text.secondary" component="div">
                                                     {t('redirect.LLM_Functions_Content')}
                                                 </Typography>
                                             </CardContent>
                                             <CardActions>
-                                            <Button size="small" color="primary">
-                                            {t('redirect.Redirect')}
-                                            </Button>
-                                        </CardActions>
+                                                <Button size="small" color="primary">
+                                                    {t('redirect.Redirect')}
+                                                </Button>
+                                            </CardActions>
                                         </Box>
                                         <CardMedia
                                             component="img"
-                                            sx={{ width: 250 }}
+                                            sx={{ minWidth: 150, maxWidth: 250 }}
                                             image="/static/image/Robot_label.jpg"
                                         />
-                             
+
                                     </Card>
                                 </CardActionArea>
                             </Box>
@@ -262,19 +282,26 @@ function Hub() {
                                                 <Typography component="div" variant="h5">
                                                     {t('redirect.Hotpot_Mode')}
                                                 </Typography>
-                                                <Typography variant="subtitle1" color="text.secondary" component="div">
+                                                <Typography
+                                                    sx={{
+                                                        display: '-webkit-box',
+                                                        overflow: 'hidden',
+                                                        WebkitBoxOrient: 'vertical',
+                                                        WebkitLineClamp: 5,
+                                                    }}
+                                                    variant="subtitle1" color="text.secondary" component="div">
                                                     {t('redirect.Hotpot_Mode_Content')}
                                                 </Typography>
                                             </CardContent>
                                             <CardActions>
-                                            <Button size="small" color="primary">
-                                            {t('redirect.Redirect')}
-                                            </Button>
-                                        </CardActions>
+                                                <Button size="small" color="primary">
+                                                    {t('redirect.Redirect')}
+                                                </Button>
+                                            </CardActions>
                                         </Box>
                                         <CardMedia
                                             component="img"
-                                            sx={{ width: 250 }}
+                                            sx={{ minWidth: 150, maxWidth: 250 }}
                                             image="/static/image/face_to_face.jpeg"
                                         />
                                     </Card>

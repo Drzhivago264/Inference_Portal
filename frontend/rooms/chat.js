@@ -21,7 +21,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import IconButton from '@mui/material/IconButton';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 550,
-    height: 700,
+    minHeight: 700,
     overflow: 'auto',
     padding: theme.spacing(2),
     ...theme.typography.body2,
@@ -224,7 +224,15 @@ function Chat() {
                 <Box m={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={4}>
-
+                        <Box mb={3}>
+                                <ChatExport
+                                    chat_message={chat_message}
+                                    choosen_export_format_chatlog={choosen_export_format_chatlog}
+                                    setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
+                                    number_of_remove_message={1}
+                                >
+                                </ChatExport>
+                            </Box>
                             <Typography mt={1} mb={1} variant='body1'>
                                 Memory Tree
                                 <IconButton aria-label="fingerprint" color="info" size="small" onClick={refresh_tree}>
@@ -253,7 +261,7 @@ function Chat() {
                                 > <Pagination count={total_node} showFirstButton showLastButton onChange={getnextnode} />
                                 </Box>}
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={5.5}>
                             <ChatBox
                                 inputsize={550}
                                 chat_message={chat_message}
@@ -269,16 +277,7 @@ function Chat() {
                             >
                             </ChatBox>
                         </Grid>
-                        <Grid item xs={2}>
-                            <Box mb={3}>
-                                <ChatExport
-                                    chat_message={chat_message}
-                                    choosen_export_format_chatlog={choosen_export_format_chatlog}
-                                    setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
-                                    number_of_remove_message={1}
-                                >
-                                </ChatExport>
-                            </Box>
+                        <Grid item xs={2.5}>
                             <ChatParameter
                                 socket_destination={socket_destination}
                                 setSocketDestination={setSocketDestination}
