@@ -153,7 +153,7 @@ export const ChatParameter = ({
     setEarlyStopping
 }) => {
     return (
-        <FormControl defaultValue="">
+        <FormControl fullWidth defaultValue="">
             <Stack direction='column' spacing={1}>
                 <InputLabel id="model-label">Models</InputLabel>
                 <Select
@@ -200,7 +200,7 @@ export const ChatParameter = ({
                     value={mode}
                 >
                     <FormControlLabel key="chat" value='chat' control={<Radio size="small" />} label="Chat Bot Mode" />
-                    <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Sentence Completion" />
+                    <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Text Completion" />
                     <Divider></Divider>
 
                 </RadioGroup>
@@ -295,11 +295,11 @@ export const ChatParameter = ({
                 <FormControlLabel control={<Switch
                     onChange={e => setBeam(e.target.checked)}
                     value={beam}
-                />} label="Beam Search: " />
+                />} label="Beam Search " />
                 <FormControlLabel control={<Switch
                     onChange={e => setEarlyStopping(e.target.checked)}
                     value={earlystopping}
-                />} label="Early Stopping: " />
+                />} label="Early Stopping " />
                 <Typography gutterBottom>Best_of: {bestof}</Typography>
                 <Slider
                     onChange={e => setBestof(e.target.value)}
@@ -448,7 +448,7 @@ export const HotpotParameter = ({
                 value={mode}
             >
                 <FormControlLabel key="chat" value='chat' control={<Radio size="small" />} label="Chat Bot Mode" />
-                <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Sentence Completion" />
+                <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Text Completion" />
                 <Divider></Divider>
 
             </RadioGroup>
@@ -554,11 +554,11 @@ export const HotpotParameter = ({
             <FormControlLabel control={<Switch
                 onChange={e => setBeam(e.target.checked)}
                 value={beam}
-            />} label="Beam Search: " />
+            />} label="Beam Search " />
             <FormControlLabel control={<Switch
                 onChange={e => setEarlyStopping(e.target.checked)}
                 value={earlystopping}
-            />} label="Early Stopping: " />
+            />} label="Early Stopping " />
             <Typography gutterBottom>Best_of: {bestof}</Typography>
             <Slider
                 onChange={e => setBestof(e.target.value)}

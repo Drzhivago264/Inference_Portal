@@ -9,7 +9,7 @@
     "user_list": [
         "Social scientists who cannot have enough of their interviewees' opinions",
         "Journalists/Marketers/Communicators who want to make argurments like their audiences",
-        "Reasonable people who need to reason like the unreasonable"
+        "Reasonable people who need to use other people's voices"
     ],
     "about_chunk_2": "Unlike mainstream language models trained by other businesses, our models are bent either by finetuning or prompt-engineering until they sound like specific groups of people. Compared to other businesses that want their models to be unbiased, helpful, logical and reasonable, we want our models to sound like a normal human with all of their emotions, biases, preferences, hatred, fears, and so on.\n\nThis website is kept as simple as possible, partly because we do not have the resources to be fancy. This is a privacy feature rather than a drawback actually. In fact, we do not ask you to register an account with us.",
     "tool_title": "Tools",
