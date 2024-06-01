@@ -24,8 +24,10 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import { CardActionArea, CardActions, Button } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { useTheme } from "@mui/material";
+import useMediaQuery from '@mui/material/useMediaQuery';
 function Hub() {
-
+    const theme = useTheme();
     const { t, i18n } = useTranslation();
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     const navigate = useNavigate();
@@ -146,7 +148,7 @@ function Hub() {
                         {!is_authenticated && <Grid item md={12} lg={12}>
                             <form autoComplete="off" onSubmit={handleLogin}>
                                 <FormControl defaultValue="" required>
-                                    <Stack ml={1} mt={3} direction="row" spacing={1}>
+                                    <Stack ml={1} mt={3} direction={{ xs: "column", md: "row" }} spacing={{ xs: 1, md: 1 }}>
                                         <TextField
                                             margin="normal"
                                             label="Key"
@@ -165,9 +167,11 @@ function Hub() {
                                             }}
                                         />
                                         <LoadingButton loading={loading} variant="contained" type="submit" endIcon={<LoginIcon />}>Login</LoadingButton>
-                                        <Divider orientation="vertical" flexItem />
+                                        <Divider orientation={useMediaQuery(theme.breakpoints.down("md")) ? "horizontal" : "vertical"}
+                                            flexItem={true} />
 
-                                        <LoadingButton size="medium" variant="contained" component={Link} to='/frontend/key-management'>  Create New Key </LoadingButton>
+                                        <LoadingButton variant="contained" component={Link} to='/frontend/key-management'>  Create New Key </LoadingButton>
+
                                     </Stack>
                                     {loginerror && <LoginErrorAlert error={loginerror} />}
                                     {redirecterror && <ErrorAlert error={redirecterror} />}
