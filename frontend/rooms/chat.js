@@ -217,10 +217,10 @@ function Chat() {
         );
     };
     return (
-        <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
+        <Container maxWidth={false} sx={{ minWidth: 1350 }} disableGutters>
             <title>Chat</title>
             <ResponsiveAppBar max_width={false}  />
-            <Container maxWidth="xl" sx={{ minWidth: 1200 }}>
+            <Container maxWidth="xl" sx={{ minWidth: 1350 }}>
                 <Box m={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={4}>

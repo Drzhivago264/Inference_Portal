@@ -391,7 +391,7 @@ function UserInstruction() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
-            <ResponsiveAppBar max_width="xl"  />
+            <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="xl" >
                 <Box m={2}>
                     <Grid container spacing={2}>
@@ -432,6 +432,19 @@ function UserInstruction() {
                                     </IconButton>}
                                 </Box>
                             </List>
+                            <Divider />
+                            <Box m={1}>
+                                <Typography gutterBottom>Max_turns: {max_turn}</Typography>
+                                <Slider
+                                    step={1}
+                                    min={1}
+                                    max={10}
+                                    marks
+                                    valueLabelDisplay="off"
+                                    onChange={e => setMaxTurn(e.target.value)}
+                                    value={max_turn}
+                                />
+                            </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={6}>
@@ -586,16 +599,6 @@ function UserInstruction() {
                             <Typography mt={1} mb={1} variant='body1'>
                                 Testbed
                             </Typography>
-                            <Typography gutterBottom>Max_turns: {max_turn}</Typography>
-                            <Slider
-                                step={1}
-                                min={1}
-                                max={10}
-                                marks
-                                valueLabelDisplay="off"
-                                onChange={e => setMaxTurn(e.target.value)}
-                                value={max_turn}
-                            />
 
                             <ChatBox
                                 inputsize={300}
