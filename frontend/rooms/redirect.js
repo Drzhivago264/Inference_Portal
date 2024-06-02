@@ -9,7 +9,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import InputAdornment from '@mui/material/InputAdornment';
 import ResponsiveAppBar from '../component/navbar.js';
 import { Link, useNavigate } from "react-router-dom";
-import { FormControl, FormLabel } from '@mui/material';
+import { FormControl, FormLabel} from '@mui/material';
 import Alert from '@mui/material/Alert';
 import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
@@ -18,7 +18,7 @@ import Divider from '@mui/material/Divider';
 import Footer from '../component/footer.js';
 import { UserContext } from '../App.js'
 import { getCookie } from '../component/getCookie.js';
-import i18next from "i18next";
+import Skeleton from '@mui/material/Skeleton';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -27,9 +27,11 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { useTheme } from "@mui/material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 function Hub() {
-    const theme = useTheme();
-    const { t, i18n } = useTranslation();
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const theme = useTheme();
+    const check_orientation = useMediaQuery(theme.breakpoints.down("md")) ? "horizontal" : "vertical";
+    const { t, i18n } = useTranslation();
+
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [key, setKey] = useState("")
@@ -99,6 +101,7 @@ function Hub() {
         );
     };
     const redirect = (destination) => {
+         
         setKeyError(false)
         setLoginError(false)
         if (!is_authenticated && key == '') {
@@ -167,7 +170,7 @@ function Hub() {
                                             }}
                                         />
                                         <LoadingButton loading={loading} variant="contained" type="submit" endIcon={<LoginIcon />}>Login</LoadingButton>
-                                        <Divider orientation={useMediaQuery(theme.breakpoints.down("md")) ? "horizontal" : "vertical"}
+                                        <Divider orientation={check_orientation}
                                             flexItem={true} />
 
                                         <LoadingButton variant="contained" component={Link} to='/frontend/key-management'>  Create New Key </LoadingButton>
@@ -198,7 +201,7 @@ function Hub() {
                                                     {t('redirect.Chatbot_Mode_Content')}
                                                 </Typography>
                                             </CardContent>
-                                            <CardActions>
+                                            <CardActions >
                                                 <Button size="small" color="primary">
                                                     {t('redirect.Redirect')}
                                                 </Button>
@@ -206,8 +209,9 @@ function Hub() {
                                         </Box>
                                         <CardMedia
                                             component="img"
-                                            sx={{ minWidth: 150, maxWidth: 250 }}
+                                            sx={{ width: 200 }}
                                             image="/static/image/robot_line.jpg"
+                                            
                                         />
                                     </Card>
                                 </CardActionArea>
@@ -239,7 +243,7 @@ function Hub() {
                                         </Box>
                                         <CardMedia
                                             component="img"
-                                            sx={{ minWidth: 150, maxWidth: 250 }}
+                                            sx={{ width: 200 }}
                                             image="/static/image/Robot_folow_instruct.jpg"
                                         />
                                     </Card>
@@ -271,7 +275,7 @@ function Hub() {
                                         </Box>
                                         <CardMedia
                                             component="img"
-                                            sx={{ minWidth: 150, maxWidth: 250 }}
+                                            sx={{ width: 200 }}
                                             image="/static/image/Robot_label.jpg"
                                         />
 
@@ -305,7 +309,7 @@ function Hub() {
                                         </Box>
                                         <CardMedia
                                             component="img"
-                                            sx={{ minWidth: 150, maxWidth: 250 }}
+                                            sx={{ width: 200 }}
                                             image="/static/image/face_to_face.jpeg"
                                         />
                                     </Card>
