@@ -35,11 +35,13 @@ function Information() {
             navigate(destination, { replace: true })
         }
     }, [destination]);
+
     return (
         <Container maxWidth={false} disableGutters>
             <div className="video-container">
                 <video ref={videoRef} className='videoTag' loop muted playsInline disablePictureInPicture controlsList="nodownload" >
-                    <source src="/static/video/introduction_background.mp4" type='video/mp4' />
+                    <source src={`https://d2f6jmzr77qqg6.cloudfront.net/video/introduction_background.mp4`} type='video/mp4' />
+                    <source src={`static/video/introduction_background.mp4`} type='video/mp4' />
                 </video>
             </div>
             <title>Introduction</title>

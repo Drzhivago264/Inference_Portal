@@ -216,7 +216,7 @@ function Hub() {
                                         <CardMedia
                                             component="img"
                                             sx={{ width: 200, display: image_1_loaded ? "block" : "none" }}
-                                            image="/static/image/robot_line.jpg"
+                                            image="https://d2f6jmzr77qqg6.cloudfront.net/image/robot_line.jpg"
                                             onLoad={() => { setImage1Load(true) }}
                                         />
                                     </Card>
@@ -253,7 +253,7 @@ function Hub() {
                                         <CardMedia
                                             component="img"
                                             sx={{ width: 200, display: image_2_loaded ? "block" : "none" }}
-                                            image="/static/image/Robot_folow_instruct.jpg"
+                                            image="https://d2f6jmzr77qqg6.cloudfront.net/image/Robot_folow_instruct.jpg"
                                             onLoad={() => { setImage2Load(true) }}
                                         />
                                     </Card>
@@ -289,7 +289,7 @@ function Hub() {
                                         <CardMedia
                                             component="img"
                                             sx={{ width: 200, display: image_3_loaded ? "block" : "none" }}
-                                            image="/static/image/Robot_label.jpg"
+                                            image="https://d2f6jmzr77qqg6.cloudfront.net/image/Robot_label.jpg"
                                             onLoad={() => { setImage3Load(true) }}
                                         />
 
@@ -327,7 +327,7 @@ function Hub() {
                                         <CardMedia
                                             component="img"
                                             sx={{ width: 200, display: image_4_loaded ? "block" : "none" }}
-                                            image="/static/image/face_to_face.jpeg"
+                                            image="https://d2f6jmzr77qqg6.cloudfront.net/image/face_to_face.jpeg"
                                             onLoad={() => { setImage4Load(true) }}
                                         />
                                     </Card>
