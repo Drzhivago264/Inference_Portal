@@ -38,7 +38,7 @@ function Information() {
     return (
         <Container maxWidth={false} disableGutters>
             <div className="video-container">
-                <video ref={videoRef} className='videoTag' autoPlay loop muted playsInline disablePictureInPicture controlsList="nodownload" onPlay={() => { setVideoLoaded(true) }}>
+                <video ref={videoRef} className='videoTag' loop muted playsInline disablePictureInPicture controlsList="nodownload" >
                     <source src="/static/video/introduction_background.mp4" type='video/mp4' />
                 </video>
             </div>
