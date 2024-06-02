@@ -9,7 +9,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import InputAdornment from '@mui/material/InputAdornment';
 import ResponsiveAppBar from '../component/navbar.js';
 import { Link, useNavigate } from "react-router-dom";
-import { FormControl, FormLabel} from '@mui/material';
+import { FormControl, FormLabel } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
@@ -36,10 +36,13 @@ function Hub() {
     const [loading, setLoading] = useState(false);
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
-
     const [loginerror, setLoginError] = useState(false);
     const [redirecterror, setRedirectError] = useState(null);
 
+    const [image_1_loaded, setImage1Load] = useState(false)
+    const [image_2_loaded, setImage2Load] = useState(false)
+    const [image_3_loaded, setImage3Load] = useState(false)
+    const [image_4_loaded, setImage4Load] = useState(false)
     const handleLogin = (event) => {
         event.preventDefault()
         setLoading(true)
@@ -101,7 +104,6 @@ function Hub() {
         );
     };
     const redirect = (destination) => {
-         
         setKeyError(false)
         setLoginError(false)
         if (!is_authenticated && key == '') {
@@ -201,17 +203,21 @@ function Hub() {
                                                     {t('redirect.Chatbot_Mode_Content')}
                                                 </Typography>
                                             </CardContent>
+
                                             <CardActions >
                                                 <Button size="small" color="primary">
                                                     {t('redirect.Redirect')}
                                                 </Button>
                                             </CardActions>
                                         </Box>
+                                        {!image_1_loaded && <CardMedia sx={{ width: 200, height: 200 }}>
+                                            <Skeleton animation="wave" height={200} width={200} />
+                                        </CardMedia>}
                                         <CardMedia
                                             component="img"
-                                            sx={{ width: 200 }}
+                                            sx={{ width: 200, display: image_1_loaded ? "block" : "none" }}
                                             image="/static/image/robot_line.jpg"
-                                            
+                                            onLoad={() => { setImage1Load(true) }}
                                         />
                                     </Card>
                                 </CardActionArea>
@@ -241,10 +247,14 @@ function Hub() {
                                                 </Button>
                                             </CardActions>
                                         </Box>
+                                        {!image_2_loaded && <CardMedia sx={{ width: 200, height: 200 }}>
+                                            <Skeleton animation="wave" height={200} width={200} />
+                                        </CardMedia>}
                                         <CardMedia
                                             component="img"
-                                            sx={{ width: 200 }}
+                                            sx={{ width: 200, display: image_2_loaded ? "block" : "none" }}
                                             image="/static/image/Robot_folow_instruct.jpg"
+                                            onLoad={() => { setImage2Load(true) }}
                                         />
                                     </Card>
                                 </CardActionArea>
@@ -273,10 +283,14 @@ function Hub() {
                                                 </Button>
                                             </CardActions>
                                         </Box>
+                                        {!image_3_loaded && <CardMedia sx={{ width: 200, height: 200 }}>
+                                            <Skeleton animation="wave" height={200} width={200} />
+                                        </CardMedia>}
                                         <CardMedia
                                             component="img"
-                                            sx={{ width: 200 }}
+                                            sx={{ width: 200, display: image_3_loaded ? "block" : "none" }}
                                             image="/static/image/Robot_label.jpg"
+                                            onLoad={() => { setImage3Load(true) }}
                                         />
 
                                     </Card>
@@ -307,10 +321,14 @@ function Hub() {
                                                 </Button>
                                             </CardActions>
                                         </Box>
+                                        {!image_4_loaded && <CardMedia sx={{ width: 200, height: 200 }}>
+                                            <Skeleton animation="wave" height={200} width={200} />
+                                        </CardMedia>}
                                         <CardMedia
                                             component="img"
-                                            sx={{ width: 200 }}
+                                            sx={{ width: 200, display: image_4_loaded ? "block" : "none" }}
                                             image="/static/image/face_to_face.jpeg"
+                                            onLoad={() => { setImage4Load(true) }}
                                         />
                                     </Card>
                                 </CardActionArea>
