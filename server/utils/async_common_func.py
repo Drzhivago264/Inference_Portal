@@ -69,6 +69,7 @@ async def send_chat_request_openai_async(self, processed_prompt) -> str:
                     await self.send(text_data=json.dumps({"message": data, "role": self.choosen_models, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         return clean_response
 
+
 async def get_model_url_async(model: str) -> list | bool:
     model_list = []
     try:
@@ -100,23 +101,26 @@ async def send_request_async(url, context):
 
 
 async def send_stream_request_async(self: object, url: str, context: object, processed_prompt: str):
-    client = httpx.AsyncClient()
-    full_response = ""
+    client = httpx.AsyncClient(timeout=5)
+
     try:
         async with client.stream('POST', url, json=context) as response:
+            response.raise_for_status()
+            full_response = ""
             async for chunk in response.aiter_text():
-                try:
-                    chunk = chunk[:-1]
-                    c = json.loads(chunk)
-                    output = c['text'][0].replace(processed_prompt, "")
-                    await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-                    full_response = output
-                except Exception as e:
-                    print(Exception)
-            return full_response
-    except httpx.ReadTimeout:
-        return httpx.ReadTimeout
 
+                chunk = chunk[:-1]
+                c = json.loads(chunk)
+                output = c['text'][0].replace(processed_prompt, "")
+                await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+                full_response = output
+            return full_response
+    except httpx.TimeoutException:
+        await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
+    except httpx.ConnectError:
+        await self.send(text_data=json.dumps({"message": "Server is starting up! wait.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
+    except httpx.HTTPError:
+        await self.send(text_data=json.dumps({"message": "You messed up the parameter! Return to default", "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
 async def query_response_log(key_object: str,  order: str, quantity: int, type_: list) -> object:
     response = list()
@@ -259,16 +263,14 @@ async def async_inference(self) -> None:
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
-                try:
-                    response_stream = await send_stream_request_async(self, url=url, context=context,
-                                                                    processed_prompt=processed_prompt)
-                    if response_stream == httpx.ReadTimeout:
-                        await self.send(text_data=json.dumps({"message": "Model timeout! try again later.", "stream_id":  self.unique_response_id, "credit": credit}))
-                    else:
-                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+                
+                response_stream = await send_stream_request_async(self, url=url, context=context,
+                                                                processed_prompt=processed_prompt)
+                if isinstance(response_stream, str):
+                    await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
                                                                                         response=response_stream, type_="chatroom")
-                except httpx.ConnectError:
-                    await self.send(text_data=json.dumps({"message": "Server is starting up! wait.", "stream_id":  self.unique_response_id, "credit": credit}))
+
+ 
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
                 response = "Server is starting up, try again in 400 seconds"
