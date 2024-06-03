@@ -111,8 +111,8 @@ async def send_stream_request_async(self: object, url: str, context: object, pro
                     output = c['text'][0].replace(processed_prompt, "")
                     await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
                     full_response = output
-                except:
-                    pass
+                except Exception as e:
+                    print(Exception)
             return full_response
     except httpx.ReadTimeout:
         return httpx.ReadTimeout
@@ -259,13 +259,16 @@ async def async_inference(self) -> None:
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
-                response_stream = await send_stream_request_async(self, url=url, context=context,
-                                                                  processed_prompt=processed_prompt)
-                if response_stream == httpx.ReadTimeout:
-                    await self.send(text_data=json.dumps({"message": "Model timeout! try again later.", "stream_id":  self.unique_response_id, "credit": credit}))
-                else:
-                    await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
-                                                                                    response=response_stream, type_="chatroom")
+                try:
+                    response_stream = await send_stream_request_async(self, url=url, context=context,
+                                                                    processed_prompt=processed_prompt)
+                    if response_stream == httpx.ReadTimeout:
+                        await self.send(text_data=json.dumps({"message": "Model timeout! try again later.", "stream_id":  self.unique_response_id, "credit": credit}))
+                    else:
+                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+                                                                                        response=response_stream, type_="chatroom")
+                except httpx.ConnectError:
+                    await self.send(text_data=json.dumps({"message": "Server is starting up! wait.", "stream_id":  self.unique_response_id, "credit": credit}))
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=REGION, action="on")
                 response = "Server is starting up, try again in 400 seconds"
