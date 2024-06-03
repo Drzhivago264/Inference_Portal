@@ -3,32 +3,36 @@ MONITOR_ITERVAL = 5
 SHUTDOWN_INTERVAL = 60
 XMR_PRICE_INTERVAL = 600
 DELETE_KEY_INTERVAL = 86400
-KEY_TTL = 7 #day
-MAX_PARENT_TEMPLATE_PER_USER = 10 #10 Parent templates x 3 Child templates
+KEY_TTL = 7  # day
+MAX_PARENT_TEMPLATE_PER_USER = 10  # 10 Parent templates x 3 Child templates
 MAX_CHILD_TEMPLATE_PER_USER = 3
 
 
-REGION =  "us-east-1"
-MODEL_TEMPLATE_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{}\n\n### Response:\n", 
-                        "Llama 2  Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>{}[/INST]", 
-                        "4Chan /Pol 2.7B": "<post> {} <comment> ", 
-                        "Reddit Helper 2.7B": "<post> {} <comment> "}
+REGION = "us-east-1"
+SHORTEN_LAST_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n",
+                          "Llama 2  Chat 13B": "{}[/INST] ",
+                          "4Chan /Pol 2.7B": "<post> {} <comment> ",
+                          "Reddit Helper 2.7B": "<post> {} <comment> ",
+                          "Llama 3 Instruct AWQ": "<|start_header_id|>user<|end_header_id|>{}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"}
 
-SHORTEN_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n{}\n", 
-                        "Llama 2  Chat 13B": "{}[/INST] {}</s>", 
-                        "4Chan /Pol 2.7B": "<post> {} <comment> {}", 
-                        "Reddit Helper 2.7B": "<post> {} <comment> {}"}
+SHORTEN_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n{}\n",
+                          "Llama 2  Chat 13B": "{}[/INST] {}</s>",
+                          "4Chan /Pol 2.7B": "<post> {} <comment> {}",
+                          "Reddit Helper 2.7B": "<post> {} <comment> {}",
+                          "Llama 3 Instruct AWQ": "<|start_header_id|>user<|end_header_id|>{}<|eot_id|><|start_header_id|>assistant<|end_header_id|>{}<|eot_id|>"}
 
-SHORTEN_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n", 
-                        "Llama 2  Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. \n<</SYS>>", 
-                        "4Chan /Pol 2.7B": "", 
-                        "Reddit Helper 2.7B": ""}
+SHORTEN_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request. \n\n {}",
+                          "Llama 2  Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. \n<</SYS>> {}",
+                          "4Chan /Pol 2.7B": "{}",
+                          "Reddit Helper 2.7B": "{}",
+                          "Llama 3 Instruct AWQ": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>You are a helpful AI assistant that answers questions<|eot_id|>{}"}
 
 TOKENIZER_TABLE = {
     "Mistral Chat 13B": "TheBloke/Amethyst-13B-Mistral-AWQ",
     "Llama 2  Chat 13B": "TheBloke/Llama-2-13B-chat-AWQ",
     "4Chan /Pol 2.7B": "EleutherAI/gpt-neo-2.7B",
-    "Reddit Helper 2.7B": "EleutherAI/gpt-neo-2.7B"
+    "Reddit Helper 2.7B": "EleutherAI/gpt-neo-2.7B",
+    "Llama 3 Instruct AWQ": "casperhansen/llama-3-8b-instruct-awq"
 }
 
 
@@ -37,20 +41,22 @@ MAX_HISTORY_LENGTH = {
     "Llama 2  Chat 13B": 3000,
     "4Chan /Pol 2.7B": 100,
     "Reddit Helper 2.7B": 100,
-    "openai": 4096
+    "openai": 4096,
+    "Llama 3 Instruct AWQ": 4096
 }
 
-OPEN_AI_MODEL_LIST = ['gpt-4', 'gpt-3.5-turbo-0125', 'gpt-3.5-turbo-instruct', 'gpt-4-0125-preview']
-DEFAULT_TOP_P =  0.73
-DEFAULT_BEST_OF =  1
-DEFAULT_TOP_K =  -1
-DEFAULT_MAX_TOKENS =  128
-DEFAULT_FREQUENCY_PENALTY =  0
-DEFAULT_PRESENCE_PENALTY =  0
-DEFAULT_TEMPERATURE =  0.73
-DEFAULT_BEAM =  False
-DEFAULT_EARLY_STOPPING =  False
-DEFAULT_LENGTH_PENALTY =  0
+OPEN_AI_MODEL_LIST = ['gpt-4', 'gpt-3.5-turbo-0125',
+                      'gpt-3.5-turbo-instruct', 'gpt-4-0125-preview']
+DEFAULT_TOP_P = 0.73
+DEFAULT_BEST_OF = 1
+DEFAULT_TOP_K = -1
+DEFAULT_MAX_TOKENS = 128
+DEFAULT_FREQUENCY_PENALTY = 0
+DEFAULT_PRESENCE_PENALTY = 0
+DEFAULT_TEMPERATURE = 0.73
+DEFAULT_BEAM = False
+DEFAULT_EARLY_STOPPING = False
+DEFAULT_LENGTH_PENALTY = 0
 DEFAULT_MODEL = "Mistral Chat 13B"
 DEFAULT_MODE = "generate"
 DEFAULT_N = 1
@@ -63,5 +69,3 @@ DEFAULT_CHAT_HISTORY_OBJECT = 3
 DEFAULT_CHAT_HISTORY_VECTOR_OBJECT = 3
 
 DEFAULT_AGENT_TURN = 4
-
-
