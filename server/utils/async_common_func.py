@@ -222,7 +222,7 @@ async def async_inference(self) -> None:
     if not self.beam:
         self.length_penalty = 1
         self.early_stopping = False
-        self.best_of = int(1)
+        self.best_of = 1
     else:
         self.best_of = int(self.best_of)
         if self.best_of == 1:
@@ -242,7 +242,7 @@ async def async_inference(self) -> None:
             'presence_penalty': float(self.presence_penalty),
             "use_beam_search": self.beam,
             "temperature": float(self.temperature),
-            "max_tokens": int(self.max_tokens),
+            "max_tokens": self.max_tokens,
             "stream": True,
             "top_k": int(self.top_k),
             "top_p": float(self.top_p),
