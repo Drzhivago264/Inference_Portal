@@ -50,20 +50,25 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
     
     if mode == "chat":
         if not agent_availability:
-            template = constant.SHORTEN_TEMPLATE_TABLE[model]
-            prompt_ = template.format(prompt, "")
+
             tokeniser = constant.TOKENIZER_TABLE[model]
             inputs = AutoTokenizer.from_pretrained(tokeniser)(prompt)
             current_history_length = len(inputs['input_ids'])
             if include_memory:
+                template = constant.SHORTEN_LAST_TEMPLATE_TABLE[model]
+                prompt_ = template.format(prompt, " ")
                 chat_history = get_chat_context(model=model,
                                                 key_object=key_object,
                                                 raw_prompt=prompt,
                                                 agent_availability=agent_availability,
                                                 current_history_length=current_history_length,
                                                 tokeniser=tokeniser)
+                prompt_ = chat_history + prompt_ 
                 return prompt_
             else:
+                template = constant.SHORTEN_INSTRUCT_TABLE[model]
+                prompt_ = template.format(constant.SHORTEN_LAST_TEMPLATE_TABLE[model].format(prompt, " "))
+                print(prompt_)
                 return prompt_
         else:
             prompt_ = {"role": "user", "content": f"{prompt}"}
@@ -534,7 +539,7 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
             if current_history_length > int(max_history_length):
                 full_instruct = full_instruct[:-(
                     current_history_length-max_history_length)]
-        full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
+        full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model].format(full_instruct) 
         return full_instruct
     else:
         max_history_length = constant.MAX_HISTORY_LENGTH["openai"]

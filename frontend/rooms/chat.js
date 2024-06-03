@@ -21,7 +21,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import IconButton from '@mui/material/IconButton';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 550,
-    minHeight: 700,
+    height: 700,
     overflow: 'auto',
     padding: theme.spacing(2),
     ...theme.typography.body2,
@@ -38,7 +38,7 @@ function Chat() {
     const [model_objects, setModels] = useState([]);
     const [chat_message, setChatMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
-    const [choosen_model, setChoosenModel] = useState("Mistral Chat 13B");
+    const [choosen_model, setChoosenModel] = useState("Llama 3 Instruct AWQ");
     const [top_p, setTopp] = useState(0.72);
     const [top_k, setTopk] = useState(-1);
     const [mode, setMode] = useState("chat");

@@ -32,10 +32,10 @@ def manage_monero(command, params=None):
 promtp= "hehe"
 context = {
     "prompt": "hi",
-    "stream": True,
+
 }
 model = "Mistral Chat 13B"
-template = constant.MODEL_TEMPLATE_TABLE[model]
+
 ami = "ami-0810c2d824776b340"
 
 import json
@@ -43,7 +43,7 @@ from openai import OpenAI
 
 import requests
 
-response = requests.post("http://127.0.0.1:8000/api/chat", headers = {"Authorization": "Bearer atnBnvVo.RCJnC24H5blnp4wocG9cw40yRaTqGjpO"}, json=context, stream=True ) 
+response = requests.post("http://34.238.136.66/generate", json=context ) 
    
 #print(response.content)
 for chunk in response.iter_lines():
