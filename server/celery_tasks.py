@@ -218,7 +218,7 @@ def Inference(unique: str,
     if not beam:
         length_penalty = 1
         early_stopping = False
-        best_of = int(1)
+        best_of = 1
     else:
         best_of = int(best_of)
         if best_of == 1:
@@ -238,7 +238,7 @@ def Inference(unique: str,
             'presence_penalty': float(presence_penalty),
             "use_beam_search": beam,
             "temperature": float(temperature),
-            "max_tokens": int(max_tokens),
+            "max_tokens": max_tokens,
             "stream": stream,
             "top_k": int(top_k),
             "top_p": float(top_p),
