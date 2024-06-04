@@ -94,6 +94,11 @@ function Agent() {
     const [default_user_child_template_list, setDefaultUserChildTemplateList] = useState([]);
     const [default_user_parent_instruct, setUserParentInstruct] = useState("");
     const [default_user_child_instruct, setUserChildInstruct] = useState("");
+    const [selectedIndex, setSelectedIndex] = React.useState(0);
+    const handleListItemClick = (event, index) => {
+        setSelectedIndex(index);
+    };
+
     const handle_use_user_template = (event) => {
         setUseUserTemplate(event.target.checked);
         let default_editor = { "time": 1709749130861, "blocks": [{ "id": "1hYKvu7PTO", "type": "header", "data": { "text": "Response", "level": 2 } }, { "id": "SrV68agaen", "type": "paragraph", "data": { "text": "" } }], "version": "2.29.1" }
@@ -399,19 +404,24 @@ function Agent() {
                                 </Typography>
                             </Box>
                             <List >
-                                {!use_user_template && default_child_template_list.map((instruct) => {
+                                {!use_user_template && default_child_template_list.map((instruct, index) => {
                                     return (
                                         <ListItem key={instruct.name} disablePadding>
-                                            <ListItemButton onClick={() => swap_child_instruction(instruct.name, 'system')}   >
+                                            <ListItemButton
+                                                selected={selectedIndex === index}
+                                                onClick={(event) => { swap_child_instruction(instruct.name, 'system'), handleListItemClick(event, index) }}   >
                                                 <ListItemText primary={instruct.name} />
                                             </ListItemButton>
                                         </ListItem>
                                     )
                                 })}
-                                {use_user_template && default_user_child_template_list.map((instruct) => {
+                                {use_user_template && default_user_child_template_list.map((instruct, index) => {
+
                                     return (
                                         <ListItem key={instruct.displayed_name} disablePadding>
-                                            <ListItemButton onClick={() => swap_child_instruction(instruct.displayed_name, 'user_template')} >
+                                            <ListItemButton
+                                                selected={selectedIndex === index}
+                                                onClick={(event) => { swap_child_instruction(instruct.displayed_name, 'user_template'), handleListItemClick(event, index) }} >
                                                 <ListItemText primary={instruct.displayed_name} />
                                             </ListItemButton>
                                         </ListItem>
