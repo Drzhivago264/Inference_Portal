@@ -66,8 +66,7 @@ def log_in(request: HttpRequest) -> Response:
 @throttle_classes([AnonRateThrottle])
 def model_api(request: HttpRequest) -> Response:
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
-    
-    models_display = LLM.objects.filter(agent_availability=False) 
+    models_display = LLM.objects.filter(is_self_host=True) 
     models_agent = LLM.objects.filter(agent_availability=True) 
     serializer_server = ServerSerializer(servers, many=True)
     serializer_model_display = ModelSerializer(models_display, many=True)
