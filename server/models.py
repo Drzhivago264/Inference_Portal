@@ -52,6 +52,7 @@ class LLM(models.Model):
     input_price = models.FloatField(default=0.0)
     output_price = models.FloatField(default=0.0)
     agent_availability = models.BooleanField(default=False)
+    is_self_host = models.BooleanField(default=True)
     context_length = models.IntegerField(default=4096)
     def __str__(self) -> str:
         return self.name

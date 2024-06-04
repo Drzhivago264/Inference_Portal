@@ -13,7 +13,7 @@ import openai
 from .common_func import inference_mode, action_parse_json, log_prompt_response
 from server.celery_tasks import command_EC2
 import regex as re
-
+from transformers import AutoTokenizer
 
 async def get_model(model: str) -> QuerySet[LLM] | bool:
     try:
@@ -108,7 +108,6 @@ async def send_stream_request_async(self: object, url: str, context: object, pro
             response.raise_for_status()
             full_response = ""
             async for chunk in response.aiter_text():
-
                 chunk = chunk[:-1]
                 c = json.loads(chunk)
                 output = c['text'][0].replace(processed_prompt, "")
@@ -121,6 +120,7 @@ async def send_stream_request_async(self: object, url: str, context: object, pro
         await self.send(text_data=json.dumps({"message": "Server is starting up! wait.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
     except httpx.HTTPError:
         await self.send(text_data=json.dumps({"message": "You messed up the parameter! Return to default", "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+
 
 async def query_response_log(key_object: str,  order: str, quantity: int, type_: list) -> object:
     response = list()
@@ -238,7 +238,7 @@ async def async_inference(self) -> None:
     processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
         model=self.choosen_models, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
 
-    if not llm.agent_availability:
+    if llm.is_self_host:
         context = {
             "prompt": processed_prompt,
             "n": 1,
@@ -263,26 +263,13 @@ async def async_inference(self) -> None:
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
-                
-                response_stream = await send_stream_request_async(self, url=url, context=context,
-                                                                processed_prompt=processed_prompt)
-                if isinstance(response_stream, str):
-                    await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
-                                                                                        response=response_stream, type_="chatroom")
 
- 
-            elif server_status == "stopped" or "stopping":
-                command_EC2.delay(instance_id, region=REGION, action="on")
-                response = "Server is starting up, try again in 400 seconds"
-                await update_server_status_in_db_async(
-                    instance_id=instance_id, update_type="status")
-                await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
-            elif server_status == "pending":
-                response = "Server is setting up, try again in 30 seconds"
-                await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
+                response_stream = await send_stream_request_async(self, url=url, context=context,
+                                                                  processed_prompt=processed_prompt)
+                if isinstance(response_stream, str):
+                    await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message, response=response_stream, type_="chatroom")
             else:
-                response = "Unknown Server state, wait 5 seconds"
-                await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
+                await manage_ec2_on_inference(self, server_status, instance_id)
         else:
             response = "Model is currently offline"
             await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": credit}))
@@ -291,6 +278,20 @@ async def async_inference(self) -> None:
         clean_response = await send_chat_request_openai_async(self, processed_prompt)
         await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
                                                                         response=clean_response, type_="open_ai")
+
+async def manage_ec2_on_inference(self, server_status, instance_id):
+    if server_status == "stopped" or "stopping":
+        command_EC2.delay(instance_id, region=REGION, action="on")
+        response = "Server is starting up, try again in 400 seconds"
+        await update_server_status_in_db_async(
+            instance_id=instance_id, update_type="status")
+        await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+    elif server_status == "pending":
+        response = "Server is setting up, try again in 30 seconds"
+        await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+    else:
+        response = "Unknown Server state, wait 5 seconds"
+        await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
 
 async def async_agent_inference(self) -> None:
@@ -311,8 +312,44 @@ async def async_agent_inference(self) -> None:
                 {'role': 'system', 'content': f'Response: {force_stop}\n'}
             ]
         self.session_history.extend(prompt)
-        clean_response = await send_agent_request_openai_async(self)
-        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=clean_response, type_="open_ai")
+        llm = await LLM.objects.aget(name=self.model_type)
+        if not llm.is_self_host:
+            clean_response = await send_agent_request_openai_async(self)
+            await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=clean_response, type_="open_ai")
+        else:
+            tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.model_type])
+            url_list = await get_model_url_async(llm)
+            session_list_to_string = tokeniser.apply_chat_template( self.session_history, tokenize=False)
+            context = {
+                "prompt": session_list_to_string,
+                "n": 1,
+                'presence_penalty': float(self.presence_penalty),
+                "temperature": float(self.temperature),
+                "max_tokens": self.max_tokens,
+                "stream": True,
+                "top_p": float(self.top_p),
+                "frequency_penalty": float(self.frequency_penalty),
+            }
+            if url_list:
+                random_url = random.choice(url_list)
+                url = random_url.url
+                instance_id = random_url.name
+                server_status = random_url.status
+                await update_server_status_in_db_async(
+                    instance_id=instance_id, update_type="time")
+                if server_status == "running":
+
+                    response_stream = await send_stream_request_async(self, url=url, context=context,
+                                                                    processed_prompt=session_list_to_string)
+                    if isinstance(response_stream, str):
+                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+                                                                                        response=response_stream, type_="chatroom")
+                else:
+                    await manage_ec2_on_inference(self, server_status, instance_id)
+            else:
+                response = "Model is currently offline"
+                await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+
     else:
         self.session_history = []
         self.current_turn = 0
@@ -339,8 +376,42 @@ async def async_agent_inference_with_summary(self) -> None:
             ]
 
         self.session_history.extend(prompt)
-        clean_response = await send_agent_request_openai_async(self)
-        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=clean_response, type_="open_ai")
+        llm = await LLM.objects.aget(name=self.model_type)
+        if not llm.is_self_host:
+            clean_response = await send_agent_request_openai_async(self)
+            await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=clean_response, type_="open_ai")
+        else:
+            tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.model_type])
+            url_list = await get_model_url_async(llm)
+            session_list_to_string = tokeniser.apply_chat_template( self.session_history, tokenize=False)
+            context = {
+                "prompt": session_list_to_string,
+                "n": 1,
+                'presence_penalty': float(self.presence_penalty),
+                "temperature": float(self.temperature),
+                "max_tokens": self.max_tokens,
+                "stream": True,
+                "top_p": float(self.top_p),
+                "frequency_penalty": float(self.frequency_penalty),
+            }
+            if url_list:
+                random_url = random.choice(url_list)
+                url = random_url.url
+                instance_id = random_url.name
+                server_status = random_url.status
+                await update_server_status_in_db_async(
+                    instance_id=instance_id, update_type="time")
+                if server_status == "running":
 
+                    response_stream = await send_stream_request_async(self, url=url, context=context,
+                                                                    processed_prompt=session_list_to_string)
+                    if isinstance(response_stream, str):
+                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+                                                                                        response=response_stream, type_="chatroom")
+                else:
+                    await manage_ec2_on_inference(self, server_status, instance_id)
+            else:
+                response = "Model is currently offline"
+                await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
     else:
         await self.send(text_data=json.dumps({"message": f"Max Turns reached, click on the paragraphs on the left to write again", "role": "Server", "time": self.time}))

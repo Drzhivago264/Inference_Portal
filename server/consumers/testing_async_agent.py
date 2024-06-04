@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 from django.core.cache import cache
 from server.models import (APIKEY,
+                           LLM,
                            InstructionTree,
                            UserInstructionTree)
 from channels.db import database_sync_to_async

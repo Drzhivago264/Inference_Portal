@@ -230,7 +230,7 @@ def Inference(unique: str,
 
     processed_prompt = inference_mode(
         model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
-    if not llm.agent_availability:
+    if llm.is_self_host:
         context = {
             "prompt": processed_prompt,
             "n": 1,
