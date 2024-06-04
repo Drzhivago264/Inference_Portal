@@ -46,29 +46,33 @@ def get_EC2_status(instance_id: str, region: str) -> str:
         return e
 
 
-def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str:
-    
+def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str | list:
+
     if mode == "chat":
         if not agent_availability:
-
-            tokeniser = constant.TOKENIZER_TABLE[model]
-            inputs = AutoTokenizer.from_pretrained(tokeniser)(prompt)
+            tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[model])
+            inputs = tokeniser(prompt)
             current_history_length = len(inputs['input_ids'])
             if include_memory:
-                template = constant.SHORTEN_LAST_TEMPLATE_TABLE[model]
-                prompt_ = template.format(prompt, " ")
+                chat = [{"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[model]}"}]
+                prompt_ =  {"role": "user", "content": f"{prompt}"}
                 chat_history = get_chat_context(model=model,
                                                 key_object=key_object,
                                                 raw_prompt=prompt,
                                                 agent_availability=agent_availability,
                                                 current_history_length=current_history_length,
                                                 tokeniser=tokeniser)
-                prompt_ = chat_history + prompt_ 
+                
+                chat += chat_history
+                chat.append(prompt_)
+                prompt_ = tokeniser.apply_chat_template(chat, tokenize=False)
                 return prompt_
             else:
-                template = constant.SHORTEN_INSTRUCT_TABLE[model]
-                prompt_ = template.format(constant.SHORTEN_LAST_TEMPLATE_TABLE[model].format(prompt, " "))
-                print(prompt_)
+                chat = [
+                    {"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[model]}"},
+                    {"role": "user", "content": f"{prompt}"},
+                ]
+                prompt_ = tokeniser.apply_chat_template(chat, tokenize=False)
                 return prompt_
         else:
             prompt_ = {"role": "user", "content": f"{prompt}"}
@@ -511,7 +515,7 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
         return False
 
 
-def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser:object) -> str | list:
+def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
     """_summary_
 
     Args:
@@ -526,34 +530,20 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(
         raw_prompt, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT)
     if not agent_availability:
-        shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
-        full_instruct = ""
         max_history_length = constant.MAX_HISTORY_LENGTH[model]
-        for mess in message_list_vector:
-            template = shorten_template.format(
-                mess.content_object.prompt, mess.content_object.response)
-            full_instruct += "\n\n"
-            full_instruct += template
-            inputs = AutoTokenizer.from_pretrained(tokeniser)(full_instruct)
-            current_history_length += len(inputs['input_ids'])
-            if current_history_length > int(max_history_length):
-                full_instruct = full_instruct[:-(
-                    current_history_length-max_history_length)]
-        full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model].format(full_instruct) 
-        return full_instruct
     else:
         max_history_length = constant.MAX_HISTORY_LENGTH["openai"]
-        full_instruct_list = []
-        for mess in message_list_vector:
-            full_instruct_list += [
-                {'role': 'user', 'content': f'{mess.content_object.prompt}'},
-                {'role': 'assistant', 'content': f'{mess.content_object.response}'}
-            ]
-            current_history_length += len(tokeniser.encode(
-                mess.content_object.prompt + " " + mess.content_object.response))
-            if current_history_length > int(max_history_length):
-                full_instruct_list = full_instruct_list[:-2 or None]
-        return full_instruct_list
+    full_instruct_list = []
+    for mess in message_list_vector:
+        full_instruct_list += [
+            {'role': 'user', 'content': f'{mess.content_object.prompt}'},
+            {'role': 'assistant', 'content': f'{mess.content_object.response}'}
+        ]
+        current_history_length += len(tokeniser.encode(
+            mess.content_object.prompt + " " + mess.content_object.response))
+        if current_history_length > int(max_history_length):
+            full_instruct_list = full_instruct_list[:-2 or None]
+    return full_instruct_list
 
 
 def manage_monero(command, params=None):
