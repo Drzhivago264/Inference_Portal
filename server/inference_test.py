@@ -43,13 +43,22 @@ from openai import OpenAI
 
 import requests
 
-response = requests.post("http://34.238.136.66/generate", json=context ) 
+#response = requests.post("http://34.238.136.66/generate", json=context ) 
    
 #print(response.content)
-for chunk in response.iter_lines():
-    if chunk:
-        print(chunk)
+from transformers import AutoTokenizer
 
+tokenizer = AutoTokenizer.from_pretrained("casperhansen/llama-3-8b-instruct-awq")
+chat = [
+
+  {"role": "user", "content": "Hello, how are you?"},
+
+  {"role": "assistant", "content": "I'm doing great. How can I help you today?"},
+
+  {"role": "user", "content": "I'd like to show off how chat templating works!"},
+
+]
+print(tokenizer.apply_chat_template(chat, tokenize=False))
 """ with mp.Pool(1) as pool:
   for result in pool.map(send_req, range(10000)):
       print(f'Got result: {result}', flush=True) """

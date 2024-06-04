@@ -9,23 +9,12 @@ MAX_CHILD_TEMPLATE_PER_USER = 3
 
 
 REGION = "us-east-1"
-SHORTEN_LAST_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n",
-                          "Llama 2  Chat 13B": "{}[/INST] ",
-                          "4Chan /Pol 2.7B": "<post> {} <comment> ",
-                          "Reddit Helper 2.7B": "<post> {} <comment> ",
-                          "Llama 3 Instruct AWQ": "<|start_header_id|>user<|end_header_id|>{}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"}
 
-SHORTEN_TEMPLATE_TABLE = {"Mistral Chat 13B": "### Instruction:\n{}\n\n### Response:\n{}\n",
-                          "Llama 2  Chat 13B": "{}[/INST] {}</s>",
-                          "4Chan /Pol 2.7B": "<post> {} <comment> {}",
-                          "Reddit Helper 2.7B": "<post> {} <comment> {}",
-                          "Llama 3 Instruct AWQ": "<|start_header_id|>user<|end_header_id|>{}<|eot_id|><|start_header_id|>assistant<|end_header_id|>{}<|eot_id|>"}
-
-SHORTEN_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request. \n\n {}",
-                          "Llama 2  Chat 13B": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. \n<</SYS>> {}",
-                          "4Chan /Pol 2.7B": "{}",
-                          "Reddit Helper 2.7B": "{}",
-                          "Llama 3 Instruct AWQ": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>You are a helpful AI assistant that answers questions<|eot_id|>{}"}
+SYSTEM_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.",
+                          "Llama 2  Chat 13B": "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
+                          "4Chan /Pol 2.7B": "",
+                          "Reddit Helper 2.7B": "",
+                          "Llama 3 Instruct AWQ": "You are a helpful AI assistant that needs to answer people questions"}
 
 TOKENIZER_TABLE = {
     "Mistral Chat 13B": "TheBloke/Amethyst-13B-Mistral-AWQ",
