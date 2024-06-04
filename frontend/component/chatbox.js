@@ -46,9 +46,7 @@ export const ChatBox = ({
                                                 <Box textAlign="right">
                                                     {mess.role} ({mess.time})
                                                 </Box>
-                                                <Box display="flex" sx={{ wordBreak: "break-word" }} justifyContent="flex-end" style={{ whiteSpace: "pre-wrap", width: '100%' }}>
-                                                    {mess.message}
-                                                </Box>
+                                                <Box display="flex" sx={{ wordBreak: "break-word" }} justifyContent="flex-end" style={{ whiteSpace: "pre-wrap", width: '100%' }}>{mess.message}</Box>
                                             </Box>
                                         </Grid>
                                     </Box>
@@ -61,7 +59,7 @@ export const ChatBox = ({
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Box pt={0.8} align="left" sx={{ wordBreak: "break-word" }} style={{ whiteSpace: "pre-wrap" }}>
-                                                <span> {mess.role} - {mess.time}: <br /><br /> {mess.message}</span>
+                                                <span>{mess.role} - {mess.time}: <br /><br />{mess.message}</span>
                                             </Box>
                                             <Box align="right">
                                                 <IconButton onClick={() => copyToClipboard(`${mess.role} - ${mess.time}:\n\n${mess.message}`)} aria-label="copy" size="small">
@@ -79,7 +77,7 @@ export const ChatBox = ({
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Box pt={0.8} align="left" style={{ whiteSpace: "pre-wrap" }}>
-                                                <span> {mess.message} ({mess.role} - {mess.time}) </span>
+                                                <span>{mess.message} ({mess.role} - {mess.time}) </span>
                                             </Box>
                                             <Box align="right">
                                                 <IconButton onClick={() => copyToClipboard(`${mess.message} (${mess.role} - ${mess.time})`)} aria-label="copy" size="small">
@@ -161,9 +159,7 @@ export const ChatBoxHotpot = ({
                                                 <Box textAlign="right">
                                                     {mess.role} ({mess.time})
                                                 </Box>
-                                                <Box display="flex" sx={{ wordBreak: "break-word" }} justifyContent="flex-end" style={{ whiteSpace: "pre-wrap" }}>
-                                                    {mess.message}
-                                                </Box>
+                                                <Box display="flex" sx={{ wordBreak: "break-word" }} justifyContent="flex-end" style={{ whiteSpace: "pre-wrap" }}>{mess.message}</Box>
                                             </Box>
                                         </Grid>
                                     </Box>
@@ -176,7 +172,7 @@ export const ChatBoxHotpot = ({
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }} id={mess.holderid} >
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Box pt={0.8} align="left" sx={{ wordBreak: "break-word" }} style={{ whiteSpace: "pre-wrap" }}>
-                                                <span> {mess.role} - {mess.time}: <br /><br /> {mess.message}</span>
+                                                <span>{mess.role} - {mess.time}: <br /><br />{mess.message}</span>
                                             </Box>
                                             <Box align="right">
                                                 <IconButton onClick={() => copyToClipboard(`${mess.role} - ${mess.time}:\n\n${mess.message}`)} aria-label="copy" size="small">
@@ -194,7 +190,7 @@ export const ChatBoxHotpot = ({
                                     <Box p={1} sx={{ borderLeft: 5, borderRadius: 1 }} className="message_log_container" style={{ whiteSpace: 'pre-line' }}>
                                         <Grid item sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Box pt={0.8} align="left" style={{ whiteSpace: "pre-wrap" }}>
-                                                <span> {mess.message} ({mess.role} - {mess.time}) </span>
+                                                <span>{mess.message} ({mess.role} - {mess.time}) </span>
                                             </Box>
                                             <Box align="right">
                                                 <IconButton onClick={() => copyToClipboard(`${mess.message} (${mess.role} - ${mess.time})`)} aria-label="copy" size="small">

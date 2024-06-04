@@ -22,7 +22,7 @@ class Consumer(AsyncWebsocketConsumer):
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        await self.send(text_data=json.dumps({"message": "You are currently using Celery backend. Default to Mistral Chat 13B or choose model on the right", "role": "Server", "time": self.time}))
+        await self.send(text_data=json.dumps({"message": "You are currently using async backend. Default to Mistral 13 B or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully show when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor", "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
         # Leave room group

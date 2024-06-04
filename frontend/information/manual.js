@@ -47,6 +47,10 @@ function Manual() {
 
     const [displaydoc, setDisplayDoc] = useState('')
     const [displaytoc, setDisplayToc] = useState('')
+    const [selectedIndex, setSelectedIndex] = React.useState(0);
+    const handleListItemClick = (event, index) => {
+        setSelectedIndex(index);
+    };
     const destination_refs = {
         key: {
             "en": [key_en, key_toc_en],
@@ -74,22 +78,22 @@ function Manual() {
     useEffect(() => {
         setDefaultLanguage(i18n.language)
     }, [i18n.language]);
-    
-    useEffect(() => {
-     
-            axios.all([
-                axios.get(destination_refs[doc][default_language][0]),
-                axios.get(destination_refs[doc][default_language][1]),
-            ])
-                .then(axios.spread((display_doc_object, display_toc_object) => {
-                    setDisplayDoc(display_doc_object.data);
-                    setDisplayToc(display_toc_object.data)
 
-                }))
-                .catch(error => {
-                    console.log(error);
-                });
-        
+    useEffect(() => {
+
+        axios.all([
+            axios.get(destination_refs[doc][default_language][0]),
+            axios.get(destination_refs[doc][default_language][1]),
+        ])
+            .then(axios.spread((display_doc_object, display_toc_object) => {
+                setDisplayDoc(display_doc_object.data);
+                setDisplayToc(display_toc_object.data)
+
+            }))
+            .catch(error => {
+                console.log(error);
+            });
+
     }, [doc, default_language]);
     return (
         <Container maxWidth={false} disableGutters>
@@ -105,11 +109,23 @@ function Manual() {
                             <Box mt={3} mb={5} sx={{ display: { xs: 'none', sm: 'none ', md: 'block' } }} >
                                 <Typography >
                                     <List dense={true}>
-                                        <ListItemButton component={Link} to='/frontend/manual/key'> <Typography variant="body2" component="body2"> {t('manual.Setting_Up_Your_API_Key')} </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography variant="body2" component="body2"> {t('manual.Authentication')} </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography variant="body2" component="body2">{t('manual.Inference')} </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography variant="body2" component="body2"> {t('manual.Common_Errors_and_Ratelimits')} </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography variant="body2" component="body2">{t('manual.The_Behaviors_of_This_Website')} </Typography> </ListItemButton>
+                                        {[{ link: '/frontend/manual/key', tranlate: 'manual.Setting_Up_Your_API_Key' },
+                                        { link: '/frontend/manual/authentication', tranlate: 'manual.Authentication' },
+                                        { link: '/frontend/manual/inference', tranlate: 'manual.Inference' },
+                                        { link: '/frontend/manual/errorlimit', tranlate: 'manual.Common_Errors_and_Ratelimits' },
+                                        { link: '/frontend/manual/behavior', tranlate: 'manual.The_Behaviors_of_This_Website' }
+                                        ].map((object, index) => {
+                                            return (
+                                                <ListItemButton
+                                                selected={selectedIndex === index}
+                                                onClick={(event)=>  handleListItemClick(event, index)  }
+                                                 component={Link} 
+                                                 to={object.link}>
+                                                     <Typography variant="body2" component="body2"> {t(object.tranlate)} </Typography> 
+                                                </ListItemButton>
+                                            )
+                                        })}
+                                       
                                     </List>
                                 </Typography>
                             </Box>

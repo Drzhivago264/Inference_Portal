@@ -73,7 +73,7 @@ function Hotpot() {
     const [instruct_change, setInstructChange] = useState(false)
     const [socket_destination, setSocketDestination] = useState("async");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-
+    const [selectedIndex, setSelectedIndex] = React.useState(0);
     useEffect(() => {
         axios.all([
             axios.get('/frontend-api/model'),
@@ -248,27 +248,33 @@ function Hotpot() {
             'template_type': 'system'
         }));
     }
+    const handleListItemClick = (event, index) => {
+        setSelectedIndex(index);
+      };
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
-            <title>Agent</title>
+            <title>Hotpot</title>
             <ResponsiveAppBar max_width={false} />
             <Container maxWidth={false} sx={{ minWidth: 1500 }}>
                 <Box m={1}>
                     <Grid container spacing={2}>
                         <Grid item xs={2}>
-                            <List subheader={
-                                <ListSubheader component="div" id="nested-list-subheader">
+                            <Box >
+                                <Typography variant="h6" id="nested-list-subheader">
                                     Template Structure
-                                </ListSubheader>
-                            }>
-                                {default_child_template_list.map((instruct) => {
-                                    return (
-                                        <ListItem key={instruct.name} disablePadding>
-                                            <ListItemButton  >
-                                                <ListItemText onClick={() => swap_child_instruction(instruct.name)} primary={instruct.name} />
-                                            </ListItemButton>
-                                        </ListItem>
-                                    )
+                                </Typography>
+                            </Box>
+                            <List>
+                                {default_child_template_list.map((instruct, index) => {
+                                        return (
+                                            <ListItem key={instruct.name} disablePadding>
+                                                <ListItemButton
+                                                    selected={selectedIndex === index}
+                                                    onClick={(event) => {swap_child_instruction(instruct.name), handleListItemClick(event, index)}} >
+                                                    <ListItemText primary={instruct.name} />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )
                                 })}
                             </List>
                             < Divider />
@@ -280,7 +286,7 @@ function Hotpot() {
                                         multiline
                                         maxRows={8}
                                         value={default_parent_instruct}
-                                        onChange={e => {setParentInstruct(e.target.value), setInstructChange(true)}}
+                                        onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -296,7 +302,7 @@ function Hotpot() {
                                         multiline
                                         maxRows={8}
                                         value={default_child_instruct}
-                                        onChange={e => {setChildInstruct(e.target.value), setInstructChange(true)}}
+                                        onChange={e => { setChildInstruct(e.target.value), setInstructChange(true) }}
                                         minRows={6}
                                         variant="standard"
                                         InputProps={{
@@ -365,8 +371,8 @@ function Hotpot() {
                                 lengthpenalty={lengthpenalty}
                                 presencepenalty={presencepenalty}
                                 frequencypenalty={frequencypenalty}
-                                max_turn = {max_turn}
-                                setMaxTurn = {setMaxTurn}
+                                max_turn={max_turn}
+                                setMaxTurn={setMaxTurn}
                                 setBeam={setBeam}
                                 setMaxToken={setMaxToken}
                                 setBestof={setBestof}
