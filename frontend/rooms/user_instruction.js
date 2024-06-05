@@ -32,7 +32,7 @@ import { styled } from '@mui/material/styles';
 import { agentsocket } from '../component/chatsocket';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Slider from '@mui/material/Slider';
+import { OpenAPIParameter } from '../component/chatroom_parameters';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 500,
@@ -64,7 +64,7 @@ function UserInstruction() {
     const [shownthinking, setThinking] = useState(false);
     const [max_turn, setMaxTurn] = useState(4)
     const [currentparagraph, setCurrentParagraph] = useState(1);
-
+    const [agent_objects, setAgents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
     const [saveerror, setSaveError] = useState(false);
@@ -387,7 +387,17 @@ function UserInstruction() {
             setInstructChange(false)
         }
     }
-
+    useEffect(() => {
+        axios.all([
+            axios.get('/frontend-api/model'),
+        ])
+            .then(axios.spread((model_object) => {
+                setAgents(model_object.data.models_agent);
+            }))
+            .catch(error => {
+                console.log(error);
+            });
+    }, []);
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
@@ -434,16 +444,25 @@ function UserInstruction() {
                             </List>
                             <Divider />
                             <Box m={1}>
-                                <Typography gutterBottom>Max_turns: {max_turn}</Typography>
-                                <Slider
-                                    step={1}
-                                    min={1}
-                                    max={10}
-                                    marks
-                                    valueLabelDisplay="off"
-                                    onChange={e => setMaxTurn(e.target.value)}
-                                    value={max_turn}
-                                />
+                                <OpenAPIParameter
+                                    top_p={top_p}
+                                    agent_objects={agent_objects}
+                                    choosen_model={choosen_model}
+                                    setChoosenModel={setChoosenModel}
+                                    setTopp={setTopp}
+                                    temperature={temperature}
+                                    setTemperature={setTemperature}
+                                    max_tokens={max_tokens}
+                                    setMaxToken={setMaxToken}
+                                    presencepenalty={presencepenalty}
+                                    setPresencePenalty={setPresencePenalty}
+                                    frequencypenalty={frequencypenalty}
+                                    setFrequencyPenalty={setFrequencyPenalty}
+                                    max_turn={max_turn}
+                                    setMaxTurn={setMaxTurn}
+
+                                >
+                                </OpenAPIParameter>
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />

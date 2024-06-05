@@ -17,6 +17,7 @@ import { ChatBox } from '../component/chatbox';
 import { chatsocket } from '../component/chatsocket';
 import { ChatExport } from '../component/chat_export';
 import Footer from '../component/footer';
+import Typography from '@mui/material/Typography';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -72,7 +73,7 @@ function FunctionLLM() {
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
-        chatsocket(websocket, setChatMessage, setThinking, document )
+        chatsocket(websocket, setChatMessage, setThinking, document)
     }, []);
 
     const handleEnter = (e) => {
@@ -126,82 +127,103 @@ function FunctionLLM() {
             <Container maxWidth="xl" sx={{ minWidth: 1200 }}>
                 <Box m={1}>
                     <Grid container spacing={2}>
-                        <Grid item md={3}>
-                            <FormControl>
-                                <FormLabel id="demo-controlled-radio-buttons-group">Toolbox</FormLabel>
-                                <RadioGroup
-                                    defaultValue="emotion"
-                                    name="radio-buttons-group"
-                                    onChange={e => { setLLMFunction(e.target.value); swap_extra_instruction(e.target.value) }}
-                                    value={llmfunction}
+                        <Grid item xs={4}>
+                            <Paper sx={{ ml: 2, mr: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Toolbox</Typography>
+                                </Box>
+                                <Divider />
+                                <Box m={2}>
+                                    <FormControl>
+                                        <RadioGroup
+                                            defaultValue="emotion"
+                                            name="radio-buttons-group"
+                                            onChange={e => { setLLMFunction(e.target.value); swap_extra_instruction(e.target.value) }}
+                                            value={llmfunction}
+                                        >
+                                            {[{ 'label': 'Summary', 'value': 'summary' },
+                                            { 'label': 'Paraphrase', 'value': 'paraphrase' },
+                                            { 'label': 'Predict Emotion', 'value': 'emotion' },
+                                            { 'label': 'Predict Sentiment', 'value': 'sentiment' },
+                                            { 'label': 'Topic Classification', 'value': 'topic' },
+                                            { 'label': 'Restyle', 'value': 'restyle' }].map((func) => {
+                                                if (func.value == 'paraphrase' || 'setiment') {
+                                                    return (
+                                                        <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
+                                                    )
+                                                }
+                                                else if (func.value == 'summary') {
+                                                    return (
+                                                        <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
+                                                    )
+                                                }
+                                                else {
+                                                    return (
+                                                        <FormControlLabel value={func.value} control={<Radio />} label={func.label} />
+                                                    )
+                                                }
+                                            }
+                                            )
+                                            }
+                                        </RadioGroup>
+                                    </FormControl>
+                                </Box>
+                            </Paper>
+                            <Paper sx={{ m: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Extra Instruction</Typography>
+                                </Box>
+                                <Divider />
+                                <Box m={2}>
+                                    <ChatInput
+                                        multiline
+                                        maxRows={6}
+                                        value={extrainstruction}
+                                        sx={{ p: '2px 4px', display: 'flex', minWidth: 200 }}
+                                        onChange={e => setExtraInstruction(e.target.value)}
+                                        minRows={4}
+
+                                    />
+                                </Box>
+                            </Paper>
+                            <Paper sx={{ m: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
+                                </Box>
+                                <Divider />
+                                <Box m={2}>
+                                    <ChatExport
+                                        chat_message={chat_message}
+                                        choosen_export_format_chatlog={choosen_export_format_chatlog}
+                                        setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
+                                        number_of_remove_message={2}
+                                        setChatMessage={setChatMessage}
+                                    >
+                                    </ChatExport>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
+                        <Grid item xs={6}>
+                            <Box mr={2}>
+                                <ChatBox
+                                    inputsize={660}
+                                    chat_message={chat_message}
+                                    usermessage={usermessage}
+                                    usermessageError={usermessageError}
+                                    ChatPaper={ChatPaper}
+                                    ChatInput={ChatInput}
+                                    setUserMessage={setUserMessage}
+                                    submitChat={submitChat}
+                                    messagesEndRef={messagesEndRef}
+                                    shownthinking={shownthinking}
+                                    handleEnter={handleEnter}
                                 >
-                                    {[{ 'label': 'Summary', 'value': 'summary' },
-                                    { 'label': 'Paraphrase', 'value': 'paraphrase' },
-                                    { 'label': 'Predict Emotion', 'value': 'emotion' },
-                                    { 'label': 'Predict Sentiment', 'value': 'sentiment' },
-                                    { 'label': 'Topic Classification', 'value': 'topic' },
-                                    { 'label': 'Restyle', 'value': 'restyle' }].map((func) => {
-                                        if (func.value == 'paraphrase' || 'setiment') {
-                                            return (
-                                                <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
-                                            )
-                                        }
-                                        else if (func.value == 'summary') {
-                                            return (
-                                                <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
-                                            )
-                                        }
-                                        else {
-                                            return (
-                                                <FormControlLabel value={func.value} control={<Radio />} label={func.label} />
-                                            )
-                                        }
-                                    }
-                                    )
-                                    }
-                                </RadioGroup>
-                            </FormControl>
-                            <Divider ></Divider>
-                            <Box mt={2} mb={2}>
-
-                                <FormLabel id="Extral Instructions">Extra Instructions</FormLabel>
-                                <ChatInput
-                                    multiline
-                                    maxRows={6}
-                                    value={extrainstruction}
-                                    sx={{ p: '2px 4px', display: 'flex', minWidth: 200 }}
-                                    onChange={e => setExtraInstruction(e.target.value)}
-                                    minRows={4}
-                              
-                                />
+                                </ChatBox>
                             </Box>
-                            <Divider></Divider>
-                            <ChatExport
-                            chat_message={chat_message}
-                            choosen_export_format_chatlog={choosen_export_format_chatlog}
-                            setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
-                            number_of_remove_message = {1}
-                            >
-
-                            </ChatExport>
                         </Grid>
-                        <Grid item md={6}>
-                        <ChatBox
-                            inputsize={660}
-                            chat_message={chat_message}
-                            usermessage={usermessage}
-                            usermessageError={usermessageError}
-                            ChatPaper={ChatPaper}
-                            ChatInput={ChatInput}
-                            setUserMessage={setUserMessage}
-                            submitChat={submitChat}
-                            messagesEndRef={messagesEndRef}
-                            shownthinking={shownthinking}
-                            handleEnter={handleEnter}
-                        >
-                        </ChatBox>
-                        </Grid>
-                        <Grid item md={2}>
+                        <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
+                        <Grid item xs={2}>
                             <OpenAPIParameter
                                 top_p={top_p}
                                 agent_objects={agent_objects}
