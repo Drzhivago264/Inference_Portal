@@ -46,6 +46,11 @@ import AlertTitle from '@mui/material/AlertTitle';
 import FormHelperText from '@mui/material/FormHelperText';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -398,139 +403,183 @@ function Agent() {
                 <Box mt={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={2}>
-                            <Box ml={2}>
-                                <Typography variant="h5" id="nested-list-subheader">
-                                    Template Structure
-                                </Typography>
-                            </Box>
-                            <List >
-                                {!use_user_template && default_child_template_list.map((instruct, index) => {
-                                    return (
-                                        <ListItem key={instruct.name} disablePadding>
-                                            <ListItemButton
-                                                selected={selectedIndex === index}
-                                                onClick={(event) => { swap_child_instruction(instruct.name, 'system'), handleListItemClick(event, index) }}   >
-                                                <ListItemText primary={instruct.name} />
-                                            </ListItemButton>
-                                        </ListItem>
-                                    )
-                                })}
-                                {use_user_template && default_user_child_template_list.map((instruct, index) => {
+                            <Paper sx={{ ml: 2, mr: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>
+                                        Template Structure
+                                    </Typography>
+                                </Box>
+                                <Divider />
+                                <List dense={true}>
+                                    {!use_user_template && default_child_template_list.map((instruct, index) => {
+                                        return (
+                                            <ListItem key={instruct.name} disablePadding>
+                                                <ListItemButton
+                                                    selected={selectedIndex === index}
+                                                    onClick={(event) => { swap_child_instruction(instruct.name, 'system'), handleListItemClick(event, index) }}   >
+                                                    <ListItemText primary={instruct.name} />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )
+                                    })}
+                                    {use_user_template && default_user_child_template_list.map((instruct, index) => {
 
-                                    return (
-                                        <ListItem key={instruct.displayed_name} disablePadding>
-                                            <ListItemButton
-                                                selected={selectedIndex === index}
-                                                onClick={(event) => { swap_child_instruction(instruct.displayed_name, 'user_template'), handleListItemClick(event, index) }} >
-                                                <ListItemText primary={instruct.displayed_name} />
-                                            </ListItemButton>
-                                        </ListItem>
-                                    )
-                                })}
-                            </List>
-                            <Divider ></Divider>
-                            <Box m={2}>
-                                <form onSubmit={handleExport}>
-                                    <Typography pb={2}>Editor Export</Typography>
-                                    <FormControl  >
-                                        <Stack direction={'row'} spacing={1}>
-                                            <InputLabel id="export-label">Formats</InputLabel>
-                                            <Select
-                                                labelId="export-label"
-                                                id="export-select"
-                                                onChange={e => setChoosenExportFormat(e.target.value)}
-                                                value={choosen_export_format}
-                                                label="Export"
-                                                size="small"
-                                            >
-                                                {['.json', '.txt', '.html', '.pdf'].map((format) => {
-                                                    return (
-                                                        <MenuItem key={format} value={format}>{format}</MenuItem>
-                                                    )
-                                                })}
-                                            </Select>
-                                            <Button size="small" variant="contained" type="submit" endIcon={<GetAppIcon />}>Export</Button>
-                                        </Stack>
-                                    </FormControl>
-                                </form>
-                                <ChatExport
-                                    chat_message={chat_message}
-                                    choosen_export_format_chatlog={choosen_export_format_chatlog}
-                                    setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
-                                    number_of_remove_message={2}
-                                    setChatMessage={setChatMessage}
-                                >
-                                </ChatExport>
-                            </Box>
+                                        return (
+                                            <ListItem key={instruct.displayed_name} disablePadding>
+                                                <ListItemButton
+                                                    selected={selectedIndex === index}
+                                                    onClick={(event) => { swap_child_instruction(instruct.displayed_name, 'user_template'), handleListItemClick(event, index) }} >
+                                                    <ListItemText primary={instruct.displayed_name} />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )
+                                    })}
+                                </List>
+                            </Paper>
+                            <Paper sx={{ m: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Editor Export</Typography>
+                                </Box>
+                                <Divider />
+                                <Box m={2}>
+                                    <form onSubmit={handleExport}>
+                                        <FormControl  >
+                                            <Stack direction={'row'} spacing={1}>
+                                                <InputLabel id="export-label">Formats</InputLabel>
+                                                <Select
+                                                    labelId="export-label"
+                                                    id="export-select"
+                                                    onChange={e => setChoosenExportFormat(e.target.value)}
+                                                    value={choosen_export_format}
+                                                    label="Export"
+                                                    size="small"
+                                                >
+                                                    {['.json', '.txt', '.html', '.pdf'].map((format) => {
+                                                        return (
+                                                            <MenuItem key={format} value={format}>{format}</MenuItem>
+                                                        )
+                                                    })}
+                                                </Select>
+                                                <Button size="small" variant="contained" type="submit" endIcon={<GetAppIcon />}>Export</Button>
+                                            </Stack>
+                                        </FormControl>
+                                    </form>
+
+                                </Box>
+                                </Paper>
+                                <Paper sx={{ m: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
+                                </Box>
+                                <Divider />
+                                <Box m={2}>
+                                    <ChatExport
+                                        chat_message={chat_message}
+                                        choosen_export_format_chatlog={choosen_export_format_chatlog}
+                                        setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
+                                        number_of_remove_message={2}
+                                        setChatMessage={setChatMessage}
+                                    >
+                                    </ChatExport>
+                                </Box>
+                            </Paper>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={4}>
-                            <Stack spacing={1}>
-                                <Typography variant="h5" gutterBottom>Parent Instruction</Typography>
-                                <Paper>
-                                    {!use_user_template && <ChatInput
-                                        id="parent-instruct"
-                                        multiline
-                                        maxRows={8}
-                                        value={default_parent_instruct}
-                                        onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
-                                        minRows={6}
-                                        variant="standard"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
+                            <Accordion defaultExpanded>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="parent-content"
+                                    id="parent-header"
+                                >
+                                    <Typography sx={{ color: 'text.secondary' }}>Parent Instruction</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails >
+                                    <Paper variant="outlined">
+                                        {!use_user_template && <ChatInput
+                                            id="parent-instruct"
+                                            multiline
+                                            maxRows={8}
+                                            value={default_parent_instruct}
+                                            onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
+                                            minRows={6}
+                                            variant="standard"
+                                            InputProps={{
+                                                startAdornment: <InputAdornment position="start">   </InputAdornment>,
 
-                                        }}
-                                    />}
-                                    {use_user_template && <ChatInput
-                                        id="user-parent-instruct"
-                                        multiline
-                                        maxRows={8}
-                                        value={default_user_parent_instruct}
-                                        onChange={e => { setUserParentInstruct(e.target.value), setInstructChange(true) }}
-                                        minRows={6}
-                                        variant="standard"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
+                                            }}
+                                        />}
+                                        {use_user_template && <ChatInput
+                                            id="user-parent-instruct"
+                                            multiline
+                                            maxRows={8}
+                                            value={default_user_parent_instruct}
+                                            onChange={e => { setUserParentInstruct(e.target.value), setInstructChange(true) }}
+                                            minRows={6}
+                                            variant="standard"
+                                            InputProps={{
+                                                startAdornment: <InputAdornment position="start">   </InputAdornment>,
 
-                                        }}
-                                    />}
-                                </Paper>
-                                <Divider />
-                                <Typography variant="h5" gutterBottom>Child Instruction</Typography>
-                                <Paper>
-                                    {!use_user_template && <ChatInput
-                                        id="child-instruct"
-                                        multiline
-                                        maxRows={8}
-                                        value={default_child_instruct}
-                                        onChange={e => { setChildInstruct(e.target.value), setInstructChange(true) }}
-                                        minRows={6}
-                                        variant="standard"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                        }}
-                                    />}
-                                    {use_user_template && <ChatInput
-                                        id="user-child-instruct"
-                                        multiline
-                                        maxRows={8}
-                                        value={default_user_child_instruct}
-                                        onChange={e => { setUserChildInstruct(e.target.value), setInstructChange(true) }}
-                                        minRows={6}
-                                        variant="standard"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                        }}
-                                    />}
-                                </Paper>
-                                <Divider />
-                                <Typography variant="h5" gutterBottom>Editor</Typography>
-                                <div id='editorjs' />
-                            </Stack>
+                                            }}
+                                        />}
+                                    </Paper>
+                                </AccordionDetails>
+                            </Accordion>
+
+                            <Accordion defaultExpanded>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="child-content"
+                                    id="child-header"
+                                >
+                                    <Typography sx={{ color: 'text.secondary' }}>Child Instruction</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Paper variant="outlined">
+                                        {!use_user_template &&
+                                            <ChatInput
+                                                id="child-instruct"
+                                                multiline
+                                                maxRows={8}
+                                                value={default_child_instruct}
+                                                onChange={e => { setChildInstruct(e.target.value), setInstructChange(true) }}
+                                                minRows={6}
+                                                variant="standard"
+                                                InputProps={{
+                                                    startAdornment: <InputAdornment position="start">   </InputAdornment>,
+                                                }}
+                                            />}
+                                        {use_user_template && <ChatInput
+                                            id="user-child-instruct"
+                                            multiline
+                                            maxRows={8}
+                                            value={default_user_child_instruct}
+                                            onChange={e => { setUserChildInstruct(e.target.value), setInstructChange(true) }}
+                                            minRows={6}
+                                            variant="standard"
+                                            InputProps={{
+                                                startAdornment: <InputAdornment position="start">   </InputAdornment>,
+                                            }}
+                                        />}
+                                    </Paper>
+                                </AccordionDetails>
+                            </Accordion>
+
+                            <Accordion defaultExpanded>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="editor-content"
+                                    id="editor-header"
+                                >
+                                    <Typography sx={{ color: 'text.secondary' }}>Editor</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <div id='editorjs' />
+                                </AccordionDetails>
+                            </Accordion>
                         </Grid>
                         <Grid item xs={4}>
                             <Box mr={2}>
-                                <Typography variant="h5" gutterBottom>Chat Log</Typography>
                                 <ChatBox
                                     inputsize={300}
                                     chat_message={chat_message}

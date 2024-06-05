@@ -44,7 +44,6 @@ export const ChatExport = ({
     }
     return (
         <Box mt={2}>
-            <Typography pb={2}>Chat Log Export:</Typography>
             <form onSubmit={handleExportChatLog}>
                 <FormControl  >
                     <Stack direction={'row'} spacing={1}>

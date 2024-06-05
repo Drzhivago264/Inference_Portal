@@ -19,6 +19,7 @@ import Pagination from '@mui/material/Pagination';
 import Alert from '@mui/material/Alert';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import IconButton from '@mui/material/IconButton';
+import Divider from '@mui/material/Divider';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 550,
     height: 700,
@@ -219,47 +220,63 @@ function Chat() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1350 }} disableGutters>
             <title>Chat</title>
-            <ResponsiveAppBar max_width={false}  />
+            <ResponsiveAppBar max_width={false} />
             <Container maxWidth="xl" sx={{ minWidth: 1350 }}>
                 <Box m={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={4}>
-                        <Box mb={3}>
-                                <ChatExport
-                                    chat_message={chat_message}
-                                    choosen_export_format_chatlog={choosen_export_format_chatlog}
-                                    setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
-                                    number_of_remove_message={1}
-                                >
-                                </ChatExport>
-                            </Box>
-                            <Typography mt={1} mb={1} variant='body1'>
-                                Memory Tree
-                                <IconButton aria-label="fingerprint" color="info" size="small" onClick={refresh_tree}>
-                                    <RefreshIcon fontSize="small" />
-                                </IconButton>
-                            </Typography>
-                            <Alert severity="info">
-                                The memory tree includes all ancestors for a given prompt. <br></br>
-                                You can travel left or right to periodically move to the next prompt.<br></br>
-                                Click on refresh button to fletch the latest prompt.<br></br>
-                            </Alert>
 
-                            {root_node && <RecursiveMemoryTree data={root_node} />}
-                            {!root_node &&
-                                <Typography variant='body2'>
-                                    There is no memory yet.
-                                </Typography>
-                            }
-                            {total_node && root_node &&
-                                <Box
-                                    display="flex"
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    m={1}
+                            <Paper variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>
+                                        Memory Tree
+                                        <IconButton aria-label="fingerprint" color="info" size="small" onClick={refresh_tree}>
+                                            <RefreshIcon fontSize="small" />
+                                        </IconButton>
+                                    </Typography>
+                                </Box>
+                                <Divider />
 
-                                > <Pagination count={total_node} showFirstButton showLastButton onChange={getnextnode} />
-                                </Box>}
+                                <Alert severity="info">
+                                    The memory tree includes all ancestors for a given prompt. <br></br>
+                                    You can travel left or right to periodically move to the next prompt.<br></br>
+                                    Click on refresh button to fletch the latest prompt.<br></br>
+                                </Alert>
+
+                                {root_node && <RecursiveMemoryTree data={root_node} />}
+                                {!root_node &&
+                                    <Typography variant='body2'>
+                                        There is no memory yet.
+                                    </Typography>
+                                }
+                                {total_node && root_node &&
+                                    <Box
+                                        display="flex"
+                                        justifyContent="center"
+                                        alignItems="center"
+                                        m={1}
+
+                                    > <Pagination count={total_node} showFirstButton showLastButton onChange={getnextnode} />
+                                    </Box>}
+                            </Paper>
+
+                            <Paper sx={{ mt: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
+                                </Box>
+                                <Divider />
+                                <Box m={2}>
+                                    <ChatExport
+                                        chat_message={chat_message}
+                                        choosen_export_format_chatlog={choosen_export_format_chatlog}
+                                        setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
+                                        number_of_remove_message={2}
+                                        setChatMessage={setChatMessage}
+                                    >
+                                    </ChatExport>
+                                </Box>
+                            </Paper>
+
                         </Grid>
                         <Grid item xs={5.5}>
                             <ChatBox

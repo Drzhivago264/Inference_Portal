@@ -20,6 +20,11 @@ import { ChatBoxHotpot } from '../component/chatbox';
 import { HotpotParameter } from '../component/chatroom_parameters'
 import { chatsocket, agentsocket } from '../component/chatsocket';
 import Footer from '../component/footer';
+import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -250,7 +255,7 @@ function Hotpot() {
     }
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
-      };
+    };
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
             <title>Hotpot</title>
@@ -259,58 +264,79 @@ function Hotpot() {
                 <Box m={1}>
                     <Grid container spacing={2}>
                         <Grid item xs={2}>
-                            <Box >
-                                <Typography variant="h6" id="nested-list-subheader">
-                                    Template Structure
-                                </Typography>
-                            </Box>
-                            <List>
-                                {default_child_template_list.map((instruct, index) => {
+                            <Paper variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Template Structure</Typography>
+                                </Box>
+                                <Divider />
+                                <List dense={true}>
+                                    {default_child_template_list.map((instruct, index) => {
                                         return (
                                             <ListItem key={instruct.name} disablePadding>
                                                 <ListItemButton
                                                     selected={selectedIndex === index}
-                                                    onClick={(event) => {swap_child_instruction(instruct.name), handleListItemClick(event, index)}} >
+                                                    onClick={(event) => { swap_child_instruction(instruct.name), handleListItemClick(event, index) }} >
                                                     <ListItemText primary={instruct.name} />
                                                 </ListItemButton>
                                             </ListItem>
                                         )
-                                })}
-                            </List>
-                            < Divider />
-                            <Stack mt={1} spacing={1}>
-                                <Typography variant="h6" gutterBottom>Parent Instruction</Typography>
-                                <Paper>
-                                    <ChatInput
-                                        id="parent-instruct"
-                                        multiline
-                                        maxRows={8}
-                                        value={default_parent_instruct}
-                                        onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
-                                        minRows={6}
-                                        variant="standard"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                        }}
-                                    />
-                                </Paper>
-                                <Divider />
-                                <Typography variant="h6" gutterBottom>Child Instruction</Typography>
-                                <Paper>
-                                    <ChatInput
-                                        id="child-instruct"
-                                        multiline
-                                        maxRows={8}
-                                        value={default_child_instruct}
-                                        onChange={e => { setChildInstruct(e.target.value), setInstructChange(true) }}
-                                        minRows={6}
-                                        variant="standard"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                        }}
-                                    />
-                                </Paper>
-                            </Stack>
+                                    })}
+                                </List>
+                            </Paper>
+                            <Accordion >
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="child-content"
+                                    id="child-header"
+                                >
+                                    <Typography sx={{ color: 'text.secondary' }}>Parent Instruction</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails >
+                                    <Paper variant="outlined">
+                                        <ChatInput
+                                            id="parent-instruct"
+                                            multiline
+                                            maxRows={8}
+                                            value={default_parent_instruct}
+                                            onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
+                                            minRows={6}
+                                            variant="standard"
+                                            InputProps={{
+                                                startAdornment: <InputAdornment position="start">   </InputAdornment>,
+
+                                            }}
+                                        />
+                                    </Paper>
+                                </AccordionDetails>
+                            </Accordion>
+
+                            <Accordion >
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="child-content"
+                                    id="child-header"
+                                >
+                                    <Typography sx={{ color: 'text.secondary' }}>Child Instruction</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Paper variant="outlined">
+
+                                        <ChatInput
+                                            id="child-instruct"
+                                            multiline
+                                            maxRows={8}
+                                            value={default_child_instruct}
+                                            onChange={e => { setChildInstruct(e.target.value), setInstructChange(true) }}
+                                            minRows={6}
+                                            variant="standard"
+                                            InputProps={{
+                                                startAdornment: <InputAdornment position="start">   </InputAdornment>,
+                                            }}
+                                        />
+
+                                    </Paper>
+                                </AccordionDetails>
+                            </Accordion>
                         </Grid>
 
                         <Grid item xs={4}>
