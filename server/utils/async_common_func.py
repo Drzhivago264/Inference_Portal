@@ -342,8 +342,7 @@ async def async_agent_inference(self) -> None:
                     response_stream = await send_stream_request_async(self, url=url, context=context,
                                                                     processed_prompt=session_list_to_string)
                     if isinstance(response_stream, str):
-                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
-                                                                                        response=response_stream, type_="chatroom")
+                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=response_stream, type_="self_host_agent")
                 else:
                     await manage_ec2_on_inference(self, server_status, instance_id)
             else:
@@ -406,8 +405,7 @@ async def async_agent_inference_with_summary(self) -> None:
                     response_stream = await send_stream_request_async(self, url=url, context=context,
                                                                     processed_prompt=session_list_to_string)
                     if isinstance(response_stream, str):
-                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
-                                                                                        response=response_stream, type_="chatroom")
+                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=response_stream, type_="self_host_agent")
                 else:
                     await manage_ec2_on_inference(self, server_status, instance_id)
             else:
