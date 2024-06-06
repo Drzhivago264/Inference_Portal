@@ -9,7 +9,7 @@ import {
   Route,
 } from "react-router-dom";
 import { check_login, logout } from './component/check_login';
-
+import GlobalStyles from "@mui/material/GlobalStyles";
 const ModelInfor = lazy(() => import("./information/model.js"));
 const Hub = lazy(() => import("./rooms/redirect.js"));
 const Information = lazy(() => import("./introduction/introduction.js"));
@@ -84,7 +84,40 @@ export default function App() {
   return (
     <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name }}>
       <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
+        <GlobalStyles
+          styles={{
+            '::-webkit-scrollbar' :{
+              width: '12px' /* Scrollbar width */
+            },
+            
+            /* Scrollbar track */
+            '::-webkit-scrollbar-track' : {
+              background: '#333' /* Track color */
+            },
+            
+            /* Scrollbar thumb */
+            "::-webkit-scrollbar-thumb" : {
+              background: '#666', /* Thumb color */
+               borderRadius: '10px' /* Thumb border-radius */
+            },
+            
+            /* Scrollbar thumb states */
+            "::-webkit-scrollbar-thumb:hover" : {
+              background: '#555' /* Hover thumb color */
+            },
+            
+            "::-webkit-scrollbar-thumb:active" : {
+              background: '#444', /* Active thumb color */
+            },
+            '*::-webkit-scrollbar': {
+              width: '0.2em',
+            },
 
+            '*::-webkit-scrollbar-thumb': {
+              outline: '1px solid slategrey',
+            },
+          }}
+        />
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Router>
