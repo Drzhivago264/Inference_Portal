@@ -4,11 +4,11 @@ from server.utils import constant
 from ninja.security import HttpBearer
 from server.models import APIKEY
 from server.utils.llm_toolbox import (Emotion,
-                                     TopicClassification,
-                                     ParaphaseDocument,
-                                     SummarizeDocument,
-                                     ChangeWrittingStyle
-                                     )
+                                      TopicClassification,
+                                      ParaphaseDocument,
+                                      SummarizeDocument,
+                                      ChangeWrittingStyle
+                                      )
 import dspy
 from asgiref.sync import sync_to_async
 from django.http import StreamingHttpResponse
@@ -46,7 +46,7 @@ from .utils import (get_chat_context,
 
 from django_ratelimit.core import is_ratelimited
 from django_ratelimit.exceptions import Ratelimited as RateLimitedError
-
+from transformers import AutoTokenizer
 
 class GlobalAuth(HttpBearer):
     @sync_to_async
@@ -92,8 +92,14 @@ async def textcompletion(request, data: PromptSchema):
                     best_of = data.best_of
                     length_penalty = data.length_penalty
                     early_stopping = True
+                tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[data.model])
+                chat = [
+                    {"role": "system", "content": "Complete the following sentence."},
+                    {"role": "user", "content": f"{data.prompt}"},
+                ]
+                processed_prompt = tokeniser.apply_chat_template(chat, tokenize=False)
                 context = {
-                    "prompt": data.prompt,
+                    "prompt": processed_prompt,
                     "n": data.n,
                     'best_of': best_of,
                     "use_beam_search": data.beam,
@@ -114,9 +120,11 @@ async def textcompletion(request, data: PromptSchema):
                         if not response:
                             raise HttpError(404, "Time Out! Slow down")
                         else:
+                            response = response.replace(
+                                    processed_prompt, "")
                             await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="prompt")
                             return 200, {'response': response,
-                                        'context': context}
+                                         'context': context}
                     except httpx.ReadTimeout:
                         raise HttpError(404, "Time Out! Slow down")
                 elif server_status == "stopped" or "stopping":
@@ -155,18 +163,28 @@ async def chatcompletion(request, data: ChatSchema):
                 if not data.beam:
                     length_penalty = 1
                     early_stopping = False
-                    best_of = int(1)
+                    best_of = 1
                 else:
                     best_of = data.best_of
                     length_penalty = data.length_penalty
                     early_stopping = True
-                template = constant.SHORTEN_TEMPLATE_TABLE[data.model]
-                chat_prompt = template.format(data.prompt, "")
+
+                tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[data.model])
+                inputs = tokeniser(data.prompt)
+                current_history_length = len(inputs['input_ids'])
                 if data.include_memory:
-                    chat_history = await get_chat_context(model=data.model, key_object=request.auth, raw_prompt=data.prompt)
-                    processed_prompt = chat_history + "\n" + chat_prompt
+                    chat_history = await get_chat_context(model=data.model, key_object=request.auth, raw_prompt=data.prompt, agent_availability=False, current_history_length=current_history_length, tokeniser=tokeniser)
+                    chat = [{"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"}]
+                    prompt_ =  {"role": "user", "content": f"{data.prompt}"}
+                    chat += chat_history
+                    chat.append(prompt_)
+                    processed_prompt = tokeniser.apply_chat_template(chat, tokenize=False)
                 else:
-                    processed_prompt = chat_prompt
+                    chat = [
+                        {"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"},
+                        {"role": "user", "content": f"{data.prompt}"},
+                    ]
+                    processed_prompt = tokeniser.apply_chat_template(chat, tokenize=False)
                 context = {
                     "prompt": processed_prompt,
                     "n": data.n,
@@ -190,10 +208,11 @@ async def chatcompletion(request, data: ChatSchema):
                             if not response:
                                 raise HttpError(404, "Time Out! Slow down")
                             else:
-                                response = response.replace(processed_prompt, "")
+                                response = response.replace(
+                                    processed_prompt, "")
                                 await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatroom")
                                 return 200, {'response': response,
-                                            'context': context}
+                                             'context': context}
                         except httpx.ReadTimeout:
                             raise HttpError(404, "Time Out! Slow down")
                     else:
@@ -264,17 +283,17 @@ async def predict_sentiment(request, data: BaseLLMSchema):
             top_p = data.top_p
             frequency_penalty = data.frequency_penalty
             client = dspy.OpenAI(model=model.name,
-                                max_tokens=max_tokens,
-                                top_p=top_p,
-                                presence_penalty=presence_penalty,
-                                frequency_penalty=frequency_penalty,
-                                temperature=temperature,
-                                api_key=config("GPT_KEY"))
+                                 max_tokens=max_tokens,
+                                 top_p=top_p,
+                                 presence_penalty=presence_penalty,
+                                 frequency_penalty=frequency_penalty,
+                                 temperature=temperature,
+                                 api_key=config("GPT_KEY"))
             dspy.configure(lm=client)
             predict = dspy.Predict('document -> sentiment')
             response = predict(document=prompt)
             return 200, {'response': response.sentiment,
-                        'context': data}
+                         'context': data}
 
 
 @api.post("/predict/emotion", tags=["Inference"], summary="Predict Emotion", response={200: ClassificationResponseSchema, 401: Error, 442: Error, 404: Error, 429: Error})
@@ -307,12 +326,12 @@ async def predict_emotion(request, data: ClassificationSchema):
             top_p = data.top_p
             frequency_penalty = data.frequency_penalty
             client = dspy.OpenAI(model=model.name,
-                                max_tokens=max_tokens,
-                                top_p=top_p,
-                                presence_penalty=presence_penalty,
-                                frequency_penalty=frequency_penalty,
-                                temperature=temperature,
-                                api_key=config("GPT_KEY"))
+                                 max_tokens=max_tokens,
+                                 top_p=top_p,
+                                 presence_penalty=presence_penalty,
+                                 frequency_penalty=frequency_penalty,
+                                 temperature=temperature,
+                                 api_key=config("GPT_KEY"))
             dspy.configure(lm=client)
             emotion_list = data.classification_list
             if emotion_list is not None:
@@ -324,7 +343,7 @@ async def predict_emotion(request, data: ClassificationSchema):
             response = predict(sentence=prompt)
 
             return 200, {'response': response.emotion,
-                        'context': data}
+                         'context': data}
 
 
 @api.post("/tasks/paraphase", tags=["Inference"], summary="Paraphase Document", response={200: BaseLLMResponseSchema, 401: Error, 442: Error, 404: Error, 429: Error})
@@ -357,17 +376,17 @@ async def paraphase(request, data: BaseLLMSchema):
             top_p = data.top_p
             frequency_penalty = data.frequency_penalty
             client = dspy.OpenAI(model=model.name,
-                                max_tokens=max_tokens,
-                                top_p=top_p,
-                                presence_penalty=presence_penalty,
-                                frequency_penalty=frequency_penalty,
-                                temperature=temperature,
-                                api_key=config("GPT_KEY"))
+                                 max_tokens=max_tokens,
+                                 top_p=top_p,
+                                 presence_penalty=presence_penalty,
+                                 frequency_penalty=frequency_penalty,
+                                 temperature=temperature,
+                                 api_key=config("GPT_KEY"))
             dspy.configure(lm=client)
             paraphaser = dspy.ChainOfThought(ParaphaseDocument)
             response = paraphaser(document=prompt)
             return 200, {'response': response.paraphased,
-                        'context': data}
+                         'context': data}
 
 
 @api.post("/tasks/summarize", tags=["Inference"], summary="Summarize Document", response={200: SummarizeResponseSchema, 401: Error, 442: Error, 404: Error, 429: Error})
@@ -404,12 +423,12 @@ async def summarize_document(request, data: SummarizeSchema):
             top_p = data.top_p
             frequency_penalty = data.frequency_penalty
             client = dspy.OpenAI(model=model.name,
-                                max_tokens=max_tokens,
-                                top_p=top_p,
-                                presence_penalty=presence_penalty,
-                                frequency_penalty=frequency_penalty,
-                                temperature=temperature,
-                                api_key=config("GPT_KEY"))
+                                 max_tokens=max_tokens,
+                                 top_p=top_p,
+                                 presence_penalty=presence_penalty,
+                                 frequency_penalty=frequency_penalty,
+                                 temperature=temperature,
+                                 api_key=config("GPT_KEY"))
             dspy.configure(lm=client)
             if number_of_word is not None:
                 Summarizer_ = SummarizeDocument
@@ -419,7 +438,7 @@ async def summarize_document(request, data: SummarizeSchema):
             summarize = dspy.ChainOfThought(Summarizer_)
             response = summarize(document=prompt)
             return 200, {'response': response.summary,
-                        'context': data}
+                         'context': data}
 
 
 @api.post("/tasks/classify", tags=["Inference"], summary="Classify Document", response={200: ClassificationResponseSchema, 401: Error, 442: Error, 404: Error, 429: Error})
@@ -452,12 +471,12 @@ async def classify_document(request, data: ClassificationSchema):
             top_p = data.top_p
             frequency_penalty = data.frequency_penalty
             client = dspy.OpenAI(model=model.name,
-                                max_tokens=max_tokens,
-                                top_p=top_p,
-                                presence_penalty=presence_penalty,
-                                frequency_penalty=frequency_penalty,
-                                temperature=temperature,
-                                api_key=config("GPT_KEY"))
+                                 max_tokens=max_tokens,
+                                 top_p=top_p,
+                                 presence_penalty=presence_penalty,
+                                 frequency_penalty=frequency_penalty,
+                                 temperature=temperature,
+                                 api_key=config("GPT_KEY"))
             dspy.configure(lm=client)
             topic_list = data.classification_list
             if topic_list is not None:
@@ -468,7 +487,7 @@ async def classify_document(request, data: ClassificationSchema):
             predict = dspy.Predict(Topic_)
             response = predict(document=prompt)
             return 200, {'response': response.topic,
-                        'context': data}
+                         'context': data}
 
 
 @api.post("/tasks/restyle", tags=["Inference"], summary="Restyle Document", response={200: RestyleResponseSchema, 401: Error, 442: Error, 404: Error, 429: Error})
@@ -504,12 +523,12 @@ async def restyle_document(request, data: RestyleSchema):
             top_p = data.top_p
             frequency_penalty = data.frequency_penalty
             client = dspy.OpenAI(model=model.name,
-                                max_tokens=max_tokens,
-                                top_p=top_p,
-                                presence_penalty=presence_penalty,
-                                frequency_penalty=frequency_penalty,
-                                temperature=temperature,
-                                api_key=config("GPT_KEY"))
+                                 max_tokens=max_tokens,
+                                 top_p=top_p,
+                                 presence_penalty=presence_penalty,
+                                 frequency_penalty=frequency_penalty,
+                                 temperature=temperature,
+                                 api_key=config("GPT_KEY"))
             dspy.configure(lm=client)
             if new_style is not None:
                 Restyler_ = ChangeWrittingStyle
@@ -519,4 +538,4 @@ async def restyle_document(request, data: RestyleSchema):
             restyler = dspy.ChainOfThought(Restyler_)
             response = restyler(document=prompt)
             return 200, {'response': response.styled,
-                        'context': data}
+                         'context': data}
