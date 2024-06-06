@@ -102,24 +102,6 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
         return prompt_
 
 
-def response_mode(mode: str, response: str, prompt: str) -> str:
-    """_summary_
-
-    Args:
-        model (_type_): _description_
-        mode (_type_): _description_
-        response (_type_): _description_
-        prompt (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    if mode == "chat":
-        response_ = response.replace(prompt, "")
-        return response_
-    elif mode == "generate":
-        return response
-
 
 def log_prompt_response(is_session_start_node: bool | None, key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
     """This function store log into a db then build a memory tree of chat history

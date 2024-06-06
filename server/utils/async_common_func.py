@@ -104,7 +104,6 @@ async def send_stream_request_async(self: object, url: str, context: object, pro
     client = httpx.AsyncClient(timeout=10)
 
     try:
-        print(context)
         async with client.stream('POST', url, json=context) as response:
             response.raise_for_status()
             full_response = ""

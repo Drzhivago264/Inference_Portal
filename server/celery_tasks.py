@@ -22,7 +22,6 @@ from .utils.common_func import (get_model_url,
                                 update_server_status_in_db,
                                 send_request,
                                 inference_mode,
-                                response_mode,
                                 send_agent_request_openai,
                                 send_chat_request_openai,
                                 log_prompt_response
@@ -34,6 +33,7 @@ logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = REGION
+from transformers import AutoTokenizer
 
 
 @shared_task
@@ -220,7 +220,6 @@ def Inference(unique: str,
         early_stopping = False
         best_of = 1
     else:
-        best_of = int(best_of)
         if best_of == 1:
             best_of += 1
         length_penalty = float(length_penalty)
@@ -230,9 +229,11 @@ def Inference(unique: str,
 
     processed_prompt = inference_mode(
         model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
+    tokeniser = AutoTokenizer.from_pretrained(TOKENIZER_TABLE[model])
+    session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
     if llm.is_self_host:
         context = {
-            "prompt": processed_prompt,
+            "prompt": session_list_to_string,
             "n": 1,
             'best_of': best_of,
             'presence_penalty': float(presence_penalty),
@@ -266,8 +267,7 @@ def Inference(unique: str,
                         if chunk:
                             data = json.loads(chunk.decode("utf-8"))
                             output = data["text"][0]
-                            output = response_mode(
-                                response=output, mode=mode, prompt=processed_prompt)
+                            output = output.replace(session_list_to_string, "")
                             re = output.replace(previous_output, "")
                             full_response += re
                             previous_output = output
