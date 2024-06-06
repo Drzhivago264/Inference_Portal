@@ -2,7 +2,6 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from celery import shared_task
 from django.core.mail import send_mail
-from vectordb import vectordb
 from django.utils import timezone
 import random
 import requests
@@ -11,14 +10,12 @@ from .models import (InferenceServer,
                      LLM,
                      APIKEY,
                      Crypto,
-                     PromptResponse,
-                     MemoryTree
                      )
 from decouple import config
 from botocore.exceptions import ClientError
 import boto3
 from openai import OpenAI
-from .utils.common_func import (get_model_url,
+from server.utils.sync_.common_func import (get_model_url,
                                 update_server_status_in_db,
                                 send_request,
                                 inference_mode,

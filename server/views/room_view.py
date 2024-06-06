@@ -4,10 +4,7 @@ from server.models import (
     APIKEY,
     MemoryTree
 )
-from django.http import HttpResponse
-from django.conf import settings
-from server.utils.common_func import get_key
-from django.core.cache import cache
+
 from server.utils import constant
 
 from hashlib import sha256

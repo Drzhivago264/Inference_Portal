@@ -2,13 +2,11 @@ import json
 import uuid
 from datetime import datetime
 from django.core.cache import cache
-from server.models import (APIKEY,
-                           LLM,
+from server.models import (
                            InstructionTree,
                            UserInstructionTree)
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from server.celery_tasks import Agent_Inference
 from asgiref.sync import sync_to_async
 from server.utils import constant
 from server.consumers.pydantic_validator import (
@@ -19,8 +17,8 @@ from server.consumers.pydantic_validator import (
 )
 import regex as re
 from pydantic import ValidationError
-from server.utils.async_common_func import async_agent_inference, async_agent_inference_with_summary
-
+from server.utils.async_.async_agent_inference import async_agent_inference
+from server.utils.async_.async_agent_inference_with_summary import async_agent_inference_with_summary
 import pytz
 from django.utils import timezone
 

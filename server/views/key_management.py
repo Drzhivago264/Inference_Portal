@@ -1,4 +1,3 @@
-from django.shortcuts import render
 import typing
 import stripe
 import requests
@@ -7,23 +6,17 @@ from server.models import (Price,
                            APIKEY,
                            Crypto,
                            PaymentHistory,
-
                            )
-from django.views.generic import DetailView, ListView
 from django.http import HttpResponse
-from django.views.decorators.cache import cache_page
 from django.shortcuts import redirect
 from django.conf import settings
 import bleach
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
 from django.views import View
-from django.urls import reverse
 from django.views.generic import TemplateView
-from server.utils.common_func import manage_monero
-from django.contrib.auth import authenticate, login
-from django.core.signing import Signer
+from server.utils.sync_.common_func import manage_monero
+from django.contrib.auth import login
 import json
 from django.http import (HttpRequest,
                          HttpResponse,

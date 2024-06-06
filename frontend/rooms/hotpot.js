@@ -51,7 +51,7 @@ function Hotpot() {
     const [agent_message, setAgentMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
     const [choosen_agent_model, setChoosenAgentModel] = useState("gpt-4");
-    const [choosen_chat_model, setChoosenChatModel] = useState("Llama 3 Instruct AWQ");
+    const [choosen_chat_model, setChoosenChatModel] = useState("gpt-4");
     const [top_p, setTopp] = useState(0.72);
     const [top_k, setTopk] = useState(-1);
     const [mode, setMode] = useState("chat");
@@ -85,7 +85,7 @@ function Hotpot() {
             axios.get('/frontend-api/instruction-tree'),
         ])
             .then(axios.spread((model_object, instruction_object) => {
-                setModels(model_object.data.models);
+                setModels(model_object.data.models_bot);
                 setAgents(model_object.data.models_agent);
                 setTemplateList(instruction_object.data.root_nodes)
                 setChildInstruct(instruction_object.data.default_children[0].instruct)
