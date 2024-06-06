@@ -101,9 +101,10 @@ async def send_request_async(url, context):
 
 
 async def send_stream_request_async(self: object, url: str, context: object, processed_prompt: str):
-    client = httpx.AsyncClient(timeout=5)
+    client = httpx.AsyncClient(timeout=10)
 
     try:
+        print(context)
         async with client.stream('POST', url, json=context) as response:
             response.raise_for_status()
             full_response = ""
@@ -118,7 +119,8 @@ async def send_stream_request_async(self: object, url: str, context: object, pro
         await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
     except httpx.ConnectError:
         await self.send(text_data=json.dumps({"message": "Server is starting up! wait.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
-    except httpx.HTTPError:
+    except httpx.HTTPError as e:
+        print(e)
         await self.send(text_data=json.dumps({"message": "You messed up the parameter! Return to default", "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
 
@@ -237,10 +239,12 @@ async def async_inference(self) -> None:
     url_list = await get_model_url_async(llm)
     processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
         model=self.choosen_models, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
-
+    tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.choosen_models])
+    url_list = await get_model_url_async(llm)
+    session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
     if llm.is_self_host:
         context = {
-            "prompt": processed_prompt,
+            "prompt": session_list_to_string,
             "n": 1,
             'best_of': self.best_of,
             'presence_penalty': float(self.presence_penalty),
@@ -265,7 +269,7 @@ async def async_inference(self) -> None:
             if server_status == "running":
 
                 response_stream = await send_stream_request_async(self, url=url, context=context,
-                                                                  processed_prompt=processed_prompt)
+                                                                  processed_prompt=session_list_to_string)
                 if isinstance(response_stream, str):
                     await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message, response=response_stream, type_="chatroom")
             else:

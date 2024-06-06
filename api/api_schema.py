@@ -8,7 +8,7 @@ from pydantic import (
 
 class PromptSchema(Schema):
     prompt: str = ""
-    model: str = constant.DEFAULT_MODEL
+    model: str = constant.DEFAULT_SELF_HOST
     top_p: float = constant.DEFAULT_TOP_P
     top_k: int = constant.DEFAULT_TOP_K
     temperature: float = constant.DEFAULT_TEMPERATURE

@@ -93,12 +93,13 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
             else:
                 return [prompt_]
     elif mode == "generate":
-        if not agent_availability:
-            return prompt
-        else:
-            prompt_ = {
-                "role": "user", "content": f"Complete the following text, keep the original text in the answer: {prompt}"}
-            return [prompt_]
+
+        prompt_ = [
+            {"role": "system", "content": "Complete the following sentence"},
+            {"role": "user", "content": f"{prompt}"},
+        ]
+
+        return prompt_
 
 
 def response_mode(mode: str, response: str, prompt: str) -> str:
@@ -516,15 +517,7 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
 
 
 def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
-    """_summary_
 
-    Args:
-        model (str): model name
-        key (str): they users' api key
-
-    Returns:
-        str: chat history of user including 3 relevant responses
-    """
 
     hashed_key = key_object.hashed_key
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(

@@ -91,29 +91,25 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
 
 
 @sync_to_async
-def get_chat_context(model: str, key_object: object, raw_prompt: str) -> str:
-
+def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
     hashed_key = key_object.hashed_key
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(
         raw_prompt, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT)
-    shorten_template = constant.SHORTEN_TEMPLATE_TABLE[model]
-    full_instruct = ""
-    max_history_length = constant.MAX_HISTORY_LENGTH[model]
-    tokeniser = constant.TOKENIZER_TABLE[model]
+    if not agent_availability:
+        max_history_length = constant.MAX_HISTORY_LENGTH[model]
+    else:
+        max_history_length = constant.MAX_HISTORY_LENGTH["openai"]
+    full_instruct_list = []
     for mess in message_list_vector:
-        template = shorten_template.format(
-            mess.content_object.prompt, mess.content_object.response)
-        full_instruct += "\n\n"
-        full_instruct += template
-        inputs = tokeniser(full_instruct)
-        current_history_length = len(inputs['input_ids'])
-
+        full_instruct_list += [
+            {'role': 'user', 'content': f'{mess.content_object.prompt}'},
+            {'role': 'assistant', 'content': f'{mess.content_object.response}'}
+        ]
+        current_history_length += len(tokeniser.encode(
+            mess.content_object.prompt + " " + mess.content_object.response))
         if current_history_length > int(max_history_length):
-            full_instruct = full_instruct[:-(
-                current_history_length-max_history_length)]
-    full_instruct = constant.SHORTEN_INSTRUCT_TABLE[model] + full_instruct
-
-    return full_instruct
+            full_instruct_list = full_instruct_list[:-2 or None]
+    return full_instruct_list
 
 
 async def log_prompt_response(key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
