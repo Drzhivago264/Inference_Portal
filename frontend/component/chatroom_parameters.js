@@ -67,33 +67,33 @@ export const OpenAPIParameter = ({
             </FormControl>
             <Divider></Divider>
             <FormLabel >Parameters</FormLabel>
-            {max_turn && 
-            <Box><Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Max_turns:</Typography>
-                <BigInput
-                    value={max_turn}
-                    size="small"
-                    onChange={(event) => setMaxTurn(event.target.value === '' ? 0 : Number(event.target.value))}
-                    onBlur={handleBlur(max_turn, setMaxTurn, 1, 10)}
-                    inputProps={{
-                        step: 1,
-                        min: 0,
-                        max: 10,
-                        type: 'number',
-                        'aria-labelledby': 'input-slider',
-                    }}
-                />
-            </Stack>
-                <Slider
-                    step={1}
-                    min={1}
-                    max={10}
-                    marks
-                    valueLabelDisplay="off"
-                    onChange={e => setMaxTurn(e.target.value)}
-                    value={max_turn}
-                />
-            </Box>}
+            {max_turn &&
+                <Box><Stack direction="row" spacing={1}>
+                    <Typography gutterBottom>Max_turns:</Typography>
+                    <BigInput
+                        value={max_turn}
+                        size="small"
+                        onChange={(event) => setMaxTurn(event.target.value === '' ? 0 : Number(event.target.value))}
+                        onBlur={handleBlur(max_turn, setMaxTurn, 1, 10)}
+                        inputProps={{
+                            step: 1,
+                            min: 0,
+                            max: 10,
+                            type: 'number',
+                            'aria-labelledby': 'input-slider',
+                        }}
+                    />
+                </Stack>
+                    <Slider
+                        step={1}
+                        min={1}
+                        max={10}
+                        marks
+                        valueLabelDisplay="off"
+                        onChange={e => setMaxTurn(e.target.value)}
+                        value={max_turn}
+                    />
+                </Box>}
 
             <Stack direction="row" spacing={1}>
                 <Typography gutterBottom>Top_p: </Typography>
@@ -491,26 +491,59 @@ export const ChatParameter = ({
                     valueLabelDisplay="off"
                 />
                 <Divider></Divider>
-                <FormControlLabel control={<Switch
-                    onChange={e => setBeam(e.target.checked)}
-                    value={beam}
-                />} label="Beam Search " />
-                <FormControlLabel control={<Switch
-                    onChange={e => setEarlyStopping(e.target.checked)}
-                    value={earlystopping}
-                />} label="Early Stopping " />
-                <Typography gutterBottom>Best_of: {bestof}</Typography>
+                <Stack direction="row">
+                    <FormControlLabel control={<Switch
+                        onChange={e => setBeam(e.target.checked)}
+                        value={beam}
+                    />} label="Beam Search" />
+                    <FormControlLabel control={<Switch
+                        onChange={e => setEarlyStopping(e.target.checked)}
+                        value={earlystopping}
+                    />} label="Early Stopping" />
+                </Stack>
+                <Stack direction="row" spacing={1}>
+                    <Typography gutterBottom>Best_of:</Typography>
+                    <SmallInput
+                        value={bestof}
+                        size="small"
+                        onChange={(event) => setBestof(event.target.value === '' ? 0 : Number(event.target.value))}
+                        onBlur={handleBlur(bestof, setBestof, 1, 5)}
+                        inputProps={{
+                            step: 1,
+                            min: 1,
+                            max: 5,
+                            type: 'number',
+                            'aria-labelledby': 'input-slider',
+                        }}
+                    />
+                </Stack>
+
                 <Slider
                     onChange={e => setBestof(e.target.value)}
                     value={bestof}
+                    marks
                     defaultValue={2}
                     step={1}
                     min={1}
                     max={5}
                     valueLabelDisplay="off"
                 />
-
-                <Typography gutterBottom>Length penalty: {lengthpenalty}</Typography>
+                <Stack direction="row" spacing={1}>
+                    <Typography gutterBottom>Length penalty:</Typography>
+                    <SmallInput
+                        value={lengthpenalty}
+                        size="small"
+                        onChange={(event) => setLengthPenalty(event.target.value === '' ? 0 : Number(event.target.value))}
+                        onBlur={handleBlur(lengthpenalty, setLengthPenalty, -2, 2)}
+                        inputProps={{
+                            step: 0.01,
+                            min: -2,
+                            max: 2,
+                            type: 'float',
+                            'aria-labelledby': 'input-slider',
+                        }}
+                    />
+                </Stack>
                 <Slider
                     onChange={e => setLengthPenalty(e.target.value)}
                     value={lengthpenalty}
@@ -651,7 +684,22 @@ export const HotpotParameter = ({
                 <Divider></Divider>
 
             </RadioGroup>
-            <Typography gutterBottom>Max_turns: {max_turn}</Typography>
+            <Stack direction="row" spacing={1}>
+                <Typography gutterBottom>Max_turns: </Typography>
+                <SmallInput
+                    value={max_turn}
+                    size="small"
+                    onChange={(event) => setMaxTurn(event.target.value === '' ? 0 : Number(event.target.value))}
+                    onBlur={handleBlur(max_turn, setMaxTurn, 1, 10)}
+                    inputProps={{
+                        step: 1,
+                        min: 1,
+                        max: 10,
+                        type: 'number',
+                        'aria-labelledby': 'input-slider',
+                    }}
+                />
+            </Stack>
             <Slider
                 step={1}
                 min={1}
@@ -855,26 +903,59 @@ export const HotpotParameter = ({
                 valueLabelDisplay="off"
             />
             <Divider></Divider>
-            <FormControlLabel control={<Switch
-                onChange={e => setBeam(e.target.checked)}
-                value={beam}
-            />} label="Beam Search " />
-            <FormControlLabel control={<Switch
-                onChange={e => setEarlyStopping(e.target.checked)}
-                value={earlystopping}
-            />} label="Early Stopping " />
-            <Typography gutterBottom>Best_of: {bestof}</Typography>
+            <Stack direction="row">
+                <FormControlLabel control={<Switch
+                    onChange={e => setBeam(e.target.checked)}
+                    value={beam}
+                />} label="Beam Search" />
+                <FormControlLabel control={<Switch
+                    onChange={e => setEarlyStopping(e.target.checked)}
+                    value={earlystopping}
+                />} label="Early Stopping" />
+            </Stack>
+            <Stack direction="row" spacing={1}>
+                <Typography gutterBottom>Best_of:</Typography>
+                <SmallInput
+                    value={bestof}
+                    size="small"
+                    onChange={(event) => setBestof(event.target.value === '' ? 0 : Number(event.target.value))}
+                    onBlur={handleBlur(bestof, setBestof, 1, 5)}
+                    inputProps={{
+                        step: 1,
+                        min: 1,
+                        max: 5,
+                        type: 'number',
+                        'aria-labelledby': 'input-slider',
+                    }}
+                />
+            </Stack>
+
             <Slider
                 onChange={e => setBestof(e.target.value)}
                 value={bestof}
+                marks
                 defaultValue={2}
                 step={1}
                 min={1}
                 max={5}
                 valueLabelDisplay="off"
             />
-
-            <Typography gutterBottom>Length penalty: {lengthpenalty}</Typography>
+            <Stack direction="row" spacing={1}>
+                <Typography gutterBottom>Length penalty:</Typography>
+                <SmallInput
+                    value={lengthpenalty}
+                    size="small"
+                    onChange={(event) => setLengthPenalty(event.target.value === '' ? 0 : Number(event.target.value))}
+                    onBlur={handleBlur(lengthpenalty, setLengthPenalty, -2, 2)}
+                    inputProps={{
+                        step: 0.01,
+                        min: -2,
+                        max: 2,
+                        type: 'float',
+                        'aria-labelledby': 'input-slider',
+                    }}
+                />
+            </Stack>
             <Slider
                 onChange={e => setLengthPenalty(e.target.value)}
                 value={lengthpenalty}
