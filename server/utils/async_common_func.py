@@ -238,10 +238,11 @@ async def async_inference(self) -> None:
     url_list = await get_model_url_async(llm)
     processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
         model=self.choosen_models, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
-    tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.choosen_models])
-    url_list = await get_model_url_async(llm)
-    session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
+
     if llm.is_self_host:
+        tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.choosen_models])
+        url_list = await get_model_url_async(llm)
+        session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
         context = {
             "prompt": session_list_to_string,
             "n": 1,
@@ -270,7 +271,7 @@ async def async_inference(self) -> None:
                 response_stream = await send_stream_request_async(self, url=url, context=context,
                                                                   processed_prompt=session_list_to_string)
                 if isinstance(response_stream, str):
-                    await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message, response=response_stream, type_="chatroom")
+                    await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=response_stream, type_="chatroom")
             else:
                 await manage_ec2_on_inference(self, server_status, instance_id)
         else:
@@ -279,7 +280,7 @@ async def async_inference(self) -> None:
 
     else:
         clean_response = await send_chat_request_openai_async(self, processed_prompt)
-        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.choosen_models, prompt=self.message,
+        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message,
                                                                         response=clean_response, type_="open_ai")
 
 async def manage_ec2_on_inference(self, server_status, instance_id):
@@ -318,7 +319,7 @@ async def async_agent_inference(self) -> None:
         llm = await LLM.objects.aget(name=self.model_type)
         if not llm.is_self_host:
             clean_response = await send_agent_request_openai_async(self)
-            await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=clean_response, type_="open_ai")
+            await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=clean_response, type_="open_ai")
         else:
             tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.model_type])
             url_list = await get_model_url_async(llm)
@@ -345,7 +346,7 @@ async def async_agent_inference(self) -> None:
                     response_stream = await send_stream_request_async(self, url=url, context=context,
                                                                     processed_prompt=session_list_to_string)
                     if isinstance(response_stream, str):
-                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=response_stream, type_="self_host_agent")
+                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=response_stream, type_="self_host_agent")
                 else:
                     await manage_ec2_on_inference(self, server_status, instance_id)
             else:
@@ -381,7 +382,7 @@ async def async_agent_inference_with_summary(self) -> None:
         llm = await LLM.objects.aget(name=self.model_type)
         if not llm.is_self_host:
             clean_response = await send_agent_request_openai_async(self)
-            await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=clean_response, type_="open_ai")
+            await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=clean_response, type_="open_ai")
         else:
             tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.model_type])
             url_list = await get_model_url_async(llm)
@@ -408,7 +409,7 @@ async def async_agent_inference_with_summary(self) -> None:
                     response_stream = await send_stream_request_async(self, url=url, context=context,
                                                                     processed_prompt=session_list_to_string)
                     if isinstance(response_stream, str):
-                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, model=self.model_type, prompt=self.message, response=response_stream, type_="self_host_agent")
+                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=response_stream, type_="self_host_agent")
                 else:
                     await manage_ec2_on_inference(self, server_status, instance_id)
             else:

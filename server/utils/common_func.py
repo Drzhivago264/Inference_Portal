@@ -103,7 +103,7 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
 
 
 
-def log_prompt_response(is_session_start_node: bool | None, key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
+def log_prompt_response(is_session_start_node: bool | None, key_object: object, llm: object, prompt: str, response: str, type_: str) -> None:
     """This function store log into a db then build a memory tree of chat history
     Args:
         is_session_start_node (bool | None): _description_
@@ -113,10 +113,9 @@ def log_prompt_response(is_session_start_node: bool | None, key_object: object, 
         response (str): _description_
         type_ (str): _description_
     """
-    llm = LLM.objects.get(name=model)
-    if llm.agent_availability:
+    if not llm.is_self_host:
         try:
-            tokeniser = tiktoken.encoding_for_model(model)
+            tokeniser = tiktoken.encoding_for_model(llm.name)
         except KeyError:
             tokeniser = tiktoken.encoding_for_model("gpt-4")
         number_input_token = len(tokeniser.encode(prompt))
@@ -124,7 +123,7 @@ def log_prompt_response(is_session_start_node: bool | None, key_object: object, 
         input_cost = number_input_token*llm.input_price
         output_cost = number_output_token*llm.output_price
     else:
-        tokeniser = constant.TOKENIZER_TABLE[model]
+        tokeniser = constant.TOKENIZER_TABLE[llm.name]
         number_input_token = len(AutoTokenizer.from_pretrained(
             tokeniser)(prompt)['input_ids'])
         number_output_token = len(AutoTokenizer.from_pretrained(
