@@ -66,15 +66,17 @@ def log_in(request: HttpRequest) -> Response:
 @throttle_classes([AnonRateThrottle])
 def model_api(request: HttpRequest) -> Response:
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
-    
-    models_display = LLM.objects.filter(agent_availability=False) 
+    model_info = LLM.objects.filter(is_self_host=True) 
+    models_bot = LLM.objects.filter(agent_availability=False) 
     models_agent = LLM.objects.filter(agent_availability=True) 
     serializer_server = ServerSerializer(servers, many=True)
-    serializer_model_display = ModelSerializer(models_display, many=True)
+    serializer_model_bot = ModelSerializer(models_bot, many=True)
     serializer_model_agent = ModelSerializer(models_agent, many=True)
+    serializer_model_info = ModelSerializer(model_info, many=True)
     return Response({"servers": serializer_server.data,
-                     "models": serializer_model_display.data,
-                     'models_agent': serializer_model_agent.data
+                     "models_bot": serializer_model_bot.data,
+                     'models_agent': serializer_model_agent.data,
+                     'models_info': serializer_model_info.data
                      }, status=status.HTTP_200_OK)
 
 

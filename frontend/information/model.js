@@ -21,7 +21,7 @@ function ModelInfor() {
         ])
             .then(axios.spread((server_object) => {
                 setMessage(server_object.data.servers);
-                setMessage_model(server_object.data.models);
+                setMessage_model(server_object.data.models_info);
 
             }))
             .catch(error => {
