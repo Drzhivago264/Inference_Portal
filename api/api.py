@@ -87,7 +87,7 @@ async def textcompletion(request, data: PromptSchema):
                 if not data.beam:
                     length_penalty = 1
                     early_stopping = False
-                    best_of = int(1)
+                    best_of = 1
                 else:
                     best_of = data.best_of
                     length_penalty = data.length_penalty
