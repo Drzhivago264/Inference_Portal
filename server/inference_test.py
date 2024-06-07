@@ -10,70 +10,37 @@ from decouple import config
 import boto3
 from botocore.exceptions import ClientError
 
-
-"""Test monero"""
-
-def manage_monero(command, params=None):
-    rpc_input = {
-        "method": command
-    }
-    if params is not None:
-        rpc_input.update({'params': params})
-    rpc_input.update({"jsonrpc": "2.0", "id": "0"})        
-    response = requests.post("http://127.0.0.1:18082/json_rpc", json=rpc_input, headers={"content-type": "application/json"}) 
-
-    return response
-#print(json.loads(manage_monero("get_balance", {"account_index":0}).text))
-
-#print(manage_monero("get_transfers", {"in":True}).text)
-#print(json.loads(manage_monero("make_integrated_address", {"payment_id":"399f9bf8ce13f73a"}).text))
-#print(json.loads(manage_monero("get_payments",{"payment_id":"8c83d1a8499ce3a2"}).text))
-##print(json.loads(manage_monero("transfer", {"destinations":[{"amount":3000000000,"address":"4LHcvZ1EWX1ZxZ4BYVJmPL7MABVBu7bQxKZwtUDZA12jC2WZ2XrA5EmDmd6Q94S5QejbgEbQmgeMXFWCTfd7PW7U8u9GXS5qpzJ7aV1Khj"}]}).text))
 promtp= "hehe"
 context = {
-    "prompt": "hi",
-
+  "prompt": "You are a communist who love hamberger, write an Mcdonald advertisement",
+  "model": "Llama 3 Instruct AWQ",
+  "top_p": 0.73,
+  "top_k": -1,
+  "temperature": 0.73,
+  "beam": False,
+  "best_of": 1,
+  "max_tokens":7000,
+  "presence_penalty": 0,
+  "frequency_penalty": 0,
+  "length_penalty": 0,
+  "early_stopping": False,
+  "n": 1,
+  "stream": True,
+  "include_memory": False
 }
-model = "Mistral Chat 13B"
 
 ami = "ami-0810c2d824776b340"
 
-import json
-from openai import OpenAI
-
-import requests
-
-#response = requests.post("http://34.238.136.66/generate", json=context ) 
-   
-#print(response.content)
-from transformers import AutoTokenizer
-
-tokenizer = AutoTokenizer.from_pretrained("casperhansen/llama-3-8b-instruct-awq")
-chat = [
-
-  {"role": "user", "content": "Hello, how are you?"},
-
-  {"role": "assistant", "content": "I'm doing great. How can I help you today?"},
-
-  {"role": "user", "content": "I'd like to show off how chat templating works!"},
-
-]
-print(tokenizer.apply_chat_template(chat, tokenize=False))
 """ with mp.Pool(1) as pool:
   for result in pool.map(send_req, range(10000)):
       print(f'Got result: {result}', flush=True) """
 
-""" response = requests.post("http://3.93.75.76/generate", headers = {"User-Agent": "Test Client"},  json={ "prompt": p,   "temperature": 0, "stream" : True}
+response = requests.post("https://professorparakeet.com/api/chat", json=context, headers = {'Authorization': 'Bearer SFCOtWDw.OsDYax0ulbQI1r3fJYE60T5o6XRdeXI6'}
                          , stream = True ) 
 previous_output = str()
-for chunk in response.iter_lines(chunk_size= 1024,
-                                    decode_unicode=False,
-                                    delimiter=b"\0"):
+for chunk in response.iter_lines():
     if chunk:
         print(chunk)
-        data = json.loads(chunk.decode("utf-8"))
-        output = data["text"][0]
-        print(output.replace(previous_output, ""))
-        previous_output = output
- """
+
+
 
