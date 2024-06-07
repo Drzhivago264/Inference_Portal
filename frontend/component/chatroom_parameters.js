@@ -16,7 +16,7 @@ import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 
 const SmallInput = styled(MuiInput)`
-  max-width: 40px;
+  max-width: 50px;
 `;
 const BigInput = styled(MuiInput)`
   max-width: 60px;
@@ -70,7 +70,7 @@ export const OpenAPIParameter = ({
             {max_turn &&
                 <Box><Stack direction="row" spacing={1}>
                     <Typography gutterBottom>Max_turns:</Typography>
-                    <BigInput
+                    <SmallInput
                         value={max_turn}
                         size="small"
                         onChange={(event) => setMaxTurn(event.target.value === '' ? 0 : Number(event.target.value))}
@@ -106,7 +106,7 @@ export const OpenAPIParameter = ({
                         step: 0.01,
                         min: 0,
                         max: 1,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -163,7 +163,7 @@ export const OpenAPIParameter = ({
                         step: 0.01,
                         min: 0,
                         max: 1,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -188,7 +188,7 @@ export const OpenAPIParameter = ({
                         step: 0.01,
                         min: -2,
                         max: 2,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -214,7 +214,7 @@ export const OpenAPIParameter = ({
                         step: 0.01,
                         min: -2,
                         max: 2,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -324,7 +324,7 @@ export const ChatParameter = ({
                             step: 0.01,
                             min: 0,
                             max: 1,
-                            type: 'float',
+                            type: 'number',
                             'aria-labelledby': 'input-slider',
                         }}
                     />
@@ -348,7 +348,7 @@ export const ChatParameter = ({
                             step: 1,
                             min: -1,
                             max: 100,
-                            type: 'float',
+                            type: 'number',
                             'aria-labelledby': 'input-slider',
                         }}
                     />
@@ -368,7 +368,7 @@ export const ChatParameter = ({
                             <Box>
                                 <Stack direction="row" spacing={1}>
                                     <Typography gutterBottom>Max_tokens: </Typography>
-                                    <BigInput
+                                    <SmallInput
                                         value={max_tokens}
                                         size="small"
                                         onChange={(event) => setMaxToken(event.target.value === '' ? 0 : Number(event.target.value))}
@@ -424,7 +424,7 @@ export const ChatParameter = ({
                             step: 0.01,
                             min: 0,
                             max: 1,
-                            type: 'float',
+                            type: 'number',
                             'aria-labelledby': 'input-slider',
                         }}
                     />
@@ -449,7 +449,7 @@ export const ChatParameter = ({
                             step: 0.01,
                             min: -2,
                             max: 2,
-                            type: 'float',
+                            type: 'number',
                             'aria-labelledby': 'input-slider',
                         }}
                     />
@@ -475,7 +475,7 @@ export const ChatParameter = ({
                             step: 0.01,
                             min: -2,
                             max: 2,
-                            type: 'float',
+                            type: 'number',
                             'aria-labelledby': 'input-slider',
                         }}
                     />
@@ -539,7 +539,7 @@ export const ChatParameter = ({
                             step: 0.01,
                             min: -2,
                             max: 2,
-                            type: 'float',
+                            type: 'number',
                             'aria-labelledby': 'input-slider',
                         }}
                     />
@@ -721,7 +721,7 @@ export const HotpotParameter = ({
                         step: 0.01,
                         min: 0,
                         max: 1,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -745,7 +745,7 @@ export const HotpotParameter = ({
                         step: 1,
                         min: -1,
                         max: 100,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -836,7 +836,7 @@ export const HotpotParameter = ({
                         step: 0.01,
                         min: 0,
                         max: 1,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -861,7 +861,7 @@ export const HotpotParameter = ({
                         step: 0.01,
                         min: -2,
                         max: 2,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -887,7 +887,7 @@ export const HotpotParameter = ({
                         step: 0.01,
                         min: -2,
                         max: 2,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
@@ -951,7 +951,7 @@ export const HotpotParameter = ({
                         step: 0.01,
                         min: -2,
                         max: 2,
-                        type: 'float',
+                        type: 'number',
                         'aria-labelledby': 'input-slider',
                     }}
                 />
