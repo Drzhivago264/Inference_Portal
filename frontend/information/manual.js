@@ -107,7 +107,7 @@ function Manual() {
                     <Grid container spacing={1}>
                         <Grid item md={3} lg={2}>
                             <Box mt={3} mb={5} sx={{ display: { xs: 'none', sm: 'none ', md: 'block' } }} >
-                                <Typography >
+                      
                                     <List dense={true}>
                                         {[{ link: '/frontend/manual/key', tranlate: 'manual.Setting_Up_Your_API_Key' },
                                         { link: '/frontend/manual/authentication', tranlate: 'manual.Authentication' },
@@ -119,21 +119,22 @@ function Manual() {
                                                 <ListItemButton
                                                 selected={selectedIndex === index}
                                                 onClick={(event)=>  handleListItemClick(event, index)  }
+                                                key={object.link}
                                                  component={Link} 
                                                  to={object.link}>
-                                                     <Typography variant="body2" component="body2"> {t(object.tranlate)} </Typography> 
+                                                     <Typography component='span' variant="body2" > {t(object.tranlate)} </Typography> 
                                                 </ListItemButton>
                                             )
                                         })}
                                        
                                     </List>
-                                </Typography>
+                     
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'block' } }} />
                         <Grid item xs={12} md={8} lg={8}>
                             <Box mt={3} sx={{ display: { sm: 'block ', md: 'none' } }} >
-                                <Typography >
+                  
                                     <List dense={true}>
                                         <ListItemButton component={Link} to='/frontend/manual/key'> <Typography>{t('manual.Setting_Up_Your_API_Key')}  </Typography> </ListItemButton>
                                         <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> {t('manual.Authentication')} </Typography> </ListItemButton>
@@ -141,7 +142,7 @@ function Manual() {
                                         <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography> {t('manual.Common_Errors_and_Ratelimits')}  </Typography> </ListItemButton>
                                         <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography> {t('manual.The_Behaviors_of_This_Website')} </Typography> </ListItemButton>
                                     </List>
-                                </Typography>
+                         
                             </Box>
                             <Box m={3}>
 

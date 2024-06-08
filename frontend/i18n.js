@@ -37,7 +37,7 @@ const resources = {
     }
   }
 };
-console.log(resources)
+
 i18n
   .use(Backend)
   // detect user language
@@ -50,7 +50,7 @@ i18n
   .init({
     fallbackLng: ['en', 'vi'],
     nonExplicitSupportedLngs: true, 
-    debug: true,
+    debug: false,
     resources,
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default

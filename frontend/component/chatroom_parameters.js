@@ -122,7 +122,7 @@ export const OpenAPIParameter = ({
             {agent_objects.map((agent_object_) => {
                 if (agent_object_.name == choosen_model) {
                     return (
-                        <Box>
+                        <Box key={agent_object_.name}>
                             <Stack direction="row" spacing={1}>
                                 <Typography gutterBottom>Max_tokens: </Typography>
                                 <BigInput
@@ -762,7 +762,7 @@ export const HotpotParameter = ({
             {agent_objects.map((agent_object_) => {
                 if (agent_object_.name == choosen_chat_model) {
                     return (
-                        <Box>
+                        <Box key={agent_object_.name}>
                             <Stack direction="row" spacing={1}>
                                 <Typography gutterBottom>Max_tokens: </Typography>
                                 <BigInput
@@ -795,7 +795,7 @@ export const HotpotParameter = ({
             {model_objects.map((model_object_) => {
                 if (model_object_.name == choosen_chat_model) {
                     return (
-                        <Box>
+                        <Box key={model_object_.name}>
                             <Stack direction="row" spacing={1}>
                                 <Typography gutterBottom>Max_tokens: </Typography>
                                 <BigInput
