@@ -24,6 +24,8 @@ from .api_schema import (
     PromptSchema,
     ResponseLogRequest,
     ResponseLogResponse,
+    AgentResponse,
+    AgentSchema,
     BaseLLMSchema,
     SummarizeSchema,
     SummarizeResponseSchema,
@@ -41,12 +43,17 @@ from .utils import (get_chat_context,
                     log_prompt_response,
                     send_request_async,
                     send_stream_request_async,
-                    query_response_log
+                    send_stream_request_agent_async,
+                    query_response_log,
+                    get_system_template,
+                    get_user_template
                     )
 
 from django_ratelimit.core import is_ratelimited
 from django_ratelimit.exceptions import Ratelimited as RateLimitedError
 from transformers import AutoTokenizer
+from server.models import UserInstructionTree, InstructionTree
+
 
 class GlobalAuth(HttpBearer):
     @sync_to_async
@@ -92,12 +99,14 @@ async def textcompletion(request, data: PromptSchema):
                     best_of = data.best_of
                     length_penalty = data.length_penalty
                     early_stopping = True
-                tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[data.model])
+                tokeniser = AutoTokenizer.from_pretrained(
+                    constant.TOKENIZER_TABLE[data.model])
                 chat = [
                     {"role": "system", "content": "Complete the following sentence."},
                     {"role": "user", "content": f"{data.prompt}"},
                 ]
-                processed_prompt = tokeniser.apply_chat_template(chat, tokenize=False)
+                processed_prompt = tokeniser.apply_chat_template(
+                    chat, tokenize=False)
                 context = {
                     "prompt": processed_prompt,
                     "n": data.n,
@@ -121,7 +130,7 @@ async def textcompletion(request, data: PromptSchema):
                             raise HttpError(404, "Time Out! Slow down")
                         else:
                             response = response.replace(
-                                    processed_prompt, "")
+                                processed_prompt, "")
                             await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="prompt")
                             return 200, {'response': response,
                                          'context': context}
@@ -169,22 +178,27 @@ async def chatcompletion(request, data: ChatSchema):
                     length_penalty = data.length_penalty
                     early_stopping = True
 
-                tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[data.model])
+                tokeniser = AutoTokenizer.from_pretrained(
+                    constant.TOKENIZER_TABLE[data.model])
                 inputs = tokeniser(data.prompt)
                 current_history_length = len(inputs['input_ids'])
                 if data.include_memory:
                     chat_history = await get_chat_context(model=data.model, key_object=request.auth, raw_prompt=data.prompt, agent_availability=False, current_history_length=current_history_length, tokeniser=tokeniser)
-                    chat = [{"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"}]
-                    prompt_ =  {"role": "user", "content": f"{data.prompt}"}
+                    chat = [
+                        {"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"}]
+                    prompt_ = {"role": "user", "content": f"{data.prompt}"}
                     chat += chat_history
                     chat.append(prompt_)
-                    processed_prompt = tokeniser.apply_chat_template(chat, tokenize=False)
+                    processed_prompt = tokeniser.apply_chat_template(
+                        chat, tokenize=False)
                 else:
                     chat = [
-                        {"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"},
+                        {"role": "system",
+                            "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"},
                         {"role": "user", "content": f"{data.prompt}"},
                     ]
-                    processed_prompt = tokeniser.apply_chat_template(chat, tokenize=False)
+                    processed_prompt = tokeniser.apply_chat_template(
+                        chat, tokenize=False)
                 context = {
                     "prompt": processed_prompt,
                     "n": data.n,
@@ -210,7 +224,7 @@ async def chatcompletion(request, data: ChatSchema):
                             else:
                                 response = response.replace(
                                     processed_prompt, "")
-                                await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatroom")
+                                await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chat_api")
                                 return 200, {'response': response,
                                              'context': context}
                         except httpx.ReadTimeout:
@@ -219,6 +233,138 @@ async def chatcompletion(request, data: ChatSchema):
                         try:
                             res = StreamingHttpResponse(send_stream_request_async(url=inference_server.url, context=context,
                                                         processed_prompt=processed_prompt, request=request, data=data), content_type="text/event-stream")
+                            res['X-Accel-Buffering'] = 'no'
+                            res['Cache-Control'] = 'no-cache'
+                            return res
+                        except:
+                            raise HttpError(404, "Time Out! Slow down")
+                elif server_status == "stopped" or "stopping":
+                    await command_EC2(inference_server.name, region=constant.REGION, action="on")
+                    await update_server_status_in_db(
+                        instance_id=inference_server.name, update_type="status")
+                    raise HttpError(
+                        442, "Server is starting up, try again in 400 seconds")
+                elif server_status == "pending":
+                    raise HttpError(
+                        442, "Server is setting up, try again in 300 seconds")
+
+
+@api.post("/agent", tags=["Inference"], summary="Infer Agents", response={200: AgentResponse, 401: Error, 442: Error, 404: Error, 429: Error})
+async def agentcompletion(request, data: AgentSchema):
+    if is_ratelimited(
+        request,
+        group="text_completion",
+        key="header:X-API-KEY",
+        rate="5/s",
+        increment=True,
+    ):
+        raise HttpError(
+            429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    else:
+        model = await get_model(data.model)
+        if not model:
+            raise HttpError(404, "Unknown Model Error. Check your model name.")
+        else:
+            available_server_list = await get_model_url(data.model)
+            if not available_server_list:
+                raise HttpError(442, "Server is currently offline")
+            else:
+                inference_server = random.choice(available_server_list)
+                server_status = inference_server.status
+                if not data.beam:
+                    length_penalty = 1
+                    early_stopping = False
+                    best_of = 1
+                else:
+                    best_of = data.best_of
+                    length_penalty = data.length_penalty
+                    early_stopping = True
+                child_template_name = data.child_template_name
+                parent_template_name = data.parent_template_name
+                use_my_template = data.use_my_template
+                if use_my_template:
+                    try:
+                        parent_template = await get_user_template(name=parent_template_name, user_object= await sync_to_async(lambda: request.auth.user)() ) if parent_template_name is not None else ""
+                    except UserInstructionTree.DoesNotExist:
+                        raise HttpError(
+                            404, "parent_template_name is incorrect")
+                    try:
+                        child_template = await get_user_template(name=child_template_name, user_object=await sync_to_async(lambda: request.auth.user)()) if child_template_name is not None else ""
+                    except UserInstructionTree.DoesNotExist:
+                        raise HttpError(
+                            404, "child_template_name is incorrect")
+                else:
+                    try:
+                        parent_template = await get_system_template(name=parent_template_name) if parent_template_name is not None else ""
+                    except InstructionTree.DoesNotExist:
+                        raise HttpError(
+                            404, "parent_template_name is incorrect")
+                    try:
+                        child_template = await get_system_template(name=child_template_name) if child_template_name is not None else ""
+                    except InstructionTree.DoesNotExist:
+                        raise HttpError(
+                            404, "child_template_name is incorrect")
+
+                tokeniser = AutoTokenizer.from_pretrained(
+                    constant.TOKENIZER_TABLE[data.model])
+                inputs = tokeniser(data.prompt)
+                if not data.working_memory:
+                    chat = [
+                        {"role": "system",
+                            "content": f"{parent_template + child_template}"},
+                        {"role": "user", "content": f"{data.prompt}"}
+                    ]
+                else:
+                    chat = data.working_memory + [{"role": "user", "content": f"{data.prompt}"}]
+                processed_prompt = tokeniser.apply_chat_template(
+                    chat, tokenize=False)
+                context = {
+                    "prompt": processed_prompt,
+                    "n": data.n,
+                    'best_of': best_of,
+                    'presence_penalty': data.presence_penalty,
+                    "temperature": data.temperature,
+                    "max_tokens": data.max_tokens,
+                    "top_k": int(data.top_k),
+                    "top_p": data.top_p,
+                    "length_penalty": length_penalty,
+                    "frequency_penalty": data.frequency_penalty,
+                    "early_stopping": early_stopping,
+                    "stream": data.stream,
+                    "use_beam_search": data.beam,
+                }
+                await update_server_status_in_db(instance_id=inference_server.name, update_type="time")
+                if server_status == "running":
+                    if not data.stream:
+                        try:
+                            response = await send_request_async(inference_server.url, context)
+                            if not response:
+                                raise HttpError(404, "Time Out! Slow down")
+                            else:
+                                response = response.replace(
+                                    processed_prompt, "")
+                                await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="agent_api")
+                                return 200, {
+                                             'context': context,
+                                             'parent_template_name': parent_template_name,
+                                             'child_template_name': child_template_name,
+                                             'use_my_template': use_my_template,
+                                             'working_memory': chat + [{"role": "assistant", "content": f"{response}"
+                                                                            }]}
+                        except httpx.ReadTimeout:
+                            raise HttpError(404, "Time Out!")
+                    else:
+                        try:
+                            res = StreamingHttpResponse(send_stream_request_agent_async(url=inference_server.url,
+                                                                                        context=context,
+                                                                                        processed_prompt=processed_prompt,
+                                                                                        request=request,
+                                                                                        working_nemory= chat,
+                                                                                        parent_template_name=parent_template_name,
+                                                                                        child_template_name=child_template_name,
+                                                                                        use_my_template=use_my_template,
+                                                                                        data=data
+                                                                                        ), content_type="text/event-stream")
                             res['X-Accel-Buffering'] = 'no'
                             res['Cache-Control'] = 'no-cache'
                             return res
