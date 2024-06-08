@@ -19,10 +19,8 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '34.198.186.123',
-                 "professorparakeet.com", "www.professorparakeet.com", "d2f6jmzr77qqg6.cloudfront.net"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://34.198.186.123:443",
-                        "https://34.198.186.123", "https://professorparakeet.com", "https://www.professorparakeet.com"]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', "professorparakeet.com", "www.professorparakeet.com", "d2f6jmzr77qqg6.cloudfront.net"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://professorparakeet.com", "https://www.professorparakeet.com"]
 
 # Application definition
 
