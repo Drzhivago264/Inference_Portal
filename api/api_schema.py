@@ -53,7 +53,7 @@ class ChatSchema(PromptSchema):
 class AgentSchema(PromptSchema):
     stream: bool = False
     working_memory: list = []
-    parent_template_name: str |None = "Assignement Agent"
+    parent_template_name: str |None = "Assignment Agent"
     child_template_name: str | None = "Introduction"
     use_my_template: bool = False
 
