@@ -50,11 +50,17 @@ class ChatSchema(PromptSchema):
     stream: bool = False
     include_memory: bool = constant.DEFAULT_MEMORY
 
+class AgentSchema(PromptSchema):
+    stream: bool = False
+    working_memory: list = []
+    parent_template_name: str |None = "Assignement Agent"
+    child_template_name: str | None = "Introduction"
+    use_my_template: bool = False
 
 class ResponseLogRequest(Schema):
     quantity: int = 10
     lastest: bool = True
-    filter_by: list = ["chatroom", "prompt", "open_ai"]
+    filter_by: list = ["chatroom", "prompt", "open_ai", "chat_api", "agent_api"]
 
 
 class ResponseLogResponse(Schema):
@@ -78,6 +84,13 @@ class ChatResponse(Schema):
     response: str
     context: ChatSchema
 
+
+class AgentResponse(Schema):
+    working_memory: list
+    context: ChatSchema
+    parent_template_name: str |None 
+    child_template_name: str | None
+    use_my_template: bool 
 
 class BaseLLMSchema(Schema):
     prompt: str = ""

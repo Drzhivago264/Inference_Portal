@@ -339,7 +339,7 @@ function ResponsiveAppBar({max_width}) {
                   onChange={(e) => { handleChangeLanguage(e.target.value) }}
                   size="small"
                 >
-                  <MenuItem value="vi"> Tiếng Việt </MenuItem>
+                  <MenuItem value="vi">Tiếng Việt</MenuItem>
                   <MenuItem value="en">English</MenuItem>
                 </Select>
               </FormControl>
@@ -375,7 +375,7 @@ function ResponsiveAppBar({max_width}) {
                   onChange={(e) => { handleChangeLanguage(e.target.value) }}
                   size="small"
                 >
-                  <MenuItem value="vi"> Tiếng Việt </MenuItem>
+                  <MenuItem value="vi">Tiếng Việt</MenuItem>
                   <MenuItem value="en">English</MenuItem>
                 </Select>
               </FormControl>

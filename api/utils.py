@@ -1,5 +1,10 @@
 from server.utils import constant
-from server.models import InferenceServer, LLM, PromptResponse, APIKEY
+from server.models import (InferenceServer,
+                           LLM,
+                           PromptResponse,
+                           APIKEY,
+                           UserInstructionTree,
+                           InstructionTree)
 from django.db.models.query import QuerySet
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
@@ -10,6 +15,22 @@ import httpx
 from botocore.exceptions import ClientError
 from vectordb import vectordb
 from django.utils import timezone
+
+
+async def get_system_template(name: str):
+    try:
+        template = await InstructionTree.objects.aget(name=name)
+        return template.instruct
+    except InstructionTree.DoesNotExist:
+        raise InstructionTree.DoesNotExist
+
+
+async def get_user_template(name: str, user_object: object):
+    try:
+        template = await UserInstructionTree.objects.aget(displayed_name=name, user=user_object)
+        return template.instruct
+    except UserInstructionTree.DoesNotExist:
+        raise UserInstructionTree.DoesNotExist
 
 
 async def get_model(model: str) -> QuerySet[LLM] | bool:
@@ -129,7 +150,7 @@ async def log_prompt_response(key_object: object, model: str, prompt: str, respo
 
 
 async def send_request_async(url, context):
-    async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2)) as client:
+    async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2), timeout=5) as client:
         response = await client.post(url, json=context,  timeout=60)
         response = response.json(
         )['text'][0] if response.status_code == 200 else None
@@ -137,7 +158,7 @@ async def send_request_async(url, context):
 
 
 async def send_stream_request_async(url: str, context: object, processed_prompt: str, request: object, data: object):
-    client = httpx.AsyncClient()
+    client = httpx.AsyncClient(timeout=5)
     full_response = ""
     try:
         async with client.stream('POST', url, json=context) as response:
@@ -150,7 +171,31 @@ async def send_stream_request_async(url: str, context: object, processed_prompt:
                     full_response = output
                 except:
                     pass
-        await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chatroom")
+        await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chat_api")
+    except httpx.ReadTimeout:
+        raise httpx.ReadTimeout
+
+
+async def send_stream_request_agent_async(url: str, context: object, processed_prompt: str, request: object, data: object, parent_template_name: str | None, child_template_name: str | None, working_nemory: list, use_my_template: str):
+    client = httpx.AsyncClient(timeout=5)
+    full_response = ""
+    try:
+        async with client.stream('POST', url, json=context) as response:
+            async for chunk in response.aiter_text():
+                try:
+                    chunk = chunk[:-1]
+                    c = json.loads(chunk)
+                    output = c['text'][0].replace(processed_prompt, "")
+                    yield str({"response": c, 
+                               "delta": output.replace(full_response, ""), 
+                               "use_my_template": use_my_template, 
+                               'working_memory': working_nemory + [{"role": "assistant", "content": f"{c}"}], 
+                               'parent_template_name': parent_template_name, 
+                               'child_template_name': child_template_name}) + "\n"
+                    full_response = output
+                except:
+                    pass
+        await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="agent_room")
     except httpx.ReadTimeout:
         raise httpx.ReadTimeout
 
