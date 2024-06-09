@@ -15,6 +15,9 @@ import contactEN from './public/locales/en/contact.json'
 import contactVI from './public/locales/vi/contact.json'
 import redirectEN from './public/locales/en/redirect.json'
 import redirectVI from './public/locales/vi/redirect.json'
+import parameterexplainVI from './public/locales/vi/parameter_explain.json'
+import parameterexplainEN from './public/locales/en/parameter_explain.json'
+
 const resources = {
   en: {
     translation: {
@@ -23,7 +26,8 @@ const resources = {
       'key_management': keymanagementEN,
       'manual': manualEN,
       'contact': contactEN,
-      'redirect': redirectEN
+      'redirect': redirectEN,
+      'parameter_explain': parameterexplainEN
     }
   },
   vi: {
@@ -33,7 +37,8 @@ const resources = {
       'key_management': keymanagementVI,
       'manual': manualVI,
       'contact': contactVI,
-      'redirect': redirectVI
+      'redirect': redirectVI,
+      'parameter_explain': parameterexplainVI
     }
   }
 };

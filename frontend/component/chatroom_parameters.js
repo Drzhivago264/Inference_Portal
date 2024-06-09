@@ -14,9 +14,14 @@ import Divider from '@mui/material/Divider';
 import MuiInput from '@mui/material/Input';
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
+import HelpIcon from '@mui/icons-material/Help';
+import IconButton from '@mui/material/IconButton';
+import { useTranslation } from 'react-i18next';
 
 const SmallInput = styled(MuiInput)`
   max-width: 50px;
+  
 `;
 const BigInput = styled(MuiInput)`
   max-width: 60px;
@@ -46,6 +51,7 @@ export const OpenAPIParameter = ({
     setMaxToken,
     max_turn,
     setMaxTurn }) => {
+    const { t, i18n } = useTranslation();
     return (
         <Stack direction='column' spacing={1}>
             <FormControl  >
@@ -69,7 +75,15 @@ export const OpenAPIParameter = ({
             <FormLabel >Parameters</FormLabel>
             {max_turn &&
                 <Box><Stack direction="row" spacing={1}>
-                    <Typography gutterBottom>Max_turns:</Typography>
+                    <Typography style={{ flex: 1 }} gutterBottom>Max_turns
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.max_turn')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Typography>
                     <SmallInput
                         value={max_turn}
                         size="small"
@@ -83,6 +97,7 @@ export const OpenAPIParameter = ({
                             'aria-labelledby': 'input-slider',
                         }}
                     />
+
                 </Stack>
                     <Slider
                         step={1}
@@ -96,7 +111,15 @@ export const OpenAPIParameter = ({
                 </Box>}
 
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Top_p: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Top_p
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.top_p')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={top_p}
                     size="small"
@@ -124,7 +147,15 @@ export const OpenAPIParameter = ({
                     return (
                         <Box key={agent_object_.name}>
                             <Stack direction="row" spacing={1}>
-                                <Typography gutterBottom>Max_tokens: </Typography>
+                                <Typography style={{ flex: 1 }} gutterBottom>Max_tokens
+                                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                                        {t('parameter_explain.max_token')}
+                                    </div>} arrow placement="top">
+                                        <IconButton size="small">
+                                            <HelpIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Typography>
                                 <BigInput
                                     value={max_tokens}
                                     size="small"
@@ -153,7 +184,15 @@ export const OpenAPIParameter = ({
                 }
             })}
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Temperature: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Temperature
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.temperature')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={temperature}
                     size="small"
@@ -178,7 +217,15 @@ export const OpenAPIParameter = ({
                 valueLabelDisplay="off"
             />
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Presence penalty: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Presence penalty
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.presence_penalty')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={presencepenalty}
                     size="small"
@@ -204,7 +251,15 @@ export const OpenAPIParameter = ({
                 valueLabelDisplay="off"
             />
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Frequency penalty: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Frequency penalty
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.frequency_penalty')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={frequencypenalty}
                     size="small"
@@ -261,6 +316,7 @@ export const ChatParameter = ({
     earlystopping,
     setEarlyStopping
 }) => {
+    const { t, i18n } = useTranslation();
     return (
         <FormControl fullWidth defaultValue="">
             <Stack direction='column' spacing={1}>
@@ -301,7 +357,19 @@ export const ChatParameter = ({
                 </FormControl>
                 <Divider></Divider>
                 <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
-                <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
+                <Stack direction='row' spacing={1}>
+                    <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
+                    <Box>
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.use_memory')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                </Stack>
+
                 <RadioGroup
                     defaultValue="chat"
                     name="radio-buttons-group"
@@ -314,7 +382,15 @@ export const ChatParameter = ({
 
                 </RadioGroup>
                 <Stack direction="row" spacing={1}>
-                    <Typography gutterBottom>Top_p: </Typography>
+                    <Typography style={{ flex: 1 }} gutterBottom>Top_p
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.top_p')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Typography>
                     <SmallInput
                         value={top_p}
                         size="small"
@@ -338,7 +414,15 @@ export const ChatParameter = ({
                     value={top_p}
                 />
                 <Stack direction="row" spacing={1}>
-                    <Typography gutterBottom>Top_k: </Typography>
+                    <Typography style={{ flex: 1 }} gutterBottom>Top_k
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.top_k')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Typography>
                     <SmallInput
                         value={top_k}
                         size="small"
@@ -367,7 +451,15 @@ export const ChatParameter = ({
                         return (
                             <Box>
                                 <Stack direction="row" spacing={1}>
-                                    <Typography gutterBottom>Max_tokens: </Typography>
+                                    <Typography style={{ flex: 1 }} gutterBottom>Max_tokens
+                                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                                            {t('parameter_explain.max_token')}
+                                        </div>} arrow placement="top">
+                                            <IconButton size="small">
+                                                <HelpIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Typography>
                                     <SmallInput
                                         value={max_tokens}
                                         size="small"
@@ -399,7 +491,30 @@ export const ChatParameter = ({
                     if (model_object_.name == choosen_model) {
                         return (
                             <Box>
-                                <Typography gutterBottom>Max_tokens: {max_tokens}</Typography>
+                                <Stack direction="row" spacing={1}>
+                                    <Typography style={{ flex: 1 }} gutterBottom>Max_tokens
+                                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                                            {t('parameter_explain.max_token')}
+                                        </div>} arrow placement="top">
+                                            <IconButton size="small">
+                                                <HelpIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Typography>
+                                    <SmallInput
+                                        value={max_tokens}
+                                        size="small"
+                                        onChange={(event) => setMaxToken(event.target.value === '' ? 0 : Number(event.target.value))}
+                                        onBlur={handleBlur(max_tokens, setMaxToken, 1, model_object_.context_length)}
+                                        inputProps={{
+                                            step: 1,
+                                            min: 1,
+                                            max: model_object_.context_length,
+                                            type: 'number',
+                                            'aria-labelledby': 'input-slider',
+                                        }}
+                                    />
+                                </Stack>
                                 <Slider
                                     defaultValue={1024}
                                     step={1}
@@ -414,7 +529,14 @@ export const ChatParameter = ({
                     }
                 })}
                 <Stack direction="row" spacing={1}>
-                    <Typography gutterBottom>Temperature: </Typography>
+                    <Typography style={{ flex: 1 }} gutterBottom>Temperature
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.temperature')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip> </Typography>
                     <SmallInput
                         value={temperature}
                         size="small"
@@ -439,7 +561,15 @@ export const ChatParameter = ({
                     valueLabelDisplay="off"
                 />
                 <Stack direction="row" spacing={1}>
-                    <Typography gutterBottom>Presence penalty: </Typography>
+                    <Typography style={{ flex: 1 }} gutterBottom>Presence penalty
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.presence_penalty')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Typography>
                     <SmallInput
                         value={presencepenalty}
                         size="small"
@@ -465,7 +595,15 @@ export const ChatParameter = ({
                     valueLabelDisplay="off"
                 />
                 <Stack direction="row" spacing={1}>
-                    <Typography gutterBottom>Frequency penalty: </Typography>
+                    <Typography style={{ flex: 1 }} gutterBottom>Frequency penalty
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.frequency_penalty')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Typography>
                     <SmallInput
                         value={frequencypenalty}
                         size="small"
@@ -491,18 +629,46 @@ export const ChatParameter = ({
                     valueLabelDisplay="off"
                 />
                 <Divider></Divider>
-                <Stack direction="row">
+                <Stack direction="row" spacing={1}>
                     <FormControlLabel control={<Switch
                         onChange={e => setBeam(e.target.checked)}
                         value={beam}
                     />} label="Beam Search" />
+                    <Box>
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.beam')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                </Stack>
+                <Stack direction="row" spacing={1}>
                     <FormControlLabel control={<Switch
                         onChange={e => setEarlyStopping(e.target.checked)}
                         value={earlystopping}
                     />} label="Early Stopping" />
+                    <Box>
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.early_stopping')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
                 </Stack>
                 <Stack direction="row" spacing={1}>
-                    <Typography gutterBottom>Best_of:</Typography>
+                    <Typography style={{ flex: 1 }} gutterBottom>Best_of
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.best_of')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Typography>
                     <SmallInput
                         value={bestof}
                         size="small"
@@ -529,7 +695,15 @@ export const ChatParameter = ({
                     valueLabelDisplay="off"
                 />
                 <Stack direction="row" spacing={1}>
-                    <Typography gutterBottom>Length penalty:</Typography>
+                    <Typography style={{ flex: 1 }} gutterBottom>Length penalty
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                            {t('parameter_explain.length_penalty')}
+                        </div>} arrow placement="top">
+                            <IconButton size="small">
+                                <HelpIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Typography>
                     <SmallInput
                         value={lengthpenalty}
                         size="small"
@@ -596,6 +770,7 @@ export const HotpotParameter = ({
     max_turn,
     setMaxTurn
 }) => {
+    const { t, i18n } = useTranslation();
     return (
         <Stack direction='column' spacing={1}>
             <FormControl defaultValue="">
@@ -672,7 +847,18 @@ export const HotpotParameter = ({
             <Divider></Divider>
             <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
             <FormControlLabel control={<Switch defaultChecked onChange={e => setDuplicateMessage(e.target.checked)} />} label="Duplicate Message" />
-            <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
+            <Stack direction='row' spacing={1}>
+                <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
+                <Box>
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.use_memory')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </Stack>
             <RadioGroup
                 defaultValue="chat"
                 name="radio-buttons-group"
@@ -685,7 +871,15 @@ export const HotpotParameter = ({
 
             </RadioGroup>
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Max_turns: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Max_turns
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.max_turn')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={max_turn}
                     size="small"
@@ -711,7 +905,15 @@ export const HotpotParameter = ({
             />
 
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Top_p: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Top_p
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.top_p')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={top_p}
                     size="small"
@@ -735,7 +937,15 @@ export const HotpotParameter = ({
                 value={top_p}
             />
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Top_k: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Top_k
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.top_k')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={top_k}
                     size="small"
@@ -764,7 +974,15 @@ export const HotpotParameter = ({
                     return (
                         <Box key={agent_object_.name}>
                             <Stack direction="row" spacing={1}>
-                                <Typography gutterBottom>Max_tokens: </Typography>
+                                <Typography style={{ flex: 1 }} gutterBottom>Max_tokens
+                                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                                        {t('parameter_explain.max_token')}
+                                    </div>} arrow placement="top">
+                                        <IconButton size="small">
+                                            <HelpIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Typography>
                                 <BigInput
                                     value={max_tokens}
                                     size="small"
@@ -797,7 +1015,15 @@ export const HotpotParameter = ({
                     return (
                         <Box key={model_object_.name}>
                             <Stack direction="row" spacing={1}>
-                                <Typography gutterBottom>Max_tokens: </Typography>
+                                <Typography style={{ flex: 1 }} gutterBottom>Max_tokens
+                                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                                        {t('parameter_explain.max_token')}
+                                    </div>} arrow placement="top">
+                                        <IconButton size="small">
+                                            <HelpIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Typography>
                                 <BigInput
                                     value={max_tokens}
                                     size="small"
@@ -826,7 +1052,15 @@ export const HotpotParameter = ({
                 }
             })}
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Temperature: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Temperature
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.temperature')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={temperature}
                     size="small"
@@ -851,7 +1085,15 @@ export const HotpotParameter = ({
                 valueLabelDisplay="off"
             />
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Presence penalty: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Presence penalty
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.presence_penalty')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={presencepenalty}
                     size="small"
@@ -877,7 +1119,15 @@ export const HotpotParameter = ({
                 valueLabelDisplay="off"
             />
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Frequency penalty: </Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Frequency penalty
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.frequency_penalty')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={frequencypenalty}
                     size="small"
@@ -903,18 +1153,46 @@ export const HotpotParameter = ({
                 valueLabelDisplay="off"
             />
             <Divider></Divider>
-            <Stack direction="row">
+            <Stack direction="row" spacing={1}>
                 <FormControlLabel control={<Switch
                     onChange={e => setBeam(e.target.checked)}
                     value={beam}
                 />} label="Beam Search" />
+                <Box>
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.beam')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </Stack>
+            <Stack direction="row" spacing={1}>
                 <FormControlLabel control={<Switch
                     onChange={e => setEarlyStopping(e.target.checked)}
                     value={earlystopping}
                 />} label="Early Stopping" />
+                <Box>
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.early_stopping')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
             </Stack>
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Best_of:</Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Best_of
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.best_of')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={bestof}
                     size="small"
@@ -941,7 +1219,15 @@ export const HotpotParameter = ({
                 valueLabelDisplay="off"
             />
             <Stack direction="row" spacing={1}>
-                <Typography gutterBottom>Length penalty:</Typography>
+                <Typography style={{ flex: 1 }} gutterBottom>Length penalty
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.length_penalty')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Typography>
                 <SmallInput
                     value={lengthpenalty}
                     size="small"
