@@ -1,0 +1,29 @@
+{
+    "use_memory": "Tham số này cho phép mô hình sử dụng bộ nhớ từ các tương tác trước đó khi được đặt thành true.\nVí dụ, trong một cuộc trò chuyện về phim, nếu use_memory là true, mô hình sẽ nhớ các đề xuất phim trước đó và có thể sử dụng thông tin đó trong các phản hồi sau.",
+
+    "chatbot_mode": "Khi được kích hoạt, tham số này cho phép mô hình hoạt động theo chế độ trò chuyện.\nVí dụ, nó có thể giúp tạo ra một chatbot có thể tương tác tự nhiên với người dùng, hiểu các truy vấn của họ và cung cấp các phản hồi phù hợp.",
+
+    "completion_mode": "Tham số này xác định cách mô hình hoàn thành một lời nhắc nhất định.\nVí dụ, nếu lời nhắc là 'Ngày xửa ngày xưa', mô hình có thể hoàn thành nó như một câu chuyện, một câu, hoặc một cụm từ, tùy thuộc vào cài đặt completion_mode.",
+
+    "top_p": "Tham số này, còn được biết đến như là nucleus sampling, kiểm soát sự ngẫu nhiên trong đầu ra của mô hình.\nVí dụ, nếu top_p được đặt thành 0.9, mô hình sẽ chọn tập hợp nhỏ nhất của các token mà xác suất tích lũy của chúng cộng lại là 0.9 cho từ tiếp theo.",
+
+    "top_k": "Còn được biết đến như là top-k sampling, tham số này kiểm soát sự ngẫu nhiên trong đầu ra của mô hình.\nVí dụ, nếu top_k được đặt thành 10, mô hình chỉ xem xét 10 token có xác suất cao nhất cho từ tiếp theo.",
+
+    "temperature": "Tham số này kiểm soát sự ngẫu nhiên của các phản hồi của mô hình.\nVí dụ, một giá trị nhiệt độ cao hơn (ví dụ: 1.0) làm cho đầu ra ngẫu nhiên và đa dạng hơn, trong khi một giá trị thấp hơn (ví dụ: 0.1) làm cho nó quyết định và tập trung hơn.",
+
+    "beam": "Được sử dụng trong tìm kiếm chùm tia, tham số này kiểm soát số lượng chuỗi thay thế mà mô hình xem xét ở mỗi bước của quá trình tạo đầu ra.\nVí dụ, một chiều rộng chùm tia 5 có nghĩa là mô hình theo dõi 5 chuỗi thay thế ở mỗi bước.",
+
+    "length_penalty": "Tham số này kiểm soát hình phạt cho độ dài đầu ra, tên gọi của tham số này thực sự mâu thuẫn với hiệu ứng của nó do quy ước đặt tên của Huggingface và sau đó được vLLM tiếp nhận.\nVí dụ, một giá trị cao hơn khuyến khích mô hình tạo ra đầu ra dài hơn. Vì vậy, nếu bạn muốn mô hình tạo ra một câu chuyện hoặc báo cáo dài hơn, bạn có thể tăng length_penalty. (chỉ được sử dụng trong Tìm kiếm chùm tia)",
+
+    "frequency_penalty": "Tham số này phạt các từ phổ biến, giảm xác suất của chúng được chọn trong đầu ra.\nVí dụ, nếu bạn đang tạo ra một câu chuyện và không muốn các từ phổ biến như 'the' và 'and' xuất hiện quá thường xuyên, bạn có thể tăng frequency_penalty.",
+
+    "presence_penalty": "Tham số này phạt các từ mới, giảm xác suất của chúng được chọn trong đầu ra.\nVí dụ, nếu bạn đang tạo ra một văn bản và muốn nó nhất quán trong việc sử dụng từ vựng, bạn có thể tăng presence_penalty.",
+
+    "max_token": "Tham số này đặt số lượng tối đa token trong đầu ra.\nVí dụ, nếu bạn đang tạo ra một tweet và muốn nó phù hợp với giới hạn ký tự của Twitter, bạn có thể đặt max_token thành một số cụ thể.",
+
+    "max_turn": "Tham số này đặt số lượng tối đa lượt mà bộ nhớ được thêm vào bộ nhớ làm việc của Agents.\nVí dụ, nếu bạn đang thiết kế một agent và muốn mô hình đưa ra kết quả cuối cùng sau 4 lượt trao đổi, đặt max_turn thành 4. Hãy cẩn thận khi đặt nó quá cao, vì bộ nhớ có thể không vừa với ngữ cảnh của mô hình bạn chọn.",
+
+    "best_of": "Tham số này kiểm soát số lần mô hình được chạy với các hạt giống ngẫu nhiên khác nhau và sau đó chọn đầu ra tốt nhất.\nVí dụ, nếu bạn đặt best_of thành 5, mô hình sẽ tạo ra 5 đầu ra khác nhau và sau đó chọn đầu ra tốt nhất dựa trên tiêu chí được xác định trước.",
+
+    "early_stopping": "Khi được đặt thành true, tham số này dừng quá trình tạo ngay khi mô hình xuất ra một token kết thúc câu.\nVí dụ, nếu bạn đang tạo ra các câu và muốn mỗi câu là một suy nghĩ hoàn chỉnh, bạn có thể kích hoạt early_stopping."
+}

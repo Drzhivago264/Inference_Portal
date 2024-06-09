@@ -1,0 +1,29 @@
+{
+    "use_memory": "This parameter allows the model to utilize its memory from previous interactions when set to true.\nFor example, in a conversation about movies, if use_memory is true, the model will remember previous movie recommendations and can use that information in later responses.",
+
+    "chatbot_mode": "When enabled, this parameter allows the model to operate in a conversational mode.\nFor instance, it can help in creating a chatbot that can interact naturally with users, understanding their queries and providing appropriate responses.",
+
+    "completion_mode": "This parameter determines how the model completes a given prompt.\nFor example, if the prompt is 'Once upon a time', the model could complete it as a story, a sentence, or a phrase, depending on the completion_mode setting.",
+
+    "top_p": "This parameter, also known as nucleus sampling, controls the randomness in the model's output.\nFor example, if top_p is set to 0.9, the model will select the smallest set of tokens whose cumulative probability adds up to 0.9 for the next word.",
+
+    "top_k": "Also known as top-k sampling, this parameter controls the randomness in the model's output.\nFor example, if top_k is set to 10, the model will only consider the top 10 tokens with the highest probability for the next word.",
+
+    "temperature": "This parameter controls the randomness of the model's responses.\nFor instance, a higher temperature value (e.g., 1.0) makes the output more random and diverse, while a lower value (e.g., 0.1) makes it more deterministic and focused.",
+
+    "beam": "Used in beam search, this parameter controls the number of alternative sequences that the model considers at each step of the output generation.\nFor example, a beam width of 5 means the model keeps track of 5 alternative sequences at each step.",
+
+    "length_penalty": "This parameter controls the penalty for output length, the naming of this parameter actually contradicts its effect due to the naming convention of Huggingface and later adopted by vLLM.\nFor instance, a higher value encourages the model to generate longer outputs. So, if you want the model to generate a longer story or report, you might increase the length_penalty. (only used in Beam search)",
+
+    "frequency_penalty": "This parameter penalizes common words, reducing their probability of being chosen in the output.\nFor example, if you're generating a story and don't want common words like 'the' and 'and' to appear too often, you could increase the frequency_penalty.",
+
+    "presence_penalty": "This parameter penalizes new words, reducing their probability of being chosen in the output.\nFor example, if you're generating a text and want it to be consistent in its use of vocabulary, you might increase the presence_penalty.",
+
+    "max_token": "This parameter sets the maximum number of tokens in the output.\nFor instance, if you're generating a tweet and want it to fit within Twitter's character limit, you might set max_token to a specific number.",
+
+    "max_turn": "This parameter sets the maximum number of turns in which memory is added in the working memory of Agents.\nFor instance, if you're designing a agent and want the model to give you the final result after 4 exchanges, sit max_turn to 4.\nBe careful when setting it too high, because the memory may not fit in the context of your choosen model.",
+
+    "best_of": "This parameter controls the number of times the model is run with different random seeds and then selects the best output.\nFor example, if you set best_of to 5, the model will generate 5 different outputs and then select the best one based on a predefined criterion.",
+
+    "early_stopping": "When set to true, this parameter stops the generation process as soon as the model outputs an end-of-sentence token.\nFor example, if you're generating sentences and want each one to be a complete thought, you might enable early_stopping."
+}

@@ -718,8 +718,6 @@ function Agent() {
                                         <MenuItem key={"/ws/engineer-async/"} value={"/ws/engineer-async/"}>Async Backend</MenuItem>
                                     </Select>
                                 </FormControl>
-                                <Divider></Divider>
-                                <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
                                 <OpenAPIParameter
                                     top_p={top_p}
                                     agent_objects={agent_objects}
