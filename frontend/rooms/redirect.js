@@ -224,7 +224,7 @@ function Hub() {
                                             </CardContent>
 
                                             <CardActions >
-                                                <Button size="small" color="primary">
+                                                <Button component="span" size="small" color="primary">
                                                     {t('redirect.Redirect')}
                                                 </Button>
                                             </CardActions>
@@ -261,7 +261,7 @@ function Hub() {
                                                 </Typography>
                                             </CardContent>
                                             <CardActions>
-                                                <Button size="small" color="primary">
+                                                <Button component="span" size="small" color="primary">
                                                     {t('redirect.Redirect')}
                                                 </Button>
                                             </CardActions>
@@ -297,7 +297,7 @@ function Hub() {
                                                 </Typography>
                                             </CardContent>
                                             <CardActions>
-                                                <Button size="small" color="primary">
+                                                <Button component="span" size="small" color="primary">
                                                     {t('redirect.Redirect')}
                                                 </Button>
                                             </CardActions>
@@ -335,7 +335,7 @@ function Hub() {
                                                 </Typography>
                                             </CardContent>
                                             <CardActions>
-                                                <Button size="small" color="primary">
+                                                <Button component="span" size="small" color="primary">
                                                     {t('redirect.Redirect')}
                                                 </Button>
                                             </CardActions>
