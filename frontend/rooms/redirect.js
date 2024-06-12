@@ -28,6 +28,7 @@ import { useTheme } from "@mui/material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Snackbar from '@mui/material/Snackbar';
 
+
 function Hub() {
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     const theme = useTheme();
@@ -48,11 +49,11 @@ function Hub() {
 
     const handleCloseSnack = (event, reason) => {
         if (reason === 'clickaway') {
-          return;
+            return;
         }
-    
+
         setOpenSnack(false);
-      };
+    };
 
     const handleLogin = (event) => {
         event.preventDefault()
@@ -158,8 +159,17 @@ function Hub() {
                     open={opensnack}
                     autoHideDuration={5000}
                     onClose={handleCloseSnack}
-                    message="Error, you need an API key!"
-                />
+                   
+                >
+                    <Alert
+                        onClose={handleCloseSnack}
+                        severity="error"
+                        variant="filled"
+                        sx={{ width: '100%' }}
+                    >
+                        You need an API key!
+                    </Alert>
+                </Snackbar>
                 <Box
                     my={1}
                     display="flex"
