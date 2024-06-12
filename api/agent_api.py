@@ -56,13 +56,12 @@ async def agentcompletion(request, data: AgentSchema):
                 inference_server = random.choice(available_server_list)
                 server_status = inference_server.status
                 if not data.beam:
-                    length_penalty = 1
-                    early_stopping = False
                     best_of = 1
                 else:
                     best_of = data.best_of
-                    length_penalty = data.length_penalty
-                    early_stopping = True
+                    if best_of == 1:
+                        best_of += 1
+
                 child_template_name = data.child_template_name
                 parent_template_name = data.parent_template_name
                 use_my_template = data.use_my_template
@@ -91,7 +90,6 @@ async def agentcompletion(request, data: AgentSchema):
 
                 tokeniser = AutoTokenizer.from_pretrained(
                     constant.TOKENIZER_TABLE[data.model])
-                inputs = tokeniser(data.prompt)
                 if not data.working_memory:
                     chat = [
                         {"role": "system",
@@ -107,13 +105,13 @@ async def agentcompletion(request, data: AgentSchema):
                     "n": data.n,
                     'best_of': best_of,
                     'presence_penalty': data.presence_penalty,
-                    "temperature": data.temperature,
+                    "temperature": data.temperature if not data.beam else 0,
                     "max_tokens": data.max_tokens,
                     "top_k": int(data.top_k),
-                    "top_p": data.top_p,
-                    "length_penalty": length_penalty,
+                    "top_p": data.top_p if not data.beam else 1,
+                    "length_penalty": data.length_penalty if data.beam else 1,
                     "frequency_penalty": data.frequency_penalty,
-                    "early_stopping": early_stopping,
+                    "early_stopping": data.early_stopping if data.beam else False,
                     "stream": data.stream,
                     "use_beam_search": data.beam,
                 }
