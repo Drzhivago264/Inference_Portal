@@ -220,11 +220,11 @@ def send_request(stream: bool, url: str, instance_id: str, context) -> str:
     try:
         if not stream:
             response = requests.post(
-                url,  json=context,  stream=stream, timeout=10)
+                url,  json=context,  stream=stream, timeout=constant.TIMEOUT)
             response = response.json()['text'][0]
         elif stream:
             response = requests.post(
-                url,  json=context,  stream=stream, timeout=10)
+                url,  json=context,  stream=stream, timeout=constant.TIMEOUT)
     except requests.exceptions.Timeout:
         response = "Request Timeout. Cannot connect to the model. If you just booted the GPU server, wait for 400 seconds, and try again"
     except requests.exceptions.InvalidJSONError:

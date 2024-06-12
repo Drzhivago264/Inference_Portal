@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useContext } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -13,15 +13,11 @@ import { chatsocket } from '../component/chatsocket';
 import { ChatExport } from '../component/chat_export';
 import Footer from '../component/footer';
 import { Typography } from '@mui/material';
-import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
-import { TreeItem } from '@mui/x-tree-view/TreeItem';
-import Pagination from '@mui/material/Pagination';
-import Alert from '@mui/material/Alert';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
 import { MemoryTree } from '../component/memory_tree';
-
+import { redirect_anon_to_login } from '../component/check_login';
+import { useNavigate } from "react-router-dom";
+import { UserContext } from '../App.js'
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 550,
@@ -60,11 +56,11 @@ function Chat() {
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const [socket_destination, setSocketDestination] = useState("/ws/chat-async/");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-
-
-
+    const navigate = useNavigate();
+    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
 
     useEffect(() => {
+        redirect_anon_to_login(navigate, is_authenticated)
         axios.all([
             axios.get('/frontend-api/model'),
         ])

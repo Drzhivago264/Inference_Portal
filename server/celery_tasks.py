@@ -304,7 +304,7 @@ def Inference(unique: str,
                 }
             )
     else:
-        client = OpenAI(api_key=config("GPT_KEY"))
+        client = OpenAI(api_key=config("GPT_KEY"), timeout=TIMEOUT, max_retries=RETRY)
         clean_response = ""
         clean_response = send_chat_request_openai(client=client,
                                                   session_history=processed_prompt,
@@ -364,7 +364,7 @@ def Agent_Inference(key: str,
         frequency_penalty (float): _description_
         presence_penalty (float): _description_
     """
-    client = OpenAI(api_key=config("GPT_KEY"))
+    client = OpenAI(api_key=config("GPT_KEY"), timeout=TIMEOUT, max_retries=RETRY)
     key_object = APIKEY.objects.get(hashed_key=key)
     llm = LLM.objects.get(name=model)
     clean_response = ""
