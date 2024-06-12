@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -26,6 +26,8 @@ import { CardActionArea, CardActions, Button } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useTheme } from "@mui/material";
 import useMediaQuery from '@mui/material/useMediaQuery';
+import Snackbar from '@mui/material/Snackbar';
+
 function Hub() {
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     const theme = useTheme();
@@ -38,11 +40,20 @@ function Hub() {
     const [keyError, setKeyError] = useState(false)
     const [loginerror, setLoginError] = useState(false);
     const [redirecterror, setRedirectError] = useState(null);
-
+    const [opensnack, setOpenSnack] = useState(false)
     const [image_1_loaded, setImage1Load] = useState(false)
     const [image_2_loaded, setImage2Load] = useState(false)
     const [image_3_loaded, setImage3Load] = useState(false)
     const [image_4_loaded, setImage4Load] = useState(false)
+
+    const handleCloseSnack = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        setOpenSnack(false);
+      };
+
     const handleLogin = (event) => {
         event.preventDefault()
         setLoading(true)
@@ -50,6 +61,7 @@ function Hub() {
         setLoginError(false)
         if (key == '') {
             setKeyError(true)
+
         }
         if (key) {
             const csrftoken = getCookie('csrftoken');
@@ -108,6 +120,7 @@ function Hub() {
         setLoginError(false)
         if (!is_authenticated && key == '') {
             setKeyError(true)
+            setOpenSnack(true)
         }
         else {
             if (destination) {
@@ -141,6 +154,12 @@ function Hub() {
             <title>Hub</title>
             <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="lg">
+                <Snackbar
+                    open={opensnack}
+                    autoHideDuration={5000}
+                    onClose={handleCloseSnack}
+                    message="Error, you need an API key!"
+                />
                 <Box
                     my={1}
                     display="flex"

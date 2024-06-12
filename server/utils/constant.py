@@ -7,9 +7,9 @@ KEY_TTL = 7  # day
 MAX_PARENT_TEMPLATE_PER_USER = 10  # 10 Parent templates x 3 Child templates
 MAX_CHILD_TEMPLATE_PER_USER = 3
 DEFAULT_SELF_HOST = "Llama 3 Instruct AWQ"
-
+TIMEOUT = 10.0
+RETRY = 0
 REGION = "us-east-1"
-
 SYSTEM_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.",
                           "Llama 2  Chat 13B": "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
                           "4Chan /Pol 2.7B": "",
@@ -23,8 +23,6 @@ TOKENIZER_TABLE = {
     "Reddit Helper 2.7B": "EleutherAI/gpt-neo-2.7B",
     "Llama 3 Instruct AWQ": "casperhansen/llama-3-8b-instruct-awq"
 }
-
-
 MAX_HISTORY_LENGTH = {
     "Mistral Chat 13B": 3000,
     "Llama 2  Chat 13B": 3000,

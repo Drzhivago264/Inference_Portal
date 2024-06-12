@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import { FormControl, FormLabel } from '@mui/material';
@@ -18,6 +18,10 @@ import { chatsocket } from '../component/chatsocket';
 import { ChatExport } from '../component/chat_export';
 import Footer from '../component/footer';
 import Typography from '@mui/material/Typography';
+import { redirect_anon_to_login } from '../component/check_login';
+import { useNavigate } from "react-router-dom";
+import { UserContext } from '../App.js'
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -32,6 +36,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 
 function FunctionLLM() {
     const ref = useRef();
+
     const websocket = useRef(null)
     const [shownthinking, setThinking] = useState(false);
     const messagesEndRef = useRef(null)
@@ -49,8 +54,11 @@ function FunctionLLM() {
     const [llmfunction, setLLMFunction] = useState("emotion");
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+    const navigate = useNavigate();
+    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
 
     useEffect(() => {
+        redirect_anon_to_login(navigate, is_authenticated)
         axios.all([
             axios.get('/frontend-api/model'),
         ])
@@ -60,7 +68,9 @@ function FunctionLLM() {
             .catch(error => {
                 console.log(error);
             });
+
     }, []);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
     }
@@ -122,7 +132,7 @@ function FunctionLLM() {
     }
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
-            <title>Agent</title>
+            <title>Tools</title>
             <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="xl" sx={{ minWidth: 1200 }}>
                 <Box m={1}>

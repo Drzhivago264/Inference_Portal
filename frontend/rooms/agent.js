@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
-import { FormControl, FormLabel } from '@mui/material';
+import { FormControl } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import InputLabel from '@mui/material/InputLabel';
@@ -22,7 +22,6 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
-import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from '../component/navbar';
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
@@ -47,10 +46,12 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Accordion from '@mui/material/Accordion';
-import AccordionActions from '@mui/material/AccordionActions';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { redirect_anon_to_login } from '../component/check_login';
+import { useNavigate } from "react-router-dom";
+import { UserContext } from '../App.js'
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -100,6 +101,9 @@ function Agent() {
     const [default_user_parent_instruct, setUserParentInstruct] = useState("");
     const [default_user_child_instruct, setUserChildInstruct] = useState("");
     const [selectedIndex, setSelectedIndex] = React.useState(0);
+    const navigate = useNavigate();
+    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
     };
@@ -111,6 +115,7 @@ function Agent() {
         editorref.current.render(default_editor)
     };
     useEffect(() => {
+        redirect_anon_to_login(navigate, is_authenticated)
         if (!ref.current) {
             const editor = new EditorJS({
                 holderId: 'editorjs',

@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
@@ -14,18 +13,18 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
-import ListSubheader from '@mui/material/ListSubheader';
 import ResponsiveAppBar from '../component/navbar';
 import { ChatBoxHotpot } from '../component/chatbox';
 import { HotpotParameter } from '../component/chatroom_parameters'
 import { chatsocket, agentsocket } from '../component/chatsocket';
 import Footer from '../component/footer';
 import Accordion from '@mui/material/Accordion';
-import AccordionActions from '@mui/material/AccordionActions';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
+import { useNavigate } from "react-router-dom";
+import { redirect_anon_to_login } from '../component/check_login';
+import { UserContext } from '../App.js'
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -79,7 +78,11 @@ function Hotpot() {
     const [socket_destination, setSocketDestination] = useState("async");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [selectedIndex, setSelectedIndex] = React.useState(0);
+
+    const navigate = useNavigate();
+    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     useEffect(() => {
+        redirect_anon_to_login(navigate, is_authenticated)
         axios.all([
             axios.get('/frontend-api/model'),
             axios.get('/frontend-api/instruction-tree'),

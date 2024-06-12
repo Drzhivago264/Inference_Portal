@@ -11,6 +11,7 @@ import openai
 from server.utils.sync_.common_func import action_parse_json
 from server.celery_tasks import command_EC2
 import regex as re
+import server.utils.constant as constant
 
 async def get_model(model: str) -> QuerySet[LLM] | bool:
     try:
@@ -35,7 +36,7 @@ async def manage_ec2_on_inference(self, server_status, instance_id):
 async def send_chat_request_openai_async(self, processed_prompt) -> str:
     clean_response = ""
     try:
-        client = AsyncOpenAI(api_key=config("GPT_KEY"))
+        client = AsyncOpenAI(api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY)
         raw_response = await client.chat.completions.create(model=self.choosen_models,
                                                             messages=processed_prompt,
                                                             stream=True,
@@ -103,8 +104,8 @@ async def update_server_status_in_db_async(instance_id: str, update_type: str) -
 
 
 async def send_request_async(url, context):
-    async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2)) as client:
-        response = await client.post(url, json=context,  timeout=60)
+    async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=constant.RETRY)) as client:
+        response = await client.post(url, json=context,  timeout=constant.TIMEOUT)
         response = response.json(
         )['text'][0] if response.status_code == 200 else None
         return response
@@ -151,7 +152,7 @@ async def query_response_log(key_object: str,  order: str, quantity: int, type_:
 async def send_agent_request_openai_async(self) -> str:
     clean_response = ""
     try:
-        client = AsyncOpenAI(api_key=config("GPT_KEY"))
+        client = AsyncOpenAI(api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY)
         raw_response = await client.chat.completions.create(model=self.model_type,
                                                             messages=self.session_history,
                                                             stream=True,
