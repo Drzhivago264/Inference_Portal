@@ -214,13 +214,10 @@ def Inference(unique: str,
     channel_layer = get_channel_layer()
     key_object = APIKEY.objects.get(hashed_key=key)
     if not beam:
-        length_penalty = 1
-        early_stopping = False
         best_of = 1
     else:
         if best_of == 1:
             best_of += 1
-        length_penalty = float(length_penalty)
 
     llm = LLM.objects.get(name=model)
     url_list = get_model_url(llm)
@@ -237,14 +234,14 @@ def Inference(unique: str,
             'best_of': best_of,
             'presence_penalty': float(presence_penalty),
             "use_beam_search": beam,
-            "temperature": float(temperature),
+            "temperature": float(temperature) if not beam else 0,
             "max_tokens": max_tokens,
             "stream": stream,
             "top_k": int(top_k),
-            "top_p": float(top_p),
+            "top_p": float(top_p) if not beam else 1,
             "length_penalty": float(length_penalty),
-            "frequency_penalty": float(frequency_penalty),
-            "early_stopping": early_stopping,
+            "length_penalty": float(length_penalty) if beam else 1,
+            "early_stopping": early_stopping if beam else False,
         }
         ''' Query a list of inference servers for a given model, pick a random one '''
         if url_list:

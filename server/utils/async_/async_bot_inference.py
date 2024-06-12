@@ -14,14 +14,13 @@ from .async_common_func import (
 
 async def async_inference(self) -> None:
     if not self.beam:
-        self.length_penalty = 1
-        self.early_stopping = False
         self.best_of = 1
     else:
         self.best_of = int(self.best_of)
         if self.best_of == 1:
             self.best_of += 1
-        self.length_penalty = float(self.length_penalty)
+        self.top_p = 1
+
     credit = self.key_object.credit
     llm = await LLM.objects.aget(name=self.choosen_models)
     url_list = await get_model_url_async(llm)
@@ -38,14 +37,14 @@ async def async_inference(self) -> None:
             'best_of': self.best_of,
             'presence_penalty': float(self.presence_penalty),
             "use_beam_search": self.beam,
-            "temperature": float(self.temperature),
+            "temperature": float(self.temperature) if not self.beam else 0,
             "max_tokens": self.max_tokens,
             "stream": True,
             "top_k": int(self.top_k),
             "top_p": float(self.top_p),
-            "length_penalty": float(self.length_penalty),
+            "length_penalty": float(self.length_penalty) if self.beam else 1,
             "frequency_penalty": float(self.frequency_penalty),
-            "early_stopping": self.early_stopping,
+            "early_stopping": self.early_stopping if self.beam else False,
         }
         ''' Query a list of inference servers for a given model, pick a random one '''
         if url_list:

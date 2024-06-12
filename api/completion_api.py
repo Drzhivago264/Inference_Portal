@@ -50,13 +50,12 @@ async def textcompletion(request, data: PromptSchema):
                 inference_server = random.choice(available_server_list)
                 server_status = inference_server.status
                 if not data.beam:
-                    length_penalty = 1
-                    early_stopping = False
                     best_of = 1
                 else:
                     best_of = data.best_of
-                    length_penalty = data.length_penalty
-                    early_stopping = True
+                    if best_of == 1:
+                        best_of += 1
+
                 tokeniser = AutoTokenizer.from_pretrained(
                     constant.TOKENIZER_TABLE[data.model])
                 chat = [
@@ -71,14 +70,15 @@ async def textcompletion(request, data: PromptSchema):
                     'best_of': best_of,
                     "use_beam_search": data.beam,
                     "stream": False,
-                    "early_stopping": early_stopping,
                     'presence_penalty': data.presence_penalty,
-                    "temperature": data.temperature,
+                    "temperature": data.temperature if not data.beam else 0,
                     "max_tokens": data.max_tokens,
                     "top_k": int(data.top_k),
-                    "top_p": data.top_p,
-                    "length_penalty": length_penalty,
-                    "frequency_penalty": data.frequency_penalty
+                    "top_p": data.top_p if not data.beam else 1,
+                    "length_penalty": data.length_penalty if data.beam else 1,
+                    "frequency_penalty": data.frequency_penalty,
+                    "early_stopping": data.early_stopping if data.beam else False,
+
                 }
                 await update_server_status_in_db(instance_id=inference_server.name, update_type="time")
                 if server_status == "running":
