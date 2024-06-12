@@ -67,7 +67,7 @@ function Chat() {
             .then(axios.spread((model_object, memory_object) => {
                 setModels(model_object.data.models_bot);
                 setAgents(model_object.data.models_agent);
-               
+
             }))
             .catch(error => {
                 console.log(error);
@@ -81,13 +81,11 @@ function Chat() {
     }, [chat_message]);
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
-    useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
-        chatsocket(websocket, setChatMessage, setThinking, document)
-    }, []);
 
     useEffect(() => {
-        websocket.current.close()
+        if (websocket.current) {
+            websocket.current.close()
+        }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         chatsocket(websocket, setChatMessage, setThinking, document)
     }, [socket_destination]);

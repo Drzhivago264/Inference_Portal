@@ -216,28 +216,12 @@ function Agent() {
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
-    useEffect(() => {
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
-        agentsocket(
-            websocket,
-            setChatMessage,
-            setThinking,
-            document,
-            setParentInstruct,
-            setChildInstruct,
-            setDefaultChildTemplateList,
-            use_user_template,
-            setUserParentInstruct,
-            setUserChildInstruct,
-            setDefaultUserChildTemplateList,
-            setEditor,
-            setCurrentParagraph,
-            editorref
-        )
-    }, []);
+
 
     useEffect(() => {
-        websocket.current.close()
+        if (websocket.current) {
+            websocket.current.close()
+        }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         agentsocket(
             websocket,
@@ -471,8 +455,8 @@ function Agent() {
                                     </form>
 
                                 </Box>
-                                </Paper>
-                                <Paper sx={{ m: 2 }} variant='outlined'>
+                            </Paper>
+                            <Paper sx={{ m: 2 }} variant='outlined'>
                                 <Box m={1}>
                                     <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
                                 </Box>

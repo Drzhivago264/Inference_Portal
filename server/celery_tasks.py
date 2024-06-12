@@ -23,13 +23,14 @@ from server.utils.sync_.common_func import (get_model_url,
                                 send_chat_request_openai,
                                 log_prompt_response
                                 )
-from .utils.constant import *
+
+import server.utils.constant as constant
 from celery.utils.log import get_task_logger
 from django.utils.timezone import datetime, timedelta
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
-region = REGION
+region = constant.REGION
 from transformers import AutoTokenizer
 
 
@@ -73,7 +74,7 @@ def update_crypto_rate(coin: str):
 @shared_task
 def periodically_delete_unused_key():
     APIKEY.objects.filter(created_at__lte=datetime.now(
-    )-timedelta(days=KEY_TTL), credit=0.0, monero_credit=0.0).delete()
+    )-timedelta(days=constant.KEY_TTL), credit=0.0, monero_credit=0.0).delete()
 
 
 @shared_task()
@@ -108,7 +109,7 @@ def periodically_shutdown_EC2_instance() -> None:
     available_server = InferenceServer.objects.filter(availability="Available")
     for server in available_server:
         un_used_time = timezone.now() - server.last_message_time
-        if un_used_time.total_seconds() > SERVER_TTL and (server.status != "stopped" or server.status != "stopping"):
+        if un_used_time.total_seconds() > constant.SERVER_TTL and (server.status != "stopped" or server.status != "stopping"):
             command_EC2.delay(server.name, region=region, action="off")
             server.status = "stopping"
             server.save()
@@ -226,9 +227,10 @@ def Inference(unique: str,
 
     processed_prompt = inference_mode(
         model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
-    tokeniser = AutoTokenizer.from_pretrained(TOKENIZER_TABLE[model])
-    session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
+
     if llm.is_self_host:
+        tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[model])
+        session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
         context = {
             "prompt": session_list_to_string,
             "n": 1,
@@ -304,7 +306,7 @@ def Inference(unique: str,
                 }
             )
     else:
-        client = OpenAI(api_key=config("GPT_KEY"), timeout=TIMEOUT, max_retries=RETRY)
+        client = OpenAI(api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY)
         clean_response = ""
         clean_response = send_chat_request_openai(client=client,
                                                   session_history=processed_prompt,
@@ -364,7 +366,7 @@ def Agent_Inference(key: str,
         frequency_penalty (float): _description_
         presence_penalty (float): _description_
     """
-    client = OpenAI(api_key=config("GPT_KEY"), timeout=TIMEOUT, max_retries=RETRY)
+    client = OpenAI(api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY)
     key_object = APIKEY.objects.get(hashed_key=key)
     llm = LLM.objects.get(name=model)
     clean_response = ""
