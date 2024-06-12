@@ -150,15 +150,15 @@ async def log_prompt_response(key_object: object, model: str, prompt: str, respo
 
 
 async def send_request_async(url, context):
-    async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=2), timeout=5) as client:
-        response = await client.post(url, json=context,  timeout=60)
+    async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=constant.RETRY), timeout=constant.TIMEOUT) as client:
+        response = await client.post(url, json=context)
         response = response.json(
         )['text'][0] if response.status_code == 200 else None
         return response
 
 
 async def send_stream_request_async(url: str, context: object, processed_prompt: str, request: object, data: object):
-    client = httpx.AsyncClient(timeout=5)
+    client = httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=constant.RETRY), timeout=constant.TIMEOUT)
     full_response = ""
     try:
         async with client.stream('POST', url, json=context) as response:
@@ -177,7 +177,7 @@ async def send_stream_request_async(url: str, context: object, processed_prompt:
 
 
 async def send_stream_request_agent_async(url: str, context: object, processed_prompt: str, request: object, data: object, parent_template_name: str | None, child_template_name: str | None, working_nemory: list, use_my_template: str):
-    client = httpx.AsyncClient(timeout=5)
+    client = httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=constant.RETRY), timeout=constant.TIMEOUT)
     full_response = ""
     try:
         async with client.stream('POST', url, json=context) as response:

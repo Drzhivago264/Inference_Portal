@@ -133,7 +133,7 @@ export const VerticalNav = ({ navigate }) => {
                 <ListItemIcon>
                     <KeyIcon />
                 </ListItemIcon>
-                <ListItemText primary="Key & Credit" />
+                <ListItemText primary="Manage Key" />
             </ListItemButton>
             <Divider component="li" />
             <ListItemButton button onClick={() => {other_redirect("/frontend/api/docs")}}>
@@ -147,7 +147,7 @@ export const VerticalNav = ({ navigate }) => {
                 <ListItemIcon>
                     <ChatIcon />
                 </ListItemIcon>
-                <ListItemText primary="Chatbots & Agents" />
+                <ListItemText primary="Inference" />
             </ListItemButton>
             <Divider component="li" />
             <ListItemButton button onClick={() => {other_redirect("/frontend/manual/key")}} >
@@ -161,7 +161,7 @@ export const VerticalNav = ({ navigate }) => {
                 <ListItemIcon>
                     <LayersIcon />
                 </ListItemIcon>
-                <ListItemText primary="Available Models" />
+                <ListItemText primary="Models" />
             </ListItemButton>
             <Divider component="li" />
             <ListItemButton button component={Link} href="https://construction.professorparakeet.com/">

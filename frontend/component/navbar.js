@@ -343,11 +343,12 @@ function ResponsiveAppBar({max_width}) {
                   <MenuItem value="en">English</MenuItem>
                 </Select>
               </FormControl>
-              <Box mt={0.5}>
+              <Box mt={0.5} ml={1}>
                 <Button
                   key='login'
                   value='login'
                   onClick={(e) => redirect(e)}
+              
                   sx={{
                     textDecoration: 'none',
                     display: { xs: 'none', sm: 'block' },
