@@ -134,15 +134,7 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
 
 
 async def log_prompt_response(key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
-    """_summary_
 
-    Args:
-        key (string): _description_
-        model (string): the name of the model
-        prompt (string): the user's prompt
-        response (string): the response from GPU
-        type_ (_type_): _description_
-    """
     llm = await LLM.objects.aget(name=model)
     pair_save = PromptResponse(
         prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)

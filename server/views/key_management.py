@@ -39,9 +39,11 @@ from server.api_throttling_rates import (KeyCreateRateThrottle,
                                         )
 from django.contrib.auth.models import User
 stripe.api_key = settings.STRIPE_SECRET_KEY
+from django.views.decorators.cache import cache_page
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
+@cache_page(60 * 15)
 def product_list_api(request: HttpRequest) -> Response:
     page_content = Product.objects.all()
     serializer = ProductSerializer(page_content, many=True)
