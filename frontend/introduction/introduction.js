@@ -25,7 +25,7 @@ function Information() {
 
         if (videoRef) {
             videoRef.current.play();
-            setVideoLoaded(true)
+            
         }
     }, [videoRef]);
     const [destination, setDestination] = useState(null)
@@ -39,7 +39,7 @@ function Information() {
     return (
         <Container maxWidth={false} disableGutters>
             <div className="video-container">
-                <video ref={videoRef} className='videoTag' loop muted playsInline disablePictureInPicture controlsList="nodownload" >
+                <video ref={videoRef} className='videoTag' onCanPlay={() => {setVideoLoaded(true)} } onPlay={() => {setVideoLoaded(true)}} loop muted playsInline disablePictureInPicture controlsList="nodownload" >
                     <source src={`https://d2f6jmzr77qqg6.cloudfront.net/video/introduction_background.mp4`} type='video/mp4' />
                     <source src={`static/video/introduction_background.mp4`} type='video/mp4' />
                 </video>

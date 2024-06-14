@@ -27,7 +27,7 @@ from server.views.serializer import (RedirectSerializer,
                                )
 from django.contrib.auth import authenticate, login
 from rest_framework.pagination import PageNumberPagination
-
+from django.views.decorators.cache import cache_page
 
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])

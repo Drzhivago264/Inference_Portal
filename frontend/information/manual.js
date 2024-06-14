@@ -36,6 +36,15 @@ import { useParams } from 'react-router';
 import Prism from "prismjs";
 import Footer from '../component/footer';
 import i18next from "i18next";
+import { useQuery } from "react-query";
+
+const retrieveManual = async (link) => {
+    const response = await axios.get(
+        link,
+    );
+
+    return response.data;
+};
 
 
 function Manual() {
@@ -47,7 +56,7 @@ function Manual() {
 
     const [displaydoc, setDisplayDoc] = useState('')
     const [displaytoc, setDisplayToc] = useState('')
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
+    const [selectedIndex, setSelectedIndex] = useState(0);
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
     };
@@ -55,46 +64,49 @@ function Manual() {
         key: {
             "en": [key_en, key_toc_en],
             "vi": [key_vi, key_toc_vi]
+        },  
+        authentication: {
+            "en": [authentication_en, authentication_toc_en],
+            "vi": [authentication_vi, authentication_toc_vi]
+        },
+        inference: {
+            "en": [inference_en, inference_toc_en],
+            "vi": [inference_vi, inference_toc_vi]
         },
         errorlimit: {
             "en": [errorlimit_en, errorlimit_toc_en],
             "vi": [errorlimit_vi, errorlimit_toc_vi]
         },
-        authentication: {
-            "en": [authentication_en, authentication_toc_en],
-            "vi": [authentication_vi, authentication_toc_vi]
-        },
         behavior: {
             "en": [behavior_en, behavior_toc_en],
             "vi": [behavior_vi, behavior_toc_vi]
         },
-        inference: {
-            "en": [inference_en, inference_toc_en],
-            "vi": [inference_vi, inference_toc_vi]
-        }
     }
     const { t, i18n } = useTranslation();
 
     useEffect(() => {
         setDefaultLanguage(i18n.language)
     }, [i18n.language]);
+    useEffect(() => {
+        console.log(Object.keys(destination_refs).indexOf(doc))
+        setSelectedIndex(Object.keys(destination_refs).indexOf(doc) )
+    }, []);
+    const docRequest = useQuery(["ManualDocData", doc, default_language], () => retrieveManual(destination_refs[doc][default_language][0]), { staleTime: Infinity, retry: false });
+
+    const tocRequest = useQuery(["ManualTocData", doc, default_language], () => retrieveManual(destination_refs[doc][default_language][1]), { staleTime: Infinity, retry: false });
 
     useEffect(() => {
 
-        axios.all([
-            axios.get(destination_refs[doc][default_language][0]),
-            axios.get(destination_refs[doc][default_language][1]),
-        ])
-            .then(axios.spread((display_doc_object, display_toc_object) => {
-                setDisplayDoc(display_doc_object.data);
-                setDisplayToc(display_toc_object.data)
+        if (docRequest.status === 'success') {
 
-            }))
-            .catch(error => {
-                console.log(error);
-            });
+            setDisplayDoc(docRequest.data);
+        }
+        if (tocRequest.status === 'success') {
+            setDisplayToc(tocRequest.data)
+        }
 
-    }, [doc, default_language]);
+
+    }, [docRequest.status, tocRequest.status, docRequest.data, tocRequest.data]);
     return (
         <Container maxWidth={false} disableGutters>
             <title>Manual</title>
@@ -107,42 +119,42 @@ function Manual() {
                     <Grid container spacing={1}>
                         <Grid item md={3} lg={2}>
                             <Box mt={3} mb={5} sx={{ display: { xs: 'none', sm: 'none ', md: 'block' } }} >
-                      
-                                    <List dense={true}>
-                                        {[{ link: '/frontend/manual/key', tranlate: 'manual.Setting_Up_Your_API_Key' },
-                                        { link: '/frontend/manual/authentication', tranlate: 'manual.Authentication' },
-                                        { link: '/frontend/manual/inference', tranlate: 'manual.Inference' },
-                                        { link: '/frontend/manual/errorlimit', tranlate: 'manual.Common_Errors_and_Ratelimits' },
-                                        { link: '/frontend/manual/behavior', tranlate: 'manual.The_Behaviors_of_This_Website' }
-                                        ].map((object, index) => {
-                                            return (
-                                                <ListItemButton
+
+                                <List dense={true}>
+                                    {[{ link: '/frontend/manual/key', tranlate: 'manual.Setting_Up_Your_API_Key' },
+                                    { link: '/frontend/manual/authentication', tranlate: 'manual.Authentication' },
+                                    { link: '/frontend/manual/inference', tranlate: 'manual.Inference' },
+                                    { link: '/frontend/manual/errorlimit', tranlate: 'manual.Common_Errors_and_Ratelimits' },
+                                    { link: '/frontend/manual/behavior', tranlate: 'manual.The_Behaviors_of_This_Website' }
+                                    ].map((object, index) => {
+                                        return (
+                                            <ListItemButton
                                                 selected={selectedIndex === index}
-                                                onClick={(event)=>  handleListItemClick(event, index)  }
+                                                onClick={(event) => handleListItemClick(event, index)}
                                                 key={object.link}
-                                                 component={Link} 
-                                                 to={object.link}>
-                                                     <Typography component='span' variant="body2" > {t(object.tranlate)} </Typography> 
-                                                </ListItemButton>
-                                            )
-                                        })}
-                                       
-                                    </List>
-                     
+                                                component={Link}
+                                                to={object.link}>
+                                                <Typography component='span' variant="body2" > {t(object.tranlate)} </Typography>
+                                            </ListItemButton>
+                                        )
+                                    })}
+
+                                </List>
+
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'block' } }} />
                         <Grid item xs={12} md={8} lg={8}>
                             <Box mt={3} sx={{ display: { sm: 'block ', md: 'none' } }} >
-                  
-                                    <List dense={true}>
-                                        <ListItemButton component={Link} to='/frontend/manual/key'> <Typography>{t('manual.Setting_Up_Your_API_Key')}  </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> {t('manual.Authentication')} </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography> {t('manual.Inference')} </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography> {t('manual.Common_Errors_and_Ratelimits')}  </Typography> </ListItemButton>
-                                        <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography> {t('manual.The_Behaviors_of_This_Website')} </Typography> </ListItemButton>
-                                    </List>
-                         
+
+                                <List dense={true}>
+                                    <ListItemButton component={Link} to='/frontend/manual/key'> <Typography>{t('manual.Setting_Up_Your_API_Key')}  </Typography> </ListItemButton>
+                                    <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> {t('manual.Authentication')} </Typography> </ListItemButton>
+                                    <ListItemButton component={Link} to='/frontend/manual/inference' ><Typography> {t('manual.Inference')} </Typography> </ListItemButton>
+                                    <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography> {t('manual.Common_Errors_and_Ratelimits')}  </Typography> </ListItemButton>
+                                    <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography> {t('manual.The_Behaviors_of_This_Website')} </Typography> </ListItemButton>
+                                </List>
+
                             </Box>
                             <Box m={3}>
 

@@ -12,22 +12,33 @@ import Container from '@mui/material/Container';
 import ResponsiveAppBar from '../component/navbar';
 import { Stack } from '@mui/material';
 import Footer from '../component/footer';
+import { useQuery } from "react-query";
+import Skeleton from '@mui/material/Skeleton';
+
+const retrieveModels = async () => {
+    const response = await axios.get(
+        "/frontend-api/model",
+    );
+    return response.data;
+};
+
 function ModelInfor() {
     const [server_objects, setMessage] = useState([]);
     const [model_objects, setMessage_model] = useState([]);
-    useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/model'),
-        ])
-            .then(axios.spread((server_object) => {
-                setMessage(server_object.data.servers);
-                setMessage_model(server_object.data.models_info);
+    const {
+        status,
+        data,
+        error,
+        isLoading,
+    } = useQuery("ModelData", retrieveModels, { staleTime: Infinity, retry: false });
 
-            }))
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
+    useEffect(() => {
+        if (status === 'success') {
+            setMessage(data.servers);
+            setMessage_model(data.models_info);
+        }
+
+    }, [status, data]);
     const columns = [
         { field: 'server', headerName: 'Server', width: 80 },
         { field: 'model', headerName: 'Model', width: 150 },
@@ -66,6 +77,13 @@ function ModelInfor() {
                 >
                     <Grid container spacing={2}>
                         <Grid item md={6}>
+                            {error && <div>An error occurred: {error.message}. Contact us and try again later</div>}
+                            {isLoading && <Stack direction='column' spacing={1}>
+                            <Skeleton animation="wave" height={60} /> 
+                            <Skeleton animation="wave" height={60}/>
+                            <Skeleton animation="wave" height={200} />
+                            <Skeleton animation="wave" height={60} />
+                            </Stack> }
                             {model_objects.map((model_object) => {
                                 if (model_object.name == 'Reddit Helper 2.7B') {
                                     return (

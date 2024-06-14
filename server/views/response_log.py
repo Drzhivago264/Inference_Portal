@@ -8,13 +8,9 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework import status
-from django.contrib.auth import logout
-from hashlib import sha256
-from django.contrib.auth import authenticate, login
 from django.http import HttpRequest
+from django.views.decorators.cache import cache_page
 
-from django.utils import timezone
-from server.views.serializer import CostSerializer
 class LogListJson(BaseDatatableView):
     columns = ['id', 'prompt', 'response',
                'model.name', 'created_at', 'p_type', 'input_cost', 'output_cost', 'number_input_tokens', 'number_output_tokens']
@@ -37,6 +33,7 @@ class LogListJson(BaseDatatableView):
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
+@cache_page(60 * 15)
 def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
     current_user = request.user
     if current_user.id == None:
