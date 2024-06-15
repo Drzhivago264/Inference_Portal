@@ -17,7 +17,7 @@
     "tool_list": [
         "Dataset labelling and or modifying.",
         "Qualitative Interview Automation and Data Collection with Interview Agent.",
-        "Students who need to write or paraphase their assignments with Assignment Agent and LLM functions.",
+        "Write or paraphase their assignments with Assignment Agent and LLM functions.",
         "Agents building or testing with Construction Zone and Your Template."
     ],
     "tool_chunk_2": "There is no sophisticated agenda or argument to be made here, we are playing the role of a parakeet, repeating other people voices.",

@@ -34,6 +34,7 @@ import Jdenticon from 'react-jdenticon';
 import { useTranslation } from 'react-i18next';
 import Select from '@mui/material/Select';
 import i18next from "i18next";
+import Fade from '@mui/material/Fade';
 
 const Listbox = styled('ul')(
   ({ theme }) => `
@@ -216,7 +217,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-function ResponsiveAppBar({max_width}) {
+function ResponsiveAppBar({ max_width, timeout = 0 }) {
   const navigate = useNavigate();
   const [destination, setDestination] = useState(null)
   const [default_language, setDefaultLanguage] = useState(i18next.language)
@@ -257,174 +258,176 @@ function ResponsiveAppBar({max_width}) {
   const { is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name } = useContext(UserContext);
 
   return (
-    <AppBarColored position="sticky" elevation={0}>
-      <Drawer size="md"
-        variant="outlined" open={open} onClose={toggleDrawer(false)}>
-        {DrawerList}
-      </Drawer>
-      <Container maxWidth={max_width}>
-        <Toolbar disableGutters>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2, display: { xs: 'block', sm: 'none' } }}
-            onClick={toggleDrawer(true)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              fontWeight: 700,
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            {t('navbar.Prof_Parakeet')}
-          </Typography>
+    <Fade in={true} timeout={timeout}>
+      <AppBarColored position="sticky" elevation={0}>
+        <Drawer size="md"
+          variant="outlined" open={open} onClose={toggleDrawer(false)}>
+          {DrawerList}
+        </Drawer>
+        <Container maxWidth={max_width}>
+          <Toolbar disableGutters>
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{ mr: 2, display: { xs: 'block', sm: 'none' } }}
+              onClick={toggleDrawer(true)}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href="/"
+              sx={{
+                mr: 2,
+                fontWeight: 700,
+                color: 'inherit',
+                textDecoration: 'none',
+              }}
+            >
+              {t('navbar.Prof_Parakeet')}
+            </Typography>
 
-          <Dropdown>
-            <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>{t('navbar.Information')}</MenuButton>
-            <Menu slots={{ listbox: Listbox }}>
-              <MenuItem_DropBox> <NavLink to="/">{t('navbar.Introduction')}</NavLink></MenuItem_DropBox>
-              <MenuItem_DropBox> <NavLink to="/frontend/manual/key">{t('navbar.Manual')}</NavLink></MenuItem_DropBox>
-              <MenuItem_DropBox> <NavLink to="/frontend/model">{t('navbar.Model')}</NavLink></MenuItem_DropBox>
-            </Menu>
-          </Dropdown>
-          <Dropdown>
-            <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>{t('navbar.Modes')}</MenuButton>
-            <Menu slots={{ listbox: Listbox }}>
-              <MenuItem_DropBox ><NavLink to="/frontend/hub">{t('navbar.Bots_Agents')}</NavLink></MenuItem_DropBox>
-              <MenuItem_DropBox ><NavLink to="/frontend/api/docs">{t('navbar.API_Docs')}</NavLink></MenuItem_DropBox>
-            </Menu>
-          </Dropdown>
-          <Button
-            key='key-management'
-            value='key-management'
-            onClick={(e) => redirect(e)}
-            sx={{
-              textDecoration: 'none',
-              display: { xs: 'none', sm: 'block' }
-            }}
-          >
-            {t('navbar.Manage_Key')}
-          </Button>
-          <Button
-            key='contact'
-            value='contact'
-            onClick={(e) => redirect(e)}
-            sx={{
-              textDecoration: 'none',
-              display: { xs: 'none', sm: 'block' }
-            }}
-          >
-            {t('navbar.Contact')}
-          </Button>
+            <Dropdown>
+              <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>{t('navbar.Information')}</MenuButton>
+              <Menu slots={{ listbox: Listbox }}>
+                <MenuItem_DropBox> <NavLink to="/">{t('navbar.Introduction')}</NavLink></MenuItem_DropBox>
+                <MenuItem_DropBox> <NavLink to="/frontend/manual/key">{t('navbar.Manual')}</NavLink></MenuItem_DropBox>
+                <MenuItem_DropBox> <NavLink to="/frontend/model">{t('navbar.Model')}</NavLink></MenuItem_DropBox>
+              </Menu>
+            </Dropdown>
+            <Dropdown>
+              <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>{t('navbar.Modes')}</MenuButton>
+              <Menu slots={{ listbox: Listbox }}>
+                <MenuItem_DropBox ><NavLink to="/frontend/hub">{t('navbar.Bots_Agents')}</NavLink></MenuItem_DropBox>
+                <MenuItem_DropBox ><NavLink to="/frontend/api/docs">{t('navbar.API_Docs')}</NavLink></MenuItem_DropBox>
+              </Menu>
+            </Dropdown>
+            <Button
+              key='key-management'
+              value='key-management'
+              onClick={(e) => redirect(e)}
+              sx={{
+                textDecoration: 'none',
+                display: { xs: 'none', sm: 'block' }
+              }}
+            >
+              {t('navbar.Manage_Key')}
+            </Button>
+            <Button
+              key='contact'
+              value='contact'
+              onClick={(e) => redirect(e)}
+              sx={{
+                textDecoration: 'none',
+                display: { xs: 'none', sm: 'block' }
+              }}
+            >
+              {t('navbar.Contact')}
+            </Button>
 
-          {!is_authenticated &&
-            <Stack direction='row' sx={{ marginLeft: "auto" }}>
-              <FormControl>
-                <InputLabel id="select-language-label">{t('navbar.Language')}</InputLabel>
-                <Select
-                  labelId="select-language-label"
-                  id="select-language-id"
-                  value={default_language}
-                  label={t('navbar.Language')}
-                  onChange={(e) => { handleChangeLanguage(e.target.value) }}
-                  size="small"
-                >
-                  <MenuItem value="vi">Tiếng Việt</MenuItem>
-                  <MenuItem value="en">English</MenuItem>
-                </Select>
-              </FormControl>
-              <Box mt={0.5} ml={1}>
-                <Button
-                  key='login'
-                  value='login'
-                  onClick={(e) => redirect(e)}
-              
-                  sx={{
-                    textDecoration: 'none',
-                    display: { xs: 'none', sm: 'block' },
-                  }}
-                >
-                  {t('navbar.Login')}
-                </Button>
-              </Box>
-              <Box>
-                <IconButton onClick={colorMode.toggleColorMode} color="inherit">
-                  {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-                </IconButton>
-              </Box>
-            </Stack>
-          }
-          {is_authenticated &&
-            <Stack direction='row' spacing={1} sx={{ marginLeft: "auto" }}>
-              <FormControl>
-                <InputLabel id="select-language-label">{t('navbar.Language')}</InputLabel>
-                <Select
-                  labelId="select-language-label"
-                  id="select-language-id"
-                  value={default_language}
-                  label={t('navbar.Language')}
-                  onChange={(e) => { handleChangeLanguage(e.target.value) }}
-                  size="small"
-                >
-                  <MenuItem value="vi">Tiếng Việt</MenuItem>
-                  <MenuItem value="en">English</MenuItem>
-                </Select>
-              </FormControl>
-              <StyledBadge
-                overlap="circular"
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                variant="dot"
-              >
-                <AvatarWithHover sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
-                  {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
-                </AvatarWithHover>
-              </StyledBadge>
+            {!is_authenticated &&
+              <Stack direction='row' sx={{ marginLeft: "auto" }}>
+                <FormControl>
+                  <InputLabel id="select-language-label">{t('navbar.Language')}</InputLabel>
+                  <Select
+                    labelId="select-language-label"
+                    id="select-language-id"
+                    value={default_language}
+                    label={t('navbar.Language')}
+                    onChange={(e) => { handleChangeLanguage(e.target.value) }}
+                    size="small"
+                  >
+                    <MenuItem value="vi">Tiếng Việt</MenuItem>
+                    <MenuItem value="en">English</MenuItem>
+                  </Select>
+                </FormControl>
+                <Box mt={0.5} ml={1}>
+                  <Button
+                    key='login'
+                    value='login'
+                    onClick={(e) => redirect(e)}
 
-              <Box>
-                <IconButton onClick={colorMode.toggleColorMode} color="inherit">
-                  {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-                </IconButton>
-              </Box>
-            </Stack>
-          }
-          <Drawer size="md"
-            variant="outlined"
-            anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
-            <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }} mt={1.5} ml={1.5} mr={1.5} >
-                <AvatarWithHover sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
-                  {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
-                </AvatarWithHover>
-                <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '11rem' }}>
-                  <Typography m={1.2} sx={{ fontWeight: 'bold' }} noWrap variant='body1'>
-                    Parent Key: {user_key_name}
-                  </Typography>
-                </div>
+                    sx={{
+                      textDecoration: 'none',
+                      display: { xs: 'none', sm: 'block' },
+                    }}
+                  >
+                    {t('navbar.Login')}
+                  </Button>
+                </Box>
+                <Box>
+                  <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+                    {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                  </IconButton>
+                </Box>
               </Stack>
-              <DrawerHeader>
-                <IconButton onClick={toggleUserDrawer(false)}>
-                  <CloseIcon />
-                </IconButton>
-              </DrawerHeader>
-            </Stack>
-            <Divider />
-            {UserDrawerList}
-          </Drawer>
+            }
+            {is_authenticated &&
+              <Stack direction='row' spacing={1} sx={{ marginLeft: "auto" }}>
+                <FormControl>
+                  <InputLabel id="select-language-label">{t('navbar.Language')}</InputLabel>
+                  <Select
+                    labelId="select-language-label"
+                    id="select-language-id"
+                    value={default_language}
+                    label={t('navbar.Language')}
+                    onChange={(e) => { handleChangeLanguage(e.target.value) }}
+                    size="small"
+                  >
+                    <MenuItem value="vi">Tiếng Việt</MenuItem>
+                    <MenuItem value="en">English</MenuItem>
+                  </Select>
+                </FormControl>
+                <StyledBadge
+                  overlap="circular"
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  variant="dot"
+                >
+                  <AvatarWithHover sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
+                    {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
+                  </AvatarWithHover>
+                </StyledBadge>
+
+                <Box>
+                  <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+                    {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                  </IconButton>
+                </Box>
+              </Stack>
+            }
+            <Drawer size="md"
+              variant="outlined"
+              anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
+              <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }} mt={1.5} ml={1.5} mr={1.5} >
+                  <AvatarWithHover sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
+                    {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
+                  </AvatarWithHover>
+                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '11rem' }}>
+                    <Typography m={1.2} sx={{ fontWeight: 'bold' }} noWrap variant='body1'>
+                      Parent Key: {user_key_name}
+                    </Typography>
+                  </div>
+                </Stack>
+                <DrawerHeader>
+                  <IconButton onClick={toggleUserDrawer(false)}>
+                    <CloseIcon />
+                  </IconButton>
+                </DrawerHeader>
+              </Stack>
+              <Divider />
+              {UserDrawerList}
+            </Drawer>
 
 
-        </Toolbar>
-      </Container>
-    </AppBarColored >
+          </Toolbar>
+        </Container>
+      </AppBarColored >
+    </Fade>
   );
 }
 export default ResponsiveAppBar;
