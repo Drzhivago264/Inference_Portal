@@ -3,8 +3,6 @@ import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import ResponsiveAppBar from '../component/navbar';
-import Skeleton from '@mui/material/Skeleton';
-import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Footer from '../component/footer';
 import { Divider } from '@mui/material';
@@ -16,6 +14,9 @@ import ListItem from '@mui/material/ListItem';
 import { TypeWriterText } from '../component/animation_text_change'
 import Fade from '@mui/material/Fade';
 import Grow from '@mui/material/Grow';
+import ReactPlayer from "react-player";
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function Information() {
 
@@ -23,14 +24,7 @@ function Information() {
     const { t, i18n } = useTranslation();
     const [videoloaded, setVideoLoaded] = useState(false);
 
-    useEffect(() => {
 
-        if (videoRef) {
-            videoRef.current.play();
-            console.log(videoRef)
-        }
-     
-    }, [videoRef]);
     const [destination, setDestination] = useState(null)
     const navigate = useNavigate();
     useEffect(() => {
@@ -41,23 +35,37 @@ function Information() {
 
     return (
         <Container maxWidth={false} disableGutters>
-            <Fade in={videoloaded} timeout={1500}>
-                <div className="video-container">
-                    <video ref={videoRef} className='videoTag'
-                        onCanPlayThrough={() => { setVideoLoaded(true) }}
-                        onPlay={() => { setVideoLoaded(true) }} loop muted playsInline disablePictureInPicture controlsList="nodownload"
-                        onLoad={() => {
-                            player.current.seek(1);
-                        }} >
-                        <source src={`https://d2f6jmzr77qqg6.cloudfront.net/video/introduction_background.mp4`} type='video/mp4' />
-                        <source src={`static/video/introduction_background.mp4`} type='video/mp4' />
-                    </video>
-                </div>
-            </Fade>
+
+
             <title>Introduction</title>
 
-            <ResponsiveAppBar max_width="xl" timeout={1500} />
-
+            <ResponsiveAppBar max_width="xl" timeout={2000} />
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={!videoloaded}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
+            <div className='player-container'>
+                <div className='video-container'>
+                    <ReactPlayer
+                        style={{ pointerEvents: "none" }}
+                        url={[
+                            {src: "https://d2f6jmzr77qqg6.cloudfront.net/video/introduction_background.mp4", type: 'video/mp4'},
+                            {src: "/static/video/introduction_background.mp4", type: 'video/mp4'},
+                        ]}
+                        className="react-player"
+                        playing={true}
+                        loop={true}
+                        controls={false}
+                        playsinline={true}
+                        muted={true}
+                        width="100%"
+                        height="100%"
+                        onPlay={() => { setVideoLoaded(true) }}
+                    />
+                </div>
+            </div>
             {videoloaded && <Container maxWidth="lg"
 
             >
@@ -102,8 +110,8 @@ function Information() {
                     <Box maxWidth="md"
                         mt={{ xs: 18, sm: 20, md: 20, lg: 22 }}
                     >
-                         <Grow  in={videoloaded} style={{ transformOrigin: '0 0 0' }} {...(videoloaded ? { timeout: 2000 } : {})}>
-        
+                        <Grow in={videoloaded} style={{ transformOrigin: '0 0 0' }} {...(videoloaded ? { timeout: 2000 } : {})}>
+
                             <Box mt={5} mb={5} p={1} >
                                 <Box mt={2} mb={2}>
                                     <Typography variant='h4'>
