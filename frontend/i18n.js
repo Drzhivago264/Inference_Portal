@@ -54,7 +54,8 @@ i18n
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
     fallbackLng: ['en', 'vi'],
-    nonExplicitSupportedLngs: true, 
+    supportedLngs: ['en', 'vi'],
+    nonExplicitSupportedLngs: false, 
     debug: false,
     resources,
     interpolation: {

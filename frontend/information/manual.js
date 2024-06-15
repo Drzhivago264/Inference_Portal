@@ -37,23 +37,22 @@ import Prism from "prismjs";
 import Footer from '../component/footer';
 import i18next from "i18next";
 import { useQuery } from "react-query";
+import Skeleton from '@mui/material/Skeleton';
+import Alert from '@mui/material/Alert';
 
-const retrieveManual = async (link) => {
+const retrieveManual = async (destination_refs, doc, default_language, id) => {
     const response = await axios.get(
-        link,
+        destination_refs[doc][default_language][id]
     );
-
     return response.data;
-};
-
+}
 
 function Manual() {
     useEffect(() => {
         Prism.highlightAll();
     });
     const { doc } = useParams();
-    const [default_language, setDefaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi' ? i18next.language : 'en')
-
+    const [default_language, setDefaultLanguage] = useState(i18next.language)
     const [displaydoc, setDisplayDoc] = useState('')
     const [displaytoc, setDisplayToc] = useState('')
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -64,7 +63,7 @@ function Manual() {
         key: {
             "en": [key_en, key_toc_en],
             "vi": [key_vi, key_toc_vi]
-        },  
+        },
         authentication: {
             "en": [authentication_en, authentication_toc_en],
             "vi": [authentication_vi, authentication_toc_vi]
@@ -88,20 +87,19 @@ function Manual() {
         setDefaultLanguage(i18n.language)
     }, [i18n.language]);
     useEffect(() => {
-        console.log(Object.keys(destination_refs).indexOf(doc))
-        setSelectedIndex(Object.keys(destination_refs).indexOf(doc) )
+        setSelectedIndex(Object.keys(destination_refs).indexOf(doc))
     }, []);
-    const docRequest = useQuery(["ManualDocData", doc, default_language], () => retrieveManual(destination_refs[doc][default_language][0]), { staleTime: Infinity, retry: false });
+    const docRequest = useQuery(["ManualDocData", destination_refs , doc, default_language], () => retrieveManual(destination_refs, doc, default_language, 0), { staleTime: Infinity, retry: false });
 
-    const tocRequest = useQuery(["ManualTocData", doc, default_language], () => retrieveManual(destination_refs[doc][default_language][1]), { staleTime: Infinity, retry: false });
+    const tocRequest = useQuery(["ManualTocData", destination_refs, doc, default_language], () => retrieveManual(destination_refs, doc, default_language, 1), { staleTime: Infinity, retry: false });
 
     useEffect(() => {
 
-        if (docRequest.status === 'success') {
+        if (docRequest.status === 'success' && docRequest.data) {
 
             setDisplayDoc(docRequest.data);
         }
-        if (tocRequest.status === 'success') {
+        if (tocRequest.status === 'success' && docRequest.data) {
             setDisplayToc(tocRequest.data)
         }
 
@@ -145,8 +143,9 @@ function Manual() {
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'block' } }} />
                         <Grid item xs={12} md={8} lg={8}>
+                          
                             <Box mt={3} sx={{ display: { sm: 'block ', md: 'none' } }} >
-
+                                
                                 <List dense={true}>
                                     <ListItemButton component={Link} to='/frontend/manual/key'> <Typography>{t('manual.Setting_Up_Your_API_Key')}  </Typography> </ListItemButton>
                                     <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> {t('manual.Authentication')} </Typography> </ListItemButton>
@@ -154,10 +153,12 @@ function Manual() {
                                     <ListItemButton component={Link} to='/frontend/manual/errorlimit' ><Typography> {t('manual.Common_Errors_and_Ratelimits')}  </Typography> </ListItemButton>
                                     <ListItemButton component={Link} to='/frontend/manual/behavior' ><Typography> {t('manual.The_Behaviors_of_This_Website')} </Typography> </ListItemButton>
                                 </List>
-
                             </Box>
                             <Box m={3}>
-
+                                {docRequest.isLoading &&  <Skeleton variant="rounded" animation="wave" height={350} />}
+                                {docRequest.error && <Alert variant="outlined" severity="error">
+                                    Cannot find the manual from server! Contact us ...
+                                </Alert>}
                                 <MuiMarkdown overrides={{
                                     ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                     h1: {
@@ -169,15 +170,14 @@ function Manual() {
                                     h3: {
                                         component: 'h3',
                                     },
-
                                 }}>{displaydoc}
                                 </MuiMarkdown>
-
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }} />
                         <Grid item xs={0} sm={2}>
                             <Box m={2} sx={{ display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }}>
+                                {tocRequest.isLoading && <Skeleton variant="rounded" animation="wave" height={100} />}
                                 <MuiMarkdown overrides={{
                                     ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                     h1: {
@@ -189,7 +189,6 @@ function Manual() {
                                     h3: {
                                         component: 'h3',
                                     },
-
                                 }}>{displaytoc}
                                 </MuiMarkdown>
                             </Box>

@@ -219,7 +219,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 function ResponsiveAppBar({max_width}) {
   const navigate = useNavigate();
   const [destination, setDestination] = useState(null)
-  const [default_language, setDefaultLanguage] = useState(i18next.language == 'en' || i18next.language == 'vi'? i18next.language : 'en' )
+  const [default_language, setDefaultLanguage] = useState(i18next.language)
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
