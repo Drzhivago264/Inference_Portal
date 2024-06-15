@@ -96,7 +96,6 @@ function Manual() {
     useEffect(() => {
 
         if (docRequest.status === 'success' && docRequest.data) {
-
             setDisplayDoc(docRequest.data);
         }
         if (tocRequest.status === 'success' && docRequest.data) {
