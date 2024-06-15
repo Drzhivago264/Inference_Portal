@@ -28,6 +28,7 @@
     "editorjs-table": "^1.4.10",
     "file-loader": "^6.2.0",
     "style-loader": "^4.0.0",
+    "video.js": "^8.12.0",
     "webpack": "^5.91.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4"
@@ -92,6 +93,7 @@
     "react-i18next": "^14.1.2",
     "react-jdenticon": "^1.1.0",
     "react-markdown": "^9.0.1",
+    "react-player": "^2.16.0",
     "react-query": "^3.39.3",
     "react-random-reveal": "^2.0.0",
     "react-router-dom": "^6.23.0",

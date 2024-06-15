@@ -1,12 +1,18 @@
-video {
-    position: relative;
-    width: auto;
-    min-width: 1500px;
-    width: 100%;
-    height: auto;
-    background-size: cover;
-}
+
 .video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-width: 100%;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: -1;  
+  }
+
+.player-container {
     display: flex;
     justify-content: center;
     align-items: center;

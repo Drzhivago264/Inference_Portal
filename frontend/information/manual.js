@@ -158,7 +158,7 @@ function Manual() {
                                 {docRequest.error && <Alert variant="outlined" severity="error">
                                     Cannot find the manual from server! Contact us ...
                                 </Alert>}
-                                <MuiMarkdown overrides={{
+                                {!docRequest.isLoading && <MuiMarkdown overrides={{
                                     ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                     h1: {
                                         component: 'h1',
@@ -170,14 +170,14 @@ function Manual() {
                                         component: 'h3',
                                     },
                                 }}>{displaydoc}
-                                </MuiMarkdown>
+                                </MuiMarkdown>}
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }} />
                         <Grid item xs={0} sm={2}>
                             <Box m={2} sx={{ display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }}>
                                 {tocRequest.isLoading && <Skeleton variant="rounded" animation="wave" height={100} />}
-                                <MuiMarkdown overrides={{
+                                {!tocRequest.isLoading && <MuiMarkdown overrides={{
                                     ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
                                     h1: {
                                         component: 'h1',
@@ -189,7 +189,7 @@ function Manual() {
                                         component: 'h3',
                                     },
                                 }}>{displaytoc}
-                                </MuiMarkdown>
+                                </MuiMarkdown>}
                             </Box>
                         </Grid>
                     </Grid>
