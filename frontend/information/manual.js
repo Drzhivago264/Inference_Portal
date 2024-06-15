@@ -39,6 +39,8 @@ import i18next from "i18next";
 import { useQuery } from "react-query";
 import Skeleton from '@mui/material/Skeleton';
 import Alert from '@mui/material/Alert';
+import TableOfContents from '../component/TableofContent';
+import Paper from '@mui/material/Paper';
 
 const retrieveManual = async (destination_refs, doc, default_language, id) => {
     const response = await axios.get(
@@ -59,6 +61,9 @@ function Manual() {
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
     };
+
+
+
     const destination_refs = {
         key: {
             "en": [key_en, key_toc_en],
@@ -175,21 +180,14 @@ function Manual() {
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }} />
                         <Grid item xs={0} sm={2}>
-                            <Box m={2} sx={{ display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }}>
-                                {tocRequest.isLoading && <Skeleton variant="rounded" animation="wave" height={100} />}
-                                {!tocRequest.isLoading && <MuiMarkdown overrides={{
-                                    ...getOverrides({ Highlight, themes, theme: themes.okaidia }),
-                                    h1: {
-                                        component: 'h1',
-                                    },
-                                    h2: {
-                                        component: 'h2',
-                                    },
-                                    h3: {
-                                        component: 'h3',
-                                    },
-                                }}>{displaytoc}
-                                </MuiMarkdown>}
+                            <Box sx={{ display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }}>
+                                {displaydoc && <Paper variant='outlined' style={{position: 'fixed', marginTop: 7, width: 270}}> 
+                                <Typography m={1} variant= 'body1'>
+                                    Table of Contents
+                                </Typography>
+                                <Divider />
+                                <Box mr={2}> <TableOfContents mdfile = {displaydoc} />  </Box> 
+                                </Paper> }
                             </Box>
                         </Grid>
                     </Grid>
