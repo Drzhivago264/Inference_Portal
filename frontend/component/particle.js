@@ -28,7 +28,7 @@ export const ParticleBackground = () => {
     const options = useMemo(
         () => ({
 
-            fpsLimit: 60,
+            fpsLimit: 18,
             interactivity: {
                 events: {
                     onClick: {
@@ -64,18 +64,16 @@ export const ParticleBackground = () => {
                     value: "#ffffff",
                 },
                 links: {
-                    color: "#808080",
-                    distance: 250,
+                    color: "#00FF00",
+                    distance: 180,
                     enable: true,
-                    opacity: 0.5,
+                    opacity: 1,
                     width: 0.5,
                 },
                 move: {
                     direction: "none",
                     enable: true,
-                    outModes: {
-                        default: "bounce",
-                    },
+             
                     random: false,
                     speed: 6,
                     straight: false,
@@ -84,8 +82,8 @@ export const ParticleBackground = () => {
                     density: {
                         enable: true,
                     },
-                    limit: 250,
-                    value: 200,
+                    limit: 150,
+                    value: 150,
                 },
                 opacity: {
                     value: { min: 0.1, max: 1 },
@@ -114,11 +112,11 @@ export const ParticleBackground = () => {
                         image: [
                             {
                                 src: "https://d2f6jmzr77qqg6.cloudfront.net/image/robot-svgrepo-com.svg",
-                                width: 32, // this width is used only for image ratio
-                                height: 32, // this height is used only for image ratio
-                                particles: { /* here you can specify all the particles options you want */
+                                width: 32, 
+                                height: 32,
+                                particles: { 
                                 }
-                            }
+                            },
                         ]
                     },
                     
