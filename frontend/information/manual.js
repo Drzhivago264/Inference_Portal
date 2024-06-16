@@ -11,24 +11,14 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import authentication_en from '../../docs/Manual/en/authentication_en.md'
 import behavior_en from '../../docs/Manual/en/behavior_en.md'
-import behavior_toc_en from '../../docs/Manual/en/behavior_toc_en.md'
 import key_en from '../../docs/Manual/en/create_key_en.md'
-import key_toc_en from '../../docs/Manual/en/create_key_toc_en.md'
 import errorlimit_en from '../../docs/Manual/en/error_ratelimit_en.md'
-import errorlimit_toc_en from '../../docs/Manual/en/error_ratelimit_toc_en.md'
 import inference_en from '../../docs/Manual/en/inference_en.md'
-import inference_toc_en from '../../docs/Manual/en/inference_toc_en.md'
-import authentication_toc_en from '../../docs/Manual/en/authentication_toc_en.md'
 import authentication_vi from '../../docs/Manual/vi/authentication_vi.md'
 import behavior_vi from '../../docs/Manual/vi/behavior_vi.md'
-import behavior_toc_vi from '../../docs/Manual/vi/behavior_toc_vi.md'
 import key_vi from '../../docs/Manual/vi/create_key_vi.md'
-import key_toc_vi from '../../docs/Manual/vi/create_key_toc_vi.md'
 import errorlimit_vi from '../../docs/Manual/vi/error_ratelimit_vi.md'
-import errorlimit_toc_vi from '../../docs/Manual/vi/error_ratelimit_toc_vi.md'
 import inference_vi from '../../docs/Manual/vi/inference_vi.md'
-import inference_toc_vi from '../../docs/Manual/vi/inference_toc_vi.md'
-import authentication_toc_vi from '../../docs/Manual/vi/authentication_toc_vi.md'
 import { useTranslation } from 'react-i18next';
 import { MuiMarkdown, getOverrides } from 'mui-markdown';
 import { Highlight, themes } from 'prism-react-renderer';
@@ -42,9 +32,9 @@ import Alert from '@mui/material/Alert';
 import TableOfContents from '../component/TableofContent';
 import Paper from '@mui/material/Paper';
 
-const retrieveManual = async (destination_refs, doc, default_language, id) => {
+const retrieveManual = async (destination_refs, doc, default_language) => {
     const response = await axios.get(
-        destination_refs[doc][default_language][id]
+        destination_refs[doc][default_language]
     );
     return response.data;
 }
@@ -56,34 +46,32 @@ function Manual() {
     const { doc } = useParams();
     const [default_language, setDefaultLanguage] = useState(i18next.language)
     const [displaydoc, setDisplayDoc] = useState('')
-    const [displaytoc, setDisplayToc] = useState('')
+
     const [selectedIndex, setSelectedIndex] = useState(0);
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
     };
 
-
-
     const destination_refs = {
         key: {
-            "en": [key_en, key_toc_en],
-            "vi": [key_vi, key_toc_vi]
+            "en": key_en,
+            "vi": key_vi
         },
         authentication: {
-            "en": [authentication_en, authentication_toc_en],
-            "vi": [authentication_vi, authentication_toc_vi]
+            "en": authentication_en,
+            "vi": authentication_vi
         },
         inference: {
-            "en": [inference_en, inference_toc_en],
-            "vi": [inference_vi, inference_toc_vi]
+            "en": inference_en,
+            "vi": inference_vi
         },
         errorlimit: {
-            "en": [errorlimit_en, errorlimit_toc_en],
-            "vi": [errorlimit_vi, errorlimit_toc_vi]
+            "en": errorlimit_en,
+            "vi": errorlimit_vi
         },
         behavior: {
-            "en": [behavior_en, behavior_toc_en],
-            "vi": [behavior_vi, behavior_toc_vi]
+            "en": behavior_en,
+            "vi": behavior_vi
         },
     }
     const { t, i18n } = useTranslation();
@@ -94,21 +82,17 @@ function Manual() {
     useEffect(() => {
         setSelectedIndex(Object.keys(destination_refs).indexOf(doc))
     }, []);
-    const docRequest = useQuery(["ManualDocData", destination_refs , doc, default_language], () => retrieveManual(destination_refs, doc, default_language, 0), { staleTime: Infinity, retry: false });
+    const docRequest = useQuery(["ManualDocData", destination_refs , doc, default_language], () => retrieveManual(destination_refs, doc, default_language), { staleTime: Infinity, retry: false });
 
-    const tocRequest = useQuery(["ManualTocData", destination_refs, doc, default_language], () => retrieveManual(destination_refs, doc, default_language, 1), { staleTime: Infinity, retry: false });
+
 
     useEffect(() => {
 
         if (docRequest.status === 'success' && docRequest.data) {
             setDisplayDoc(docRequest.data);
         }
-        if (tocRequest.status === 'success' && docRequest.data) {
-            setDisplayToc(tocRequest.data)
-        }
 
-
-    }, [docRequest.status, tocRequest.status, docRequest.data, tocRequest.data]);
+    }, [docRequest.status, docRequest.data]);
     return (
         <Container maxWidth={false} disableGutters>
             <title>Manual</title>
