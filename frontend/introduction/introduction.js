@@ -36,7 +36,7 @@ function Information() {
 
             <title>Introduction</title>
 
-            <ResponsiveAppBar max_width="xl" timeout={2000} />
+            {videoloaded && <ResponsiveAppBar max_width="xl" timeout={2000} /> }
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={!videoloaded}
@@ -107,7 +107,7 @@ function Information() {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Box maxWidth="md"
-                        mt={{ xs: 18, sm: 20, md: 20, lg: 22 }}
+                        mt={{ xs: 14, sm: 12, md: 10, lg: 16, xl: 22 }}
                     >
                         <Grow in={videoloaded} style={{ transformOrigin: '0 0 0' }} {...(videoloaded ? { timeout: 2000 } : {})}>
 
