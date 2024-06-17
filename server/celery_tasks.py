@@ -375,13 +375,14 @@ def Agent_Inference(key: str,
             ]
         elif current_turn_inner > 0 and current_turn_inner < (max_turns-1):
             prompt = [
-                {'role': 'user', 'content': f'Response: {message}\n'}
+                {'role': 'user', 'content': f'Response: {message}'}
             ]
 
         elif current_turn_inner == (max_turns-1):
             force_stop = "You should directly give results based on history information."
             prompt = [
-                {'role': 'system', 'content': f'Response: {force_stop}\n'}
+                 {'role': 'user', 'content': f'Response: {message}'},
+                {'role': 'system', 'content': f'Response: {force_stop}'}
             ]
         session_history.extend(prompt)
         clean_response = send_agent_request_openai(client=client,

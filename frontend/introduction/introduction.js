@@ -12,7 +12,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import { TypeWriterText } from '../component/animation_text_change'
 import Slide from '@mui/material/Slide';
-import Grow from '@mui/material/Grow';
 import { Stack } from '@mui/material';
 import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
@@ -35,31 +34,34 @@ function Information() {
             <Container maxWidth="xxl"
 
             >
-                <Grid container spacing={1} >
-                    <Grid item lg={12} xl={4}>
-                        <Box ml={2} mt={10}>
+                <Grid container spacing={1} justify="flex-end"
+                    alignItems="center" mt={{ lg:5, xl:0 }} >
+                    <Grid item lg={12} xl={4} >
+                        <Slide direction="right" in={true} timeout={1500} mountOnEnter unmountOnExit>
+                            <Box ml={2}  >
 
-                            <Typography variant='h2' style={{ fontWeight: 600 }}>
-                                What price will you pay for the power of words?
-                            </Typography>
-                            <Typography mt={3} variant='body1'>
-                                We are building a new medium for your voices, and offer you a total control over large language models.
-                            </Typography>
+                                <Typography variant='h2' style={{ fontWeight: 600 }}>
+                                    {t('introduction.introduction_title')}
+                                </Typography>
+                                <Typography mt={3} variant='body1'>
+                                    {t('introduction.introduction_explain')}
+                                </Typography>
 
-                            <Stack mt={5} direction='row' spacing={2}>
-                                <Button variant="contained" size="large" href="/frontend/key-management">
-                                    Get Started
-                                </Button>
-                                <Button variant="outlined" size="large" href="/frontend/manual/key">
-                                    Manual
-                                </Button>
-                            </Stack>
+                                <Stack mt={5} direction='row' spacing={2}>
+                                    <Button variant="contained" size="large" href="/frontend/key-management">
+                                        Get Started
+                                    </Button>
+                                    <Button variant="outlined" size="large" href="/frontend/manual/key">
+                                        Manual
+                                    </Button>
+                                </Stack>
 
-                        </Box>
+                            </Box>
+                        </Slide>
                     </Grid>
                     <Grid item lg={12} xl={8}>
                         <Box mr={2} mt={5} sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
-                            <Slide direction="left" in={true} timeout={1500} mountOnEnter unmountOnExit>
+                            <Slide direction="left" in={true} timeout={1000} mountOnEnter unmountOnExit>
                                 <Paper square={false}>
 
                                     <CardMedia
@@ -77,7 +79,7 @@ function Information() {
                     <Box maxWidth="md"
 
                     >
-                        <Grow style={{ transformOrigin: '0 0 0' }} in={true} timeout={2000}>
+                        <Slide direction="up" in={true} timeout={2000} mountOnEnter unmountOnExit>
 
                             <Stack mt={5} mb={5} direction='column' spacing={5}>
                                 <Paper variant='outlined'>
@@ -223,7 +225,7 @@ function Information() {
                                     </Box>
                                 </Paper>
                             </Stack>
-                        </Grow>
+                        </Slide>
                     </Box>
                 </Box>
 
