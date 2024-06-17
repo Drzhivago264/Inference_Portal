@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
@@ -16,6 +16,8 @@ import { Stack } from '@mui/material';
 import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
 import Grid from '@mui/material/Grid';
+import { ColorModeContext } from '../App';
+
 function Information() {
     const { t, i18n } = useTranslation();
     const [destination, setDestination] = useState(null)
@@ -25,56 +27,56 @@ function Information() {
             navigate(destination, { replace: true })
         }
     }, [destination]);
-
+    const { colorMode, mode, theme } = useContext(ColorModeContext);
     return (
         <Container maxWidth={false} disableGutters>
             <title>Introduction</title>
-            <ResponsiveAppBar max_width="xl" timeout={2000} />
+            <ResponsiveAppBar timeout={2000} max_width={false} />
 
-            <Container maxWidth="xxl"
+            <Container maxWidth="xxl" disableGutters>
+                <Box p={5} style={{ backgroundImage: `url(https://d2f6jmzr77qqg6.cloudfront.net/image/introduction_background_${mode}.svg)`, boxShadow: `0px 0px 36px 36px inset ${theme.palette.background.default}` }}>
+                    <Grid container spacing={1} justify="flex-end"
+                        alignItems="center" mt={{ xs: 5, xl: 0 }} >
+                        <Grid item lg={12} xl={4} >
+                            <Slide direction="right" in={true} timeout={1500} mountOnEnter unmountOnExit>
+                                <Box ml={2}  >
 
-            >
-                <Grid container spacing={1} justify="flex-end"
-                    alignItems="center" mt={{ xs:5, xl:0 }} >
-                    <Grid item lg={12} xl={4} >
-                        <Slide direction="right" in={true} timeout={1500} mountOnEnter unmountOnExit>
-                            <Box ml={2}  >
+                                    <Typography variant='h2' style={{ fontWeight: 600 }}>
+                                        {t('introduction.introduction_title')}
+                                    </Typography>
+                                    <Typography mt={3} variant='body1'>
+                                        {t('introduction.introduction_explain')}
+                                    </Typography>
 
-                                <Typography variant='h2' style={{ fontWeight: 600 }}>
-                                    {t('introduction.introduction_title')}
-                                </Typography>
-                                <Typography mt={3} variant='body1'>
-                                    {t('introduction.introduction_explain')}
-                                </Typography>
+                                    <Stack mt={5} direction='row' spacing={2}>
+                                        <Button variant="contained" size="large" href="/frontend/key-management">
+                                            Get Started (It's Free)
+                                        </Button>
+                                        <Button variant="contained" size="large" href="/frontend/manual/key">
+                                            Manual
+                                        </Button>
+                                    </Stack>
 
-                                <Stack mt={5} direction='row' spacing={2}>
-                                    <Button variant="contained" size="large" href="/frontend/key-management">
-                                        Get Started
-                                    </Button>
-                                    <Button variant="outlined" size="large" href="/frontend/manual/key">
-                                        Manual
-                                    </Button>
-                                </Stack>
-
-                            </Box>
-                        </Slide>
-                    </Grid>
-                    <Grid item lg={12} xl={8}>
-                        <Box mr={2} mt={5} sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
-                            <Slide direction="left" in={true} timeout={1000} mountOnEnter unmountOnExit>
-                                <Paper square={false}>
-
-                                    <CardMedia
-                                        component="img"
-                                        image="https://d2f6jmzr77qqg6.cloudfront.net/image/show_case.png"
-                                        sx={{ objectFit: "contain", borderRadius: '3px', }}
-                                    />
-
-                                </Paper>
+                                </Box>
                             </Slide>
-                        </Box>
+                        </Grid>
+                        <Grid item lg={12} xl={8}>
+                            <Box mr={2} mt={5} mb={5} sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
+                                <Slide direction="left" in={true} timeout={1000} mountOnEnter unmountOnExit>
+                                    <Paper square={false}>
+
+                                        <CardMedia
+                                            component="img"
+                                            image="https://d2f6jmzr77qqg6.cloudfront.net/image/show_case.png"
+                                            sx={{ objectFit: "contain", borderRadius: '3px', }}
+                                        />
+
+                                    </Paper>
+                                </Slide>
+                            </Box>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Box maxWidth="md"
 
