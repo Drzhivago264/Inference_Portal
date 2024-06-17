@@ -35,7 +35,7 @@ function Information() {
 
             >
                 <Grid container spacing={1} justify="flex-end"
-                    alignItems="center" mt={{ lg:5, xl:0 }} >
+                    alignItems="center" mt={{ xs:5, xl:0 }} >
                     <Grid item lg={12} xl={4} >
                         <Slide direction="right" in={true} timeout={1500} mountOnEnter unmountOnExit>
                             <Box ml={2}  >
