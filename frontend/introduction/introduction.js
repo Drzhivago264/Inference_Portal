@@ -7,21 +7,18 @@ import Typography from '@mui/material/Typography';
 import Footer from '../component/footer';
 import { Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import '../component/css/background_video.css'
 import { useTranslation } from 'react-i18next';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import { TypeWriterText } from '../component/animation_text_change'
-import Fade from '@mui/material/Fade';
+import Slide from '@mui/material/Slide';
 import Grow from '@mui/material/Grow';
-import ReactPlayer from "react-player";
-import Backdrop from '@mui/material/Backdrop';
-import { ParticleBackground } from '../component/particle';
 import { Stack } from '@mui/material';
-
+import Button from '@mui/material/Button';
+import CardMedia from '@mui/material/CardMedia';
+import Grid from '@mui/material/Grid';
 function Information() {
     const { t, i18n } = useTranslation();
-    const [videoloaded, setVideoLoaded] = useState(false);
     const [destination, setDestination] = useState(null)
     const navigate = useNavigate();
     useEffect(() => {
@@ -32,86 +29,57 @@ function Information() {
 
     return (
         <Container maxWidth={false} disableGutters>
-
-
             <title>Introduction</title>
+            <ResponsiveAppBar max_width="xl" timeout={2000} />
 
-            {videoloaded && <ResponsiveAppBar max_width="xl" timeout={2000} /> }
-            <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={!videoloaded}
-            >
-            </Backdrop>
-            <div className='player-container'>
-                <div className='video-container'>
-                    <ReactPlayer
-                        style={{ pointerEvents: "none" }}
-                        url={[
-                            { src: "https://d2f6jmzr77qqg6.cloudfront.net/video/introduction_background.mp4", type: 'video/mp4' },
-                            { src: "/static/video/introduction_background.mp4", type: 'video/mp4' },
-                        ]}
-                        className="react-player"
-                        playing={true}
-                        loop={true}
-                        controls={false}
-                        playsinline={true}
-                        muted={true}
-                        width="100%"
-                        height="100%"
-                        onPlay={() => { setVideoLoaded(true) }}
-                    />
-                </div>
-            </div>
-        
-            {videoloaded && <Container maxWidth="lg"
+            <Container maxWidth="xxl"
 
             >
-                   
-                <Box alignItems="center" justifyContent='center' sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
+                <Grid container spacing={1} >
+                    <Grid item lg={12} xl={4}>
+                        <Box ml={2} mt={10}>
 
-                    '& > :not(style)': {
-                        width: 1,
-                        mt: { xs: 12, sm: 12, md: 15, lg: 17 },
-                        height: { xs: "220px", sm: '230px', md: '270px', lg: '180px' },
-                        fontSize: { xs: "1.25em", sm: '1.5em', md: '1.75em' },
+                            <Typography variant='h2' style={{ fontWeight: 600 }}>
+                                What price will you pay for the power of words?
+                            </Typography>
+                            <Typography mt={3} variant='body1'>
+                                We are building a new medium for your voices, and offer you a total control over large language models.
+                            </Typography>
 
-                    },
-                }}>
-                     <ParticleBackground />
-                    <Fade in={videoloaded} timeout={2000}>
-                        <Box display="flex" alignItems="center" sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, .25)' : 'rgba(255, 255, 255, .25)', borderRadius: '12px' }} >
-                            <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '20px', lineHeight: 1.7, }}
-                                sequence={[
-                                    t('introduction.introduction_animation', { returnObjects: true })[0],
-                                    1500,
-                                    t('introduction.introduction_animation', { returnObjects: true })[1],
-                                    1500,
-                                    t('introduction.introduction_animation', { returnObjects: true })[2],
-                                    3000,
-                                    ''
-                                    ,
-                                    () => {
-                                    },
-                                ]}
-                                wrapper="span"
-                                cursor={true}
-                                repeat={Infinity}
-                                speed={120}
-                                deletionSpeed={90}
-                            />
+                            <Stack mt={5} direction='row' spacing={2}>
+                                <Button variant="contained" size="large" href="/frontend/key-management">
+                                    Get Started
+                                </Button>
+                                <Button variant="outlined" size="large" href="/frontend/manual/key">
+                                    Manual
+                                </Button>
+                            </Stack>
 
                         </Box>
-                    </Fade>
-                </Box>
+                    </Grid>
+                    <Grid item lg={12} xl={8}>
+                        <Box mr={2} mt={5} sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
+                            <Slide direction="left" in={true} timeout={1500} mountOnEnter unmountOnExit>
+                                <Paper square={false}>
+
+                                    <CardMedia
+                                        component="img"
+                                        image="/static/image/show_case.png"
+                                        sx={{ objectFit: "contain", borderRadius: '3px', }}
+                                    />
+
+                                </Paper>
+                            </Slide>
+                        </Box>
+                    </Grid>
+                </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Box maxWidth="md"
-                        mt={{ xs: 14, sm: 12, md: 10, lg: 16, xl: 22 }}
-                    >
-                        <Grow in={videoloaded} style={{ transformOrigin: '0 0 0' }} {...(videoloaded ? { timeout: 2000 } : {})}>
 
-                            <Stack mt={5} mb={5}  direction='column' spacing={5}>
+                    >
+                        <Grow style={{ transformOrigin: '0 0 0' }} in={true} timeout={2000}>
+
+                            <Stack mt={5} mb={5} direction='column' spacing={5}>
                                 <Paper variant='outlined'>
                                     <Box mt={2} ml={2} mb={1}>
                                         <Typography variant='h4'>
@@ -181,7 +149,7 @@ function Information() {
                                     <Typography m={2}>
                                         {t('introduction.example_chunk_1')}
                                     </Typography>
-                                    <Box m={1}  sx={{
+                                    <Box m={1} sx={{
                                         display: 'flex',
                                         flexWrap: 'wrap',
                                         '& > :not(style)': {
@@ -259,9 +227,9 @@ function Information() {
                     </Box>
                 </Box>
 
-            </Container >}
-            {videoloaded && <Footer />}
-        
+            </Container >
+            <Footer />
+
         </Container >
     );
 }

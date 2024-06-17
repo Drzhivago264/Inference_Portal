@@ -26,6 +26,7 @@ async def async_agent_inference_with_summary(self) -> None:
         elif self.current_turn == (self.max_turns-1):
             force_stop = "You should directly give results based on history information. You must summary the interview log for the question with no more than 100 words."
             prompt = [
+                {'role': 'user', 'content': f'Response: {self.message}\n'},
                 {'role': 'system', 'content': f'Response: {force_stop}\n'}
             ]
 

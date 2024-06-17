@@ -21,13 +21,14 @@ async def async_agent_inference(self) -> None:
             ]
         elif self.current_turn > 0 and self.current_turn < (self.max_turns-1):
             prompt = [
-                {'role': 'user', 'content': f'Response: {self.message}\n'}
+                {'role': 'user', 'content': f'Response: {self.message}'}
             ]
 
         elif self.current_turn == (self.max_turns-1):
             force_stop = "You should directly give results based on history information."
             prompt = [
-                {'role': 'system', 'content': f'Response: {force_stop}\n'}
+                 {'role': 'user', 'content': f'Response: {self.message}'},
+                {'role': 'system', 'content': f'Response: {force_stop}'}
             ]
         self.session_history.extend(prompt)
         llm = await LLM.objects.aget(name=self.model_type)
