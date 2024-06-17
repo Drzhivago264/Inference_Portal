@@ -1,8 +1,7 @@
 {
-    "introduction_animation": [
-        "We are building a new medium for your voices,",
-        "We are building a new medium for your voices, or the voice that you want to be heard."
-    ],
+    "introduction_title": 
+        "What price will you pay for the power of words?",
+    "introduction_explain": "We are building a new medium for your voices (or the voices that you want to be heard), and offer you a total control over large language models.",
     "about_title": "About",
     "about_chunk_1": "This website is trying to sell you the access to several finetuned/base language models and the tools to interact with them. These language models aim to support:",
     "user_list": [
