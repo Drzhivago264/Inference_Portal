@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { lazy, Suspense } from "react";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -55,16 +55,16 @@ export const ColorModeContext = React.createContext({ toggleColorMode: () => { }
 export const UserContext = React.createContext();
 
 export default function App() {
-  const [mode, setMode] = React.useState('dark');
-  const [is_authenticated, setIsAuthenticated] = React.useState(false)
-  const [user_hashed_key, setUserHashKey] = React.useState(null)
-  const [user_key_name, setUserKeyName] = React.useState(null)
+  const [mode, setMode] = useState('dark');
+  const [is_authenticated, setIsAuthenticated] = useState(false)
+  const [user_hashed_key, setUserHashKey] = useState(null)
+  const [user_key_name, setUserKeyName] = useState(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     check_login(setIsAuthenticated, setUserHashKey, setUserKeyName)
   }, [is_authenticated, user_hashed_key, user_key_name]);
 
-  const colorMode = React.useMemo(
+  const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
         setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
@@ -72,7 +72,7 @@ export default function App() {
     }),
     [],
   );
-  const theme = React.useMemo(
+  const theme = useMemo(
     () =>
       createTheme({
         palette: {

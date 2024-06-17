@@ -48,13 +48,17 @@ function Information() {
                                         {t('introduction.introduction_explain')}
                                     </Typography>
 
-                                    <Stack mt={5} direction='row' spacing={2}>
-                                        <Button variant="contained" size="large" href="/frontend/key-management">
-                                            Get Started (It's Free)
-                                        </Button>
-                                        <Button variant="contained" size="large" href="/frontend/manual/key">
-                                            Manual
-                                        </Button>
+                                    <Stack mt={5} direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                                        <Box>
+                                            <Button variant="contained" size="large" href="/frontend/key-management">
+                                                Get Started for Free
+                                            </Button>
+                                        </Box>
+                                        <Box>
+                                            <Button variant="contained" size="large" href="/frontend/manual/key">
+                                                Manual
+                                            </Button>
+                                        </Box>
                                     </Stack>
 
                                 </Box>
