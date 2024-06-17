@@ -64,7 +64,7 @@ function Information() {
 
                                     <CardMedia
                                         component="img"
-                                        image="/static/image/show_case.png"
+                                        image="https://d2f6jmzr77qqg6.cloudfront.net/image/show_case.png"
                                         sx={{ objectFit: "contain", borderRadius: '3px', }}
                                     />
 
