@@ -17,6 +17,7 @@ import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
 import Grid from '@mui/material/Grid';
 import { ColorModeContext } from '../App';
+import IntroductionVerticalLinearStepper from '../component/IntroductionStepper';
 
 function Information() {
     const { t, i18n } = useTranslation();
@@ -33,7 +34,7 @@ function Information() {
             <title>Introduction</title>
             <ResponsiveAppBar timeout={2000} max_width={false} />
 
-            <Container maxWidth="xxl" disableGutters>
+            <Container maxWidth="xxl" disableGutters sx={{ justifyContent: 'center', alignItems: 'center' }} >
                 <Box p={5} style={{ backgroundImage: `url(https://d2f6jmzr77qqg6.cloudfront.net/image/introduction_background_${mode}.svg)`, boxShadow: `0px 0px 36px 36px inset ${theme.palette.background.default}` }}>
                     <Grid container spacing={1} justify="flex-end"
                         alignItems="center" mt={{ xs: 5, xl: 0 }} >
@@ -81,158 +82,159 @@ function Information() {
                         </Grid>
                     </Grid>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Box maxWidth="md"
-
-                    >
-                        <Slide direction="up" in={true} timeout={2000} mountOnEnter unmountOnExit>
-
-                            <Stack mt={5} mb={5} direction='column' spacing={5}>
-                                <Paper variant='outlined'>
-                                    <Box mt={2} ml={2} mb={1}>
-                                        <Typography variant='h4'>
-                                            {t('introduction.about_title')}
-                                        </Typography>
-                                    </Box>
-                                    <Divider />
-                                    <Box m={2}>
-                                        <Typography >
-                                            {t('introduction.about_chunk_1')}
-                                        </Typography>
-                                        <Box ml={4}>
-                                            <List sx={{ listStyleType: 'disc' }}>
-                                                {t('introduction.user_list', { returnObjects: true }).map(l => (
-                                                    < ListItem key={l} sx={{ display: 'list-item' }} >{l}</ListItem>
-                                                )
-                                                )
-                                                }
-                                            </List>
-                                        </Box>
-                                        <Typography style={{ whiteSpace: 'pre-line' }}>
-                                            {t('introduction.about_chunk_2')}
-                                        </Typography>
-                                    </Box>
-                                </Paper>
-                                <Paper variant='outlined'>
-                                    <Box mt={2} ml={2} mb={1} >
-                                        <Typography variant='h4'>
-                                            {t('introduction.tool_title')}
-                                        </Typography>
-                                    </Box>
-                                    <Divider />
-                                    <Box m={2}>
-                                        <Typography >
-                                            {t('introduction.tool_chunk_1')}
-                                        </Typography>
-                                        <Box ml={4}>
-                                            <List sx={{ listStyleType: 'disc' }}>
-                                                {t('introduction.tool_list', { returnObjects: true }).map(l => (
-                                                    < ListItem key={l} sx={{ display: 'list-item' }} >{l}</ListItem>
-                                                )
-                                                )
-                                                }
-                                            </List>
-                                        </Box>
-                                        <Typography >
-                                            {t('introduction.tool_chunk_2')}
-                                        </Typography>
-                                        <Box ml={4}>
-                                            <List sx={{ listStyleType: 'disc' }}>
-                                                {t('introduction.call_to_act_list', { returnObjects: true }).map(l => (
-                                                    < ListItem key={l} sx={{ display: 'list-item' }} >{l}</ListItem>
-                                                )
-                                                )
-                                                }
-                                            </List>
-                                        </Box>
-                                    </Box>
-                                </Paper>
-                                <Paper variant='outlined'>
-                                    <Box mt={2} ml={2} mb={1} >
-                                        <Typography variant='h4'>
-                                            {t('introduction.example_title')}
-                                        </Typography>
-                                    </Box>
-                                    <Divider />
-                                    <Typography m={2}>
-                                        {t('introduction.example_chunk_1')}
-                                    </Typography>
-                                    <Box m={1} sx={{
-                                        display: 'flex',
-                                        flexWrap: 'wrap',
-                                        '& > :not(style)': {
-                                            width: 1,
-                                            height: { xs: "250px" },
-                                            overflow: 'auto',
-                                            fontSize: { xs: "1em" }
-                                        }
-                                    }}>
-
-                                        <Paper variant="outlined">
-                                            <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
-                                                {t('introduction.example_1')}
-                                            </Typography>
-                                            <Divider></Divider>
-
-                                            <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
-                                                sequence={[
-                                                    t('introduction.example_1_answer'),
-                                                    3000,
-                                                    ''
-                                                    ,
-                                                    () => {
-                                                    },
-                                                ]}
-                                                wrapper="span"
-                                                cursor={true}
-                                                repeat={Infinity}
-                                                speed={120}
-                                                deletionSpeed={90}
-                                            />
-
+                <Box maxWidth='xxl' justifyContent="center" >
+                    <Grid container spacing={2} maxWidth="lg" m="auto">
+                        <Grid item xs={8}>
+                            <Box >
+                                <Slide direction="up" in={true} timeout={2000} mountOnEnter unmountOnExit>
+                                    <Stack mt={5} mb={5} direction='column' spacing={5}>
+                                        <Paper variant='outlined'>
+                                            <Box mt={2} ml={2} mb={1}>
+                                                <Typography variant='h4'>
+                                                    {t('introduction.about_title')}
+                                                </Typography>
+                                            </Box>
+                                            <Divider />
+                                            <Box m={2}>
+                                                <Typography >
+                                                    {t('introduction.about_chunk_1')}
+                                                </Typography>
+                                                <Box ml={4}>
+                                                    <List sx={{ listStyleType: 'disc' }}>
+                                                        {t('introduction.user_list', { returnObjects: true }).map(l => (
+                                                            < ListItem key={l} sx={{ display: 'list-item' }} >{l}</ListItem>
+                                                        )
+                                                        )
+                                                        }
+                                                    </List>
+                                                </Box>
+                                                <Typography style={{ whiteSpace: 'pre-line' }}>
+                                                    {t('introduction.about_chunk_2')}
+                                                </Typography>
+                                            </Box>
                                         </Paper>
-                                    </Box>
-
-                                    <Typography m={2}>
-                                        {t('introduction.example_chunk_2')}
-                                    </Typography>
-                                    <Box m={1} sx={{
-                                        display: 'flex',
-                                        flexWrap: 'wrap',
-                                        '& > :not(style)': {
-                                            width: 1,
-                                            height: { xs: "250px" },
-                                            overflow: 'auto',
-                                            fontSize: { xs: "1em" }
-                                        }
-                                    }}>
-                                        <Paper variant="outlined">
-                                            <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
-                                                {t('introduction.example_2')}
-                                            </Typography>
-                                            <Divider></Divider>
-                                            <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
-                                                sequence={[
-                                                    t('introduction.example_2_answer'),
-                                                    3000,
-                                                    ''
-                                                    ,
-                                                    () => {
-                                                    },
-                                                ]}
-                                                wrapper="span"
-                                                cursor={true}
-                                                repeat={Infinity}
-                                                speed={120}
-                                                deletionSpeed={90}
-                                            />
-
+                                        <Paper variant='outlined'>
+                                            <Box mt={2} ml={2} mb={1} >
+                                                <Typography variant='h4'>
+                                                    {t('introduction.tool_title')}
+                                                </Typography>
+                                            </Box>
+                                            <Divider />
+                                            <Box m={2}>
+                                                <Typography >
+                                                    {t('introduction.tool_chunk_1')}
+                                                </Typography>
+                                                <Box ml={4}>
+                                                    <List sx={{ listStyleType: 'disc' }}>
+                                                        {t('introduction.tool_list', { returnObjects: true }).map(l => (
+                                                            < ListItem key={l} sx={{ display: 'list-item' }} >{l}</ListItem>
+                                                        )
+                                                        )
+                                                        }
+                                                    </List>
+                                                </Box>
+                                                <Typography >
+                                                    {t('introduction.tool_chunk_2')}
+                                                </Typography>
+                                            </Box>
                                         </Paper>
-                                    </Box>
-                                </Paper>
-                            </Stack>
-                        </Slide>
-                    </Box>
+                                        <Paper variant='outlined'>
+                                            <Box mt={2} ml={2} mb={1} >
+                                                <Typography variant='h4'>
+                                                    {t('introduction.example_title')}
+                                                </Typography>
+                                            </Box>
+                                            <Divider />
+                                            <Typography m={2}>
+                                                {t('introduction.example_chunk_1')}
+                                            </Typography>
+                                            <Box m={1} sx={{
+                                                display: 'flex',
+                                                flexWrap: 'wrap',
+                                                '& > :not(style)': {
+                                                    width: 1,
+                                                    height: { xs: "250px" },
+                                                    overflow: 'auto',
+                                                    fontSize: { xs: "1em" }
+                                                }
+                                            }}>
+
+                                                <Paper variant="outlined">
+                                                    <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                                                        {t('introduction.example_1')}
+                                                    </Typography>
+                                                    <Divider></Divider>
+
+                                                    <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+                                                        sequence={[
+                                                            t('introduction.example_1_answer'),
+                                                            3000,
+                                                            ''
+                                                            ,
+                                                            () => {
+                                                            },
+                                                        ]}
+                                                        wrapper="span"
+                                                        cursor={true}
+                                                        repeat={Infinity}
+                                                        speed={120}
+                                                        deletionSpeed={90}
+                                                    />
+
+                                                </Paper>
+                                            </Box>
+
+                                            <Typography m={2}>
+                                                {t('introduction.example_chunk_2')}
+                                            </Typography>
+                                            <Box m={1} sx={{
+                                                display: 'flex',
+                                                flexWrap: 'wrap',
+                                                '& > :not(style)': {
+                                                    width: 1,
+                                                    height: { xs: "250px" },
+                                                    overflow: 'auto',
+                                                    fontSize: { xs: "1em" }
+                                                }
+                                            }}>
+                                                <Paper variant="outlined">
+                                                    <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                                                        {t('introduction.example_2')}
+                                                    </Typography>
+                                                    <Divider></Divider>
+                                                    <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+                                                        sequence={[
+                                                            t('introduction.example_2_answer'),
+                                                            3000,
+                                                            ''
+                                                            ,
+                                                            () => {
+                                                            },
+                                                        ]}
+                                                        wrapper="span"
+                                                        cursor={true}
+                                                        repeat={Infinity}
+                                                        speed={120}
+                                                        deletionSpeed={90}
+                                                    />
+
+                                                </Paper>
+                                            </Box>
+                                        </Paper>
+                                    </Stack>
+                                </Slide>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <Slide direction="up" in={true} timeout={2000} mountOnEnter unmountOnExit>
+                                <Box mt={5} mb={5}>
+                                    <IntroductionVerticalLinearStepper />
+                                </Box>
+                            </Slide>
+                        </Grid>
+
+                    </Grid>
+
                 </Box>
 
             </Container >
