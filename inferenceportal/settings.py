@@ -134,7 +134,7 @@ USE_TZ = True
 if DEBUG:
   STATIC_URL = 'static/' # Don't break local dev
 else:
-  STATIC_URL = 'https://d2f6jmzr77qqg6.cloudfront.net/'
+  STATIC_URL = 'https://static.professorparakeet.com/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
