@@ -35,7 +35,7 @@ function Information() {
             <ResponsiveAppBar timeout={2000} max_width={false} />
 
             <Container maxWidth="xxl" disableGutters sx={{ justifyContent: 'center', alignItems: 'center' }} >
-                <Box p={5} style={{ backgroundImage: `url(https://d2f6jmzr77qqg6.cloudfront.net/image/introduction_background_${mode}.svg)`, boxShadow: `0px 0px 36px 36px inset ${theme.palette.background.default}` }}>
+                <Box p={5} style={{ backgroundImage: `url(https://static.professorparakeet.com/image/introduction_background_${mode}.svg)`, boxShadow: `0px 0px 36px 36px inset ${theme.palette.background.default}` }}>
                     <Grid container spacing={1} justify="flex-end"
                         alignItems="center" mt={{ xs: 5, xl: 0 }} >
                         <Grid item lg={12} xl={4} >
@@ -72,7 +72,7 @@ function Information() {
 
                                         <CardMedia
                                             component="img"
-                                            image="https://d2f6jmzr77qqg6.cloudfront.net/image/show_case.png"
+                                            image="https://static.professorparakeet.com/image/show_case.png"
                                             sx={{ objectFit: "contain", borderRadius: '3px', }}
                                         />
 
