@@ -157,6 +157,7 @@ function Hotpot() {
     }, [socket_destination]);
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
+            e.preventDefault()
             if (duplicatemessage) {
                 submitChat()
                 submitAgent()

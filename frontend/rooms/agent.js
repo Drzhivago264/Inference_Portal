@@ -262,6 +262,7 @@ function Agent() {
 
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
+            e.preventDefault()
             submitChat()
         }
     }

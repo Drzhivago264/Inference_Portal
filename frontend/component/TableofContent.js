@@ -2,7 +2,6 @@ import '../component/css/TableofContent.css'
 import React, { useState, useEffect, useRef } from 'react';
 const useHeadingsData = (mdfile) => {
     const [nestedHeadings, setNestedHeadings] = useState([]);
-    console.log(mdfile)
     useEffect(() => {
         const headingElements = Array.from(
             document.querySelectorAll("h2, h3")
@@ -12,7 +11,6 @@ const useHeadingsData = (mdfile) => {
         const newNestedHeadings = getNestedHeadings(headingElements);
         setNestedHeadings(newNestedHeadings);
     }, [mdfile]);
-    console.log(nestedHeadings)
     return { nestedHeadings };
 };
 

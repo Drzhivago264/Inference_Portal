@@ -10,6 +10,7 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TwitterIcon from '@mui/icons-material/X';
 import { useTranslation } from 'react-i18next';
 import i18next from "i18next";
+import { useNavigate } from 'react-router-dom';
 function Copyright() {
 
     return (
@@ -22,6 +23,7 @@ function Copyright() {
 }
 export default function Footer() {
     const { t, i18n } = useTranslation();
+    const navigate = useNavigate()
     return (
         <Container maxWidth="xl"
             sx={{
@@ -50,21 +52,38 @@ export default function Footer() {
                     }}
                 >
                     <Box sx={{ width: { xs: '100%', sm: '100%' } }}>
-                        <Typography
-                            variant="h6"
-                            noWrap
-                            component="a"
-                            href="/"
-                            sx={{
-                                mr: 2,
-                                display: { xs: 'none', md: 'flex' },
-                                fontWeight: 700,
-                                color: 'inherit',
-                                textDecoration: 'none',
-                            }}
-                        >
-                            {t('navbar.Prof_Parakeet')}
-                        </Typography>
+                        <Stack direction="row" alignItems="center"
+                            justifyContent="center">
+
+                            <Box
+                                component="img"
+                                sx={{
+                                    height: 128,
+                                    width: 128,
+                                }}
+                                onClick={(e)=>{navigate("/")}}
+                                alt="Big Logo."
+                                src="https://static.professorparakeet.com/image/compressed_parakeet.png"
+                            />
+                            <Typography
+                                variant="h6"
+                                noWrap
+                                component="a"
+                                onClick={(e)=>{navigate("/")}}
+                                sx={{
+
+                                    mr: 2,
+                                    display: { xs: 'none', md: 'flex' },
+                                    fontWeight: 700,
+                                    color: 'inherit',
+                                    textDecoration: 'none',
+                                }}
+
+                            >
+
+                                {t('navbar.Prof_Parakeet')}
+                            </Typography>
+                        </Stack>
                     </Box>
                 </Box>
                 <Box
@@ -95,13 +114,13 @@ export default function Footer() {
                     }}
                 >
                     <Typography variant="body2" fontWeight={600}>
-                    {t('navbar.Money_Talks')}
+                        {t('navbar.Money_Talks')}
                     </Typography>
                     <Link color="text.secondary" href="/frontend/key-management">
                         {t('navbar.Manage_Key')}
                     </Link>
                     <Link color="text.secondary" href="/frontend/model">
-                    {t('navbar.Pricing')}
+                        {t('navbar.Pricing')}
                     </Link>
                 </Box>
                 <Box
