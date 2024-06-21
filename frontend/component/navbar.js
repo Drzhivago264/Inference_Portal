@@ -25,7 +25,6 @@ const grey = Constant_Colours.grey;
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Avatar from '@mui/material/Avatar';
-import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import { ColorModeContext, UserContext } from '../App.js'
 import { Divider, Stack } from '@mui/material';
 import Badge from '@mui/material/Badge';
@@ -276,13 +275,21 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
             >
               <MenuIcon />
             </IconButton>
+            <Avatar
+              alt="logo"
+              src="https://static.professorparakeet.com/image/android-chrome-192x192.png"
+              onClick={(e)=>{navigate("/")}}
+              sx={{ width: 42, height: 42 }}
+              variant="rounded"
+            />
             <Typography
               variant="h6"
               noWrap
               component="a"
-              href="/"
+              onClick={(e)=>{navigate("/")}}
               sx={{
-                mr: 2,
+                mr: 1,
+                mt:0.75,
                 fontWeight: 700,
                 color: 'inherit',
                 textDecoration: 'none',
@@ -360,7 +367,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
                   </Button>
                 </Box>
                 <Box>
-                  <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+                  <IconButton aria-label="color-mode" onClick={colorMode.toggleColorMode} color="inherit">
                     {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
                   </IconButton>
                 </Box>

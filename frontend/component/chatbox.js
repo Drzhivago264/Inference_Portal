@@ -107,7 +107,7 @@ export const ChatBox = ({
                         value={usermessage}
                         error={usermessageError}
                         onChange={e => setUserMessage(e.target.value)}
-                        onKeyUp={e => handleEnter(e)}
+                        onKeyPress={e => handleEnter(e)}
                         minRows={4}
                         variant="standard"
                         InputProps={{
@@ -220,7 +220,7 @@ export const ChatBoxHotpot = ({
                         value={usermessage}
                         error={usermessageError}
                         onChange={e => { setUserMessage(e.target.value); check_duplicate_message(e.target.value) }}
-                        onKeyUp={e => handleEnter(e)}
+                        onKeyPress={e => handleEnter(e)}
                         minRows={4}
                         variant="standard"
                         InputProps={{

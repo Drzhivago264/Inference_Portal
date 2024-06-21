@@ -92,6 +92,7 @@ function Chat() {
 
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
+            e.preventDefault()
             submitChat()
         }
     }

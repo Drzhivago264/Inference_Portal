@@ -41,7 +41,6 @@ function Information() {
                         <Grid item lg={12} xl={4} >
                             <Slide direction="right" in={true} timeout={1500} mountOnEnter unmountOnExit>
                                 <Box ml={2}  >
-
                                     <Typography variant='h2' style={{ fontWeight: 600 }}>
                                         {t('introduction.introduction_title')}
                                     </Typography>
@@ -229,7 +228,7 @@ function Information() {
                             <Grid item sm={12} md={4}  >
                                 <Slide direction="up" in={true} timeout={2000} mountOnEnter unmountOnExit sx={{ display: { xs: 'none', md: 'block' } }}>
                                     <Box mt={3} mb={5} >
-                                        <IntroductionVerticalLinearStepper />
+                                        <IntroductionVerticalLinearStepper t={t}/>
                                     </Box>
                                 </Slide>
                             </Grid>
