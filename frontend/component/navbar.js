@@ -289,7 +289,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               onClick={(e)=>{navigate("/")}}
               sx={{
                 mr: 1,
-                mt:0.75,
+                mt:0.55,
                 fontWeight: 700,
                 color: 'inherit',
                 textDecoration: 'none',

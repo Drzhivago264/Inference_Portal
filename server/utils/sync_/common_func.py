@@ -503,20 +503,22 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
     hashed_key = key_object.hashed_key
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(
         raw_prompt, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT)
+
     if not agent_availability:
         max_history_length = constant.MAX_HISTORY_LENGTH[model]
     else:
         max_history_length = constant.MAX_HISTORY_LENGTH["openai"]
     full_instruct_list = []
     for mess in message_list_vector:
-        full_instruct_list += [
-            {'role': 'user', 'content': f'{mess.content_object.prompt}'},
-            {'role': 'assistant', 'content': f'{mess.content_object.response}'}
-        ]
-        current_history_length += len(tokeniser.encode(
-            mess.content_object.prompt + " " + mess.content_object.response))
-        if current_history_length > int(max_history_length):
-            full_instruct_list = full_instruct_list[:-2 or None]
+        if mess.distance <= constant.DEFAULT_MAX_DISTANCE:
+            full_instruct_list += [
+                {'role': 'user', 'content': f'{mess.content_object.prompt}'},
+                {'role': 'assistant', 'content': f'{mess.content_object.response}'}
+            ]
+            current_history_length += len(tokeniser.encode(
+                mess.content_object.prompt + " " + mess.content_object.response))
+            if current_history_length > int(max_history_length):
+                full_instruct_list = full_instruct_list[:-2 or None]
     return full_instruct_list
 
 

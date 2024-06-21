@@ -66,13 +66,14 @@ export default function Footer() {
                                 src="https://static.professorparakeet.com/image/apple-touch-icon.png"
                             />
                             <Typography
-                                variant="h6"
+                                variant="h4"
                                 noWrap
                                 component="a"
                                 onClick={(e)=>{navigate("/")}}
                                 sx={{
 
                                     mr: 2,
+                                    ml: 2,
                                     display: { xs: 'none', md: 'flex' },
                                     fontWeight: 700,
                                     color: 'inherit',
