@@ -63,7 +63,7 @@ export default function Footer() {
                                 }}
                                 onClick={(e)=>{navigate("/")}}
                                 alt="Big Logo."
-                                src="https://static.professorparakeet.com/image/compressed_parakeet.png"
+                                src="https://static.professorparakeet.com/image/apple-touch-icon.png"
                             />
                             <Typography
                                 variant="h6"
