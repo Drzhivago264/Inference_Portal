@@ -8,7 +8,7 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
-import { check_login, logout } from './component/check_login';
+import { check_login, logout } from './component/checkLogin.js';
 import GlobalStyles from "@mui/material/GlobalStyles";
 const ModelInfor = lazy(() => import("./information/model.js"));
 const Hub = lazy(() => import("./rooms/redirect.js"));
@@ -26,6 +26,7 @@ const PaymentSuccess = lazy(() => import("./key_management/payment_success.js"))
 const Login = lazy(() => import("./key_management/login.js"))
 const UserInstruction = lazy(() => import("./rooms/user_instruction.js"))
 const CostMonitoring = lazy(() => import("./key_management/cost_monitoring.js"))
+const DataSynthesis = lazy(()=> import("./rooms/data_synthesis.js"))
 import { AwsRum } from 'aws-rum-web';
 try {
   const config = {
@@ -127,7 +128,8 @@ export default function App() {
 
               <Route path="/frontend/manual" element={<ManualPage />} />
               <Route path="/frontend/cost-monitoring" element={<CostMonitoringPage />} />
-              <Route path="/frontend/user-instruction" element={<UserInstructionPage />} />
+              <Route path="/frontend/user-instruction/:keyhash" element={<UserInstructionPage />} />
+              <Route path="/frontend/data-synthesis/:keyhash" element={<DataSynthesisPage />} />
               <Route path="/frontend/manual/:doc" element={<ManualPage />} />
               <Route path="/frontend/api/docs" element={<APIDocPage />} />
               <Route path="/frontend/model" element={<ModelInforPage />} />
@@ -243,5 +245,11 @@ const UserInstructionPage = () => (
 const CostMonitoringPage = () => (
   <Suspense fallback={<LinearProgress />}>
     <CostMonitoring />
+  </Suspense>
+);
+
+const DataSynthesisPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <DataSynthesis />
   </Suspense>
 );

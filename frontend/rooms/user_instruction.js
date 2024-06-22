@@ -5,8 +5,8 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from '../component/navbar';
-import Footer from '../component/footer';
+import ResponsiveAppBar from '../component/Navbar';
+import Footer from '../component/Footer';
 import { Divider, List, Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -27,12 +27,12 @@ import { getCookie } from '../component/getCookie';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Snackbar from '@mui/material/Snackbar';
 import { nanoid } from 'nanoid'
-import { ChatBox } from '../component/chatbox';
+import { ChatBox } from '../component/Chatbox';
 import { styled } from '@mui/material/styles';
-import { agentsocket } from '../component/chatsocket';
+import { agentsocket } from '../component/ChatSocket';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { OpenAPIParameter } from '../component/chatroom_parameters';
+import { OpenAPIParameter } from '../component/ChatroomParameters';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 500,
@@ -443,8 +443,7 @@ function UserInstruction() {
                                     </IconButton>}
                                 </Box>
                             </List>
-                            <Divider />
-                            <Box m={1}>
+              
                                 <OpenAPIParameter
                                     top_p={top_p}
                                     agent_objects={agent_objects}
@@ -464,7 +463,7 @@ function UserInstruction() {
 
                                 >
                                 </OpenAPIParameter>
-                            </Box>
+                            
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={6}>

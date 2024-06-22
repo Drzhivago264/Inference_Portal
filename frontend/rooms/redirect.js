@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import KeyIcon from '@mui/icons-material/Key';
 import InputAdornment from '@mui/material/InputAdornment';
-import ResponsiveAppBar from '../component/navbar.js';
+import ResponsiveAppBar from '../component/Navbar.js';
 import { Link, useNavigate } from "react-router-dom";
 import { FormControl, FormLabel } from '@mui/material';
 import Alert from '@mui/material/Alert';
@@ -15,7 +15,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
 import Divider from '@mui/material/Divider';
-import Footer from '../component/footer.js';
+import Footer from '../component/Footer.js';
 import { UserContext } from '../App.js'
 import { getCookie } from '../component/getCookie.js';
 import Skeleton from '@mui/material/Skeleton';
@@ -27,7 +27,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { useTheme } from "@mui/material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Snackbar from '@mui/material/Snackbar';
-
+import { RedirectMediaCards } from '../component/RedirectMediaCard.js';
 
 function Hub() {
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
@@ -46,7 +46,7 @@ function Hub() {
     const [image_2_loaded, setImage2Load] = useState(false)
     const [image_3_loaded, setImage3Load] = useState(false)
     const [image_4_loaded, setImage4Load] = useState(false)
-
+    const [image_5_loaded, setImage5Load] = useState(false)
     const handleCloseSnack = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -214,154 +214,52 @@ function Hub() {
                         </Grid>
                         }
                         <Grid item md={12} lg={12}>
-                            <Box m={1}>
-                                <CardActionArea onClick={() => { redirect('chat') }}>
-                                    <Card sx={{ display: 'flex' }}>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                            <CardContent sx={{ flex: '1 0 auto' }}>
-                                                <Typography component="div" variant="h5">
-                                                    {t('redirect.Chatbot_Mode')}
-                                                </Typography>
-                                                <Typography variant="subtitle1"
-                                                    sx={{
-                                                        display: '-webkit-box',
-                                                        overflow: 'hidden',
-                                                        WebkitBoxOrient: 'vertical',
-                                                        WebkitLineClamp: 5,
-                                                    }} color="text.secondary" component="div">
-                                                    {t('redirect.Chatbot_Mode_Content')}
-                                                </Typography>
-                                            </CardContent>
-
-                                            <CardActions >
-                                                <Button component="span" size="small" color="primary">
-                                                    {t('redirect.Redirect')}
-                                                </Button>
-                                            </CardActions>
-                                        </Box>
-                                        {!image_1_loaded && <CardMedia sx={{ width: 200, height: 200 }}>
-                                            <Skeleton animation="wave" height={200} width={200} />
-                                        </CardMedia>}
-                                        <CardMedia
-                                            component="img"
-                                            sx={{ width: 200, display: image_1_loaded ? "block" : "none" }}
-                                            image="https://static.professorparakeet.com/image/robot_line.jpg"
-                                            onLoad={() => { setImage1Load(true) }}
-                                        />
-                                    </Card>
-                                </CardActionArea>
-                            </Box>
-                            <Box m={1}>
-                                <CardActionArea onClick={() => { redirect('engineer') }}>
-                                    <Card sx={{ display: 'flex' }}>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                            <CardContent sx={{ flex: '1 0 auto' }}>
-                                                <Typography component="div" variant="h5">
-                                                    {t('redirect.Agent_Mode')}
-                                                </Typography>
-                                                <Typography variant="subtitle1"
-                                                    sx={{
-                                                        display: '-webkit-box',
-                                                        overflow: 'hidden',
-                                                        WebkitBoxOrient: 'vertical',
-                                                        WebkitLineClamp: 5,
-                                                    }}
-                                                    color="text.secondary" component="div">
-                                                    {t('redirect.Agent_Mode_Content')}
-                                                </Typography>
-                                            </CardContent>
-                                            <CardActions>
-                                                <Button component="span" size="small" color="primary">
-                                                    {t('redirect.Redirect')}
-                                                </Button>
-                                            </CardActions>
-                                        </Box>
-                                        {!image_2_loaded && <CardMedia sx={{ width: 200, height: 200 }}>
-                                            <Skeleton animation="wave" height={200} width={200} />
-                                        </CardMedia>}
-                                        <CardMedia
-                                            component="img"
-                                            sx={{ width: 200, display: image_2_loaded ? "block" : "none" }}
-                                            image="https://static.professorparakeet.com/image/Robot_folow_instruct.jpg"
-                                            onLoad={() => { setImage2Load(true) }}
-                                        />
-                                    </Card>
-                                </CardActionArea>
-                            </Box>
-                            <Box m={1}>
-                                <CardActionArea onClick={() => { redirect('toolbox') }}>
-                                    <Card sx={{ display: 'flex' }}>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                            <CardContent sx={{ flex: '1 0 auto' }}>
-                                                <Typography component="div" variant="h5">
-                                                    {t('redirect.LLM_Functions')}
-                                                </Typography>
-                                                <Typography variant="subtitle1" sx={{
-                                                    display: '-webkit-box',
-                                                    overflow: 'hidden',
-                                                    WebkitBoxOrient: 'vertical',
-                                                    WebkitLineClamp: 5,
-                                                }}
-                                                    color="text.secondary" component="div">
-                                                    {t('redirect.LLM_Functions_Content')}
-                                                </Typography>
-                                            </CardContent>
-                                            <CardActions>
-                                                <Button component="span" size="small" color="primary">
-                                                    {t('redirect.Redirect')}
-                                                </Button>
-                                            </CardActions>
-                                        </Box>
-                                        {!image_3_loaded && <CardMedia sx={{ width: 200, height: 200 }}>
-                                            <Skeleton animation="wave" height={200} width={200} />
-                                        </CardMedia>}
-                                        <CardMedia
-                                            component="img"
-                                            sx={{ width: 200, display: image_3_loaded ? "block" : "none" }}
-                                            image="https://static.professorparakeet.com/image/Robot_label.jpg"
-                                            onLoad={() => { setImage3Load(true) }}
-                                        />
-
-                                    </Card>
-                                </CardActionArea>
-                            </Box>
-                            <Box m={1}>
-                                <CardActionArea onClick={() => { redirect('hotpot') }}>
-                                    <Card sx={{ display: 'flex' }}>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                            <CardContent sx={{ flex: '1 0 auto' }}>
-                                                <Typography component="div" variant="h5">
-                                                    {t('redirect.Hotpot_Mode')}
-                                                </Typography>
-                                                <Typography
-                                                    sx={{
-                                                        display: '-webkit-box',
-                                                        overflow: 'hidden',
-                                                        WebkitBoxOrient: 'vertical',
-                                                        WebkitLineClamp: 5,
-                                                    }}
-                                                    variant="subtitle1" color="text.secondary" component="div">
-                                                    {t('redirect.Hotpot_Mode_Content')}
-                                                </Typography>
-                                            </CardContent>
-                                            <CardActions>
-                                                <Button component="span" size="small" color="primary">
-                                                    {t('redirect.Redirect')}
-                                                </Button>
-                                            </CardActions>
-                                        </Box>
-                                        {!image_4_loaded && <CardMedia sx={{ width: 200, height: 200 }}>
-                                            <Skeleton animation="wave" height={200} width={200} />
-                                        </CardMedia>}
-                                        <CardMedia
-                                            component="img"
-                                            sx={{ width: 200, display: image_4_loaded ? "block" : "none" }}
-                                            image="https://static.professorparakeet.com/image/face_to_face.jpeg"
-                                            onLoad={() => { setImage4Load(true) }}
-                                        />
-                                    </Card>
-                                </CardActionArea>
-                            </Box>
+                        <RedirectMediaCards
+                                image_link={"https://static.professorparakeet.com/image/robot_line.jpg"}
+                                redirect={redirect}
+                                destination={'chat'}
+                                image_loaded={image_1_loaded}
+                                setImageLoad={setImage1Load}
+                                t={t}
+                                name={'Chatbot_Mode'}
+                            />
+                            <RedirectMediaCards
+                                image_link={"https://static.professorparakeet.com/image/Robot_folow_instruct.jpg"}
+                                redirect={redirect}
+                                destination={'engineer'}
+                                image_loaded={image_2_loaded}
+                                setImageLoad={setImage2Load}
+                                t={t}
+                                name={'Agent_Mode'}
+                            />
+                            <RedirectMediaCards
+                                image_link={"https://static.professorparakeet.com/image/Robot_label.jpg"}
+                                redirect={redirect}
+                                destination={'toolbox'}
+                                image_loaded={image_3_loaded}
+                                setImageLoad={setImage3Load}
+                                t={t}
+                                name={'LLM_Functions'}
+                            />
+                            <RedirectMediaCards
+                                image_link={"https://static.professorparakeet.com/image/face_to_face.jpeg"}
+                                redirect={redirect}
+                                destination={'hotpot'}
+                                image_loaded={image_4_loaded}
+                                setImageLoad={setImage4Load}
+                                t={t}
+                                name={'Hotpot_Mode'}
+                            />
+                            <RedirectMediaCards
+                                image_link={"/static/image/data_synthesis.jpg"}
+                                redirect={redirect}
+                                destination={'data-synthesis'}
+                                image_loaded={image_5_loaded}
+                                setImageLoad={setImage5Load}
+                                t={t}
+                                name={'Data_Synthesis'}
+                            />
+                           
 
                         </Grid>
                     </Grid>

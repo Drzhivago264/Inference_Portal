@@ -11,14 +11,14 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import ResponsiveAppBar from '../component/navbar';
-import { OpenAPIParameter } from '../component/chatroom_parameters'
-import { ChatBox } from '../component/chatbox';
-import { chatsocket } from '../component/chatsocket';
-import { ChatExport } from '../component/chat_export';
-import Footer from '../component/footer';
+import ResponsiveAppBar from '../component/Navbar.js';
+import { OpenAPIParameter } from '../component/ChatroomParameters.js'
+import { ChatBox } from '../component/Chatbox.js';
+import { chatsocket } from '../component/ChatSocket.js';
+import { ChatExport } from '../component/chatExport.js';
+import Footer from '../component/Footer.js';
 import Typography from '@mui/material/Typography';
-import { redirect_anon_to_login } from '../component/check_login';
+import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
 import { UserContext } from '../App.js'
 

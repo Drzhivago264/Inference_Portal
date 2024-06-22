@@ -7,7 +7,7 @@ import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from '../component/navbar.js';
+import ResponsiveAppBar from '../component/Navbar.js';
 import Alert from '@mui/material/Alert';
 import KeyIcon from '@mui/icons-material/Key';
 import Link from '@mui/material/Link';
@@ -34,14 +34,14 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import { saveAs } from "file-saver";
 import { RandomReveal } from 'react-random-reveal'
 import SvgIcon from '@mui/material/SvgIcon';
-import Footer from '../component/footer.js';
+import Footer from '../component/Footer.js';
 import {
     createTheme,
     responsiveFontSizes,
     ThemeProvider,
 } from '@mui/material/styles';
 import AlertTitle from '@mui/material/AlertTitle';
-import { logout } from '../component/check_login.js';
+import { logout } from '../component/checkLogin.js';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';

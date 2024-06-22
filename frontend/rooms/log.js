@@ -3,8 +3,8 @@ import $ from 'jquery'
 
 import React, { useEffect, useRef, useState, useContext } from "react"
 import Container from '@mui/material/Container';
-import ResponsiveAppBar from '../component/navbar';
-import Footer from '../component/footer';
+import ResponsiveAppBar from '../component/Navbar.js';
+import Footer from '../component/Footer.js';
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import * as pdfMake from 'pdfmake/build/pdfmake.min';
 import JSZip from 'jszip';
@@ -18,7 +18,7 @@ import 'datatables.net-buttons/js/buttons.print.mjs';
 require('../component/css/dataTables.dataTables.css')
 require('../component/css/buttons.dataTables.css')
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
-import { redirect_anon_to_login } from '../component/check_login';
+import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
 import { UserContext } from '../App.js'
 function Log() {

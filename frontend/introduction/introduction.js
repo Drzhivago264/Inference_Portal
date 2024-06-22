@@ -2,15 +2,15 @@ import React, { useState, useEffect, useContext } from 'react';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import ResponsiveAppBar from '../component/navbar';
+import ResponsiveAppBar from '../component/Navbar';
 import Typography from '@mui/material/Typography';
-import Footer from '../component/footer';
+import Footer from '../component/Footer';
 import { Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import { TypeWriterText } from '../component/animation_text_change'
+import { TypeWriterText } from '../component/AnimatedText'
 import Slide from '@mui/material/Slide';
 import { Stack } from '@mui/material';
 import Button from '@mui/material/Button';
