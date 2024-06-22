@@ -13,17 +13,17 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
-import ResponsiveAppBar from '../component/navbar';
-import { ChatBoxHotpot } from '../component/chatbox';
-import { HotpotParameter } from '../component/chatroom_parameters'
-import { chatsocket, agentsocket } from '../component/chatsocket';
-import Footer from '../component/footer';
+import ResponsiveAppBar from '../component/Navbar.js';
+import { ChatBoxHotpot } from '../component/Chatbox.js';
+import { HotpotParameter } from '../component/ChatroomParameters.js'
+import { chatsocket, agentsocket } from '../component/ChatSocket.js';
+import Footer from '../component/Footer.js';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate } from "react-router-dom";
-import { redirect_anon_to_login } from '../component/check_login';
+import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { UserContext } from '../App.js'
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,

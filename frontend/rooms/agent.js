@@ -22,7 +22,7 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
-import ResponsiveAppBar from '../component/navbar';
+import ResponsiveAppBar from '../component/Navbar.js';
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import Quote from "@editorjs/quote"
@@ -34,12 +34,12 @@ const Table = require('editorjs-table');
 const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
 import editorjsCodecup from '@calumk/editorjs-codecup';
 import GetAppIcon from '@mui/icons-material/GetApp';
-import { OpenAPIParameter } from '../component/chatroom_parameters';
-import { ChatBox } from '../component/chatbox';
-import { agentsocket } from '../component/chatsocket';
+import { OpenAPIParameter } from '../component/ChatroomParameters.js';
+import { ChatBox } from '../component/Chatbox.js';
+import { agentsocket } from '../component/ChatSocket.js';
 import '../component/css/editor-js.css';
-import { ChatExport } from '../component/chat_export';
-import Footer from '../component/footer';
+import { ChatExport } from '../component/chatExport.js';
+import Footer from '../component/Footer.js';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import FormHelperText from '@mui/material/FormHelperText';
@@ -49,7 +49,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { redirect_anon_to_login } from '../component/check_login';
+import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
 import { UserContext } from '../App.js'
 
