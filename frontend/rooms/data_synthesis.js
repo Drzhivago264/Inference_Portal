@@ -166,6 +166,7 @@ function DataSynthesis() {
     const [default_user_child_instruct, setUserChildInstruct] = useState("");
 
 
+
     const [csv_row, setCSVRow] = useState([]);
     const [csv_column, setCSVColumn] = useState([]);
     const handleFileLoad = (csvData) => {
@@ -379,7 +380,7 @@ function DataSynthesis() {
     }
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
-            <title>Agent</title>
+            <title>Data Synthesis</title>
             <ResponsiveAppBar max_width={false} />
             <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
                 <Box mt={2}>
