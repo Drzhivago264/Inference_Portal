@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useLayoutEffect, useCallback } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import { FormControl } from '@mui/material';
@@ -23,16 +23,6 @@ import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
 import ResponsiveAppBar from '../component/Navbar.js';
-import EditorJS from "@editorjs/editorjs";
-import Header from "@editorjs/header";
-import Quote from "@editorjs/quote"
-import Paragraph from "@editorjs/paragraph"
-import Underline from "@editorjs/underline"
-const EditorList = require("@editorjs/list");
-import InlineCode from '@editorjs/inline-code';
-const Table = require('editorjs-table');
-const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
-import editorjsCodecup from '@calumk/editorjs-codecup';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import { OpenAPIParameter } from '../component/ChatroomParameters.js';
 import { ChatBox } from '../component/Chatbox.js';
@@ -52,6 +42,13 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
 import { UserContext } from '../App.js'
+import CsvFileInput from '../component/CsvInput.js';
+import {
+    DataGrid, useGridApiContext,
+    GridCellEditStopReasons,
+} from '@mui/x-data-grid';
+import Popper from '@mui/material/Popper';
+import InputBase from '@mui/material/InputBase';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -65,9 +62,76 @@ const ChatInput = styled(TextField)(({ theme }) => ({
     ...theme.typography.body2,
 }));
 
+function isKeyboardEvent(event) {
+    return !!event.key;
+}
+
+function EditTextarea(props) {
+    const { id, field, value, colDef, hasFocus } = props;
+    const [valueState, setValueState] = useState(value);
+    const [anchorEl, setAnchorEl] = useState();
+    const [inputRef, setInputRef] = useState(null);
+    const apiRef = useGridApiContext();
+
+    useLayoutEffect(() => {
+        if (hasFocus && inputRef) {
+            inputRef.focus();
+        }
+    }, [hasFocus, inputRef]);
+
+    const handleRef = useCallback((el) => {
+        setAnchorEl(el);
+    }, []);
+
+    const handleChange = useCallback(
+        (event) => {
+            const newValue = event.target.value;
+            setValueState(newValue);
+            apiRef.current.setEditCellValue(
+                { id, field, value: newValue, debounceMs: 200 },
+                event,
+            );
+        },
+        [apiRef, field, id],
+    );
+
+    return (
+        <div style={{ position: 'relative', alignSelf: 'flex-start' }}>
+            <div
+                ref={handleRef}
+                style={{
+                    height: 1,
+                    width: colDef.computedWidth,
+                    display: 'block',
+                    position: 'absolute',
+                    top: 0,
+                }}
+            />
+            {anchorEl && (
+                <Popper open anchorEl={anchorEl} placement="bottom-start">
+                    <Paper elevation={1} sx={{ p: 1, minWidth: colDef.computedWidth }}>
+                        <InputBase
+                            multiline
+                            rows={4}
+                            value={valueState}
+                            sx={{ textarea: { resize: 'both' }, width: '100%' }}
+                            onChange={handleChange}
+                            inputRef={(ref) => setInputRef(ref)}
+                        />
+                    </Paper>
+                </Popper>
+            )}
+        </div>
+    );
+}
+
+const multilineColumn = {
+    type: 'string',
+    renderEditCell: (params) => <EditTextarea {...params} />,
+};
+
 function DataSynthesis() {
     const ref = useRef();
-    const editorref = useRef();
     const websocket = useRef(null)
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
@@ -100,75 +164,36 @@ function DataSynthesis() {
     const [default_user_child_template_list, setDefaultUserChildTemplateList] = useState([]);
     const [default_user_parent_instruct, setUserParentInstruct] = useState("");
     const [default_user_child_instruct, setUserChildInstruct] = useState("");
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
+
+
+    const [csv_row, setCSVRow] = useState([]);
+    const [csv_column, setCSVColumn] = useState([]);
+    const handleFileLoad = (csvData) => {
+        setCSVRow(csvData);
+    };
+
+    useEffect(() => {
+        if (csv_row[0]) {
+            var keys = Object.keys(csv_row[0])
+            var column = []
+            for (let k in keys) {
+                column.push({
+                    field: keys[k],
+                    headerName: keys[k],
+                    editable: true,
+                    ...multilineColumn,
+                })
+            }
+            setCSVColumn(column)
+        }
+    }, [csv_row]);
+
+
     const navigate = useNavigate();
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
 
-    const handleListItemClick = (event, index) => {
-        setSelectedIndex(index);
-    };
-
-    const handle_use_user_template = (event) => {
-        setUseUserTemplate(event.target.checked);
-        let default_editor = { "time": 1709749130861, "blocks": [{ "id": "1hYKvu7PTO", "type": "header", "data": { "text": "Response", "level": 2 } }, { "id": "SrV68agaen", "type": "paragraph", "data": { "text": "" } }], "version": "2.29.1" }
-        setEditor(default_editor)
-        editorref.current.render(default_editor)
-    };
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
-        if (!ref.current) {
-            const editor = new EditorJS({
-                holderId: 'editorjs',
-                tools: {
-                    header: {
-                        class: Header,
-                        inlineToolbar: ['link']
-                    },
-                    list: {
-                        class: EditorList,
-                        inlineToolbar: true
-                    },
-                    quote: {
-                        class: Quote,
-                        inlineToolbar: true,
-                    },
-                    paragraph: {
-                        class: Paragraph,
-                        config: {
-                            preserveBlank: true
-                        },
-                        inlineToolbar: true
-                    },
-                    underline: Underline,
-                    code: {
-                        class: editorjsCodecup,
-                        inlineToolbar: true,
-                    },
-                    inlineCode: {
-                        class: InlineCode,
-                        shortcut: 'CMD+SHIFT+M',
-                    },
-                    anyTuneName: {
-                        class: AlignmentTuneTool,
-                        config: {
-                            default: "right",
-                            blocks: {
-                                header: 'center',
-                                list: 'right'
-                            }
-                        },
-                    }
-
-                },
-                data: default_editor_structure,
-            });
-            editor.isReady
-                .then(() => {
-                })
-            editorref.current = editor;
-        }
-    }, []);
-    useEffect(() => {
         axios.all([
             axios.get('/frontend-api/model'),
             axios.get('/frontend-api/instruction-tree'),
@@ -188,19 +213,6 @@ function DataSynthesis() {
                 setDefaultChildTemplateList(instruction_object.data.default_children)
                 setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
 
-                editorref.current.isReady
-                    .then(() => {
-                        for (var node in instruction_object.data.root_nodes) {
-                            if (instruction_object.data.root_nodes[node].name == choosen_template) {
-                                setParentInstruct(instruction_object.data.root_nodes[node].instruct)
-                                setEditor(JSON.parse(instruction_object.data.root_nodes[node].default_editor_template))
-                                editorref.current.render(JSON.parse(instruction_object.data.root_nodes[node].default_editor_template))
-                            }
-                        }
-                    })
-                    .catch((reason) => {
-                        console.log(`Editor.js initialization failed because of ${reason}`)
-                    });
             }))
             .catch(error => {
                 console.log(error);
@@ -216,8 +228,6 @@ function DataSynthesis() {
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
-
-
     useEffect(() => {
         if (websocket.current) {
             websocket.current.close()
@@ -237,7 +247,7 @@ function DataSynthesis() {
             setDefaultUserChildTemplateList,
             setEditor,
             setCurrentParagraph,
-            editorref
+
         )
     }, [socket_destination]);
 
@@ -256,7 +266,6 @@ function DataSynthesis() {
             setDefaultUserChildTemplateList,
             setEditor,
             setCurrentParagraph,
-            editorref
         )
     }, [use_user_template, default_user_child_instruct, default_user_parent_instruct, default_user_child_template_list]);
 
@@ -305,24 +314,7 @@ function DataSynthesis() {
         }));
     }
 
-    useEffect(() => {
-        const editorElement = document.getElementById('editorjs');
-        const onClick = (e) => {
-            if (editorref.current && e.type === "click") {
-                const blockIndex = editorref.current.blocks.getCurrentBlockIndex();
-                setCurrentParagraph(blockIndex)
-                websocket.current.send(JSON.stringify({
-                    'paragraph': blockIndex,
-                }));
-            }
-        }
-        if (editorElement) {
-            editorElement.addEventListener('click', onClick);
-        }
-        return () => {
-            editorElement?.removeEventListener('click', onClick);
-        }
-    }, [focus]);
+
 
     const handleExport = (event) => {
         event.preventDefault()
@@ -396,35 +388,14 @@ function DataSynthesis() {
                             <Paper sx={{ ml: 2, mr: 2 }} variant='outlined'>
                                 <Box m={1}>
                                     <Typography sx={{ color: 'text.secondary' }}>
-                                        Template Structure
+                                        Load CSV File
                                     </Typography>
                                 </Box>
                                 <Divider />
-                                <List dense={true}>
-                                    {!use_user_template && default_child_template_list.map((instruct, index) => {
-                                        return (
-                                            <ListItem key={instruct.name} disablePadding>
-                                                <ListItemButton
-                                                    selected={selectedIndex === index}
-                                                    onClick={(event) => { swap_child_instruction(instruct.name, 'system'), handleListItemClick(event, index) }}   >
-                                                    <ListItemText primary={instruct.name} />
-                                                </ListItemButton>
-                                            </ListItem>
-                                        )
-                                    })}
-                                    {use_user_template && default_user_child_template_list.map((instruct, index) => {
+                                <Box m={2}>
+                                    <CsvFileInput onFileLoad={handleFileLoad} />
+                                </Box>
 
-                                        return (
-                                            <ListItem key={instruct.displayed_name} disablePadding>
-                                                <ListItemButton
-                                                    selected={selectedIndex === index}
-                                                    onClick={(event) => { swap_child_instruction(instruct.displayed_name, 'user_template'), handleListItemClick(event, index) }} >
-                                                    <ListItemText primary={instruct.displayed_name} />
-                                                </ListItemButton>
-                                            </ListItem>
-                                        )
-                                    })}
-                                </List>
                             </Paper>
                             <Paper sx={{ m: 2 }} variant='outlined'>
                                 <Box m={1}>
@@ -475,100 +446,34 @@ function DataSynthesis() {
                             </Paper>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
-                        <Grid item xs={4}>
-                            <Accordion defaultExpanded>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="parent-content"
-                                    id="parent-header"
-                                >
-                                    <Typography sx={{ color: 'text.secondary' }}>Parent Instruction</Typography>
-                                </AccordionSummary>
-                                <AccordionDetails >
-                                    <Paper variant="outlined">
-                                        {!use_user_template && <ChatInput
-                                            id="parent-instruct"
-                                            multiline
-                                            maxRows={8}
-                                            value={default_parent_instruct}
-                                            onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
-                                            minRows={6}
-                                            variant="standard"
-                                            InputProps={{
-                                                startAdornment: <InputAdornment position="start">   </InputAdornment>,
+                        <Grid item xs={5}>
+                            <Box >
+                                <DataGrid
 
-                                            }}
-                                        />}
-                                        {use_user_template && <ChatInput
-                                            id="user-parent-instruct"
-                                            multiline
-                                            maxRows={8}
-                                            value={default_user_parent_instruct}
-                                            onChange={e => { setUserParentInstruct(e.target.value), setInstructChange(true) }}
-                                            minRows={6}
-                                            variant="standard"
-                                            InputProps={{
-                                                startAdornment: <InputAdornment position="start">   </InputAdornment>,
+                                    rows={csv_row}
+                                    columns={csv_column}
+                                    initialState={{
+                                        pagination: {
+                                            paginationModel: {
+                                                pageSize: 10,
+                                            },
+                                        },
+                                    }}
+                                    pageSizeOptions={[10]}
+                                    onCellEditStop={(params, event) => {
+                                        if (params.reason !== GridCellEditStopReasons.enterKeyDown) {
+                                            return;
+                                        }
+                                        if (isKeyboardEvent(event) && !event.ctrlKey && !event.metaKey) {
+                                            event.defaultMuiPrevented = true;
+                                        }
+                                    }}
 
-                                            }}
-                                        />}
-                                    </Paper>
-                                </AccordionDetails>
-                            </Accordion>
+                                />
+                            </Box>
 
-                            <Accordion defaultExpanded>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="child-content"
-                                    id="child-header"
-                                >
-                                    <Typography sx={{ color: 'text.secondary' }}>Child Instruction</Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Paper variant="outlined">
-                                        {!use_user_template &&
-                                            <ChatInput
-                                                id="child-instruct"
-                                                multiline
-                                                maxRows={8}
-                                                value={default_child_instruct}
-                                                onChange={e => { setChildInstruct(e.target.value), setInstructChange(true) }}
-                                                minRows={6}
-                                                variant="standard"
-                                                InputProps={{
-                                                    startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                                }}
-                                            />}
-                                        {use_user_template && <ChatInput
-                                            id="user-child-instruct"
-                                            multiline
-                                            maxRows={8}
-                                            value={default_user_child_instruct}
-                                            onChange={e => { setUserChildInstruct(e.target.value), setInstructChange(true) }}
-                                            minRows={6}
-                                            variant="standard"
-                                            InputProps={{
-                                                startAdornment: <InputAdornment position="start">   </InputAdornment>,
-                                            }}
-                                        />}
-                                    </Paper>
-                                </AccordionDetails>
-                            </Accordion>
-
-                            <Accordion defaultExpanded>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="editor-content"
-                                    id="editor-header"
-                                >
-                                    <Typography sx={{ color: 'text.secondary' }}>Editor</Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <div id='editorjs' />
-                                </AccordionDetails>
-                            </Accordion>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs={3}>
                             <Box mr={2}>
                                 <ChatBox
                                     inputsize={300}
@@ -623,43 +528,9 @@ function DataSynthesis() {
                                         })}
                                     </Select>
                                 </FormControl>}
-                                <Divider></Divider>
-                                {user_template_list.length == 0 && <FormControl disabled>
-                                    <InputLabel id="use-agent-label" shrink>Users' Agents</InputLabel>
-                                    <Stack direction='column' spacing={1}>
-                                        {!use_user_template && <Select notched
-                                            labelId="user-agent-label"
-                                            id="user-agent-select"
-                                            onChange={e => { setChoosenUserTemplate(e.target.value); swap_template(e.target.value, 'user_template') }}
-                                            value={choosen_user_template}
-                                            label="Users' Agents"
-                                            size="small"
-                                            disabled
-                                        >
-                                            {user_template_list.map((template) => {
-                                                return (
-                                                    <MenuItem key={template.displayed_name} value={template.displayed_name}>{template.displayed_name}</MenuItem>
-                                                )
-                                            })}
-                                        </Select>}
-                                        {use_user_template && <Select notched
-                                            labelId="user-agent-label"
-                                            id="user-agent-select"
-                                            onChange={e => { setChoosenUserTemplate(e.target.value); swap_template(e.target.value, 'user_template') }}
-                                            value={choosen_user_template}
-                                            label="Users' Agents"
-                                            size="small"
-                                        >
-                                            {user_template_list.map((template) => {
-                                                return (
-                                                    <MenuItem key={template.displayed_name} value={template.displayed_name}>{template.displayed_name}</MenuItem>
-                                                )
-                                            })}
-                                        </Select>}
-                                        <FormControlLabel disabled control={<Switch checked={use_user_template} onChange={handle_use_user_template} />} label="Use My Template" />
-                                    </Stack>
-                                    <FormHelperText>No Users' Agent Found</FormHelperText>
-                                </FormControl>}
+
+
+
                                 {user_template_list.length > 0 && <FormControl>
                                     <InputLabel id="use-agent-label">Users' Agents</InputLabel>
                                     {!use_user_template && <Select
