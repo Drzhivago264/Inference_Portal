@@ -57,8 +57,8 @@ export default function Footer() {
                             <Box
                                 component="img"
                                 sx={{
-                                    height: 128,
-                                    width: 128,
+                                    height: 155,
+                                    width: 155,
                                 }}
                                 onClick={(e)=>{navigate("/")}}
                                 alt="Big Logo."
@@ -66,7 +66,7 @@ export default function Footer() {
                             />
 
                             <Typography
-                                variant="h3"
+                                variant="h5"
                                 noWrap
                                 component="a"
                                 onClick={(e)=>{navigate("/")}}

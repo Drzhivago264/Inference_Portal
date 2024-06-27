@@ -5,9 +5,6 @@ import { FormControl } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import InputLabel from '@mui/material/InputLabel';
-import edjsParser from "editorjs-parser"
-import * as pdfMake from 'pdfmake/build/pdfmake.min';
-import pdfFonts from "pdfmake/build/vfs_fonts";
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
@@ -27,7 +24,6 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import { OpenAPIParameter } from '../component/ChatroomParameters.js';
 import { ChatBox } from '../component/Chatbox.js';
 import { agentsocket } from '../component/ChatSocket.js';
-import '../component/css/editor-js.css';
 import { ChatExport } from '../component/chatExport.js';
 import Footer from '../component/Footer.js';
 import Alert from '@mui/material/Alert';
@@ -132,9 +128,12 @@ const multilineColumn = {
 
 function DataSynthesis() {
     const ref = useRef();
+
     const websocket = useRef(null)
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
+    const [choosen_prompt_column, setChoosenPromptColumn] = useState(null);
+    const [choosen_response_column, setChoosenResponseColumn] = useState(null);
     const [chat_message, setChatMessage] = useState([]);
     const [agent_objects, setAgents] = useState([]);
     const [choosen_model, setChoosenModel] = useState("gpt-4");
@@ -150,7 +149,7 @@ function DataSynthesis() {
     const [instruct_change, setInstructChange] = useState(false)
     const [usermessageError, setUserMessageError] = useState(false);
     const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
-    const [default_editor_structure, setEditor] = useState(null);
+
     const [currentparagraph, setCurrentParagraph] = useState(1);
     const [template_list, setTemplateList] = useState([]);
     const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
@@ -164,15 +163,31 @@ function DataSynthesis() {
     const [default_user_child_template_list, setDefaultUserChildTemplateList] = useState([]);
     const [default_user_parent_instruct, setUserParentInstruct] = useState("");
     const [default_user_child_instruct, setUserChildInstruct] = useState("");
-
-
-
-    const [csv_row, setCSVRow] = useState([]);
-    const [csv_column, setCSVColumn] = useState([]);
+    const [csv_row, setCSVRow] = useState([
+        { id: 1, samplePrompt: 'A water well is an excavation or structure created in the ground by digging, driving, boring, or drilling to access groundwater in underground aquifers. The well water is drawn by a pump, or using containers, such as buckets, that are raised mechanically or by hand. Wells were first constructed at least eight thousand years ago and historically vary in construction from a simple scoop in the sediment of a dry watercourse to the stepwells of India, the qanats of Iran, and the shadoofs and sakiehs of India. Placing a lining in the well shaft helps create stability and linings of wood or wickerwork date back at least as far as the Iron Age. Where does water for a well come from?' },
+        { id: 2, samplePrompt: 'Generate short a sentence that can be linguistically classified as acceptable (OPTIONS: - unacceptable - acceptable)' },
+        { id: 3, samplePrompt: 'Is the premise "The Chocolate Lab jumps too late to get the toy as the Black Lab captures it in the driveway." true if "The Chocolate Labe got the toy."? OPTIONS: - yes - it is not possible to tell - no' },
+        { id: 4, samplePrompt: 'In this task, you are given an open-domain question. Your task is to provide an answer to the given question. There is only one unique answer for each question. Your answer should be short, and refer to an entity, date, number, etc. Do not put your answer in the context of a sentence. Who played chewbacca in the original star wars movies?' },
+        { id: 5, samplePrompt: 'Given a statement and question, generate the answer to the question such that the answer is contained in the statement. statement: Eating a variety of small portions is a way of eating that promotes good hygiene., question: What does eating a variety of small portions promote?' },
+        { id: 6, samplePrompt: 'Two analogies that relate actions to the tools used to perform the action is given in the form "A : B. C : ?". "A : B" relates action A to tool B. Your task is to replace the question mark (?) with the appropriate tool for the given action C, following the "A : B" relation. vacuum : vacuum. drill : ?' },
+        { id: 7, samplePrompt: 'In this task, you are given two simple actions (associated with "A", "B"). You must identify which action is considered less ethical. Do not generate anything else apart from one of the following characters: "A", "B". (A) ditching a messy group (B) doing greasy strategies in Super Smash brothers' },
+        { id: 8, samplePrompt: 'In this task, you need to provide the correct option for a given problem on probability from the provided options. Problem: there is a 50 % chance jen will visit chile this year , while there is a 50 % chance that she will visit madagascar this year . what is the probability that jen will visit either chile or madagascar this year , but not both ? Options: a ) 25.0 % , b ) 50.0 % , c ) 62.5 % , d ) 75.0 % , e ) 80.0 %' },
+        { id: 9, samplePrompt: 'The town lies along the stretch of coastline designated as Gold Beach during the D-Day landings , one of the beaches used by British troops in the allied invasion. Arromanches was selected as one of the sites for two Mulberry Harbours built on the Normandy coast, the other one built further West at Omaha Beach. Based on that paragraph can we conclude that the sentence below is true? The Normandy landings took place in June 1944. OPTIONS: - yes - no' },
+    ]);
+    const [csv_column, setCSVColumn] = useState([
+        { field: 'id', headerName: 'ID', width: 20 },
+        {
+            field: 'samplePrompt',
+            headerName: 'Sample Prompts',
+            flex: 1,
+            editable: true,
+        }
+    ]);
     const handleFileLoad = (csvData) => {
         setCSVRow(csvData);
     };
 
+   
     useEffect(() => {
         if (csv_row[0]) {
             var keys = Object.keys(csv_row[0])
@@ -246,7 +261,7 @@ function DataSynthesis() {
             setUserParentInstruct,
             setUserChildInstruct,
             setDefaultUserChildTemplateList,
-            setEditor,
+            null,
             setCurrentParagraph,
 
         )
@@ -265,7 +280,7 @@ function DataSynthesis() {
             setUserParentInstruct,
             setUserChildInstruct,
             setDefaultUserChildTemplateList,
-            setEditor,
+            null,
             setCurrentParagraph,
         )
     }, [use_user_template, default_user_child_instruct, default_user_parent_instruct, default_user_child_template_list]);
@@ -302,82 +317,7 @@ function DataSynthesis() {
             setInstructChange(false)
         }
     }
-    const swap_template = (template, type) => {
-        websocket.current.send(JSON.stringify({
-            'swap_template': template,
-            'template_type': type
-        }));
-    }
-    const swap_child_instruction = (child, type) => {
-        websocket.current.send(JSON.stringify({
-            'swap_child_instruct': child,
-            'template_type': type
-        }));
-    }
 
-
-
-    const handleExport = (event) => {
-        event.preventDefault()
-        if (choosen_export_format == ".json") {
-            download("application/json", 'Written_By_Professor_Parakeet.json')
-        }
-        else if (choosen_export_format == ".html") {
-            download("text/html", 'Written_By_Professor_Parakeet.html')
-        }
-        else if (choosen_export_format == ".txt") {
-            download("text/plain", 'Written_By_Professor_Parakeet.txt')
-        }
-        else if (choosen_export_format == ".pdf") {
-            download("application/pdf", 'Written_By_Professor_Parakeet.pdf')
-        }
-    }
-
-    const parser = new edjsParser();
-    const download = (mimeType, filename) => {
-        editorref.current.save().then((outputData) => {
-
-            let download_content = outputData
-            if (mimeType == "application/json") {
-                download_content = JSON.stringify(outputData, null, 4)
-            }
-            else if (mimeType == "text/html") {
-                download_content = parser.parse(download_content);
-            }
-            else if (mimeType == "text/plain") {
-                let html = parser.parse(download_content);
-                html = html.toString()
-                html = html.replace(/<style([\s\S]*?)<\/style>/gi, '');
-                html = html.replace(/<script([\s\S]*?)<\/script>/gi, '');
-                html = html.replace(/<\/div>/ig, '\n');
-                html = html.replace(/<\/li>/ig, '\n');
-                html = html.replace(/<li>/ig, '  *  ');
-                html = html.replace(/<\/ul>/ig, '\n');
-                html = html.replace(/<\/p>/ig, '\n');
-                html = html.replace(/<br\s*[\/]?>/gi, "\n");
-                html = html.replace(/<[^>]+>/ig, '');
-                download_content = html
-            }
-            else if (mimeType == "application/pdf") {
-                let html = parser.parse(download_content);
-                var htmlToPdfmake = require("html-to-pdfmake");
-                var html_to_pdf = htmlToPdfmake(html);
-                var pdf = { content: html_to_pdf };
-                pdfMake.vfs = pdfFonts.pdfMake.vfs;
-                pdfMake.createPdf(pdf).download('Written_By_Professor_Parakeet.pdf')
-            }
-            if (mimeType != "application/pdf") {
-                var a = document.createElement('a')
-                var blob = new Blob([download_content], { type: mimeType })
-                var url = URL.createObjectURL(blob)
-                a.setAttribute('href', url)
-                a.setAttribute('download', filename)
-                a.click()
-            }
-        }).catch((error) => {
-            console.log('Saving failed: ', error)
-        });
-    }
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
             <title>Data Synthesis</title>
@@ -396,39 +336,9 @@ function DataSynthesis() {
                                 <Box m={2}>
                                     <CsvFileInput onFileLoad={handleFileLoad} />
                                 </Box>
-
                             </Paper>
-                            <Paper sx={{ m: 2 }} variant='outlined'>
-                                <Box m={1}>
-                                    <Typography sx={{ color: 'text.secondary' }}>Editor Export</Typography>
-                                </Box>
-                                <Divider />
-                                <Box m={2}>
-                                    <form onSubmit={handleExport}>
-                                        <FormControl  >
-                                            <Stack direction={'row'} spacing={1}>
-                                                <InputLabel id="export-label">Formats</InputLabel>
-                                                <Select
-                                                    labelId="export-label"
-                                                    id="export-select"
-                                                    onChange={e => setChoosenExportFormat(e.target.value)}
-                                                    value={choosen_export_format}
-                                                    label="Export"
-                                                    size="small"
-                                                >
-                                                    {['.json', '.txt', '.html', '.pdf'].map((format) => {
-                                                        return (
-                                                            <MenuItem key={format} value={format}>{format}</MenuItem>
-                                                        )
-                                                    })}
-                                                </Select>
-                                                <Button size="small" variant="contained" type="submit" endIcon={<GetAppIcon />}>Export</Button>
-                                            </Stack>
-                                        </FormControl>
-                                    </form>
 
-                                </Box>
-                            </Paper>
+
                             <Paper sx={{ m: 2 }} variant='outlined'>
                                 <Box m={1}>
                                     <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
@@ -448,9 +358,10 @@ function DataSynthesis() {
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={5}>
-                            <Box >
+                            <Box style={{ maxHeight: 700, width: '100%' }}>
                                 <DataGrid
-
+                                    onColumnHeaderClick={(params, event)=>{console.log(params.field)}}
+                                    disableColumnSorting 
                                     rows={csv_row}
                                     columns={csv_column}
                                     initialState={{
@@ -461,6 +372,7 @@ function DataSynthesis() {
                                         },
                                     }}
                                     pageSizeOptions={[10]}
+                                    getRowHeight={() => 'auto'}
                                     onCellEditStop={(params, event) => {
                                         if (params.reason !== GridCellEditStopReasons.enterKeyDown) {
                                             return;
@@ -476,96 +388,29 @@ function DataSynthesis() {
                         </Grid>
                         <Grid item xs={3}>
                             <Box mr={2}>
-                                <ChatBox
-                                    inputsize={300}
-                                    chat_message={chat_message}
-                                    usermessage={usermessage}
-                                    usermessageError={usermessageError}
-                                    ChatPaper={ChatPaper}
-                                    ChatInput={ChatInput}
-                                    setUserMessage={setUserMessage}
-                                    submitChat={submitChat}
-                                    messagesEndRef={messagesEndRef}
-                                    shownthinking={shownthinking}
-                                    handleEnter={handleEnter}
-                                >
-                                </ChatBox>
+                                <Stack>
+                                    {[
+                                        { label: "Translate", default: "Translate the following sentence to Vietnamese" }
+                                    ].map((object, index) => {
+                                        return (
+                                            <TextField
+                                                id={index}
+                                                label={object.label}
+                                                multiline
+                                                maxRows={4}
+                                                defaultValue={object.default}
+                                            />
+                                        );
+                                    })}
+
+                                </Stack>
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={2}>
                             <Stack direction='column' mr={2} spacing={2}>
-                                {!use_user_template && <FormControl >
-                                    <InputLabel id="agent-label">Agents</InputLabel>
-                                    <Select
-                                        labelId="agent-label"
-                                        id="agent-select"
-                                        onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value, 'system') }}
-                                        value={choosen_template}
-                                        label="Agents"
-                                        size="small"
-                                    >
-                                        {template_list.map((template) => {
-                                            return (
-                                                <MenuItem key={template.name} value={template.name}>{template.name}</MenuItem>
-                                            )
-                                        })}
-                                    </Select>
-                                </FormControl>}
-                                {use_user_template && <FormControl disabled>
-                                    <InputLabel id="agent-label">Agents</InputLabel>
-                                    <Select
-                                        labelId="agent-label"
-                                        id="agent-select"
-                                        onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value, 'system') }}
-                                        value={choosen_template}
-                                        label="Agents"
-                                        size="small"
-                                    >
-                                        {template_list.map((template) => {
-                                            return (
-                                                <MenuItem key={template.name} value={template.name}>{template.name}</MenuItem>
-                                            )
-                                        })}
-                                    </Select>
-                                </FormControl>}
 
 
-
-                                {user_template_list.length > 0 && <FormControl>
-                                    <InputLabel id="use-agent-label">Users' Agents</InputLabel>
-                                    {!use_user_template && <Select
-                                        labelId="user-agent-label"
-                                        id="user-agent-select"
-                                        onChange={e => { setChoosenUserTemplate(e.target.value); swap_template(e.target.value, "user_template") }}
-                                        value={choosen_user_template}
-                                        label="Users' Agents"
-                                        size="small"
-                                        disabled
-                                    >
-                                        {user_template_list.map((template) => {
-                                            return (
-                                                <MenuItem key={template.displayed_name} value={template.displayed_name}>{template.displayed_name}</MenuItem>
-                                            )
-                                        })}
-                                    </Select>}
-                                    {use_user_template && <Select
-                                        labelId="user-agent-label"
-                                        id="user-agent-select"
-                                        onChange={e => { setChoosenUserTemplate(e.target.value); swap_template(e.target.value, "user_template") }}
-                                        value={choosen_user_template}
-                                        label="Users' Agents"
-                                        size="small"
-                                    >
-                                        {user_template_list.map((template) => {
-                                            return (
-                                                <MenuItem key={template.displayed_name} value={template.displayed_name}>{template.displayed_name}</MenuItem>
-                                            )
-                                        })}
-                                    </Select>}
-                                    <FormControlLabel control={<Switch checked={use_user_template} onChange={handle_use_user_template} />} label="Use My Template" />
-                                </FormControl>}
-                                <Divider></Divider>
                                 <FormControl defaultValue="">
                                     <InputLabel id="model-label">Backends</InputLabel>
                                     <Select
