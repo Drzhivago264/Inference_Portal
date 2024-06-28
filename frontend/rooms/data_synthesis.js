@@ -48,6 +48,8 @@ import InputBase from '@mui/material/InputBase';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -185,6 +187,7 @@ function DataSynthesis() {
         { id: 8, samplePrompt: 'In this task, you need to provide the correct option for a given problem on probability from the provided options. Problem: there is a 50 % chance jen will visit chile this year , while there is a 50 % chance that she will visit madagascar this year . what is the probability that jen will visit either chile or madagascar this year , but not both ? Options: a ) 25.0 % , b ) 50.0 % , c ) 62.5 % , d ) 75.0 % , e ) 80.0 %' },
         { id: 9, samplePrompt: 'The town lies along the stretch of coastline designated as Gold Beach during the D-Day landings , one of the beaches used by British troops in the allied invasion. Arromanches was selected as one of the sites for two Mulberry Harbours built on the Normandy coast, the other one built further West at Omaha Beach. Based on that paragraph can we conclude that the sentence below is true? The Normandy landings took place in June 1944. OPTIONS: - yes - no' },
     ]);
+    const [is_running, setIsRunning] = useState(null);
     const [csv_column, setCSVColumn] = useState([
         { field: 'id', headerName: 'ID', width: 20 },
         {
@@ -352,11 +355,11 @@ function DataSynthesis() {
     }
     const add_child_instruct = () => {
         setDefaultChildInstructList(
-            [ 
-              ...default_child_instruct_list, 
-              { label: "User Defined", default: "" } 
+            [
+                ...default_child_instruct_list,
+                { label: "User Defined", default: "" }
             ]
-          );
+        );
     }
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
@@ -384,7 +387,7 @@ function DataSynthesis() {
                                     <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
                                 </Box>
                                 <Divider />
-                                <Box m={2}>
+                                <Box mb={2} mt={2} ml={1} mr={2}>
                                     <ChatExport
                                         chat_message={chat_message}
                                         choosen_export_format_chatlog={choosen_export_format_chatlog}
@@ -393,6 +396,19 @@ function DataSynthesis() {
                                         setChatMessage={setChatMessage}
                                     >
                                     </ChatExport>
+                                </Box>
+                            </Paper>
+
+                            <Paper sx={{ m: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Run</Typography>
+                                </Box>
+                                <Divider />
+                                <Box mb={2} mt={2} ml={1} mr={2}>
+                                    <Stack direction={'row'} spacing={1}>
+                                        <Button color="success" fullWidth variant="contained" onClick={() => {setIsRunning(true)}} startIcon={<PlayCircleOutlineIcon />} disabled={is_running?true:false} >Run</Button>
+                                        <Button color="secondary" fullWidth variant="contained" onClick={() => {setIsRunning(false)}} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running?true:false}>Pause</Button>
+                                    </Stack>
                                 </Box>
                             </Paper>
                         </Grid>
@@ -465,7 +481,7 @@ function DataSynthesis() {
                                             overflowY: "scroll"
                                         }}>
                                         <Box p={1}>
-                                            <Typography variant='body1'>Evolving Instructions</Typography>
+                                            <Typography sx={{ color: 'text.secondary' }} variant='body1'>Evolving Instructions</Typography>
                                         </Box>
                                         <Divider />
                                         <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>

@@ -139,7 +139,7 @@ function Chat() {
                                     <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
                                 </Box>
                                 <Divider />
-                                <Box m={2}>
+                                <Box mb={2} mt={2} ml={1} mr={2}>
                                     <ChatExport
                                         chat_message={chat_message}
                                         choosen_export_format_chatlog={choosen_export_format_chatlog}
