@@ -45,6 +45,9 @@ import {
 } from '@mui/x-data-grid';
 import Popper from '@mui/material/Popper';
 import InputBase from '@mui/material/InputBase';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -153,8 +156,16 @@ function DataSynthesis() {
     const [currentparagraph, setCurrentParagraph] = useState(1);
     const [template_list, setTemplateList] = useState([]);
     const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
-    const [default_parent_instruct, setParentInstruct] = useState("");
+    const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Rewriter.\nYour objective is to rewrite a given prompt into a more complex version to create a diverse training dataset. The rewritten prompt must be reasonable and must be understood and responded by humans. Your rewriting cannot omit the non-text parts such as the table and code in #Given Prompt#.\nAlso, do not omit the input in #Given Prompt#.");
     const [default_child_instruct, setChildInstruct] = useState("");
+    const [default_child_instruct_list, setDefaultChildInstructList] = useState([
+        { label: "Translating", default: "Translate the #Given Prompt# to Vietnamese" },
+        { label: "Concretizing", default: "Replace general concepts in the #Given Prompt# with more specific concepts." },
+        { label: "Increased Reasoning Steps", default: "If #Given Prompt# can be solved with just a few simple thinking processes, you can rewrite it to explicitly request multiple-step reasoning." },
+        { label: "Complicate Input", default: "You SHOULD complicate the given prompt using the following method:\nAdd one more constraints/requirements into #Given Prompt#" },
+        { label: "Deepening", default: "If #Given Prompt# contains inquiries about certain issues, the depth and breadth of the inquiry can be increased." },
+        { label: "Breadth Evolving", default: "You should draw inspiration from the #Given Prompt# to create a brand new prompt.\nThis new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\nThe LENGTH and difficulty level of the #Created Prompt# should be similar to that of the #Given Prompt#." }
+    ]);
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
@@ -187,7 +198,7 @@ function DataSynthesis() {
         setCSVRow(csvData);
     };
 
-   
+
     useEffect(() => {
         if (csv_row[0]) {
             var keys = Object.keys(csv_row[0])
@@ -317,7 +328,36 @@ function DataSynthesis() {
             setInstructChange(false)
         }
     }
+    const updateChildInstructList = (value, index_) => {
+        const new_child_instruct_list = default_child_instruct_list.map((instruct, index) => {
+            if (index === index_) {
+                return {
+                    ...instruct,
+                    default: value,
+                }
+            }
+            else {
+                return instruct
+            }
 
+        });
+        setDefaultChildInstructList(new_child_instruct_list);
+    }
+    const delete_child_instruct = (index_) => {
+        setDefaultChildInstructList(
+            default_child_instruct_list.filter((instruct, index) =>
+                index !== index_
+            )
+        )
+    }
+    const add_child_instruct = () => {
+        setDefaultChildInstructList(
+            [ 
+              ...default_child_instruct_list, 
+              { label: "User Defined", default: "" } 
+            ]
+          );
+    }
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
             <title>Data Synthesis</title>
@@ -360,8 +400,8 @@ function DataSynthesis() {
                         <Grid item xs={5}>
                             <Box style={{ maxHeight: 700, width: '100%' }}>
                                 <DataGrid
-                                    onColumnHeaderClick={(params, event)=>{console.log(params.field)}}
-                                    disableColumnSorting 
+                                    onColumnHeaderClick={(params, event) => { console.log(params.field) }}
+                                    disableColumnSorting
                                     rows={csv_row}
                                     columns={csv_column}
                                     initialState={{
@@ -388,22 +428,81 @@ function DataSynthesis() {
                         </Grid>
                         <Grid item xs={3}>
                             <Box mr={2}>
-                                <Stack>
-                                    {[
-                                        { label: "Translate", default: "Translate the following sentence to Vietnamese" }
-                                    ].map((object, index) => {
-                                        return (
-                                            <TextField
-                                                id={index}
-                                                label={object.label}
+                                <Accordion defaultExpanded>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="parent-content"
+                                        id="parent-header"
+                                    >
+                                        <Typography sx={{ color: 'text.secondary' }}>Parent Instruction</Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails >
+                                        <Paper variant="outlined">
+                                            <ChatInput
+                                                id="parent-instruct"
                                                 multiline
-                                                maxRows={4}
-                                                defaultValue={object.default}
-                                            />
-                                        );
-                                    })}
+                                                maxRows={8}
+                                                value={default_parent_instruct}
+                                                onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
+                                                minRows={6}
+                                                variant="standard"
+                                                InputProps={{
+                                                    startAdornment: <InputAdornment position="start">   </InputAdornment>,
 
-                                </Stack>
+                                                }}
+                                            />
+
+                                        </Paper>
+                                    </AccordionDetails>
+                                </Accordion>
+                                <Paper variant='outlined'>
+                                    <Box
+                                        justifyContent="center"
+                                        alignItems="center"
+                                        sx={{
+                                            height: 480,
+                                            overflow: "hidden",
+                                            overflowY: "scroll"
+                                        }}>
+                                        <Box p={1}>
+                                            <Typography variant='body1'>Evolving Instructions</Typography>
+                                        </Box>
+                                        <Divider />
+                                        <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
+
+                                            {default_child_instruct_list && default_child_instruct_list.map((object, index) => {
+                                                return (
+                                                    <Grid container>
+                                                        <Grid item xs={11}>
+                                                            <TextField
+                                                                id={index}
+                                                                label={object.label}
+                                                                multiline
+                                                                maxRows={4}
+                                                                defaultValue={object.default}
+                                                                onChange={(e) => { updateChildInstructList(e.target.value, index) }}
+                                                                fullWidth
+                                                            />
+                                                        </Grid>
+                                                        <Grid item xs={1}>
+                                                            <IconButton aria-label="delete" onClick={() => { delete_child_instruct(index) }}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Grid>
+                                                    </Grid>
+
+                                                );
+                                            })}
+                                            <Box display="flex" justifyContent="center"
+                                                alignItems="center" >
+                                                <IconButton aria-label="add" onClick={() => { add_child_instruct() }}>
+                                                    <AddCircleOutlineIcon />
+                                                </IconButton>
+                                            </Box>
+                                        </Stack>
+
+                                    </Box>
+                                </Paper>
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
