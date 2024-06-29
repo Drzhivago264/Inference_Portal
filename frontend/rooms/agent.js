@@ -36,7 +36,7 @@ import editorjsCodecup from '@calumk/editorjs-codecup';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import { OpenAPIParameter } from '../component/ChatroomParameters.js';
 import { ChatBox } from '../component/Chatbox.js';
-import { agentsocket } from '../component/ChatSocket.js';
+import { agentsocket } from '../component/websocket/AgentSocket.js';
 import '../component/css/editor-js.css';
 import { ChatExport } from '../component/chatExport.js';
 import Footer from '../component/Footer.js';

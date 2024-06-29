@@ -31,6 +31,7 @@ async def async_inference(self) -> None:
         tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.choosen_models])
         url_list = await get_model_url_async(llm)
         session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
+
         context = {
             "prompt": session_list_to_string,
             "n": 1,

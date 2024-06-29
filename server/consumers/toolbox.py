@@ -111,7 +111,6 @@ class Consumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
 
         else:
-            print(event['max_tokens'])
             try:
                 client = dspy.OpenAI(model=event['choosen_models'], 
                                     max_tokens=event['max_tokens'] ,

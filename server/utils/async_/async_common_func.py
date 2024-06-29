@@ -119,11 +119,15 @@ async def send_stream_request_async(self: object, url: str, context: object, pro
             response.raise_for_status()
             full_response = ""
             async for chunk in response.aiter_text():
-                chunk = chunk[:-1]
-                c = json.loads(chunk)
-                output = c['text'][0].replace(processed_prompt, "")
-                await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-                full_response = output
+                if (chunk):
+                    chunk = chunk[:-1]
+                    try:
+                        c = json.loads(chunk)
+                        output = c['text'][0].replace(processed_prompt, "")
+                        await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+                    except json.decoder.JSONDecodeError:
+                        pass
+                    full_response = output
             return full_response
     except httpx.TimeoutException:
         await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))

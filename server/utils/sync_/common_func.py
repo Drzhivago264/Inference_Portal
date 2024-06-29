@@ -47,51 +47,24 @@ def get_EC2_status(instance_id: str, region: str) -> str:
 
 
 def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str | list:
-
     if mode == "chat":
-        if not agent_availability:
-            tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[model])
-            inputs = tokeniser(prompt)
-            current_history_length = len(inputs['input_ids'])
-            if include_memory:
-                chat = [{"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[model]}"}]
-                prompt_ =  {"role": "user", "content": f"{prompt}"}
-                chat_history = get_chat_context(model=model,
-                                                key_object=key_object,
-                                                raw_prompt=prompt,
-                                                agent_availability=agent_availability,
-                                                current_history_length=current_history_length,
-                                                tokeniser=tokeniser)
-                
-                chat += chat_history
-                chat.append(prompt_)
-                prompt_ = tokeniser.apply_chat_template(chat, tokenize=False)
-                return prompt_
-            else:
-                chat = [
-                    {"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[model]}"},
-                    {"role": "user", "content": f"{prompt}"},
-                ]
-                prompt_ = tokeniser.apply_chat_template(chat, tokenize=False)
-                return prompt_
+        prompt_ = {"role": "user", "content": f"{prompt}"}
+        if include_memory:
+            try:
+                tokeniser = tiktoken.encoding_for_model(model)
+            except:
+                tokeniser = tiktoken.encoding_for_model("gpt-4")
+            current_history_length = len(tokeniser.encode(prompt))
+            chat_history = get_chat_context(model=model,
+                                            key_object=key_object,
+                                            raw_prompt=prompt,
+                                            agent_availability=agent_availability,
+                                            current_history_length=current_history_length,
+                                            tokeniser=tokeniser)
+            chat_history.append(prompt_)
+            return chat_history
         else:
-            prompt_ = {"role": "user", "content": f"{prompt}"}
-            if include_memory:
-                try:
-                    tokeniser = tiktoken.encoding_for_model(model)
-                except:
-                    tokeniser = tiktoken.encoding_for_model("gpt-4")
-                current_history_length = len(tokeniser.encode(prompt))
-                chat_history = get_chat_context(model=model,
-                                                key_object=key_object,
-                                                raw_prompt=prompt,
-                                                agent_availability=agent_availability,
-                                                current_history_length=current_history_length,
-                                                tokeniser=tokeniser)
-                chat_history.append(prompt_)
-                return chat_history
-            else:
-                return [prompt_]
+            return [prompt_]
     elif mode == "generate":
 
         prompt_ = [
@@ -100,7 +73,6 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
         ]
 
         return prompt_
-
 
 
 def log_prompt_response(is_session_start_node: bool | None, key_object: object, llm: object, prompt: str, response: str, type_: str) -> None:
@@ -218,13 +190,10 @@ def send_request(stream: bool, url: str, instance_id: str, context) -> str:
         _type_: _description_
     """
     try:
+        response = requests.post(
+                url,  json=context,  stream=stream, timeout=constant.TIMEOUT)
         if not stream:
-            response = requests.post(
-                url,  json=context,  stream=stream, timeout=constant.TIMEOUT)
             response = response.json()['text'][0]
-        elif stream:
-            response = requests.post(
-                url,  json=context,  stream=stream, timeout=constant.TIMEOUT)
     except requests.exceptions.Timeout:
         response = "Request Timeout. Cannot connect to the model. If you just booted the GPU server, wait for 400 seconds, and try again"
     except requests.exceptions.InvalidJSONError:
@@ -498,7 +467,6 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
 
 
 def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
-
 
     hashed_key = key_object.hashed_key
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(

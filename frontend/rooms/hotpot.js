@@ -16,7 +16,8 @@ import ListItem from '@mui/material/ListItem';
 import ResponsiveAppBar from '../component/Navbar.js';
 import { ChatBoxHotpot } from '../component/Chatbox.js';
 import { HotpotParameter } from '../component/ChatroomParameters.js'
-import { chatsocket, agentsocket } from '../component/ChatSocket.js';
+import { chatsocket } from '../component/websocket/ChatSocket.js';
+import { agentsocket } from '../component/websocket/AgentSocket.js';
 import Footer from '../component/Footer.js';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';

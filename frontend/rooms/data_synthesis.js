@@ -13,24 +13,13 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
-import List from '@mui/material/List';
-import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItem from '@mui/material/ListItem';
 import ResponsiveAppBar from '../component/Navbar.js';
-import GetAppIcon from '@mui/icons-material/GetApp';
 import { OpenAPIParameter } from '../component/ChatroomParameters.js';
-import { ChatBox } from '../component/Chatbox.js';
-import { agentsocket } from '../component/ChatSocket.js';
-import { ChatExport } from '../component/chatExport.js';
 import Footer from '../component/Footer.js';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import FormHelperText from '@mui/material/FormHelperText';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -50,14 +39,11 @@ import IconButton from '@mui/material/IconButton';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
+import { DatasetExport } from '../component/datasetExport.js';
+import { file } from 'jszip';
+import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 
-const ChatPaper = styled(Paper)(({ theme }) => ({
-    minWidth: 300,
-    height: 700,
-    overflow: 'auto',
-    padding: theme.spacing(2),
-    ...theme.typography.body2,
-}));
+
 const ChatInput = styled(TextField)(({ theme }) => ({
     width: '100%',
     ...theme.typography.body2,
@@ -133,33 +119,25 @@ const multilineColumn = {
 
 function DataSynthesis() {
     const ref = useRef();
-
     const websocket = useRef(null)
     const messagesEndRef = useRef(null)
-    const [shownthinking, setThinking] = useState(false);
-    const [choosen_prompt_column, setChoosenPromptColumn] = useState(null);
-    const [choosen_response_column, setChoosenResponseColumn] = useState(null);
-    const [chat_message, setChatMessage] = useState([]);
+    const [choosen_prompt_column, setChoosenPromptColumn] = useState("samplePrompt");
     const [agent_objects, setAgents] = useState([]);
     const [choosen_model, setChoosenModel] = useState("gpt-4");
-    const [choosen_template, setChoosenTemplate] = useState("Assignment Agent");
-    const [choosen_user_template, setChoosenUserTemplate] = useState("");
     const [top_p, setTopp] = useState(0.72);
     const [max_tokens, setMaxToken] = useState(null);
     const [temperature, setTemperature] = useState(0.73);
     const [presencepenalty, setPresencePenalty] = useState(0);
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
-    const [usermessage, setUserMessage] = useState("");
-    const [max_turn, setMaxTurn] = useState(4)
-    const [instruct_change, setInstructChange] = useState(false)
-    const [usermessageError, setUserMessageError] = useState(false);
-    const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
+    
 
-    const [currentparagraph, setCurrentParagraph] = useState(1);
-    const [template_list, setTemplateList] = useState([]);
-    const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
+    const [max_turn, setMaxTurn] = useState(null)
+    const [instruct_change, setInstructChange] = useState(false)
+    const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
+    const [filename, setFileName] = useState("No file loaded")
     const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Rewriter.\nYour objective is to rewrite a given prompt into a more complex version to create a diverse training dataset. The rewritten prompt must be reasonable and must be understood and responded by humans. Your rewriting cannot omit the non-text parts such as the table and code in #Given Prompt#.\nAlso, do not omit the input in #Given Prompt#.");
-    const [default_child_instruct, setChildInstruct] = useState("");
+    const [default_extra_instruct, setExtraInstruct] = useState("You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#.\n'#Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#\n#Given Prompt#:")
+
     const [default_child_instruct_list, setDefaultChildInstructList] = useState([
         { label: "Translating", default: "Translate the #Given Prompt# to Vietnamese" },
         { label: "Concretizing", default: "Replace general concepts in the #Given Prompt# with more specific concepts." },
@@ -169,13 +147,7 @@ function DataSynthesis() {
         { label: "Breadth Evolving", default: "You should draw inspiration from the #Given Prompt# to create a brand new prompt.\nThis new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\nThe LENGTH and difficulty level of the #Created Prompt# should be similar to that of the #Given Prompt#." }
     ]);
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
-    const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-    const [user_template_list, setUserTemplateList] = useState([]);
-    const [use_user_template, setUseUserTemplate] = useState(false)
-    const [default_user_child_template_list, setDefaultUserChildTemplateList] = useState([]);
-    const [default_user_parent_instruct, setUserParentInstruct] = useState("");
-    const [default_user_child_instruct, setUserChildInstruct] = useState("");
     const [csv_row, setCSVRow] = useState([
         { id: 1, samplePrompt: 'A water well is an excavation or structure created in the ground by digging, driving, boring, or drilling to access groundwater in underground aquifers. The well water is drawn by a pump, or using containers, such as buckets, that are raised mechanically or by hand. Wells were first constructed at least eight thousand years ago and historically vary in construction from a simple scoop in the sediment of a dry watercourse to the stepwells of India, the qanats of Iran, and the shadoofs and sakiehs of India. Placing a lining in the well shaft helps create stability and linings of wood or wickerwork date back at least as far as the Iron Age. Where does water for a well come from?' },
         { id: 2, samplePrompt: 'Generate short a sentence that can be linguistically classified as acceptable (OPTIONS: - unacceptable - acceptable)' },
@@ -186,7 +158,10 @@ function DataSynthesis() {
         { id: 7, samplePrompt: 'In this task, you are given two simple actions (associated with "A", "B"). You must identify which action is considered less ethical. Do not generate anything else apart from one of the following characters: "A", "B". (A) ditching a messy group (B) doing greasy strategies in Super Smash brothers' },
         { id: 8, samplePrompt: 'In this task, you need to provide the correct option for a given problem on probability from the provided options. Problem: there is a 50 % chance jen will visit chile this year , while there is a 50 % chance that she will visit madagascar this year . what is the probability that jen will visit either chile or madagascar this year , but not both ? Options: a ) 25.0 % , b ) 50.0 % , c ) 62.5 % , d ) 75.0 % , e ) 80.0 %' },
         { id: 9, samplePrompt: 'The town lies along the stretch of coastline designated as Gold Beach during the D-Day landings , one of the beaches used by British troops in the allied invasion. Arromanches was selected as one of the sites for two Mulberry Harbours built on the Normandy coast, the other one built further West at Omaha Beach. Based on that paragraph can we conclude that the sentence below is true? The Normandy landings took place in June 1944. OPTIONS: - yes - no' },
+        { id: 10, samplePrompt: "Here's a problem to solve: Newton's work in physics helped to provide mathematical explanations for the earlier conclusions of which scientist? Among the 4 following options, which is the correct answer? - A: Ptolemy - B: Aristotle - C: Nicolas Copernicus - D: Dmitri Mendeleev" },
     ]);
+    const [from_row, setFromRow] = useState(0)
+    const [to_row, setToRow] = useState(10000)
     const [is_running, setIsRunning] = useState(null);
     const [csv_column, setCSVColumn] = useState([
         { field: 'id', headerName: 'ID', width: 20 },
@@ -201,7 +176,6 @@ function DataSynthesis() {
         setCSVRow(csvData);
     };
 
-
     useEffect(() => {
         if (csv_row[0]) {
             var keys = Object.keys(csv_row[0])
@@ -215,9 +189,9 @@ function DataSynthesis() {
                 })
             }
             setCSVColumn(column)
+            setChoosenPromptColumn(keys[1])
         }
     }, [csv_row]);
-
 
     const navigate = useNavigate();
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
@@ -226,110 +200,43 @@ function DataSynthesis() {
         redirect_anon_to_login(navigate, is_authenticated)
         axios.all([
             axios.get('/frontend-api/model'),
-            axios.get('/frontend-api/instruction-tree'),
         ])
-            .then(axios.spread((model_object, instruction_object) => {
+            .then(axios.spread((model_object) => {
                 setAgents(model_object.data.models_agent);
-                setTemplateList(instruction_object.data.root_nodes)
-                setUserTemplateList(instruction_object.data.user_root_nodes)
-                if (instruction_object.data.user_root_nodes.length > 0) {
-                    setChoosenUserTemplate(instruction_object.data.user_root_nodes[0].displayed_name)
-                    setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
-                }
-                setChildInstruct(instruction_object.data.default_children[0].instruct)
-                if (instruction_object.data.default_user_children.length > 0) {
-                    setUserChildInstruct(instruction_object.data.default_user_children[0].instruct)
-                }
-                setDefaultChildTemplateList(instruction_object.data.default_children)
-                setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
-
             }))
             .catch(error => {
                 console.log(error);
             });
     }, []);
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
-    }
-
-    useEffect(() => {
-        scrollToBottom()
-    }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
+
         if (websocket.current) {
             websocket.current.close()
         }
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
-        agentsocket(
-            websocket,
-            setChatMessage,
-            setThinking,
-            document,
-            setParentInstruct,
-            setChildInstruct,
-            setDefaultChildTemplateList,
-            use_user_template,
-            setUserParentInstruct,
-            setUserChildInstruct,
-            setDefaultUserChildTemplateList,
-            null,
-            setCurrentParagraph,
-
-        )
+        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
+        datasynthesissocket(websocket)
     }, [socket_destination]);
 
-    useEffect(() => {
-        agentsocket(
-            websocket,
-            setChatMessage,
-            setThinking,
-            document,
-            setParentInstruct,
-            setChildInstruct,
-            setDefaultChildTemplateList,
-            use_user_template,
-            setUserParentInstruct,
-            setUserChildInstruct,
-            setDefaultUserChildTemplateList,
-            null,
-            setCurrentParagraph,
-        )
-    }, [use_user_template, default_user_child_instruct, default_user_parent_instruct, default_user_child_template_list]);
+    const submitSeed = (seed_prompt ) => {
+        var data = {
+            'seed_prompt': seed_prompt,
+            'child_instruction_list': default_child_instruct_list,
+            'parent_instruction': default_parent_instruct,
+            'optional_innstruction': default_extra_instruct,
+            'choosen_models': choosen_model,
+            'role': 'Human',
+            'top_p': top_p,
+            'max_tokens': max_tokens,
+            'frequency_penalty': frequencypenalty,
+            'presence_penalty': presencepenalty,
+            'temperature': temperature,
+            'include_memory': false
+        }
+        websocket.current.send(JSON.stringify(data))
 
-    const handleEnter = (e) => {
-        if (e.key == "Enter" && !e.shiftKey) {
-            e.preventDefault()
-            submitChat()
-        }
-    }
-    const submitChat = () => {
-        if (usermessage == '') {
-            setUserMessageError(true)
-        }
-        else {
-            var data = {
-                'max_turn': max_turn,
-                'instruct_change': instruct_change,
-                'currentParagraph': currentparagraph,
-                'message': usermessage,
-                'choosen_models': choosen_model,
-                'choosen_template': use_user_template ? choosen_user_template : choosen_template,
-                'role': 'Human',
-                'top_p': top_p,
-                'max_tokens': max_tokens,
-                'frequency_penalty': frequencypenalty,
-                'presence_penalty': presencepenalty,
-                'temperature': temperature,
-                'agent_instruction': use_user_template ? default_user_parent_instruct : default_parent_instruct,
-                'child_instruction': use_user_template ? default_user_child_instruct : default_child_instruct
-            }
-            websocket.current.send(JSON.stringify(data))
-            setUserMessage("")
-            setInstructChange(false)
-        }
     }
     const updateChildInstructList = (value, index_) => {
         const new_child_instruct_list = default_child_instruct_list.map((instruct, index) => {
@@ -361,6 +268,12 @@ function DataSynthesis() {
             ]
         );
     }
+    const startSubmitLoop = () => {
+        setIsRunning(true)
+        for (let i in csv_row) {
+            submitSeed(csv_row[i][`${choosen_prompt_column}`])
+        }
+    }
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
             <title>Data Synthesis</title>
@@ -377,46 +290,71 @@ function DataSynthesis() {
                                 </Box>
                                 <Divider />
                                 <Box m={2}>
-                                    <CsvFileInput onFileLoad={handleFileLoad} />
+                                    <CsvFileInput
+                                        onFileLoad={handleFileLoad}
+                                        filename={filename}
+                                        setFileName={setFileName}
+                                        from_row={from_row}
+                                        to_row={to_row}
+                                        setFromRow={setFromRow}
+                                        setToRow={setToRow}
+                                    />
                                 </Box>
                             </Paper>
-
-
-                            <Paper sx={{ m: 2 }} variant='outlined'>
-                                <Box m={1}>
-                                    <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
-                                </Box>
-                                <Divider />
-                                <Box mb={2} mt={2} ml={1} mr={2}>
-                                    <ChatExport
-                                        chat_message={chat_message}
-                                        choosen_export_format_chatlog={choosen_export_format_chatlog}
-                                        setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
-                                        number_of_remove_message={2}
-                                        setChatMessage={setChatMessage}
-                                    >
-                                    </ChatExport>
-                                </Box>
-                            </Paper>
-
                             <Paper sx={{ m: 2 }} variant='outlined'>
                                 <Box m={1}>
                                     <Typography sx={{ color: 'text.secondary' }}>Run</Typography>
                                 </Box>
                                 <Divider />
                                 <Box mb={2} mt={2} ml={1} mr={2}>
+                                    <Box mb={1}>
+                                        <FormControl fullWidth>
+                                            <InputLabel id="seed-prompt">Seed Prompt</InputLabel>
+                                            <Select
+                                                labelId="seed-prompt"
+                                                onChange={e => setChoosenPromptColumn(e.target.value)}
+                                                value={choosen_prompt_column}
+                                                label="Seed Prompt"
+                                                size="small"
+
+                                            >
+                                                {csv_column.map((column) => {
+                                                    return (
+                                                        <MenuItem key={column.field} value={column.field}>{column.field}</MenuItem>
+                                                    )
+                                                })}
+                                            </Select>
+                                        </FormControl>
+                                    </Box>
                                     <Stack direction={'row'} spacing={1}>
-                                        <Button color="success" fullWidth variant="contained" onClick={() => {setIsRunning(true)}} startIcon={<PlayCircleOutlineIcon />} disabled={is_running?true:false} >Run</Button>
-                                        <Button color="secondary" fullWidth variant="contained" onClick={() => {setIsRunning(false)}} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running?true:false}>Pause</Button>
+                                        <Button color="success" fullWidth variant="contained" onClick={() => { startSubmitLoop() }} startIcon={<PlayCircleOutlineIcon />} disabled={is_running ? true : false} >Run</Button>
+                                        <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false) }} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
                                     </Stack>
+
+
+                                </Box>
+                            </Paper>
+                            <Paper sx={{ m: 2 }} variant='outlined'>
+                                <Box m={1}>
+                                    <Typography sx={{ color: 'text.secondary' }}>Dataset Export</Typography>
+                                </Box>
+                                <Divider />
+                                <Box mb={2} mt={2} ml={1} mr={2}>
+                                    <DatasetExport
+                                        choosen_export_format={choosen_export_format}
+                                        setChoosenExportFormat={setChoosenExportFormat}
+                                        data={csv_row}
+                                        filename={`Processed_${filename}_from_${from_row}_to_${to_row}`}
+                                    >
+                                    </DatasetExport>
+
                                 </Box>
                             </Paper>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={5}>
-                            <Box style={{ maxHeight: 700, width: '100%' }}>
+                            <Box style={{ maxHeight: 900, width: '100%' }}>
                                 <DataGrid
-                                    onColumnHeaderClick={(params, event) => { console.log(params.field) }}
                                     disableColumnSorting
                                     rows={csv_row}
                                     columns={csv_column}
@@ -457,10 +395,9 @@ function DataSynthesis() {
                                             <ChatInput
                                                 id="parent-instruct"
                                                 multiline
-                                                maxRows={8}
+                                                maxRows={6}
                                                 value={default_parent_instruct}
                                                 onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
-                                                minRows={6}
                                                 variant="standard"
                                                 InputProps={{
                                                     startAdornment: <InputAdornment position="start">   </InputAdornment>,
@@ -471,54 +408,81 @@ function DataSynthesis() {
                                         </Paper>
                                     </AccordionDetails>
                                 </Accordion>
-                                <Paper variant='outlined'>
-                                    <Box
-                                        justifyContent="center"
-                                        alignItems="center"
-                                        sx={{
-                                            height: 480,
-                                            overflow: "hidden",
-                                            overflowY: "scroll"
-                                        }}>
-                                        <Box p={1}>
-                                            <Typography sx={{ color: 'text.secondary' }} variant='body1'>Evolving Instructions</Typography>
-                                        </Box>
-                                        <Divider />
-                                        <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
+                                <Box mt={1} mb={1}>
+                                    <Paper variant='outlined'>
+                                        <Box
+                                            justifyContent="center"
+                                            alignItems="center"
 
-                                            {default_child_instruct_list && default_child_instruct_list.map((object, index) => {
-                                                return (
-                                                    <Grid container>
-                                                        <Grid item xs={11}>
-                                                            <TextField
-                                                                id={index}
-                                                                label={object.label}
-                                                                multiline
-                                                                maxRows={4}
-                                                                defaultValue={object.default}
-                                                                onChange={(e) => { updateChildInstructList(e.target.value, index) }}
-                                                                fullWidth
-                                                            />
-                                                        </Grid>
-                                                        <Grid item xs={1}>
-                                                            <IconButton aria-label="delete" onClick={() => { delete_child_instruct(index) }}>
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                        </Grid>
-                                                    </Grid>
+                                            sx={{
 
-                                                );
-                                            })}
-                                            <Box display="flex" justifyContent="center"
-                                                alignItems="center" >
-                                                <IconButton aria-label="add" onClick={() => { add_child_instruct() }}>
-                                                    <AddCircleOutlineIcon />
-                                                </IconButton>
+                                                height: 530,
+                                                overflow: "hidden",
+                                                overflowY: "scroll"
+                                            }}>
+                                            <Box p={1}>
+                                                <Typography sx={{ color: 'text.secondary' }} variant='body1'>Evolving Instructions</Typography>
                                             </Box>
-                                        </Stack>
+                                            <Divider />
+                                            <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
+                                                {default_child_instruct_list && default_child_instruct_list.map((object, index) => {
+                                                    return (
+                                                        <Grid container>
+                                                            <Grid item xs={11}>
+                                                                <TextField
+                                                                    id={index}
+                                                                    label={object.label}
+                                                                    multiline
+                                                                    maxRows={4}
+                                                                    defaultValue={object.default}
+                                                                    onChange={(e) => { updateChildInstructList(e.target.value, index) }}
+                                                                    fullWidth
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={1}>
+                                                                <IconButton aria-label="delete" onClick={() => { delete_child_instruct(index) }}>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </Grid>
+                                                        </Grid>
+                                                    );
+                                                })}
+                                                <Box display="flex" justifyContent="center"
+                                                    alignItems="center" >
+                                                    <IconButton aria-label="add" onClick={() => { add_child_instruct() }}>
+                                                        <AddCircleOutlineIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            </Stack>
+                                        </Box>
+                                    </Paper>
+                                </Box>
+                                <Accordion >
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="parent-content"
+                                        id="parent-header"
+                                    >
+                                        <Typography sx={{ color: 'text.secondary' }}>Extra Instruction (optional)</Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails >
+                                        <Paper variant="outlined">
+                                            <ChatInput
+                                                id="extra-instruct"
+                                                multiline
+                                                maxRows={4}
+                                                value={default_extra_instruct}
+                                                onChange={e => { setExtraInstruct(e.target.value), setInstructChange(true) }}
+                                                variant="standard"
+                                                InputProps={{
+                                                    startAdornment: <InputAdornment position="start">   </InputAdornment>,
 
-                                    </Box>
-                                </Paper>
+                                                }}
+                                            />
+
+                                        </Paper>
+                                    </AccordionDetails>
+                                </Accordion>
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />

@@ -199,7 +199,7 @@ class Consumer(AsyncWebsocketConsumer):
                 self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
             # Send message to WebSocket
             if role == "Human" or role == "Server":
-                await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
+                await self.send(text_data=json.dumps({"message": "\n" + message, "role": role,  "time": self.time}))
                 if role == "Human":
                     self.is_session_start_node = False
                     unique_response_id = event['unique']
