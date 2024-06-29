@@ -9,7 +9,7 @@ import TextField from '@mui/material/TextField';
 import ResponsiveAppBar from '../component/Navbar.js';
 import { ChatParameter } from '../component/ChatroomParameters.js';
 import { ChatBox } from '../component/Chatbox.js';
-import { chatsocket } from '../component/ChatSocket.js';
+import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { ChatExport } from '../component/chatExport.js';
 import Footer from '../component/Footer.js';
 import { Typography } from '@mui/material';

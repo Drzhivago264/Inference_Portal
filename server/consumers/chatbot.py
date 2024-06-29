@@ -10,12 +10,14 @@ from django.utils import timezone
 from asgiref.sync import sync_to_async
 from server.utils import constant
 
+
 class Consumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(
+            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
         self.user = self.scope['user']
@@ -24,7 +26,7 @@ class Consumer(AsyncWebsocketConsumer):
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        await self.send(text_data=json.dumps({ "message": f"You are currently using Celery backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully show when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor", "role": "Server", "time": self.time}))
+        await self.send(text_data=json.dumps({"message": f"You are currently using Celery backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully show when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor", "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -45,9 +47,7 @@ class Consumer(AsyncWebsocketConsumer):
                 message = validated.message
                 top_p = validated.top_p
                 best_of = validated.best_of
-                top_k = validated.top_k
-                if top_k <= 0:
-                    top_k = -1
+                top_k = validated.top_k if validated.top_k > 0 else -1
                 max_tokens = validated.max_tokens
                 frequency_penalty = validated.frequency_penalty
                 presence_penalty = validated.presence_penalty
@@ -75,7 +75,7 @@ class Consumer(AsyncWebsocketConsumer):
                                 type_="chatroom",
                                 stream=True,
                                 key=self.key_object.hashed_key,
-                                credit= self.key_object.credit,
+                                credit=self.key_object.credit,
                                 room_group_name=self.room_group_name,
                                 model=choosen_models,
                                 top_k=top_k,
@@ -101,7 +101,7 @@ class Consumer(AsyncWebsocketConsumer):
         self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
-            await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
+            await self.send(text_data=json.dumps({"message": "\n" + message, "role": role,  "time": self.time}))
             if role == "Human":
                 self.is_session_start_node = False
                 unique_response_id = event['unique']

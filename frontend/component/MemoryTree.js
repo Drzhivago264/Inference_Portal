@@ -1,17 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
-import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from './Navbar';
-import { ChatParameter } from './ChatroomParameters';
-import { ChatBox } from './Chatbox';
-import { chatsocket } from './ChatSocket';
-import { ChatExport } from './chatExport';
-import Footer from './Footer';
 import { Typography } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';

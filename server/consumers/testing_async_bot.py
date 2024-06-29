@@ -49,9 +49,7 @@ class Consumer(AsyncWebsocketConsumer):
                 self.message = validated.message
                 self.top_p = validated.top_p
                 self.best_of = validated.best_of
-                self.top_k = validated.top_k
-                if self.top_k <= 0:
-                    self.top_k = -1
+                self.top_k = validated.top_k if validated.top_k > 0 else -1
                 self.max_tokens = validated.max_tokens
                 self.frequency_penalty = validated.frequency_penalty
                 self.presence_penalty = validated.presence_penalty
@@ -87,7 +85,7 @@ class Consumer(AsyncWebsocketConsumer):
         # Send message to WebSocket
         if role == "Human" or role == "Server":
             credit = self.key_object.credit
-            await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
+            await self.send(text_data=json.dumps({"message": "\n" + message, "role": role,  "time": self.time}))
             if role == "Human":
                 unique_response_id = self.unique_response_id
                 await self.send(text_data=json.dumps({"holder": "place_holder", "holderid":  unique_response_id, "role": self.choosen_models, "time": self.time, "credit": credit}))

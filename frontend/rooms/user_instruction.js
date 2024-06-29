@@ -29,7 +29,7 @@ import Snackbar from '@mui/material/Snackbar';
 import { nanoid } from 'nanoid'
 import { ChatBox } from '../component/Chatbox';
 import { styled } from '@mui/material/styles';
-import { agentsocket } from '../component/ChatSocket';
+import { agentsocket } from '../component/websocket/AgentSocket';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { OpenAPIParameter } from '../component/ChatroomParameters';

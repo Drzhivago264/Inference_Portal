@@ -19,11 +19,8 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 
-const CsvFileInput = ({ onFileLoad }) => {
+const CsvFileInput = ({ onFileLoad, filename, setFileName, from_row, to_row, setFromRow, setToRow }) => {
 
-    const [from_row, setFromRow] = useState(0)
-    const [to_row, setToRow] = useState(10000)
-    const [filename, setFileName] = useState("No file loaded")
     const inputFile = useRef(null);
     const handleFileChange = (e, is_fisrt_load) => {
         console.log(is_fisrt_load)
@@ -67,7 +64,6 @@ const CsvFileInput = ({ onFileLoad }) => {
                         role={undefined}
                         variant="contained"
                         tabIndex={-1}
-                        
                         startIcon={<CloudUploadIcon />}
                     >
                         Load CSV

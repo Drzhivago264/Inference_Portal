@@ -161,7 +161,7 @@ async def send_stream_request_async(url: str, context: object, processed_prompt:
                     output = c['text'][0].replace(processed_prompt, "")
                     yield str({"response": c, "delta": output.replace(full_response, "")}) + "\n"
                     full_response = output
-                except:
+                except json.decoder.JSONDecodeError:
                     pass
         await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chat_api")
     except httpx.ReadTimeout:

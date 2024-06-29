@@ -183,7 +183,7 @@ class Consumer(AsyncWebsocketConsumer):
         # Send message to WebSocket
         if role == "Human" or role == "Server":
             credit = self.key_object.credit
-            await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
+            await self.send(text_data=json.dumps({"message": "\n" + message, "role": role,  "time": self.time}))
             if role == "Human":
                 unique_response_id = self.unique_response_id
                 await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": self.choosen_template, "time": self.time, "credit": credit}))
