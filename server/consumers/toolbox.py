@@ -36,7 +36,7 @@ class Consumer(AsyncWebsocketConsumer):
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        await self.send(text_data=json.dumps({"message": "You are currently using Celery backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
+        await self.send(text_data=json.dumps({"message": "You are currently using Async backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
         # Leave room group

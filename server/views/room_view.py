@@ -63,6 +63,7 @@ def hub_redirect_api(request: HttpRequest) -> Response:
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
+@cache_page(60 * 15)
 def instruction_tree_api(request):
     current_user = request.user
     if current_user.id == None:

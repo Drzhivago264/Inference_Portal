@@ -16,7 +16,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
-import { OpenAPIParameter } from '../component/chat_components/ChatroomParameters.js';
+import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
 import Footer from '../component/nav/Footer.js';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
@@ -120,7 +120,7 @@ const multilineColumn = {
 
 function DataSynthesis() {
     const ref = useRef();
-    const { websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [choosen_prompt_column, setChoosenPromptColumn] = useState("samplePrompt");
     const [agent_objects, setAgents] = useState([]);
@@ -213,9 +213,14 @@ function DataSynthesis() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
-
         if (websocket.current) {
             websocket.current.close()
+        }
+        if (agent_websocket.current) {
+            agent_websocket.current.close()
+        }
+        if (chat_websocket.current){
+            chat_websocket.current.close()
         }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
         datasynthesissocket(websocket)

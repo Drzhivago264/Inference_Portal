@@ -15,7 +15,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import { ChatBoxHotpot } from '../component/chat_components/Chatbox.js';
-import { HotpotParameter } from '../component/chat_components/ChatroomParameters.js'
+import { HotpotParameter } from '../component/chat_components/HotpotParameters.js';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
 import Footer from '../component/nav/Footer.js';
@@ -40,9 +40,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 
 function Hotpot() {
     const ref = useRef();
-    const { websocket } = useContext(WebSocketContext);
-    const agent_websocket = useRef(null)
-    const chat_websocket = useRef(null)
+    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [shownthinkingagent, setThinkingAgent] = useState(false);
     const [shownthinkingchat, setThinkingChat] = useState(false);
@@ -128,7 +126,7 @@ function Hotpot() {
         if (agent_websocket.current) {
             agent_websocket.current.close()
         }
-        if (chat_message.current){
+        if (chat_websocket.current){
             chat_websocket.current.close()
         }
      

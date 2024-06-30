@@ -32,10 +32,10 @@ import { styled } from '@mui/material/styles';
 import { agentsocket } from '../component/websocket/AgentSocket';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { OpenAPIParameter } from '../component/chat_components/ChatroomParameters.js';
+import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
 import { UserContext, WebSocketContext } from '../App.js'
 import { redirect_anon_to_login } from '../component/checkLogin.js';
-
+import { useNavigate } from 'react-router-dom';
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 500,
@@ -49,7 +49,8 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function UserInstruction() {
-    const { websocket } = useContext(WebSocketContext);
+    const navigate = useNavigate();
+    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [instruct_change, setInstructChange] = useState(false)
     const [choosen_model, setChoosenModel] = useState("gpt-4");
@@ -339,6 +340,12 @@ function UserInstruction() {
         redirect_anon_to_login(navigate, is_authenticated)
         if (websocket.current) {
             websocket.current.close()
+        }
+        if (agent_websocket.current) {
+            agent_websocket.current.close()
+        }
+        if (chat_websocket.current){
+            chat_websocket.current.close()
         }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         agentsocket(
