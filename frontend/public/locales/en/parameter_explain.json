@@ -1,5 +1,7 @@
 {
-    "use_memory": "This parameter allows the model to utilize its memory from previous interactions when set to true.\nFor example, in a conversation about movies, if use_memory is true, the model will remember previous movie recommendations and can use that information in later responses.",
+    "use_memory": "This parameter allows the model to utilize its memory from previous interactions when set to true.\nFor example, in a conversation about movies, if use_memory (All) is true, the model will remember previous movie recommendations and can use that information in later responses.",
+
+    "use_memory_current": "This parameter allows the model to utilize its memory from the current interaction when set to true.\nFor example, in a conversation about movies, if use_memory (Current) is true, the model will remember previous movie recommendations that presents in current interaction and use that information for later response.",
 
     "chatbot_mode": "When enabled, this parameter allows the model to operate in a conversational mode.\nFor instance, it can help in creating a chatbot that can interact naturally with users, understanding their queries and providing appropriate responses.",
 

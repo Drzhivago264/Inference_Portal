@@ -22,6 +22,7 @@ class Consumer(AsyncWebsocketConsumer):
         self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
+        self.session_history = []
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
 
@@ -59,8 +60,10 @@ class Consumer(AsyncWebsocketConsumer):
                 self.length_penalty = validated.length_penalty
                 self.choosen_models = validated.choosen_models
                 self.include_memory = validated.include_memory
+                self.include_current_memory = validated.include_current_memory
                 self.role = validated.role
                 self.unique_response_id = str(uuid.uuid4())
+                self.session_history.append({"role": "user", "content": f"{validated.message}"})
                 # Send message to room group
                 await self.channel_layer.group_send(
                     self.room_group_name, {"type": "chat_message",

@@ -1,23 +1,26 @@
 import React, { useState, useEffect, useRef, useMemo, useContext } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from '../component/Navbar.js';
-import { ChatParameter } from '../component/ChatroomParameters.js';
-import { ChatBox } from '../component/Chatbox.js';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import { ChatParameter } from '../component/chat_components/ChatroomParameters.js';
+import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
-import { ChatExport } from '../component/chatExport.js';
-import Footer from '../component/Footer.js';
+import { ChatExport } from '../component/import_export/chatExport.js';
+import Footer from '../component/nav/Footer.js';
 import { Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
-import { MemoryTree } from '../component/MemoryTree';
+import { MemoryTree } from '../component/chat_components/MemoryTree.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
-import { UserContext } from '../App.js'
+import { UserContext, WebSocketContext } from '../App.js'
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 550,
@@ -32,7 +35,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function Chat() {
-    const websocket = useRef(null)
+    const { websocket } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
     const [model_objects, setModels] = useState([]);
@@ -43,7 +46,8 @@ function Chat() {
     const [top_k, setTopk] = useState(-1);
     const [mode, setMode] = useState("chat");
     const [max_tokens, setMaxToken] = useState(null);
-    const [usememory, setUseMemory] = useState(true);
+    const [usememory, setUseMemory] = useState(false);
+    const [usememorycurrent, setUseMemoryCurrent] = useState(true);
     const [temperature, setTemperature] = useState(0.73);
     const [beam, setBeam] = useState(false);
     const [earlystopping, setEarlyStopping] = useState(false);
@@ -73,6 +77,9 @@ function Chat() {
                 console.log(error);
             });
     }, []);
+
+
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
     }
@@ -117,7 +124,8 @@ function Chat() {
                 'beam': beam,
                 'early_stopping': earlystopping,
                 'length_penalty': lengthpenalty,
-                'include_memory': usememory
+                'include_memory': usememory,
+                'include_current_memory': usememorycurrent
             }
             websocket.current.send(JSON.stringify(data))
             setUserMessage("")
@@ -134,22 +142,29 @@ function Chat() {
                     <Grid container spacing={2}>
                         <Grid item xs={4}>
                             {MemoMemoryTree}
-                            <Paper sx={{ mt: 2 }} variant='outlined'>
-                                <Box m={1}>
-                                    <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
-                                </Box>
-                                <Divider />
-                                <Box mb={2} mt={2} ml={1} mr={2}>
-                                    <ChatExport
-                                        chat_message={chat_message}
-                                        choosen_export_format_chatlog={choosen_export_format_chatlog}
-                                        setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
-                                        number_of_remove_message={2}
-                                        setChatMessage={setChatMessage}
-                                    >
-                                    </ChatExport>
-                                </Box>
-                            </Paper>
+                            <Stack direction='row'>
+                                <Paper sx={{ mt: 2 }} variant='outlined'>
+                                    <Box m={1}>
+                                        <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
+                                    </Box>
+                                    <Divider />
+                                    <Box mb={2} mt={2} ml={1} mr={2}>
+                                        <ChatExport
+                                            chat_message={chat_message}
+                                            choosen_export_format_chatlog={choosen_export_format_chatlog}
+                                            setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
+                                            number_of_remove_message={2}
+                                            setChatMessage={setChatMessage}
+                                        >
+                                        </ChatExport>
+                                    </Box>
+                                </Paper>
+                                <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
+                                    <AlertTitle>Note: </AlertTitle>
+                                    {`Celery Backend is deprecated, Async Backend supports newest features.`}
+                                </Alert>
+                            </Stack>
+
 
                         </Grid>
                         <Grid item xs={5.5}>
@@ -196,6 +211,9 @@ function Chat() {
                                 setTopk={setTopk}
                                 setTopp={setTopp}
                                 setUseMemory={setUseMemory}
+                                setUseMemoryCurrent={setUseMemoryCurrent}
+                                usememory={usememory}
+                                usememorycurrent={usememorycurrent}
                                 earlystopping={earlystopping}
                                 setEarlyStopping={setEarlyStopping}
                             ></ChatParameter>

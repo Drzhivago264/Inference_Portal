@@ -65,6 +65,7 @@ class ChatSchema(BaseModel):
     temperature:float = constant.DEFAULT_TEMPERATURE
     max_tokens: int | None
     include_memory: bool = True
+    include_current_memory: bool = True
     role: str
     @field_validator('frequency_penalty','length_penalty','presence_penalty')
     @classmethod

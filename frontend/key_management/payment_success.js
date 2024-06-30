@@ -7,7 +7,7 @@ import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from '../component/Navbar';
+import ResponsiveAppBar from '../component/nav/Navbar';
 import Alert from '@mui/material/Alert';
 import KeyIcon from '@mui/icons-material/Key';
 import Link from '@mui/material/Link';
@@ -29,7 +29,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import SvgIcon from '@mui/material/SvgIcon';
-import Footer from '../component/Footer';
+import Footer from '../component/nav/Footer';
 import {
     createTheme,
     responsiveFontSizes,

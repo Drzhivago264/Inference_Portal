@@ -15,9 +15,9 @@ import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import ResponsiveAppBar from '../component/Navbar.js';
-import { OpenAPIParameter } from '../component/ChatroomParameters.js';
-import Footer from '../component/Footer.js';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import { OpenAPIParameter } from '../component/chat_components/ChatroomParameters.js';
+import Footer from '../component/nav/Footer.js';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Accordion from '@mui/material/Accordion';
@@ -26,8 +26,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
-import { UserContext } from '../App.js'
-import CsvFileInput from '../component/CsvInput.js';
+import { UserContext, WebSocketContext } from '../App.js'
+import CsvFileInput from '../component/import_export/CsvInput.js';
 import {
     DataGrid, useGridApiContext,
     GridCellEditStopReasons,
@@ -39,7 +39,7 @@ import IconButton from '@mui/material/IconButton';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
-import { DatasetExport } from '../component/datasetExport.js';
+import { DatasetExport } from '../component/import_export/datasetExport.js';
 import { file } from 'jszip';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 
@@ -54,6 +54,7 @@ function isKeyboardEvent(event) {
 }
 
 function EditTextarea(props) {
+  
     const { id, field, value, colDef, hasFocus } = props;
     const [valueState, setValueState] = useState(value);
     const [anchorEl, setAnchorEl] = useState();
@@ -119,7 +120,7 @@ const multilineColumn = {
 
 function DataSynthesis() {
     const ref = useRef();
-    const websocket = useRef(null)
+    const { websocket } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [choosen_prompt_column, setChoosenPromptColumn] = useState("samplePrompt");
     const [agent_objects, setAgents] = useState([]);

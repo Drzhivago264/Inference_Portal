@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import KeyIcon from '@mui/icons-material/Key';
 import InputAdornment from '@mui/material/InputAdornment';
-import ResponsiveAppBar from '../component/Navbar.js';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
 import { Link, useNavigate } from "react-router-dom";
 import { FormControl, FormLabel } from '@mui/material';
 import Alert from '@mui/material/Alert';
@@ -15,7 +15,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
 import Divider from '@mui/material/Divider';
-import Footer from '../component/Footer.js';
+import Footer from '../component/nav/Footer.js';
 import { UserContext } from '../App.js'
 import { getCookie } from '../component/getCookie.js';
 import Skeleton from '@mui/material/Skeleton';

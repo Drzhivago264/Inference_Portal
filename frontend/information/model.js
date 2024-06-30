@@ -9,9 +9,9 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Container from '@mui/material/Container';
-import ResponsiveAppBar from '../component/Navbar';
+import ResponsiveAppBar from '../component/nav/Navbar';
 import { Stack } from '@mui/material';
-import Footer from '../component/Footer';
+import Footer from '../component/nav/Footer';
 import { useQuery } from "react-query";
 import Skeleton from '@mui/material/Skeleton';
 
