@@ -54,7 +54,7 @@ function isKeyboardEvent(event) {
 }
 
 function EditTextarea(props) {
-  
+
     const { id, field, value, colDef, hasFocus } = props;
     const [valueState, setValueState] = useState(value);
     const [anchorEl, setAnchorEl] = useState();
@@ -130,7 +130,7 @@ function DataSynthesis() {
     const [temperature, setTemperature] = useState(0.73);
     const [presencepenalty, setPresencePenalty] = useState(0);
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
-    
+
 
     const [max_turn, setMaxTurn] = useState(null)
     const [instruct_change, setInstructChange] = useState(false)
@@ -219,14 +219,14 @@ function DataSynthesis() {
         if (agent_websocket.current) {
             agent_websocket.current.close()
         }
-        if (chat_websocket.current){
+        if (chat_websocket.current) {
             chat_websocket.current.close()
         }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
         datasynthesissocket(websocket)
     }, [socket_destination]);
 
-    const submitSeed = (seed_prompt ) => {
+    const submitSeed = (seed_prompt) => {
         var data = {
             'seed_prompt': seed_prompt,
             'child_instruction_list': default_child_instruct_list,
@@ -416,6 +416,10 @@ function DataSynthesis() {
                                 </Accordion>
                                 <Box mt={1} mb={1}>
                                     <Paper variant='outlined'>
+                                        <Box p={1}>
+                                            <Typography sx={{ color: 'text.secondary' }} variant='body1'>Evolving Instructions</Typography>
+                                        </Box>
+                                        <Divider />
                                         <Box
                                             justifyContent="center"
                                             alignItems="center"
@@ -426,10 +430,8 @@ function DataSynthesis() {
                                                 overflow: "hidden",
                                                 overflowY: "scroll"
                                             }}>
-                                            <Box p={1}>
-                                                <Typography sx={{ color: 'text.secondary' }} variant='body1'>Evolving Instructions</Typography>
-                                            </Box>
-                                            <Divider />
+
+                                           
                                             <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
                                                 {default_child_instruct_list && default_child_instruct_list.map((object, index) => {
                                                     return (

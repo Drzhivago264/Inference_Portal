@@ -344,7 +344,7 @@ function UserInstruction() {
         if (agent_websocket.current) {
             agent_websocket.current.close()
         }
-        if (chat_websocket.current){
+        if (chat_websocket.current) {
             chat_websocket.current.close()
         }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
@@ -417,48 +417,50 @@ function UserInstruction() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
-            <ResponsiveAppBar max_width="xl" />
-            <Container maxWidth="xl" >
+            <ResponsiveAppBar max_width={false} />
+            <Container maxWidth="xxl" >
                 <Box m={2}>
                     <Grid container spacing={2}>
                         <Grid item xs={2}>
-                            <Typography mt={1} mb={1} variant='body1'>
-                                Instruction Template
-                            </Typography>
-                            <List>
-                                {template_list.map((t, index) => {
-                                    return (
-                                        <ListItemButton sx={{ height: 38 }}
-                                            key={index}
-                                            selected={selectedIndex === index}
-                                            onClick={(event) => handleListItemClick(event, index)}
-                                        >
-                                            <ListItemIcon>
-                                                {selectedIndex === index && <FolderOpenIcon />}
-                                                {selectedIndex !== index && <FolderIcon />}
-                                            </ListItemIcon>
-                                            <ListItemText primaryTypographyProps={{
-                                                fontWeight: 'medium',
-                                                variant: 'body2',
-                                                style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
-                                            }} primary={t.displayed_name} />
-                                        </ListItemButton>
-                                    )
-                                })}
-                                <Box display="flex" justifyContent="center"
-                                    alignItems="center">
-                                    {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent ({max_parent_num}).</Alert>}
-                                    {!add_parent_error && is_save &&
-                                        <IconButton aria-label="add" onClick={() => { addParent("add") }}>
-                                            <AddCircleOutlineIcon />
-                                        </IconButton>
-                                    }
-                                    {template_list.length > 1 && <IconButton aria-label="delete" onClick={() => { addParent("delete") }}>
-                                        <DeleteIcon />
-                                    </IconButton>}
-                                </Box>
-                            </List>
-              
+                            <Paper sx={{ mr: 2 }} variant='outlined'>
+                                <Typography m={1} variant='body1' sx={{ color: 'text.secondary' }}>
+                                    Instruction Template
+                                </Typography>
+                                <List>
+                                    {template_list.map((t, index) => {
+                                        return (
+                                            <ListItemButton sx={{ height: 38 }}
+                                                key={index}
+                                                selected={selectedIndex === index}
+                                                onClick={(event) => handleListItemClick(event, index)}
+                                            >
+                                                <ListItemIcon>
+                                                    {selectedIndex === index && <FolderOpenIcon />}
+                                                    {selectedIndex !== index && <FolderIcon />}
+                                                </ListItemIcon>
+                                                <ListItemText primaryTypographyProps={{
+                                                    fontWeight: 'medium',
+                                                    variant: 'body2',
+                                                    style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
+                                                }} primary={t.displayed_name} />
+                                            </ListItemButton>
+                                        )
+                                    })}
+                                    <Box display="flex" justifyContent="center"
+                                        alignItems="center">
+                                        {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent ({max_parent_num}).</Alert>}
+                                        {!add_parent_error && is_save &&
+                                            <IconButton aria-label="add" onClick={() => { addParent("add") }}>
+                                                <AddCircleOutlineIcon />
+                                            </IconButton>
+                                        }
+                                        {template_list.length > 1 && <IconButton aria-label="delete" onClick={() => { addParent("delete") }}>
+                                            <DeleteIcon />
+                                        </IconButton>}
+                                    </Box>
+                                </List>
+                            </Paper>
+                            <Box sx={{ mr: 2, mt:2 }} >
                                 <OpenAPIParameter
                                     top_p={top_p}
                                     agent_objects={agent_objects}
@@ -478,7 +480,7 @@ function UserInstruction() {
 
                                 >
                                 </OpenAPIParameter>
-                            
+                            </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={6}>

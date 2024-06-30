@@ -52,6 +52,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
 import { UserContext, WebSocketContext } from '../App.js'
+const { convert } = require('html-to-text');
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -351,6 +352,7 @@ function Agent() {
         editorref.current.save().then((outputData) => {
 
             let download_content = outputData
+            console.log(download_content)
             if (mimeType == "application/json") {
                 download_content = JSON.stringify(outputData, null, 4)
             }
@@ -359,17 +361,8 @@ function Agent() {
             }
             else if (mimeType == "text/plain") {
                 let html = parser.parse(download_content);
-                html = html.toString()
-                html = html.replace(/<style([\s\S]*?)<\/style>/gi, '');
-                html = html.replace(/<script([\s\S]*?)<\/script>/gi, '');
-                html = html.replace(/<\/div>/ig, '\n');
-                html = html.replace(/<\/li>/ig, '\n');
-                html = html.replace(/<li>/ig, '  *  ');
-                html = html.replace(/<\/ul>/ig, '\n');
-                html = html.replace(/<\/p>/ig, '\n');
-                html = html.replace(/<br\s*[\/]?>/gi, "\n");
-                html = html.replace(/<[^>]+>/ig, '');
-                download_content = html
+                let text = convert(html, {wordwrap: 130});
+                download_content = text
             }
             else if (mimeType == "application/pdf") {
                 let html = parser.parse(download_content);
