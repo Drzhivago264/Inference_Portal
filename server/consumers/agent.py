@@ -160,7 +160,7 @@ class Consumer(AsyncWebsocketConsumer):
                         message=message,
                         credit=self.key_object.credit,
                         room_group_name=self.room_group_name,
-                        model=choosen_template,
+                        model=self.model_type,
                         max_turns=self.max_turns,
                         current_turn_inner=self.current_turn,
                         agent_instruction=agent_instruction,
