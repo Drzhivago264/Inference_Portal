@@ -18,9 +18,10 @@ import CardMedia from '@mui/material/CardMedia';
 import Grid from '@mui/material/Grid';
 import { ColorModeContext } from '../App';
 import IntroductionVerticalLinearStepper from '../component/IntroductionStepper';
-
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 function Information() {
     const { t, i18n } = useTranslation();
+    const isChrome = !!window.chrome;
     const [destination, setDestination] = useState(null)
     const navigate = useNavigate();
     useEffect(() => {
@@ -50,13 +51,13 @@ function Information() {
 
                                     <Stack mt={5} direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                                         <Box>
-                                            <Button variant="contained" size="large" href="/frontend/key-management">
-                                                Get Started for Free
+                                            <Button variant="contained" size="large" href="/frontend/key-management" sx={{ borderRadius: 28 }} endIcon={<NavigateNextIcon />}>
+                                                <span style={{ position: 'relative', top: isChrome ? '0px' : '2px' }}>{t('introduction.get_start_button')}</span>
                                             </Button>
                                         </Box>
                                         <Box>
-                                            <Button variant="contained" size="large" href="/frontend/manual/key">
-                                                Manual
+                                            <Button variant="outlined" size="large" href="/frontend/manual/key" sx={{ borderRadius: 28 }} endIcon={<NavigateNextIcon />}>
+                                                <span style={{ position: 'relative', top: isChrome ? '0px' : '2px' }}>{t('introduction.manual_button')}</span>
                                             </Button>
                                         </Box>
                                     </Stack>
@@ -87,7 +88,7 @@ function Information() {
                             <Grid item sm={12} md={8} >
                                 <Box >
                                     <Slide direction="up" in={true} timeout={2000} mountOnEnter unmountOnExit>
-                                        <Stack mt={3}  direction='column' spacing={5}>
+                                        <Stack mt={3} direction='column' spacing={5}>
                                             <Paper variant='outlined'>
                                                 <Box mt={2} ml={2} mb={1}>
                                                     <Typography variant='h4'>
@@ -228,7 +229,7 @@ function Information() {
                             <Grid item sm={12} md={4}  >
                                 <Slide direction="up" in={true} timeout={2000} mountOnEnter unmountOnExit sx={{ display: { xs: 'none', md: 'block' } }}>
                                     <Box mt={3} mb={5} >
-                                        <IntroductionVerticalLinearStepper t={t}/>
+                                        <IntroductionVerticalLinearStepper t={t} />
                                     </Box>
                                 </Slide>
                             </Grid>

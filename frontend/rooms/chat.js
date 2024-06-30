@@ -35,7 +35,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function Chat() {
-    const { websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
     const [model_objects, setModels] = useState([]);
@@ -93,6 +93,12 @@ function Chat() {
         if (websocket.current) {
             websocket.current.close()
         }
+        if (agent_websocket.current) {
+            agent_websocket.current.close()
+        }
+        if (chat_websocket.current){
+            chat_websocket.current.close()
+        }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         chatsocket(websocket, setChatMessage, setThinking, document)
     }, [socket_destination]);
@@ -136,7 +142,7 @@ function Chat() {
     return (
         <Container maxWidth={false} sx={{ minWidth: 1350 }} disableGutters>
             <title>Chat</title>
-            <ResponsiveAppBar max_width={false} />
+            <ResponsiveAppBar max_width={'xl'} />
             <Container maxWidth="xl" sx={{ minWidth: 1350 }}>
                 <Box m={2}>
                     <Grid container spacing={2}>

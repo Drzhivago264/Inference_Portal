@@ -12,7 +12,7 @@ import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
-import { OpenAPIParameter } from '../component/chat_components/ChatroomParameters.js'
+import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { ChatExport } from '../component/import_export/chatExport.js';
@@ -37,7 +37,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 function FunctionLLM() {
     const ref = useRef();
 
-    const { websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
     const [shownthinking, setThinking] = useState(false);
     const messagesEndRef = useRef(null)
     const [chat_message, setChatMessage] = useState([]);
@@ -82,6 +82,15 @@ function FunctionLLM() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
+        if (websocket.current) {
+            websocket.current.close()
+        }
+        if (agent_websocket.current) {
+            agent_websocket.current.close()
+        }
+        if (chat_websocket.current){
+            chat_websocket.current.close()
+        }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
         chatsocket(websocket, setChatMessage, setThinking, document)
     }, []);

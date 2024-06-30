@@ -34,7 +34,7 @@ const Table = require('editorjs-table');
 const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
 import editorjsCodecup from '@calumk/editorjs-codecup';
 import GetAppIcon from '@mui/icons-material/GetApp';
-import { OpenAPIParameter } from '../component/chat_components/ChatroomParameters.js';
+import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
 import '../component/css/editor-js.css';
@@ -66,7 +66,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function Agent() {
-    const { websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
     const ref = useRef();
     const editorref = useRef();
     const messagesEndRef = useRef(null)
@@ -221,6 +221,12 @@ function Agent() {
     useEffect(() => {
         if (websocket.current) {
             websocket.current.close()
+        }
+        if (agent_websocket.current) {
+            agent_websocket.current.close()
+        }
+        if (chat_websocket.current){
+            chat_websocket.current.close()
         }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         agentsocket(

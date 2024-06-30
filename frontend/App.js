@@ -62,7 +62,8 @@ export default function App() {
   const [user_hashed_key, setUserHashKey] = useState(null)
   const [user_key_name, setUserKeyName] = useState(null)
   const websocket = useRef(null)
-
+  const chat_websocket = useRef(null)
+  const agent_websocket = useRef(null)
   useEffect(() => {
     check_login(setIsAuthenticated, setUserHashKey, setUserKeyName)
   }, [is_authenticated, user_hashed_key, user_key_name]);
@@ -78,14 +79,17 @@ export default function App() {
   const theme = useMemo(
     () =>
       createTheme({
+        
         palette: {
           mode,
         },
-      }),
+        
+      },
+    ),
     [mode],
   );
   return (
-    <WebSocketContext.Provider value={{websocket}}>
+    <WebSocketContext.Provider value={{websocket, agent_websocket, chat_websocket}}>
       <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name }}>
         <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
           <GlobalStyles
