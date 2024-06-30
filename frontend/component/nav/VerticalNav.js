@@ -15,12 +15,12 @@ import Divider from '@mui/material/Divider';
 import { Link } from "react-router-dom";
 import LogoutIcon from '@mui/icons-material/Logout';
 import RuleIcon from '@mui/icons-material/Rule';
-import { UserContext } from '../App.js'
-import { logout } from './checkLogin.js';
+import { UserContext } from "../../App.js";
+import { logout } from '../checkLogin.js';
 import StorageIcon from '@mui/icons-material/Storage';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import SavingsIcon from '@mui/icons-material/Savings';
-import { getCookie } from './getCookie.js'
+import { getCookie } from '../getCookie.js'
 import axios from 'axios';
 
 

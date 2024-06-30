@@ -1,5 +1,7 @@
 {
-    "use_memory": "Tham số này cho phép mô hình sử dụng bộ nhớ từ các tương tác trước đó khi được đặt thành true.\nVí dụ, trong một cuộc trò chuyện về phim, nếu use_memory là true, mô hình sẽ nhớ các đề xuất phim trước đó và có thể sử dụng thông tin đó trong các phản hồi sau.",
+    "use_memory": "Tham số này cho phép mô hình sử dụng bộ nhớ từ các tương tác trước đó khi được đặt thành true.\nVí dụ, trong một cuộc trò chuyện về phim, nếu use_memory (All) là true, mô hình sẽ nhớ các đề xuất phim trước đó và có thể sử dụng thông tin đó trong các phản hồi sau.",
+
+    "use_memory_current": "Tham số này cho phép mô hình sử dụng bộ nhớ từ tương tác hiện tại khi được đặt thành true.\nVí dụ, trong một cuộc trò chuyện về phim, nếu use_memory (Current) là true, mô hình sẽ nhớ các đề xuất phim trong đoạn hội thoại và có thể sử dụng thông tin đó trong các phản hồi sau.",
 
     "chatbot_mode": "Khi được kích hoạt, tham số này cho phép mô hình hoạt động theo chế độ trò chuyện.\nVí dụ, nó có thể giúp tạo ra một chatbot có thể tương tác tự nhiên với người dùng, hiểu các truy vấn của họ và cung cấp các phản hồi phù hợp.",
 

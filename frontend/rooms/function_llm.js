@@ -11,16 +11,16 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
-import ResponsiveAppBar from '../component/Navbar.js';
-import { OpenAPIParameter } from '../component/ChatroomParameters.js'
-import { ChatBox } from '../component/Chatbox.js';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import { OpenAPIParameter } from '../component/chat_components/ChatroomParameters.js'
+import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
-import { ChatExport } from '../component/chatExport.js';
-import Footer from '../component/Footer.js';
+import { ChatExport } from '../component/import_export/chatExport.js';
+import Footer from '../component/nav/Footer.js';
 import Typography from '@mui/material/Typography';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
-import { UserContext } from '../App.js'
+import { UserContext, WebSocketContext } from '../App.js'
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -37,7 +37,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 function FunctionLLM() {
     const ref = useRef();
 
-    const websocket = useRef(null)
+    const { websocket } = useContext(WebSocketContext);
     const [shownthinking, setThinking] = useState(false);
     const messagesEndRef = useRef(null)
     const [chat_message, setChatMessage] = useState([]);

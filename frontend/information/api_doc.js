@@ -1,10 +1,10 @@
 import React from 'react';
 import Box from '@mui/material/Box';
-import ResponsiveAppBar from '../component/Navbar';
+import ResponsiveAppBar from '../component/nav/Navbar';
 import Container from '@mui/material/Container';
 import SwaggerUI from "swagger-ui-react"
 import "swagger-ui-react/swagger-ui.css"
-import Footer from '../component/Footer';
+import Footer from '../component/nav/Footer';
 function APIDoc() {
     const ui = SwaggerUI({
         dom_id: '#swaggerContainer',

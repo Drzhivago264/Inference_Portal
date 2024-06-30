@@ -24,8 +24,12 @@ async def async_inference(self) -> None:
     credit = self.key_object.credit
     llm = await LLM.objects.aget(name=self.choosen_models)
     url_list = await get_model_url_async(llm)
-    processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
-        model=self.choosen_models, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
+    
+    if not self.include_current_memory:
+        processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
+            model=self.choosen_models, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
+    else:
+        processed_prompt = self.session_history
 
     if llm.is_self_host:
         tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.choosen_models])
@@ -60,6 +64,7 @@ async def async_inference(self) -> None:
                 response_stream = await send_stream_request_async(self, url=url, context=context,
                                                                   processed_prompt=session_list_to_string)
                 if isinstance(response_stream, str):
+                    self.session_history.append({"role": "assistant", "content": f"{response_stream}"})
                     await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=response_stream, type_="chatroom")
             else:
                 await manage_ec2_on_inference(self, server_status, instance_id)
@@ -69,5 +74,6 @@ async def async_inference(self) -> None:
 
     else:
         clean_response = await send_chat_request_openai_async(self, processed_prompt)
+        self.session_history.append({"role": "assistant", "content": f"{clean_response}"})
         await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message,
                                                                         response=clean_response, type_="open_ai")

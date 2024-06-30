@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from '../component/Navbar';
-import Footer from '../component/Footer';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import Footer from '../component/nav/Footer.js';
 import { Divider, List, Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -27,12 +27,15 @@ import { getCookie } from '../component/getCookie';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Snackbar from '@mui/material/Snackbar';
 import { nanoid } from 'nanoid'
-import { ChatBox } from '../component/Chatbox';
+import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { styled } from '@mui/material/styles';
 import { agentsocket } from '../component/websocket/AgentSocket';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { OpenAPIParameter } from '../component/ChatroomParameters';
+import { OpenAPIParameter } from '../component/chat_components/ChatroomParameters.js';
+import { UserContext, WebSocketContext } from '../App.js'
+import { redirect_anon_to_login } from '../component/checkLogin.js';
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 500,
@@ -46,7 +49,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function UserInstruction() {
-    const websocket = useRef(null)
+    const { websocket } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [instruct_change, setInstructChange] = useState(false)
     const [choosen_model, setChoosenModel] = useState("gpt-4");
@@ -83,6 +86,7 @@ function UserInstruction() {
     const [children_instruction_list, setChildInstructionList] = useState([
         { id: null, dislayed_name: "", instruct: "", unique: nanoid(), add: false },
     ])
+    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
 
     const handleOnDragEnd = (result) => {
         const items = Array.from(children_instruction_list);
@@ -332,6 +336,10 @@ function UserInstruction() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var url = window.location.pathname.split("/").filter(path => path !== "")
     useEffect(() => {
+        redirect_anon_to_login(navigate, is_authenticated)
+        if (websocket.current) {
+            websocket.current.close()
+        }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
         agentsocket(
             websocket,
@@ -339,7 +347,7 @@ function UserInstruction() {
             setThinking,
             document,
         )
-    }, []);
+    }, [socket_destination]);
 
     useEffect(() => {
         if (reload) {

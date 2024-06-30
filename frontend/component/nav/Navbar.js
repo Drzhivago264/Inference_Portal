@@ -16,7 +16,7 @@ import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
 import { MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
-import Constant_Colours from './color.js'
+import Constant_Colours from '../color.js'
 import { useNavigate } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
 import { VerticalNav, UserVeticalNav } from './VerticalNav.js';
@@ -25,7 +25,7 @@ const grey = Constant_Colours.grey;
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Avatar from '@mui/material/Avatar';
-import { ColorModeContext, UserContext } from '../App.js'
+import { ColorModeContext, UserContext } from '../../App.js'
 import { Divider, Stack } from '@mui/material';
 import Badge from '@mui/material/Badge';
 import CloseIcon from '@mui/icons-material/Close';

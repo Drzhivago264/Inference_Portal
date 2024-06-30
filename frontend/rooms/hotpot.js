@@ -13,19 +13,19 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
-import ResponsiveAppBar from '../component/Navbar.js';
-import { ChatBoxHotpot } from '../component/Chatbox.js';
-import { HotpotParameter } from '../component/ChatroomParameters.js'
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import { ChatBoxHotpot } from '../component/chat_components/Chatbox.js';
+import { HotpotParameter } from '../component/chat_components/ChatroomParameters.js'
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
-import Footer from '../component/Footer.js';
+import Footer from '../component/nav/Footer.js';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate } from "react-router-dom";
 import { redirect_anon_to_login } from '../component/checkLogin.js';
-import { UserContext } from '../App.js'
+import { UserContext, WebSocketContext } from '../App.js'
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -40,6 +40,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 
 function Hotpot() {
     const ref = useRef();
+    const { websocket } = useContext(WebSocketContext);
     const agent_websocket = useRef(null)
     const chat_websocket = useRef(null)
     const messagesEndRef = useRef(null)
@@ -56,7 +57,8 @@ function Hotpot() {
     const [top_k, setTopk] = useState(-1);
     const [mode, setMode] = useState("chat");
     const [max_tokens, setMaxToken] = useState(null);
-    const [usememory, setUseMemory] = useState(true);
+    const [usememory, setUseMemory] = useState(false);
+    const [usememorycurrent, setUseMemoryCurrent] = useState(true)
     const [temperature, setTemperature] = useState(0.73);
     const [beam, setBeam] = useState(false);
     const [earlystopping, setEarlyStopping] = useState(false);
@@ -120,6 +122,9 @@ function Hotpot() {
     var url = window.location.pathname.split("/").filter(path => path !== "")
 
     useEffect(() => {
+        if (websocket.current) {
+            websocket.current.close()
+        }
         if (agent_websocket.current) {
             agent_websocket.current.close()
         }
@@ -223,7 +228,8 @@ function Hotpot() {
                 'beam': beam,
                 'early_stopping': earlystopping,
                 'length_penalty': lengthpenalty,
-                'include_memory': usememory
+                'include_memory': usememory,
+                'include_current_memory': usememorycurrent
             }
             chat_websocket.current.send(JSON.stringify(data))
             setUserChatMessage("")
@@ -398,6 +404,9 @@ function Hotpot() {
                                 setTopk={setTopk}
                                 setTopp={setTopp}
                                 setUseMemory={setUseMemory}
+                                setUseMemoryCurrent={setUseMemoryCurrent}
+                                usememory={usememory}
+                                usememorycurrent={usememorycurrent}
                                 earlystopping={earlystopping}
                                 setEarlyStopping={setEarlyStopping}
                                 setChoosenAgentModel={setChoosenAgentModel}

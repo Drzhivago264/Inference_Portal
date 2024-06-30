@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { FormControl, FormLabel } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import Radio from '@mui/material/Radio';
@@ -290,6 +290,7 @@ export const ChatParameter = ({
     setSocketDestination,
     socket_destination,
     setUseMemory,
+    setUseMemoryCurrent,
     choosen_model,
     setChoosenModel,
     mode,
@@ -314,9 +315,25 @@ export const ChatParameter = ({
     model_objects,
     agent_objects,
     earlystopping,
-    setEarlyStopping
+    setEarlyStopping,
+    usememory,
+    usememorycurrent
 }) => {
     const { t, i18n } = useTranslation();
+    const toggleMemory = (value, memory_type) => {
+        if (memory_type == "usememory" && value) {
+            setUseMemory(value)
+            setUseMemoryCurrent(!value)
+        }
+        else if (memory_type == "usememorycurrent" && value) {
+            setUseMemory(!value)
+            setUseMemoryCurrent(value)
+        }
+        else {
+            setUseMemory(false)
+            setUseMemoryCurrent(false)
+        }
+    }
     return (
 
         <Stack direction='column' spacing={1}>
@@ -360,7 +377,8 @@ export const ChatParameter = ({
             <Divider></Divider>
             <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
             <Stack direction='row' spacing={1}>
-                <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
+                <FormControlLabel control={<Switch checked={usememory} onChange={e => toggleMemory(e.target.checked, "usememory")} />} label="Use Memory (All)" />
+
                 <Box>
                     <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
                         {t('parameter_explain.use_memory')}
@@ -371,7 +389,18 @@ export const ChatParameter = ({
                     </Tooltip>
                 </Box>
             </Stack>
-
+            <Stack direction='row' spacing={1}>
+                <FormControlLabel control={<Switch checked={usememorycurrent} onChange={e => toggleMemory(e.target.checked, "usememorycurrent")} />} label="Use Memory (Current)" />
+                <Box>
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.use_memory_current')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </Stack>
             <RadioGroup
                 defaultValue="chat"
                 name="radio-buttons-group"
@@ -451,7 +480,7 @@ export const ChatParameter = ({
             {agent_objects.map((agent_object_) => {
                 if (agent_object_.name == choosen_model) {
                     return (
-                        <Box>
+                        <Box key={agent_object_.name}>
                             <Stack direction="row" spacing={1}>
                                 <Typography style={{ flex: 1 }} gutterBottom>Max_tokens
                                     <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
@@ -491,7 +520,7 @@ export const ChatParameter = ({
             {model_objects.map((model_object_) => {
                 if (model_object_.name == choosen_model) {
                     return (
-                        <Box>
+                        <Box key={model_object_.name}>
                             <Stack direction="row" spacing={1}>
                                 <Typography style={{ flex: 1 }} gutterBottom>Max_tokens
                                     <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
@@ -736,6 +765,9 @@ export const ChatParameter = ({
 export const HotpotParameter = ({
     template_list,
     setUseMemory,
+    setUseMemoryCurrent,
+    usememory,
+    usememorycurrent,
     setDuplicateMessage,
     choosen_chat_model,
     choosen_template,
@@ -772,6 +804,20 @@ export const HotpotParameter = ({
     setMaxTurn
 }) => {
     const { t, i18n } = useTranslation();
+    const toggleMemory = (value, memory_type) => {
+        if (memory_type == "usememory" && value) {
+            setUseMemory(value)
+            setUseMemoryCurrent(!value)
+        }
+        else if (memory_type == "usememorycurrent" && value) {
+            setUseMemory(!value)
+            setUseMemoryCurrent(value)
+        }
+        else {
+            setUseMemory(false)
+            setUseMemoryCurrent(false)
+        }
+    }
     return (
         <Stack direction='column' spacing={1}>
             <FormControl defaultValue="">
@@ -849,10 +895,22 @@ export const HotpotParameter = ({
             <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
             <FormControlLabel control={<Switch defaultChecked onChange={e => setDuplicateMessage(e.target.checked)} />} label="Duplicate Message" />
             <Stack direction='row' spacing={1}>
-                <FormControlLabel control={<Switch defaultChecked onChange={e => setUseMemory(e.target.checked)} />} label="Use Memory" />
+                <FormControlLabel control={<Switch checked={usememory} onChange={e => toggleMemory(e.target.checked, "usememory")} />} label="Use Memory (All)" />
                 <Box>
                     <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
                         {t('parameter_explain.use_memory')}
+                    </div>} arrow placement="top">
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </Stack>
+            <Stack direction='row' spacing={1}>
+                <FormControlLabel control={<Switch checked={usememorycurrent} onChange={e => toggleMemory(e.target.checked, "usememorycurrent")} />} label="Use Memory (Current)" />
+                <Box>
+                    <Tooltip title={<div style={{ whiteSpace: 'pre-line' }}>
+                        {t('parameter_explain.use_memory_current')}
                     </div>} arrow placement="top">
                         <IconButton size="small">
                             <HelpIcon fontSize="small" />

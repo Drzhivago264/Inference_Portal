@@ -3,8 +3,8 @@ import $ from 'jquery'
 
 import React, { useEffect, useRef, useState, useContext } from "react"
 import Container from '@mui/material/Container';
-import ResponsiveAppBar from '../component/Navbar.js';
-import Footer from '../component/Footer.js';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import Footer from '../component/nav/Footer.js';
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import * as pdfMake from 'pdfmake/build/pdfmake.min';
 import JSZip from 'jszip';
