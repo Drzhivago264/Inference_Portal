@@ -24,7 +24,7 @@ async def async_inference(self) -> None:
     credit = self.key_object.credit
     llm = await LLM.objects.aget(name=self.choosen_models)
     url_list = await get_model_url_async(llm)
-    
+
     if not self.include_current_memory:
         processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
             model=self.choosen_models, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
@@ -33,7 +33,6 @@ async def async_inference(self) -> None:
 
     if llm.is_self_host:
         tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.choosen_models])
-        url_list = await get_model_url_async(llm)
         session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
 
         context = {
