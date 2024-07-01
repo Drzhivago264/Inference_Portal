@@ -42,7 +42,7 @@ import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
 import { DatasetExport } from '../component/import_export/datasetExport.js';
 import { file } from 'jszip';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
-
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const ChatInput = styled(TextField)(({ theme }) => ({
     width: '100%',
@@ -130,17 +130,17 @@ function DataSynthesis() {
     const [temperature, setTemperature] = useState(0.73);
     const [presencepenalty, setPresencePenalty] = useState(0);
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
-
+    const [shownthinking, setThinking] = useState(false);
 
     const [max_turn, setMaxTurn] = useState(null)
     const [instruct_change, setInstructChange] = useState(false)
     const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
     const [filename, setFileName] = useState("No file loaded")
-    const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Rewriter.\nYour objective is to rewrite a given prompt into a more complex version to create a diverse training dataset. The rewritten prompt must be reasonable and must be understood and responded by humans. Your rewriting cannot omit the non-text parts such as the table and code in #Given Prompt#.\nAlso, do not omit the input in #Given Prompt#.");
-    const [default_extra_instruct, setExtraInstruct] = useState("You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#.\n'#Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#\n#Given Prompt#:")
+    const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Rewriter.\nYour objective is to rewrite a given prompt into a more complex version to create a diverse training dataset. The rewritten prompt must be reasonable and must be understood and responded by humans. Your rewriting cannot omit the non-text parts such as the table and code in #Given Prompt#.");
+    const [default_extra_instruct, setExtraInstruct] = useState("Do not make #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#.\n#Given Prompt#:")
 
     const [default_child_instruct_list, setDefaultChildInstructList] = useState([
-        { label: "Translating", default: "Translate the #Given Prompt# to Vietnamese" },
+        { label: "Translating", default: "The #Rewritten Prompt# must be written in Vietnamese." },
         { label: "Concretizing", default: "Replace general concepts in the #Given Prompt# with more specific concepts." },
         { label: "Increased Reasoning Steps", default: "If #Given Prompt# can be solved with just a few simple thinking processes, you can rewrite it to explicitly request multiple-step reasoning." },
         { label: "Complicate Input", default: "You SHOULD complicate the given prompt using the following method:\nAdd one more constraints/requirements into #Given Prompt#" },
@@ -169,8 +169,9 @@ function DataSynthesis() {
         {
             field: 'samplePrompt',
             headerName: 'Sample Prompts',
-            flex: 1,
+            width: 350,
             editable: true,
+            disableColumnMenu: true
         }
     ]);
     const handleFileLoad = (csvData) => {
@@ -223,26 +224,26 @@ function DataSynthesis() {
             chat_websocket.current.close()
         }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
-        datasynthesissocket(websocket)
+        datasynthesissocket(websocket, setCSVColumn, setCSVRow, csv_column, csv_row, setThinking)
     }, [socket_destination]);
 
-    const submitSeed = (seed_prompt) => {
+    const submitSeed = (seed_prompt, row_no) => {
+
         var data = {
+            'row_no': row_no,
             'seed_prompt': seed_prompt,
             'child_instruction_list': default_child_instruct_list,
             'parent_instruction': default_parent_instruct,
-            'optional_innstruction': default_extra_instruct,
+            'optional_instruction': default_extra_instruct,
             'choosen_models': choosen_model,
-            'role': 'Human',
             'top_p': top_p,
             'max_tokens': max_tokens,
             'frequency_penalty': frequencypenalty,
             'presence_penalty': presencepenalty,
             'temperature': temperature,
-            'include_memory': false
         }
         websocket.current.send(JSON.stringify(data))
-
+        setThinking(true)
     }
     const updateChildInstructList = (value, index_) => {
         const new_child_instruct_list = default_child_instruct_list.map((instruct, index) => {
@@ -267,17 +268,21 @@ function DataSynthesis() {
         )
     }
     const add_child_instruct = () => {
-        setDefaultChildInstructList(
-            [
-                ...default_child_instruct_list,
-                { label: "User Defined", default: "" }
-            ]
-        );
+        if (default_child_instruct_list.length <= 10) {
+            setDefaultChildInstructList(
+                [
+                    ...default_child_instruct_list,
+                    { label: "User Defined", default: "" }
+                ]
+            );
+        }
     }
     const startSubmitLoop = () => {
         setIsRunning(true)
         for (let i in csv_row) {
-            submitSeed(csv_row[i][`${choosen_prompt_column}`])
+            if (i < 1) {
+                submitSeed(csv_row[i][`${choosen_prompt_column}`], csv_row[i]['id'])
+            }
         }
     }
     return (
@@ -333,7 +338,9 @@ function DataSynthesis() {
                                         </FormControl>
                                     </Box>
                                     <Stack direction={'row'} spacing={1}>
-                                        <Button color="success" fullWidth variant="contained" onClick={() => { startSubmitLoop() }} startIcon={<PlayCircleOutlineIcon />} disabled={is_running ? true : false} >Run</Button>
+                                        <LoadingButton loadingPosition="start" loading={shownthinking} color="success" fullWidth variant="contained" onClick={() => { startSubmitLoop() }} startIcon={<PlayCircleOutlineIcon />} disabled={is_running ? true : false} >
+                                            Run
+                                        </LoadingButton>
                                         <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false) }} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
                                     </Stack>
 
@@ -359,7 +366,7 @@ function DataSynthesis() {
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={5}>
-                            <Box style={{ maxHeight: 900, width: '100%' }}>
+                            <div style={{ height: 875, width: '100%' }}>
                                 <DataGrid
                                     disableColumnSorting
                                     rows={csv_row}
@@ -373,6 +380,7 @@ function DataSynthesis() {
                                     }}
                                     pageSizeOptions={[10]}
                                     getRowHeight={() => 'auto'}
+                                    getEstimatedRowHeight={() => 100}
                                     onCellEditStop={(params, event) => {
                                         if (params.reason !== GridCellEditStopReasons.enterKeyDown) {
                                             return;
@@ -383,7 +391,7 @@ function DataSynthesis() {
                                     }}
 
                                 />
-                            </Box>
+                            </div>
 
                         </Grid>
                         <Grid item xs={3}>
@@ -426,12 +434,12 @@ function DataSynthesis() {
 
                                             sx={{
 
-                                                height: 530,
+                                                height: 522,
                                                 overflow: "hidden",
                                                 overflowY: "scroll"
                                             }}>
 
-                                           
+
                                             <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
                                                 {default_child_instruct_list && default_child_instruct_list.map((object, index) => {
                                                     return (
@@ -455,12 +463,12 @@ function DataSynthesis() {
                                                         </Grid>
                                                     );
                                                 })}
-                                                <Box display="flex" justifyContent="center"
+                                                {default_child_instruct_list.length < 10 && <Box display="flex" justifyContent="center"
                                                     alignItems="center" >
                                                     <IconButton aria-label="add" onClick={() => { add_child_instruct() }}>
                                                         <AddCircleOutlineIcon />
                                                     </IconButton>
-                                                </Box>
+                                                </Box>}
                                             </Stack>
                                         </Box>
                                     </Paper>

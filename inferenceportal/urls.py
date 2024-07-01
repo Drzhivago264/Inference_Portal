@@ -12,8 +12,7 @@ from api.api import api
 urlpatterns = [
     path("", include("server.urls")),
     path(f"{config('ADMIN_PATH')}/", admin.site.urls),
-    path("api/", api.urls),
-    path('tinymce/', include('tinymce.urls')),
+    path("api/", api.urls)
 ]
 
 handler403 = handler_403

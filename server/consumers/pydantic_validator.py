@@ -121,6 +121,7 @@ class ToolSchema(BaseModel):
     
 
 class DataSynthesisSchema(BaseModel):
+    row_no: int
     child_instruction_list: list
     seed_prompt: str
     parent_instruction: str
@@ -131,8 +132,7 @@ class DataSynthesisSchema(BaseModel):
     presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
     temperature:float = constant.DEFAULT_TEMPERATURE
     max_tokens: int | None
-    include_memory: bool = False
-    role: str
+
     @field_validator('frequency_penalty','presence_penalty')
     @classmethod
     def check_range_fre_pre_len(cls, v: float, info: ValidationInfo):
