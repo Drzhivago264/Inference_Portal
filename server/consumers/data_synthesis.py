@@ -83,7 +83,7 @@ class Consumer(AsyncWebsocketConsumer):
     # Receive message from room group
 
     async def chat_message(self, event):
-
+        
         async def async_data_synthesis_inference(self) -> None:
             credit = self.key_object.credit
             llm = await LLM.objects.aget(name=self.choosen_models)
