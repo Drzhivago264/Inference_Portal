@@ -369,6 +369,7 @@ function DataSynthesis() {
                             <div style={{ height: 875, width: '100%' }}>
                                 <DataGrid
                                     disableColumnSorting
+                                    disableAutosize
                                     rows={csv_row}
                                     columns={csv_column}
                                     initialState={{
