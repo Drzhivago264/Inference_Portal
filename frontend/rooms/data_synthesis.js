@@ -131,7 +131,7 @@ function DataSynthesis() {
     const [presencepenalty, setPresencePenalty] = useState(0);
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [shownthinking, setThinking] = useState(false);
-
+    const [is_early_stopping, setIsEarlyStopping] = useState(null);
     const [max_turn, setMaxTurn] = useState(null)
     const [instruct_change, setInstructChange] = useState(false)
     const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
@@ -149,6 +149,7 @@ function DataSynthesis() {
     ]);
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+
     const [csv_row, setCSVRow] = useState([
         { id: 1, samplePrompt: 'A water well is an excavation or structure created in the ground by digging, driving, boring, or drilling to access groundwater in underground aquifers. The well water is drawn by a pump, or using containers, such as buckets, that are raised mechanically or by hand. Wells were first constructed at least eight thousand years ago and historically vary in construction from a simple scoop in the sediment of a dry watercourse to the stepwells of India, the qanats of Iran, and the shadoofs and sakiehs of India. Placing a lining in the well shaft helps create stability and linings of wood or wickerwork date back at least as far as the Iron Age. Where does water for a well come from?' },
         { id: 2, samplePrompt: 'Generate short a sentence that can be linguistically classified as acceptable (OPTIONS: - unacceptable - acceptable)' },
@@ -161,9 +162,12 @@ function DataSynthesis() {
         { id: 9, samplePrompt: 'The town lies along the stretch of coastline designated as Gold Beach during the D-Day landings , one of the beaches used by British troops in the allied invasion. Arromanches was selected as one of the sites for two Mulberry Harbours built on the Normandy coast, the other one built further West at Omaha Beach. Based on that paragraph can we conclude that the sentence below is true? The Normandy landings took place in June 1944. OPTIONS: - yes - no' },
         { id: 10, samplePrompt: "Here's a problem to solve: Newton's work in physics helped to provide mathematical explanations for the earlier conclusions of which scientist? Among the 4 following options, which is the correct answer? - A: Ptolemy - B: Aristotle - C: Nicolas Copernicus - D: Dmitri Mendeleev" },
     ]);
+    const row_ref = useRef(csv_row)
     const [from_row, setFromRow] = useState(0)
     const [to_row, setToRow] = useState(10000)
     const [is_running, setIsRunning] = useState(null);
+    const is_running_ref = useRef(is_running)
+    const column_ref = useRef(csv_column)
     const [csv_column, setCSVColumn] = useState([
         { field: 'id', headerName: 'ID', width: 20 },
         {
@@ -176,11 +180,9 @@ function DataSynthesis() {
     ]);
     const handleFileLoad = (csvData) => {
         setCSVRow(csvData);
-    };
 
-    useEffect(() => {
-        if (csv_row[0]) {
-            var keys = Object.keys(csv_row[0])
+        if (csvData[0]) {
+            var keys = Object.keys(csvData[0])
             var column = []
             for (let k in keys) {
                 column.push({
@@ -193,7 +195,8 @@ function DataSynthesis() {
             setCSVColumn(column)
             setChoosenPromptColumn(keys[1])
         }
-    }, [csv_row]);
+
+    };
 
     const navigate = useNavigate();
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
@@ -224,8 +227,27 @@ function DataSynthesis() {
             chat_websocket.current.close()
         }
         websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
-        datasynthesissocket(websocket, setCSVColumn, setCSVRow, csv_column, csv_row, setThinking)
+
     }, [socket_destination]);
+
+
+
+    useEffect(() => {
+        row_ref.current = csv_row
+    }, [csv_row]);
+    useEffect(() => {
+        column_ref.current = csv_column
+    }, [column_ref]);
+    useEffect(() => {
+        is_running_ref.current = is_running
+        if (!is_running) {
+            setThinking(false)
+        }
+    }, [is_running]);
+
+    useEffect(() => {
+        datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref)
+    }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref]);
 
     const submitSeed = (seed_prompt, row_no) => {
 
@@ -277,13 +299,16 @@ function DataSynthesis() {
             );
         }
     }
-    const startSubmitLoop = () => {
-        setIsRunning(true)
+
+    function* submitLoop() {
         for (let i in csv_row) {
-            if (i < 1) {
-                submitSeed(csv_row[i][`${choosen_prompt_column}`], csv_row[i]['id'])
-            }
+            yield [csv_row[i][`${choosen_prompt_column}`], csv_row[i]['id']]
         }
+    }
+    const genSubmit = useRef(submitLoop())
+    const startSubmit = () => {
+        var next_value = genSubmit.current.next()
+        submitSeed(next_value.value[0], next_value.value[1])
     }
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
@@ -338,10 +363,10 @@ function DataSynthesis() {
                                         </FormControl>
                                     </Box>
                                     <Stack direction={'row'} spacing={1}>
-                                        <LoadingButton loadingPosition="start" loading={shownthinking} color="success" fullWidth variant="contained" onClick={() => { startSubmitLoop() }} startIcon={<PlayCircleOutlineIcon />} disabled={is_running ? true : false} >
+                                        <LoadingButton loadingPosition="start" loading={shownthinking} color="success" fullWidth variant="contained" onClick={() => { startSubmit(), setIsRunning(true) }} startIcon={<PlayCircleOutlineIcon />} disabled={is_running ? true : false} >
                                             Run
                                         </LoadingButton>
-                                        <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false) }} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
+                                        <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false), setIsEarlyStopping(true) }} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
                                     </Stack>
 
 
