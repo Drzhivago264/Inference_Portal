@@ -1,18 +1,14 @@
 from ninja import Router
-
 from server.utils import constant
-
-from asgiref.sync import sync_to_async
-from django.http import StreamingHttpResponse
 from ninja.errors import HttpError
 import httpx
 import random
-from .api_schema import (
+from api.api_schema import (
     Error,
     PromptResponse,
     PromptSchema,
 )
-from .utils import (
+from api.utils import (
                     get_model,
                     get_model_url,
                     command_EC2,
@@ -22,7 +18,6 @@ from .utils import (
                     )
 
 from django_ratelimit.core import is_ratelimited
-from django_ratelimit.exceptions import Ratelimited as RateLimitedError
 from transformers import AutoTokenizer
 
 router = Router()

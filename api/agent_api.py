@@ -1,35 +1,34 @@
-from ninja import Router
-from decouple import config
-from server.utils import constant
-
-from asgiref.sync import sync_to_async
-from django.http import StreamingHttpResponse
-from ninja.errors import HttpError
 import httpx
-from typing import List
 import random
-from .api_schema import (
+from transformers import AutoTokenizer
+from asgiref.sync import sync_to_async
+
+from ninja import Router
+from ninja.errors import HttpError
+
+from django.http import StreamingHttpResponse
+from django_ratelimit.core import is_ratelimited
+
+from api.api_schema import (
     Error,
     AgentResponse,
     AgentSchema,
 
 )
-from .utils import (
-                    get_model,
-                    get_model_url,
-                    command_EC2,
-                    update_server_status_in_db,
-                    log_prompt_response,
-                    send_request_async,
-                    send_stream_request_agent_async,
-                    get_system_template,
-                    get_user_template
-                    )
+from api.utils import (
+    get_model,
+    get_model_url,
+    command_EC2,
+    update_server_status_in_db,
+    log_prompt_response,
+    send_request_async,
+    send_stream_request_agent_async,
+    get_system_template,
+    get_user_template
+)
 
-from django_ratelimit.core import is_ratelimited
-from django_ratelimit.exceptions import Ratelimited as RateLimitedError
-from transformers import AutoTokenizer
 from server.models import UserInstructionTree, InstructionTree
+from server.utils import constant
 
 router = Router()
 
@@ -67,7 +66,7 @@ async def agentcompletion(request, data: AgentSchema):
                 use_my_template = data.use_my_template
                 if use_my_template:
                     try:
-                        parent_template = await get_user_template(name=parent_template_name, user_object= await sync_to_async(lambda: request.auth.user)() ) if parent_template_name is not None else ""
+                        parent_template = await get_user_template(name=parent_template_name, user_object=await sync_to_async(lambda: request.auth.user)()) if parent_template_name is not None else ""
                     except UserInstructionTree.DoesNotExist:
                         raise HttpError(
                             404, "parent_template_name is incorrect")
@@ -97,7 +96,8 @@ async def agentcompletion(request, data: AgentSchema):
                         {"role": "user", "content": f"{data.prompt}"}
                     ]
                 else:
-                    chat = data.working_memory + [{"role": "user", "content": f"{data.prompt}"}]
+                    chat = data.working_memory + \
+                        [{"role": "user", "content": f"{data.prompt}"}]
                 processed_prompt = tokeniser.apply_chat_template(
                     chat, tokenize=False)
                 context = {
@@ -127,12 +127,12 @@ async def agentcompletion(request, data: AgentSchema):
                                     processed_prompt, "")
                                 await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="agent_api")
                                 return 200, {
-                                             'context': context,
-                                             'parent_template_name': parent_template_name,
-                                             'child_template_name': child_template_name,
-                                             'use_my_template': use_my_template,
-                                             'working_memory': chat + [{"role": "assistant", "content": f"{response}"
-                                                                            }]}
+                                    'context': context,
+                                    'parent_template_name': parent_template_name,
+                                    'child_template_name': child_template_name,
+                                    'use_my_template': use_my_template,
+                                    'working_memory': chat + [{"role": "assistant", "content": f"{response}"
+                                                               }]}
                         except httpx.ReadTimeout:
                             raise HttpError(404, "Time Out!")
                     else:
@@ -141,7 +141,7 @@ async def agentcompletion(request, data: AgentSchema):
                                                                                         context=context,
                                                                                         processed_prompt=processed_prompt,
                                                                                         request=request,
-                                                                                        working_nemory= chat,
+                                                                                        working_nemory=chat,
                                                                                         parent_template_name=parent_template_name,
                                                                                         child_template_name=child_template_name,
                                                                                         use_my_template=use_my_template,

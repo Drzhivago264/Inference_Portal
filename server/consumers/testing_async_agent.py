@@ -1,21 +1,18 @@
 import json
 import uuid
-from datetime import datetime
-from django.core.cache import cache
 from server.models import (
-                           InstructionTree,
-                           UserInstructionTree)
+    InstructionTree,
+    UserInstructionTree
+)
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
-from server.utils import constant
 from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
     AgentSchemaMessage,
     AgentSchemaParagraph,
     AgentSchemaTemplate,
 )
-import regex as re
 from pydantic import ValidationError
 from server.utils.async_.async_agent_inference import async_agent_inference
 from server.utils.async_.async_agent_inference_with_summary import async_agent_inference_with_summary
@@ -119,7 +116,7 @@ class Consumer(AsyncWebsocketConsumer):
                                                       "default_child_instruct": child_template['default_instruct']}))
             except ValidationError as e:
                 await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
-        elif 'swap_child_instruct' in text_data_json:         
+        elif 'swap_child_instruct' in text_data_json:
             try:
                 data = AgentSchemaInstruct.model_validate_json(text_data)
                 swap_child_instruct = data.swap_child_instruct
@@ -140,7 +137,7 @@ class Consumer(AsyncWebsocketConsumer):
                 elif not text_data_json["message"].strip():
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
                 elif self.key_object and text_data_json["message"].strip():
-                    #Reset the working memory if the instruction(s) change
+                    # Reset the working memory if the instruction(s) change
                     if validated.instruct_change and self.current_turn > 0:
                         self.current_turn = 0
                         self.session_history = []

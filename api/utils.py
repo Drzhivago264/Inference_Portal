@@ -1,21 +1,20 @@
-from server.utils import constant
-from server.models import (InferenceServer,
-                           LLM,
-                           PromptResponse,
-                           APIKEY,
-                           UserInstructionTree,
-                           InstructionTree)
-from django.db.models.query import QuerySet
-from asgiref.sync import sync_to_async
-from django.core.cache import cache
-from decouple import config
 import json
 import boto3
 import httpx
+from server.utils import constant
+from server.models import (
+    InferenceServer,
+    LLM,
+    PromptResponse,
+    UserInstructionTree,
+    InstructionTree
+)
+from django.utils import timezone
+from django.db.models.query import QuerySet
+from asgiref.sync import sync_to_async
+from decouple import config
 from botocore.exceptions import ClientError
 from vectordb import vectordb
-from django.utils import timezone
-
 
 async def get_system_template(name: str):
     try:
@@ -64,16 +63,7 @@ async def update_server_status_in_db(instance_id: str, update_type: str) -> None
 
 @sync_to_async
 def command_EC2(instance_id: str, region: str, action: str) -> None | str:
-    """This func is used to turn on, off, or reboot ec2 instances
 
-    Args:
-        instance_id (string): the id of EC2 instance
-        region (string): the region of EC2 instances
-        action (string): either turn on, off or reboot instance
-
-    Returns:
-        string or None: either return error or nothing
-    """
     aws = config("aws_access_key_id")
     aws_secret = config("aws_secret_access_key")
     ec2 = boto3.client('ec2', region_name=region,
@@ -150,7 +140,8 @@ async def send_request_async(url, context):
 
 
 async def send_stream_request_async(url: str, context: object, processed_prompt: str, request: object, data: object):
-    client = httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=constant.RETRY), timeout=constant.TIMEOUT)
+    client = httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(
+        retries=constant.RETRY), timeout=constant.TIMEOUT)
     full_response = ""
     try:
         async with client.stream('POST', url, json=context) as response:
@@ -169,7 +160,8 @@ async def send_stream_request_async(url: str, context: object, processed_prompt:
 
 
 async def send_stream_request_agent_async(url: str, context: object, processed_prompt: str, request: object, data: object, parent_template_name: str | None, child_template_name: str | None, working_nemory: list, use_my_template: str):
-    client = httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=constant.RETRY), timeout=constant.TIMEOUT)
+    client = httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(
+        retries=constant.RETRY), timeout=constant.TIMEOUT)
     full_response = ""
     try:
         async with client.stream('POST', url, json=context) as response:
@@ -178,11 +170,11 @@ async def send_stream_request_agent_async(url: str, context: object, processed_p
                     chunk = chunk[:-1]
                     c = json.loads(chunk)
                     output = c['text'][0].replace(processed_prompt, "")
-                    yield str({"response": c, 
-                               "delta": output.replace(full_response, ""), 
-                               "use_my_template": use_my_template, 
-                               'working_memory': working_nemory + [{"role": "assistant", "content": f"{c}"}], 
-                               'parent_template_name': parent_template_name, 
+                    yield str({"response": c,
+                               "delta": output.replace(full_response, ""),
+                               "use_my_template": use_my_template,
+                               'working_memory': working_nemory + [{"role": "assistant", "content": f"{c}"}],
+                               'parent_template_name': parent_template_name,
                                'child_template_name': child_template_name}) + "\n"
                     full_response = output
                 except:

@@ -1,29 +1,29 @@
+from hashlib import sha256
+
+from django.contrib.auth import logout
+from django.contrib.auth import authenticate, login
+from django.views.decorators.cache import cache_page
 from django.shortcuts import render
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+)
+
+from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
+from rest_framework import status
+
+from server.views.serializer import (
+    ModelSerializer,
+    ServerSerializer,
+    LoginSerializer
+)
 from server.models import (
     LLM,
     InferenceServer,
     APIKEY
 )
-from rest_framework import viewsets
-from server.views.serializer import (
-                               ModelSerializer,
-                               ServerSerializer,
-                               LoginSerializer
-                               )
-
-from django.http import HttpResponse
-from django.http import (
-    HttpRequest,
-    HttpResponse,
-)
-from rest_framework.decorators import api_view, throttle_classes
-from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
-from rest_framework import status
-from django.contrib.auth import logout
-from hashlib import sha256
-from django.contrib.auth import authenticate, login
-from django.views.decorators.cache import cache_page
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
@@ -68,9 +68,9 @@ def log_in(request: HttpRequest) -> Response:
 @cache_page(60 * 15)
 def model_api(request: HttpRequest) -> Response:
     servers = InferenceServer.objects.all().defer('name').order_by("hosted_model")
-    model_info = LLM.objects.filter(is_self_host=True) 
-    models_bot = LLM.objects.filter(agent_availability=False) 
-    models_agent = LLM.objects.filter(agent_availability=True) 
+    model_info = LLM.objects.filter(is_self_host=True)
+    models_bot = LLM.objects.filter(agent_availability=False)
+    models_agent = LLM.objects.filter(agent_availability=True)
     serializer_server = ServerSerializer(servers, many=True)
     serializer_model_bot = ModelSerializer(models_bot, many=True)
     serializer_model_agent = ModelSerializer(models_agent, many=True)

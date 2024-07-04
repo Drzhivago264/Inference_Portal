@@ -1,20 +1,15 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from django.conf import settings
-import bleach
-from server.models import APIKEY
-from django.contrib import messages
-from server.celery_tasks import send_email_
-from django.http import (HttpRequest, 
-                         HttpResponse, 
-                         HttpResponseRedirect
-                         )
+from django.http import HttpRequest
+
+from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
+
 from server.api_throttling_rates import KeyCreateRateThrottle
 from server.views.serializer import SendMailSerializer
-from rest_framework import status
+from server.models import APIKEY
+from server.celery_tasks import send_email_
+
 
 @api_view(['POST'])
 @throttle_classes([KeyCreateRateThrottle])

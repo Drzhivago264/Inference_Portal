@@ -1,16 +1,23 @@
-from server.utils import constant
-from server.models import LLM
+
 from asgiref.sync import sync_to_async
 import json
 import random
-from server.utils.sync_.common_func import inference_mode,  log_prompt_response
 from transformers import AutoTokenizer
-from .async_common_func import (
-                                get_model_url_async, 
-                                update_server_status_in_db_async, 
-                                send_stream_request_async, 
-                                manage_ec2_on_inference,
-                                send_chat_request_openai_async)
+
+from server.utils import constant
+from server.models import LLM
+from server.utils.sync_.inference import inference_mode
+from server.utils.sync_.log_database import log_prompt_response
+from server.utils.async_.async_inference import (
+    send_stream_request_async,
+    send_chat_request_openai_async
+)
+from server.utils.async_.async_query_database import get_model_url_async
+from server.utils.async_.async_manage_ec2 import (
+    manage_ec2_on_inference,
+    update_server_status_in_db_async
+)
+
 
 async def async_inference(self) -> None:
     if not self.beam:
@@ -32,8 +39,10 @@ async def async_inference(self) -> None:
         processed_prompt = self.session_history
 
     if llm.is_self_host:
-        tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[self.choosen_models])
-        session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
+        tokeniser = AutoTokenizer.from_pretrained(
+            constant.TOKENIZER_TABLE[self.choosen_models])
+        session_list_to_string = tokeniser.apply_chat_template(
+            processed_prompt, tokenize=False)
 
         context = {
             "prompt": session_list_to_string,
@@ -63,7 +72,8 @@ async def async_inference(self) -> None:
                 response_stream = await send_stream_request_async(self, url=url, context=context,
                                                                   processed_prompt=session_list_to_string)
                 if isinstance(response_stream, str):
-                    self.session_history.append({"role": "assistant", "content": f"{response_stream}"})
+                    self.session_history.append(
+                        {"role": "assistant", "content": f"{response_stream}"})
                     await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=response_stream, type_="chatroom")
             else:
                 await manage_ec2_on_inference(self, server_status, instance_id)
@@ -73,6 +83,7 @@ async def async_inference(self) -> None:
 
     else:
         clean_response = await send_chat_request_openai_async(self, processed_prompt)
-        self.session_history.append({"role": "assistant", "content": f"{clean_response}"})
+        self.session_history.append(
+            {"role": "assistant", "content": f"{clean_response}"})
         await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message,
                                                                         response=clean_response, type_="open_ai")

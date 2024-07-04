@@ -1,33 +1,33 @@
+import httpx
+import random
 from ninja import Router
+from ninja.errors import HttpError
 
 from server.utils import constant
 
-from asgiref.sync import sync_to_async
 from django.http import StreamingHttpResponse
-from ninja.errors import HttpError
-import httpx
-import random
-from .api_schema import (
+from django_ratelimit.core import is_ratelimited
+
+from api.api_schema import (
     Error,
     ChatResponse,
     ChatSchema,
 )
-from .utils import (
-                    get_model,
-                    get_model_url,
-                    command_EC2,
-                    update_server_status_in_db,
-                    log_prompt_response,
-                    send_request_async,
-                    get_chat_context,
-                    send_stream_request_async
-                    )
+from api.utils import (
+    get_model,
+    get_model_url,
+    command_EC2,
+    update_server_status_in_db,
+    log_prompt_response,
+    send_request_async,
+    get_chat_context,
+    send_stream_request_async
+)
 
-from django_ratelimit.core import is_ratelimited
-from django_ratelimit.exceptions import Ratelimited as RateLimitedError
 from transformers import AutoTokenizer
 
 router = Router()
+
 
 @router.post("/chat", tags=["Inference"], summary="Infer Chatbots", response={200: ChatResponse, 401: Error, 442: Error, 404: Error, 429: Error})
 async def chatcompletion(request, data: ChatSchema):
@@ -57,7 +57,6 @@ async def chatcompletion(request, data: ChatSchema):
                     best_of = data.best_of
                     if best_of == 1:
                         best_of += 1
-
 
                 tokeniser = AutoTokenizer.from_pretrained(
                     constant.TOKENIZER_TABLE[data.model])

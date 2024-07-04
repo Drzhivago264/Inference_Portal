@@ -1,15 +1,14 @@
-from server.models import (
-    PromptResponse,
-    APIKEY,
-)
+from django.http import HttpRequest
+from django.views.decorators.cache import cache_page
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.db.models import Q, Sum
+
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework import status
-from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
+
+from server.models import PromptResponse
 
 class LogListJson(BaseDatatableView):
     columns = ['id', 'prompt', 'response',

@@ -1,37 +1,43 @@
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-from celery import shared_task
-from django.core.mail import send_mail
-from django.utils import timezone
 import random
 import requests
 import json
-from .models import (InferenceServer,
-                     LLM,
-                     APIKEY,
-                     Crypto,
-                     )
+
+from transformers import AutoTokenizer
+from asgiref.sync import async_to_sync
+
+from channels.layers import get_channel_layer
+
+from celery import shared_task
+from celery.utils.log import get_task_logger
+from django.core.mail import send_mail
+from django.utils import timezone
+from django.utils.timezone import datetime, timedelta
+
 from decouple import config
 from botocore.exceptions import ClientError
 import boto3
 from openai import OpenAI
-from server.utils.sync_.common_func import (get_model_url,
-                                update_server_status_in_db,
-                                send_request,
-                                inference_mode,
-                                send_agent_request_openai,
-                                send_chat_request_openai,
-                                log_prompt_response
-                                )
+from server.utils.sync_.inference import (
+    send_request,
+    inference_mode,
+    send_agent_request_openai,
+    send_chat_request_openai,
+)
+from server.utils import constant
+from server.utils.sync_.log_database import log_prompt_response
+from server.utils.sync_.query_database import get_model_url
+from server.utils.sync_.manage_ec2 import update_server_status_in_db
+from server.models import (
+    InferenceServer,
+    LLM,
+    APIKEY,
+    Crypto,
+)
 
-import server.utils.constant as constant
-from celery.utils.log import get_task_logger
-from django.utils.timezone import datetime, timedelta
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
-from transformers import AutoTokenizer
 
 
 @shared_task
@@ -165,6 +171,7 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
             return e
         return
 
+
 @shared_task
 def Inference(unique: str,
               is_session_start_node: bool | None,
@@ -226,8 +233,10 @@ def Inference(unique: str,
         model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
 
     if llm.is_self_host:
-        tokeniser = AutoTokenizer.from_pretrained(constant.TOKENIZER_TABLE[model])
-        session_list_to_string = tokeniser.apply_chat_template( processed_prompt, tokenize=False)
+        tokeniser = AutoTokenizer.from_pretrained(
+            constant.TOKENIZER_TABLE[model])
+        session_list_to_string = tokeniser.apply_chat_template(
+            processed_prompt, tokenize=False)
         context = {
             "prompt": session_list_to_string,
             "n": 1,
@@ -291,7 +300,7 @@ def Inference(unique: str,
                 response = "Unknown Server state, wait 5 seconds"
         else:
             response = "Model is currently offline"
-        if  isinstance(response, str):
+        if isinstance(response, str):
             async_to_sync(channel_layer.group_send)(
                 room_group_name,
                 {
@@ -303,7 +312,8 @@ def Inference(unique: str,
                 }
             )
     else:
-        client = OpenAI(api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY)
+        client = OpenAI(api_key=config("GPT_KEY"),
+                        timeout=constant.TIMEOUT, max_retries=constant.RETRY)
         clean_response = ""
         clean_response = send_chat_request_openai(client=client,
                                                   session_history=processed_prompt,
@@ -363,7 +373,8 @@ def Agent_Inference(key: str,
         frequency_penalty (float): _description_
         presence_penalty (float): _description_
     """
-    client = OpenAI(api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY)
+    client = OpenAI(api_key=config("GPT_KEY"),
+                    timeout=constant.TIMEOUT, max_retries=constant.RETRY)
     key_object = APIKEY.objects.get(hashed_key=key)
     llm = LLM.objects.get(name=model)
     clean_response = ""
@@ -381,7 +392,7 @@ def Agent_Inference(key: str,
         elif current_turn_inner == (max_turns-1):
             force_stop = "You should directly give results based on history information."
             prompt = [
-                 {'role': 'user', 'content': f'Response: {message}'},
+                {'role': 'user', 'content': f'Response: {message}'},
                 {'role': 'system', 'content': f'Response: {force_stop}'}
             ]
         session_history.extend(prompt)

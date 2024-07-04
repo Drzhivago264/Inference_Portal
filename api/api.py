@@ -1,58 +1,20 @@
-from ninja import NinjaAPI, Schema
-from decouple import config
-from server.utils import constant
+from ninja import NinjaAPI
 from ninja.security import HttpBearer
-from server.models import APIKEY
-from server.utils.llm_toolbox import (Emotion,
-                                      TopicClassification,
-                                      ParaphaseDocument,
-                                      SummarizeDocument,
-                                      ChangeWrittingStyle
-                                      )
-import dspy
-from asgiref.sync import sync_to_async
-from django.http import StreamingHttpResponse
 from ninja.errors import HttpError
-import httpx
-from typing import List
-import random
-from .api_schema import (
-    Error,
-    ChatResponse,
-    PromptResponse,
-    ChatSchema,
-    PromptSchema,
-    ResponseLogRequest,
-    ResponseLogResponse,
-    AgentResponse,
-    AgentSchema,
-    BaseLLMSchema,
-    SummarizeSchema,
-    SummarizeResponseSchema,
-    RestyleSchema,
-    RestyleResponseSchema,
-    ClassificationSchema,
-    BaseLLMResponseSchema,
-    ClassificationResponseSchema
-)
-from .utils import (get_chat_context,
-                    get_model,
-                    get_model_url,
-                    command_EC2,
-                    update_server_status_in_db,
-                    log_prompt_response,
-                    send_request_async,
-                    send_stream_request_async,
-                    send_stream_request_agent_async,
-                    query_response_log,
-                    get_system_template,
-                    get_user_template
-                    )
 
 from django_ratelimit.core import is_ratelimited
-from django_ratelimit.exceptions import Ratelimited as RateLimitedError
-from transformers import AutoTokenizer
-from server.models import UserInstructionTree, InstructionTree
+
+from server.models import APIKEY
+
+from asgiref.sync import sync_to_async
+from typing import List
+
+from api.api_schema import (
+    Error,
+    ResponseLogRequest,
+    ResponseLogResponse,
+)
+from api.utils import query_response_log
 from api.completion_api import router as completion_router
 from api.chat_api import router as chat_router
 from api.agent_api import router as agent_router
