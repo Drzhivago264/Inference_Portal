@@ -1,16 +1,11 @@
 import json
 import uuid
-from datetime import datetime
-from django.core.cache import cache
-from server.models import APIKEY
-from channels.db import database_sync_to_async
+import pytz
 from channels.generic.websocket import AsyncWebsocketConsumer
-from server.celery_tasks import Inference
 from server.utils import constant
 from server.consumers.pydantic_validator import ChatSchema
 from pydantic import ValidationError
 from server.utils.async_.async_bot_inference import async_inference
-import pytz
 from django.utils import timezone
 from asgiref.sync import sync_to_async
 

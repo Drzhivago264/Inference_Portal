@@ -8,8 +8,6 @@ from pydantic import ValidationError
 import pytz
 from django.utils import timezone
 from asgiref.sync import sync_to_async
-from server.utils import constant
-
 
 class Consumer(AsyncWebsocketConsumer):
 

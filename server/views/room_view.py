@@ -1,33 +1,37 @@
+import uuid
+from hashlib import sha256
+
+from django.contrib.auth import authenticate, login
+from django.views.decorators.cache import cache_page
+from django.http import HttpRequest
+
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
+from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.pagination import PageNumberPagination
+
+from server.views.serializer import (
+    RedirectSerializer,
+    InstructionTreeSerializer,
+    UserInstructionTreeSerializer,
+    MemoryTreeSerializer,
+    NestedUserInstructionCreateSerializer,
+    UserInstructionCreateSerializer,
+    UserInstructionDeleteCreateSerializer,
+    UserInstructionGetSerializer
+
+)
 from server.models import (
     InstructionTree,
     UserInstructionTree,
     APIKEY,
     MemoryTree
 )
-
 from server.utils import constant
 
-from hashlib import sha256
-from django.http import HttpRequest
-import uuid
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
-from rest_framework.decorators import api_view, throttle_classes
-from server.views.serializer import (RedirectSerializer,
-                               InstructionTreeSerializer,
-                               UserInstructionTreeSerializer,
-                               MemoryTreeSerializer,
-                               NestedUserInstructionCreateSerializer,
-                               UserInstructionCreateSerializer,
-                               UserInstructionDeleteCreateSerializer,
-                               UserInstructionGetSerializer
 
-                               )
-from django.contrib.auth import authenticate, login
-from rest_framework.pagination import PageNumberPagination
-from django.views.decorators.cache import cache_page
 
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
@@ -70,20 +74,24 @@ def instruction_tree_api(request):
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         root_nodes = InstructionTree.objects.filter(level=0)
-        user_root_nodes = UserInstructionTree.objects.filter(level=1, user=current_user)
+        user_root_nodes = UserInstructionTree.objects.filter(
+            level=1, user=current_user)
         serializer = InstructionTreeSerializer(root_nodes, many=True)
-        user_serializer = UserInstructionTreeSerializer(user_root_nodes, many=True)
+        user_serializer = UserInstructionTreeSerializer(
+            user_root_nodes, many=True)
         for root in root_nodes:
             if root.name == "Assignment Agent":
                 default_child_template = root.get_children()
                 serializer_children = InstructionTreeSerializer(
                     default_child_template, many=True)
-                
+
         if user_root_nodes.count() > 0:
-            user_serializer_children = UserInstructionTreeSerializer(user_root_nodes[0].get_children(), many=True)
-            return Response({'root_nodes': serializer.data,'user_root_nodes': user_serializer.data ,'default_children': serializer_children.data, 'default_user_children': user_serializer_children.data}, status=status.HTTP_200_OK)
+            user_serializer_children = UserInstructionTreeSerializer(
+                user_root_nodes[0].get_children(), many=True)
+            return Response({'root_nodes': serializer.data, 'user_root_nodes': user_serializer.data, 'default_children': serializer_children.data, 'default_user_children': user_serializer_children.data}, status=status.HTTP_200_OK)
         else:
-            return Response({'root_nodes': serializer.data,'user_root_nodes': user_serializer.data ,'default_children': serializer_children.data, 'default_user_children': []}, status=status.HTTP_200_OK)
+            return Response({'root_nodes': serializer.data, 'user_root_nodes': user_serializer.data, 'default_children': serializer_children.data, 'default_user_children': []}, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
@@ -97,14 +105,14 @@ def user_instruction_tree_api(request):
                 user=current_user, level=1)
             serializer = UserInstructionGetSerializer(root_nodes, many=True)
             return Response({'root_nodes': serializer.data,
-                              'max_child_num': constant.MAX_CHILD_TEMPLATE_PER_USER,
-                              'max_parent_num': constant.MAX_PARENT_TEMPLATE_PER_USER
-                              }, status=status.HTTP_200_OK)
+                             'max_child_num': constant.MAX_CHILD_TEMPLATE_PER_USER,
+                             'max_parent_num': constant.MAX_PARENT_TEMPLATE_PER_USER
+                             }, status=status.HTTP_200_OK)
         except IndexError:
             return Response({'detail': "no instruction",
-                              'max_child_num': constant.MAX_CHILD_TEMPLATE_PER_USER,
-                              'max_parent_num': constant.MAX_PARENT_TEMPLATE_PER_USER
-                              },
+                             'max_child_num': constant.MAX_CHILD_TEMPLATE_PER_USER,
+                             'max_parent_num': constant.MAX_PARENT_TEMPLATE_PER_USER
+                             },
                             status=status.HTTP_204_NO_CONTENT)
 
 
@@ -161,11 +169,13 @@ def post_user_instruction_tree_api(request):
                                 user=current_user, name=current_user.apikey.hashed_key)
 
                         parent_node = UserInstructionTree.objects.create(user=current_user, parent=grandparent_node,
-                                                                        name=current_user.apikey.hashed_key +
-                                                                        str(uuid.uuid4()),
-                                                                        displayed_name=parent_instruction.data['displayed_name'],
-                                                                        instruct=parent_instruction.data['instruct']
-                                                                        )
+                                                                         name=current_user.apikey.hashed_key +
+                                                                         str(uuid.uuid4(
+                                                                         )),
+                                                                         displayed_name=parent_instruction.data[
+                                                                             'displayed_name'],
+                                                                         instruct=parent_instruction.data['instruct']
+                                                                         )
                         for index, c in enumerate(childrens.data):
                             if index < 4:
                                 node = UserInstructionTree.objects.create(
@@ -179,12 +189,13 @@ def post_user_instruction_tree_api(request):
                                 )
                             else:
                                 return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
-                    
+
                     return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
                 else:
                     return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
             else:
                 return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['DELETE'])
 @throttle_classes([AnonRateThrottle])
@@ -194,7 +205,7 @@ def delete_user_instruction_tree_api(request):
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         serializer = UserInstructionDeleteCreateSerializer(
-        data=request.data)
+            data=request.data)
         if serializer.is_valid():
             id = serializer.data['id']
             try:

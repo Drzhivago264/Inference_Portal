@@ -1,13 +1,14 @@
+import json
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils.timezone import now
 from django.db import models
-import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from rest_framework_api_key.models import AbstractAPIKey
 from mptt.models import MPTTModel, TreeForeignKey
-from django.contrib.auth.models import User
+
 User = settings.AUTH_USER_MODEL
 
 def get_image_filename(instance, filename):

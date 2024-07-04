@@ -1,33 +1,31 @@
 
 import json
 import uuid
-from datetime import datetime
-from django.core.cache import cache
-from server.models import APIKEY
-from channels.db import database_sync_to_async
-from decouple import config
-import dspy
-from channels.generic.websocket import AsyncWebsocketConsumer
-from server.utils.llm_toolbox import (Emotion, 
-                               TopicClassification, 
-                               SummarizeDocument, 
-                               ParaphaseDocument, 
-                               ChangeWrittingStyle
-                               )
-from server.utils import constant
-from server.consumers.pydantic_validator import ToolSchema
-from pydantic import ValidationError
 import pytz
+import dspy
+
+from pydantic import ValidationError
+from decouple import config
+from channels.generic.websocket import AsyncWebsocketConsumer
+from server.utils.llm_toolbox import (
+    Emotion,
+    TopicClassification,
+    SummarizeDocument,
+    ParaphaseDocument,
+    ChangeWrittingStyle
+)
+from server.consumers.pydantic_validator import ToolSchema
+
 from django.utils import timezone
 from asgiref.sync import sync_to_async
 
 class Consumer(AsyncWebsocketConsumer):
 
-
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(
+            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
         self.user = self.scope['user']
@@ -102,7 +100,8 @@ class Consumer(AsyncWebsocketConsumer):
         role = event["role"]
         credit = event["credit"]
         unique_response_id = event['unique']
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(
+            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
             await self.send(text_data=json.dumps({"message": message, "role": role,  "time": self.time}))
@@ -112,13 +111,13 @@ class Consumer(AsyncWebsocketConsumer):
 
         else:
             try:
-                client = dspy.OpenAI(model=event['choosen_models'], 
-                                    max_tokens=event['max_tokens'] ,
-                                    top_p = event['top_p'],
-                                    presence_penalty = event['presence_penalty'],
-                                    frequency_penalty = event['frequency_penalty'],
-                                    temperature = event['temperature'],
-                                    api_key=config("GPT_KEY"))
+                client = dspy.OpenAI(model=event['choosen_models'],
+                                     max_tokens=event['max_tokens'],
+                                     top_p=event['top_p'],
+                                     presence_penalty=event['presence_penalty'],
+                                     frequency_penalty=event['frequency_penalty'],
+                                     temperature=event['temperature'],
+                                     api_key=config("GPT_KEY"))
                 dspy.configure(lm=client)
 
                 if role == "summary":
@@ -156,7 +155,7 @@ class Consumer(AsyncWebsocketConsumer):
                         Topic_ = TopicClassification
                     predict = dspy.Predict(Topic_)
                     response = predict(document=message)
-                    await self.send(text_data=json.dumps({"message": response.topic, "stream_id":  unique_response_id, "credit": credit}))      
+                    await self.send(text_data=json.dumps({"message": response.topic, "stream_id":  unique_response_id, "credit": credit}))
                 elif role == "paraphrase":
                     paraphaser = dspy.Predict(ParaphaseDocument)
                     response = paraphaser(document=message)

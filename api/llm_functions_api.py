@@ -1,31 +1,20 @@
 from ninja import Router
-from decouple import config
-from server.utils import constant
-from ninja.security import HttpBearer
-from server.models import APIKEY
-from server.utils.llm_toolbox import (Emotion,
-                                      TopicClassification,
-                                      ParaphaseDocument,
-                                      SummarizeDocument,
-                                      ChangeWrittingStyle
-                                      )
-import dspy
-from asgiref.sync import sync_to_async
-from django.http import StreamingHttpResponse
 from ninja.errors import HttpError
-import httpx
-from typing import List
-import random
-from .api_schema import (
+from decouple import config
+import dspy
+
+from server.utils.llm_toolbox import (
+    Emotion,
+    TopicClassification,
+    ParaphaseDocument,
+    SummarizeDocument,
+    ChangeWrittingStyle
+)
+
+from django_ratelimit.core import is_ratelimited
+
+from api.api_schema import (
     Error,
-    ChatResponse,
-    PromptResponse,
-    ChatSchema,
-    PromptSchema,
-    ResponseLogRequest,
-    ResponseLogResponse,
-    AgentResponse,
-    AgentSchema,
     BaseLLMSchema,
     SummarizeSchema,
     SummarizeResponseSchema,
@@ -35,26 +24,12 @@ from .api_schema import (
     BaseLLMResponseSchema,
     ClassificationResponseSchema
 )
-from .utils import (get_chat_context,
-                    get_model,
-                    get_model_url,
-                    command_EC2,
-                    update_server_status_in_db,
-                    log_prompt_response,
-                    send_request_async,
-                    send_stream_request_async,
-                    send_stream_request_agent_async,
-                    query_response_log,
-                    get_system_template,
-                    get_user_template
-                    )
+from api.utils import get_model
 
-from django_ratelimit.core import is_ratelimited
-from django_ratelimit.exceptions import Ratelimited as RateLimitedError
-from transformers import AutoTokenizer
-from server.models import UserInstructionTree, InstructionTree
+
 
 router = Router()
+
 
 @router.post("/predict/sentiment", tags=["LLM Functions"], summary="Predict Sentiment", response={200: BaseLLMResponseSchema, 401: Error, 442: Error, 404: Error, 429: Error})
 async def predict_sentiment(request, data: BaseLLMSchema):
@@ -286,7 +261,8 @@ async def classify_document(request, data: ClassificationSchema):
             response = predict(document=prompt)
             return 200, {'response': response.topic,
                          'context': data}
-        
+
+
 @router.post("/tasks/restyle", tags=["LLM Functions"], summary="Restyle Document", response={200: RestyleResponseSchema, 401: Error, 442: Error, 404: Error, 429: Error})
 async def restyle_document(request, data: RestyleSchema):
     """

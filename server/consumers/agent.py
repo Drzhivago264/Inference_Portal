@@ -1,18 +1,17 @@
 import json
 import uuid
-from server.models import (APIKEY, 
-                           InstructionTree,
-                           UserInstructionTree)
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server.celery_tasks import Agent_Inference
-
-from server.utils import constant
 from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
     AgentSchemaMessage,
     AgentSchemaParagraph,
     AgentSchemaTemplate,
+)
+from server.models import (
+                           InstructionTree,
+                           UserInstructionTree
 )
 import regex as re
 from pydantic import ValidationError
