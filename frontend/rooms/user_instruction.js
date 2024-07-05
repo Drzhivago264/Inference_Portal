@@ -387,7 +387,7 @@ function UserInstruction() {
                 'max_turn': max_turn,
                 'currentParagraph': currentparagraph,
                 'message': usermessage,
-                'choosen_models': choosen_model,
+                'choosen_model': choosen_model,
                 'choosen_template': choosen_template,
                 'role': 'Human',
                 'top_p': top_p,

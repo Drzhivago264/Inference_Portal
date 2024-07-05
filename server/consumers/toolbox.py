@@ -58,7 +58,7 @@ class Consumer(AsyncWebsocketConsumer):
                 frequency_penalty = validated.frequency_penalty
                 presence_penalty = validated.presence_penalty
                 temperature = validated.temperature
-                choosen_models = validated.choosen_models
+                choosen_model = validated.choosen_model
                 role = validated.role
                 unique_response_id = str(uuid.uuid4())
                 # Send message to room group
@@ -68,7 +68,7 @@ class Consumer(AsyncWebsocketConsumer):
                                            "message": message,
                                            "credit": self.key_object.credit,
                                            "unique": unique_response_id,
-                                           "choosen_model": choosen_models
+                                           "choosen_model": choosen_model
                                            }
                 )
                 await self.channel_layer.group_send(
@@ -77,7 +77,7 @@ class Consumer(AsyncWebsocketConsumer):
                                            "message": message,
                                            "credit": self.key_object.credit,
                                            "unique": unique_response_id,
-                                           "choosen_models": choosen_models,
+                                           "choosen_model": choosen_model,
                                            "max_tokens": max_tokens,
                                            "emotion_list": validated.emotion_list,
                                            "topic_list": validated.topic_list,
@@ -111,7 +111,7 @@ class Consumer(AsyncWebsocketConsumer):
 
         else:
             try:
-                client = dspy.OpenAI(model=event['choosen_models'],
+                client = dspy.OpenAI(model=event['choosen_model'],
                                      max_tokens=event['max_tokens'],
                                      top_p=event['top_p'],
                                      presence_penalty=event['presence_penalty'],

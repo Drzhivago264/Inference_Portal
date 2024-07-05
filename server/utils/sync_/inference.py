@@ -15,7 +15,6 @@ aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
-
 def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str | list:
     if mode == "chat":
         prompt_ = {"role": "user", "content": f"{prompt}"}
@@ -36,16 +35,14 @@ def inference_mode(model: str, key_object: object,  mode: str, prompt: str, incl
         else:
             return [prompt_]
     elif mode == "generate":
-
         prompt_ = [
             {"role": "system", "content": "Complete the following sentence"},
             {"role": "user", "content": f"{prompt}"},
         ]
-
         return prompt_
 
 
-def send_request(stream: bool, url: str, instance_id: str, context) -> str:
+def send_request(stream: bool, url: str, instance_id: str, context: dict) -> str:
     try:
         response = requests.post(
                 url,  json=context,  stream=stream, timeout=constant.TIMEOUT)
@@ -74,7 +71,7 @@ def action_parse_json(context: str) -> list | bool:
 
 def send_chat_request_openai(stream: bool,
                              session_history: list,
-                             model_type: str,
+                             choosen_model: str,
                              model: str,
                              unique: str,
                              credit: float,
@@ -89,7 +86,7 @@ def send_chat_request_openai(stream: bool,
 
     try:
         channel_layer = get_channel_layer()
-        raw_response = client.chat.completions.create(model=model_type,
+        raw_response = client.chat.completions.create(model=choosen_model,
                                                       messages=session_history,
                                                       stream=stream,
                                                       max_tokens=max_tokens,
@@ -155,7 +152,7 @@ def send_chat_request_openai(stream: bool,
 
 def send_agent_request_openai(stream: bool,
                               session_history: list,
-                              model_type: str,
+                              choosen_model: str,
                               current_turn_inner: int,
                               model: str,
                               unique: str,
@@ -171,7 +168,7 @@ def send_agent_request_openai(stream: bool,
 
     channel_layer = get_channel_layer()
     try:
-        raw_response = client.chat.completions.create(model=model_type,
+        raw_response = client.chat.completions.create(model=choosen_model,
                                                       messages=session_history,
                                                       stream=stream,
                                                       max_tokens=max_tokens,

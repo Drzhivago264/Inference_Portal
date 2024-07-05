@@ -2,8 +2,8 @@ from django.urls import path
 
 import server.consumers.agent as agent
 import server.consumers.chatbot as chatbot
-import server.consumers.testing_async_bot as async_bot
-import server.consumers.testing_async_agent as async_agent
+import server.consumers.async_chatbot as async_bot
+import server.consumers.async_agent as async_agent
 import server.consumers.toolbox as toolbox
 import server.consumers.data_synthesis as data_synthesis
 

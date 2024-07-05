@@ -137,8 +137,8 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                             key.monero_credit += amount/1e+12
                             key.save()
                             return Response({"detail": f"Transaction is success, add {amount/1e+12} XMR to key {key_}"}, status=status.HTTP_200_OK)
-                        except Exception as e:
-                            return Response({"detail": f"{e}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                        except Exception:
+                            return Response({"detail": f"An internal error has occurred!"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
                     else:
                         return Response({"detail": f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations"}, status=status.HTTP_200_OK)
             else:

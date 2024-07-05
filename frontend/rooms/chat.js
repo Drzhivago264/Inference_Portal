@@ -118,7 +118,7 @@ function Chat() {
             var data = {
                 'mode': mode,
                 'message': usermessage,
-                'choosen_models': choosen_model,
+                'choosen_model': choosen_model,
                 'role': 'Human',
                 'top_k': top_k,
                 'top_p': top_p,

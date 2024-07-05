@@ -53,7 +53,7 @@ class Consumer(AsyncWebsocketConsumer):
                 beam = validated.beam
                 early_stopping = validated.early_stopping
                 length_penalty = validated.length_penalty
-                choosen_models = validated.choosen_models
+                choosen_model = validated.choosen_model
                 include_memory = validated.include_memory
                 role = validated.role
                 unique_response_id = str(uuid.uuid4())
@@ -64,7 +64,7 @@ class Consumer(AsyncWebsocketConsumer):
                                            "message": message,
                                            "credit": self.key_object.credit,
                                            "unique": unique_response_id,
-                                           "choosen_model": choosen_models
+                                           "choosen_model": choosen_model
                                            }
                 )
                 Inference.delay(unique=unique_response_id,
@@ -75,7 +75,7 @@ class Consumer(AsyncWebsocketConsumer):
                                 key=self.key_object.hashed_key,
                                 credit=self.key_object.credit,
                                 room_group_name=self.room_group_name,
-                                model=choosen_models,
+                                model=choosen_model,
                                 top_k=top_k,
                                 top_p=top_p,
                                 best_of=best_of,

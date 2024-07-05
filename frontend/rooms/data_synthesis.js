@@ -247,7 +247,7 @@ function DataSynthesis() {
 
     useEffect(() => {
         datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref)
-    }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref]);
+    }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref, choosen_model, choosen_prompt_column]);
 
     const submitSeed = (seed_prompt, row_no) => {
 
@@ -257,7 +257,7 @@ function DataSynthesis() {
             'child_instruction_list': default_child_instruct_list,
             'parent_instruction': default_parent_instruct,
             'optional_instruction': default_extra_instruct,
-            'choosen_models': choosen_model,
+            'choosen_model': choosen_model,
             'top_p': top_p,
             'max_tokens': max_tokens,
             'frequency_penalty': frequencypenalty,

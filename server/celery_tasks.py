@@ -318,7 +318,7 @@ def Inference(unique: str,
         clean_response = send_chat_request_openai(client=client,
                                                   session_history=processed_prompt,
                                                   model=model,
-                                                  model_type=model,
+                                                  choosen_models=model,
                                                   credit=credit,
                                                   unique=unique,
                                                   stream=stream,
@@ -345,7 +345,7 @@ def Agent_Inference(key: str,
                     agent_instruction: str,
                     message: str,
                     session_history: list,
-                    model_type: str,
+                    choosen_models: str,
                     max_turns: int,
                     temperature: float,
                     max_tokens: int,
@@ -365,7 +365,7 @@ def Agent_Inference(key: str,
         agent_instruction (str): _description_
         message (str): _description_
         session_history (list): _description_
-        model_type (str): _description_
+        choosen_models (str): _description_
         max_turns (int): _description_
         temperature (float): _description_
         max_tokens (int): _description_
@@ -399,7 +399,7 @@ def Agent_Inference(key: str,
         clean_response = send_agent_request_openai(client=client,
                                                    session_history=session_history,
                                                    model=model,
-                                                   model_type=model_type,
+                                                   choosen_models=choosen_models,
                                                    credit=credit,
                                                    unique=unique,
                                                    current_turn_inner=current_turn_inner,
