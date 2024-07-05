@@ -110,7 +110,7 @@ function FunctionLLM() {
             var data = {
                 'message': usermessage,
                 'tool': llmfunction,
-                'choosen_models': choosen_model,
+                'choosen_model': choosen_model,
                 'role': 'Human',
                 'top_p': top_p,
                 'max_tokens': max_tokens,

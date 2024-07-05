@@ -190,7 +190,7 @@ function Hotpot() {
                 'instruct_change': instruct_change,
                 'currentParagraph': currentparagraph,
                 'message': useragentmessage,
-                'choosen_models': choosen_agent_model,
+                'choosen_model': choosen_agent_model,
                 'choosen_template': choosen_template,
                 'role': 'Human',
                 'top_p': top_p,
@@ -214,7 +214,7 @@ function Hotpot() {
             var data = {
                 'mode': mode,
                 'message': userchatmessage,
-                'choosen_models': choosen_chat_model,
+                'choosen_model': choosen_chat_model,
                 'role': 'Human',
                 'top_k': top_k,
                 'top_p': top_p,

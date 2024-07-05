@@ -283,7 +283,7 @@ function Agent() {
                 'instruct_change': instruct_change,
                 'currentParagraph': currentparagraph,
                 'message': usermessage,
-                'choosen_models': choosen_model,
+                'choosen_model': choosen_model,
                 'choosen_template': use_user_template ? choosen_user_template : choosen_template,
                 'role': 'Human',
                 'top_p': top_p,

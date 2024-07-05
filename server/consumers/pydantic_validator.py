@@ -8,7 +8,7 @@ from server.utils import constant
 
 class AgentSchemaMessage(BaseModel):
     message: str
-    choosen_models: str
+    choosen_model: str
     instruct_change: bool 
     max_turn: int
     choosen_template: str
@@ -52,7 +52,7 @@ class AgentSchemaTemplate(BaseModel):
 
 class ChatSchema(BaseModel):
     message: str
-    choosen_models: str
+    choosen_model: str
     mode: str
     best_of: int = constant.DEFAULT_BEST_OF
     beam: bool = constant.DEFAULT_BEAM
@@ -88,7 +88,7 @@ class ChatSchema(BaseModel):
 
 class ToolSchema(BaseModel):
     message: str
-    choosen_models: str
+    choosen_model: str
     tool: str
     emotion_list: str | None = None
     topic_list: str | None = None
@@ -126,7 +126,7 @@ class DataSynthesisSchema(BaseModel):
     seed_prompt: str
     parent_instruction: str
     optional_instruction: str = ""
-    choosen_models: str
+    choosen_model: str
     top_p: float = constant.DEFAULT_TOP_P
     frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
     presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY

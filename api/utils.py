@@ -124,14 +124,13 @@ def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_avai
 
 
 async def log_prompt_response(key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
-
     llm = await LLM.objects.aget(name=model)
     pair_save = PromptResponse(
         prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)
     await pair_save.asave()
 
 
-async def send_request_async(url, context):
+async def send_request_async(url, context: dict):
     async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=constant.RETRY), timeout=constant.TIMEOUT) as client:
         response = await client.post(url, json=context)
         response = response.json(

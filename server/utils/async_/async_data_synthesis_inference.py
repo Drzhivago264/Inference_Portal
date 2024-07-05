@@ -13,7 +13,7 @@ from django.utils import timezone
 
 async def async_data_synthesis_inference(self) -> None:
     credit = self.key_object.credit
-    llm = await LLM.objects.aget(name=self.choosen_models)
+    llm = await LLM.objects.aget(name=self.choosen_model)
     url_list = await get_model_url_async(llm)
     processed_instruction_list = []
 
@@ -28,9 +28,10 @@ async def async_data_synthesis_inference(self) -> None:
         ]
 
         if llm.is_self_host:
-            server_url = random.choice(url_list)
+            headers = {'Content-Type': 'application/json'}
+            server_url = random.choice(url_list).url
             tokeniser = AutoTokenizer.from_pretrained(
-                constant.TOKENIZER_TABLE[self.choosen_models])
+                constant.TOKENIZER_TABLE[self.choosen_model])
             processed_prompt = tokeniser.apply_chat_template(
                 prompt_, tokenize=False)
             processed_instruction_list.append(processed_prompt)
@@ -46,6 +47,15 @@ async def async_data_synthesis_inference(self) -> None:
                 }
                 for processed_instruction in processed_instruction_list
             ]
+            async with httpx.AsyncClient(timeout=120) as client:
+                tasks = [client.post(server_url, json=context, headers=headers)
+                            for context in context_list]
+                result = await asyncio.gather(*tasks)
+                self.time = timezone.localtime(timezone.now(), pytz.timezone(
+                    self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+          
+                await self.send(text_data=json.dumps({"response_list": [r.json()['text'][0].replace(processed_instruction_list[index], "")
+                        for index, r in enumerate(result)], "role": self.choosen_model,"time": self.time, "row_no": self.row_no}))
         else:
             headers = {'Content-Type': 'application/json',
                         "Authorization": f'Bearer {config("GPT_KEY")}'}
@@ -53,7 +63,7 @@ async def async_data_synthesis_inference(self) -> None:
             processed_instruction_list.append(prompt_)
             context_list = [
                 {
-                    "model": self.choosen_models,
+                    "model": self.choosen_model,
                     "messages": processed_instruction,
                     "stream": False,
                     "top_p": self.top_p,
@@ -65,11 +75,11 @@ async def async_data_synthesis_inference(self) -> None:
                 for processed_instruction in processed_instruction_list
             ]
 
-    async with httpx.AsyncClient(timeout=120) as client:
-        tasks = [client.post(server_url, json=context, headers=headers)
-                    for context in context_list]
-        result = await asyncio.gather(*tasks)
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(
-            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        await self.send(text_data=json.dumps({"response_list": [i.json()['choices'][0]['message']['content']
-                for i in result], "role": self.choosen_models,"time": self.time, "row_no": self.row_no}))
+            async with httpx.AsyncClient(timeout=120) as client:
+                tasks = [client.post(server_url, json=context, headers=headers)
+                            for context in context_list]
+                result = await asyncio.gather(*tasks)
+                self.time = timezone.localtime(timezone.now(), pytz.timezone(
+                    self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+                await self.send(text_data=json.dumps({"response_list": [i.json()['choices'][0]['message']['content']
+                        for i in result], "role": self.choosen_model,"time": self.time, "row_no": self.row_no}))

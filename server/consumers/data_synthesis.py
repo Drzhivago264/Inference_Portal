@@ -46,7 +46,7 @@ class Consumer(AsyncWebsocketConsumer):
                 self.frequency_penalty = validated.frequency_penalty
                 self.presence_penalty = validated.presence_penalty
                 self.temperature = validated.temperature
-                self.choosen_models = validated.choosen_models
+                self.choosen_model = validated.choosen_model
                 self.row_no = validated.row_no
                 # Send message to room group
                 await self.channel_layer.group_send(

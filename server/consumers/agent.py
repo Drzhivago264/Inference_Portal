@@ -60,7 +60,7 @@ class Consumer(AsyncWebsocketConsumer):
         self.is_session_start_node = True
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
-        self.model_type = ""
+        self.choosen_model = ""
         self.agent_instruction = ""
         self.child_instruction = ""        
         self.room_group_name = "agent_%s" % self.url
@@ -140,7 +140,7 @@ class Consumer(AsyncWebsocketConsumer):
                     currentParagraph = validated.currentParagraph
                     self.working_paragraph = currentParagraph
                     message = validated.message
-                    self.model_type = validated.choosen_models
+                    self.choosen_model = validated.choosen_model
                     choosen_template = validated.choosen_template
                     role = validated.role
                     unique_response_id = str(uuid.uuid4())
@@ -159,12 +159,12 @@ class Consumer(AsyncWebsocketConsumer):
                         message=message,
                         credit=self.key_object.credit,
                         room_group_name=self.room_group_name,
-                        model=self.model_type,
+                        model=self.choosen_model,
                         max_turns=self.max_turns,
                         current_turn_inner=self.current_turn,
                         agent_instruction=agent_instruction,
                         session_history=self.session_history,
-                        model_type=self.model_type,
+                        choosen_model=self.choosen_model,
                         frequency_penalty=frequency_penalty,
                         top_p=top_p,
                         max_tokens=max_tokens,
