@@ -8,6 +8,7 @@ import json
 from server.utils.async_.async_data_synthesis_inference import async_data_synthesis_inference
 from server.consumers.pydantic_validator import DataSynthesisSchema
 
+
 class Consumer(AsyncWebsocketConsumer):
 
     async def connect(self):
@@ -36,7 +37,6 @@ class Consumer(AsyncWebsocketConsumer):
                 await self.disconnect(self)
 
             elif self.key_object:
-  
                 self.seed_prompt = validated.seed_prompt
                 self.child_instruction_list = validated.child_instruction_list
                 self.parent_instruction = validated.parent_instruction
@@ -50,16 +50,14 @@ class Consumer(AsyncWebsocketConsumer):
                 self.row_no = validated.row_no
                 # Send message to room group
                 await self.channel_layer.group_send(
-                    self.room_group_name, {"type": "chat_message",
-                                           "message": self.seed_prompt,
-                                           }
+                    self.room_group_name, {
+                        "type": "chat_message",
+                        "message": self.seed_prompt,
+                    }
                 )
 
         except ValidationError as e:
             await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
     # Receive message from room group
-
     async def chat_message(self, event):
-        
         await async_data_synthesis_inference(self)
-
