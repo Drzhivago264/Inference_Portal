@@ -100,8 +100,7 @@ async def send_vllm_request_async(self: object, llm: object, context: dict):
         else:
             await manage_ec2_on_inference(self, server_status, instance_id)
     else:
-        response = "Model is currently offline"
-        await self.send(text_data=json.dumps({"message": response, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+        await self.send(text_data=json.dumps({"message": "Model is currently offline", "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
   
 
 async def send_agent_request_openai_async(self, llm: str) -> str:
