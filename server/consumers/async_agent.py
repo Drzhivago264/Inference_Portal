@@ -1,26 +1,73 @@
 import json
 import uuid
+import pytz
+
+from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import sync_to_async
+from pydantic import ValidationError
+from transformers import AutoTokenizer
+from django.utils import timezone
+
+from server.utils import constant
+from server.models import LLM
+from server.utils.async_.async_inference import AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin
 from server.models import (
     InstructionTree,
     UserInstructionTree
 )
-from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
-from asgiref.sync import sync_to_async
 from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
     AgentSchemaMessage,
     AgentSchemaParagraph,
     AgentSchemaTemplate,
 )
-from pydantic import ValidationError
-from server.utils.async_.async_agent_inference import async_agent_inference
 
-import pytz
-from django.utils import timezone
+class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin):
 
+    async def inference(self):
+        if self.current_turn >= 0 and self.current_turn <= (self.max_turns-1):
+            if self.current_turn == 0:
+                prompt = [
+                    {'role': 'system', 'content': f"{self.agent_instruction}"}, {
+                        'role': 'user', 'content': f'{self.message}'}
+                ]
+            elif self.current_turn > 0 and self.current_turn < (self.max_turns-1):
+                prompt = [
+                    {'role': 'user', 'content': f'Response: {self.message}'}
+                ]
 
-class Consumer(AsyncWebsocketConsumer):
+            elif self.current_turn == (self.max_turns-1):
+                prompt = [
+                    {'role': 'user', 'content': f'Response: {self.message}'},
+                    {'role': 'system', 'content': f'Response: {self.force_stop}'}
+                ]
+            self.session_history.extend(prompt)
+            llm = await LLM.objects.aget(name=self.choosen_model)
+            if not llm.is_self_host:
+                await self.send_agent_request_openai_async(llm=llm)
+            else:
+                tokeniser = AutoTokenizer.from_pretrained(
+                    constant.TOKENIZER_TABLE[self.choosen_model])
+                session_list_to_string = tokeniser.apply_chat_template(
+                    self.session_history, tokenize=False)
+                context = {
+                    "prompt": session_list_to_string,
+                    "n": 1,
+                    'presence_penalty': float(self.presence_penalty),
+                    "temperature": float(self.temperature),
+                    "max_tokens": self.max_tokens,
+                    "stream": True,
+                    "top_p": float(self.top_p),
+                    "frequency_penalty": float(self.frequency_penalty),
+                }
+                await self.send_vllm_request_async(llm=llm, context=context)
+        else:
+            self.session_history = []
+            self.current_turn = 0
+            await self.send(text_data=json.dumps({"message": "Max Turns reached",  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
+            await self.send(text_data=json.dumps({"message": f"Reseting working memory", "role": "Server", "time": self.time}))
+
 
     async def get_template(self, name, template_type):
         try:
@@ -189,5 +236,5 @@ class Consumer(AsyncWebsocketConsumer):
                 unique_response_id = self.unique_response_id
                 await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": self.choosen_template, "time": self.time, "credit": credit}))
         else:
-            await async_agent_inference(self)
+            await self.inference()
             self.is_session_start_node = False

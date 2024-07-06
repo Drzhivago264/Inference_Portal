@@ -1,9 +1,11 @@
 from ninja import Schema
 import datetime
+from typing_extensions import Self
 from server.utils import constant
 from pydantic import (
     ValidationInfo,
     field_validator,
+    model_validator
 )
 
 class PromptSchema(Schema):
@@ -47,13 +49,31 @@ class PromptSchema(Schema):
         return v
 
 class ChatSchema(PromptSchema):
+    prompt: str | list = ""
     stream: bool = False
     include_memory: bool = constant.DEFAULT_MEMORY
+    include_current_memory: bool = not constant.DEFAULT_MEMORY
 
+    @model_validator(mode='after')
+    def only_one_memory_type(self) -> Self:
+        include_memory = self.include_memory
+        include_current_memory = self.include_current_memory
+        if include_current_memory and include_memory:
+            raise ValueError('Only use one type of memory at a time, set include_memory or include_current_memory or both False')
+        return self
+
+    @model_validator(mode='after')
+    def list_for_current_memory(self) -> Self:
+        prompt = self.prompt
+        include_current_memory = self.include_current_memory
+        if include_current_memory and isinstance(prompt, str):
+            raise ValueError('Prompt must be a list if include_current_memory = True')
+        return self
+       
 class AgentSchema(PromptSchema):
     stream: bool = False
     working_memory: list = []
-    parent_template_name: str |None = "Assignment Agent"
+    parent_template_name: str | None = "Assignment Agent"
     child_template_name: str | None = "Introduction"
     use_my_template: bool = False
 

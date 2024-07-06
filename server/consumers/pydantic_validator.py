@@ -2,8 +2,9 @@ from pydantic import (
     BaseModel,
     ValidationInfo,
     field_validator,
+    model_validator
 )
-
+from typing_extensions import Self
 from server.utils import constant
 
 class AgentSchemaMessage(BaseModel):
@@ -64,9 +65,18 @@ class ChatSchema(BaseModel):
     length_penalty: float = constant.DEFAULT_LENGTH_PENALTY
     temperature:float = constant.DEFAULT_TEMPERATURE
     max_tokens: int | None
-    include_memory: bool = True
+    include_memory: bool = False
     include_current_memory: bool = True
     role: str
+
+    @model_validator(mode='after')
+    def only_one_memory_type(self) -> Self:
+        include_memory = self.include_memory
+        include_current_memory = self.include_current_memory
+        if include_current_memory and include_memory:
+            raise ValueError('Only use one type of memory at a time, set include_memory or include_current_memory or both False')
+        return self
+    
     @field_validator('frequency_penalty','length_penalty','presence_penalty')
     @classmethod
     def check_range_fre_pre_len(cls, v: float, info: ValidationInfo):
