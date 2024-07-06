@@ -1,7 +1,7 @@
 import json
 import uuid
 from channels.generic.websocket import AsyncWebsocketConsumer
-from server.celery_tasks import Inference
+from server.celery_tasks import inference
 from server.utils import constant
 from server.consumers.pydantic_validator import ChatSchema
 from pydantic import ValidationError
@@ -24,7 +24,7 @@ class Consumer(AsyncWebsocketConsumer):
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        await self.send(text_data=json.dumps({"message": f"You are currently using Celery backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully show when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor", "role": "Server", "time": self.time}))
+        await self.send(text_data=json.dumps({"message": f"You are currently using Celery backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully slow when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor", "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -67,7 +67,7 @@ class Consumer(AsyncWebsocketConsumer):
                                            "choosen_model": choosen_model
                                            }
                 )
-                Inference.delay(unique=unique_response_id,
+                inference.delay(unique=unique_response_id,
                                 is_session_start_node=self.is_session_start_node,
                                 mode=mode,
                                 type_="chatroom",

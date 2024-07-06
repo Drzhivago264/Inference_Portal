@@ -173,7 +173,7 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
 
 
 @shared_task
-def Inference(unique: str,
+def inference(unique: str,
               is_session_start_node: bool | None,
               mode: str,
               type_: str,
@@ -222,9 +222,8 @@ def Inference(unique: str,
     key_object = APIKEY.objects.get(hashed_key=key)
     if not beam:
         best_of = 1
-    else:
-        if best_of == 1:
-            best_of += 1
+    elif beam and best_of <= 1:
+        best_of = 2
 
     llm = LLM.objects.get(name=model)
     url_list = get_model_url(llm)
@@ -334,7 +333,7 @@ def Inference(unique: str,
 
 
 @shared_task
-def Agent_Inference(key: str,
+def agent_inference(key: str,
                     is_session_start_node: bool | None,
                     current_turn_inner: int,
                     stream: bool,

@@ -53,10 +53,10 @@ async def chatcompletion(request, data: ChatSchema):
                 server_status = inference_server.status
                 if not data.beam:
                     best_of = 1
+                elif data.beam and data.best_of <= 1:
+                    best_of = 2
                 else:
-                    best_of = data.best_of
-                    if best_of == 1:
-                        best_of += 1
+                    best_of=data.best_of
 
                 tokeniser = AutoTokenizer.from_pretrained(
                     constant.TOKENIZER_TABLE[data.model])
@@ -72,11 +72,17 @@ async def chatcompletion(request, data: ChatSchema):
                     processed_prompt = tokeniser.apply_chat_template(
                         chat, tokenize=False)
                 else:
-                    chat = [
-                        {"role": "system",
-                            "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"},
-                        {"role": "user", "content": f"{data.prompt}"},
-                    ]
+                    if isinstance(data.prompt, str):
+                        chat = [
+                            {"role": "system",
+                                "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"},
+                            {"role": "user", "content": f"{data.prompt}"},
+                        ]
+                    else:
+                        if data.include_current_memory:
+                            chat = data.prompt
+                        else:
+                            chat = [data.prompt[0]]
                     processed_prompt = tokeniser.apply_chat_template(
                         chat, tokenize=False)
                 context = {

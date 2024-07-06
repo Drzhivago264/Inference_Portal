@@ -1,15 +1,105 @@
 import json
 import pytz
+import httpx
+import asyncio
+import random
 from channels.generic.websocket import AsyncWebsocketConsumer
 from pydantic import ValidationError
 from django.utils import timezone
 from asgiref.sync import sync_to_async
-import json
-from server.utils.async_.async_data_synthesis_inference import async_data_synthesis_inference
+from transformers import AutoTokenizer
+from decouple import config
+
 from server.consumers.pydantic_validator import DataSynthesisSchema
+from server.utils.async_.async_query_database import get_model_url_async
+from server.utils import constant
+from server.models import LLM
+from server.utils.async_.async_manage_ec2 import (
+    ManageEC2Mixin,
+    update_server_status_in_db_async
+)
 
+class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin):
 
-class Consumer(AsyncWebsocketConsumer):
+    async def inference(self) -> None:
+        llm = await LLM.objects.aget(name=self.choosen_model)
+        processed_instruction_list = []
+        for child_instruction in self.child_instruction_list:
+            prompt_ = [
+                {"role": "system",
+                    "content": self.parent_instruction + "\n" +
+                    child_instruction['default'] + "\n" +
+                    self.seed_prompt + "\n" +
+                    self.optional_instruction},
+            ]
+
+            if llm.is_self_host:
+                url_list = await get_model_url_async(llm)
+                if url_list:
+                    random_url = random.choice(url_list)
+                    url = random_url.url
+                    instance_id = random_url.name
+                    server_status = random_url.status
+                    await update_server_status_in_db_async(
+                        instance_id=instance_id, update_type="time")
+                    if server_status == "running":
+                        tokeniser = AutoTokenizer.from_pretrained(
+                            constant.TOKENIZER_TABLE[self.choosen_model])
+                        processed_prompt = tokeniser.apply_chat_template(
+                            prompt_, tokenize=False)
+                        processed_instruction_list.append(processed_prompt)
+                        context_list = [
+                            {
+                                "prompt": processed_instruction,
+                                "top_p": self.top_p,
+                                "temperature": self.temperature,
+                                "max_tokens": self.max_tokens,
+                                "presence_penalty": self.presence_penalty,
+                                "frequency_penalty": self.frequency_penalty
+                            }
+                            for processed_instruction in processed_instruction_list
+                        ]
+                        headers = {'Content-Type': 'application/json'}
+                        async with httpx.AsyncClient(timeout=120) as client:
+                            tasks = [client.post(url, json=context, headers=headers)
+                                     for context in context_list]
+                            result = await asyncio.gather(*tasks)
+                            self.time = timezone.localtime(timezone.now(), pytz.timezone(
+                                self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+
+                            await self.send(text_data=json.dumps({"response_list": [r.json()['text'][0].replace(processed_instruction_list[index], "")
+                                                                                    for index, r in enumerate(result)], "role": self.choosen_model, "time": self.time, "row_no": self.row_no}))
+                    else:
+                        await self.manage_ec2_on_inference(server_status, instance_id)
+                else:
+                    await self.send(text_data=json.dumps({"message": f"Model is currently offline", "role": "Server", "time": self.time}))
+
+            else:
+                headers = {'Content-Type': 'application/json',
+                           "Authorization": f'Bearer {config("GPT_KEY")}'}
+                url = "https://api.openai.com/v1/chat/completions"
+                processed_instruction_list.append(prompt_)
+                context_list = [
+                    {
+                        "model": self.choosen_model,
+                        "messages": processed_instruction,
+                        "top_p": self.top_p,
+                        "temperature": self.temperature,
+                        "max_tokens": self.max_tokens,
+                        "presence_penalty": self.presence_penalty,
+                        "frequency_penalty": self.frequency_penalty
+                    }
+                    for processed_instruction in processed_instruction_list
+                ]
+
+                async with httpx.AsyncClient(timeout=120) as client:
+                    tasks = [client.post(url, json=context, headers=headers)
+                             for context in context_list]
+                    result = await asyncio.gather(*tasks)
+                    self.time = timezone.localtime(timezone.now(), pytz.timezone(
+                        self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+                    await self.send(text_data=json.dumps({"response_list": [i.json()['choices'][0]['message']['content']
+                                                                            for i in result], "role": self.choosen_model, "time": self.time, "row_no": self.row_no}))
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
@@ -25,9 +115,7 @@ class Consumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"message": f"Connected", "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
-        # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-    # Receive message from WebSocket
 
     async def receive(self, text_data):
         try:
@@ -59,5 +147,6 @@ class Consumer(AsyncWebsocketConsumer):
         except ValidationError as e:
             await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
     # Receive message from room group
+
     async def chat_message(self, event):
-        await async_data_synthesis_inference(self)
+        await self.inference()

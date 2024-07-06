@@ -2,7 +2,7 @@ import json
 import uuid
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from server.celery_tasks import Agent_Inference
+from server.celery_tasks import agent_inference
 from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
     AgentSchemaMessage,
@@ -151,7 +151,7 @@ class Consumer(AsyncWebsocketConsumer):
                     presence_penalty = validated.presence_penalty
                     temperature = validated.temperature
                     agent_instruction += child_instruction
-                    Agent_Inference.delay(
+                    agent_inference.delay(
                         is_session_start_node=self.is_session_start_node,
                         unique=unique_response_id,
                         key=self.key_object.hashed_key,
