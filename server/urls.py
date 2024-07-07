@@ -9,16 +9,16 @@ from server.views.information import (
     log_in
 )
 from server.views.key_management import (StripeWebhookView,
-                                       SuccessView,
-                                       CancelView,
-                                       CreateStripeCheckoutSessionView,
-                                       generate_key_api,
-                                       confirm_xmr_payment_api,
-                                       retrive_xmr_wallet_api,
-                                       check_credit_api,
-                                       stripe_redirect,
-                                       product_list_api,
-                                       )
+                                         SuccessView,
+                                         CancelView,
+                                         CreateStripeCheckoutSessionView,
+                                         generate_key_api,
+                                         confirm_xmr_payment_api,
+                                         retrive_xmr_wallet_api,
+                                         check_credit_api,
+                                         stripe_redirect,
+                                         product_list_api,
+                                         )
 
 from server.views.room_view import (hub_redirect_api,
                                     instruction_tree_api,
@@ -33,8 +33,10 @@ app_name = "server"
 urlpatterns = [
     path('', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual', TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/user-instruction/<str:key>/', TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/data-synthesis/<str:key>/', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/user-instruction',
+         TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/data-synthesis',
+         TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual/key',
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual/inference',
@@ -50,18 +52,17 @@ urlpatterns = [
     path('frontend/key-management',
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/contact', TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/chat/<str:key>/',
+    path('frontend/chat',
          TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/engineer/<str:key>/',
+    path('frontend/engineer',
          TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/toolbox/<str:key>/',
+    path('frontend/toolbox',
          TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/hotpot/<str:key>/',
+    path('frontend/hotpot',
          TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/log/<str:key>/',
+    path('frontend/log',
          TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/dataanalysis/<str:key>/',
-         TemplateView.as_view(template_name='frontend_index.html')),
+
     path('frontend/api/docs/',
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/payment-success/',
@@ -108,6 +109,6 @@ urlpatterns = [
     path("cancel/", CancelView.as_view(), name="cancel"),
 
 
-    path("log/<str:key>/", LogListJson.as_view()),
+    path("log/", LogListJson.as_view()),
 
 ]

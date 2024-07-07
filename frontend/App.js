@@ -136,19 +136,19 @@ export default function App() {
 
                 <Route path="/frontend/manual" element={<ManualPage />} />
                 <Route path="/frontend/cost-monitoring" element={<CostMonitoringPage />} />
-                <Route path="/frontend/user-instruction/:keyhash" element={<UserInstructionPage />} />
-                <Route path="/frontend/data-synthesis/:keyhash" element={<DataSynthesisPage />} />
+                <Route path="/frontend/user-instruction" element={<UserInstructionPage />} />
+                <Route path="/frontend/data-synthesis" element={<DataSynthesisPage />} />
                 <Route path="/frontend/manual/:doc" element={<ManualPage />} />
                 <Route path="/frontend/api/docs" element={<APIDocPage />} />
                 <Route path="/frontend/model" element={<ModelInforPage />} />
                 <Route path="/frontend/key-management" element={<KeyManagementPage />} />
                 <Route path="/frontend/hub" element={<HubPage />} />
                 <Route path="/frontend/payment-success" element={<PaymentSuccessPage />} />
-                <Route path="/frontend/chat/:keyhash" element={<ChatPage />} />
-                <Route path="/frontend/engineer/:keyhash" element={<AgentPage />} />
-                <Route path="/frontend/toolbox/:keyhash" element={<FunctionLLMPage />} />
-                <Route path="/frontend/hotpot/:keyhash" element={<HotpotPage />} />
-                <Route path="/frontend/log/:keyhash" element={<LogPage />} />
+                <Route path="/frontend/chat" element={<ChatPage />} />
+                <Route path="/frontend/engineer" element={<AgentPage />} />
+                <Route path="/frontend/toolbox" element={<FunctionLLMPage />} />
+                <Route path="/frontend/hotpot" element={<HotpotPage />} />
+                <Route path="/frontend/log" element={<LogPage />} />
                 <Route path="/frontend/contact" element={<ContactPage />} />
                 <Route path="/frontend/login" element={<LoginPage />} />
               </Routes>

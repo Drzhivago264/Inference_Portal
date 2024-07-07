@@ -1,4 +1,5 @@
 from hashlib import sha256
+import datetime
 
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
@@ -32,7 +33,8 @@ def check_login(request: HttpRequest) -> Response:
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        return Response({'websocket_hash': sha256(current_user.apikey.hashed_key.encode('utf-8')).hexdigest() ,'key_name': current_user.apikey.name}, status=status.HTTP_200_OK)
+        unique_hash_seed = current_user.apikey.id + current_user.apikey.name + str(current_user.apikey.created_at) 
+        return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': current_user.apikey.name}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

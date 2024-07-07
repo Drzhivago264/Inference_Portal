@@ -52,7 +52,7 @@ function Log() {
                 ],
                 processing: true,
                 serverSide: true,
-                ajax: "/log/" + url[url.length - 1],
+                ajax: "/log/" ,
                 responsive: true,
                 destroy: true,
             }
