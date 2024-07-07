@@ -227,7 +227,7 @@ function DataSynthesis() {
             chat_websocket.current.close()
         }
         if (websocket_hash) {
-            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + websocket_hash + '/' + timeZone + '/');
+            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/data-synthesis/' + websocket_hash + '/' + timeZone + '/');
         }
     }, [socket_destination, websocket_hash]);
 

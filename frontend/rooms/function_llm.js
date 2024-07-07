@@ -92,7 +92,7 @@ function FunctionLLM() {
             chat_websocket.current.close()
         }
         if (websocket_hash) {
-            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/data-synthesis/' + websocket_hash + '/' + timeZone + '/');
+            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/toolbox/' + websocket_hash + '/' + timeZone + '/');
             chatsocket(websocket, setChatMessage, setThinking, document)
         }
     }, [websocket_hash]);
