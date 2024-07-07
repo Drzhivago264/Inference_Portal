@@ -50,7 +50,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 
 function UserInstruction() {
     const navigate = useNavigate();
-    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [instruct_change, setInstructChange] = useState(false)
     const [choosen_model, setChoosenModel] = useState("gpt-4");
@@ -335,7 +335,7 @@ function UserInstruction() {
     }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    var url = window.location.pathname.split("/").filter(path => path !== "")
+
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
         if (websocket.current) {
@@ -347,14 +347,16 @@ function UserInstruction() {
         if (chat_websocket.current) {
             chat_websocket.current.close()
         }
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
-        agentsocket(
-            websocket,
-            setChatMessage,
-            setThinking,
-            document,
-        )
-    }, [socket_destination]);
+        if (websocket_hash) {
+            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + websocket_hash + '/' + timeZone + '/');
+            agentsocket(
+                websocket,
+                setChatMessage,
+                setThinking,
+                document,
+            )
+        }
+    }, [socket_destination, websocket_hash]);
 
     useEffect(() => {
         if (reload) {
@@ -460,7 +462,7 @@ function UserInstruction() {
                                     </Box>
                                 </List>
                             </Paper>
-                            <Box sx={{ mr: 2, mt:2 }} >
+                            <Box sx={{ mr: 2, mt: 2 }} >
                                 <OpenAPIParameter
                                     top_p={top_p}
                                     agent_objects={agent_objects}

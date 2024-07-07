@@ -140,7 +140,7 @@ function Hub() {
                 axios.post("/frontend-api/hub-redirect", data, config)
                     .then((response) => {
                         setIsAuthenticated(true)
-                        navigate(response.data.redirect_link, { replace: true, state: { credential: key } });
+                        navigate(response.data.redirect_link, { replace: true });
                     }).catch(error => {
                         setRedirectError(error.response.data.detail)
                         if (error.response.status == "400") {

@@ -37,7 +37,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 function FunctionLLM() {
     const ref = useRef();
 
-    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const [shownthinking, setThinking] = useState(false);
     const messagesEndRef = useRef(null)
     const [chat_message, setChatMessage] = useState([]);
@@ -80,7 +80,7 @@ function FunctionLLM() {
     }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    var url = window.location.pathname.split("/").filter(path => path !== "")
+
     useEffect(() => {
         if (websocket.current) {
             websocket.current.close()
@@ -88,12 +88,14 @@ function FunctionLLM() {
         if (agent_websocket.current) {
             agent_websocket.current.close()
         }
-        if (chat_websocket.current){
+        if (chat_websocket.current) {
             chat_websocket.current.close()
         }
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
-        chatsocket(websocket, setChatMessage, setThinking, document)
-    }, []);
+        if (websocket_hash) {
+            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/data-synthesis/' + websocket_hash + '/' + timeZone + '/');
+            chatsocket(websocket, setChatMessage, setThinking, document)
+        }
+    }, [websocket_hash]);
 
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {

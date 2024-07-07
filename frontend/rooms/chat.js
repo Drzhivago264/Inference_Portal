@@ -35,7 +35,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function Chat() {
-    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
     const [model_objects, setModels] = useState([]);
@@ -87,7 +87,6 @@ function Chat() {
         scrollToBottom()
     }, [chat_message]);
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    var url = window.location.pathname.split("/").filter(path => path !== "")
 
     useEffect(() => {
         if (websocket.current) {
@@ -96,12 +95,14 @@ function Chat() {
         if (agent_websocket.current) {
             agent_websocket.current.close()
         }
-        if (chat_websocket.current){
+        if (chat_websocket.current) {
             chat_websocket.current.close()
         }
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
-        chatsocket(websocket, setChatMessage, setThinking, document)
-    }, [socket_destination]);
+        if (websocket_hash) {
+            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + websocket_hash + '/' + timeZone + '/');
+            chatsocket(websocket, setChatMessage, setThinking, document)
+        }
+    }, [socket_destination, websocket_hash]);
 
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
