@@ -49,7 +49,7 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                     login(request, user)
                     key_hash = sha256(
                         api_key.hashed_key.encode('utf-8')).hexdigest()
-                    return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
+                    return Response({"redirect_link": f"/frontend/{destination}"}, status=status.HTTP_200_OK)
                 else:
                     return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -60,7 +60,7 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                 api_key = APIKEY.objects.get(user=request.user)
                 key_hash = sha256(
                     api_key.hashed_key.encode('utf-8')).hexdigest()
-                return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
+                return Response({"redirect_link": f"/frontend/{destination}"}, status=status.HTTP_200_OK)
             else:
                 return Response({'detail': 'Unknown Key error!, Login again'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
