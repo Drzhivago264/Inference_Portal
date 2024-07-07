@@ -47,6 +47,7 @@ class PaymentHistory(models.Model):
 
 class LLM(models.Model):
     name = models.CharField(max_length=200)
+    base = models.CharField(max_length=200, blank=True, null=True)
     size =  models.IntegerField(default=1)
     desc = models.TextField()
     chat_template = models.TextField(default="")

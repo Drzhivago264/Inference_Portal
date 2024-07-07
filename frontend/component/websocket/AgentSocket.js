@@ -79,6 +79,9 @@ export function agentsocket(
                     setThinking(true)
                     dataFromServer.message = ""
                 }
+                if (dataFromServer.role=="Server") {
+                    setThinking(false)
+                }
                 setChatMessage(chat_message => [
                     ...chat_message,
                     {

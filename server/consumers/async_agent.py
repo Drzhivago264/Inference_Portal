@@ -10,7 +10,6 @@ from transformers import AutoTokenizer
 from django.utils import timezone
 
 from server.utils import constant
-from server.models import LLM
 from server.utils.async_.async_inference import AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin
 from server.models import (
     InstructionTree,
@@ -22,8 +21,9 @@ from server.consumers.pydantic_validator import (
     AgentSchemaParagraph,
     AgentSchemaTemplate,
 )
+from server.utils.async_.async_query_database import QueryDBMixin
 
-class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin):
+class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin, QueryDBMixin):
 
     async def inference(self):
         if self.current_turn >= 0 and self.current_turn <= (self.max_turns-1):
@@ -43,25 +43,28 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
                     {'role': 'system', 'content': f'Response: {self.force_stop}'}
                 ]
             self.session_history.extend(prompt)
-            llm = await LLM.objects.aget(name=self.choosen_model)
-            if not llm.is_self_host:
-                await self.send_agent_request_openai_async(llm=llm)
+            llm = await self.get_model()
+            if llm:
+                if not llm.is_self_host:
+                    await self.send_agent_request_openai_async(llm=llm)
+                else:
+                    tokeniser = AutoTokenizer.from_pretrained(
+                        constant.TOKENIZER_TABLE[self.choosen_model])
+                    session_list_to_string = tokeniser.apply_chat_template(
+                        self.session_history, tokenize=False)
+                    context = {
+                        "prompt": session_list_to_string,
+                        "n": 1,
+                        'presence_penalty': float(self.presence_penalty),
+                        "temperature": float(self.temperature),
+                        "max_tokens": self.max_tokens,
+                        "stream": True,
+                        "top_p": float(self.top_p),
+                        "frequency_penalty": float(self.frequency_penalty),
+                    }
+                    await self.send_vllm_request_async(llm=llm, context=context)
             else:
-                tokeniser = AutoTokenizer.from_pretrained(
-                    constant.TOKENIZER_TABLE[self.choosen_model])
-                session_list_to_string = tokeniser.apply_chat_template(
-                    self.session_history, tokenize=False)
-                context = {
-                    "prompt": session_list_to_string,
-                    "n": 1,
-                    'presence_penalty': float(self.presence_penalty),
-                    "temperature": float(self.temperature),
-                    "max_tokens": self.max_tokens,
-                    "stream": True,
-                    "top_p": float(self.top_p),
-                    "frequency_penalty": float(self.frequency_penalty),
-                }
-                await self.send_vllm_request_async(llm=llm, context=context)
+                await self.send(text_data=json.dumps({"message": "Cannot find the choosen model",  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
         else:
             self.session_history = []
             self.current_turn = 0

@@ -1,18 +1,31 @@
+import random
 from server.models import (
-    InferenceServer
+    InferenceServer,
+    LLM
 )
 from django.db.models.query import QuerySet
-from asgiref.sync import sync_to_async
+from typing import Tuple
 
-async def get_model_url_async(model: str) -> list | bool:
-    model_list = []
-    try:
-        async for m in InferenceServer.objects.filter(
-                hosted_model__name=model, availability="Available"):
-            model_list.append(m)
-        return model_list
-    except Exception as e:
-        return False
+class QueryDBMixin:
+    async def get_model(self) -> QuerySet[LLM] | bool:
+        try:
+            return await LLM.objects.aget(name=self.choosen_model)
+        except LLM.DoesNotExist:
+            return False
+        
+    async def get_model_url_async(self) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
+        model_list = []
+        try:
+            async for m in InferenceServer.objects.filter(
+                    hosted_model__name=self.choosen_model, availability="Available"):
+                model_list.append(m)
+            random_url = random.choice(model_list)
+            url = random_url.url
+            instance_id = random_url.name
+            server_status = random_url.status
+            return url, instance_id, server_status
+        except Exception as e:
+            return False, False, False
 
 
 

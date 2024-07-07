@@ -1,4 +1,3 @@
-
 from decouple import config
 from asgiref.sync import sync_to_async
 import random
@@ -9,23 +8,20 @@ import random
 
 from server.utils.sync_.inference import action_parse_json
 from server.utils.sync_.log_database import log_prompt_response
-from server.utils.async_.async_query_database import get_model_url_async
+from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.async_.async_manage_ec2 import (
     ManageEC2Mixin, 
     update_server_status_in_db_async
 )
+from server.models import LLM
 import regex as re
 import server.utils.constant as constant
 
-class AsyncInferenceVllmMixin(ManageEC2Mixin):
-    async def send_vllm_request_async(self: object, llm: object, context: dict):
+class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
+    async def send_vllm_request_async(self, llm: LLM, context: dict) -> None:
         client = httpx.AsyncClient(timeout=10)
-        url_list = await get_model_url_async(llm)
-        if url_list:
-            random_url = random.choice(url_list)
-            url = random_url.url
-            instance_id = random_url.name
-            server_status = random_url.status
+        url, instance_id, server_status = await self.get_model_url_async()
+        if url:
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
@@ -60,7 +56,7 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin):
             await self.send(text_data=json.dumps({"message": "Model is currently offline", "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
     
 class AsyncInferenceOpenaiMixin:
-    async def openai_client_async(self, processed_prompt, max_token_error):
+    async def openai_client_async(self, processed_prompt: list, max_token_error: bool) -> None:
         try:
             client = openai.AsyncOpenAI(api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY)
             raw_response = await client.chat.completions.create(model=self.choosen_model,
@@ -87,7 +83,7 @@ class AsyncInferenceOpenaiMixin:
             else:
                 await self.send(text_data=json.dumps({"message": f"OpenAI API returned an API Error: {e}", "role": self.choosen_model, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
-    async def send_chat_request_openai_async(self, processed_prompt: list, llm: str) -> str:
+    async def send_chat_request_openai_async(self, processed_prompt: list, llm: LLM) -> str:
         clean_response = ""
         raw_response = await self.openai_client_async(processed_prompt=processed_prompt, max_token_error=False)
         if raw_response:
@@ -103,7 +99,7 @@ class AsyncInferenceOpenaiMixin:
                 await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message,
                                                                                 response=clean_response, type_="open_ai")
 
-    async def send_agent_request_openai_async(self, llm: str) -> str:
+    async def send_agent_request_openai_async(self, llm: LLM) -> str:
         clean_response = ""
         raw_response = await self.openai_client_async(processed_prompt=self.session_history, max_token_error=False)       
         if raw_response:

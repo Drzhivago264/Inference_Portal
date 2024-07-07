@@ -4,55 +4,56 @@ import pytz
 
 from server.utils import constant
 from server.consumers.pydantic_validator import ChatSchema
-from server.utils import constant
-from server.models import LLM
 from server.utils.sync_.inference import inference_mode
 from server.utils.async_.async_inference import AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin
+from server.utils.async_.async_query_database import QueryDBMixin
 
 from pydantic import ValidationError
 from django.utils import timezone
 from asgiref.sync import sync_to_async
-from asgiref.sync import sync_to_async
 from transformers import AutoTokenizer
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin):
+class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin, QueryDBMixin):
     async def inference(self):
         if not self.beam:
             self.best_of = 1
         elif self.beam and self.best_of <= 1:
             self.best_of = 2
 
-        llm = await LLM.objects.aget(name=self.choosen_model)
-        if not self.include_current_memory:
-            processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
-                model=self.choosen_model, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
-        else:
-            processed_prompt = self.session_history
+        llm = await self.get_model()
+        if llm:
+            if not self.include_current_memory:
+                processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
+                    model=self.choosen_model, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
+            else:
+                processed_prompt = self.session_history
 
-        if llm.is_self_host:
-            tokeniser = AutoTokenizer.from_pretrained(
-                constant.TOKENIZER_TABLE[self.choosen_model])
-            session_list_to_string = tokeniser.apply_chat_template(
-                processed_prompt, tokenize=False)
-            context = {
-                "prompt": session_list_to_string,
-                "n": 1,
-                'best_of': self.best_of,
-                'presence_penalty': float(self.presence_penalty),
-                "use_beam_search": self.beam,
-                "temperature": float(self.temperature) if not self.beam else 0,
-                "max_tokens": self.max_tokens,
-                "stream": True,
-                "top_k": int(self.top_k),
-                "top_p": float(self.top_p) if not self.beam else 1,
-                "length_penalty": float(self.length_penalty) if self.beam else 1,
-                "frequency_penalty": float(self.frequency_penalty),
-                "early_stopping": self.early_stopping if self.beam else False,
-            }
-            await self.send_vllm_request_async(llm=llm, context=context)
+            if llm.is_self_host:
+                tokeniser = AutoTokenizer.from_pretrained(
+                    constant.TOKENIZER_TABLE[self.choosen_model])
+                session_list_to_string = tokeniser.apply_chat_template(
+                    processed_prompt, tokenize=False)
+                context = {
+                    "prompt": session_list_to_string,
+                    "n": 1,
+                    'best_of': self.best_of,
+                    'presence_penalty': float(self.presence_penalty),
+                    "use_beam_search": self.beam,
+                    "temperature": float(self.temperature) if not self.beam else 0,
+                    "max_tokens": self.max_tokens,
+                    "stream": True,
+                    "top_k": int(self.top_k),
+                    "top_p": float(self.top_p) if not self.beam else 1,
+                    "length_penalty": float(self.length_penalty) if self.beam else 1,
+                    "frequency_penalty": float(self.frequency_penalty),
+                    "early_stopping": self.early_stopping if self.beam else False,
+                }
+                await self.send_vllm_request_async(llm=llm, context=context)
+            else:
+                await self.send_chat_request_openai_async(processed_prompt, llm)
         else:
-            await self.send_chat_request_openai_async(processed_prompt, llm)
+            await self.send(text_data=json.dumps({"message": "Cannot find the choosen model",  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
