@@ -1,4 +1,4 @@
-
+import random
 from django.core.cache import cache
 from server.models import (InferenceServer,
                            LLM,
@@ -9,12 +9,14 @@ from decouple import config
 from django.db.models.query import QuerySet
 from celery.utils.log import get_task_logger
 from vectordb import vectordb
+from typing import Tuple
+
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
-def get_model_url(model: object) -> list | bool:
+def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
     try:
         model_list = cache.get(f"{model}_link_list")
         if model_list == None:
@@ -22,17 +24,13 @@ def get_model_url(model: object) -> list | bool:
                 hosted_model=model, availability="Available"))
             cache.set(f"{model}_link_list", model_list,
                       constant.CACHE_SERVER_LINK_RETRIVAL)
-        return model_list
+        random_url = random.choice(model_list)
+        url = random_url.url
+        instance_id = random_url.name
+        server_status = random_url.status
+        return url, instance_id, server_status
     except:
-        return False
-
-
-def get_key(name: str, key: str) -> object | QuerySet[APIKEY]:
-    try:
-        key_ = APIKEY.objects.get_from_key(key)
-        return key_
-    except APIKEY.DoesNotExist:
-        return False
+        return False, False, False
 
 
 def get_model(model: str) -> QuerySet[LLM] | bool:
@@ -41,7 +39,7 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
     except LLM.DoesNotExist:
         return False
     
-def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
+def get_chat_context(model: str, key_object: APIKEY, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
 
     hashed_key = key_object.hashed_key
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(

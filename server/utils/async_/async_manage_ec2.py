@@ -14,7 +14,7 @@ async def update_server_status_in_db_async(instance_id: str, update_type: str) -
         await ser_obj.asave()
     
 class ManageEC2Mixin:
-    async def manage_ec2_on_inference(self, server_status, instance_id):
+    async def manage_ec2_on_inference(self, server_status: str, instance_id: str) -> None:
         if server_status == "stopped" or "stopping":
             command_EC2.delay(instance_id, region=REGION, action="on")
             response = "Server is starting up, try again in 400 seconds"

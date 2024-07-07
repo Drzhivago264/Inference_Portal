@@ -2,7 +2,9 @@
 from django.utils import timezone
 from server.models import (
                            PromptResponse,
-                           MemoryTree
+                           MemoryTree,
+                           LLM,
+                           APIKEY
                            )
 from server.utils import constant
 from decouple import config
@@ -15,7 +17,7 @@ aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
-def log_prompt_response(is_session_start_node: bool | None, key_object: object, llm: object, prompt: str, response: str, type_: str) -> None:
+def log_prompt_response(is_session_start_node: bool | None, key_object: APIKEY, llm: LLM, prompt: str, response: str, type_: str) -> None:
     """This function store log into a db then build a memory tree of chat history
     Args:
         is_session_start_node (bool | None): _description_

@@ -10,12 +10,13 @@ from asgiref.sync import async_to_sync
 from server.models import InferenceServer
 from server.utils import constant
 from server.utils.sync_.query_database import get_chat_context
+from server.models import APIKEY
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
-def inference_mode(model: str, key_object: object,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str | list:
+def inference_mode(model: str, key_object: APIKEY,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str | list:
     if mode == "chat":
         prompt_ = {"role": "user", "content": f"{prompt}"}
         if include_memory:

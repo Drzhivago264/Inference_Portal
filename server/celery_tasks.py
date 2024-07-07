@@ -226,8 +226,8 @@ def inference(unique: str,
         best_of = 2
 
     llm = LLM.objects.get(name=model)
-    url_list = get_model_url(llm)
 
+    url, instance_id, server_status = get_model_url(llm)
     processed_prompt = inference_mode(
         model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
 
@@ -252,11 +252,7 @@ def inference(unique: str,
             "early_stopping": early_stopping if beam else False,
         }
         ''' Query a list of inference servers for a given model, pick a random one '''
-        if url_list:
-            random_url = random.choice(url_list)
-            url = random_url.url
-            instance_id = random_url.name
-            server_status = random_url.status
+        if url:
             update_server_status_in_db(
                 instance_id=instance_id, update_type="time")
             if server_status == "running":
@@ -317,7 +313,7 @@ def inference(unique: str,
         clean_response = send_chat_request_openai(client=client,
                                                   session_history=processed_prompt,
                                                   model=model,
-                                                  choosen_models=model,
+                                                  choosen_model=model,
                                                   credit=credit,
                                                   unique=unique,
                                                   stream=stream,
@@ -344,7 +340,7 @@ def agent_inference(key: str,
                     agent_instruction: str,
                     message: str,
                     session_history: list,
-                    choosen_models: str,
+                    choosen_model: str,
                     max_turns: int,
                     temperature: float,
                     max_tokens: int,
@@ -364,7 +360,7 @@ def agent_inference(key: str,
         agent_instruction (str): _description_
         message (str): _description_
         session_history (list): _description_
-        choosen_models (str): _description_
+        choosen_model (str): _description_
         max_turns (int): _description_
         temperature (float): _description_
         max_tokens (int): _description_
@@ -398,7 +394,7 @@ def agent_inference(key: str,
         clean_response = send_agent_request_openai(client=client,
                                                    session_history=session_history,
                                                    model=model,
-                                                   choosen_models=choosen_models,
+                                                   choosen_model=choosen_model,
                                                    credit=credit,
                                                    unique=unique,
                                                    current_turn_inner=current_turn_inner,
