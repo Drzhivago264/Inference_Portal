@@ -32,7 +32,6 @@ from server.models import (
 from server.utils import constant
 
 
-
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
 def hub_redirect_api(request: HttpRequest) -> Response:
@@ -48,7 +47,8 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                     request, username=api_key.hashed_key, password=api_key.hashed_key)
                 if user is not None:
                     login(request, user)
-                    key_hash = sha256(key.encode('utf-8')).hexdigest()
+                    key_hash = sha256(
+                        api_key.hashed_key.encode('utf-8')).hexdigest()
                     return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
                 else:
                     return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -57,7 +57,9 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                 return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             if request.user.id is not None:
-                key_hash = sha256(key.encode('utf-8')).hexdigest()
+                api_key = APIKEY.objects.get(user=request.user)
+                key_hash = sha256(
+                    api_key.hashed_key.encode('utf-8')).hexdigest()
                 return Response({"redirect_link": f"/frontend/{destination}/{key_hash}"}, status=status.HTTP_200_OK)
             else:
                 return Response({'detail': 'Unknown Key error!, Login again'}, status=status.HTTP_401_UNAUTHORIZED)

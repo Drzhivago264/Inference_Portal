@@ -1,14 +1,15 @@
 import axios from 'axios';
 
-export function check_login(setLoginState, setUserHashKey, setUserKeyName) {
+export function check_login(setLoginState, setUserHashKey, setUserKeyName, setWebsocketHash) {
     axios.all([
         axios.get('/frontend-api/check-login'),
     ])
         .then(axios.spread((login_object) => {
             if (login_object.status == '200') {
                 setLoginState(true)
-                setUserHashKey(login_object.data.detail)
+                setUserHashKey(login_object.data.websocket_hash)
                 setUserKeyName(login_object.data.key_name)
+                setWebsocketHash(login_object.data.websocket_hash)
             }
 
         }))

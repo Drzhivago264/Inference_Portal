@@ -120,7 +120,7 @@ const multilineColumn = {
 
 function DataSynthesis() {
     const ref = useRef();
-    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [choosen_prompt_column, setChoosenPromptColumn] = useState("samplePrompt");
     const [agent_objects, setAgents] = useState([]);
@@ -226,9 +226,10 @@ function DataSynthesis() {
         if (chat_websocket.current) {
             chat_websocket.current.close()
         }
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + url[url.length - 1] + '/' + timeZone + '/');
-
-    }, [socket_destination]);
+        if (websocket_hash) {
+            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/' + url[url.length - 2] + '/' + websocket_hash + '/' + timeZone + '/');
+        }
+    }, [socket_destination, websocket_hash]);
 
 
 
@@ -246,8 +247,10 @@ function DataSynthesis() {
     }, [is_running]);
 
     useEffect(() => {
-        datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref)
-    }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref, choosen_model, choosen_prompt_column]);
+        if (websocket_hash) {
+            datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref)
+        }
+    }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref, choosen_model, choosen_prompt_column, websocket_hash]);
 
     const submitSeed = (seed_prompt, row_no) => {
 

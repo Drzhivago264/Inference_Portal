@@ -64,9 +64,10 @@ export default function App() {
   const websocket = useRef(null)
   const chat_websocket = useRef(null)
   const agent_websocket = useRef(null)
+  const [websocket_hash, setWebsocketHash] = useState(null)
   useEffect(() => {
-    check_login(setIsAuthenticated, setUserHashKey, setUserKeyName)
-  }, [is_authenticated, user_hashed_key, user_key_name]);
+    check_login(setIsAuthenticated, setUserHashKey, setUserKeyName, setWebsocketHash)
+  }, [is_authenticated, user_hashed_key, user_key_name, websocket_hash]);
 
   const colorMode = useMemo(
     () => ({
@@ -89,7 +90,7 @@ export default function App() {
     [mode],
   );
   return (
-    <WebSocketContext.Provider value={{websocket, agent_websocket, chat_websocket}}>
+    <WebSocketContext.Provider value={{websocket, agent_websocket, chat_websocket, websocket_hash}}>
       <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name }}>
         <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
           <GlobalStyles

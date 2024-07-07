@@ -67,7 +67,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function Agent() {
-    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const ref = useRef();
     const editorref = useRef();
     const messagesEndRef = useRef(null)
@@ -216,8 +216,6 @@ function Agent() {
     }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    var url = window.location.pathname.split("/").filter(path => path !== "")
-
 
     useEffect(() => {
         if (websocket.current) {
@@ -226,27 +224,29 @@ function Agent() {
         if (agent_websocket.current) {
             agent_websocket.current.close()
         }
-        if (chat_websocket.current){
+        if (chat_websocket.current) {
             chat_websocket.current.close()
         }
-        websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + url[url.length - 1] + '/' + timeZone + '/');
-        agentsocket(
-            websocket,
-            setChatMessage,
-            setThinking,
-            document,
-            setParentInstruct,
-            setChildInstruct,
-            setDefaultChildTemplateList,
-            use_user_template,
-            setUserParentInstruct,
-            setUserChildInstruct,
-            setDefaultUserChildTemplateList,
-            setEditor,
-            setCurrentParagraph,
-            editorref
-        )
-    }, [socket_destination]);
+        if (websocket_hash) {
+            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + websocket_hash + '/' + timeZone + '/');
+            agentsocket(
+                websocket,
+                setChatMessage,
+                setThinking,
+                document,
+                setParentInstruct,
+                setChildInstruct,
+                setDefaultChildTemplateList,
+                use_user_template,
+                setUserParentInstruct,
+                setUserChildInstruct,
+                setDefaultUserChildTemplateList,
+                setEditor,
+                setCurrentParagraph,
+                editorref
+            )
+        }
+    }, [socket_destination, websocket_hash]);
 
     useEffect(() => {
         agentsocket(
@@ -361,7 +361,7 @@ function Agent() {
             }
             else if (mimeType == "text/plain") {
                 let html = parser.parse(download_content);
-                let text = convert(html, {wordwrap: 130});
+                let text = convert(html, { wordwrap: 130 });
                 download_content = text
             }
             else if (mimeType == "application/pdf") {
@@ -431,29 +431,29 @@ function Agent() {
                                 </Box>
                                 <Divider />
                                 <Box mb={2} mt={2} ml={1} mr={2}>
-                            
-                                        <FormControl  fullWidth>
-                                            <Stack direction={'row'} spacing={1}>
-                                                <InputLabel id="export-label">Formats</InputLabel>
-                                                <Select
-                                                    labelId="export-label"
-                                                    id="export-select"
-                                                    onChange={e => setChoosenExportFormat(e.target.value)}
-                                                    value={choosen_export_format}
-                                                    label="Export"
-                                                    size="small"
-                                                    fullWidth
-                                                >
-                                                    {['.json', '.txt', '.html', '.pdf'].map((format) => {
-                                                        return (
-                                                            <MenuItem key={format} value={format}>{format}</MenuItem>
-                                                        )
-                                                    })}
-                                                </Select>
-                                                <Button size="small" fullWidth variant="contained" onClick={handleExport} endIcon={<GetAppIcon />}>Export</Button>
-                                            </Stack>
-                                        </FormControl>
-                                    
+
+                                    <FormControl fullWidth>
+                                        <Stack direction={'row'} spacing={1}>
+                                            <InputLabel id="export-label">Formats</InputLabel>
+                                            <Select
+                                                labelId="export-label"
+                                                id="export-select"
+                                                onChange={e => setChoosenExportFormat(e.target.value)}
+                                                value={choosen_export_format}
+                                                label="Export"
+                                                size="small"
+                                                fullWidth
+                                            >
+                                                {['.json', '.txt', '.html', '.pdf'].map((format) => {
+                                                    return (
+                                                        <MenuItem key={format} value={format}>{format}</MenuItem>
+                                                    )
+                                                })}
+                                            </Select>
+                                            <Button size="small" fullWidth variant="contained" onClick={handleExport} endIcon={<GetAppIcon />}>Export</Button>
+                                        </Stack>
+                                    </FormControl>
+
 
                                 </Box>
                             </Paper>

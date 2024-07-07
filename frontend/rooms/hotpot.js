@@ -40,7 +40,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 
 function Hotpot() {
     const ref = useRef();
-    const { websocket, agent_websocket, chat_websocket } = useContext(WebSocketContext);
+    const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [shownthinkingagent, setThinkingAgent] = useState(false);
     const [shownthinkingchat, setThinkingChat] = useState(false);
@@ -117,7 +117,6 @@ function Hotpot() {
     }, [agent_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    var url = window.location.pathname.split("/").filter(path => path !== "")
 
     useEffect(() => {
         if (websocket.current) {
@@ -126,39 +125,39 @@ function Hotpot() {
         if (agent_websocket.current) {
             agent_websocket.current.close()
         }
-        if (chat_websocket.current){
+        if (chat_websocket.current) {
             chat_websocket.current.close()
         }
-     
-        if (socket_destination == 'async') {
+        if (websocket_hash) {
+            if (socket_destination == 'async') {
+                Promise.all([
+                    agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer-async/' + websocket_hash + '/' + timeZone + '/'),
+                    chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat-async/' + websocket_hash + '/' + timeZone + '/')
+                ])
+            }
+            else {
+                Promise.all([
+                    agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + websocket_hash + '/' + timeZone + '/'),
+                    chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + websocket_hash + '/' + timeZone + '/')
+                ])
+            }
             Promise.all([
-                agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer-async/' + url[url.length - 1] + '/' + timeZone + '/'),
-                chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat-async/' + url[url.length - 1] + '/' + timeZone + '/')
+                chatsocket(
+                    chat_websocket,
+                    setChatMessage,
+                    setThinkingChat,
+                    document),
+                agentsocket(
+                    agent_websocket,
+                    setAgentMessage,
+                    setThinkingAgent,
+                    document,
+                    setParentInstruct,
+                    setChildInstruct,
+                    setDefaultChildTemplateList,)
             ])
         }
-        else {
-            Promise.all([
-                agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + url[url.length - 1] + '/' + timeZone + '/'),
-                chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + url[url.length - 1] + '/' + timeZone + '/')
-            ])
-        }
-        Promise.all([
-            chatsocket(
-                chat_websocket,
-                setChatMessage,
-                setThinkingChat,
-                document),
-            agentsocket(
-                agent_websocket,
-                setAgentMessage,
-                setThinkingAgent,
-                document,
-                setParentInstruct,
-                setChildInstruct,
-                setDefaultChildTemplateList,)
-        ])
-
-    }, [socket_destination]);
+    }, [socket_destination, websocket_hash]);
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
             e.preventDefault()
