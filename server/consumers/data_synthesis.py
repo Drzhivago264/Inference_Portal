@@ -2,7 +2,7 @@ import json
 import pytz
 import httpx
 import asyncio
-import random
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from pydantic import ValidationError
 from django.utils import timezone
@@ -12,7 +12,6 @@ from decouple import config
 
 from server.consumers.pydantic_validator import DataSynthesisSchema
 from server.utils.async_.async_query_database import QueryDBMixin
-from server.utils import constant
 from server.utils.async_.async_manage_ec2 import (
     ManageEC2Mixin,
     update_server_status_in_db_async
@@ -39,8 +38,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                         await update_server_status_in_db_async(
                             instance_id=instance_id, update_type="time")
                         if server_status == "running":
-                            tokeniser = AutoTokenizer.from_pretrained(
-                                constant.TOKENIZER_TABLE[self.choosen_model])
+                            tokeniser = AutoTokenizer.from_pretrained(llm.base)
                             processed_prompt = tokeniser.apply_chat_template(
                                 prompt_, tokenize=False)
                             processed_instruction_list.append(processed_prompt)

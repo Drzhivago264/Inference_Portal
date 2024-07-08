@@ -43,8 +43,6 @@ region = constant.REGION
 @shared_task
 def send_email_(subject: str, message: str, email_from: str, recipient_list: list) -> None:
     send_mail(subject, message, email_from, recipient_list)
-    return
-
 
 @shared_task
 def update_crypto_rate(coin: str):
@@ -279,8 +277,9 @@ def inference(unique: str,
                                     'unique': unique
                                 }
                             )
-                    log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=prompt,
-                                        response=full_response, type_=type_)
+                    if full_response and isinstance(full_response, str):
+                        log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=prompt,
+                                            response=full_response, type_=type_)
 
             elif server_status == "stopped" or "stopping":
                 command_EC2.delay(instance_id, region=region, action="on")
@@ -320,7 +319,7 @@ def inference(unique: str,
                                                   max_tokens=max_tokens,
                                                   temperature=temperature,
                                                   presence_penalty=presence_penalty)
-        if isinstance(clean_response, str):
+        if clean_response and isinstance(clean_response, str):
             log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=prompt,
                                 response=clean_response, type_="open_ai")
 
@@ -401,7 +400,7 @@ def agent_inference(key: str,
                                                    max_tokens=max_tokens,
                                                    temperature=temperature,
                                                    presence_penalty=presence_penalty)
-        if isinstance(clean_response, str):
+        if clean_response and isinstance(clean_response, str):
             log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=message,
                                 response=clean_response, type_="open_ai")
     else:

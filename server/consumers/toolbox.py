@@ -1,10 +1,9 @@
-
 import json
 import uuid
 import pytz
 import dspy
-import random
-from urllib.parse import urlsplit, urlunsplit
+
+from urllib.parse import urlsplit
 from pydantic import ValidationError
 from decouple import config
 from channels.generic.websocket import AsyncWebsocketConsumer

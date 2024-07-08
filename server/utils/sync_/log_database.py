@@ -1,11 +1,11 @@
 
 from django.utils import timezone
 from server.models import (
-                           PromptResponse,
-                           MemoryTree,
-                           LLM,
-                           APIKEY
-                           )
+    PromptResponse,
+    MemoryTree,
+    LLM,
+    APIKEY
+)
 from server.utils import constant
 from decouple import config
 from transformers import AutoTokenizer
@@ -16,6 +16,7 @@ logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
+
 
 def log_prompt_response(is_session_start_node: bool | None, key_object: APIKEY, llm: LLM, prompt: str, response: str, type_: str) -> None:
     """This function store log into a db then build a memory tree of chat history

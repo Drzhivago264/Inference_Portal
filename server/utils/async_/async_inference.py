@@ -94,7 +94,7 @@ class AsyncInferenceOpenaiMixin:
                         await self.send(text_data=json.dumps({"message": data, "role": self.choosen_model, "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
             self.session_history.append(
                 {"role": "assistant", "content": f"{clean_response}"})
-            if clean_response:
+            if clean_response and isinstance(clean_response, str):
                 await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message,
                                                                                 response=clean_response, type_="open_ai")
 
@@ -146,5 +146,5 @@ class AsyncInferenceOpenaiMixin:
                         ]
                         self.session_history.extend(prompt)
                         await self.send(text_data=json.dumps({"agent_action": action, "result_id": self.working_paragraph, "full_result": full_result}))
-            if clean_response:
+            if clean_response and isinstance(clean_response, str):
                 await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=clean_response, type_="open_ai")

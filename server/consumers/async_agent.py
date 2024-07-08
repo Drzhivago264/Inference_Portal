@@ -8,12 +8,10 @@ from pydantic import ValidationError
 from transformers import AutoTokenizer
 from django.utils import timezone
 
-from server.utils import constant
 from server.utils.async_.async_inference import (
     AsyncInferenceOpenaiMixin, 
     AsyncInferenceVllmMixin
 )
-
 from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
     AgentSchemaMessage,
