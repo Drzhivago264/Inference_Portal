@@ -68,7 +68,7 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 
 function Agent() {
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
-    const ref = useRef();
+
     const editorref = useRef();
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
@@ -117,7 +117,7 @@ function Agent() {
     };
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
-        if (!ref.current) {
+        if (!editorref.current) {
             const editor = new EditorJS({
                 holderId: 'editorjs',
                 tools: {
@@ -170,42 +170,44 @@ function Agent() {
         }
     }, []);
     useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/model'),
-            axios.get('/frontend-api/instruction-tree'),
-        ])
-            .then(axios.spread((model_object, instruction_object) => {
-                setAgents(model_object.data.models_agent);
-                setTemplateList(instruction_object.data.root_nodes)
-                setUserTemplateList(instruction_object.data.user_root_nodes)
-                if (instruction_object.data.user_root_nodes.length > 0) {
-                    setChoosenUserTemplate(instruction_object.data.user_root_nodes[0].displayed_name)
-                    setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
-                }
-                setChildInstruct(instruction_object.data.default_children[0].instruct)
-                if (instruction_object.data.default_user_children.length > 0) {
-                    setUserChildInstruct(instruction_object.data.default_user_children[0].instruct)
-                }
-                setDefaultChildTemplateList(instruction_object.data.default_children)
-                setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
+        if (editorref.current) {
+            axios.all([
+                axios.get('/frontend-api/model'),
+                axios.get('/frontend-api/instruction-tree'),
+            ])
+                .then(axios.spread((model_object, instruction_object) => {
+                    setAgents(model_object.data.models_agent);
+                    setTemplateList(instruction_object.data.root_nodes)
+                    setUserTemplateList(instruction_object.data.user_root_nodes)
+                    if (instruction_object.data.user_root_nodes.length > 0) {
+                        setChoosenUserTemplate(instruction_object.data.user_root_nodes[0].displayed_name)
+                        setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
+                    }
+                    setChildInstruct(instruction_object.data.default_children[0].instruct)
+                    if (instruction_object.data.default_user_children.length > 0) {
+                        setUserChildInstruct(instruction_object.data.default_user_children[0].instruct)
+                    }
+                    setDefaultChildTemplateList(instruction_object.data.default_children)
+                    setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
 
-                editorref.current.isReady
-                    .then(() => {
-                        for (var node in instruction_object.data.root_nodes) {
-                            if (instruction_object.data.root_nodes[node].name == choosen_template) {
-                                setParentInstruct(instruction_object.data.root_nodes[node].instruct)
-                                setEditor(JSON.parse(instruction_object.data.root_nodes[node].default_editor_template))
-                                editorref.current.render(JSON.parse(instruction_object.data.root_nodes[node].default_editor_template))
+                    editorref.current.isReady
+                        .then(() => {
+                            for (var node in instruction_object.data.root_nodes) {
+                                if (instruction_object.data.root_nodes[node].name == choosen_template) {
+                                    setParentInstruct(instruction_object.data.root_nodes[node].instruct)
+                                    setEditor(JSON.parse(instruction_object.data.root_nodes[node].default_editor_template))
+                                    editorref.current.render(JSON.parse(instruction_object.data.root_nodes[node].default_editor_template))
+                                }
                             }
-                        }
-                    })
-                    .catch((reason) => {
-                        console.log(`Editor.js initialization failed because of ${reason}`)
-                    });
-            }))
-            .catch(error => {
-                console.log(error);
-            });
+                        })
+                        .catch((reason) => {
+                            console.log(`Editor.js initialization failed because of ${reason}`)
+                        });
+                }))
+                .catch(error => {
+                    console.log(error);
+                });
+        }
     }, []);
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
@@ -249,23 +251,25 @@ function Agent() {
     }, [socket_destination, websocket_hash]);
 
     useEffect(() => {
-        agentsocket(
-            websocket,
-            setChatMessage,
-            setThinking,
-            document,
-            setParentInstruct,
-            setChildInstruct,
-            setDefaultChildTemplateList,
-            use_user_template,
-            setUserParentInstruct,
-            setUserChildInstruct,
-            setDefaultUserChildTemplateList,
-            setEditor,
-            setCurrentParagraph,
-            editorref
-        )
-    }, [use_user_template, default_user_child_instruct, default_user_parent_instruct, default_user_child_template_list]);
+        if (websocket.current) {
+            agentsocket(
+                websocket,
+                setChatMessage,
+                setThinking,
+                document,
+                setParentInstruct,
+                setChildInstruct,
+                setDefaultChildTemplateList,
+                use_user_template,
+                setUserParentInstruct,
+                setUserChildInstruct,
+                setDefaultUserChildTemplateList,
+                setEditor,
+                setCurrentParagraph,
+                editorref
+            )
+        }
+    }, [use_user_template, default_user_child_instruct, default_user_parent_instruct, default_user_child_template_list, editorref, websocket.current]);
 
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
