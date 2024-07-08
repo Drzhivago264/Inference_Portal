@@ -226,14 +226,12 @@ def inference(unique: str,
         best_of = 2
 
     llm = LLM.objects.get(name=model)
-
     url, instance_id, server_status = get_model_url(llm)
     processed_prompt = inference_mode(
-        model=model, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, agent_availability=llm.agent_availability)
+        llm=llm, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, include_current_memory=False, session_history=None)
 
     if llm.is_self_host:
-        tokeniser = AutoTokenizer.from_pretrained(
-            constant.TOKENIZER_TABLE[model])
+        tokeniser = AutoTokenizer.from_pretrained(llm.base)
         session_list_to_string = tokeniser.apply_chat_template(
             processed_prompt, tokenize=False)
         context = {
@@ -309,7 +307,6 @@ def inference(unique: str,
     else:
         client = OpenAI(api_key=config("GPT_KEY"),
                         timeout=constant.TIMEOUT, max_retries=constant.RETRY)
-        clean_response = ""
         clean_response = send_chat_request_openai(client=client,
                                                   session_history=processed_prompt,
                                                   model=model,
@@ -318,14 +315,14 @@ def inference(unique: str,
                                                   unique=unique,
                                                   stream=stream,
                                                   room_group_name=room_group_name,
-                                                  clean_response=clean_response,
                                                   frequency_penalty=frequency_penalty,
                                                   top_p=top_p,
                                                   max_tokens=max_tokens,
                                                   temperature=temperature,
                                                   presence_penalty=presence_penalty)
-        log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=prompt,
-                            response=clean_response, type_="open_ai")
+        if isinstance(clean_response, str):
+            log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=prompt,
+                                response=clean_response, type_="open_ai")
 
 
 @shared_task
@@ -372,7 +369,6 @@ def agent_inference(key: str,
                     timeout=constant.TIMEOUT, max_retries=constant.RETRY)
     key_object = APIKEY.objects.get(hashed_key=key)
     llm = LLM.objects.get(name=model)
-    clean_response = ""
     if current_turn_inner >= 0 and current_turn_inner <= (max_turns-1):
         if current_turn_inner == 0:
             prompt = [
@@ -400,14 +396,14 @@ def agent_inference(key: str,
                                                    current_turn_inner=current_turn_inner,
                                                    stream=stream,
                                                    room_group_name=room_group_name,
-                                                   clean_response=clean_response,
                                                    frequency_penalty=frequency_penalty,
                                                    top_p=top_p,
                                                    max_tokens=max_tokens,
                                                    temperature=temperature,
                                                    presence_penalty=presence_penalty)
-        log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=message,
-                            response=clean_response, type_="open_ai")
+        if isinstance(clean_response, str):
+            log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=message,
+                                response=clean_response, type_="open_ai")
     else:
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(

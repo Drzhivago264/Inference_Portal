@@ -37,11 +37,10 @@ def log_prompt_response(is_session_start_node: bool | None, key_object: APIKEY, 
         input_cost = number_input_token*llm.input_price
         output_cost = number_output_token*llm.output_price
     else:
-        tokeniser = constant.TOKENIZER_TABLE[llm.name]
         number_input_token = len(AutoTokenizer.from_pretrained(
-            tokeniser)(prompt)['input_ids'])
+            llm.base)(prompt)['input_ids'])
         number_output_token = len(AutoTokenizer.from_pretrained(
-            tokeniser)(response)['input_ids'])
+            llm.base)(response)['input_ids'])
         input_cost = number_input_token*llm.input_price
         output_cost = number_output_token*llm.output_price
 

@@ -7,46 +7,59 @@ from celery.utils.log import get_task_logger
 import openai
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from server.models import InferenceServer
+from server.models import (
+    InferenceServer,
+    LLM
+)
 from server.utils import constant
 from server.utils.sync_.query_database import get_chat_context
 from server.models import APIKEY
+from transformers import AutoTokenizer
+
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
-def inference_mode(model: str, key_object: APIKEY,  mode: str, prompt: str, include_memory: bool, agent_availability: bool) -> str | list:
+
+def inference_mode(llm: LLM, key_object: APIKEY,  mode: str, prompt: str, include_memory: bool, include_current_memory: bool, session_history: list | None) -> str | list:
+    try:
+        tokeniser = AutoTokenizer.from_pretrained(llm.base) if llm.is_self_host else tiktoken.encoding_for_model(llm.name)
+    except KeyError:
+        tokeniser = tiktoken.encoding_for_model("gpt-4")
     if mode == "chat":
         prompt_ = {"role": "user", "content": f"{prompt}"}
-        if include_memory:
-            try:
-                tokeniser = tiktoken.encoding_for_model(model)
-            except:
-                tokeniser = tiktoken.encoding_for_model("gpt-4")
+        if include_current_memory:
+            session_list_to_string = tokeniser.apply_chat_template(
+                session_history, tokenize=False) if llm.is_self_host else session_history
+        elif include_memory:
             current_history_length = len(tokeniser.encode(prompt))
-            chat_history = get_chat_context(model=model,
+            chat_history = get_chat_context(llm=llm,
                                             key_object=key_object,
                                             raw_prompt=prompt,
-                                            agent_availability=agent_availability,
                                             current_history_length=current_history_length,
                                             tokeniser=tokeniser)
             chat_history.append(prompt_)
-            return chat_history
+            session_list_to_string = tokeniser.apply_chat_template(
+                chat_history, tokenize=False) if llm.is_self_host else chat_history
         else:
-            return [prompt_]
+            session_list_to_string = tokeniser.apply_chat_template(
+                [prompt_], tokenize=False) if llm.is_self_host else [prompt_]
+        return session_list_to_string
     elif mode == "generate":
         prompt_ = [
             {"role": "system", "content": "Complete the following sentence"},
             {"role": "user", "content": f"{prompt}"},
         ]
-        return prompt_
+        session_list_to_string = tokeniser.apply_chat_template(
+            prompt_, tokenize=False) if llm.is_self_host else prompt_
+        return session_list_to_string
 
 
 def send_request(stream: bool, url: str, instance_id: str, context: dict) -> str:
     try:
         response = requests.post(
-                url,  json=context,  stream=stream, timeout=constant.TIMEOUT)
+            url,  json=context,  stream=stream, timeout=constant.TIMEOUT)
         if not stream:
             response = response.json()['text'][0]
     except requests.exceptions.Timeout:
@@ -78,15 +91,14 @@ def send_chat_request_openai(stream: bool,
                              credit: float,
                              room_group_name: str,
                              client: object,
-                             clean_response: str,
                              max_tokens: int | None,
                              frequency_penalty: float,
                              temperature: float,
                              top_p: float,
                              presence_penalty: float) -> str:
-
+    clean_response = ""
+    channel_layer = get_channel_layer()
     try:
-        channel_layer = get_channel_layer()
         raw_response = client.chat.completions.create(model=choosen_model,
                                                       messages=session_history,
                                                       stream=stream,
@@ -124,7 +136,7 @@ def send_chat_request_openai(stream: bool,
                 'unique': unique,
             }
         )
-        return e
+
     except openai.RateLimitError as e:
         async_to_sync(channel_layer.group_send)(
             room_group_name,
@@ -136,7 +148,7 @@ def send_chat_request_openai(stream: bool,
                 'unique': unique,
             }
         )
-        return e
+
     except openai.APIError as e:
         async_to_sync(channel_layer.group_send)(
             room_group_name,
@@ -148,7 +160,6 @@ def send_chat_request_openai(stream: bool,
                 'unique': unique,
             }
         )
-        return e
 
 
 def send_agent_request_openai(stream: bool,
@@ -160,13 +171,12 @@ def send_agent_request_openai(stream: bool,
                               credit: float,
                               room_group_name: str,
                               client: object,
-                              clean_response: str,
                               max_tokens: int,
                               frequency_penalty: float,
                               temperature: float,
                               top_p: float,
                               presence_penalty: float) -> str:
-
+    clean_response = ""
     channel_layer = get_channel_layer()
     try:
         raw_response = client.chat.completions.create(model=choosen_model,
@@ -229,7 +239,7 @@ def send_agent_request_openai(stream: bool,
                 "current_turn": current_turn_inner
             }
         )
-        return e
+
     except openai.RateLimitError as e:
         async_to_sync(channel_layer.group_send)(
             room_group_name,
@@ -243,7 +253,7 @@ def send_agent_request_openai(stream: bool,
                 "current_turn": current_turn_inner
             }
         )
-        return e
+
     except openai.APIError as e:
         async_to_sync(channel_layer.group_send)(
             room_group_name,
@@ -257,12 +267,3 @@ def send_agent_request_openai(stream: bool,
                 "current_turn": current_turn_inner
             }
         )
-        return e
-
-
-
-
-
-
-
-

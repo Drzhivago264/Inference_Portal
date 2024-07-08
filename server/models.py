@@ -56,6 +56,7 @@ class LLM(models.Model):
     agent_availability = models.BooleanField(default=False)
     is_self_host = models.BooleanField(default=True)
     context_length = models.IntegerField(default=4096)
+    max_history_length = models.IntegerField(default=0)
     def __str__(self) -> str:
         return self.name
 
