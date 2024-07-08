@@ -28,7 +28,7 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                 try:
                     async with client.stream('POST', url, json=context) as response:
                         response.raise_for_status()
-                        full_response = ""
+                        full_response = str()
                         async for chunk in response.aiter_text():
                             if (chunk):
                                 chunk = chunk[:-1]
@@ -40,6 +40,8 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                                 except json.decoder.JSONDecodeError:
                                     pass
                                 full_response = output
+                    if full_response and isinstance(full_response, str):
+                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=full_response, type_="self_host_agent")
                 
                 except httpx.TimeoutException:
                     await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
@@ -47,9 +49,6 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                     await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
                 except httpx.HTTPError as e:
                     await self.send(text_data=json.dumps({"message": "You messed up the parameter! Return to default", "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-
-                if isinstance(output, str):
-                    await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=output, type_="self_host_agent")
             else:
                 await self.manage_ec2_on_inference(server_status, instance_id)
         else:

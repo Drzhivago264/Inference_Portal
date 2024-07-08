@@ -2,7 +2,6 @@ import json
 import uuid
 import pytz
 
-from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from pydantic import ValidationError
@@ -10,11 +9,11 @@ from transformers import AutoTokenizer
 from django.utils import timezone
 
 from server.utils import constant
-from server.utils.async_.async_inference import AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin
-from server.models import (
-    InstructionTree,
-    UserInstructionTree
+from server.utils.async_.async_inference import (
+    AsyncInferenceOpenaiMixin, 
+    AsyncInferenceVllmMixin
 )
+
 from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
     AgentSchemaMessage,
@@ -48,8 +47,7 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
                 if not llm.is_self_host:
                     await self.send_agent_request_openai_async(llm=llm)
                 else:
-                    tokeniser = AutoTokenizer.from_pretrained(
-                        constant.TOKENIZER_TABLE[self.choosen_model])
+                    tokeniser = AutoTokenizer.from_pretrained(llm.base)
                     session_list_to_string = tokeniser.apply_chat_template(
                         self.session_history, tokenize=False)
                     context = {
@@ -70,34 +68,6 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
             self.current_turn = 0
             await self.send(text_data=json.dumps({"message": "Max Turns reached",  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
             await self.send(text_data=json.dumps({"message": f"Reseting working memory", "role": "Server", "time": self.time}))
-
-
-    async def get_template(self, name, template_type):
-        try:
-            if template_type == 'system':
-                template = await InstructionTree.objects.aget(name=name)
-            elif template_type == 'user_template':
-                template = await UserInstructionTree.objects.aget(displayed_name=name, user=self.user)
-            return template
-        except InstructionTree.DoesNotExist or UserInstructionTree.DoesNotExist:
-            return False
-
-    @database_sync_to_async
-    def get_child_template_list(self, template, template_type="system"):
-        try:
-            if template_type == 'system':
-                child_template = InstructionTree.objects.get(
-                    name=template).get_leafnodes()
-                return {"name_list": [c.name for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
-            elif template_type == 'user_template':
-                child_template = UserInstructionTree.objects.get(
-                    displayed_name=template.displayed_name).get_leafnodes()
-                if len(child_template) > 0:
-                    return {"name_list": [c.displayed_name for c in child_template], "default_child": child_template[0].displayed_name, "default_instruct": child_template[0].instruct}
-                else:
-                    return {"name_list": [], "default_child": "", "default_instruct": ""}
-        except Exception as e:
-            return e
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]

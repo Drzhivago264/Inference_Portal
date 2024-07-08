@@ -16,24 +16,8 @@ SYSTEM_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that descr
                           "Reddit Helper 2.7B": "",
                           "Llama 3 Instruct AWQ": "You are a helpful AI assistant that needs to answer people questions"}
 
-TOKENIZER_TABLE = {
-    "Mistral Chat 13B": "TheBloke/Amethyst-13B-Mistral-AWQ",
-    "Llama 2  Chat 13B": "TheBloke/Llama-2-13B-chat-AWQ",
-    "4Chan /Pol 2.7B": "EleutherAI/gpt-neo-2.7B",
-    "Reddit Helper 2.7B": "EleutherAI/gpt-neo-2.7B",
-    "Llama 3 Instruct AWQ": "casperhansen/llama-3-8b-instruct-awq"
-}
-MAX_HISTORY_LENGTH = {
-    "Mistral Chat 13B": 3000,
-    "Llama 2  Chat 13B": 3000,
-    "4Chan /Pol 2.7B": 100,
-    "Reddit Helper 2.7B": 100,
-    "openai": 4096,
-    "Llama 3 Instruct AWQ": 4096
-}
 
-OPEN_AI_MODEL_LIST = ['gpt-4', 'gpt-3.5-turbo-0125',
-                      'gpt-3.5-turbo-instruct', 'gpt-4-0125-preview']
+
 DEFAULT_TOP_P = 0.73
 DEFAULT_BEST_OF = 1
 DEFAULT_TOP_K = -1

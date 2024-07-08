@@ -1,7 +1,13 @@
 import json
 import uuid
-from channels.db import database_sync_to_async
+import pytz
+import regex as re
+from pydantic import ValidationError
+from asgiref.sync import sync_to_async
+from django.utils import timezone
+
 from channels.generic.websocket import AsyncWebsocketConsumer
+
 from server.celery_tasks import agent_inference
 from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
@@ -9,45 +15,9 @@ from server.consumers.pydantic_validator import (
     AgentSchemaParagraph,
     AgentSchemaTemplate,
 )
-from server.models import (
-                           InstructionTree,
-                           UserInstructionTree
-)
-import regex as re
-from pydantic import ValidationError
-from asgiref.sync import sync_to_async
-import pytz
-from django.utils import timezone
+from server.utils.async_.async_query_database import QueryDBMixin
 
-
-class Consumer(AsyncWebsocketConsumer):
-
-    async def get_template(self, name, template_type):
-        try:
-            if template_type == 'system':
-                template = await InstructionTree.objects.aget(name=name)
-            elif template_type == 'user_template':
-                template = await UserInstructionTree.objects.aget(displayed_name=name, user=self.user)
-            return template
-        except InstructionTree.DoesNotExist or UserInstructionTree.DoesNotExist:
-            return False
-
-    @database_sync_to_async
-    def get_child_template_list(self, template, template_type="system"):
-        try:
-            if template_type == 'system':
-                child_template = InstructionTree.objects.get(
-                    name=template).get_leafnodes()
-                return {"name_list": [c.name for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
-            elif template_type == 'user_template':
-                child_template = UserInstructionTree.objects.get(
-                    displayed_name=template.displayed_name).get_leafnodes()
-                if len(child_template) > 0: 
-                    return {"name_list": [c.displayed_name for c in child_template], "default_child": child_template[0].displayed_name, "default_instruct": child_template[0].instruct}
-                else:
-                    return {"name_list": [], "default_child": "", "default_instruct": ""}
-        except Exception as e:
-            return e
+class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]

@@ -14,7 +14,9 @@ from asgiref.sync import sync_to_async
 from transformers import AutoTokenizer
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+
 class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin, QueryDBMixin):
+
     async def inference(self):
         if not self.beam:
             self.best_of = 1
@@ -23,17 +25,10 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
 
         llm = await self.get_model()
         if llm:
-            if not self.include_current_memory:
-                processed_prompt = await sync_to_async(inference_mode, thread_sensitive=True)(
-                    model=self.choosen_model, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, agent_availability=llm.agent_availability)
-            else:
-                processed_prompt = self.session_history
+            session_list_to_string = await sync_to_async(inference_mode, thread_sensitive=True)(
+                llm=llm, key_object=self.key_object, mode=self.mode, prompt=self.message, include_memory=self.include_memory, include_current_memory=self.include_current_memory, session_history=self.session_history)
 
-            if llm.is_self_host:
-                tokeniser = AutoTokenizer.from_pretrained(
-                    constant.TOKENIZER_TABLE[self.choosen_model])
-                session_list_to_string = tokeniser.apply_chat_template(
-                    processed_prompt, tokenize=False)
+            if llm.is_self_host:   
                 context = {
                     "prompt": session_list_to_string,
                     "n": 1,
@@ -51,14 +46,15 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
                 }
                 await self.send_vllm_request_async(llm=llm, context=context)
             else:
-                await self.send_chat_request_openai_async(processed_prompt, llm)
+                await self.send_chat_request_openai_async(processed_prompt=session_list_to_string, llm=llm)
         else:
             await self.send(text_data=json.dumps({"message": "Cannot find the choosen model",  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(
+            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
         self.session_history = []
@@ -101,7 +97,8 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
                 self.include_current_memory = validated.include_current_memory
                 self.role = validated.role
                 self.unique_response_id = str(uuid.uuid4())
-                self.session_history.append({"role": "user", "content": f"{validated.message}"})
+                self.session_history.append(
+                    {"role": "user", "content": f"{validated.message}"})
                 # Send message to room group
                 await self.channel_layer.group_send(
                     self.room_group_name, {"type": "chat_message",
@@ -122,7 +119,8 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
     async def chat_message(self, event):
         message = event["message"]
         role = event["role"]
-        self.time = timezone.localtime(timezone.now(), pytz.timezone(self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = timezone.localtime(timezone.now(), pytz.timezone(
+            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         # Send message to WebSocket
         if role == "Human" or role == "Server":
             credit = self.key_object.credit
