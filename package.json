@@ -55,7 +55,6 @@
     "@mui/x-date-pickers": "^6.20.0",
     "@mui/x-tree-view": "^7.4.0",
     "add": "^2.0.6",
-    "aws-rum-web": "^1.17.2",
     "axios": "^1.6.8",
     "babel-plugin-prismjs": "^2.1.0",
     "chart.js": "^4.4.3",

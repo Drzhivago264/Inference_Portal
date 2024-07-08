@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { FormControl, FormLabel } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import Radio from '@mui/material/Radio';
@@ -86,46 +86,50 @@ export const ChatParameter = ({
     }
     return (
 
-        <Stack direction='column' spacing={1}>
-            <FormControl defaultValue="">
-                <InputLabel id="model-label">Models</InputLabel>
-                <Select
-                    labelId="model-label"
-                    id="model-select"
-                    onChange={e => setChoosenModel(e.target.value)}
-                    value={choosen_model}
-                    label="Models"
-                    size="small"
-                >
-                    {model_objects.map((model_object_) => {
-                        return (
-                            <MenuItem key={model_object_.name} value={model_object_.name}>{model_object_.name}</MenuItem>
-                        )
-                    })}
-                    {agent_objects.map((agent_object_) => {
-                        return (
-                            <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
-                        )
-                    })}
-                </Select>
-            </FormControl>
-            <Divider></Divider>
-            <FormControl defaultValue="">
-                <InputLabel id="model-label">Backends</InputLabel>
-                <Select
-                    labelId="socket-label"
-                    id="socket-select"
-                    onChange={e => setSocketDestination(e.target.value)}
-                    value={socket_destination}
-                    label="Backends"
-                    size="small"
-                >
-                    <MenuItem key={"/ws/chat/"} value={"/ws/chat/"}>Celery Backend</MenuItem>
-                    <MenuItem key={"/ws/chat-async/"} value={"/ws/chat-async/"}>Async Backend</MenuItem>
-                </Select>
-            </FormControl>
-            <Divider></Divider>
+        <Stack direction='column' spacing={0}>
+            <Stack direction='column' spacing={1}>
+                <FormControl defaultValue="">
+                    <InputLabel id="model-label">Models</InputLabel>
+                    <Select
+                        labelId="model-label"
+                        id="model-select"
+                        onChange={e => setChoosenModel(e.target.value)}
+                        value={choosen_model}
+                        label="Models"
+                        size="small"
+                    >
+                        {model_objects.map((model_object_) => {
+                            return (
+                                <MenuItem key={model_object_.name} value={model_object_.name}>{model_object_.name}</MenuItem>
+                            )
+                        })}
+                        {agent_objects.map((agent_object_) => {
+                            return (
+                                <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
+                            )
+                        })}
+                    </Select>
+                </FormControl>
+
+                <FormControl defaultValue="">
+                    <InputLabel id="model-label">Backends</InputLabel>
+                    <Select
+                        labelId="socket-label"
+                        id="socket-select"
+                        onChange={e => setSocketDestination(e.target.value)}
+                        value={socket_destination}
+                        label="Backends"
+                        size="small"
+                    >
+                        <MenuItem key={"/ws/chat/"} value={"/ws/chat/"}>Celery Backend</MenuItem>
+                        <MenuItem key={"/ws/chat-async/"} value={"/ws/chat-async/"}>Async Backend</MenuItem>
+                    </Select>
+                </FormControl>
+  
+            </Stack>
+            <Box mt={1}>
             <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
+            </Box>
             <Stack direction='row' spacing={1}>
                 <FormControlLabel control={<Switch checked={usememory} onChange={e => toggleMemory(e.target.checked, "usememory")} />} label="Use Memory (All)" />
 
@@ -159,7 +163,7 @@ export const ChatParameter = ({
             >
                 <FormControlLabel key="chat" value='chat' control={<Radio size="small" />} label="Chat Bot Mode" />
                 <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Text Completion" />
-                <Divider></Divider>
+
 
             </RadioGroup>
             <Stack direction="row" spacing={1}>
@@ -408,7 +412,6 @@ export const ChatParameter = ({
                 value={frequencypenalty}
                 valueLabelDisplay="off"
             />
-            <Divider></Divider>
             <Stack direction="row" spacing={1}>
                 <FormControlLabel control={<Switch
                     onChange={e => setBeam(e.target.checked)}

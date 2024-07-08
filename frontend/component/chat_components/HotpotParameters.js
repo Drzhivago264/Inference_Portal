@@ -93,81 +93,85 @@ export const HotpotParameter = ({
         }
     }
     return (
-        <Stack direction='column' spacing={1}>
-            <FormControl defaultValue="">
-                <InputLabel id="model-label">Backends</InputLabel>
-                <Select
-                    labelId="socket-label"
-                    id="socket-select"
-                    onChange={e => setSocketDestination(e.target.value)}
-                    value={socket_destination}
-                    label="Backends"
-                    size="small"
-                >
-                    <MenuItem key={"none_async"} value={"none_async"}>Celery Backend</MenuItem>
-                    <MenuItem key={"async"} value={"async"}>Async Backend</MenuItem>
-                </Select>
-            </FormControl>
-            <FormControl  >
-                <InputLabel id="model-label">Chat Models</InputLabel>
-                <Select
-                    labelId="model-label"
-                    id="model-select"
-                    onChange={e => setChoosenChatModel(e.target.value)}
-                    value={choosen_chat_model}
-                    label="Models"
-                    size="small"
-                >
-                    {agent_objects.map((agent_object_) => {
-                        return (
-                            <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
-                        )
-                    })}
-                    {model_objects.map((model_object_) => {
-                        return (
-                            <MenuItem key={model_object_.name} value={model_object_.name}>{model_object_.name}</MenuItem>
-                        )
-                    })}
-                </Select>
-            </FormControl>
-            <FormControl  >
-                <InputLabel id="model-label">Agent Models</InputLabel>
-                <Select
-                    labelId="model-label"
-                    id="model-select"
-                    onChange={e => setChoosenAgentModel(e.target.value)}
-                    value={choosen_agent_model}
-                    label="Models"
-                    size="small"
-                >
-                    {agent_objects.map((agent_object_) => {
-                        return (
-                            <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
-                        )
-                    })}
-                </Select>
-            </FormControl>
-            <FormControl >
-                <InputLabel id="agent-label">Agents</InputLabel>
-                <Select
-                    labelId="agent-label"
-                    id="agent-select"
-                    onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value) }}
-                    value={choosen_template}
-                    label="Agents"
-                    size="small"
-                >
-                    {template_list.map((template) => {
-                        return (
-                            <MenuItem key={template.name} value={template.name}>{template.name}</MenuItem>
-                        )
-                    })}
-                </Select>
-            </FormControl>
-
-            <Divider></Divider>
-            <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
-            <FormControlLabel control={<Switch defaultChecked onChange={e => setDuplicateMessage(e.target.checked)} />} label="Duplicate Message" />
+        <Stack direction='column' spacing={0}>
+            <Stack direction='column' spacing={1}>
+                <FormControl defaultValue="">
+                    <InputLabel id="model-label">Backends</InputLabel>
+                    <Select
+                        labelId="socket-label"
+                        id="socket-select"
+                        onChange={e => setSocketDestination(e.target.value)}
+                        value={socket_destination}
+                        label="Backends"
+                        size="small"
+                    >
+                        <MenuItem key={"none_async"} value={"none_async"}>Celery Backend</MenuItem>
+                        <MenuItem key={"async"} value={"async"}>Async Backend</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl  >
+                    <InputLabel id="model-label">Chat Models</InputLabel>
+                    <Select
+                        labelId="model-label"
+                        id="model-select"
+                        onChange={e => setChoosenChatModel(e.target.value)}
+                        value={choosen_chat_model}
+                        label="Models"
+                        size="small"
+                    >
+                        {agent_objects.map((agent_object_) => {
+                            return (
+                                <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
+                            )
+                        })}
+                        {model_objects.map((model_object_) => {
+                            return (
+                                <MenuItem key={model_object_.name} value={model_object_.name}>{model_object_.name}</MenuItem>
+                            )
+                        })}
+                    </Select>
+                </FormControl>
+                <FormControl  >
+                    <InputLabel id="model-label">Agent Models</InputLabel>
+                    <Select
+                        labelId="model-label"
+                        id="model-select"
+                        onChange={e => setChoosenAgentModel(e.target.value)}
+                        value={choosen_agent_model}
+                        label="Models"
+                        size="small"
+                    >
+                        {agent_objects.map((agent_object_) => {
+                            return (
+                                <MenuItem key={agent_object_.name} value={agent_object_.name}>{agent_object_.name}</MenuItem>
+                            )
+                        })}
+                    </Select>
+                </FormControl>
+                <FormControl >
+                    <InputLabel id="agent-label">Agents</InputLabel>
+                    <Select
+                        labelId="agent-label"
+                        id="agent-select"
+                        onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value) }}
+                        value={choosen_template}
+                        label="Agents"
+                        size="small"
+                    >
+                        {template_list.map((template) => {
+                            return (
+                                <MenuItem key={template.name} value={template.name}>{template.name}</MenuItem>
+                            )
+                        })}
+                    </Select>
+                </FormControl>
+            </Stack>
+            <Box mt={1}>
+                <FormLabel id="demo-radio-buttons-group-label">Parameters</FormLabel>
+            </Box>
+            <Box ml={1}>
+                <FormControlLabel control={<Switch defaultChecked onChange={e => setDuplicateMessage(e.target.checked)} />} label="Duplicate Message" />
+            </Box>
             <Stack direction='row' spacing={1}>
                 <FormControlLabel control={<Switch checked={usememory} onChange={e => toggleMemory(e.target.checked, "usememory")} />} label="Use Memory (All)" />
                 <Box>
