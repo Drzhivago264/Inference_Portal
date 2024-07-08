@@ -27,30 +27,7 @@ const Login = lazy(() => import("./key_management/login.js"))
 const UserInstruction = lazy(() => import("./rooms/user_instruction.js"))
 const CostMonitoring = lazy(() => import("./key_management/cost_monitoring.js"))
 const DataSynthesis = lazy(() => import("./rooms/data_synthesis.js"))
-import { AwsRum } from 'aws-rum-web';
-try {
-  const config = {
-    sessionSampleRate: 1,
-    identityPoolId: "us-east-1:ac9263b5-0bbc-43fe-821d-f424ca28d40e",
-    endpoint: "https://dataplane.rum.us-east-1.amazonaws.com",
-    telemetries: ["performance"],
-    allowCookies: true,
-    enableXRay: false
-  };
 
-  const APPLICATION_ID = 'cd3bf393-dc5f-41d0-bbde-2f0997d4a45a';
-  const APPLICATION_VERSION = '1.0.0';
-  const APPLICATION_REGION = 'us-east-1';
-
-  const awsRum = new AwsRum(
-    APPLICATION_ID,
-    APPLICATION_VERSION,
-    APPLICATION_REGION,
-    config
-  );
-} catch (error) {
-  // Ignore errors thrown during CloudWatch RUM web client initialization
-}
 
 export const ColorModeContext = createContext({ toggleColorMode: () => { } });
 export const UserContext = createContext();

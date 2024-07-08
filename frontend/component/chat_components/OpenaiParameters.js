@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { FormControl, FormLabel } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import Radio from '@mui/material/Radio';
@@ -53,7 +53,7 @@ export const OpenAPIParameter = ({
     setMaxTurn }) => {
     const { t, i18n } = useTranslation();
     return (
-        <Stack direction='column' spacing={1}>
+        <Stack direction='column' spacing={0}>
             <FormControl  >
                 <InputLabel id="model-label">Models</InputLabel>
                 <Select
@@ -71,8 +71,9 @@ export const OpenAPIParameter = ({
                     })}
                 </Select>
             </FormControl>
-            <Divider></Divider>
-            <FormLabel >Parameters</FormLabel>
+            <Box mt={1}>
+                <FormLabel >Parameters</FormLabel>
+            </Box>
             {max_turn &&
                 <Box><Stack direction="row" spacing={1}>
                     <Typography style={{ flex: 1 }} gutterBottom>Max_turns
