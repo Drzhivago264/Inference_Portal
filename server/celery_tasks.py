@@ -225,13 +225,10 @@ def inference(unique: str,
 
     llm = LLM.objects.get(name=model)
     url, instance_id, server_status = get_model_url(llm)
-    processed_prompt = inference_mode(
+    session_list_to_string = inference_mode(
         llm=llm, key_object=key_object, mode=mode, prompt=prompt, include_memory=include_memory, include_current_memory=False, session_history=None)
 
     if llm.is_self_host:
-        tokeniser = AutoTokenizer.from_pretrained(llm.base)
-        session_list_to_string = tokeniser.apply_chat_template(
-            processed_prompt, tokenize=False)
         context = {
             "prompt": session_list_to_string,
             "n": 1,
@@ -307,7 +304,7 @@ def inference(unique: str,
         client = OpenAI(api_key=config("GPT_KEY"),
                         timeout=constant.TIMEOUT, max_retries=constant.RETRY)
         clean_response = send_chat_request_openai(client=client,
-                                                  session_history=processed_prompt,
+                                                  session_history=session_list_to_string,
                                                   model=model,
                                                   choosen_model=model,
                                                   credit=credit,
