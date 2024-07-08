@@ -1,13 +1,14 @@
 import json
 import uuid
+import pytz
+from pydantic import ValidationError
+from django.utils import timezone
+from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server.celery_tasks import inference
 from server.utils import constant
 from server.consumers.pydantic_validator import ChatSchema
-from pydantic import ValidationError
-import pytz
-from django.utils import timezone
-from asgiref.sync import sync_to_async
+
 
 class Consumer(AsyncWebsocketConsumer):
 
