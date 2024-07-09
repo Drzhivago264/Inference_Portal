@@ -1,0 +1,2 @@
+/*! © SpryMedia Ltd - datatables.net/license */
+import jQuery from"jquery";import DataTable from"datatables.net";let $=jQuery;DataTable.intlOrder=function(e,t){var r;window.Intl&&(r=new Intl.Collator(e,t),delete(e=DataTable.ext.type).order["string-pre"],e.order["string-asc"]=r.compare,e.order["string-desc"]=function(e,t){return-1*r.compare(e,t)})},DataTable.ext.type.order.intl=DataTable.intlOrder;export default DataTable;

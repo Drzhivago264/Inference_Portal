@@ -17,6 +17,7 @@ from server.utils.async_.async_manage_ec2 import (
     ManageEC2Mixin,
     update_server_status_in_db_async
 )
+from server.celery_tasks import celery_log_prompt_response
 
 
 class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
@@ -28,7 +29,10 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                 [
                     {"role": "system",
                      "content": self.parent_instruction + "\n" +
-                     child_instruction['default'] + "\n" +
+                     child_instruction['default'] + "\n"
+                     },
+                    {"role": "user",
+                     "content":  "#Given Prompt#:\n" +
                      self.seed_prompt + "\n" +
                      self.optional_instruction}
                 ]
@@ -73,6 +77,8 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                                 if r.status_code == 200:
                                     response_list.append(r.json()['text'][0].replace(
                                         processed_instruction_list[index], ""))
+                                    celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=self.key_object.id, llm_id=llm.id, prompt=processed_instruction_list[index],
+                                    response=r.json()['choices'][0]['message']['content'], type_="data_synthesis")
                                 elif r.status_code == 429:
                                     response_list.append(
                                         "Too many requests, slow down")
@@ -105,14 +111,14 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                     tasks = [client.post(url, json=context, headers=headers)
                              for context in context_list]
                     result = await asyncio.gather(*tasks)
-                    print("--- %s seconds ---" %
-                          (time.time() - start_time))
                     self.time = timezone.localtime(timezone.now(), pytz.timezone(
                         self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
                     for index, r in enumerate(result):
                         if r.status_code == 200:
                             response_list.append(
                                 r.json()['choices'][0]['message']['content'])
+                            celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=self.key_object.id, llm_id=llm.id, prompt=processed_instruction_list[index][0]['content'] + processed_instruction_list[index][1]['content'],
+                                                             response=r.json()['choices'][0]['message']['content'], type_="data_synthesis")
                         elif r.status_code == 429:
                             response_list.append(
                                 "Too many requests, slow down")

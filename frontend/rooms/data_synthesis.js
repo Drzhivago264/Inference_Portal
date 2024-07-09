@@ -32,8 +32,6 @@ import {
     DataGrid, useGridApiContext,
     GridCellEditStopReasons,
 } from '@mui/x-data-grid';
-import Popper from '@mui/material/Popper';
-import InputBase from '@mui/material/InputBase';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -43,80 +41,12 @@ import { DatasetExport } from '../component/import_export/datasetExport.js';
 import { file } from 'jszip';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { isKeyboardEvent, multilineColumn } from '../component/MultipleLineEdittingDataGrid.js';
 
 const ChatInput = styled(TextField)(({ theme }) => ({
     width: '100%',
     ...theme.typography.body2,
 }));
-
-function isKeyboardEvent(event) {
-    return !!event.key;
-}
-
-function EditTextarea(props) {
-
-    const { id, field, value, colDef, hasFocus } = props;
-    const [valueState, setValueState] = useState(value);
-    const [anchorEl, setAnchorEl] = useState();
-    const [inputRef, setInputRef] = useState(null);
-    const apiRef = useGridApiContext();
-
-    useLayoutEffect(() => {
-        if (hasFocus && inputRef) {
-            inputRef.focus();
-        }
-    }, [hasFocus, inputRef]);
-
-    const handleRef = useCallback((el) => {
-        setAnchorEl(el);
-    }, []);
-
-    const handleChange = useCallback(
-        (event) => {
-            const newValue = event.target.value;
-            setValueState(newValue);
-            apiRef.current.setEditCellValue(
-                { id, field, value: newValue, debounceMs: 200 },
-                event,
-            );
-        },
-        [apiRef, field, id],
-    );
-
-    return (
-        <div style={{ position: 'relative', alignSelf: 'flex-start' }}>
-            <div
-                ref={handleRef}
-                style={{
-                    height: 1,
-                    width: colDef.computedWidth,
-                    display: 'block',
-                    position: 'absolute',
-                    top: 0,
-                }}
-            />
-            {anchorEl && (
-                <Popper open anchorEl={anchorEl} placement="bottom-start">
-                    <Paper elevation={1} sx={{ p: 1, minWidth: colDef.computedWidth }}>
-                        <InputBase
-                            multiline
-                            rows={4}
-                            value={valueState}
-                            sx={{ textarea: { resize: 'both' }, width: '100%' }}
-                            onChange={handleChange}
-                            inputRef={(ref) => setInputRef(ref)}
-                        />
-                    </Paper>
-                </Popper>
-            )}
-        </div>
-    );
-}
-
-const multilineColumn = {
-    type: 'string',
-    renderEditCell: (params) => <EditTextarea {...params} />,
-};
 
 function DataSynthesis() {
     const ref = useRef();
@@ -137,7 +67,7 @@ function DataSynthesis() {
     const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
     const [filename, setFileName] = useState("No file loaded")
     const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Writer, you need to rewrite a given prompt following the instruction to produce a more complex version, you must directly provide the #Rewritten Prompt# and must not repeat the #Given Prompt#. You cannot omit the non-text parts such as the table and code in #Given Prompt#.\nInstruction:\n");
-    const [default_extra_instruct, setExtraInstruct] = useState("Do not make #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#.You must not repeat the #Given Prompt#.\n#Given Prompt#:")
+    const [default_extra_instruct, setExtraInstruct] = useState("Do not make #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#. You must not repeat the #Given Prompt#, #Given Prompt# must not appear in your answer.")
 
     const [default_child_instruct_list, setDefaultChildInstructList] = useState([
         { label: "Translating", default: "The #Rewritten Prompt# must be written in Vietnamese." },
@@ -157,10 +87,6 @@ function DataSynthesis() {
         { id: 4, samplePrompt: 'In this task, you are given an open-domain question. Your task is to provide an answer to the given question. There is only one unique answer for each question. Your answer should be short, and refer to an entity, date, number, etc. Do not put your answer in the context of a sentence. Who played chewbacca in the original star wars movies?' },
         { id: 5, samplePrompt: 'Given a statement and question, generate the answer to the question such that the answer is contained in the statement. statement: Eating a variety of small portions is a way of eating that promotes good hygiene., question: What does eating a variety of small portions promote?' },
         { id: 6, samplePrompt: 'Two analogies that relate actions to the tools used to perform the action is given in the form "A : B. C : ?". "A : B" relates action A to tool B. Your task is to replace the question mark (?) with the appropriate tool for the given action C, following the "A : B" relation. vacuum : vacuum. drill : ?' },
-        { id: 7, samplePrompt: 'In this task, you are given two simple actions (associated with "A", "B"). You must identify which action is considered less ethical. Do not generate anything else apart from one of the following characters: "A", "B". (A) ditching a messy group (B) doing greasy strategies in Super Smash brothers' },
-        { id: 8, samplePrompt: 'In this task, you need to provide the correct option for a given problem on probability from the provided options. Problem: there is a 50 % chance jen will visit chile this year , while there is a 50 % chance that she will visit madagascar this year . what is the probability that jen will visit either chile or madagascar this year , but not both ? Options: a ) 25.0 % , b ) 50.0 % , c ) 62.5 % , d ) 75.0 % , e ) 80.0 %' },
-        { id: 9, samplePrompt: 'The town lies along the stretch of coastline designated as Gold Beach during the D-Day landings , one of the beaches used by British troops in the allied invasion. Arromanches was selected as one of the sites for two Mulberry Harbours built on the Normandy coast, the other one built further West at Omaha Beach. Based on that paragraph can we conclude that the sentence below is true? The Normandy landings took place in June 1944. OPTIONS: - yes - no' },
-        { id: 10, samplePrompt: "Here's a problem to solve: Newton's work in physics helped to provide mathematical explanations for the earlier conclusions of which scientist? Among the 4 following options, which is the correct answer? - A: Ptolemy - B: Aristotle - C: Nicolas Copernicus - D: Dmitri Mendeleev" },
     ]);
     const row_ref = useRef(csv_row)
     const [from_row, setFromRow] = useState(0)
@@ -175,7 +101,8 @@ function DataSynthesis() {
             headerName: 'Sample Prompts',
             width: 350,
             editable: true,
-            disableColumnMenu: true
+            disableColumnMenu: true,
+            ...multilineColumn,
         }
     ]);
     const handleFileLoad = (csvData) => {
@@ -570,8 +497,7 @@ function DataSynthesis() {
                                 </OpenAPIParameter>
                                 <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
                                     <AlertTitle>Note: </AlertTitle>
-                                    {`Async Backend is the preferred backend that supports newest features. \n
-                                    Interview Agent only works on Async Backend.`}
+                                    {`Celery Backend is deprecated, Async Backend supports newest features.`}
                                 </Alert>
                             </Stack>
                         </Grid>

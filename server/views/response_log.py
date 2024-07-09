@@ -11,11 +11,12 @@ from rest_framework import status
 from server.models import PromptResponse
 
 class LogListJson(BaseDatatableView):
-    columns = ['id', 'prompt', 'response',
+    columns = ['prompt', 'response',
                'model.name', 'created_at', 'p_type', 'input_cost', 'output_cost', 'number_input_tokens', 'number_output_tokens']
-    order_columns = ['id', 'prompt', 'response',
+    order_columns = ['prompt', 'response',
                      'model.name', 'created_at', 'p_type', 'input_cost', 'output_cost', 'number_input_tokens', 'number_output_tokens']
     max_display_length = 500
+
 
     def get_initial_queryset(self):
         user = self.request.user
