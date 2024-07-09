@@ -28,7 +28,6 @@ function Log() {
     const tableRef = useRef()
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
-        var url = window.location.pathname.split("/").filter(path => path !== "")
         $.fn.dataTable.ext.errMode = () => alert('You need to login before viewing log!');
         const table = $(tableRef.current).DataTable(
             {
@@ -39,9 +38,8 @@ function Log() {
                     }
                 },
                 columns: [
-                    { title: "No." },
-                    { title: "Prompts" },
-                    { title: "Response" },
+                    { title: "Prompts", width: '30%' },
+                    { title: "Response", width: '30%' },
                     { title: "Models" },
                     { title: "Created Time" },
                     { title: "Type" },

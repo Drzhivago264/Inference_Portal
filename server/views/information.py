@@ -1,5 +1,4 @@
 from hashlib import sha256
-import datetime
 
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login

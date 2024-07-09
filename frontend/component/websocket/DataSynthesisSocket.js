@@ -1,3 +1,4 @@
+import { multilineColumn } from "../MultipleLineEdittingDataGrid";
 
 export function datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref) {
 
@@ -25,6 +26,7 @@ export function datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmi
                             width: 350,
                             disableColumnMenu: true,
                             editable: true,
+                            ...multilineColumn
                         })
 
                         response_list[`Evolved_Prompt_No_${i}`] = dataFromServer['response_list'][i]

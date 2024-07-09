@@ -1,11 +1,10 @@
 import random
-from decouple import config
-from django.db.models.query import QuerySet
-from celery.utils.log import get_task_logger
 from vectordb import vectordb
 from typing import Tuple
 
+from django.db.models.query import QuerySet
 from django.core.cache import cache
+
 from server.models import (
     InferenceServer,
     LLM,
@@ -14,10 +13,6 @@ from server.models import (
 from server.utils import constant
 
 
-logger = get_task_logger(__name__)
-aws = config("aws_access_key_id")
-aws_secret = config("aws_secret_access_key")
-region = constant.REGION
 
 
 def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:

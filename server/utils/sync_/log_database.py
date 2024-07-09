@@ -1,21 +1,15 @@
+import tiktoken
+from vectordb import vectordb
+from transformers import AutoTokenizer
 
 from django.utils import timezone
+
 from server.models import (
     PromptResponse,
     MemoryTree,
     LLM,
     APIKEY
 )
-from server.utils import constant
-from decouple import config
-from transformers import AutoTokenizer
-import tiktoken
-from celery.utils.log import get_task_logger
-from vectordb import vectordb
-logger = get_task_logger(__name__)
-aws = config("aws_access_key_id")
-aws_secret = config("aws_secret_access_key")
-region = constant.REGION
 
 
 def log_prompt_response(is_session_start_node: bool | None, key_object: APIKEY, llm: LLM, prompt: str, response: str, type_: str) -> None:

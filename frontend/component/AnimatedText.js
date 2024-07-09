@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TypeAnimation } from 'react-type-animation';
-const VisibilitySensor = require('react-visibility-sensor');
 
 export const TypeWriterText = ({
 	sequence,

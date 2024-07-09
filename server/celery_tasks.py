@@ -1,7 +1,9 @@
-import random
+
 import requests
 import json
+import tiktoken
 
+from vectordb import vectordb
 from transformers import AutoTokenizer
 from asgiref.sync import async_to_sync
 
@@ -27,12 +29,16 @@ from server.utils import constant
 from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.query_database import get_model_url
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
+from django.utils import timezone
 from server.models import (
     InferenceServer,
-    LLM,
-    APIKEY,
     Crypto,
+    PromptResponse,
+    MemoryTree,
+    LLM,
+    APIKEY
 )
+
 
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
@@ -43,6 +49,71 @@ region = constant.REGION
 @shared_task
 def send_email_(subject: str, message: str, email_from: str, recipient_list: list) -> None:
     send_mail(subject, message, email_from, recipient_list)
+
+@shared_task
+def celery_log_prompt_response(is_session_start_node: bool | None, key_object_id: int, llm_id: int, prompt: str, response: str, type_: str) -> None:
+    """This function store log into a db then build a memory tree of chat history
+    Args:
+        is_session_start_node (bool | None): _description_
+        key_object (object): _description_
+        model (str): _description_
+        prompt (str): _description_
+        response (str): _description_
+        type_ (str): _description_
+    """
+    llm = LLM.objects.get(id=llm_id)
+    key_object = APIKEY.objects.get(id=key_object_id)
+    if not llm.is_self_host:
+        try:
+            tokeniser = tiktoken.encoding_for_model(llm.name)
+        except KeyError:
+            tokeniser = tiktoken.encoding_for_model("gpt-4")
+        number_input_token = len(tokeniser.encode(prompt))
+        number_output_token = len(tokeniser.encode(response))
+        input_cost = number_input_token*llm.input_price
+        output_cost = number_output_token*llm.output_price
+    else:
+        number_input_token = len(AutoTokenizer.from_pretrained(
+            llm.base)(prompt)['input_ids'])
+        number_output_token = len(AutoTokenizer.from_pretrained(
+            llm.base)(response)['input_ids'])
+        input_cost = number_input_token*llm.input_price
+        output_cost = number_output_token*llm.output_price
+
+    pair_save = PromptResponse(
+        prompt=prompt,
+        response=response,
+        key=key_object,
+        model=llm,
+        p_type=type_,
+        number_input_tokens=number_input_token,
+        number_output_tokens=number_output_token,
+        input_cost=input_cost,
+        output_cost=output_cost
+    )
+    pair_save.save()
+    if is_session_start_node is not None:
+        memory_tree_node_number = MemoryTree.objects.filter(
+            key=key_object).count()
+        if memory_tree_node_number == 0:
+            MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt,
+                                      response=response, model=llm, p_type=type_, is_session_start_node=True)
+
+        elif memory_tree_node_number > 0 and is_session_start_node:
+            most_similar_vector = vectordb.filter(
+                metadata__key=key_object.hashed_key).search(prompt+response, k=2)
+            most_similar_prompt = most_similar_vector[1].content_object.prompt
+            most_similar_response = most_similar_vector[1].content_object.response
+            most_similar_node = MemoryTree.objects.filter(
+                key=key_object, prompt=most_similar_prompt, response=most_similar_response).order_by("-created_at")[0]
+            MemoryTree.objects.create(name=f"{prompt} -- session_start_at {timezone.now()}", parent=most_similar_node,
+                                      key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
+
+        elif memory_tree_node_number > 0 and not is_session_start_node:
+            parent_node = MemoryTree.objects.filter(
+                key=key_object, is_session_start_node=True).latest('created_at')
+            MemoryTree.objects.create(name=f"{prompt} -- child_node_added_at {timezone.now()}", parent=parent_node,
+                                      key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)
 
 @shared_task
 def update_crypto_rate(coin: str):
@@ -167,7 +238,7 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
             ec2.reboot_instances(InstanceIds=[instance_id], DryRun=False)
         except ClientError as e:
             return e
-        return
+    
 
 
 @shared_task
