@@ -136,8 +136,8 @@ function DataSynthesis() {
     const [instruct_change, setInstructChange] = useState(false)
     const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
     const [filename, setFileName] = useState("No file loaded")
-    const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Rewriter.\nYour objective is to rewrite a given prompt into a more complex version to create a diverse training dataset. The rewritten prompt must be reasonable and must be understood and responded by humans. Your rewriting cannot omit the non-text parts such as the table and code in #Given Prompt#.");
-    const [default_extra_instruct, setExtraInstruct] = useState("Do not make #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#.\n#Given Prompt#:")
+    const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Writer, you need to rewrite a given prompt following the instruction to produce a more complex version, you must directly provide the #Rewritten Prompt# and must not repeat the #Given Prompt#. You cannot omit the non-text parts such as the table and code in #Given Prompt#.\nInstruction:\n");
+    const [default_extra_instruct, setExtraInstruct] = useState("Do not make #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#.You must not repeat the #Given Prompt#.\n#Given Prompt#:")
 
     const [default_child_instruct_list, setDefaultChildInstructList] = useState([
         { label: "Translating", default: "The #Rewritten Prompt# must be written in Vietnamese." },
