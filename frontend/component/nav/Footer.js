@@ -1,16 +1,17 @@
 import * as React from 'react';
+
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import FacebookIcon from '@mui/icons-material/GitHub';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import FacebookIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import Stack from '@mui/material/Stack';
 import TwitterIcon from '@mui/icons-material/X';
-import { useTranslation } from 'react-i18next';
-import i18next from "i18next";
+import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
 function Copyright() {
 
     return (
@@ -22,7 +23,7 @@ function Copyright() {
     );
 }
 export default function Footer() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const navigate = useNavigate()
     return (
         <Container maxWidth="xl"

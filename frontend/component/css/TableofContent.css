@@ -27,14 +27,12 @@ h3 {
 }
 
 a {
-    color: grey;
     text-decoration: none;
 }
 
-li.active>a {
-    color: white;
-}
-
-li>a:hover {
-    color: white;
-}
+ul {
+    list-style-type: none;
+    margin-left:15px;
+    padding-left:15px;
+  }
+  

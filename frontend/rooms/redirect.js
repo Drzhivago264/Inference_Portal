@@ -1,39 +1,35 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
-import Grid from '@mui/material/Grid';
+import { Link, useNavigate } from "react-router-dom";
+import React, { useContext, useState } from 'react';
+
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import KeyIcon from '@mui/icons-material/Key';
-import InputAdornment from '@mui/material/InputAdornment';
-import ResponsiveAppBar from '../component/nav/Navbar.js';
-import { Link, useNavigate } from "react-router-dom";
-import { FormControl, FormLabel } from '@mui/material';
-import Alert from '@mui/material/Alert';
-import LoginIcon from '@mui/icons-material/Login';
-import Typography from '@mui/material/Typography';
-import { useTranslation } from 'react-i18next';
 import Divider from '@mui/material/Divider';
 import Footer from '../component/nav/Footer.js';
-import { UserContext } from '../App.js'
-import { getCookie } from '../component/getCookie.js';
-import Skeleton from '@mui/material/Skeleton';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import { CardActionArea, CardActions, Button } from '@mui/material';
+import { FormControl } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import InputAdornment from '@mui/material/InputAdornment';
+import KeyIcon from '@mui/icons-material/Key';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { useTheme } from "@mui/material";
-import useMediaQuery from '@mui/material/useMediaQuery';
-import Snackbar from '@mui/material/Snackbar';
+import LoginIcon from '@mui/icons-material/Login';
 import { RedirectMediaCards } from '../component/RedirectMediaCard.js';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import Snackbar from '@mui/material/Snackbar';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { UserContext } from '../App.js'
+import axios from 'axios';
+import { getCookie } from '../component/getCookie.js';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 
 function Hub() {
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     const theme = useTheme();
     const check_orientation = useMediaQuery(theme.breakpoints.down("md")) ? "horizontal" : "vertical";
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);

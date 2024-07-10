@@ -1,57 +1,60 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import axios from 'axios';
-import Box from '@mui/material/Box';
-import { FormControl } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
-import InputLabel from '@mui/material/InputLabel';
-import edjsParser from "editorjs-parser"
-import * as pdfMake from 'pdfmake/build/pdfmake.min';
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
-import Container from '@mui/material/Container';
-import InputAdornment from '@mui/material/InputAdornment';
-import List from '@mui/material/List';
-import ListItemText from '@mui/material/ListItemText';
-import TextField from '@mui/material/TextField';
-import Divider from '@mui/material/Divider';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItem from '@mui/material/ListItem';
-import ResponsiveAppBar from '../component/nav/Navbar.js';
-import EditorJS from "@editorjs/editorjs";
-import Header from "@editorjs/header";
-import Quote from "@editorjs/quote"
-import Paragraph from "@editorjs/paragraph"
-import Underline from "@editorjs/underline"
-const EditorList = require("@editorjs/list");
-import InlineCode from '@editorjs/inline-code';
-const Table = require('editorjs-table');
-const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
-import editorjsCodecup from '@calumk/editorjs-codecup';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
-import { ChatBox } from '../component/chat_components/Chatbox.js';
-import { agentsocket } from '../component/websocket/AgentSocket.js';
 import '../component/css/editor-js.css';
-import { ChatExport } from '../component/import_export/chatExport.js';
-import Footer from '../component/nav/Footer.js';
+
+import * as pdfMake from 'pdfmake/build/pdfmake.min';
+
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { UserContext, WebSocketContext } from '../App.js'
+
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import FormHelperText from '@mui/material/FormHelperText';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import { ChatBox } from '../component/chat_components/Chatbox.js';
+import { ChatExport } from '../component/import_export/chatExport.js';
+import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import EditorJS from "@editorjs/editorjs";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Footer from '../component/nav/Footer.js';
+import { FormControl } from '@mui/material';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormHelperText from '@mui/material/FormHelperText';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import Grid from '@mui/material/Grid';
+import Header from "@editorjs/header";
+import InlineCode from '@editorjs/inline-code';
+import InputAdornment from '@mui/material/InputAdornment';
+import InputLabel from '@mui/material/InputLabel';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import MenuItem from '@mui/material/MenuItem';
+import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
+import Paper from '@mui/material/Paper';
+import Paragraph from "@editorjs/paragraph"
+import Quote from "@editorjs/quote"
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import Select from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Underline from "@editorjs/underline"
+import { agentsocket } from '../component/websocket/AgentSocket.js';
+import axios from 'axios';
+import editorjsCodecup from '@calumk/editorjs-codecup';
+import edjsParser from "editorjs-parser"
+import pdfFonts from "pdfmake/build/vfs_fonts";
 import { redirect_anon_to_login } from '../component/checkLogin.js';
+import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
-import { UserContext, WebSocketContext } from '../App.js'
+
+const EditorList = require("@editorjs/list");
+const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
 const { convert } = require('html-to-text');
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -103,7 +106,7 @@ function Agent() {
     const [default_user_child_instruct, setUserChildInstruct] = useState("");
     const [selectedIndex, setSelectedIndex] = React.useState(0);
     const navigate = useNavigate();
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const { is_authenticated } = useContext(UserContext);
 
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);

@@ -1,22 +1,21 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-
 import Backend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import contactEN from './public/locales/en/contact.json'
+import contactVI from './public/locales/vi/contact.json'
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
 import introJsonEN from './public/locales/en/introduction.json'
 import introJsonVI from './public/locales/vi/introduction.json'
-import navbarEN from './public/locales/en/navbar.json'
-import navbarVI from './public/locales/vi/navbar.json'
 import keymanagementEN from './public/locales/en/key_management.json'
 import keymanagementVI from './public/locales/vi/key_management.json'
 import manualEN from './public/locales/en/manual.json'
 import manualVI from './public/locales/vi/manual.json'
-import contactEN from './public/locales/en/contact.json'
-import contactVI from './public/locales/vi/contact.json'
+import navbarEN from './public/locales/en/navbar.json'
+import navbarVI from './public/locales/vi/navbar.json'
+import parameterexplainEN from './public/locales/en/parameter_explain.json'
+import parameterexplainVI from './public/locales/vi/parameter_explain.json'
 import redirectEN from './public/locales/en/redirect.json'
 import redirectVI from './public/locales/vi/redirect.json'
-import parameterexplainVI from './public/locales/vi/parameter_explain.json'
-import parameterexplainEN from './public/locales/en/parameter_explain.json'
 
 const resources = {
   en: {

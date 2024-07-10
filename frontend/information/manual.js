@@ -1,36 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Grid from '@mui/material/Grid';
+import { Highlight, themes } from 'prism-react-renderer';
+import { MuiMarkdown, getOverrides } from 'mui-markdown';
+import React, { useEffect, useState } from 'react';
+
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import ResponsiveAppBar from '../component/nav/Navbar';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import { Link } from "react-router-dom";
 import Divider from '@mui/material/Divider';
+import Footer from '../component/nav/Footer';
+import Grid from '@mui/material/Grid';
+import { Link } from "react-router-dom";
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import authentication_en from '../../docs/Manual/en/authentication_en.md'
-import behavior_en from '../../docs/Manual/en/behavior_en.md'
-import key_en from '../../docs/Manual/en/create_key_en.md'
-import errorlimit_en from '../../docs/Manual/en/error_ratelimit_en.md'
-import inference_en from '../../docs/Manual/en/inference_en.md'
-import authentication_vi from '../../docs/Manual/vi/authentication_vi.md'
-import behavior_vi from '../../docs/Manual/vi/behavior_vi.md'
-import key_vi from '../../docs/Manual/vi/create_key_vi.md'
-import errorlimit_vi from '../../docs/Manual/vi/error_ratelimit_vi.md'
-import inference_vi from '../../docs/Manual/vi/inference_vi.md'
-import { useTranslation } from 'react-i18next';
-import { MuiMarkdown, getOverrides } from 'mui-markdown';
-import { Highlight, themes } from 'prism-react-renderer';
-import { useParams } from 'react-router';
-import Prism from "prismjs";
-import Footer from '../component/nav/Footer';
-import i18next from "i18next";
-import { useQuery } from "react-query";
-import Skeleton from '@mui/material/Skeleton';
-import Alert from '@mui/material/Alert';
-import TableOfContents from '../component/TableofContent';
 import Paper from '@mui/material/Paper';
+import Prism from "prismjs";
+import ResponsiveAppBar from '../component/nav/Navbar';
+import Skeleton from '@mui/material/Skeleton';
+import TableOfContents from '../component/TableofContent';
+import Typography from '@mui/material/Typography';
+import authentication_en from '../../docs/Manual/en/authentication_en.md'
+import authentication_vi from '../../docs/Manual/vi/authentication_vi.md'
+import axios from 'axios';
+import behavior_en from '../../docs/Manual/en/behavior_en.md'
+import behavior_vi from '../../docs/Manual/vi/behavior_vi.md'
+import errorlimit_en from '../../docs/Manual/en/error_ratelimit_en.md'
+import errorlimit_vi from '../../docs/Manual/vi/error_ratelimit_vi.md'
+import i18next from "i18next";
+import inference_en from '../../docs/Manual/en/inference_en.md'
+import inference_vi from '../../docs/Manual/vi/inference_vi.md'
+import key_en from '../../docs/Manual/en/create_key_en.md'
+import key_vi from '../../docs/Manual/vi/create_key_vi.md'
+import { useParams } from 'react-router';
+import { useQuery } from "react-query";
+import { useTranslation } from 'react-i18next';
 
 const retrieveManual = async (destination_refs, doc, default_language) => {
     const response = await axios.get(

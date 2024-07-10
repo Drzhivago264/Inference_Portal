@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { TypeAnimation } from 'react-type-animation';
 
 export const TypeWriterText = ({

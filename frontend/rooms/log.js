@@ -1,26 +1,29 @@
-
-import $ from 'jquery'
-
-import React, { useEffect, useRef, useState, useContext } from "react"
-import Container from '@mui/material/Container';
-import ResponsiveAppBar from '../component/nav/Navbar.js';
-import Footer from '../component/nav/Footer.js';
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import * as pdfMake from 'pdfmake/build/pdfmake.min';
-import JSZip from 'jszip';
-window.JSZip = JSZip;
-import Box from '@mui/material/Box';
 import 'datatables.net-buttons-dt';
 import 'datatables.net-buttons/js/buttons.colVis.mjs';
-import Paper from '@mui/material/Paper';
 import 'datatables.net-buttons/js/buttons.html5.mjs';
 import 'datatables.net-buttons/js/buttons.print.mjs';
+
+import * as pdfMake from 'pdfmake/build/pdfmake.min';
+
+import React, { useContext, useEffect, useRef } from "react"
+
+import $ from 'jquery'
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Footer from '../component/nav/Footer.js';
+import JSZip from 'jszip';
+import Paper from '@mui/material/Paper';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import { UserContext } from '../App.js'
+import pdfFonts from "pdfmake/build/vfs_fonts";
+import { redirect_anon_to_login } from '../component/checkLogin.js';
+import { useNavigate } from "react-router-dom";
+
+window.JSZip = JSZip;
 require('../component/css/dataTables.dataTables.css')
 require('../component/css/buttons.dataTables.css')
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
-import { redirect_anon_to_login } from '../component/checkLogin.js';
-import { useNavigate } from "react-router-dom";
-import { UserContext } from '../App.js'
+
 function Log() {
     const navigate = useNavigate();
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);

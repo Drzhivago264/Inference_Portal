@@ -1,8 +1,11 @@
+import './i18n';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
-import App from './App';
-import './i18n';
+
 import { QueryClient, QueryClientProvider } from "react-query";
+
+import App from './App';
 
 const queryClient = new QueryClient();
 

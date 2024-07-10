@@ -1,26 +1,27 @@
-import React, { useState, useEffect, useRef, useMemo, useContext } from 'react';
-import axios from 'axios';
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { UserContext, WebSocketContext } from '../App.js'
+
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
-import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from '../component/nav/Navbar.js';
-import { ChatParameter } from '../component/chat_components/ChatroomParameters.js';
+import Box from '@mui/material/Box';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
-import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { ChatExport } from '../component/import_export/chatExport.js';
-import Footer from '../component/nav/Footer.js';
-import { Typography } from '@mui/material';
+import { ChatParameter } from '../component/chat_components/ChatroomParameters.js';
+import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
+import Footer from '../component/nav/Footer.js';
+import Grid from '@mui/material/Grid';
 import { MemoryTree } from '../component/chat_components/MemoryTree.js';
+import Paper from '@mui/material/Paper';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import { Typography } from '@mui/material';
+import axios from 'axios';
+import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
+import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
-import { UserContext, WebSocketContext } from '../App.js'
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 550,
@@ -61,14 +62,14 @@ function Chat() {
     const [socket_destination, setSocketDestination] = useState("/ws/chat-async/");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const navigate = useNavigate();
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const { is_authenticated} = useContext(UserContext);
 
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
         axios.all([
             axios.get('/frontend-api/model'),
         ])
-            .then(axios.spread((model_object, memory_object) => {
+            .then(axios.spread((model_object) => {
                 setModels(model_object.data.models_bot);
                 setAgents(model_object.data.models_agent);
 
@@ -164,10 +165,12 @@ function Chat() {
                                         </ChatExport>
                                     </Box>
                                 </Paper>
-                                <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
-                                    <AlertTitle>Note: </AlertTitle>
-                                    {`Celery Backend is deprecated, Async Backend supports newest features.`}
-                                </Alert>
+                                <Box mt={2}>
+                                    <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
+                                        <AlertTitle>Note: </AlertTitle>
+                                        {`Celery Backend is deprecated, Async Backend supports newest features.`}
+                                    </Alert>
+                                </Box>
                             </Stack>
 
 

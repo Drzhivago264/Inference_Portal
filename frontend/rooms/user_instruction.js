@@ -1,41 +1,42 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import axios from 'axios';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
-import ResponsiveAppBar from '../component/nav/Navbar.js';
-import Footer from '../component/nav/Footer.js';
 import { Divider, List, Typography } from '@mui/material';
-import Alert from '@mui/material/Alert';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import IconButton from '@mui/material/IconButton';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { UserContext, WebSocketContext } from '../App.js'
+
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import FormControl from '@mui/material/FormControl';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import { ChatBox } from '../component/chat_components/Chatbox.js';
+import Checkbox from '@mui/material/Checkbox';
+import Container from '@mui/material/Container';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
-import Stack from '@mui/material/Stack';
-import SaveIcon from '@mui/icons-material/Save';
+import FolderIcon from '@mui/icons-material/Folder';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import Footer from '../component/nav/Footer.js';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import FolderIcon from '@mui/icons-material/Folder';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import { getCookie } from '../component/getCookie';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Snackbar from '@mui/material/Snackbar';
-import { nanoid } from 'nanoid'
-import { ChatBox } from '../component/chat_components/Chatbox.js';
-import { styled } from '@mui/material/styles';
-import { agentsocket } from '../component/websocket/AgentSocket';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
-import { UserContext, WebSocketContext } from '../App.js'
+import Paper from '@mui/material/Paper';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import SaveIcon from '@mui/icons-material/Save';
+import Snackbar from '@mui/material/Snackbar';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import { agentsocket } from '../component/websocket/AgentSocket';
+import axios from 'axios';
+import { getCookie } from '../component/getCookie';
+import { nanoid } from 'nanoid'
 import { redirect_anon_to_login } from '../component/checkLogin.js';
+import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 500,
