@@ -1,22 +1,56 @@
 import { multilineColumn } from "../MultipleLineEdittingDataGrid";
+import dayjs from 'dayjs'
 
-export function datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref) {
+export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref) {
 
     websocket.current.onopen = () => {
-        console.log("WebSocket  Connected");
+        setChatMessage(chat_message => [
+            ...chat_message,
+            {
+                holder: "",
+                holderid: "",
+                role: "Server",
+                time: dayjs().format('mm:ss'),
+                credit: "",
+                message: "Websocket Connected",
+                status: ""
+            },
+        ]);
     };
     websocket.current.onclose = () => {
-        console.log("WebSocket  Disconnected");
+        setChatMessage(chat_message => [
+            ...chat_message,
+            {
+                holder: "",
+                holderid: "",
+                role: "Server",
+                time: dayjs().format('mm:ss'),
+                credit: "",
+                message: "Websocket Disconnected",
+                status: ""
+            },
+        ]);
     };
     websocket.current.onmessage = (message) => {
         const dataFromServer = JSON.parse(message.data);
         if (dataFromServer['role'] == "Server") {
-
+            setChatMessage(chat_message => [
+                ...chat_message,
+                {
+                    holder: dataFromServer.holder,
+                    holderid: dataFromServer.holderid,
+                    role: dataFromServer.role,
+                    time: dataFromServer.time,
+                    credit: dataFromServer.credit,
+                    message: dataFromServer.message,
+                    status: dataFromServer.status
+                },
+            ])
         }
         else {
             var response_list = {}
             var additional_column = []
-
+            console.log(dataFromServer)
             if (dataFromServer['response_list'].length > 0) {
                 for (var i = 0; i < dataFromServer['response_list'].length; i++) {
                     if (!column_ref.current.hasOwnProperty(`Evolved_Prompt_No_${i}`)) {
@@ -32,7 +66,6 @@ export function datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmi
                         response_list[`Evolved_Prompt_No_${i}`] = dataFromServer['response_list'][i]
                     }
                 }
-
                 if (response_list != column_ref.current && additional_column.length > 0) {
                     setCSVColumn([
                         ...column_ref.current,
@@ -40,14 +73,11 @@ export function datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmi
                     ]
                     )
                 }
-
                 const new_csv_row = row_ref.current.map(row => {
-                    console.log(row.id, dataFromServer['row_no'])
                     if (row.id === dataFromServer['row_no']) {
                         console.log({ ...row, ...response_list })
                         return { ...row, ...response_list };
                     } else {
-
                         return row;
                     }
                 }

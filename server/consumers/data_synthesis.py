@@ -2,7 +2,6 @@ import json
 import pytz
 import httpx
 import asyncio
-import time
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from pydantic import ValidationError
@@ -38,7 +37,6 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                 ]
                 for child_instruction in self.child_instruction_list
             ]
-
             if llm.is_self_host:
                 url, instance_id, server_status = await self.get_model_url_async()
                 if url:
@@ -51,7 +49,6 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                                 prompt_, tokenize=False)
                             for prompt_ in processed_instruction_list
                         ]
-
                         context_list = [
                             {
                                 "prompt": processed_instruction,
@@ -68,31 +65,40 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                         async with httpx.AsyncClient(timeout=120) as client:
                             tasks = [client.post(url, json=context, headers=headers)
                                      for context in context_list]
-
                             result = await asyncio.gather(*tasks)
-                            self.time = timezone.localtime(timezone.now(), pytz.timezone(
-                                self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-
                             for index, r in enumerate(result):
                                 if r.status_code == 200:
                                     response_list.append(r.json()['text'][0].replace(
                                         processed_instruction_list[index], ""))
-                                    celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=self.key_object.id, llm_id=llm.id, prompt=processed_instruction_list[index],
-                                    response=r.json()['choices'][0]['message']['content'], type_="data_synthesis")
+                                    await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}", 
+                                                                          "role": "Server", 
+                                                                          "time": self.time, 
+                                                                          "status": f"{r.status_code} Success"}))
+                                    celery_log_prompt_response.delay(is_session_start_node=None, 
+                                                                     key_object_id=self.key_object.id, 
+                                                                     llm_id=llm.id, 
+                                                                     prompt=processed_instruction_list[index],
+                                                                     response=r.json()['choices'][0]['message']['content'], 
+                                                                     type_="data_synthesis")
                                 elif r.status_code == 429:
                                     response_list.append(
                                         "Too many requests, slow down")
-                            await self.send(text_data=json.dumps({"response_list": response_list, "role": self.choosen_model, "time": self.time, "row_no": self.row_no}))
+                                    await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}",
+                                                                           "role": "Server", 
+                                                                           "time": self.time, 
+                                                                           "status": f"{r.status_code} Failed-Too many request" }))
+                            await self.send(text_data=json.dumps({"response_list": response_list, 
+                                                                  "role": self.choosen_model, 
+                                                                  "time": self.time, 
+                                                                  "row_no": self.row_no}))
                     else:
                         await self.manage_ec2_on_inference(server_status, instance_id)
                 else:
                     await self.send(text_data=json.dumps({"message": f"Model is currently offline", "role": "Server", "time": self.time}))
-
             else:
                 headers = {'Content-Type': 'application/json',
                            "Authorization": f'Bearer {config("GPT_KEY")}'}
                 url = "https://api.openai.com/v1/chat/completions"
-
                 context_list = [
                     {
                         "model": self.choosen_model,
@@ -105,39 +111,45 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                     }
                     for processed_instruction in processed_instruction_list
                 ]
-                start_time = time.time()
                 response_list = list()
                 async with httpx.AsyncClient(timeout=120) as client:
                     tasks = [client.post(url, json=context, headers=headers)
                              for context in context_list]
                     result = await asyncio.gather(*tasks)
-                    self.time = timezone.localtime(timezone.now(), pytz.timezone(
-                        self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
                     for index, r in enumerate(result):
                         if r.status_code == 200:
                             response_list.append(
                                 r.json()['choices'][0]['message']['content'])
+                            await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}", 
+                                                                  "role": "Server", 
+                                                                  "time": self.time, 
+                                                                  "status": f"{r.status_code} Success"}))
                             celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=self.key_object.id, llm_id=llm.id, prompt=processed_instruction_list[index][0]['content'] + processed_instruction_list[index][1]['content'],
                                                              response=r.json()['choices'][0]['message']['content'], type_="data_synthesis")
                         elif r.status_code == 429:
                             response_list.append(
                                 "Too many requests, slow down")
+                            await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}", 
+                                                                  "role": "Server",
+                                                                  "time": self.time, 
+                                                                  "status": f"{r.status_code} Failed-Too many request" }))
                     await self.send(text_data=json.dumps({"response_list": response_list, "role": self.choosen_model, "time": self.time, "row_no": self.row_no}))
         else:
-            await self.send(text_data=json.dumps({"message": f"Cannot find the choosen model", "role": "Server", "time": self.time}))
+            await self.send(text_data=json.dumps({"message": f"Cannot find the choosen model",
+                                                   "role": "Server", 
+                                                   "time": self.time}))
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
         self.time = timezone.localtime(timezone.now(), pytz.timezone(
-            self.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            self.timezone)).strftime('%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        await self.send(text_data=json.dumps({"message": f"Connected", "role": "Server", "time": self.time}))
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)

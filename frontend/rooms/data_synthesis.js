@@ -38,10 +38,10 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
 import { DatasetExport } from '../component/import_export/datasetExport.js';
-import { file } from 'jszip';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { isKeyboardEvent, multilineColumn } from '../component/MultipleLineEdittingDataGrid.js';
+import { LogBox } from '../component/chat_components/LogBox.js';
 
 const ChatInput = styled(TextField)(({ theme }) => ({
     width: '100%',
@@ -49,8 +49,9 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function DataSynthesis() {
-    const ref = useRef();
+
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
+    const [chat_message, setChatMessage] = useState([]);
     const messagesEndRef = useRef(null)
     const [choosen_prompt_column, setChoosenPromptColumn] = useState("samplePrompt");
     const [agent_objects, setAgents] = useState([]);
@@ -107,7 +108,6 @@ function DataSynthesis() {
     ]);
     const handleFileLoad = (csvData) => {
         setCSVRow(csvData);
-
         if (csvData[0]) {
             var keys = Object.keys(csvData[0])
             var column = []
@@ -122,7 +122,6 @@ function DataSynthesis() {
             setCSVColumn(column)
             setChoosenPromptColumn(keys[1])
         }
-
     };
 
     const navigate = useNavigate();
@@ -158,8 +157,6 @@ function DataSynthesis() {
         }
     }, [socket_destination, websocket_hash]);
 
-
-
     useEffect(() => {
         row_ref.current = csv_row
     }, [csv_row]);
@@ -175,12 +172,11 @@ function DataSynthesis() {
 
     useEffect(() => {
         if (websocket_hash) {
-            datasynthesissocket(websocket, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref)
+            datasynthesissocket(websocket, setChatMessage, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref)
         }
     }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref, choosen_model, choosen_prompt_column, websocket_hash]);
 
     const submitSeed = (seed_prompt, row_no) => {
-
         var data = {
             'row_no': row_no,
             'seed_prompt': seed_prompt,
@@ -272,7 +268,7 @@ function DataSynthesis() {
                                     <Typography sx={{ color: 'text.secondary' }}>Run</Typography>
                                 </Box>
                                 <Divider />
-                                <Box mb={2} mt={2} ml={1} mr={2}>
+                                <Box m={2}>
                                     <Box mb={1}>
                                         <FormControl fullWidth>
                                             <InputLabel id="seed-prompt">Seed Prompt</InputLabel>
@@ -298,8 +294,6 @@ function DataSynthesis() {
                                         </LoadingButton>
                                         <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false), setIsEarlyStopping(true) }} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
                                     </Stack>
-
-
                                 </Box>
                             </Paper>
                             <Paper sx={{ m: 2 }} variant='outlined'>
@@ -318,7 +312,9 @@ function DataSynthesis() {
 
                                 </Box>
                             </Paper>
+                            <LogBox chat_message={chat_message} messagesEndRef={messagesEndRef}/>
                         </Grid>
+
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={5}>
                             <div style={{ height: 875, width: '100%' }}>
@@ -371,10 +367,8 @@ function DataSynthesis() {
                                                 variant="standard"
                                                 InputProps={{
                                                     startAdornment: <InputAdornment position="start">   </InputAdornment>,
-
                                                 }}
                                             />
-
                                         </Paper>
                                     </AccordionDetails>
                                 </Accordion>
@@ -394,8 +388,6 @@ function DataSynthesis() {
                                                 overflow: "hidden",
                                                 overflowY: "scroll"
                                             }}>
-
-
                                             <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
                                                 {default_child_instruct_list && default_child_instruct_list.map((object, index) => {
                                                     return (
@@ -447,8 +439,7 @@ function DataSynthesis() {
                                                 onChange={e => { setExtraInstruct(e.target.value), setInstructChange(true) }}
                                                 variant="standard"
                                                 InputProps={{
-                                                    startAdornment: <InputAdornment position="start">   </InputAdornment>,
-
+                                                    startAdornment: <InputAdornment position="start">   </InputAdornment>
                                                 }}
                                             />
 
@@ -460,8 +451,6 @@ function DataSynthesis() {
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={2}>
                             <Stack direction='column' mr={2} spacing={2}>
-
-
                                 <FormControl defaultValue="">
                                     <InputLabel id="model-label">Backends</InputLabel>
                                     <Select
