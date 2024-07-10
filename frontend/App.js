@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useMemo, createContext, useRef } from 'react';
-import { lazy, Suspense } from "react";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import LinearProgress from '@mui/material/LinearProgress';
+import React, { createContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Route,
   BrowserRouter as Router,
   Routes,
-  Route,
 } from "react-router-dom";
-import { check_login, logout } from './component/checkLogin.js';
+import { Suspense, lazy } from "react";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+import CssBaseline from '@mui/material/CssBaseline';
 import GlobalStyles from "@mui/material/GlobalStyles";
+import LinearProgress from '@mui/material/LinearProgress';
+import { check_login } from './component/checkLogin.js';
+
 const ModelInfor = lazy(() => import("./information/model.js"));
 const Hub = lazy(() => import("./rooms/redirect.js"));
 const Information = lazy(() => import("./introduction/introduction.js"));

@@ -1,9 +1,9 @@
-import React, { useState, useLayoutEffect, useCallback } from 'react';
-import { useGridApiContext } from '@mui/x-data-grid';
-import Popper from '@mui/material/Popper';
-import InputBase from '@mui/material/InputBase';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
+
 import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
 import TextField from '@mui/material/TextField';
+import { useGridApiContext } from '@mui/x-data-grid';
 
 export function isKeyboardEvent(event) {
     return !!event.key;

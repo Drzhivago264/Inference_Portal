@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
+import { FormControl } from '@mui/material';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import { FormControl, FormLabel } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import GetAppIcon from '@mui/icons-material/GetApp';
-
 import Papa from 'papaparse';
+import React from 'react';
+import Select from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+
 export const DatasetExport = ({
     filename,
     data,

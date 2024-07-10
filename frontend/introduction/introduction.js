@@ -1,24 +1,26 @@
-import React, { useState, useEffect, useContext } from 'react';
-import Paper from '@mui/material/Paper';
-import Container from '@mui/material/Container';
+import React, { useContext, useEffect, useState } from 'react';
+
 import Box from '@mui/material/Box';
-import ResponsiveAppBar from '../component/nav/Navbar';
-import Typography from '@mui/material/Typography';
-import Footer from '../component/nav/Footer';
-import { Divider } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import { TypeWriterText } from '../component/AnimatedText'
-import Slide from '@mui/material/Slide';
-import { Stack } from '@mui/material';
 import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
-import Grid from '@mui/material/Grid';
 import { ColorModeContext } from '../App';
+import Container from '@mui/material/Container';
+import { Divider } from '@mui/material';
+import Footer from '../component/nav/Footer';
+import Grid from '@mui/material/Grid';
 import IntroductionVerticalLinearStepper from '../component/IntroductionStepper';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import Paper from '@mui/material/Paper';
+import ResponsiveAppBar from '../component/nav/Navbar';
+import Slide from '@mui/material/Slide';
+import { Stack } from '@mui/material';
+import { TypeWriterText } from '../component/AnimatedText'
+import Typography from '@mui/material/Typography';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
 function Information() {
     const { t, i18n } = useTranslation();
     const isChrome = !!window.chrome;

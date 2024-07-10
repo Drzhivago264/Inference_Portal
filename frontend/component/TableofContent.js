@@ -1,5 +1,7 @@
 import '../component/css/TableofContent.css'
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { ColorModeContext } from '../App';
+
 const useHeadingsData = (mdfile) => {
     const [nestedHeadings, setNestedHeadings] = useState([]);
     useEffect(() => {
@@ -14,7 +16,8 @@ const useHeadingsData = (mdfile) => {
     return { nestedHeadings };
 };
 
-const useIntersectionObserver = (setActiveId, mdfile) => {
+const useIntersectionObserver = (setActiveId, mdfile, mode) => {
+    
     const headingElementsRef = useRef({});
     useEffect(() => {
         const callback = (headings) => {
@@ -43,7 +46,7 @@ const useIntersectionObserver = (setActiveId, mdfile) => {
         headingElements.forEach((element) => observer.observe(element));
 
         return () => observer.disconnect();
-    }, [setActiveId, mdfile]);
+    }, [setActiveId, mdfile, mode]);
 };
 
 const getNestedHeadings = (headingElements) => {
@@ -64,17 +67,18 @@ const getNestedHeadings = (headingElements) => {
 
     return nestedHeadings;
 };
-const Headings = ({ headings, activeId }) => (
+
+const Headings = ({ headings, activeId, mode }) => (
+    
     <ul>
         {headings.map((heading ) => (
             <li key={heading.id} className={heading.id === activeId ? "active" : ""}>
-                <a href={`#${heading.id}`}
-                >{heading.title}</a>
+                { heading.id === activeId && <a style={{'color': mode == 'dark' ? 'white': 'black'}} href={`#${heading.id}`}>{heading.title}</a>}
+                { heading.id !== activeId && <a style={{'color': 'gray'}} href={`#${heading.id}`}>{heading.title}</a>}
                 {heading.items.length > 0 && (<ul> {heading.items.map((child) => (
                     <li key={child.id} className={child.id === activeId ? "active" : ""}>
-                        <a href={`#${child.id}`}
-
-                        >{child.title}</a>
+                        { child.id === activeId && <a style={{'color': mode == 'dark' ? 'white': 'black'}} href={`#${child.id}`}>{child.title}</a>}
+                        { child.id !== activeId && <a style={{'color': 'gray'}} href={`#${child.id}`}>{child.title}</a>}
                     </li>))}
                 </ul>)}
             </li>
@@ -83,12 +87,14 @@ const Headings = ({ headings, activeId }) => (
 );
 
 const TableOfContents = ({ mdfile }) => {
+    const { colorMode, mode, theme } = useContext(ColorModeContext);
+    
     const [activeId, setActiveId] = useState();
     const { nestedHeadings } = useHeadingsData(mdfile);
-    useIntersectionObserver(setActiveId, mdfile);
+    useIntersectionObserver(setActiveId, mdfile, mode);
     return (
         <nav aria-label="Table of contents">
-            <Headings headings={nestedHeadings} activeId={activeId} />
+            <Headings headings={nestedHeadings} activeId={activeId} mode={mode}/>
         </nav>
     );
 };

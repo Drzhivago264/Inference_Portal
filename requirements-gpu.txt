@@ -20,6 +20,7 @@ openai==1.12.0
 pydantic==2.5.0
 python-decouple==3.6
 pytz==2023.3.post1
+psycopg2==2.9.9
 regex==2023.12.25
 requests==2.32.3
 stripe==5.0.0

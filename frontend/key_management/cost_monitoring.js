@@ -1,38 +1,42 @@
-import axios from 'axios';
-import React, { useEffect, useRef, useState } from "react"
-import Container from '@mui/material/Container';
-import ResponsiveAppBar from '../component/nav/Navbar';
-import Footer from '../component/nav/Footer';
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import * as pdfMake from 'pdfmake/build/pdfmake.min';
-import JSZip from 'jszip';
-window.JSZip = JSZip;
-import Box from '@mui/material/Box';
 import 'datatables.net-buttons-dt';
 import 'datatables.net-buttons/js/buttons.colVis.mjs';
-import Paper from '@mui/material/Paper';
 import 'datatables.net-buttons/js/buttons.html5.mjs';
 import 'datatables.net-buttons/js/buttons.print.mjs';
-require('../component/css/dataTables.dataTables.css')
-require('../component/css/buttons.dataTables.css')
-import dayjs from 'dayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-import Grid from '@mui/material/Grid';
-import moment from 'moment';
+
+import * as pdfMake from 'pdfmake/build/pdfmake.min';
+
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
   BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
   Title,
   Tooltip,
-  Legend,
 } from 'chart.js';
+import React, { useEffect, useState } from "react"
+
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Bar } from 'react-chartjs-2';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import Footer from '../component/nav/Footer';
+import Grid from '@mui/material/Grid';
+import JSZip from 'jszip';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import Paper from '@mui/material/Paper';
+import ResponsiveAppBar from '../component/nav/Navbar';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import moment from 'moment';
+import pdfFonts from "pdfmake/build/vfs_fonts";
+
+window.JSZip = JSZip;
+require('../component/css/dataTables.dataTables.css')
+require('../component/css/buttons.dataTables.css')
+const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 ChartJS.register(

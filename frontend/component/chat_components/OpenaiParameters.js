@@ -1,22 +1,18 @@
-import React, { useEffect } from "react";
 import { FormControl, FormLabel } from '@mui/material';
-import InputLabel from '@mui/material/InputLabel';
-import Radio from '@mui/material/Radio';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import RadioGroup from '@mui/material/RadioGroup';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Slider from '@mui/material/Slider';
-import Switch from '@mui/material/Switch';
-import Divider from '@mui/material/Divider';
-import MuiInput from '@mui/material/Input';
+
 import Box from '@mui/material/Box';
-import { styled } from '@mui/material/styles';
-import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import HelpIcon from '@mui/icons-material/Help';
 import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import MuiInput from '@mui/material/Input';
+import React from "react";
+import Select from '@mui/material/Select';
+import Slider from '@mui/material/Slider';
+import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 const SmallInput = styled(MuiInput)`

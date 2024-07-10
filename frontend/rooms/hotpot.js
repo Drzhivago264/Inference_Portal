@@ -1,31 +1,33 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import axios from 'axios';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { UserContext, WebSocketContext } from '../App.js'
+
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
+import { ChatBoxHotpot } from '../component/chat_components/Chatbox.js';
 import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Footer from '../component/nav/Footer.js';
+import Grid from '@mui/material/Grid';
+import { HotpotParameter } from '../component/chat_components/HotpotParameters.js';
 import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
-import ListItemText from '@mui/material/ListItemText';
-import TextField from '@mui/material/TextField';
-import Divider from '@mui/material/Divider';
-import ListItemButton from '@mui/material/ListItemButton';
 import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
-import { ChatBoxHotpot } from '../component/chat_components/Chatbox.js';
-import { HotpotParameter } from '../component/chat_components/HotpotParameters.js';
-import { chatsocket } from '../component/websocket/ChatSocket.js';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
-import Footer from '../component/nav/Footer.js';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
-import { UserContext, WebSocketContext } from '../App.js'
+import { styled } from '@mui/material/styles';
+import { useNavigate } from "react-router-dom";
+
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
     height: 700,
@@ -39,7 +41,6 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function Hotpot() {
-    const ref = useRef();
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [shownthinkingagent, setThinkingAgent] = useState(false);

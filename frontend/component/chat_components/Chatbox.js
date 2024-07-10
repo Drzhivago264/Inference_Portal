@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
-import InputAdornment from '@mui/material/InputAdornment';
-import Grid from '@mui/material/Grid';
-import LinearProgress from '@mui/material/LinearProgress';
-import SendIcon from '@mui/icons-material/Send';
-import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import LinearProgress from '@mui/material/LinearProgress';
+import Paper from '@mui/material/Paper';
+import React from 'react';
+import SendIcon from '@mui/icons-material/Send';
+import Stack from '@mui/material/Stack';
 
 export const ChatBox = ({
     inputsize,

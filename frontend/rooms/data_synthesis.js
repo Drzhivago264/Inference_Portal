@@ -1,47 +1,48 @@
-import React, { useState, useEffect, useRef, useContext, useLayoutEffect, useCallback } from 'react';
-import axios from 'axios';
-import Box from '@mui/material/Box';
-import { FormControl } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
-import Container from '@mui/material/Container';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
-import Divider from '@mui/material/Divider';
-import ResponsiveAppBar from '../component/nav/Navbar.js';
-import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
-import Footer from '../component/nav/Footer.js';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { redirect_anon_to_login } from '../component/checkLogin.js';
-import { useNavigate } from "react-router-dom";
-import { UserContext, WebSocketContext } from '../App.js'
-import CsvFileInput from '../component/import_export/CsvInput.js';
 import {
-    DataGrid, useGridApiContext,
+    DataGrid,
     GridCellEditStopReasons,
 } from '@mui/x-data-grid';
-import DeleteIcon from '@mui/icons-material/Delete';
-import IconButton from '@mui/material/IconButton';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
-import { DatasetExport } from '../component/import_export/datasetExport.js';
-import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
-import LoadingButton from '@mui/lab/LoadingButton';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { UserContext, WebSocketContext } from '../App.js'
 import { isKeyboardEvent, multilineColumn } from '../component/MultipleLineEdittingDataGrid.js';
+
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import CsvFileInput from '../component/import_export/CsvInput.js';
+import { DatasetExport } from '../component/import_export/datasetExport.js';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Divider from '@mui/material/Divider';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Footer from '../component/nav/Footer.js';
+import { FormControl } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import InputLabel from '@mui/material/InputLabel';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { LogBox } from '../component/chat_components/LogBox.js';
+import MenuItem from '@mui/material/MenuItem';
+import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
+import Paper from '@mui/material/Paper';
+import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import ResponsiveAppBar from '../component/nav/Navbar.js';
+import Select from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import axios from 'axios';
+import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
+import { redirect_anon_to_login } from '../component/checkLogin.js';
+import { styled } from '@mui/material/styles';
+import { useNavigate } from "react-router-dom";
 
 const ChatInput = styled(TextField)(({ theme }) => ({
     width: '100%',
@@ -125,7 +126,7 @@ function DataSynthesis() {
     };
 
     const navigate = useNavigate();
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const { is_authenticated} = useContext(UserContext);
 
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
@@ -141,7 +142,7 @@ function DataSynthesis() {
     }, []);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    var url = window.location.pathname.split("/").filter(path => path !== "")
+
     useEffect(() => {
         if (websocket.current) {
             websocket.current.close()
@@ -391,7 +392,7 @@ function DataSynthesis() {
                                             <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
                                                 {default_child_instruct_list && default_child_instruct_list.map((object, index) => {
                                                     return (
-                                                        <Grid container>
+                                                        <Grid key={object.label} container>
                                                             <Grid item xs={11}>
                                                                 <TextField
                                                                     id={index}

@@ -1,26 +1,27 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import axios from 'axios';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { UserContext, WebSocketContext } from '../App.js'
+
 import Box from '@mui/material/Box';
-import { FormControl, FormLabel } from '@mui/material';
+import { ChatBox } from '../component/chat_components/Chatbox.js';
+import { ChatExport } from '../component/import_export/chatExport.js';
+import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import Footer from '../component/nav/Footer.js';
+import { FormControl } from '@mui/material';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
+import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
+import Paper from '@mui/material/Paper';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
-import Paper from '@mui/material/Paper';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
-import Divider from '@mui/material/Divider';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
-import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
-import { ChatBox } from '../component/chat_components/Chatbox.js';
-import { chatsocket } from '../component/websocket/ChatSocket.js';
-import { ChatExport } from '../component/import_export/chatExport.js';
-import Footer from '../component/nav/Footer.js';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import axios from 'axios';
+import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
+import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
-import { UserContext, WebSocketContext } from '../App.js'
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
     minWidth: 300,
@@ -35,8 +36,6 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function FunctionLLM() {
-    const ref = useRef();
-
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const [shownthinking, setThinking] = useState(false);
     const messagesEndRef = useRef(null)
@@ -55,7 +54,7 @@ function FunctionLLM() {
     const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const navigate = useNavigate();
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const { is_authenticated } = useContext(UserContext);
 
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
@@ -138,7 +137,7 @@ function FunctionLLM() {
         else if (e == 'summary') {
             setExtraInstruction(100)
         }
-        else if (e == 'topic' || 'paraphrase' || 'sentiment') {
+        else if (e == 'topic' || e == 'paraphrase' || e == 'sentiment') {
             setExtraInstruction("")
         }
     }
@@ -169,7 +168,7 @@ function FunctionLLM() {
                                             { 'label': 'Predict Sentiment', 'value': 'sentiment' },
                                             { 'label': 'Topic Classification', 'value': 'topic' },
                                             { 'label': 'Restyle', 'value': 'restyle' }].map((func) => {
-                                                if (func.value == 'paraphrase' || 'setiment') {
+                                                if (func.value == 'paraphrase' || func.value == 'setiment') {
                                                     return (
                                                         <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
                                                     )
