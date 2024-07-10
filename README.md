@@ -11,18 +11,17 @@ This website processses API and HTTP requests from users, forwards them to the G
 
 Design
 -------
-![Alt text](design.png)
-
-Explain:
+- The /frontend of this website uses React.js which are packed into bundle in frontend/templates/frontend_index.html using webpack. 
+- The backend of this website can be found in /server which use Django Rest Framework to serve requests from the frontend.
 - Redis server fowards the message for the websockets that are used for real time chat.
-- SQL stores API key and model metadata using the default SQLlite shipped with Django. 
-- The chat and prompt history of user is vectorised and stored for vector search
+- Django Channel with async customers are used to serve real-time chat messages. 
+- The chat and prompt history of user is vectorised and stored for vector search.
 - Django Ninja open REST api endpoints forward the user requests to GPU servers.
 - GPU servers do inference, each GPU server holds one model and uses vLLM to open endpoints. 
 - Nginx is used as a proxy for the Django server and serve static files.
 - Celery is used to run multiple background tasks including spin up, stop, create and terminate EC GPU instances. Celery is also used to queue 
- API requests to GPU servers.
-- Django server is used to connect all components.
+ API requests to GPU servers. Noting that Celery does not run probably on Window so you should switch to Linux or living with with --solo.
+- Postgresql runs locally and can only be accessed from Django
 
 The implementation of React and data flow is explained in the diagram below
 
@@ -34,6 +33,29 @@ Installation
 First of all, for start using django-inference-portal, you must download it using git
 
     git clone https://github.com/Drzhivago264/Inference_Portal.git
+
+Before install dependencies, you need to install Postgres, and create a table named professorparakeet. 
+
+    sudo apt install postgresql postgresql-contrib
+    sudo apt-get install libpq-dev
+
+    sudo -i -u postgres #postgress is the default user when install postgres
+    createdb professorparakeet
+    psql
+    \password
+    #create a password for postgres user
+
+    sudo systemctl start postgresql.service
+    python manage.py migrate
+    python manage.py loaddata dbbackup.json
+
+    #if you want to enable postgres on start up use this command
+    sudo systemctl enable postgresql
+
+You also need to install NPM and Node.js for the frontend.
+    
+    sudo apt install nodejs
+    sudo apt install npm
 
 Next you must install dependencies:
 
@@ -84,6 +106,8 @@ Next you need to set up .env file and setup the following key:
     aws_secret_access_key="" (The AWS secret key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
     ADMIN_PATH = "" (your admin path, keep it hard to guess)
     DJANGO_SECRET_KEY = "" 
+    POSTGRES_USER = "" (Your Postgres Username)
+    POSTGRES_PASSWORD = "" (YOUR Postgres Password)
     GPT_KEY = "" (OPENAI key for the agent function)
     CMC_API = "" (Coinmarketcap API to get the exchange rate of Monero, you may use different API but you need to rewrite the update_crypto_rate() in celery_tasks.py)
 
@@ -109,7 +133,7 @@ In addition, as we need to automatically boot and shutdown your GPU intances, yo
 
 Development environment setup
 -----------------------------
-After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page and remember to avoid 8000 and 6380 port that Django is running)):
+After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page and remember to avoid 8000 and 6380 port that Django is running):
 
     pip install vllm
     python -m vllm.entrypoints.api_server --model gpt2 --port 8080
@@ -121,7 +145,23 @@ If you have more than 1 GPU, you can serve multiple models at multiple ports (re
 
 If you have issue, you may need to seperate vLLM into multiple local environments.
 
+If you want to customise frontend, you should run:
+
+    npm run dev
+
+This command will automatically update your changes to the /static folder. Also, you need to change the DEBUG = True to see the changes as you made them.
+
+However, in production env, you must run later:
+
+    npm run build
+
+This command will remove error traceback and pack up your code into much smaller size that is suitable for production. These files still live in /static and you must follow up the command below to hash the filenames and move it to /staticfiles:
+
+    python manage.py collectstatic
+
+Currently, this website use cloudflare CDN to serve webpack bundles. However, you can adjust the settings.py and directly use your /staticfiles 
+
 Final words
 -----------
 
-This project is in testing stage but feel free to test it and if you have any suggestions you can tell me.
+This project is actively developed stage if you have any suggestions you can tell me. I also need your help if you have some.
