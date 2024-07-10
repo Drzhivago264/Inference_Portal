@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 export function agentsocket(
     websocket,
     setChatMessage,
@@ -18,7 +20,17 @@ export function agentsocket(
         console.log("WebSocket  Connected");
     };
     websocket.current.onclose = () => {
-        console.log("WebSocket  Disconnected");
+        setChatMessage(chat_message => [
+            ...chat_message,
+            {
+                holder: "",
+                holderid: "",
+                role: "Server",
+                time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                credit: "",
+                message: "Websocket Disconnected!"
+            },
+        ]);
     };
     websocket.current.onmessage = (message) => {
         const dataFromServer = JSON.parse(message.data);
