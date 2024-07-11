@@ -32,7 +32,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function Contact() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const [showPassword, setShowPassword] = React.useState(false);
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {

@@ -1,3 +1,5 @@
+import React, {useContext} from "react";
+
 import ApiIcon from '@mui/icons-material/Api';
 import ArticleIcon from '@mui/icons-material/Article';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -13,7 +15,6 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
-import React from "react";
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import RuleIcon from '@mui/icons-material/Rule';
 import SavingsIcon from '@mui/icons-material/Savings';
@@ -25,7 +26,7 @@ import { logout } from '../checkLogin.js';
 
 export const UserVeticalNav = ({ navigate }) => {
 
-    const { is_authenticated, setIsAuthenticated, user_hashed_key } = React.useContext(UserContext);
+    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     const log_out_ = (setIsAuthenticaed) => {
         logout(setIsAuthenticaed)
         navigate("/");

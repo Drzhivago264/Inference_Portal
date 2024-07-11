@@ -35,7 +35,7 @@ export function agentsocket(
     websocket.current.onmessage = (message) => {
         const dataFromServer = JSON.parse(message.data);
         if (dataFromServer) {
-            if ((dataFromServer.hasOwnProperty("swap_template"))) {
+            if ((Object.prototype.hasOwnProperty.call( dataFromServer, "swap_template"))) {
 
                 if (!use_user_template){
                     let new_child_template_list = []
@@ -54,8 +54,8 @@ export function agentsocket(
                 }
                 else {
                     let new_child_template_list = []
-                    for (var new_child in dataFromServer.child_template_name_list) {
-                        new_child_template_list.push({ 'displayed_name': dataFromServer.child_template_name_list[new_child] })
+                    for (var template_name in dataFromServer.child_template_name_list) {
+                        new_child_template_list.push({ 'displayed_name': dataFromServer.child_template_name_list[template_name] })
                     }
                     setUserParentInstruct(dataFromServer.swap_instruction)
                     setUserChildInstruct(dataFromServer.default_child_instruct)
@@ -70,7 +70,7 @@ export function agentsocket(
                 }
                 dataFromServer.message = ""
             }
-            else if ((dataFromServer.hasOwnProperty("child_instruct"))) {
+            else if (Object.prototype.hasOwnProperty.call(dataFromServer, "child_instruct")) {
                 if (!use_user_template){
                     setChildInstruct(dataFromServer.child_instruct)
                 }
@@ -79,7 +79,7 @@ export function agentsocket(
                 }
                 dataFromServer.message = ""
             }
-            else if (dataFromServer.hasOwnProperty("paragraph")) {
+            else if (Object.prototype.hasOwnProperty.call(dataFromServer, "paragraph")) {
                 if (setCurrentParagraph) {
                     setCurrentParagraph(dataFromServer.paragraph)
                     dataFromServer.message = ""
@@ -106,7 +106,7 @@ export function agentsocket(
                     },
                 ])
             }
-            else if (dataFromServer.hasOwnProperty("agent_action")) {
+            else if (Object.prototype.hasOwnProperty.call(dataFromServer, "agent_action")) {
                 if (dataFromServer.agent_action == "STOP" || dataFromServer.agent_action == "NEXT") {
                     var blockToAdd = {
                         type: 'paragraph',
@@ -134,7 +134,7 @@ export function agentsocket(
             };
             var logTa = document.getElementById("chat-log")
             if (!logTa) {
-                var logTa = document.getElementById("chat-log-agent")
+                 logTa = document.getElementById("chat-log-agent")
             }
             logTa.scrollTop = logTa.scrollHeight;
         }

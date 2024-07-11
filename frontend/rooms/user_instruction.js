@@ -60,7 +60,6 @@ function UserInstruction() {
     const [chat_message, setChatMessage] = useState([]);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-    const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
     const [top_p, setTopp] = useState(0.72);
     const [max_tokens, setMaxToken] = useState(null);
     const [temperature, setTemperature] = useState(0.73);
@@ -68,7 +67,6 @@ function UserInstruction() {
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [shownthinking, setThinking] = useState(false);
     const [max_turn, setMaxTurn] = useState(4)
-    const [currentparagraph, setCurrentParagraph] = useState(1);
     const [agent_objects, setAgents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
@@ -88,7 +86,7 @@ function UserInstruction() {
     const [children_instruction_list, setChildInstructionList] = useState([
         { id: null, dislayed_name: "", instruct: "", unique: nanoid(), add: false },
     ])
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const { is_authenticated } = useContext(UserContext);
 
     const handleOnDragEnd = (result) => {
         const items = Array.from(children_instruction_list);
@@ -123,7 +121,7 @@ function UserInstruction() {
             "childrens": children_instruction_list
         }
         axios.post("/frontend-api/post-user-instruction", data, config)
-            .then((response) => {
+            .then(() => {
                 setReload(true)
                 setSaveSuccess(true)
                 setLoading(false)
@@ -147,7 +145,7 @@ function UserInstruction() {
                 'X-CSRFToken': csrftoken,
             }
         })
-            .then((response) => {
+            .then(() => {
                 setDeleteSuccess(true)
             }).catch(error => {
                 setDeleteError(true)
@@ -349,7 +347,7 @@ function UserInstruction() {
             chat_websocket.current.close()
         }
         if (websocket_hash) {
-            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + websocket_hash + '/' + timeZone + '/');
+            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + "/ws/engineer-async/" + websocket_hash + '/' + timeZone + '/');
             agentsocket(
                 websocket,
                 setChatMessage,
@@ -357,7 +355,7 @@ function UserInstruction() {
                 document,
             )
         }
-    }, [socket_destination, websocket_hash]);
+    }, [websocket_hash]);
 
     useEffect(() => {
         if (reload) {
@@ -388,7 +386,7 @@ function UserInstruction() {
             var data = {
                 'instruct_change': instruct_change,
                 'max_turn': max_turn,
-                'currentParagraph': currentparagraph,
+                'currentParagraph': 1,
                 'message': usermessage,
                 'choosen_model': choosen_model,
                 'choosen_template': choosen_template,

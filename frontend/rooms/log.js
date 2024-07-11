@@ -2,6 +2,8 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-buttons/js/buttons.colVis.mjs';
 import 'datatables.net-buttons/js/buttons.html5.mjs';
 import 'datatables.net-buttons/js/buttons.print.mjs';
+import '../component/css/dataTables.dataTables.css'
+import '../component/css/buttons.dataTables.css'
 
 import * as pdfMake from 'pdfmake/build/pdfmake.min';
 
@@ -20,13 +22,11 @@ import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
 
 window.JSZip = JSZip;
-require('../component/css/dataTables.dataTables.css')
-require('../component/css/buttons.dataTables.css')
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 function Log() {
     const navigate = useNavigate();
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const { is_authenticated } = useContext(UserContext);
     $.DataTable = require('datatables.net')
     const tableRef = useRef()
     useEffect(() => {

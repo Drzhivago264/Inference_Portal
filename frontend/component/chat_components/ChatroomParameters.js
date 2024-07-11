@@ -59,7 +59,8 @@ export const ChatParameter = ({
     setFrequencyPenalty,
     presencepenalty,
     setPresencePenalty,
-    beam, setBeam,
+    beam,
+    setBeam,
     max_tokens,
     setMaxToken,
     model_objects,
@@ -69,7 +70,7 @@ export const ChatParameter = ({
     usememory,
     usememorycurrent
 }) => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const toggleMemory = (value, memory_type) => {
         if (memory_type == "usememory" && value) {
             setUseMemory(value)

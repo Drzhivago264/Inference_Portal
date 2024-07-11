@@ -136,11 +136,11 @@ function ModelInfor() {
                                     />
                                 </div>
                                 <Alert variant="outlined" severity="info">
-                                    <li> Status can be "pending", "running", "stopping" and "stopped" which refers to the current stage of
-                                        the servers</li>
-                                    <li> Availability can be "availabe" and "not availabe" which refers to the ability of users to boot the
-                                        instance by themselves</li>
-                                    <li> Highly demanded models are load-balanced across multiple servers</li>
+                                    <li>{` Status can be "pending", "running", "stopping" and "stopped" which refers to the current stage of
+                                        the servers `}</li>
+                                    <li>{` Availability can be "availabe" and "not availabe" which refers to the ability of users to boot the
+                                        instance by themselves `}</li>
+                                    <li>{` Highly demanded models are load-balanced across multiple servers `}</li>
                                 </Alert>
                             </Stack>
                         </Grid>

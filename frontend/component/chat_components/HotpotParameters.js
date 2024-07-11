@@ -78,7 +78,7 @@ export const HotpotParameter = ({
     max_turn,
     setMaxTurn
 }) => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const toggleMemory = (value, memory_type) => {
         if (memory_type == "usememory" && value) {
             setUseMemory(value)

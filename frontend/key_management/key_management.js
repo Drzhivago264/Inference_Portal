@@ -56,7 +56,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function KeyManagement() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
     const [product_objects, setProduct] = useState([]);

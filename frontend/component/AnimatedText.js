@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import PropTypes from 'prop-types'
 import { TypeAnimation } from 'react-type-animation';
 
 export const TypeWriterText = ({
@@ -9,7 +10,6 @@ export const TypeWriterText = ({
     repeat,
     speed,
     deletionSpeed,
-	onFinish,
     style,
 	className = '',
 }) => {
@@ -42,3 +42,14 @@ export const TypeWriterText = ({
 			: null
 	);
 };
+
+TypeWriterText.propTypes = {
+    cursor: PropTypes.bool,
+    sequence: PropTypes.array,
+    repeat: PropTypes.number,
+    speed: PropTypes.number,
+    className: PropTypes.string,
+    deletionSpeed: PropTypes.number,
+    wrapper: PropTypes.string,
+    style: PropTypes.object
+}

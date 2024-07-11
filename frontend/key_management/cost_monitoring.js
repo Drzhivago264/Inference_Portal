@@ -2,8 +2,8 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-buttons/js/buttons.colVis.mjs';
 import 'datatables.net-buttons/js/buttons.html5.mjs';
 import 'datatables.net-buttons/js/buttons.print.mjs';
-
-import * as pdfMake from 'pdfmake/build/pdfmake.min';
+import '../component/css/buttons.dataTables.css'
+import '../component/css/dataTables.dataTables.css'
 
 import {
   BarElement,
@@ -24,20 +24,11 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import Footer from '../component/nav/Footer';
 import Grid from '@mui/material/Grid';
-import JSZip from 'jszip';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import moment from 'moment';
-import pdfFonts from "pdfmake/build/vfs_fonts";
-
-window.JSZip = JSZip;
-require('../component/css/dataTables.dataTables.css')
-require('../component/css/buttons.dataTables.css')
-const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 ChartJS.register(
   CategoryScale,
@@ -51,13 +42,13 @@ ChartJS.register(
 
 function CostMonitoring() {
   const format_to_hour = "YYYY-MM-DD HH:mm"
-
+  const now = dayjs()
   const [data_by_date, setDataByDate] = useState(null);
   const [data_total, setDataTotal] = useState(null);
-  const [enddate, setEnddate] = useState(moment().format(format_to_hour));
-  const [startdate, setStartDate] = useState(moment().subtract(7, 'days').format(format_to_hour));
-  const [enddate_total, setEnddateTotal] = useState(moment().format(format_to_hour));
-  const [startdate_total, setStartDateTotal] = useState(moment().subtract(7, 'days').format(format_to_hour));
+  const [enddate, setEnddate] = useState(now.format(format_to_hour));
+  const [startdate, setStartDate] = useState(now.subtract(7, 'days').format(format_to_hour));
+  const [enddate_total, setEnddateTotal] = useState(now.format(format_to_hour));
+  const [startdate_total, setStartDateTotal] = useState(now.subtract(7, 'days').format(format_to_hour));
   function getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');
     var color = '#';
@@ -269,12 +260,12 @@ function CostMonitoring() {
                       <DemoContainer components={['DatePicker', 'DatePicker']}>
                         <DesktopDatePicker label="Start Date"
                           value={dayjs(startdate_total)}
-                          onChange={(newValue) => setStartDate(newValue.format(format_to_hour))}
+                          onChange={(newValue) => setStartDateTotal(newValue.format(format_to_hour))}
                           slotProps={{ textField: { size: 'small' } }}
                         />
                         <DesktopDatePicker label="End Date"
                           value={dayjs(enddate_total)}
-                          onChange={(newValue) => setEnddate(newValue.format(format_to_hour))}
+                          onChange={(newValue) => setEnddateTotal(newValue.format(format_to_hour))}
                           slotProps={{ textField: { size: 'small' } }}
                         />
                       </DemoContainer>

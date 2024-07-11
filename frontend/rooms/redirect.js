@@ -72,7 +72,7 @@ function Hub() {
                 key: key,
             }
             axios.post("/frontend-api/login", data, config)
-                .then((response) => {
+                .then(() => {
                     setIsAuthenticated(true)
                     navigate('/frontend/hub');
                 }).catch(error => {

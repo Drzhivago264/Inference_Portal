@@ -10,6 +10,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import AlignmentTuneTool from 'editorjs-text-alignment-blocktune';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
@@ -17,6 +18,7 @@ import { ChatExport } from '../component/import_export/chatExport.js';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
 import EditorJS from "@editorjs/editorjs";
+import EditorList from "@editorjs/list"
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
@@ -53,8 +55,6 @@ import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
 
-const EditorList = require("@editorjs/list");
-const AlignmentTuneTool = require('editorjs-text-alignment-blocktune');
 const { convert } = require('html-to-text');
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -97,7 +97,6 @@ function Agent() {
     const [default_parent_instruct, setParentInstruct] = useState("");
     const [default_child_instruct, setChildInstruct] = useState("");
     const [choosen_export_format, setChoosenExportFormat] = useState(".json");
-    const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [user_template_list, setUserTemplateList] = useState([]);
     const [use_user_template, setUseUserTemplate] = useState(false)
@@ -472,8 +471,6 @@ function Agent() {
                                 <Box mb={2} mt={2} ml={1} mr={2}>
                                     <ChatExport
                                         chat_message={chat_message}
-                                        choosen_export_format_chatlog={choosen_export_format_chatlog}
-                                        setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
                                         number_of_remove_message={2}
                                         setChatMessage={setChatMessage}
                                     >
@@ -632,7 +629,7 @@ function Agent() {
                                 </FormControl>}
                                 <Divider></Divider>
                                 {user_template_list.length == 0 && <FormControl disabled>
-                                    <InputLabel id="use-agent-label" shrink>Users' Agents</InputLabel>
+                                    <InputLabel id="use-agent-label" shrink>{` Users' Agents `}</InputLabel>
                                     <Stack direction='column' spacing={1}>
                                         {!use_user_template && <Select notched
                                             labelId="user-agent-label"
@@ -665,10 +662,10 @@ function Agent() {
                                         </Select>}
                                         <FormControlLabel disabled control={<Switch checked={use_user_template} onChange={handle_use_user_template} />} label="Use My Template" />
                                     </Stack>
-                                    <FormHelperText>No Users' Agent Found</FormHelperText>
+                                    <FormHelperText>{`No Users' Agent Found`}</FormHelperText>
                                 </FormControl>}
                                 {user_template_list.length > 0 && <FormControl>
-                                    <InputLabel id="use-agent-label">Users' Agents</InputLabel>
+                                    <InputLabel id="use-agent-label">{`Users' Agents`}</InputLabel>
                                     {!use_user_template && <Select
                                         labelId="user-agent-label"
                                         id="user-agent-select"
