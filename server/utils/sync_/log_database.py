@@ -3,7 +3,7 @@ from vectordb import vectordb
 from transformers import AutoTokenizer
 
 from django.utils import timezone
-
+from django.db.utils import DataError
 from server.models import (
     PromptResponse,
     MemoryTree,
@@ -38,38 +38,41 @@ def log_prompt_response(is_session_start_node: bool | None, key_object: APIKEY, 
             llm.base)(response)['input_ids'])
         input_cost = number_input_token*llm.input_price
         output_cost = number_output_token*llm.output_price
+    try:
+        pair_save = PromptResponse(
+            prompt=prompt,
+            response=response,
+            key=key_object,
+            model=llm,
+            p_type=type_,
+            number_input_tokens=number_input_token,
+            number_output_tokens=number_output_token,
+            input_cost=input_cost,
+            output_cost=output_cost
+        )
+        pair_save.save()
+        if is_session_start_node is not None:
+            memory_tree_node_number = MemoryTree.objects.filter(
+                key=key_object).count()
+            if memory_tree_node_number == 0:
+                MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt,
+                                        response=response, model=llm, p_type=type_, is_session_start_node=True)
 
-    pair_save = PromptResponse(
-        prompt=prompt,
-        response=response,
-        key=key_object,
-        model=llm,
-        p_type=type_,
-        number_input_tokens=number_input_token,
-        number_output_tokens=number_output_token,
-        input_cost=input_cost,
-        output_cost=output_cost
-    )
-    pair_save.save()
-    if is_session_start_node is not None:
-        memory_tree_node_number = MemoryTree.objects.filter(
-            key=key_object).count()
-        if memory_tree_node_number == 0:
-            MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt,
-                                      response=response, model=llm, p_type=type_, is_session_start_node=True)
+            elif memory_tree_node_number > 0 and is_session_start_node:
+                most_similar_vector = vectordb.filter(
+                    metadata__key=key_object.hashed_key).search(prompt+response, k=2)
+                most_similar_prompt = most_similar_vector[1].content_object.prompt
+                most_similar_response = most_similar_vector[1].content_object.response
+                most_similar_node = MemoryTree.objects.filter(
+                    key=key_object, prompt=most_similar_prompt, response=most_similar_response).order_by("-created_at")[0]
+                MemoryTree.objects.create(name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}", parent=most_similar_node,
+                                        key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
 
-        elif memory_tree_node_number > 0 and is_session_start_node:
-            most_similar_vector = vectordb.filter(
-                metadata__key=key_object.hashed_key).search(prompt+response, k=2)
-            most_similar_prompt = most_similar_vector[1].content_object.prompt
-            most_similar_response = most_similar_vector[1].content_object.response
-            most_similar_node = MemoryTree.objects.filter(
-                key=key_object, prompt=most_similar_prompt, response=most_similar_response).order_by("-created_at")[0]
-            MemoryTree.objects.create(name=f"{prompt} -- session_start_at {timezone.now()}", parent=most_similar_node,
-                                      key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
+            elif memory_tree_node_number > 0 and not is_session_start_node:
+                parent_node = MemoryTree.objects.filter(
+                    key=key_object, is_session_start_node=True).latest('created_at')
+                MemoryTree.objects.create(name=f"{key_object.hashed_key} -- child_node_added_at {timezone.now()}", parent=parent_node,
+                                        key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)
+    except DataError:
+        pass
 
-        elif memory_tree_node_number > 0 and not is_session_start_node:
-            parent_node = MemoryTree.objects.filter(
-                key=key_object, is_session_start_node=True).latest('created_at')
-            MemoryTree.objects.create(name=f"{prompt} -- child_node_added_at {timezone.now()}", parent=parent_node,
-                                      key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)

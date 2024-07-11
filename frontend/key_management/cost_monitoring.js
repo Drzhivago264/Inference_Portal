@@ -127,7 +127,7 @@ function CostMonitoring() {
         for (let m in model_list) {
           let sum_input_tokens = 0
           let sum_output_tokens = 0
-          for (let l in labels) {
+          for (let l = 0; l < labels.length; l++) {
             var result = log_object.data.cost_by_model.filter(
               function (data) { return data.model__name == model_list[m] }
             )
