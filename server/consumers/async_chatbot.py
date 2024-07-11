@@ -62,7 +62,7 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
         self.session_history = []
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
-
+        self.p_type = "chatbot"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()

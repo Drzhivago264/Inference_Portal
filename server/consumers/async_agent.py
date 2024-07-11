@@ -75,7 +75,7 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
         self.current_turn = 0
         self.session_history = []
         self.working_paragraph = ""
-        self.is_session_start_node = True
+        self.is_session_start_node = None
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
         self.choosen_model = ""
@@ -83,6 +83,7 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
         self.use_summary = False
         self.agent_instruction = ""
         self.child_instruction = ""
+        self.p_type = "agent"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -208,4 +209,3 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
                 await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": self.choosen_template, "time": self.time, "credit": credit}))
         else:
             await self.inference()
-            self.is_session_start_node = False

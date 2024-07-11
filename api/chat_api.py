@@ -4,6 +4,7 @@ from ninja import Router
 from ninja.errors import HttpError
 
 from server.utils import constant
+from server.celery_tasks import celery_log_prompt_response
 
 from django.http import StreamingHttpResponse
 from django_ratelimit.core import is_ratelimited
@@ -110,7 +111,7 @@ async def chatcompletion(request, data: ChatSchema):
                             else:
                                 response = response.replace(
                                     processed_prompt, "")
-                                await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chat_api")
+                                await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatbot_api")
                                 return 200, {'response': response,
                                              'context': context}
                         except httpx.ReadTimeout:

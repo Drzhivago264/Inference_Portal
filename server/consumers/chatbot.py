@@ -21,7 +21,7 @@ class Consumer(AsyncWebsocketConsumer):
         self.is_session_start_node = True
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
-
+        self.p_type = "chatbot"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -71,7 +71,7 @@ class Consumer(AsyncWebsocketConsumer):
                 inference.delay(unique=unique_response_id,
                                 is_session_start_node=self.is_session_start_node,
                                 mode=mode,
-                                type_="chatroom",
+                                type_=self.p_type,
                                 stream=True,
                                 key=self.key_object.hashed_key,
                                 credit=self.key_object.credit,

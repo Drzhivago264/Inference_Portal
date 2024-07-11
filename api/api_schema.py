@@ -47,12 +47,26 @@ class PromptSchema(Schema):
         if not (-1 <= v <= 100): 
             raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
+    
+    @model_validator(mode='after')
+    def validate_context_length(self) -> Self:
+        message = self.prompt
+        if len(message) > constant.DEFAULT_MAX_INPUT_LENGTH:
+            raise ValueError('Your message exceeds the maximum context')
+        return self
 
 class ChatSchema(PromptSchema):
     prompt: str | list = ""
     stream: bool = False
     include_memory: bool = constant.DEFAULT_MEMORY
     include_current_memory: bool = not constant.DEFAULT_MEMORY
+
+    @model_validator(mode='after')
+    def validate_context_length(self) -> Self:
+        message = self.message
+        if len(message) > constant.DEFAULT_MAX_INPUT_LENGTH:
+            raise ValueError('Your message exceeds the maximum context')
+        return self
 
     @model_validator(mode='after')
     def only_one_memory_type(self) -> Self:
@@ -62,13 +76,7 @@ class ChatSchema(PromptSchema):
             raise ValueError('Only use one type of memory at a time, set include_memory or include_current_memory or both False')
         return self
 
-    @model_validator(mode='after')
-    def list_for_current_memory(self) -> Self:
-        prompt = self.prompt
-        include_current_memory = self.include_current_memory
-        if include_current_memory and isinstance(prompt, str):
-            raise ValueError('Prompt must be a list if include_current_memory = True')
-        return self
+
        
 class AgentSchema(PromptSchema):
     stream: bool = False
