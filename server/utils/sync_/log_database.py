@@ -51,28 +51,38 @@ def log_prompt_response(is_session_start_node: bool | None, key_object: APIKEY, 
             output_cost=output_cost
         )
         pair_save.save()
-        if is_session_start_node is not None:
-            memory_tree_node_number = MemoryTree.objects.filter(
-                key=key_object).count()
-            if memory_tree_node_number == 0:
-                MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt,
-                                        response=response, model=llm, p_type=type_, is_session_start_node=True)
+        build_memory_tree(key_object=key_object, prompt=prompt, response=response, llm=llm, type_= type_, is_session_start_node=is_session_start_node)
+    except DataError:
+        pass 
+    except IndexError:
+        pass 
 
-            elif memory_tree_node_number > 0 and is_session_start_node:
-                most_similar_vector = vectordb.filter(
-                    metadata__key=key_object.hashed_key).search(prompt+response, k=2)
+def build_memory_tree(key_object: APIKEY, prompt: str, response: str, llm: LLM, type_: str, is_session_start_node: bool) -> None:
+    if is_session_start_node is not None and type_ == "chatbot":
+        memory_tree_node_number = MemoryTree.objects.filter(
+            key=key_object).count()
+        if memory_tree_node_number == 0:
+            MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt,
+                                    response=response, model=llm, p_type=type_, is_session_start_node=True)
+
+        elif memory_tree_node_number > 0 and is_session_start_node:
+            most_similar_vector = vectordb.filter(
+                metadata__key=key_object.hashed_key, metadata__p_type=type_).search(prompt+response, k=2)
+            if len(most_similar_vector)>1:
                 most_similar_prompt = most_similar_vector[1].content_object.prompt
                 most_similar_response = most_similar_vector[1].content_object.response
                 most_similar_node = MemoryTree.objects.filter(
                     key=key_object, prompt=most_similar_prompt, response=most_similar_response).order_by("-created_at")[0]
                 MemoryTree.objects.create(name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}", parent=most_similar_node,
                                         key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
+            else:
+                most_similar_node = MemoryTree.objects.filter(
+                    key=key_object).order_by("-created_at")[0]
+                MemoryTree.objects.create(name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}", parent=most_similar_node,
+                        key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
 
-            elif memory_tree_node_number > 0 and not is_session_start_node:
-                parent_node = MemoryTree.objects.filter(
-                    key=key_object, is_session_start_node=True).latest('created_at')
-                MemoryTree.objects.create(name=f"{key_object.hashed_key} -- child_node_added_at {timezone.now()}", parent=parent_node,
-                                        key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)
-    except DataError:
-        pass
-
+        elif memory_tree_node_number > 0 and not is_session_start_node:
+            parent_node = MemoryTree.objects.filter(
+                key=key_object, is_session_start_node=True).latest('created_at')
+            MemoryTree.objects.create(name=f"{key_object.hashed_key} -- child_node_added_at {timezone.now()}", parent=parent_node,
+                                    key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)

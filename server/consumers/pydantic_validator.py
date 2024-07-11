@@ -7,6 +7,7 @@ from pydantic import (
 from typing_extensions import Self
 from server.utils import constant
 
+
 class AgentSchemaMessage(BaseModel):
     message: str
     choosen_model: str
@@ -39,6 +40,13 @@ class AgentSchemaMessage(BaseModel):
     def check_max_turn(cls, v: float, info: ValidationInfo):
         if not (0 < v <= 10): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
+    
+    @model_validator(mode='after')
+    def validate_context_length(self) -> Self:
+        message = self.message
+        if len(message) > constant.DEFAULT_MAX_INPUT_LENGTH:
+            raise ValueError('Your message exceeds the maximum context')
+        return self
     
 class AgentSchemaParagraph(BaseModel):
     paragraph: int
@@ -75,6 +83,13 @@ class ChatSchema(BaseModel):
         include_current_memory = self.include_current_memory
         if include_current_memory and include_memory:
             raise ValueError('Only use one type of memory at a time, set include_memory or include_current_memory or both False')
+        return self
+    
+    @model_validator(mode='after')
+    def validate_context_length(self) -> Self:
+        message = self.message
+        if len(message) > constant.DEFAULT_MAX_INPUT_LENGTH:
+            raise ValueError('Your message exceeds the maximum context')
         return self
     
     @field_validator('frequency_penalty','length_penalty','presence_penalty')
@@ -128,7 +143,13 @@ class ToolSchema(BaseModel):
         if v is not None:
             if not (0 <= v <= 8192): raise ValueError(f'{v} is not a valid {info.field_name}.')
         return v
-    
+
+    @model_validator(mode='after')
+    def validate_context_length(self) -> Self:
+        message = self.message
+        if len(message) > constant.DEFAULT_MAX_INPUT_LENGTH:
+            raise ValueError('Your message exceeds the maximum context')
+        return self
 
 class DataSynthesisSchema(BaseModel):
     row_no: int

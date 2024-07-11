@@ -22,12 +22,12 @@ class APIKEY(AbstractAPIKey):
     monero_credit = models.FloatField(default=0.0) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    integrated_address = models.CharField(max_length=400)
-    payment_id = models.CharField(max_length=400)
+    integrated_address = models.TextField(max_length=400)
+    payment_id = models.TextField(max_length=400)
 
 class Crypto(models.Model):
-    coin = models.CharField(max_length=255)
-    address = models.CharField(max_length=400)
+    coin = models.TextField()
+    address = models.TextField()
     balance = models.FloatField(default=0.0)
     coin_usd_rate= models.FloatField(default=0.0)
     def __str__(self) -> str:
@@ -85,12 +85,12 @@ class ProductTag(models.Model):
         return self.name
         
 class PromptResponse(models.Model):
-    prompt = models.CharField(max_length=8192)
-    response = models.CharField(max_length=8192)
+    prompt = models.TextField()
+    response = models.TextField()
     model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    p_type = models.CharField(max_length=8192, default="prompt")
+    p_type = models.CharField(max_length=255, default="prompt")
     input_cost = models.FloatField(default=0.0)
     output_cost = models.FloatField(default=0.0)
     number_input_tokens = models.IntegerField(default=0)
@@ -133,12 +133,12 @@ class Price(models.Model):
 
 class MemoryTree(MPTTModel):
     name = models.CharField(max_length=255, unique=True)
-    prompt = models.CharField(max_length=8192)
-    response = models.CharField(max_length=8192)
+    prompt = models.TextField()
+    response = models.TextField()
     model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    p_type = models.CharField(max_length=8192, default="prompt")
+    p_type = models.CharField(max_length=255, default="prompt")
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     is_session_start_node = models.BooleanField(default=False)
     def __str__(self) -> str:
@@ -149,7 +149,7 @@ class MemoryTree(MPTTModel):
 
 class InstructionTree(MPTTModel):
     name = models.CharField(max_length=255, unique=True)
-    code = models.CharField(max_length=10)
+    code = models.TextField()
     instruct = models.TextField(default="")
     default_child = models.BooleanField(default=False)
     default_editor_template = models.TextField(default="")
@@ -162,8 +162,8 @@ class InstructionTree(MPTTModel):
 class UserInstructionTree(MPTTModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, unique=True)
-    displayed_name = models.TextField(max_length=255, default="")
-    code = models.TextField(max_length=10, default="")
+    displayed_name = models.TextField(default="")
+    code = models.TextField(default="")
     instruct = models.TextField(default="")
     default_child = models.BooleanField(default=False)
     default_editor_template = models.TextField(default="")

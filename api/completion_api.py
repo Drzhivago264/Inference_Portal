@@ -84,7 +84,7 @@ async def textcompletion(request, data: PromptSchema):
                         else:
                             response = response.replace(
                                 processed_prompt, "")
-                            await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="prompt")
+                            await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatbot_api")
                             return 200, {'response': response,
                                          'context': context}
                     except httpx.ReadTimeout:

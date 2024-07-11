@@ -7,7 +7,7 @@ import openai
 import random
 
 from server.utils.sync_.inference import action_parse_json
-from server.utils.sync_.log_database import log_prompt_response
+from server.celery_tasks import celery_log_prompt_response
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.async_.async_manage_ec2 import (
     ManageEC2Mixin, 
@@ -41,8 +41,8 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                                     pass
                                 full_response = output
                     if full_response and isinstance(full_response, str):
-                        await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=full_response, type_="self_host_agent")
-                
+                        celery_log_prompt_response.delay(is_session_start_node=self.is_session_start_node, key_object_id=self.key_object.id, llm_id=llm.id, prompt=self.message, response=full_response, type_=self.p_type)
+
                 except httpx.TimeoutException:
                     await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
                 except httpx.ConnectError:
@@ -95,8 +95,9 @@ class AsyncInferenceOpenaiMixin:
             self.session_history.append(
                 {"role": "assistant", "content": f"{clean_response}"})
             if clean_response and isinstance(clean_response, str):
-                await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message,
-                                                                                response=clean_response, type_="open_ai")
+                celery_log_prompt_response.delay(is_session_start_node=self.is_session_start_node, key_object_id=self.key_object.id, llm_id=llm.id, prompt=self.message,
+                                                                                response=clean_response, type_=self.p_type)
+
 
     async def send_agent_request_openai_async(self, llm: LLM) -> str:
         clean_response = ""
@@ -147,4 +148,4 @@ class AsyncInferenceOpenaiMixin:
                         self.session_history.extend(prompt)
                         await self.send(text_data=json.dumps({"agent_action": action, "result_id": self.working_paragraph, "full_result": full_result}))
             if clean_response and isinstance(clean_response, str):
-                await sync_to_async(log_prompt_response, thread_sensitive=True)(is_session_start_node=self.is_session_start_node, key_object=self.key_object, llm=llm, prompt=self.message, response=clean_response, type_="open_ai")
+                celery_log_prompt_response.delay(is_session_start_node=self.is_session_start_node, key_object_id=self.key_object.id, llm_id=llm.id, prompt=self.message, response=clean_response, type_=self.p_type)

@@ -27,13 +27,14 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
         self.current_turn = 0
         self.session_history = []
         self.working_paragraph = ""
-        self.is_session_start_node = True
+        self.is_session_start_node = None
         self.user = self.scope['user']
         self.key_object = await sync_to_async(lambda: self.user.apikey)()
         self.choosen_model = ""
         self.agent_instruction = ""
         self.child_instruction = ""        
         self.room_group_name = "agent_%s" % self.url
+        self.p_type = "agent"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -122,6 +123,7 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
                     temperature = validated.temperature
                     agent_instruction += child_instruction
                     agent_inference.delay(
+                        type_ = self.p_type,
                         is_session_start_node=self.is_session_start_node,
                         unique=unique_response_id,
                         key=self.key_object.hashed_key,
@@ -170,7 +172,6 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
             if role == "Human" or role == "Server":
                 await self.send(text_data=json.dumps({"message": "\n" + message, "role": role,  "time": self.time}))
                 if role == "Human":
-                    self.is_session_start_node = False
                     unique_response_id = event['unique']
                     await self.send(text_data=json.dumps({"holder": "place_holder",  "holderid":  unique_response_id, "role": event['choosen_model'], "time": self.time, "credit": credit}))
             else:
