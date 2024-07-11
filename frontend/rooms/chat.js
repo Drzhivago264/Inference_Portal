@@ -58,7 +58,7 @@ function Chat() {
     const [lengthpenalty, setLengthPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-    const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
+   
     const [socket_destination, setSocketDestination] = useState("/ws/chat-async/");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const navigate = useNavigate();
@@ -157,9 +157,7 @@ function Chat() {
                                     <Box mb={2} mt={2} ml={1} mr={2}>
                                         <ChatExport
                                             chat_message={chat_message}
-                                            choosen_export_format_chatlog={choosen_export_format_chatlog}
-                                            setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
-                                            number_of_remove_message={2}
+                                            number_of_remove_message={1}
                                             setChatMessage={setChatMessage}
                                         >
                                         </ChatExport>

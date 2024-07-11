@@ -70,7 +70,7 @@ function Hotpot() {
     const [useragentmessage, setUserAgentMessage] = useState("");
     const [useragentmessageError, setUserAgentMessageError] = useState(false);
     const [max_turn, setMaxTurn] = useState(4)
-    const [currentparagraph, setCurrentParagraph] = useState(1);
+
     const [template_list, setTemplateList] = useState([]);
     const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
     const [default_parent_instruct, setParentInstruct] = useState("");
@@ -82,7 +82,7 @@ function Hotpot() {
     const [selectedIndex, setSelectedIndex] = React.useState(0);
 
     const navigate = useNavigate();
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const { is_authenticated } = useContext(UserContext);
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
         axios.all([
@@ -188,7 +188,7 @@ function Hotpot() {
             var data = {
                 'max_turn': max_turn,
                 'instruct_change': instruct_change,
-                'currentParagraph': currentparagraph,
+                'currentParagraph': 1,
                 'message': useragentmessage,
                 'choosen_model': choosen_agent_model,
                 'choosen_template': choosen_template,

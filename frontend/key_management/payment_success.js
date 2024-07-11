@@ -371,7 +371,7 @@ function KeyManagement() {
                             <Alert variant="outlined" severity="info">
                                 We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
                                 <li> To pay by Stripe, include the Key and Key Name in the form below and click Stripe. </li>
-                                <li> To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.) </li>
+                                <li>{` To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.) `}</li>
                             </Alert>
                             <Alert variant="outlined" severity="warning">
                                 <li> If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks. </li>

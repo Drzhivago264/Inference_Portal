@@ -1,3 +1,5 @@
+import React, {useState} from 'react';
+
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { FormControl } from '@mui/material';
@@ -5,37 +7,36 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Papa from 'papaparse';
-import React from 'react';
+import PropTypes from 'prop-types'
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 
 export const DatasetExport = ({
     filename,
     data,
-    choosen_export_format,
-    setChoosenExportFormat
-}) => {
 
+}) => {
+    const [choosen_export_format, setChoosenExportFormat] = useState(".json");
     const handleExportChatLog = (event) => {
         event.preventDefault()
+       
         var data_clone = [...data]
         var a = document.createElement('a')
         if (choosen_export_format == ".json") {
-            var download_content = JSON.stringify(data_clone)
-            var blob = new Blob([download_content], { type: "application/json" })
-            var url = URL.createObjectURL(blob)
+            let download_content = JSON.stringify(data_clone)
+            let blob = new Blob([download_content], { type: "application/json" })
+            let url = URL.createObjectURL(blob)
             a.setAttribute('href', url)
             a.setAttribute('download', `${filename}.json`)
 
         }
         else if (choosen_export_format == ".csv") {
-            var download_content = Papa.unparse(data)
-            var blob = new Blob([download_content]);
+            let download_content = Papa.unparse(data)
+            let blob = new Blob([download_content]);
             if (window.navigator.msSaveOrOpenBlob)  
                 window.navigator.msSaveBlob(blob, `${filename}.csv`);
             else
             {
-                var a = window.document.createElement("a");
                 a.href = window.URL.createObjectURL(blob, {type: "text/plain"});
                 a.download = `${filename}.csv`;
                 document.body.appendChild(a);
@@ -71,4 +72,9 @@ export const DatasetExport = ({
             </FormControl>
         </Box>
     )
+}
+
+DatasetExport.propTypes = {
+    data: PropTypes.array,
+    filename: PropTypes.string
 }

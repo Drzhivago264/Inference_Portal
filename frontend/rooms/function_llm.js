@@ -51,7 +51,6 @@ function FunctionLLM() {
     const [usermessageError, setUserMessageError] = useState(false);
     const [extrainstruction, setExtraInstruction] = useState("sadness, joy, love, anger, fear, surprise, neutral");
     const [llmfunction, setLLMFunction] = useState("emotion");
-    const [choosen_export_format_chatlog, setChoosenExportFormatChatLog] = useState(".json");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const navigate = useNavigate();
     const { is_authenticated } = useContext(UserContext);
@@ -180,7 +179,7 @@ function FunctionLLM() {
                                                 }
                                                 else {
                                                     return (
-                                                        <FormControlLabel value={func.value} control={<Radio />} label={func.label} />
+                                                        <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />
                                                     )
                                                 }
                                             }
@@ -215,8 +214,6 @@ function FunctionLLM() {
                                 <Box mb={2} mt={2} ml={1} mr={2}>
                                     <ChatExport
                                         chat_message={chat_message}
-                                        choosen_export_format_chatlog={choosen_export_format_chatlog}
-                                        setChoosenExportFormatChatLog={setChoosenExportFormatChatLog}
                                         number_of_remove_message={2}
                                         setChatMessage={setChatMessage}
                                     >

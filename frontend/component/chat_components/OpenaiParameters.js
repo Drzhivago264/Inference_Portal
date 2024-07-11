@@ -47,7 +47,7 @@ export const OpenAPIParameter = ({
     setMaxToken,
     max_turn,
     setMaxTurn }) => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     return (
         <Stack direction='column' spacing={0}>
             <FormControl  >

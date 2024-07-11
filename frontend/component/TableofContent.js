@@ -1,5 +1,7 @@
 import '../component/css/TableofContent.css'
-import React, { useState, useEffect, useRef, useContext } from 'react';
+
+import React, { useContext, useEffect, useRef, useState } from 'react';
+
 import { ColorModeContext } from '../App';
 
 const useHeadingsData = (mdfile) => {
@@ -87,7 +89,7 @@ const Headings = ({ headings, activeId, mode }) => (
 );
 
 const TableOfContents = ({ mdfile }) => {
-    const { colorMode, mode, theme } = useContext(ColorModeContext);
+    const {  mode } = useContext(ColorModeContext);
     
     const [activeId, setActiveId] = useState();
     const { nestedHeadings } = useHeadingsData(mdfile);

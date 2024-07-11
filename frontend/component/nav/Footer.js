@@ -61,7 +61,7 @@ export default function Footer() {
                                     height: 155,
                                     width: 155,
                                 }}
-                                onClick={(e)=>{navigate("/")}}
+                                onClick={()=>{navigate("/")}}
                                 alt="Big Logo."
                                 src="https://static.professorparakeet.com/image/apple-touch-icon.png"
                             />
@@ -70,7 +70,7 @@ export default function Footer() {
                                 variant="h5"
                                 noWrap
                                 component="a"
-                                onClick={(e)=>{navigate("/")}}
+                                onClick={()=>{navigate("/")}}
                                 sx={{
                                     mt: 2,
                                     display: { xs: 'none', md: 'flex' },

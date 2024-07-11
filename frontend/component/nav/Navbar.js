@@ -33,6 +33,7 @@ import i18next from "i18next";
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+
 const blue = Constant_Colours.blue;
 const grey = Constant_Colours.grey;
 
@@ -126,7 +127,7 @@ const Button = styled(BaseButton)(
 );
 
 const AvatarWithHover = styled(Avatar)(
-  ({ theme }) => `
+  `
   background: #CCC;
   &:hover {
     -webkit-filter: brightness(70%);
@@ -254,8 +255,8 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
       <UserVeticalNav navigate={setDestination} />
     </Box>
   );
-  const { colorMode, mode, theme } = useContext(ColorModeContext);
-  const { is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name } = useContext(UserContext);
+  const { colorMode, theme } = useContext(ColorModeContext);
+  const { is_authenticated, user_hashed_key, user_key_name } = useContext(UserContext);
 
   return (
     <Fade in={true} timeout={timeout}>
@@ -279,7 +280,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
             <Avatar
               alt="logo"
               src="https://static.professorparakeet.com/image/android-chrome-192x192.png"
-              onClick={(e)=>{navigate("/")}}
+              onClick={()=>{navigate("/")}}
               sx={{ width: 42, height: 42 }}
               variant="rounded"
             />
@@ -287,7 +288,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               variant="h6"
               noWrap
               component="a"
-              onClick={(e)=>{navigate("/")}}
+              onClick={()=>{navigate("/")}}
               sx={{
                 mr: 1,
                 mt:0.55,

@@ -37,7 +37,7 @@ export function redirect_anon_to_login(navigate, is_authenticated) {
 
 export function logout(setLoginState) {
     axios.get("/frontend-api/logout")
-        .then((response) => {
+        .then(() => {
             setLoginState(false)
         }).catch(error => {
             console.log(error)

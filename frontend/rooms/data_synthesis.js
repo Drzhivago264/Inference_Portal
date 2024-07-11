@@ -63,9 +63,7 @@ function DataSynthesis() {
     const [presencepenalty, setPresencePenalty] = useState(0);
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [shownthinking, setThinking] = useState(false);
-    const [is_early_stopping, setIsEarlyStopping] = useState(null);
     const [max_turn, setMaxTurn] = useState(null)
-    const [instruct_change, setInstructChange] = useState(false)
     const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
     const [filename, setFileName] = useState("No file loaded")
     const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Writer, you need to rewrite a given prompt following the instruction to produce a more complex version, you must directly provide the #Rewritten Prompt# and must not repeat the #Given Prompt#. You cannot omit the non-text parts such as the table and code in #Given Prompt#.\nInstruction:\n");
@@ -79,7 +77,7 @@ function DataSynthesis() {
         { label: "Deepening", default: "If #Given Prompt# contains inquiries about certain issues, the depth and breadth of the inquiry can be increased." },
         { label: "Breadth Evolving", default: "You should draw inspiration from the #Given Prompt# to create a brand new prompt.\nThis new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\nThe LENGTH and difficulty level of the #Created Prompt# should be similar to that of the #Given Prompt#." }
     ]);
-    const [choosen_export_format, setChoosenExportFormat] = useState(".json");
+    
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const [csv_row, setCSVRow] = useState([
@@ -293,7 +291,7 @@ function DataSynthesis() {
                                         <LoadingButton loadingPosition="start" loading={shownthinking} color="success" fullWidth variant="contained" onClick={() => { startSubmit(), setIsRunning(true) }} startIcon={<PlayCircleOutlineIcon />} disabled={is_running ? true : false} >
                                             Run
                                         </LoadingButton>
-                                        <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false), setIsEarlyStopping(true) }} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
+                                        <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false)}} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
                                     </Stack>
                                 </Box>
                             </Paper>
@@ -304,8 +302,6 @@ function DataSynthesis() {
                                 <Divider />
                                 <Box mb={2} mt={2} ml={1} mr={2}>
                                     <DatasetExport
-                                        choosen_export_format={choosen_export_format}
-                                        setChoosenExportFormat={setChoosenExportFormat}
                                         data={csv_row}
                                         filename={`Processed_${filename}_from_${from_row}_to_${to_row}`}
                                     >
@@ -364,7 +360,7 @@ function DataSynthesis() {
                                                 multiline
                                                 maxRows={6}
                                                 value={default_parent_instruct}
-                                                onChange={e => { setParentInstruct(e.target.value), setInstructChange(true) }}
+                                                onChange={e => { setParentInstruct(e.target.value) }}
                                                 variant="standard"
                                                 InputProps={{
                                                     startAdornment: <InputAdornment position="start">   </InputAdornment>,
@@ -437,7 +433,7 @@ function DataSynthesis() {
                                                 multiline
                                                 maxRows={4}
                                                 value={default_extra_instruct}
-                                                onChange={e => { setExtraInstruct(e.target.value), setInstructChange(true) }}
+                                                onChange={e => { setExtraInstruct(e.target.value)}}
                                                 variant="standard"
                                                 InputProps={{
                                                     startAdornment: <InputAdornment position="start">   </InputAdornment>

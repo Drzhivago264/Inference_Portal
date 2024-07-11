@@ -31,8 +31,8 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function Contact() {
-    const [showPassword, setShowPassword] = React.useState(false);
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const [showPassword, setShowPassword] = useState(false);
+    const { setIsAuthenticated } = useContext(UserContext);
     const navigate = useNavigate();
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
@@ -62,7 +62,7 @@ function Contact() {
                 key: key,
             }
             axios.post("/frontend-api/login", data, config)
-                .then((response) => {
+                .then(() => {
                     setIsAuthenticated(true)
                     navigate('/frontend/hub');
                 }).catch(error => {

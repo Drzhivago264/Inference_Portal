@@ -1,5 +1,5 @@
-import { multilineColumn } from "../MultipleLineEdittingDataGrid";
 import dayjs from 'dayjs'
+import { multilineColumn } from "../MultipleLineEdittingDataGrid";
 
 export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref) {
 
@@ -53,7 +53,7 @@ export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, set
             console.log(dataFromServer)
             if (dataFromServer['response_list'].length > 0) {
                 for (var i = 0; i < dataFromServer['response_list'].length; i++) {
-                    if (!column_ref.current.hasOwnProperty(`Evolved_Prompt_No_${i}`)) {
+                    if (!Object.prototype.hasOwnProperty.call(column_ref.current, `Evolved_Prompt_No_${i}`)) {
                         additional_column.push({
                             field: `Evolved_Prompt_No_${i}`,
                             headerName: `Evolved Prompt No.${i}`,

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -18,20 +18,12 @@ import Slide from '@mui/material/Slide';
 import { Stack } from '@mui/material';
 import { TypeWriterText } from '../component/AnimatedText'
 import Typography from '@mui/material/Typography';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 function Information() {
-    const { t, i18n } = useTranslation();
-    const isChrome = !!window.chrome;
-    const [destination, setDestination] = useState(null)
-    const navigate = useNavigate();
-    useEffect(() => {
-        if (destination) {
-            navigate(destination, { replace: true })
-        }
-    }, [destination]);
-    const { colorMode, mode, theme } = useContext(ColorModeContext);
+    const { t } = useTranslation();
+    const isChrome = !!window.chrome;  
+    const { mode, theme } = useContext(ColorModeContext);
     return (
         <Container maxWidth={false} disableGutters>
             <title>Introduction</title>
@@ -163,12 +155,12 @@ function Information() {
                                                 }}>
 
                                                     <Paper variant="outlined">
-                                                        <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                                                        <Typography variant='body1' style={{  display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                                                             {t('introduction.example_1')}
                                                         </Typography>
                                                         <Divider></Divider>
 
-                                                        <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+                                                        <TypeWriterText style={{ display: 'block', padding: '10px', lineHeight: 1.7, }}
                                                             sequence={[
                                                                 t('introduction.example_1_answer'),
                                                                 3000,
@@ -201,11 +193,11 @@ function Information() {
                                                     }
                                                 }}>
                                                     <Paper variant="outlined">
-                                                        <Typography variant='body1' style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                                                        <Typography variant='body1' style={{  display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                                                             {t('introduction.example_2')}
                                                         </Typography>
                                                         <Divider></Divider>
-                                                        <TypeWriterText style={{ whiteSpace: 'pre-line', display: 'block', padding: '10px', lineHeight: 1.7, }}
+                                                        <TypeWriterText style={{  display: 'block', padding: '10px', lineHeight: 1.7, }}
                                                             sequence={[
                                                                 t('introduction.example_2_answer'),
                                                                 3000,

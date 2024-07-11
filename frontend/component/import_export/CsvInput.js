@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import CachedIcon from '@mui/icons-material/Cached';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Papa from 'papaparse';
+import PropTypes from 'prop-types'
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -26,10 +27,10 @@ const CsvFileInput = ({ onFileLoad, filename, setFileName, from_row, to_row, set
     const handleFileChange = (e, is_fisrt_load) => {
         console.log(is_fisrt_load)
         if (is_fisrt_load) {
-            var file =  e.target.files[0]
+            var file = e.target.files[0]
             setFileName(e.target.files[0].name)
         }
-        else{
+        else {
             file = inputFile.current.files[0]
         }
         var preview_list = []
@@ -43,7 +44,7 @@ const CsvFileInput = ({ onFileLoad, filename, setFileName, from_row, to_row, set
                         preview_list.push(Object.assign({ id: preview_list.length }, result.data))
                         onFileLoad(preview_list)
                     }
-                    if (current_row == to_row){
+                    if (current_row == to_row) {
                         parser.abort()
                     }
                     current_row += 1
@@ -102,4 +103,15 @@ const CsvFileInput = ({ onFileLoad, filename, setFileName, from_row, to_row, set
             <Button fullWidth size='small' variant="contained" startIcon={<CachedIcon />} onClick={(e) => { handleFileChange(e, false) }}>Reload</Button>
         </Fragment>
     );
-}; export default CsvFileInput;
+};
+CsvFileInput.propTypes = {
+    onFileLoad: PropTypes.func,
+    filename: PropTypes.string,
+    setToRow: PropTypes.func,
+    from_row: PropTypes.number,
+    to_row: PropTypes.number,
+    setFromRow: PropTypes.func,
+    setFileName: PropTypes.func
+}
+
+export default CsvFileInput;
