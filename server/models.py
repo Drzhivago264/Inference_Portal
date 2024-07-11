@@ -26,7 +26,7 @@ class APIKEY(AbstractAPIKey):
     payment_id = models.CharField(max_length=400)
 
 class Crypto(models.Model):
-    coin = models.CharField(max_length=200)
+    coin = models.CharField(max_length=255)
     address = models.CharField(max_length=400)
     balance = models.FloatField(default=0.0)
     coin_usd_rate= models.FloatField(default=0.0)
@@ -46,8 +46,8 @@ class PaymentHistory(models.Model):
         return str(self.amount)
 
 class LLM(models.Model):
-    name = models.CharField(max_length=200)
-    base = models.CharField(max_length=200, blank=True, null=True)
+    name = models.CharField(max_length=255)
+    base = models.CharField(max_length=255, blank=True, null=True)
     size =  models.IntegerField(default=1)
     desc = models.TextField()
     chat_template = models.TextField(default="")
@@ -55,22 +55,22 @@ class LLM(models.Model):
     output_price = models.FloatField(default=0.0)
     agent_availability = models.BooleanField(default=False)
     is_self_host = models.BooleanField(default=True)
-    context_length = models.IntegerField(default=4096)
+    context_length = models.IntegerField(default=8192)
     max_history_length = models.IntegerField(default=0)
     def __str__(self) -> str:
         return self.name
 
 class InferenceServer(models.Model):
-    name = models.CharField(max_length=200)
-    instance_type = models.CharField(max_length=200)
-    url = models.URLField(max_length = 200) 
-    alternative_url = models.URLField(max_length = 200)
+    name = models.CharField(max_length=255)
+    instance_type = models.CharField(max_length=255)
+    url = models.URLField(max_length = 255) 
+    alternative_url = models.URLField(max_length = 255)
     hosted_model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     public_ip = models.GenericIPAddressField()
     private_ip = models.GenericIPAddressField()
-    status = models.CharField(max_length = 200, default="off")
+    status = models.CharField(max_length = 255, default="off")
     last_message_time = models.DateTimeField(default=now)
-    availability = models.CharField(max_length = 200, default="Not Available")
+    availability = models.CharField(max_length = 255, default="Not Available")
     def __str__(self) -> str:
         return self.name
         
@@ -85,12 +85,12 @@ class ProductTag(models.Model):
         return self.name
         
 class PromptResponse(models.Model):
-    prompt = models.CharField(max_length=4096)
-    response = models.CharField(max_length=4096)
+    prompt = models.CharField(max_length=8192)
+    response = models.CharField(max_length=8192)
     model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    p_type = models.CharField(max_length=4096, default="prompt")
+    p_type = models.CharField(max_length=8192, default="prompt")
     input_cost = models.FloatField(default=0.0)
     output_cost = models.FloatField(default=0.0)
     number_input_tokens = models.IntegerField(default=0)
@@ -111,7 +111,7 @@ class PromptResponse(models.Model):
                 "created_at": json.dumps(self.created_at, cls=DjangoJSONEncoder)}
 
 class Product(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=255)
     tags = models.ManyToManyField(ProductTag, blank=True)
     desc = models.TextField(_("Description"), blank=True)
     quantity = models.IntegerField(default=1)
@@ -132,13 +132,13 @@ class Price(models.Model):
         return f"{self.product.name} {self.price}"
 
 class MemoryTree(MPTTModel):
-    name = models.CharField(max_length=200, unique=True)
-    prompt = models.CharField(max_length=4096)
-    response = models.CharField(max_length=4096)
+    name = models.CharField(max_length=255, unique=True)
+    prompt = models.CharField(max_length=8192)
+    response = models.CharField(max_length=8192)
     model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    p_type = models.CharField(max_length=4096, default="prompt")
+    p_type = models.CharField(max_length=8192, default="prompt")
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     is_session_start_node = models.BooleanField(default=False)
     def __str__(self) -> str:
@@ -148,7 +148,7 @@ class MemoryTree(MPTTModel):
         order_insertion_by = ['created_at']
 
 class InstructionTree(MPTTModel):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=255, unique=True)
     code = models.CharField(max_length=10)
     instruct = models.TextField(default="")
     default_child = models.BooleanField(default=False)
@@ -161,8 +161,8 @@ class InstructionTree(MPTTModel):
     
 class UserInstructionTree(MPTTModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=200, unique=True)
-    displayed_name = models.TextField(max_length=200, default="")
+    name = models.CharField(max_length=255, unique=True)
+    displayed_name = models.TextField(max_length=255, default="")
     code = models.TextField(max_length=10, default="")
     instruct = models.TextField(default="")
     default_child = models.BooleanField(default=False)

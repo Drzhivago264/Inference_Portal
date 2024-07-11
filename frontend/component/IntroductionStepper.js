@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import Box from '@mui/material/Box';
+import PropTypes from 'prop-types'
 import Step from '@mui/material/Step';
 import StepContent from '@mui/material/StepContent';
 import StepLabel from '@mui/material/StepLabel';
@@ -12,7 +13,7 @@ export default function IntroductionVerticalLinearStepper({t}) {
   return (
     <Box sx={{ maxWidth: 400 }}>
       <Stepper orientation="vertical">
-        {t('introduction.stepper', { returnObjects: true }).map((step, index) => (
+        {t('introduction.stepper', { returnObjects: true }).map((step) => (
           <Step expanded={true} active={true} key={step.label}>
             <StepLabel>
               {step.label}
@@ -26,4 +27,8 @@ export default function IntroductionVerticalLinearStepper({t}) {
 
     </Box>
   );
+}
+
+IntroductionVerticalLinearStepper.propTypes = {
+  t: PropTypes.func,
 }

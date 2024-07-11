@@ -14,6 +14,7 @@ from celery.utils.log import get_task_logger
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.utils.timezone import datetime, timedelta
+from django.db.utils import DataError
 
 from decouple import config
 from botocore.exceptions import ClientError
@@ -29,7 +30,7 @@ from server.utils import constant
 from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.query_database import get_model_url
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
-from django.utils import timezone
+
 from server.models import (
     InferenceServer,
     Crypto,
@@ -79,41 +80,43 @@ def celery_log_prompt_response(is_session_start_node: bool | None, key_object_id
             llm.base)(response)['input_ids'])
         input_cost = number_input_token*llm.input_price
         output_cost = number_output_token*llm.output_price
+    try:
+        pair_save = PromptResponse(
+            prompt=prompt,
+            response=response,
+            key=key_object,
+            model=llm,
+            p_type=type_,
+            number_input_tokens=number_input_token,
+            number_output_tokens=number_output_token,
+            input_cost=input_cost,
+            output_cost=output_cost
+        )
+        pair_save.save()
+        if is_session_start_node is not None:
+            memory_tree_node_number = MemoryTree.objects.filter(
+                key=key_object).count()
+            if memory_tree_node_number == 0:
+                MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt,
+                                        response=response, model=llm, p_type=type_, is_session_start_node=True)
 
-    pair_save = PromptResponse(
-        prompt=prompt,
-        response=response,
-        key=key_object,
-        model=llm,
-        p_type=type_,
-        number_input_tokens=number_input_token,
-        number_output_tokens=number_output_token,
-        input_cost=input_cost,
-        output_cost=output_cost
-    )
-    pair_save.save()
-    if is_session_start_node is not None:
-        memory_tree_node_number = MemoryTree.objects.filter(
-            key=key_object).count()
-        if memory_tree_node_number == 0:
-            MemoryTree.objects.create(name=key_object.hashed_key, key=key_object, prompt=prompt,
-                                      response=response, model=llm, p_type=type_, is_session_start_node=True)
+            elif memory_tree_node_number > 0 and is_session_start_node:
+                most_similar_vector = vectordb.filter(
+                    metadata__key=key_object.hashed_key).search(prompt+response, k=2)
+                most_similar_prompt = most_similar_vector[1].content_object.prompt
+                most_similar_response = most_similar_vector[1].content_object.response
+                most_similar_node = MemoryTree.objects.filter(
+                    key=key_object, prompt=most_similar_prompt, response=most_similar_response).order_by("-created_at")[0]
+                MemoryTree.objects.create(name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}", parent=most_similar_node,
+                                        key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
 
-        elif memory_tree_node_number > 0 and is_session_start_node:
-            most_similar_vector = vectordb.filter(
-                metadata__key=key_object.hashed_key).search(prompt+response, k=2)
-            most_similar_prompt = most_similar_vector[1].content_object.prompt
-            most_similar_response = most_similar_vector[1].content_object.response
-            most_similar_node = MemoryTree.objects.filter(
-                key=key_object, prompt=most_similar_prompt, response=most_similar_response).order_by("-created_at")[0]
-            MemoryTree.objects.create(name=f"{prompt} -- session_start_at {timezone.now()}", parent=most_similar_node,
-                                      key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=True)
-
-        elif memory_tree_node_number > 0 and not is_session_start_node:
-            parent_node = MemoryTree.objects.filter(
-                key=key_object, is_session_start_node=True).latest('created_at')
-            MemoryTree.objects.create(name=f"{prompt} -- child_node_added_at {timezone.now()}", parent=parent_node,
-                                      key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)
+            elif memory_tree_node_number > 0 and not is_session_start_node:
+                parent_node = MemoryTree.objects.filter(
+                    key=key_object, is_session_start_node=True).latest('created_at')
+                MemoryTree.objects.create(name=f"{key_object.hashed_key} -- child_node_added_at {timezone.now()}", parent=parent_node,
+                                        key=key_object, prompt=prompt, response=response, model=llm, p_type=type_, is_session_start_node=False)
+    except DataError:
+        pass
 
 @shared_task
 def update_crypto_rate(coin: str):

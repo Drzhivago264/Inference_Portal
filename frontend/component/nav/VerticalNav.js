@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, { useContext } from "react";
 
 import ApiIcon from '@mui/icons-material/Api';
 import ArticleIcon from '@mui/icons-material/Article';
@@ -36,27 +36,27 @@ export const UserVeticalNav = ({ navigate }) => {
     }
     const redirect = (destination) => {
 
-            if (destination) {
-                const csrftoken = getCookie('csrftoken');
-                const config = {
-                    headers: {
-                        'content-type': 'application/json',
-                        'X-CSRFToken': csrftoken,
-                    }
+        if (destination) {
+            const csrftoken = getCookie('csrftoken');
+            const config = {
+                headers: {
+                    'content-type': 'application/json',
+                    'X-CSRFToken': csrftoken,
                 }
-                const data = {
-                    key: "",
-                    check_login: is_authenticated,
-                    destination: destination
-                }
-                axios.post("/frontend-api/hub-redirect", data, config)
-                    .then((response) => {
-                        navigate(response.data.redirect_link, { replace: true });
-                    }).catch(error => {
-                        console.log(error)
-                    });
             }
-        
+            const data = {
+                key: "",
+                check_login: is_authenticated,
+                destination: destination
+            }
+            axios.post("/frontend-api/hub-redirect", data, config)
+                .then((response) => {
+                    navigate(response.data.redirect_link, { replace: true });
+                }).catch(error => {
+                    console.log(error)
+                });
+        }
+
     }
     const logredirect = () => {
         const csrftoken = getCookie('csrftoken');
@@ -75,72 +75,70 @@ export const UserVeticalNav = ({ navigate }) => {
             .then((response) => {
                 navigate(response.data.redirect_link);
             }).catch(error => {
-
+                console.log(error)
             });
     }
-
+    const listItems = [
+        {
+            onClick: () => redirect("user-instruction"),
+            icon: <HistoryEduIcon />,
+            text: "Your Templates",
+            disabled: false,
+        },
+        {
+            onClick: () => other_redirect(""),
+            icon: <RuleIcon />,
+            text: "Your Oauth 2 Access Token(s)",
+            disabled: true,
+        },
+        {
+            onClick: logredirect,
+            icon: <StorageIcon />,
+            text: "Your Logs",
+            disabled: false,
+        },
+        {
+            onClick: null,
+            icon: <ReceiptIcon />,
+            text: "Your Payment History",
+            disabled: true,
+        },
+        {
+            onClick: () => other_redirect("/frontend/cost-monitoring"),
+            icon: <SavingsIcon />,
+            text: "Cost Monitoring",
+            disabled: false,
+        },
+        {
+            onClick: () => log_out_(setIsAuthenticated),
+            icon: <LogoutIcon color="error" />,
+            text: "Log Out",
+            disabled: false,
+            primaryTypographyProps: {
+                style: {
+                    color: "#f44336",
+                }
+            }
+        },
+    ];
     return (
-        <List>
-            <ListItemButton sx={{ height: 38 }} onClick={() => {redirect("user-instruction")}} >
-                <ListItemIcon>
-                    <HistoryEduIcon />
-                </ListItemIcon>
-                <ListItemText primaryTypographyProps={{
-                    fontWeight: 'medium',
-                    variant: 'body2',
-                }} primary="Your Templates" />
-            </ListItemButton>
-            <ListItemButton sx={{ height: 38 }} disabled onClick={() => {other_redirect("")}}>
-                <ListItemIcon>
-                    <RuleIcon />
-                </ListItemIcon>
-                <ListItemText primaryTypographyProps={{
-                    fontWeight: 'medium',
-                    variant: 'body2',
-                }} primary="Your Oauth 2 Access Token(s)" />
-            </ListItemButton>
-            <ListItemButton sx={{ height: 38 }} onClick={() => { logredirect() }}>
-                <ListItemIcon>
-                    <StorageIcon />
-                </ListItemIcon>
-                <ListItemText
-                    primaryTypographyProps={{
-                        fontWeight: 'medium',
-                        variant: 'body2',
-                    }}
-                    primary="Your Logs" />
-            </ListItemButton>
-            <ListItemButton sx={{ height: 38 }} disabled >
-                <ListItemIcon>
-                    <ReceiptIcon />
-                </ListItemIcon>
-                <ListItemText primaryTypographyProps={{
-                    fontWeight: 'medium',
-                    variant: 'body2',
-                }} primary="Your Payment History" />
-            </ListItemButton>
-            <ListItemButton sx={{ height: 38 }} onClick={() => {other_redirect("/frontend/cost-monitoring")}}>
-                <ListItemIcon>
-                    <SavingsIcon />
-                </ListItemIcon>
-                <ListItemText primaryTypographyProps={{
-                    fontWeight: 'medium',
-                    variant: 'body2',
-                }} primary="Cost Monitoring" />
-            </ListItemButton>
-            <ListItemButton sx={{ height: 38 }} onClick={() => { log_out_(setIsAuthenticated) }}>
-                <ListItemIcon>
-                    <LogoutIcon color="error" />
-                </ListItemIcon>
-                <ListItemText primaryTypographyProps={{
-                    fontWeight: 'medium',
-                    variant: 'body2',
-                    style: {
-                        color: "#f44336",
 
-                    }
-                }} primary="Log Out" />
-            </ListItemButton>
+        <List>
+            {listItems.map((item, index) => (
+                <ListItemButton key={index} sx={{ height: 38 }} onClick={item.onClick} disabled={item.disabled}>
+                    <ListItemIcon>
+                        {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                        primaryTypographyProps={{
+                            fontWeight: 'medium',
+                            variant: 'body2',
+                            ...item.primaryTypographyProps
+                        }}
+                        primary={item.text}
+                    />
+                </ListItemButton>
+            ))}
         </List>
 
     )
@@ -150,56 +148,28 @@ export const VerticalNav = ({ navigate }) => {
     const other_redirect = (destination) => {
         navigate(destination)
     }
+    const listItems = [
+        { redirect: "/frontend/key-management", icon: KeyIcon, text: "Manage Key" },
+        { redirect: "/frontend/api/docs", icon: ApiIcon, text: "APIs" },
+        { redirect: "/frontend/hub", icon: ChatIcon, text: "Inference" },
+        { redirect: "/frontend/manual/key", icon: ArticleIcon, text: "Manual" },
+        { redirect: "/frontend/model", icon: LayersIcon, text: "Models" },
+        { href: "https://construction.professorparakeet.com/", icon: PrecisionManufacturingIcon, text: "Construction Zone" },
+        { redirect: "/frontend/contact", icon: EmailIcon, text: "Contact Us" },
+    ];
     return (
         <List>
-            <ListItemButton onClick={() => {other_redirect("/frontend/key-management")}} >
-                <ListItemIcon>
-                    <KeyIcon />
-                </ListItemIcon>
-                <ListItemText primary="Manage Key" />
-            </ListItemButton>
-            <Divider component="li" />
-            <ListItemButton button onClick={() => {other_redirect("/frontend/api/docs")}}>
-                <ListItemIcon>
-                    <ApiIcon />
-                </ListItemIcon>
-                <ListItemText primary="APIs" />
-            </ListItemButton>
-            <Divider component="li" />
-            <ListItemButton button onClick={() => {other_redirect("/frontend/hub")}} >
-                <ListItemIcon>
-                    <ChatIcon />
-                </ListItemIcon>
-                <ListItemText primary="Inference" />
-            </ListItemButton>
-            <Divider component="li" />
-            <ListItemButton button onClick={() => {other_redirect("/frontend/manual/key")}} >
-                <ListItemIcon>
-                    <ArticleIcon />
-                </ListItemIcon>
-                <ListItemText primary="Manual" />
-            </ListItemButton>
-            <Divider component="li" />
-            <ListItemButton button onClick={() => {other_redirect("/frontend/model")}}>
-                <ListItemIcon>
-                    <LayersIcon />
-                </ListItemIcon>
-                <ListItemText primary="Models" />
-            </ListItemButton>
-            <Divider component="li" />
-            <ListItemButton button component={Link} href="https://construction.professorparakeet.com/">
-                <ListItemIcon>
-                    <PrecisionManufacturingIcon />
-                </ListItemIcon>
-                <ListItemText primary="Construction Zone" />
-            </ListItemButton>
-            <Divider component="li" />
-            <ListItemButton button onClick={() => {other_redirect("/frontend/contact")}}>
-                <ListItemIcon>
-                    <EmailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Contact Us" />
-            </ListItemButton>
+            {listItems.map((item, index) => (
+                <React.Fragment key={index}>
+                    <ListItemButton onClick={() => { item.redirect && other_redirect(item.redirect) }} component={item.href && Link} href={item.href}>
+                        <ListItemIcon>
+                            <item.icon />
+                        </ListItemIcon>
+                        <ListItemText primary={item.text} />
+                    </ListItemButton>
+                </React.Fragment>
+            ))
+            }
         </List>
     )
 };

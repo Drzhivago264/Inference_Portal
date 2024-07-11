@@ -272,7 +272,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               edge="start"
               color="inherit"
               aria-label="menu"
-              sx={{ mr: 2, display: { xs: 'block', sm: 'none' } }}
+              sx={{ mr: 2, display: { xs: 'block', sm: 'block', md: 'none' } }}
               onClick={toggleDrawer(true)}
             >
               <MenuIcon />
@@ -301,7 +301,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
             </Typography>
 
             <Dropdown>
-              <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>{t('navbar.Information')}</MenuButton>
+              <MenuButton sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>{t('navbar.Information')}</MenuButton>
               <Menu slots={{ listbox: Listbox }}>
                 <MenuItem_DropBox> <NavLink to="/">{t('navbar.Introduction')}</NavLink></MenuItem_DropBox>
                 <MenuItem_DropBox> <NavLink to="/frontend/manual/key">{t('navbar.Manual')}</NavLink></MenuItem_DropBox>
@@ -309,7 +309,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               </Menu>
             </Dropdown>
             <Dropdown>
-              <MenuButton sx={{ display: { xs: 'none', sm: 'block' } }}>{t('navbar.Modes')}</MenuButton>
+              <MenuButton sx={{ display: { xs: 'none', sm: 'none', md: 'block'  } }}>{t('navbar.Modes')}</MenuButton>
               <Menu slots={{ listbox: Listbox }}>
                 <MenuItem_DropBox ><NavLink to="/frontend/hub">{t('navbar.Bots_Agents')}</NavLink></MenuItem_DropBox>
                 <MenuItem_DropBox ><NavLink to="/frontend/api/docs">{t('navbar.API_Docs')}</NavLink></MenuItem_DropBox>
@@ -321,7 +321,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               onClick={(e) => redirect(e)}
               sx={{
                 textDecoration: 'none',
-                display: { xs: 'none', sm: 'block' }
+                display: { xs: 'none', sm: 'none', md: 'block'  }
               }}
             >
               {t('navbar.Manage_Key')}
@@ -332,7 +332,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               onClick={(e) => redirect(e)}
               sx={{
                 textDecoration: 'none',
-                display: { xs: 'none', sm: 'block' }
+                display: { xs: 'none', sm: 'none', md: 'block'  }
               }}
             >
               {t('navbar.Contact')}
