@@ -7,10 +7,11 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server.celery_tasks import inference
 from server.utils import constant
+
 from server.consumers.pydantic_validator import ChatSchema
+from server.utils.async_.async_query_database import QueryDBMixin
 
-
-class Consumer(AsyncWebsocketConsumer):
+class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
@@ -25,7 +26,10 @@ class Consumer(AsyncWebsocketConsumer):
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        await self.send(text_data=json.dumps({"message": f"You are currently using Celery backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully slow when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor", "role": "Server", "time": self.time}))
+        is_authorised = await self.check_permission(permission_code='server.allow_chat', destination="Chatbots")
+        if is_authorised:
+            await self.send(text_data=json.dumps({"message": f"You are currently using Celery backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully slow when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor", "role": "Server", "time": self.time}))
+ 
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -37,7 +41,7 @@ class Consumer(AsyncWebsocketConsumer):
             validated = ChatSchema.model_validate_json(text_data)
             if not self.key_object:
                 await self.send(text_data=json.dumps({"message": "Cannot find key, Disconnected! You need to login first", "role": "Server", "time": self.time}))
-                await self.disconnect(self)
+                await self.disconnect({'code': 3003})
             elif not validated.message.strip():
                 await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
             elif self.key_object and validated.message.strip():

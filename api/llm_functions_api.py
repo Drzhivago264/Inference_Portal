@@ -2,6 +2,7 @@ from ninja import Router
 from ninja.errors import HttpError
 from decouple import config
 import dspy
+from asgiref.sync import sync_to_async
 
 from server.utils.llm_toolbox import (
     Emotion,
@@ -26,10 +27,7 @@ from api.api_schema import (
 )
 from api.utils import get_model
 
-
-
 router = Router()
-
 
 @router.post("/predict/sentiment", tags=["LLM Functions"], summary="Predict Sentiment", response={200: BaseLLMResponseSchema, 401: Error, 442: Error, 404: Error, 429: Error})
 async def predict_sentiment(request, data: BaseLLMSchema):
@@ -39,6 +37,8 @@ async def predict_sentiment(request, data: BaseLLMSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -48,6 +48,9 @@ async def predict_sentiment(request, data: BaseLLMSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
+        raise HttpError(
+            401, "Your key is not authorised to use toolbox api")
     else:
         model = await get_model(data.model)
         if not model:
@@ -81,6 +84,8 @@ async def predict_emotion(request, data: ClassificationSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -90,6 +95,9 @@ async def predict_emotion(request, data: ClassificationSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
+        raise HttpError(
+            401, "Your key is not authorised to use toolbox api")
     else:
         model = await get_model(data.model)
         if not model:
@@ -130,6 +138,8 @@ async def paraphase(request, data: BaseLLMSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -139,6 +149,9 @@ async def paraphase(request, data: BaseLLMSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
+        raise HttpError(
+            401, "Your key is not authorised to use toolbox api")
     else:
         model = await get_model(data.model)
         if not model:
@@ -175,6 +188,8 @@ async def summarize_document(request, data: SummarizeSchema):
     You can choose to classify the document in a specific number of words with **number_of_word** parameter. 
     This number of words is only respected if it is smaller than the number of words decided by the model and presented in your document.
     """
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -184,6 +199,9 @@ async def summarize_document(request, data: SummarizeSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
+        raise HttpError(
+            401, "Your key is not authorised to use toolbox api")
     else:
         model = await get_model(data.model)
         if not model:
@@ -223,6 +241,8 @@ async def classify_document(request, data: ClassificationSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -232,6 +252,9 @@ async def classify_document(request, data: ClassificationSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
+        raise HttpError(
+            401, "Your key is not authorised to use toolbox api")
     else:
         model = await get_model(data.model)
         if not model:
@@ -273,6 +296,8 @@ async def restyle_document(request, data: RestyleSchema):
 
      The new style can be an adjective (e.g., **sad**) or multiple strings of adjectives (e.g., **professional**, **serious**)
     """
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -282,6 +307,9 @@ async def restyle_document(request, data: RestyleSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
+        raise HttpError(
+            401, "Your key is not authorised to use toolbox api")
     else:
         model = await get_model(data.model)
         if not model:

@@ -1,4 +1,6 @@
 import json
+import datetime
+
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils.timezone import now
@@ -6,16 +8,38 @@ from django.db import models
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
+
 from rest_framework_api_key.models import AbstractAPIKey
+from rest_framework_api_key.models import BaseAPIKeyManager
+from rest_framework_api_key.crypto import KeyGenerator
+
 from mptt.models import MPTTModel, TreeForeignKey
 
 User = settings.AUTH_USER_MODEL
 
-def get_image_filename(instance, filename):
-    name = instance.name
-    slug = slugify(name)
-    return f"products/{slug}-{filename}"
-    
+class CustomPermissionWithoutContentType(models.Model):
+            
+    class Meta:
+        
+        managed = False  # No database table creation or deletion  \
+                         # operations will be performed for this model. 
+                
+        default_permissions = () # disable "add", "change", "delete"
+                                 # and "view" default permissions
+
+        permissions = ( 
+            ('allow_chat', 'Global permission for chatroom'),  
+            ('allow_agent', 'Global permission for using agent'), 
+            ('allow_toolbox', 'Global permission for using toolbox'), 
+            ('allow_view_log', 'Global permission for viewing log'),
+            ('allow_chat_api', 'Global permission for chat api'),  
+            ('allow_agent_api', 'Global permission for using agent api'), 
+            ('allow_toolbox_api', 'Global permission for using toolbox api'), 
+            ('allow_view_cost', 'Global permission for viewing cost'),
+            ('allow_create_template', 'Global permission for creating template'),
+            ('allow_data_synthesis', 'Global permission for using data synthesis')
+        )
+
 class APIKEY(AbstractAPIKey):
     user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
     credit = models.FloatField(default=0.0) 
@@ -24,6 +48,24 @@ class APIKEY(AbstractAPIKey):
     updated_at = models.DateTimeField(auto_now=True)
     integrated_address = models.TextField(max_length=400)
     payment_id = models.TextField(max_length=400)
+    class Meta:
+        verbose_name = 'Master API Key'
+        verbose_name_plural = 'Master API Keys'
+        
+class FineGrainAPIKeyManager(BaseAPIKeyManager):
+    key_generator = KeyGenerator(prefix_length=12, secret_key_length=64)
+
+class FineGrainAPIKEY(AbstractAPIKey):
+    objects = FineGrainAPIKeyManager()
+    master_key = models.ForeignKey(APIKEY, null=True ,on_delete=models.CASCADE) #the APIKEY that create FineGrainAPIKey
+    user = models.OneToOneField(User, null=True ,on_delete=models.CASCADE) # the dummy account for the FineGrainAPIKEY 
+    created_at = models.DateTimeField(auto_now_add=True)
+    ttl = models.DurationField(default=datetime.timedelta(days=10))
+    first_three_char = models.TextField(default="???")
+    last_three_char = models.TextField(default="???")
+    class Meta:
+        verbose_name = 'FineGrain API Key'
+        verbose_name_plural = 'FineGrain API Keys'
 
 class Crypto(models.Model):
     coin = models.TextField()

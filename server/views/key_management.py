@@ -5,6 +5,7 @@ import requests
 import bleach
 import json
 
+from django.contrib.auth.models import Permission
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
@@ -45,6 +46,8 @@ from server.models import (
     Crypto,
     PaymentHistory,
 )
+from server.utils import constant
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @api_view(['GET'])
@@ -170,6 +173,11 @@ def generate_key_api(request: HttpRequest) -> Response:
         created_key = APIKEY.objects.get_from_key(key)
         hashed_key = created_key.hashed_key
         user = User.objects.create_user(hashed_key, '', hashed_key)
+
+        #Adding all permission for master user
+        permissions = Permission.objects.filter(codename__in=constant.DEFAULT_PERMISSION_CODENAMES)
+        user.user_permissions.add(*permissions)
+        
         created_key.user = user
         created_key.save()
         login(request, user)

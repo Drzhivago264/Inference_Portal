@@ -1,8 +1,13 @@
-from ninja import Router
-from server.utils import constant
-from ninja.errors import HttpError
 import httpx
 import random
+
+from ninja import Router
+from ninja.errors import HttpError
+
+from server.utils import constant
+
+from asgiref.sync import sync_to_async
+
 from api.api_schema import (
     Error,
     PromptResponse,
@@ -24,6 +29,8 @@ router = Router()
 
 @router.post("/completion", tags=["Inference"], summary="Text completion", response={200: PromptResponse, 401: Error, 442: Error, 404: Error, 429: Error})
 async def textcompletion(request, data: PromptSchema):
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -33,6 +40,9 @@ async def textcompletion(request, data: PromptSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_chat_api'):
+        raise HttpError(
+            401, "Your key is not authorised to use chat api")
     else:
         model = await get_model(data.model)
         if not model:
@@ -51,8 +61,7 @@ async def textcompletion(request, data: PromptSchema):
                     if best_of == 1:
                         best_of += 1
 
-                tokeniser = AutoTokenizer.from_pretrained(
-                    constant.TOKENIZER_TABLE[data.model])
+                tokeniser = AutoTokenizer.from_pretrained(model.base)
                 chat = [
                     {"role": "system", "content": "Complete the following sentence."},
                     {"role": "user", "content": f"{data.prompt}"},

@@ -41,7 +41,10 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
-        await self.send(text_data=json.dumps({"message": "You are currently using Async backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
+        is_authorised = await self.check_permission(permission_code='server.allow_toolbox', destination="Toolbox")
+        if is_authorised:
+            await self.send(text_data=json.dumps({"message": "You are currently using Async backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
+
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -54,7 +57,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
 
             if not self.key_object:
                 await self.send(text_data=json.dumps({"message": "Key is incorrect, disconnected! You need to log in first", "role": "Server", "time": self.time}))
-                await self.disconnect(self)
+                await self.disconnect({'code': 3003})
             elif not validated.message.strip():
                 await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
             elif self.key_object and validated.message.strip():

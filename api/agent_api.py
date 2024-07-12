@@ -34,6 +34,8 @@ router = Router()
 
 @router.post("/agent", tags=["Inference"], summary="Infer Agents", response={200: AgentResponse, 401: Error, 442: Error, 404: Error, 429: Error})
 async def agentcompletion(request, data: AgentSchema):
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -43,6 +45,9 @@ async def agentcompletion(request, data: AgentSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_agent_api'):
+        raise HttpError(
+            401, "Your key is not authorised to use agent api")
     else:
         model = await get_model(data.model)
         if not model:
@@ -87,8 +92,7 @@ async def agentcompletion(request, data: AgentSchema):
                         raise HttpError(
                             404, "child_template_name is incorrect")
 
-                tokeniser = AutoTokenizer.from_pretrained(
-                    constant.TOKENIZER_TABLE[data.model])
+                tokeniser = AutoTokenizer.from_pretrained(model.base)
                 if not data.working_memory:
                     chat = [
                         {"role": "system",
@@ -125,7 +129,7 @@ async def agentcompletion(request, data: AgentSchema):
                             else:
                                 response = response.replace(
                                     processed_prompt, "")
-                                await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="agent_api")
+                                await log_prompt_response(key_object=key_object, model=data.model, prompt=data.prompt, response=response, type_="agent_api")
                                 return 200, {
                                     'context': context,
                                     'parent_template_name': parent_template_name,
