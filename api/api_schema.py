@@ -112,7 +112,6 @@ class ChatResponse(Schema):
     response: str
     context: ChatSchema
 
-
 class AgentResponse(Schema):
     working_memory: list
     context: ChatSchema

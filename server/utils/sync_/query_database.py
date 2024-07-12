@@ -12,9 +12,6 @@ from server.models import (
 )
 from server.utils import constant
 
-
-
-
 def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
     try:
         server_list = cache.get(f"{model}_link_list")
@@ -43,14 +40,10 @@ def get_model(model: str) -> QuerySet[LLM] | bool:
 
 
 def get_chat_context(llm: LLM, key_object: APIKEY, raw_prompt: str, current_history_length: int, tokeniser: object) -> str | list:
-
     hashed_key = key_object.hashed_key
     message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=llm.name).search(
         raw_prompt, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT)
-
-
     max_history_length = llm.max_history_length
-
     full_instruct_list = []
     for mess in message_list_vector:
         if mess.distance <= constant.DEFAULT_MAX_DISTANCE:

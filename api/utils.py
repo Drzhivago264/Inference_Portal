@@ -1,42 +1,42 @@
 import json
-import boto3
 import httpx
+
 from server.utils import constant
 from server.models import (
     InferenceServer,
     LLM,
+    APIKEY,
     PromptResponse,
     UserInstructionTree,
     InstructionTree
 )
-from django.utils import timezone
-from django.db.models.query import QuerySet
-from asgiref.sync import sync_to_async
-from decouple import config
-from botocore.exceptions import ClientError
-from vectordb import vectordb
+from server.celery_tasks import celery_log_prompt_response
 
-async def get_system_template(name: str):
+
+from asgiref.sync import sync_to_async
+from ninja.errors import HttpError
+
+from api.api_schema import ChatSchema, AgentSchema
+
+async def check_permission(user_object, permission, destination):
+    if not await sync_to_async(user_object.has_perm)(permission):
+        raise HttpError(
+            401, f"Your key is not authorised to use {destination} api")
+
+async def get_system_template(name: str) -> str:
     try:
         template = await InstructionTree.objects.aget(name=name)
         return template.instruct
     except InstructionTree.DoesNotExist:
-        raise InstructionTree.DoesNotExist
+        raise HttpError(404, f"template: {name} is incorrect")
 
 
-async def get_user_template(name: str, user_object: object):
+async def get_user_template(name: str, user_object: object) -> str:
     try:
         template = await UserInstructionTree.objects.aget(displayed_name=name, user=user_object)
         return template.instruct
     except UserInstructionTree.DoesNotExist:
-        raise UserInstructionTree.DoesNotExist
-
-
-async def get_model(model: str) -> QuerySet[LLM] | bool:
-    try:
-        return await LLM.objects.aget(name=model)
-    except LLM.DoesNotExist:
-        return False
+        raise HttpError(404, f"template: {name} is incorrect")
 
 
 async def get_model_url(model: str) -> list | bool:
@@ -49,93 +49,14 @@ async def get_model_url(model: str) -> list | bool:
     except:
         return False
 
-
-async def update_server_status_in_db(instance_id: str, update_type: str) -> None:
-    ser_obj = await InferenceServer.objects.aget(name=instance_id)
-    if update_type == "status":
-        ser_obj.status = "pending"
-        await ser_obj.asave()
-    elif update_type == "time":
-        ser_obj.last_message_time = timezone.now()
-        await ser_obj.asave()
-    return
-
-
-@sync_to_async
-def command_EC2(instance_id: str, region: str, action: str) -> None | str:
-
-    aws = config("aws_access_key_id")
-    aws_secret = config("aws_secret_access_key")
-    ec2 = boto3.client('ec2', region_name=region,
-                       aws_access_key_id=aws, aws_secret_access_key=aws_secret)
-    if action == "on":
-        try:
-            ec2.start_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if 'DryRunOperation' not in str(e):
-                raise
-        try:
-            ec2.start_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-    elif action == "off":
-        try:
-            ec2.stop_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if 'DryRunOperation' not in str(e):
-                raise
-        try:
-            ec2.stop_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-    elif action == "reboot":
-        try:
-            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if 'DryRunOperation' not in str(e):
-                raise
-        try:
-            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-        return
-
-
-@sync_to_async
-def get_chat_context(model: LLM, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
-    hashed_key = key_object.hashed_key
-    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model.name).search(
-        raw_prompt, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT)
-    max_history_length = model.max_history_length
-    full_instruct_list = []
-    for mess in message_list_vector:
-        full_instruct_list += [
-            {'role': 'user', 'content': f'{mess.content_object.prompt}'},
-            {'role': 'assistant', 'content': f'{mess.content_object.response}'}
-        ]
-        current_history_length += len(tokeniser.encode(
-            mess.content_object.prompt + " " + mess.content_object.response))
-        if current_history_length > int(max_history_length):
-            full_instruct_list = full_instruct_list[:-2 or None]
-    return full_instruct_list
-
-
-async def log_prompt_response(key_object: object, model: str, prompt: str, response: str, type_: str) -> None:
-    llm = await LLM.objects.aget(name=model)
-    pair_save = PromptResponse(
-        prompt=prompt, response=response, key=key_object, model=llm, p_type=type_)
-    await pair_save.asave()
-
-
-async def send_request_async(url, context: dict):
+async def send_request_async(url: str, context: dict):
     async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=constant.RETRY), timeout=constant.TIMEOUT) as client:
         response = await client.post(url, json=context)
         response = response.json(
         )['text'][0] if response.status_code == 200 else None
         return response
 
-
-async def send_stream_request_async(url: str, context: object, processed_prompt: str, request: object, data: object):
+async def send_stream_request_async(url: str, context: dict, processed_prompt: str, key_object: APIKEY, model: LLM, data: ChatSchema ):
     client = httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(
         retries=constant.RETRY), timeout=constant.TIMEOUT)
     full_response = ""
@@ -150,12 +71,13 @@ async def send_stream_request_async(url: str, context: object, processed_prompt:
                     full_response = output
                 except json.decoder.JSONDecodeError:
                     pass
-        await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="chat_api")
+        celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=key_object.id, llm_id=model.id, prompt=data.prompt, response=response, type_='chat_api')
+
     except httpx.ReadTimeout:
         raise httpx.ReadTimeout
 
 
-async def send_stream_request_agent_async(url: str, context: object, processed_prompt: str, request: object, data: object, parent_template_name: str | None, child_template_name: str | None, working_nemory: list, use_my_template: str):
+async def send_stream_request_agent_async(url: str, context: dict, processed_prompt: str, key_object: APIKEY, model: LLM, data: AgentSchema, parent_template_name: str | None, child_template_name: str | None, working_nemory: list, use_my_template: str):
     client = httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(
         retries=constant.RETRY), timeout=constant.TIMEOUT)
     full_response = ""
@@ -174,8 +96,8 @@ async def send_stream_request_agent_async(url: str, context: object, processed_p
                                'child_template_name': child_template_name}) + "\n"
                     full_response = output
                 except:
-                    pass
-        await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=full_response, type_="agent_room")
+                    pass                                
+        celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=key_object.id, llm_id=model.id, prompt=data.prompt, response=response, type_='agent_api')
     except httpx.ReadTimeout:
         raise httpx.ReadTimeout
 

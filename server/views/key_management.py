@@ -350,13 +350,11 @@ class StripeWebhookView(View):
             return HttpResponse(status=400)
 
         if event["type"] == "checkout.session.completed":
-            print("Payment successful")
             session = event["data"]["object"]
             customer_email = session["customer_details"]["email"]
             product_id = session["metadata"]["product_id"]
             name = session["metadata"]["name"]
             key = session["metadata"]["key"]
-            print(session["metadata"]["price"], session["metadata"]["price"])
             c = float(session["metadata"]["price"]) * \
                 float(session["metadata"]["quantity"])
             k = APIKEY.objects.get_from_key(key)

@@ -4,6 +4,10 @@ from ninja import Router
 from ninja.errors import HttpError
 
 from server.utils import constant
+from server.utils.sync_.query_database import get_chat_context
+from server.celery_tasks import celery_log_prompt_response, command_EC2
+from server.utils.async_.async_query_database import QueryDBMixin
+from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 
 from django.http import StreamingHttpResponse
 from django_ratelimit.core import is_ratelimited
@@ -16,25 +20,23 @@ from api.api_schema import (
     ChatSchema,
 )
 from api.utils import (
-    get_model,
     get_model_url,
-    command_EC2,
-    update_server_status_in_db,
-    log_prompt_response,
     send_request_async,
-    get_chat_context,
-    send_stream_request_async
+    send_stream_request_async,
+    check_permission
 )
 
 from transformers import AutoTokenizer
 
 router = Router()
 
-
 @router.post("/chat", tags=["Inference"], summary="Infer Chatbots", response={200: ChatResponse, 401: Error, 442: Error, 404: Error, 429: Error})
 async def chatcompletion(request, data: ChatSchema):
     key_object =  request.auth
     user_object = await sync_to_async(lambda: key_object.user)()
+    query_db_mixin = QueryDBMixin()
+    await check_permission(user_object=user_object, permission='server.allow_chat_api', destination='chat')
+    
     if is_ratelimited(
         request,
         group="text_completion",
@@ -44,12 +46,8 @@ async def chatcompletion(request, data: ChatSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
-    elif not await sync_to_async(user_object.has_perm)('server.allow_chat_api'):
-        print(await sync_to_async(user_object.has_perm)('server.allow_chat_api'))
-        raise HttpError(
-            401, "Your key is not authorised to use chat api")
     else:
-        model = await get_model(data.model)
+        model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
@@ -70,7 +68,7 @@ async def chatcompletion(request, data: ChatSchema):
                 inputs = tokeniser(data.prompt)
                 current_history_length = len(inputs['input_ids'])
                 if data.include_memory:
-                    chat_history = await get_chat_context(model=model, key_object=request.auth, raw_prompt=data.prompt, agent_availability=False, current_history_length=current_history_length, tokeniser=tokeniser)
+                    chat_history = await sync_to_async(get_chat_context)(llm=model, key_object=request.auth, raw_prompt=data.prompt, current_history_length=current_history_length, tokeniser=tokeniser)
                     chat = [
                         {"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"}]
                     prompt_ = {"role": "user", "content": f"{data.prompt}"}
@@ -107,17 +105,18 @@ async def chatcompletion(request, data: ChatSchema):
                     "stream": data.stream,
                     "use_beam_search": data.beam,
                 }
-                await update_server_status_in_db(instance_id=inference_server.name, update_type="time")
+                await update_server_status_in_db_async(instance_id=inference_server.name, update_type="time")
                 if server_status == "running":
                     if not data.stream:
                         try:
                             response = await send_request_async(inference_server.url, context)
                             if not response:
-                                raise HttpError(404, "Time Out! Slow down")
+                                raise HttpError(404, "Time Out!")
                             else:
                                 response = response.replace(
                                     processed_prompt, "")
-                                await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatbot_api")
+                                celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=key_object.id, llm_id=model.id, prompt=data.prompt, response=response, type_='chatbot_api')
+
                                 return 200, {'response': response,
                                              'context': context}
                         except httpx.ReadTimeout:
@@ -125,15 +124,15 @@ async def chatcompletion(request, data: ChatSchema):
                     else:
                         try:
                             res = StreamingHttpResponse(send_stream_request_async(url=inference_server.url, context=context,
-                                                        processed_prompt=processed_prompt, request=request, data=data), content_type="text/event-stream")
+                                                        processed_prompt=processed_prompt, key_object=key_object, model=model, data=data), content_type="text/event-stream")
                             res['X-Accel-Buffering'] = 'no'
                             res['Cache-Control'] = 'no-cache'
                             return res
                         except:
                             raise HttpError(404, "Time Out! Slow down")
                 elif server_status == "stopped" or "stopping":
-                    await command_EC2(inference_server.name, region=constant.REGION, action="on")
-                    await update_server_status_in_db(
+                    command_EC2.delay(inference_server.name, region=constant.REGION, action="on")
+                    await update_server_status_in_db_async(
                         instance_id=inference_server.name, update_type="status")
                     raise HttpError(
                         442, "Server is starting up, try again in 400 seconds")
