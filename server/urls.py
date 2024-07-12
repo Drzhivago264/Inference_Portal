@@ -71,6 +71,8 @@ urlpatterns = [
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/cost-monitoring/',
          TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/token-management',
+         TemplateView.as_view(template_name='frontend_index.html')),
 
     path('frontend-api/cost/<str:startdate>/<str:enddate>/', cost_api, name='cost'),
     path('frontend-api/model/',  model_api, name='model'),
@@ -90,6 +92,7 @@ urlpatterns = [
     path('frontend-api/logout', log_out, name='logout'),
     path('frontend-api/login', log_in, name='login'),
     path('frontend-api/memory-tree', memory_tree_api, name='memory-tree'),
+    
 
 
     path('frontend-api/get-user-instruction',
