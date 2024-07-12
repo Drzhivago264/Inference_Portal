@@ -19,6 +19,7 @@ const Agent = lazy(() => import("./rooms/agent.js"));
 const Chat = lazy(() => import("./rooms/chat.js"));
 const Contact = lazy(() => import("./contact/contact.js"));
 const KeyManagement = lazy(() => import("./key_management/key_management.js"));
+const TokenManagement = lazy(() => import("./key_management/token_management.js"));
 const Hotpot = lazy(() => import("./rooms/hotpot.js"));
 const FunctionLLM = lazy(() => import("./rooms/function_llm.js"));
 const Manual = lazy(() => import("./information/manual.js"));
@@ -121,6 +122,7 @@ export default function App() {
                 <Route path="/frontend/api/docs" element={<APIDocPage />} />
                 <Route path="/frontend/model" element={<ModelInforPage />} />
                 <Route path="/frontend/key-management" element={<KeyManagementPage />} />
+                <Route path="/frontend/token-management" element={<TokenManagementPage />} />
                 <Route path="/frontend/hub" element={<HubPage />} />
                 <Route path="/frontend/payment-success" element={<PaymentSuccessPage />} />
                 <Route path="/frontend/chat" element={<ChatPage />} />
@@ -186,6 +188,13 @@ const KeyManagementPage = () => (
     <KeyManagement />
   </Suspense>
 );
+
+const TokenManagementPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <TokenManagement />
+  </Suspense>
+);
+
 
 const FunctionLLMPage = () => (
   <Suspense fallback={<LinearProgress />}>
