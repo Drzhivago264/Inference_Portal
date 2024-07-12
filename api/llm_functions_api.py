@@ -1,9 +1,11 @@
+import dspy
+
 from ninja import Router
 from ninja.errors import HttpError
 from decouple import config
-import dspy
 from asgiref.sync import sync_to_async
 
+from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.llm_toolbox import (
     Emotion,
     TopicClassification,
@@ -25,7 +27,7 @@ from api.api_schema import (
     BaseLLMResponseSchema,
     ClassificationResponseSchema
 )
-from api.utils import get_model
+from api.utils import check_permission
 
 router = Router()
 
@@ -39,6 +41,8 @@ async def predict_sentiment(request, data: BaseLLMSchema):
     """
     key_object =  request.auth
     user_object = await sync_to_async(lambda: key_object.user)()
+    query_db_mixin = QueryDBMixin()
+    await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
         request,
         group="text_completion",
@@ -48,11 +52,8 @@ async def predict_sentiment(request, data: BaseLLMSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
-    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
-        raise HttpError(
-            401, "Your key is not authorised to use toolbox api")
     else:
-        model = await get_model(data.model)
+        model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
@@ -86,6 +87,8 @@ async def predict_emotion(request, data: ClassificationSchema):
     """
     key_object =  request.auth
     user_object = await sync_to_async(lambda: key_object.user)()
+    query_db_mixin = QueryDBMixin()
+    await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
         request,
         group="text_completion",
@@ -95,11 +98,8 @@ async def predict_emotion(request, data: ClassificationSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
-    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
-        raise HttpError(
-            401, "Your key is not authorised to use toolbox api")
     else:
-        model = await get_model(data.model)
+        model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
@@ -140,6 +140,8 @@ async def paraphase(request, data: BaseLLMSchema):
     """
     key_object =  request.auth
     user_object = await sync_to_async(lambda: key_object.user)()
+    query_db_mixin = QueryDBMixin()
+    await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
         request,
         group="text_completion",
@@ -149,11 +151,8 @@ async def paraphase(request, data: BaseLLMSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
-    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
-        raise HttpError(
-            401, "Your key is not authorised to use toolbox api")
     else:
-        model = await get_model(data.model)
+        model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
@@ -190,6 +189,8 @@ async def summarize_document(request, data: SummarizeSchema):
     """
     key_object =  request.auth
     user_object = await sync_to_async(lambda: key_object.user)()
+    query_db_mixin = QueryDBMixin()
+    await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
         request,
         group="text_completion",
@@ -199,11 +200,9 @@ async def summarize_document(request, data: SummarizeSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
-    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
-        raise HttpError(
-            401, "Your key is not authorised to use toolbox api")
+
     else:
-        model = await get_model(data.model)
+        model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
@@ -243,6 +242,8 @@ async def classify_document(request, data: ClassificationSchema):
     """
     key_object =  request.auth
     user_object = await sync_to_async(lambda: key_object.user)()
+    query_db_mixin = QueryDBMixin()
+    await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
         request,
         group="text_completion",
@@ -252,11 +253,8 @@ async def classify_document(request, data: ClassificationSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
-    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
-        raise HttpError(
-            401, "Your key is not authorised to use toolbox api")
     else:
-        model = await get_model(data.model)
+        model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
@@ -298,6 +296,8 @@ async def restyle_document(request, data: RestyleSchema):
     """
     key_object =  request.auth
     user_object = await sync_to_async(lambda: key_object.user)()
+    query_db_mixin = QueryDBMixin()
+    await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
         request,
         group="text_completion",
@@ -307,11 +307,8 @@ async def restyle_document(request, data: RestyleSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
-    elif not await sync_to_async(user_object.has_perm)('server.allow_toolbox_api'):
-        raise HttpError(
-            401, "Your key is not authorised to use toolbox api")
     else:
-        model = await get_model(data.model)
+        model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:

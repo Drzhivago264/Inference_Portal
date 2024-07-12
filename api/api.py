@@ -14,7 +14,7 @@ from api.api_schema import (
     ResponseLogRequest,
     ResponseLogResponse,
 )
-from api.utils import query_response_log
+from api.utils import query_response_log, check_permission
 from api.completion_api import router as completion_router
 from api.chat_api import router as chat_router
 from api.agent_api import router as agent_router
@@ -40,6 +40,9 @@ api.add_router("/", llm_function_router)
 
 @api.post("/responselog", tags=["Log"], summary="Get log", response={200: List[ResponseLogResponse], 401: Error, 429: Error})
 async def log(request, data: ResponseLogRequest):
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
+    await check_permission(user_object=user_object, permission='server.allow_view_log', destination='log')
     if is_ratelimited(
         request,
         group="log",

@@ -17,7 +17,6 @@ class QueryDBMixin:
 
     async def check_permission(self, permission_code, destination):
         if await sync_to_async(self.user.has_perm)(permission_code):
-            print(sync_to_async(self.user.has_perm)(permission_code))
             return True
         else:
             await self.send(text_data=json.dumps({"message": f"Your key is not authorised to use {destination}. Disconnected", "role": "Server", "time": self.time}))
@@ -50,9 +49,9 @@ class QueryDBMixin:
         except InstructionTree.DoesNotExist or UserInstructionTree.DoesNotExist:
             return False
         
-    async def get_model(self) -> QuerySet[LLM] | bool:
+    async def get_model(self, name = None) -> QuerySet[LLM] | bool:
         try:
-            return await LLM.objects.aget(name=self.choosen_model)
+            return await LLM.objects.aget(name=self.choosen_model if name is None else name)
         except LLM.DoesNotExist:
             return False
         
@@ -62,12 +61,15 @@ class QueryDBMixin:
             async for m in InferenceServer.objects.filter(
                     hosted_model__name=self.choosen_model, availability="Available"):
                 model_list.append(m)
-            random_url = random.choice(model_list)
-            url = random_url.url
-            instance_id = random_url.name
-            server_status = random_url.status
-            return url, instance_id, server_status
-        except Exception as e:
+            if model_list:
+                random_url = random.choice(model_list)
+                url = random_url.url
+                instance_id = random_url.name
+                server_status = random_url.status
+                return url, instance_id, server_status
+            else:
+                return False, False, False
+        except IndexError:
             return False, False, False
 
 

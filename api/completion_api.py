@@ -5,6 +5,9 @@ from ninja import Router
 from ninja.errors import HttpError
 
 from server.utils import constant
+from server.celery_tasks import celery_log_prompt_response, command_EC2
+from server.utils.async_.async_query_database import QueryDBMixin
+from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 
 from asgiref.sync import sync_to_async
 
@@ -14,12 +17,9 @@ from api.api_schema import (
     PromptSchema,
 )
 from api.utils import (
-                    get_model,
                     get_model_url,
-                    command_EC2,
-                    update_server_status_in_db,
-                    log_prompt_response,
-                    send_request_async
+                    send_request_async,
+                    check_permission
                     )
 
 from django_ratelimit.core import is_ratelimited
@@ -31,6 +31,8 @@ router = Router()
 async def textcompletion(request, data: PromptSchema):
     key_object =  request.auth
     user_object = await sync_to_async(lambda: key_object.user)()
+    query_db_mixin = QueryDBMixin()
+    await check_permission(user_object=user_object, permission='server.allow_chat_api', destination='chat')
     if is_ratelimited(
         request,
         group="text_completion",
@@ -40,11 +42,8 @@ async def textcompletion(request, data: PromptSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
-    elif not await sync_to_async(user_object.has_perm)('server.allow_chat_api'):
-        raise HttpError(
-            401, "Your key is not authorised to use chat api")
     else:
-        model = await get_model(data.model)
+        model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
@@ -56,10 +55,10 @@ async def textcompletion(request, data: PromptSchema):
                 server_status = inference_server.status
                 if not data.beam:
                     best_of = 1
+                elif data.beam and data.best_of <= 1:
+                    best_of = 2
                 else:
                     best_of = data.best_of
-                    if best_of == 1:
-                        best_of += 1
 
                 tokeniser = AutoTokenizer.from_pretrained(model.base)
                 chat = [
@@ -84,7 +83,7 @@ async def textcompletion(request, data: PromptSchema):
                     "early_stopping": data.early_stopping if data.beam else False,
 
                 }
-                await update_server_status_in_db(instance_id=inference_server.name, update_type="time")
+                await update_server_status_in_db_async(instance_id=inference_server.name, update_type="time")
                 if server_status == "running":
                     try:
                         response = await send_request_async(inference_server.url, context)
@@ -93,14 +92,14 @@ async def textcompletion(request, data: PromptSchema):
                         else:
                             response = response.replace(
                                 processed_prompt, "")
-                            await log_prompt_response(key_object=request.auth, model=data.model, prompt=data.prompt, response=response, type_="chatbot_api")
+                            celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=key_object.id, llm_id=model.id, prompt=data.prompt, response=response, type_='chatbot_api')
                             return 200, {'response': response,
                                          'context': context}
                     except httpx.ReadTimeout:
                         raise HttpError(404, "Time Out! Slow down")
                 elif server_status == "stopped" or "stopping":
-                    await command_EC2(inference_server.name, region=constant.REGION, action="on")
-                    await update_server_status_in_db(
+                    command_EC2.delay(inference_server.name, region=constant.REGION, action="on")
+                    await update_server_status_in_db_async(
                         instance_id=inference_server.name, update_type="status")
                     raise HttpError(
                         442, "Server is starting up, try again in 400 seconds")
