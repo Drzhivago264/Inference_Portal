@@ -14,6 +14,7 @@ from .models import (
     MemoryTree,
     InstructionTree,
     UserInstructionTree,
+    FineGrainAPIKEY
 )
 from mptt.admin import DraggableMPTTAdmin
 
@@ -32,6 +33,9 @@ class ProductAdmin(admin.ModelAdmin):
 class APIKEYModelAdmin(APIKeyModelAdmin):
     pass
 
+@admin.register(FineGrainAPIKEY)
+class FineGrainAPIKEYModelAdmin(APIKeyModelAdmin):
+    pass
 
 admin.site.register(ProductTag)
 admin.site.register(Price)

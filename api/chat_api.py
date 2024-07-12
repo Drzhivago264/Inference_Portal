@@ -4,10 +4,11 @@ from ninja import Router
 from ninja.errors import HttpError
 
 from server.utils import constant
-from server.celery_tasks import celery_log_prompt_response
 
 from django.http import StreamingHttpResponse
 from django_ratelimit.core import is_ratelimited
+
+from asgiref.sync import sync_to_async
 
 from api.api_schema import (
     Error,
@@ -32,6 +33,8 @@ router = Router()
 
 @router.post("/chat", tags=["Inference"], summary="Infer Chatbots", response={200: ChatResponse, 401: Error, 442: Error, 404: Error, 429: Error})
 async def chatcompletion(request, data: ChatSchema):
+    key_object =  request.auth
+    user_object = await sync_to_async(lambda: key_object.user)()
     if is_ratelimited(
         request,
         group="text_completion",
@@ -41,6 +44,10 @@ async def chatcompletion(request, data: ChatSchema):
     ):
         raise HttpError(
             429, "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.")
+    elif not await sync_to_async(user_object.has_perm)('server.allow_chat_api'):
+        print(await sync_to_async(user_object.has_perm)('server.allow_chat_api'))
+        raise HttpError(
+            401, "Your key is not authorised to use chat api")
     else:
         model = await get_model(data.model)
         if not model:
@@ -57,14 +64,13 @@ async def chatcompletion(request, data: ChatSchema):
                 elif data.beam and data.best_of <= 1:
                     best_of = 2
                 else:
-                    best_of=data.best_of
+                    best_of = data.best_of
 
-                tokeniser = AutoTokenizer.from_pretrained(
-                    constant.TOKENIZER_TABLE[data.model])
+                tokeniser = AutoTokenizer.from_pretrained(model.base)
                 inputs = tokeniser(data.prompt)
                 current_history_length = len(inputs['input_ids'])
                 if data.include_memory:
-                    chat_history = await get_chat_context(model=data.model, key_object=request.auth, raw_prompt=data.prompt, agent_availability=False, current_history_length=current_history_length, tokeniser=tokeniser)
+                    chat_history = await get_chat_context(model=model, key_object=request.auth, raw_prompt=data.prompt, agent_availability=False, current_history_length=current_history_length, tokeniser=tokeniser)
                     chat = [
                         {"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"}]
                     prompt_ = {"role": "user", "content": f"{data.prompt}"}

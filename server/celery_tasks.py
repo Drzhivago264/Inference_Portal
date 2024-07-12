@@ -324,7 +324,7 @@ def inference(unique: str,
                                                   presence_penalty=presence_penalty)
         if clean_response and isinstance(clean_response, str):
             log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=prompt,
-                                response=clean_response, type_="open_ai")
+                                response=clean_response, type_=type_)
 
 
 @shared_task

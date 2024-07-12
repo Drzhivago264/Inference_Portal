@@ -37,10 +37,14 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
         self.p_type = "agent"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        
         await self.accept()
-        await self.send(text_data=json.dumps({"message": "You are currently using Celery backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
-        await self.send(text_data=json.dumps({"message": """Instruction to the user:\n1. Click on the paragraph that you want to work on, then give the agent instructions to write \n2. If you face any bug, refresh and retry.\n3. Shift-Enter to drop line in chatbox.\n4. You can export all paragraphs by clicking on [Export] on the left.""",
-                                              "role": "Server", "time": self.time}))
+        is_authorised = await self.check_permission(permission_code='server.allow_agent', destination="Agents")
+        if is_authorised:
+            await self.send(text_data=json.dumps({"message": "You are currently using Celery backend. Default to GPT4 or choose model on the right.", "role": "Server", "time": self.time}))
+            await self.send(text_data=json.dumps({"message": """Instruction to the user:\n1. Click on the paragraph that you want to work on, then give the agent instructions to write \n2. If you face any bug, refresh and retry.\n3. Shift-Enter to drop line in chatbox.\n4. You can export all paragraphs by clicking on [Export] on the left.""",
+                                                "role": "Server", "time": self.time}))
+
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -99,7 +103,7 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
                 validated = AgentSchemaMessage.model_validate_json(text_data)
                 if not self.key_object:
                     await self.send(text_data=json.dumps({"message": "Cannot find your key, disconnected! Refresh the page to try again", "role": "Server", "time": self.time}))
-                    await self.disconnect(self)
+                    await self.disconnect({'code': 3003})
                 elif not text_data_json["message"].strip():
                     await self.send(text_data=json.dumps({"message": "Empty string recieved", "role": "Server", "time": self.time}))
                 elif self.key_object and text_data_json["message"].strip():

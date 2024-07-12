@@ -1,13 +1,13 @@
 from hashlib import sha256
 
-from django.contrib.auth import logout
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.cache import cache_page
 from django.shortcuts import render
 from django.http import (
     HttpRequest,
     HttpResponse,
 )
+from django.contrib.auth.models import Permission
 
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response

@@ -1,15 +1,28 @@
+import json
 import random
+
 from server.models import (
     InferenceServer,
     LLM,
     InstructionTree,
     UserInstructionTree
 )
+
 from django.db.models.query import QuerySet
 from typing import Tuple
 from channels.db import database_sync_to_async
+from asgiref.sync import sync_to_async
 
 class QueryDBMixin:
+
+    async def check_permission(self, permission_code, destination):
+        if await sync_to_async(self.user.has_perm)(permission_code):
+            print(sync_to_async(self.user.has_perm)(permission_code))
+            return True
+        else:
+            await self.send(text_data=json.dumps({"message": f"Your key is not authorised to use {destination}. Disconnected", "role": "Server", "time": self.time}))
+            await self.disconnect(close_code={'code': 3000})
+
     async def get_template(self, name, template_type):
         try:
             if template_type == 'system':

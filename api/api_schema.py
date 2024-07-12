@@ -63,7 +63,7 @@ class ChatSchema(PromptSchema):
 
     @model_validator(mode='after')
     def validate_context_length(self) -> Self:
-        message = self.message
+        message = self.prompt
         if len(message) > constant.DEFAULT_MAX_INPUT_LENGTH:
             raise ValueError('Your message exceeds the maximum context')
         return self

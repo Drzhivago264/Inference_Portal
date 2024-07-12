@@ -31,7 +31,7 @@ function Log() {
     const tableRef = useRef()
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
-        $.fn.dataTable.ext.errMode = () => alert('You need to login before viewing log!');
+        $.fn.dataTable.ext.errMode = () => alert('Your key is not authorised to view log!');
         const table = $(tableRef.current).DataTable(
             {
                 layout: {

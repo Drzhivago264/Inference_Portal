@@ -151,6 +151,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
+        await self.check_permission(permission_code='server.allow_data_synthesis', destination="Data Synthesis")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
@@ -160,7 +161,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
             validated = DataSynthesisSchema.model_validate_json(text_data)
             if not self.key_object:
                 await self.send(text_data=json.dumps({"message": "Cannot find key, Disconnected! You need to login first", "role": "Server", "time": self.time}))
-                await self.disconnect(self)
+                await self.disconnect({'code': 3003})
 
             elif self.key_object:
                 self.seed_prompt = validated.seed_prompt

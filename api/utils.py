@@ -102,14 +102,11 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
 
 
 @sync_to_async
-def get_chat_context(model: str, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
+def get_chat_context(model: LLM, key_object: object, raw_prompt: str, agent_availability: bool, current_history_length: int, tokeniser: object) -> str | list:
     hashed_key = key_object.hashed_key
-    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model).search(
+    message_list_vector = vectordb.filter(metadata__key=hashed_key, metadata__model=model.name).search(
         raw_prompt, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT)
-    if not agent_availability:
-        max_history_length = constant.MAX_HISTORY_LENGTH[model]
-    else:
-        max_history_length = constant.MAX_HISTORY_LENGTH["openai"]
+    max_history_length = model.max_history_length
     full_instruct_list = []
     for mess in message_list_vector:
         full_instruct_list += [
