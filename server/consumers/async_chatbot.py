@@ -16,7 +16,6 @@ from django.utils import timezone
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-
 class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInferenceVllmMixin, QueryDBMixin):
 
     async def inference(self):
@@ -61,7 +60,7 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
         self.is_session_start_node = True
         self.session_history = []
         self.user = self.scope['user']
-        self.key_object = await sync_to_async(lambda: self.user.apikey)()
+        self.key_object = await self.get_key_object()
         self.p_type = "chatbot"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)

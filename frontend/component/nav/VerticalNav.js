@@ -86,10 +86,10 @@ export const UserVeticalNav = ({ navigate }) => {
             disabled: false,
         },
         {
-            onClick: () => other_redirect(""),
+            onClick: () => other_redirect("/frontend/token-management"),
             icon: <RuleIcon />,
-            text: "Your Oauth 2 Access Token(s)",
-            disabled: true,
+            text: "Your Access Token(s)",
+            disabled: false,
         },
         {
             onClick: logredirect,

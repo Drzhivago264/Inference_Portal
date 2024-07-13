@@ -3,11 +3,10 @@ import uuid
 import pytz
 from pydantic import ValidationError
 from django.utils import timezone
-from asgiref.sync import sync_to_async
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server.celery_tasks import inference
 from server.utils import constant
-
 from server.consumers.pydantic_validator import ChatSchema
 from server.utils.async_.async_query_database import QueryDBMixin
 
@@ -21,7 +20,7 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
         self.user = self.scope['user']
-        self.key_object = await sync_to_async(lambda: self.user.apikey)()
+        self.key_object = await self.get_key_object()
         self.p_type = "chatbot"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)

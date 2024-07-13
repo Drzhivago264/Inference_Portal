@@ -2,6 +2,7 @@ import json
 import uuid
 import pytz
 
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from pydantic import ValidationError
@@ -77,7 +78,7 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
         self.working_paragraph = ""
         self.is_session_start_node = None
         self.user = self.scope['user']
-        self.key_object = await sync_to_async(lambda: self.user.apikey)()
+        self.key_object = await self.get_key_object()
         self.choosen_model = ""
         self.room_group_name = "agent_%s" % self.url
         self.use_summary = False

@@ -9,11 +9,23 @@ from server.models import (
 )
 
 from django.db.models.query import QuerySet
+from django.contrib.auth.models import User
+
 from typing import Tuple
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 
+
 class QueryDBMixin:
+
+    async def get_key_object(self):
+        try:
+            key_object = await sync_to_async(lambda: self.user.apikey)()
+            return key_object
+        except User.apikey.RelatedObjectDoesNotExist:
+            token = await sync_to_async(lambda: self.user.finegrainapikey)()
+            key_object = await sync_to_async(lambda: token.master_key)()
+            return key_object
 
     async def check_permission(self, permission_code, destination):
         if await sync_to_async(self.user.has_perm)(permission_code):
@@ -48,13 +60,13 @@ class QueryDBMixin:
                     return {"name_list": [], "default_child": "", "default_instruct": ""}
         except InstructionTree.DoesNotExist or UserInstructionTree.DoesNotExist:
             return False
-        
-    async def get_model(self, name = None) -> QuerySet[LLM] | bool:
+
+    async def get_model(self, name=None) -> QuerySet[LLM] | bool:
         try:
             return await LLM.objects.aget(name=self.choosen_model if name is None else name)
         except LLM.DoesNotExist:
             return False
-        
+
     async def get_model_url_async(self) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
         model_list = []
         try:
@@ -71,6 +83,3 @@ class QueryDBMixin:
                 return False, False, False
         except IndexError:
             return False, False, False
-
-
-

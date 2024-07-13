@@ -8,7 +8,8 @@ DEFAULT_PERMISSION_CODENAMES = [
     'allow_toolbox_api',
     'allow_view_cost',
     'allow_create_template',
-    'allow_data_synthesis'
+    'allow_data_synthesis',
+    'allow_create_token'
 ]
 SERVER_TTL = 1200
 MONITOR_ITERVAL = 5
@@ -18,6 +19,7 @@ DELETE_KEY_INTERVAL = 86400
 KEY_TTL = 7  # day
 MAX_PARENT_TEMPLATE_PER_USER = 10  # 10 Parent templates x 3 Child templates
 MAX_CHILD_TEMPLATE_PER_USER = 3
+MAX_TOKEN_PER_USER = 10
 DEFAULT_SELF_HOST = "Llama 3 Instruct AWQ"
 TIMEOUT = 10.0
 RETRY = 0

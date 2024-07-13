@@ -10,31 +10,26 @@ from server.models import (
 
 )
 
-
 class CostSerializer(serializers.ModelSerializer):
     model = serializers.SlugRelatedField(
         read_only=True,
         slug_field='name'
     )
-
     class Meta:
         model = PromptResponse
         fields = ("number_input_tokens", "number_output_tokens",
                   "created_at", "model", "p_type")
-
 
 class InstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstructionTree
         fields = ('instruct', "name", "code", "default_editor_template")
 
-
 class UserInstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInstructionTree
         fields = ('instruct', "displayed_name",
                   "code", "default_editor_template")
-
 
 class MemoryTreeSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
@@ -47,7 +42,6 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
 
     def get_children(self, instance):
         return None
-
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -83,6 +77,29 @@ class RedirectSerializer(LoginSerializer):
 class CreateKeySerializer(serializers.Serializer):
     key_name = serializers.CharField()
 
+class PermissionSerializer(serializers.Serializer):
+    allow_chat = serializers.BooleanField()
+    allow_agent = serializers.BooleanField()
+    allow_chat_api = serializers.BooleanField()
+    allow_agent_api = serializers.BooleanField()    
+    allow_toolbox = serializers.BooleanField()
+    allow_toolbox_api = serializers.BooleanField()    
+    allow_view_log = serializers.BooleanField()
+    allow_view_cost = serializers.BooleanField()
+    allow_create_template = serializers.BooleanField()
+
+class CreateTokenSerializer(serializers.Serializer):
+    token_name = serializers.CharField()
+    use_ttl = serializers.BooleanField()
+    ttl = serializers.IntegerField()
+    time_unit = serializers.CharField()
+    permission = PermissionSerializer()
+
+class ModifyTokenSerializer(serializers.Serializer):
+    token_name = serializers.CharField()
+    prefix = serializers.CharField()
+    first_and_last_char = serializers.CharField()
+    permission = serializers.CharField(required = False)
 
 class CheckKeySerializer(CreateKeySerializer):
     key = serializers.CharField()
@@ -109,7 +126,6 @@ class ServerSerializer(serializers.ModelSerializer):
     model_name = serializers.SerializerMethodField()
     model_price_input = serializers.SerializerMethodField()
     model_price_output = serializers.SerializerMethodField()
-
     class Meta:
         model = InferenceServer
         fields = ('id', 'status', 'availability', 'model_name',

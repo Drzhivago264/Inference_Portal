@@ -37,7 +37,8 @@ class CustomPermissionWithoutContentType(models.Model):
             ('allow_toolbox_api', 'Global permission for using toolbox api'), 
             ('allow_view_cost', 'Global permission for viewing cost'),
             ('allow_create_template', 'Global permission for creating template'),
-            ('allow_data_synthesis', 'Global permission for using data synthesis')
+            ('allow_data_synthesis', 'Global permission for using data synthesis'),
+            ('allow_create_token', 'Global permission for creating token')
         )
 
 class APIKEY(AbstractAPIKey):
@@ -53,14 +54,14 @@ class APIKEY(AbstractAPIKey):
         verbose_name_plural = 'Master API Keys'
         
 class FineGrainAPIKeyManager(BaseAPIKeyManager):
-    key_generator = KeyGenerator(prefix_length=12, secret_key_length=64)
+    key_generator = KeyGenerator(prefix_length=8, secret_key_length=64)
 
 class FineGrainAPIKEY(AbstractAPIKey):
     objects = FineGrainAPIKeyManager()
     master_key = models.ForeignKey(APIKEY, null=True ,on_delete=models.CASCADE) #the APIKEY that create FineGrainAPIKey
     user = models.OneToOneField(User, null=True ,on_delete=models.CASCADE) # the dummy account for the FineGrainAPIKEY 
     created_at = models.DateTimeField(auto_now_add=True)
-    ttl = models.DurationField(default=datetime.timedelta(days=10))
+    ttl = models.DurationField(default=datetime.timedelta(days=10), null=True)
     first_three_char = models.TextField(default="???")
     last_three_char = models.TextField(default="???")
     class Meta:
