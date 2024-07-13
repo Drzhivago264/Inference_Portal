@@ -1,6 +1,7 @@
 
 import datetime
 
+from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 from django.http import HttpRequest
@@ -26,6 +27,7 @@ def generate_token_api(request: HttpRequest) -> Response:
         ttl_raw = serializer.data['ttl']
         time_unit = serializer.data['time_unit']
         use_ttl = serializer.data['use_ttl']
+        slave_group, created = Group.objects.get_or_create(name="slave_user")
         number_of_current_key = FineGrainAPIKEY.objects.filter(master_key = master_key_object).count()
         if number_of_current_key >= constant.MAX_TOKEN_PER_USER:
              return Response({"detail": f"Exceeding max number of token ({constant.MAX_TOKEN_PER_USER}), cannot create more token!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -55,7 +57,7 @@ def generate_token_api(request: HttpRequest) -> Response:
         created_key.save()
         hashed_token = created_key.hashed_key
         user = User.objects.create_user(hashed_token, '', hashed_token)
-
+        slave_group.user_set.add(user)
         permissions = Permission.objects.filter(codename__in=permission_list)
         user.user_permissions.add(*permissions)
 

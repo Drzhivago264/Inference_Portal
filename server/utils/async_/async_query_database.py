@@ -19,13 +19,14 @@ from asgiref.sync import sync_to_async
 class QueryDBMixin:
 
     async def get_key_object(self):
-        try:
+        if await sync_to_async(self.user.groups.filter(name='master_user').exists)():
             key_object = await sync_to_async(lambda: self.user.apikey)()
             return key_object
-        except User.apikey.RelatedObjectDoesNotExist:
+        elif await sync_to_async(self.user.groups.filter(name="slave_user").exists)():
             token = await sync_to_async(lambda: self.user.finegrainapikey)()
             key_object = await sync_to_async(lambda: token.master_key)()
             return key_object
+        
 
     async def check_permission(self, permission_code, destination):
         if await sync_to_async(self.user.has_perm)(permission_code):

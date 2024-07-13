@@ -34,10 +34,10 @@ def check_login(request: HttpRequest) -> Response:
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        try:
+        if current_user.groups.filter(name='master_user').exists():
             unique_hash_seed = current_user.apikey.id + current_user.apikey.name + str(current_user.apikey.created_at) 
             key_name = current_user.apikey.name
-        except User.apikey.RelatedObjectDoesNotExist:
+        elif current_user.groups.filter(name='slave_user').exists():
             unique_hash_seed = current_user.finegrainapikey.id + current_user.finegrainapikey.name + str(current_user.finegrainapikey.created_at) 
             key_name = current_user.finegrainapikey.name
         return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': key_name}, status=status.HTTP_200_OK)

@@ -27,6 +27,7 @@ from server.models import (
     InstructionTree,
     UserInstructionTree,
     APIKEY,
+    FineGrainAPIKEY,
     MemoryTree
 )
 from server.utils import constant
@@ -42,7 +43,10 @@ def hub_redirect_api(request: HttpRequest) -> Response:
         check_login = serializer.data['check_login']
         if not check_login:
             try:
-                api_key = APIKEY.objects.get_from_key(key)
+                try:
+                    api_key = APIKEY.objects.get_from_key(key)
+                except APIKEY.DoesNotExist:
+                    api_key = FineGrainAPIKEY.objects.get_from_key(key)
                 user = authenticate(
                     request, username=api_key.hashed_key, password=api_key.hashed_key)
                 if user is not None:
@@ -50,8 +54,7 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                     return Response({"redirect_link": f"/frontend/{destination}"}, status=status.HTTP_200_OK)
                 else:
                     return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
-
-            except APIKEY.DoesNotExist:
+            except FineGrainAPIKEY.DoesNotExist:
                 return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             if request.user.id is not None:

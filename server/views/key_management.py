@@ -5,6 +5,7 @@ import requests
 import bleach
 import json
 
+from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
@@ -160,6 +161,7 @@ def generate_key_api(request: HttpRequest) -> Response:
     serializer = CreateKeySerializer(data=request.data)
     if serializer.is_valid():
         key_name = serializer.data['key_name']
+        master_group, created = Group.objects.get_or_create(name="master_user")
         try:
             wallet = manage_monero("make_integrated_address")
             integrated_address = json.loads(
@@ -173,6 +175,7 @@ def generate_key_api(request: HttpRequest) -> Response:
         created_key = APIKEY.objects.get_from_key(key)
         hashed_key = created_key.hashed_key
         user = User.objects.create_user(hashed_key, '', hashed_key)
+        master_group.user_set.add(user)
 
         #Adding all permission for master user
         permissions = Permission.objects.filter(codename__in=constant.DEFAULT_PERMISSION_CODENAMES)
