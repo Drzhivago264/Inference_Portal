@@ -8,25 +8,32 @@ from server.views.information import (
     log_out,
     log_in
 )
-from server.views.key_management import (StripeWebhookView,
-                                         SuccessView,
-                                         CancelView,
-                                         CreateStripeCheckoutSessionView,
-                                         generate_key_api,
-                                         confirm_xmr_payment_api,
-                                         retrive_xmr_wallet_api,
-                                         check_credit_api,
-                                         stripe_redirect,
-                                         product_list_api,
-                                         )
-
-from server.views.room_view import (hub_redirect_api,
-                                    instruction_tree_api,
-                                    memory_tree_api,
-                                    user_instruction_tree_api,
-                                    post_user_instruction_tree_api,
-                                    delete_user_instruction_tree_api
-                                    )
+from server.views.key_management import (
+    StripeWebhookView,
+    SuccessView,
+    CancelView,
+    CreateStripeCheckoutSessionView,
+    generate_key_api,
+    confirm_xmr_payment_api,
+    retrive_xmr_wallet_api,
+    check_credit_api,
+    stripe_redirect,
+    product_list_api,
+)
+from server.views.token_management import (
+    generate_token_api,
+    get_token_api,
+    remove_permission,
+    invalidate_token
+)
+from server.views.room_view import (
+    hub_redirect_api,
+    instruction_tree_api,
+    memory_tree_api,
+    user_instruction_tree_api,
+    post_user_instruction_tree_api,
+    delete_user_instruction_tree_api
+)
 
 app_name = "server"
 
@@ -62,7 +69,6 @@ urlpatterns = [
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/log',
          TemplateView.as_view(template_name='frontend_index.html')),
-
     path('frontend/api/docs/',
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/payment-success/',
@@ -79,7 +85,17 @@ urlpatterns = [
     path('frontend-api/hub-redirect',  hub_redirect_api, name='hub-redirect'),
     path('frontend-api/instruction-tree',
          instruction_tree_api, name='instruction-tree'),
+
     path('frontend-api/generate-key',  generate_key_api, name='generate-key'),
+    path('frontend-api/generate-token',
+         generate_token_api, name='generate-token'),
+    path('frontend-api/get-token',  get_token_api, name='generate-get'),
+    path('frontend-api/remove-permission',
+         remove_permission, name='remove_permission'),
+
+    path('frontend-api/invalidate-token',
+         invalidate_token, name='invalidate-token'),
+
     path('frontend-api/check-credit',  check_credit_api, name='check-key'),
     path('frontend-api/get-xmr-wallet',
          retrive_xmr_wallet_api, name='get-xmr-wallet'),
@@ -92,8 +108,6 @@ urlpatterns = [
     path('frontend-api/logout', log_out, name='logout'),
     path('frontend-api/login', log_in, name='login'),
     path('frontend-api/memory-tree', memory_tree_api, name='memory-tree'),
-    
-
 
     path('frontend-api/get-user-instruction',
          user_instruction_tree_api, name='user-instruction'),

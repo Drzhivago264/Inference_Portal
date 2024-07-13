@@ -1,6 +1,7 @@
 from hashlib import sha256
 
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout 
+from django.contrib.auth.models import User
 from django.views.decorators.cache import cache_page
 from django.shortcuts import render
 from django.http import (
@@ -22,7 +23,8 @@ from server.views.serializer import (
 from server.models import (
     LLM,
     InferenceServer,
-    APIKEY
+    APIKEY,
+    FineGrainAPIKEY
 )
 
 @api_view(['GET'])
@@ -32,8 +34,13 @@ def check_login(request: HttpRequest) -> Response:
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        unique_hash_seed = current_user.apikey.id + current_user.apikey.name + str(current_user.apikey.created_at) 
-        return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': current_user.apikey.name}, status=status.HTTP_200_OK)
+        try:
+            unique_hash_seed = current_user.apikey.id + current_user.apikey.name + str(current_user.apikey.created_at) 
+            key_name = current_user.apikey.name
+        except User.apikey.RelatedObjectDoesNotExist:
+            unique_hash_seed = current_user.finegrainapikey.id + current_user.finegrainapikey.name + str(current_user.finegrainapikey.created_at) 
+            key_name = current_user.finegrainapikey.name
+        return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': key_name}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -49,8 +56,12 @@ def log_in(request: HttpRequest) -> Response:
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         key = serializer.data['key']
+        print(len(key))
         try:
-            api_key = APIKEY.objects.get_from_key(key)
+            if len(key) == 41: #Master Key length
+                api_key = APIKEY.objects.get_from_key(key)
+            elif len(key) == 73: #Token length
+                api_key = FineGrainAPIKEY.objects.get_from_key(key)
             user = authenticate(
                 request, username=api_key.hashed_key, password=api_key.hashed_key)
             if user is not None:

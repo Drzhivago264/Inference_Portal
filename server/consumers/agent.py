@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from asgiref.sync import sync_to_async
 from django.utils import timezone
 
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from server.celery_tasks import agent_inference
@@ -29,7 +30,7 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
         self.working_paragraph = ""
         self.is_session_start_node = None
         self.user = self.scope['user']
-        self.key_object = await sync_to_async(lambda: self.user.apikey)()
+        self.key_object = await self.get_key_object()
         self.choosen_model = ""
         self.agent_instruction = ""
         self.child_instruction = ""        

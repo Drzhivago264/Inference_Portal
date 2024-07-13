@@ -8,3 +8,6 @@ class CreditCheckRateThrottle(AnonRateThrottle):
 
 class XMRConfirmationRateThrottle(AnonRateThrottle):
     scope = "confirm_monero"
+
+class UserRateThrottle(AnonRateThrottle):
+    scope = 'user'

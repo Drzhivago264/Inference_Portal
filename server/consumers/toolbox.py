@@ -23,7 +23,7 @@ from server.utils.async_.async_manage_ec2 import (
 )
 
 from django.utils import timezone
-from asgiref.sync import sync_to_async
+
 
 
 class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
@@ -36,7 +36,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = None
         self.user = self.scope['user']
-        self.key_object = await sync_to_async(lambda: self.user.apikey)()
+        self.key_object = await self.get_key_object()
         self.p_type = "toolbox"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
