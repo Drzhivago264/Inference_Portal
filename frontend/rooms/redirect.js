@@ -12,7 +12,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import KeyIcon from '@mui/icons-material/Key';
 import LoadingButton from '@mui/lab/LoadingButton';
 import LoginIcon from '@mui/icons-material/Login';
-import { RedirectMediaCards } from '../component/RedirectMediaCard.js';
+import { RedirectMediaCards } from '../component/custom_ui_component/RedirectMediaCard.js';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';

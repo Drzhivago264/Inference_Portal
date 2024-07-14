@@ -4,7 +4,7 @@ import {
 } from '@mui/x-data-grid';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
-import { isKeyboardEvent, multilineColumn } from '../component/MultipleLineEdittingDataGrid.js';
+import { isKeyboardEvent, multilineColumn } from '../component/custom_ui_component/MultipleLineEdittingDataGrid.js';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';

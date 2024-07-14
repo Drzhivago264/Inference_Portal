@@ -20,7 +20,7 @@ Design
 - GPU servers do inference, each GPU server holds one model and uses vLLM to open endpoints. 
 - Nginx is used as a proxy for the Django server and serve static files.
 - Celery is used to run multiple background tasks including spin up, stop, create and terminate EC GPU instances. Celery is also used to queue 
- API requests to GPU servers. Noting that Celery does not run probably on Window so you should switch to Linux or living with with --solo.
+ API requests to GPU servers. Noting that Celery does not run properly on Window, so you should switch to Linux or living with with --solo pool.
 - Postgresql runs locally and can only be accessed from Django
 
 The implementation of React and data flow is explained in the diagram below
@@ -46,8 +46,6 @@ Before install dependencies, you need to install Postgres, and create a table na
     #create a password for postgres user
 
     sudo systemctl start postgresql.service
-    python manage.py migrate
-    python manage.py loaddata dbbackup.json
 
     #if you want to enable postgres on start up use this command
     sudo systemctl enable postgresql
@@ -57,9 +55,12 @@ You also need to install NPM and Node.js for the frontend.
     sudo apt install nodejs
     sudo apt install npm
 
-Next you must install dependencies:
+Next you must install dependencies and migrate the db to Postgresql:
 
     pip install -r "requirements.txt"
+    
+    python manage.py migrate
+    python manage.py loaddata whole.json
 
 Next you must install Redis and start Redis Server at port 6380:
 
