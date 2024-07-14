@@ -33,6 +33,7 @@ def generate_token_api(request: HttpRequest) -> Response:
         number_of_current_key = FineGrainAPIKEY.objects.filter(master_key = master_key_object).count()
         if number_of_current_key >= constant.MAX_TOKEN_PER_USER:
              return Response({"detail": f"Exceeding max number of token ({constant.MAX_TOKEN_PER_USER}), cannot create more token!"}, status=status.HTTP_400_BAD_REQUEST)
+    
         time_dispatcher = {
             'day': datetime.timedelta(days=ttl_raw),
             'hour': datetime.timedelta(hours=ttl_raw),
@@ -43,6 +44,9 @@ def generate_token_api(request: HttpRequest) -> Response:
         for perm, value in permission_dict.items():
             if value and perm != "allow_create_token": #Only Master User is allowed to create token
                 permission_list.append(perm)
+
+        if len(permission_list) == 0:
+            return Response({"detail": f"Cannot create a token with no permission!"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             ttl = time_dispatcher[time_unit] if use_ttl else None
         except KeyError:

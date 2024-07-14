@@ -175,6 +175,21 @@ function TokenManagement() {
     const [tokencreateresponse, settokenCreateResponse] = useState(null);
     const [tokencreateerror, settokenCreateError] = useState(null);
 
+    const setAllPermission = (value) => {
+        setPermission({
+            ...permission,
+            allow_chat: value,
+            allow_agent: value,
+            allow_chat_api: value,
+            allow_agent_api: value,
+            allow_toolbox: value,
+            allow_create_template: value,
+            allow_toolbox_api: value,
+            allow_data_synthesis: value,
+            allow_view_log: value,
+            allow_view_cost: value
+        })
+    }
 
     const handleCreateToken = (event) => {
         event.preventDefault()
@@ -182,11 +197,22 @@ function TokenManagement() {
         settokenCreateResponse(null)
         settokenNameError(false)
         setRandomAnimation(false)
+        settokenCreateError(null)
         if (tokenname == '') {
             settokenCreateLoading(false)
             settokenNameError(true)
         }
-        if (tokenname) {
+        var perm_count = 0;
+        for (var key in permission) {
+            if (permission[key]) {
+                perm_count++;
+            }
+        }
+        if (perm_count === 0) {
+            settokenCreateError("You tried to create a token without any permission, the key will be unusable. Associate at least one permission for the token.")
+            settokenCreateLoading(false)
+        }
+        if (tokenname && perm_count > 0) {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -214,7 +240,7 @@ function TokenManagement() {
 
     function exporttoken(tokenfile) {
         var blob = new Blob([tokenfile], { type: "text/plain;charset=utf-8" });
-        saveAs(blob, "token_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
+        saveAs(blob, "Token_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
     }
     const TokenCreateExport = ({ token_, token_name, ttl, created_at, permission }) => {
         return (
@@ -333,7 +359,12 @@ function TokenManagement() {
                                 <Typography mb={2} variant="h6" >
                                     <Box sx={{ lineHeight: 2, fontWeight: '700' }}>Access Tokens</Box>
                                 </Typography>
-
+                                {token_list.length === 0 &&
+                                    <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
+                                        <AlertTitle>Infor</AlertTitle>
+                                        You do not have any access token. You can create maximum 10 access tokens.
+                                    </Alert>
+                                }
                                 <TableContainer >
                                     <Table size="small" sx={{ tableLayout: 'fixed', minWidth: 650 }} aria-label="simple table">
                                         <TableHead>
@@ -347,6 +378,7 @@ function TokenManagement() {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
+
                                             {token_list.map((row, index) => (
                                                 <TableRow
                                                     key={row.created_at.toString()}
@@ -409,7 +441,6 @@ function TokenManagement() {
                                         }} item xs={7} >
                                             <form autoComplete="off" onSubmit={handleCreateToken}>
                                                 <FormControl defaultValue="" required>
-
                                                     <Stack direction='column' spacing={1}>
                                                         <TextField
                                                             margin="normal"
@@ -482,7 +513,15 @@ function TokenManagement() {
                                 <Typography variant="h6" >
                                     <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>Token permissions</Box>
                                 </Typography>
-                                <Box m={2} >
+                                <Box m={1} >
+                                    <Box mb={1}>
+                                        <FormControlLabel
+                                            sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}
+                                            key='allow_all'
+                                            control={<Checkbox size='small' onChange={(e) => { setAllPermission(e.target.checked) }} />}
+                                            label="Set all permissions"
+                                        />
+                                    </Box>
                                     <Grid container spacing={2}>
                                         <Grid item sm={12} md={6} >
                                             <Stack direction='column' >
@@ -499,7 +538,7 @@ function TokenManagement() {
                                                     <FormControlLabel
                                                         sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}
                                                         key={perm.key}
-                                                        control={<Checkbox size='small' onChange={(e) => { setPermission({ ...permission, [perm.key]: e.target.checked }) }} />}
+                                                        control={<Checkbox size='small' checked={permission[perm.key]} onChange={(e) => { setPermission({ ...permission, [perm.key]: e.target.checked }) }} />}
                                                         label={perm.label}
                                                     />
                                                 ))}
@@ -516,13 +555,10 @@ function TokenManagement() {
                                                     <FormControlLabel
                                                         sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}
                                                         key={perm.key}
-                                                        control={<Checkbox size='small' onChange={(e) => { setPermission({ ...permission, [perm.key]: e.target.checked }) }} />}
+                                                        control={<Checkbox size='small' checked={permission[perm.key]} onChange={(e) => { setPermission({ ...permission, [perm.key]: e.target.checked }) }} />}
                                                         label={perm.label}
                                                     />
                                                 ))}
-
-
-
 
                                             </Stack>
                                         </Grid>
@@ -531,7 +567,6 @@ function TokenManagement() {
                             </StyledPaper>
                         </Box>
                     </Grid>
-
                 </Grid>
             </Container >
             <Footer />
