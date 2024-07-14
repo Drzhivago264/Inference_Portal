@@ -36,11 +36,14 @@ def check_login(request: HttpRequest) -> Response:
     else:
         if current_user.groups.filter(name='master_user').exists():
             unique_hash_seed = current_user.apikey.id + current_user.apikey.name + str(current_user.apikey.created_at) 
-            key_name = current_user.apikey.name
+            key_name = current_user.apikey.prefix + "..."
+            return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': key_name}, status=status.HTTP_200_OK)
         elif current_user.groups.filter(name='slave_user').exists():
             unique_hash_seed = current_user.finegrainapikey.id + current_user.finegrainapikey.name + str(current_user.finegrainapikey.created_at) 
-            key_name = current_user.finegrainapikey.name
-        return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': key_name}, status=status.HTTP_200_OK)
+            key_name = current_user.finegrainapikey.prefix + "..."
+            return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': key_name}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': "User does not have permission, generate new key"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['GET'])
@@ -56,12 +59,13 @@ def log_in(request: HttpRequest) -> Response:
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         key = serializer.data['key']
-        print(len(key))
         try:
-            if len(key) == 41: #Master Key length
-                api_key = APIKEY.objects.get_from_key(key)
-            elif len(key) == 73: #Token length
-                api_key = FineGrainAPIKEY.objects.get_from_key(key)
+            key_model = {
+                '41': APIKEY, #Master Key length
+                '73': FineGrainAPIKEY #Token length
+            }
+  
+            api_key = key_model[str(len(key))].objects.get_from_key(key)
             user = authenticate(
                 request, username=api_key.hashed_key, password=api_key.hashed_key)
             if user is not None:
@@ -69,7 +73,7 @@ def log_in(request: HttpRequest) -> Response:
                 return Response({"detail": f"Login Success!"}, status=status.HTTP_200_OK)
             else:
                 return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
-        except APIKEY.DoesNotExist:
+        except APIKEY.DoesNotExist or FineGrainAPIKEY.DoesNotExist or KeyError:
             return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
