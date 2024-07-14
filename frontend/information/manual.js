@@ -15,7 +15,7 @@ import Paper from '@mui/material/Paper';
 import Prism from "prismjs";
 import ResponsiveAppBar from '../component/nav/Navbar';
 import Skeleton from '@mui/material/Skeleton';
-import TableOfContents from '../component/TableofContent';
+import TableOfContents from '../component/custom_ui_component/TableofContent';
 import Typography from '@mui/material/Typography';
 import authentication_en from '../../docs/Manual/en/authentication_en.md'
 import authentication_vi from '../../docs/Manual/vi/authentication_vi.md'

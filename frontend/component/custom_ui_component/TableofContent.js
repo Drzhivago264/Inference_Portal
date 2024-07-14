@@ -1,8 +1,8 @@
-import '../component/css/TableofContent.css'
+import '../css/TableofContent.css'
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { ColorModeContext } from '../App';
+import { ColorModeContext } from '../../App';
 
 const useHeadingsData = (mdfile) => {
     const [nestedHeadings, setNestedHeadings] = useState([]);

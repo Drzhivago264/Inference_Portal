@@ -13,7 +13,6 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import { TextareaAutosize as BaseTextareaAutosize } from '@mui/base/TextareaAutosize';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -25,6 +24,7 @@ import { FormControl } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
+import KeyCreateExport from '../component/import_export/keyExport.js';
 import KeyIcon from '@mui/icons-material/Key';
 import Link from '@mui/material/Link';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -32,13 +32,13 @@ import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuItem from '@mui/material/MenuItem';
-import Paper from '@mui/material/Paper';
-import { RandomReveal } from 'react-random-reveal'
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
+import StyledPaper from '../component/custom_ui_component/StyledPaper.js';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
+import Textarea from '../component/custom_ui_component/customTextArea.js';
 import Typography from '@mui/material/Typography';
 import { UserContext } from '../App.js'
 import Visibility from '@mui/icons-material/Visibility';
@@ -46,14 +46,6 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import axios from 'axios';
 import { getCookie } from '../component/getCookie.js';
 import { logout } from '../component/checkLogin.js';
-import { saveAs } from "file-saver";
-import { styled } from '@mui/system';
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-
-    padding: theme.spacing(4),
-    ...theme.typography.body2,
-}));
 
 function KeyManagement() {
     const { t } = useTranslation();
@@ -78,55 +70,6 @@ function KeyManagement() {
                 console.log(error);
             });
     }, []);
-
-    const blue = {
-        100: '#DAECFF',
-        200: '#b6daff',
-        400: '#3399FF',
-        500: '#007FFF',
-        600: '#0072E5',
-        900: '#003A75',
-    };
-
-    const grey = {
-        50: '#F3F6F9',
-        100: '#E5EAF2',
-        200: '#DAE2ED',
-        300: '#C7D0DD',
-        400: '#B0B8C4',
-        500: '#9DA8B7',
-        600: '#6B7A90',
-        700: '#434D5B',
-        800: '#303740',
-        900: '#1C2025',
-    };
-
-    const Textarea = styled(BaseTextareaAutosize)(
-        ({ theme }) => `
-        box-sizing: border-box;
-        font-family: 'IBM Plex Sans', sans-serif;
-        font-size: 0.875rem;
-        font-weight: 400;
-        width:100%;
-        line-height: 1.5;
-        padding: 8px 12px;
-        border-radius: 8px;
-        color: ${theme.palette.mode === 'dark' ? grey[300] : grey[900]};
-        background: ${theme.palette.mode === 'dark' ? grey[900] : '#fff'};
-        border: 1px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
-        box-shadow: 0px 2px 2px ${theme.palette.mode === 'dark' ? grey[900] : grey[50]};
-        &:hover {
-          border-color: ${blue[400]};
-        }
-        &:focus {
-          border-color: ${blue[400]};
-          box-shadow: 0 0 0 3px ${theme.palette.mode === 'dark' ? blue[600] : blue[200]};
-        }
-        &:focus-visible {
-          outline: 0;
-        }
-      `,
-    );
 
     const [keycreateloading, setKeyCreateLoading] = useState(false);
     const [keycheckloading, setKeyCheckLoading] = useState(false);
@@ -314,45 +257,6 @@ function KeyManagement() {
                 });
         }
     }
-    function exportKey(keyfile) {
-        var blob = new Blob([keyfile], { type: "text/plain;charset=utf-8" });
-        saveAs(blob, "Key_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
-    }
-    const KeyCreateExport = ({ key_, key_name, integrated_wallet, payment_id }) => {
-
-        return (
-            <Box my={4}>
-                {!randomanimation && <Box style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }} textAlign='center' my={1}>
-                    <Alert severity="info"> Key: <RandomReveal
-                        isPlaying
-                        duration={4}
-                        revealDuration={1.6}
-                        characters={key_}
-                        onComplete={() => (setRandomAnimation(true), setKeyCreateLoading(false), setIsAuthenticated(true))}
-
-                    /></Alert>
-                </Box>}
-                {randomanimation && <Alert severity="success" sx={{ whiteSpace: 'pre-line' }}>
-                    <AlertTitle>Success</AlertTitle>
-                    {t('key_management.key_create_success')}
-                </Alert>}
-                {randomanimation && <Box textAlign='center' my={4}>
-                    <Textarea
-                        defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`}
-                        minRows={4}
-                        maxRows={10}
-                    />
-                    <Box textAlign='center' my={1}>
-                        <Button size="small" variant="outlined" onClick={() => exportKey(`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`)}>Export Key</Button>
-                    </Box>
-                </Box>}
-            </Box >
-        );
-    };
 
     const KeyCheckDisplay = ({ key_, key_name, monero_balance, fiat_balance }) => {
         return (
@@ -438,7 +342,7 @@ function KeyManagement() {
                             <Box sx={{ lineHeight: 2, fontWeight: '700' }}> {t('key_management.1_Create_a_Key')} </Box>
                         </Typography>
                         <Typography variant="body1" >
-                        {t('key_management.Start_by_generating_a_random_key_by_giving_it_a_name')}
+                            {t('key_management.Start_by_generating_a_random_key_by_giving_it_a_name')}
                         </Typography>
                         <Box my={4} justifyContent="center" alignItems="center" display="flex" >
                             {!is_authenticated && <form autoComplete="off" onSubmit={handleCreateKey}>
@@ -491,7 +395,19 @@ function KeyManagement() {
                             </form>
                             }
                         </Box>
-                        {keycreateresponse && <KeyCreateExport key_={keycreateresponse.key} key_name={keycreateresponse.key_name} payment_id={keycreateresponse.payment_id} integrated_wallet={keycreateresponse.integrated_wallet} />}
+                        {keycreateresponse &&
+                            <KeyCreateExport
+                                key_={keycreateresponse.key}
+                                key_name={keycreateresponse.key_name}
+                                payment_id={keycreateresponse.payment_id}
+                                integrated_wallet={keycreateresponse.integrated_wallet}
+                                t={t}
+                                setIsAuthenticated={setIsAuthenticated}
+                                setKeyCreateLoading={setKeyCreateLoading}
+                                setRandomAnimation={setRandomAnimation}
+                                randomanimation={randomanimation}
+                            />
+                        }
                         {keycreateerror && <ErrorAlert error={keycreateerror} />}
                         <Divider></Divider>
                         <Typography variant="h5" >
@@ -575,12 +491,12 @@ function KeyManagement() {
                                         id="panel1-header"
                                     >
                                         <Typography variant="h6" >
-                                        {t('key_management.21_Check_credit_balance')} 
+                                            {t('key_management.21_Check_credit_balance')}
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                        {t('key_management.21_info')}
+                                            {t('key_management.21_info')}
                                         </Typography>
                                         <Box mt={2}>
                                             <LoadingButton loading={keycheckloading} variant="contained" name="checkcredit" onClick={handleCheckKey.bind(this)} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
@@ -596,12 +512,12 @@ function KeyManagement() {
                                         id="panel2-header"
                                     >
                                         <Typography variant="h6" >
-                                        {t('key_management.22_Pay_by_Stripe')}                                     
+                                            {t('key_management.22_Pay_by_Stripe')}
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                        {t('key_management.22_info')}
+                                            {t('key_management.22_info')}
                                         </Typography>
                                         <Box mt={2}>
                                             <Button variant="contained" onClick={handleStripeRedirect.bind(this)} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
@@ -616,12 +532,12 @@ function KeyManagement() {
                                         id="panel3-header"
                                     >
                                         <Typography variant="h6" >
-                                        {t('key_management.23_Retrieve_XMR_wallet')}            
+                                            {t('key_management.23_Retrieve_XMR_wallet')}
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                        {t('key_management.23_info')}
+                                            {t('key_management.23_info')}
                                         </Typography>
                                         <Box mt={2}>
                                             <LoadingButton loading={xmrretrieveloading} variant="contained" type="submit" onClick={handleXMRRetrive.bind(this)} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
@@ -637,13 +553,13 @@ function KeyManagement() {
                                         id="panel4-header"
                                     >
                                         <Typography variant="h6" >
-                                        {t('key_management.24_Confirm_XMR_Payment')}
-                                            
+                                            {t('key_management.24_Confirm_XMR_Payment')}
+
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                        {t('key_management.24_info')}
+                                            {t('key_management.24_info')}
                                         </Typography>
                                         <Box mt={2}>
                                             <LoadingButton loading={xmrconfirmationloading} variant="contained" type="submit" onClick={handleXMRConfirmation.bind(this)} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
@@ -659,9 +575,9 @@ function KeyManagement() {
                             <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> {t('key_management.3_Check_user_manual')} </Box>
                         </Typography>
                         <Typography variant="body1" >
-                        <Trans
-                            i18nKey="key_management.3_infor"
-                                 t={t}
+                            <Trans
+                                i18nKey="key_management.3_infor"
+                                t={t}
                                 components={{ Link: <Link href="/frontend/manual/key" /> }}>
                             </Trans>
 

@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 import { Divider } from '@mui/material';
 import Footer from '../component/nav/Footer';
 import Grid from '@mui/material/Grid';
-import IntroductionVerticalLinearStepper from '../component/IntroductionStepper';
+import IntroductionVerticalLinearStepper from '../component/custom_ui_component/IntroductionStepper';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -16,7 +16,7 @@ import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar';
 import Slide from '@mui/material/Slide';
 import { Stack } from '@mui/material';
-import { TypeWriterText } from '../component/AnimatedText'
+import { TypeWriterText } from '../component/custom_ui_component/AnimatedText'
 import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
 
