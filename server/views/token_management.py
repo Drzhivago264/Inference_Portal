@@ -20,6 +20,8 @@ from server.utils import constant
 def generate_token_api(request: HttpRequest) -> Response:
     serializer = CreateTokenSerializer(data=request.data)
     current_user = request.user
+    if not current_user.has_perm('server.allow_create_token'):
+        return Response({"detail": f"Your key is not allowed to create access tokens"}, status=status.HTTP_400_BAD_REQUEST)
     master_key_object = current_user.apikey
     if serializer.is_valid():
         token_name = serializer.data['token_name']

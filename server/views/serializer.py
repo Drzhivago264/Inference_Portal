@@ -48,8 +48,6 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('name', 'id')
 
-# Recursive Serializer
-
 
 class UserInstructionGetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -76,6 +74,7 @@ class RedirectSerializer(LoginSerializer):
 
 class CreateKeySerializer(serializers.Serializer):
     key_name = serializers.CharField()
+
 
 class PermissionSerializer(serializers.Serializer):
     allow_chat = serializers.BooleanField()
