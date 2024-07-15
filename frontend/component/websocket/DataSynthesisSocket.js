@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { multilineColumn } from "../MultipleLineEdittingDataGrid";
+import { multilineColumn } from "../custom_ui_component/MultipleLineEdittingDataGrid";
 
 export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref) {
 

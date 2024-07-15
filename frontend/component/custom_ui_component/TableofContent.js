@@ -11,7 +11,6 @@ const useHeadingsData = (mdfile) => {
             document.querySelectorAll("h2, h3")
 
         );
-
         const newNestedHeadings = getNestedHeadings(headingElements);
         setNestedHeadings(newNestedHeadings);
     }, [mdfile]);
@@ -19,7 +18,6 @@ const useHeadingsData = (mdfile) => {
 };
 
 const useIntersectionObserver = (setActiveId, mdfile, mode) => {
-    
     const headingElementsRef = useRef({});
     useEffect(() => {
         const callback = (headings) => {
@@ -42,21 +40,16 @@ const useIntersectionObserver = (setActiveId, mdfile, mode) => {
         const observer = new IntersectionObserver(callback, {
             rootMargin: "0px 0px -40% 0px"
         });
-
         const headingElements = Array.from(document.querySelectorAll("h2, h3"));
-
         headingElements.forEach((element) => observer.observe(element));
-
         return () => observer.disconnect();
     }, [setActiveId, mdfile, mode]);
 };
 
 const getNestedHeadings = (headingElements) => {
     const nestedHeadings = [];
-
     headingElements.forEach((heading) => {
         const { innerText: title, id } = heading;
-
         if (heading.nodeName === "H2") {
             nestedHeadings.push({ id, title, items: [] });
         } else if (heading.nodeName === "H3" && nestedHeadings.length > 0) {
@@ -66,12 +59,10 @@ const getNestedHeadings = (headingElements) => {
             });
         }
     });
-
     return nestedHeadings;
 };
 
 const Headings = ({ headings, activeId, mode }) => (
-    
     <ul>
         {headings.map((heading ) => (
             <li key={heading.id} className={heading.id === activeId ? "active" : ""}>
@@ -90,7 +81,6 @@ const Headings = ({ headings, activeId, mode }) => (
 
 const TableOfContents = ({ mdfile }) => {
     const {  mode } = useContext(ColorModeContext);
-    
     const [activeId, setActiveId] = useState();
     const { nestedHeadings } = useHeadingsData(mdfile);
     useIntersectionObserver(setActiveId, mdfile, mode);

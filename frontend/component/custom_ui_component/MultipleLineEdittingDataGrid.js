@@ -9,7 +9,6 @@ export function isKeyboardEvent(event) {
     return !!event.key;
 }
 
-
 function EditTextarea(props) {
     const { id, field, value, colDef, hasFocus } = props;
     const [valueState, setValueState] = useState(value);
