@@ -24,6 +24,7 @@ from server.views.token_management import (
     generate_token_api,
     get_token_api,
     remove_permission,
+    add_permission,
     invalidate_token
 )
 from server.views.room_view import (
@@ -92,7 +93,8 @@ urlpatterns = [
     path('frontend-api/get-token',  get_token_api, name='generate-get'),
     path('frontend-api/remove-permission',
          remove_permission, name='remove_permission'),
-
+    path('frontend-api/add-permission',
+         add_permission, name='add_permission'),
     path('frontend-api/invalidate-token',
          invalidate_token, name='invalidate-token'),
 

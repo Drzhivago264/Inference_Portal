@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import AddPermissionDialog from '../component/custom_ui_component/MorePermissionDialog.js';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
@@ -143,6 +144,7 @@ function TokenManagement() {
                     'X-CSRFToken': csrftoken,
                 }
             }
+
             const data = {
                 token_name: tokenname,
                 permission: permission,
@@ -163,19 +165,17 @@ function TokenManagement() {
     const deletePermission = (token_prefix, token_name, token_value, permission, token_index, perm_index) => {
         if (token_prefix && token_name && token_value && permission) {
             const csrftoken = getCookie('csrftoken');
-            const config = {
+            axios.delete("/frontend-api/remove-permission", {
                 headers: {
                     'content-type': 'application/json',
                     'X-CSRFToken': csrftoken,
+                }, data: {
+                    token_name: token_name,
+                    prefix: token_prefix,
+                    first_and_last_char: token_value,
+                    permission: permission
                 }
-            }
-            const data = {
-                token_name: token_name,
-                prefix: token_prefix,
-                first_and_last_char: token_value,
-                permission: permission
-            }
-            axios.post("/frontend-api/remove-permission", data, config)
+            })
                 .then((response) => {
                     setReloadToken(true)
                     setTokenList((prev) => {
@@ -196,18 +196,18 @@ function TokenManagement() {
     const deleteToken = (token_prefix, token_name, token_value, index) => {
         if (token_prefix && token_name && token_value) {
             const csrftoken = getCookie('csrftoken');
-            const config = {
+
+            axios.delete("/frontend-api/invalidate-token", {
                 headers: {
                     'content-type': 'application/json',
                     'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    token_name: token_name,
+                    prefix: token_prefix,
+                    first_and_last_char: token_value
                 }
-            }
-            const data = {
-                token_name: token_name,
-                prefix: token_prefix,
-                first_and_last_char: token_value
-            }
-            axios.post("/frontend-api/invalidate-token", data, config)
+            })
                 .then((response) => {
                     setTokenList(prev => {
                         return prev.filter((_, i) => i !== index)
@@ -284,6 +284,15 @@ function TokenManagement() {
                                                                 </Grid>
 
                                                             ))}
+                                                            <Grid item > <AddPermissionDialog
+                                                                current_permission_list={row.permissions}
+                                                                full_permission_list={permission}
+                                                                token_name={row.name}
+                                                                token_value={row.value}
+                                                                token_prefix={row.prefix}
+                                                                setReloadToken={setReloadToken}
+                                                                settokenCreateError={settokenCreateError} />
+                                                            </Grid>
                                                         </Grid>
                                                     </TableCell>
                                                     <TableCell >
@@ -309,7 +318,6 @@ function TokenManagement() {
                                 <Typography variant="h6" >
                                     <Box sx={{ lineHeight: 2, fontWeight: '700' }}> Create New Access Token </Box>
                                 </Typography>
-
                                 <Box my={2} justifyContent="center" alignItems="center" display="flex" >
                                     <Grid container direction="row" spacing={1}>
                                         <Grid item style={{
@@ -320,7 +328,6 @@ function TokenManagement() {
                                                 <AlertTitle>Infor</AlertTitle>
                                                 Access tokens authenticate allow trusted actors or applications to use the services based on permissions. Access tokens aims afford teams collaborating on the same project.
                                             </Alert>
-
                                         </Grid>
                                         <Grid style={{
                                             alignItems: 'center',

@@ -41,10 +41,11 @@ def generate_token_api(request: HttpRequest) -> Response:
             'second': datetime.timedelta(seconds=ttl_raw)
         }
         permission_list = list()
+        print(permission_dict)
         for perm, value in permission_dict.items():
             if value and perm != "allow_create_token": #Only Master User is allowed to create token
                 permission_list.append(perm)
-
+        print(permission_list)
         if len(permission_list) == 0:
             return Response({"detail": f"Cannot create a token with no permission!"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -97,9 +98,42 @@ def get_token_api(request: HttpRequest) -> Response:
     return Response({"token_list": response}, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
+@api_view(['DELETE'])
 @throttle_classes([UserRateThrottle])
 def remove_permission(request: HttpRequest) -> Response:
+    serializer = ModifyTokenSerializer(data=request.data)
+    current_user = request.user
+    master_key_object = current_user.apikey
+    if serializer.is_valid():
+        token_name = serializer.data['token_name']
+        permission = serializer.data['permission']
+        try:
+            permission_object = Permission.objects.get(codename=permission)
+        except Permission.DoesNotExist:
+            return Response('Error: permission does not exist', status=status.HTTP_400_BAD_REQUEST)
+        first_and_last_char = serializer.data['first_and_last_char']
+        prefix = serializer.data['prefix']
+        try:
+
+            token = FineGrainAPIKEY.objects.get(
+                master_key=master_key_object,
+                name=token_name,
+                prefix=prefix,
+                first_three_char=first_and_last_char[:3],
+                last_three_char=first_and_last_char[-3:]
+            )
+        except FineGrainAPIKEY.DoesNotExist:
+            return Response({'detail':'Error: token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        token.user.user_permissions.remove(permission_object)
+
+        return Response({
+            "reponse": f"{permission_object.codename} is deleted",
+            "value": first_and_last_char
+        }, status=status.HTTP_200_OK)
+
+@api_view(['PUT'])
+@throttle_classes([UserRateThrottle])
+def add_permission(request: HttpRequest) -> Response:
     serializer = ModifyTokenSerializer(data=request.data)
     current_user = request.user
     master_key_object = current_user.apikey
@@ -122,15 +156,15 @@ def remove_permission(request: HttpRequest) -> Response:
             )
         except FineGrainAPIKEY.DoesNotExist:
             return Response({'detail':'Error: token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        token.user.user_permissions.remove(permission_object)
+        token.user.user_permissions.add(permission_object)
 
         return Response({
-            "reponse": f"{permission_object.codename} is deleted",
+            "reponse": f"{permission_object.codename} is added",
             "value": first_and_last_char
         }, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
+@api_view(['DELETE'])
 @throttle_classes([UserRateThrottle])
 def invalidate_token(request: HttpRequest) -> Response:
     serializer = ModifyTokenSerializer(data=request.data)
