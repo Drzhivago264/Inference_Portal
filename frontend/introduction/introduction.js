@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 import { Divider } from '@mui/material';
 import Footer from '../component/nav/Footer';
 import Grid from '@mui/material/Grid';
-import IntroductionVerticalLinearStepper from '../component/custom_ui_component/IntroductionStepper';
+import IntroductionVerticalLinearStepper from '../component/IntroductionStepper';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';

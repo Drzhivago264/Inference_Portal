@@ -84,7 +84,6 @@ def instruction_tree_api(request):
                 default_child_template = root.get_children()
                 serializer_children = InstructionTreeSerializer(
                     default_child_template, many=True)
-
         if user_root_nodes.count() > 0:
             user_serializer_children = UserInstructionTreeSerializer(
                 user_root_nodes[0].get_children(), many=True)
@@ -123,78 +122,77 @@ def post_user_instruction_tree_api(request):
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        if request.method == 'POST':
-            serializer = NestedUserInstructionCreateSerializer(
-                data=request.data)
-            if serializer.is_valid():
-                parent_instruction = serializer.data['parent_instruction']
-                childrens = serializer.data['childrens']
-                parent_instruction = UserInstructionCreateSerializer(
-                    parent_instruction)
-                childrens = UserInstructionCreateSerializer(
-                    childrens, many=True)
-                if UserInstructionTree.objects.filter(user=current_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
-                    if parent_instruction.data['id'] is not None:
-                        node = UserInstructionTree.objects.get(
-                            id=parent_instruction.data['id'], user=current_user)
-                        node.instruct = parent_instruction.data['instruct']
-                        node.displayed_name = parent_instruction.data['displayed_name']
-                        node.save()
-                        for index, c in enumerate(childrens.data):
-                            if index < 4:
-                                if c['id'] is not None:
-                                    child_node = UserInstructionTree.objects.get(
-                                        id=c['id'], user=current_user)
-                                    child_node.instruct = c['instruct']
-                                    child_node.displayed_name = c['displayed_name']
-                                    child_node.code = index
-                                    child_node.save()
-                                else:
-                                    UserInstructionTree.objects.create(
-                                        instruct=c['instruct'],
-                                        displayed_name=c['displayed_name'],
-                                        name=current_user.apikey.hashed_key +
-                                        str(uuid.uuid4()),
-                                        parent=node,
-                                        user=current_user,
-                                        code=index)
+        serializer = NestedUserInstructionCreateSerializer(
+            data=request.data)
+        if serializer.is_valid():
+            parent_instruction = serializer.data['parent_instruction']
+            childrens = serializer.data['childrens']
+            parent_instruction = UserInstructionCreateSerializer(
+                parent_instruction)
+            childrens = UserInstructionCreateSerializer(
+                childrens, many=True)
+            if UserInstructionTree.objects.filter(user=current_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
+                if parent_instruction.data['id'] is not None:
+                    node = UserInstructionTree.objects.get(
+                        id=parent_instruction.data['id'], user=current_user)
+                    node.instruct = parent_instruction.data['instruct']
+                    node.displayed_name = parent_instruction.data['displayed_name']
+                    node.save()
+                    for index, c in enumerate(childrens.data):
+                        if index < 4:
+                            if c['id'] is not None:
+                                child_node = UserInstructionTree.objects.get(
+                                    id=c['id'], user=current_user)
+                                child_node.instruct = c['instruct']
+                                child_node.displayed_name = c['displayed_name']
+                                child_node.code = index
+                                child_node.save()
                             else:
-                                return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
-                    else:
-                        try:
-                            grandparent_node = UserInstructionTree.objects.get(
-                                user=current_user, level=0)
-                        except UserInstructionTree.DoesNotExist:
-                            grandparent_node = UserInstructionTree.objects.create(
-                                user=current_user, name=current_user.apikey.hashed_key)
-
-                        parent_node = UserInstructionTree.objects.create(user=current_user, parent=grandparent_node,
-                                                                         name=current_user.apikey.hashed_key +
-                                                                         str(uuid.uuid4(
-                                                                         )),
-                                                                         displayed_name=parent_instruction.data[
-                                                                             'displayed_name'],
-                                                                         instruct=parent_instruction.data['instruct']
-                                                                         )
-                        for index, c in enumerate(childrens.data):
-                            if index < 4:
-                                node = UserInstructionTree.objects.create(
-                                    user=current_user,
-                                    parent=parent_node,
+                                UserInstructionTree.objects.create(
+                                    instruct=c['instruct'],
+                                    displayed_name=c['displayed_name'],
                                     name=current_user.apikey.hashed_key +
                                     str(uuid.uuid4()),
-                                    displayed_name=c['displayed_name'],
-                                    instruct=c['instruct'],
-                                    code=index
-                                )
-                            else:
-                                return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
-
-                    return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
+                                    parent=node,
+                                    user=current_user,
+                                    code=index)
+                        else:
+                            return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
+                    try:
+                        grandparent_node = UserInstructionTree.objects.get(
+                            user=current_user, level=0)
+                    except UserInstructionTree.DoesNotExist:
+                        grandparent_node = UserInstructionTree.objects.create(
+                            user=current_user, name=current_user.apikey.hashed_key)
+
+                    parent_node = UserInstructionTree.objects.create(user=current_user, parent=grandparent_node,
+                                                                     name=current_user.apikey.hashed_key +
+                                                                     str(uuid.uuid4(
+                                                                     )),
+                                                                     displayed_name=parent_instruction.data[
+                                                                         'displayed_name'],
+                                                                     instruct=parent_instruction.data['instruct']
+                                                                     )
+                    for index, c in enumerate(childrens.data):
+                        if index < 4:
+                            node = UserInstructionTree.objects.create(
+                                user=current_user,
+                                parent=parent_node,
+                                name=current_user.apikey.hashed_key +
+                                str(uuid.uuid4()),
+                                displayed_name=c['displayed_name'],
+                                instruct=c['instruct'],
+                                code=index
+                            )
+                        else:
+                            return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
+
+                return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
             else:
-                return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['DELETE'])

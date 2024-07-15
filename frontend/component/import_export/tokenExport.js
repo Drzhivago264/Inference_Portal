@@ -47,7 +47,7 @@ TokenCreateExport.propTypes = {
     token_name: PropTypes.string,
     ttl: PropTypes.string,
     created_at: PropTypes.string,
-    permission: PropTypes.string,
+    permission: PropTypes.array,
     setReloadToken: PropTypes.func,
     settokenCreateLoading: PropTypes.func,
     setRandomAnimation: PropTypes.func,

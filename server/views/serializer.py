@@ -86,6 +86,7 @@ class PermissionSerializer(serializers.Serializer):
     allow_view_log = serializers.BooleanField()
     allow_view_cost = serializers.BooleanField()
     allow_create_template = serializers.BooleanField()
+    allow_data_synthesis = serializers.BooleanField()
 
 class CreateTokenSerializer(serializers.Serializer):
     token_name = serializers.CharField()
