@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 import { Divider } from '@mui/material';
 import Footer from '../component/nav/Footer';
 import Grid from '@mui/material/Grid';
-import IntroductionVerticalLinearStepper from '../component/IntroductionStepper';
+import IntroductionVerticalLinearStepper from '../component/custom_ui_component/IntroductionStepper';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -28,7 +28,6 @@ function Information() {
         <Container maxWidth={false} disableGutters>
             <title>Introduction</title>
             <ResponsiveAppBar timeout={2000} max_width={false} />
-
             <Container maxWidth="xxl" disableGutters sx={{ justifyContent: 'center', alignItems: 'center' }} >
                 <Box p={5} style={{ backgroundImage: `url(https://static.professorparakeet.com/image/introduction_background_${mode}.svg)`, boxShadow: `0px 0px 36px 36px inset ${theme.palette.background.default}` }}>
                     <Grid container spacing={1} justify="flex-end"
@@ -42,7 +41,6 @@ function Information() {
                                     <Typography mt={3} variant='body1'>
                                         {t('introduction.introduction_explain')}
                                     </Typography>
-
                                     <Stack mt={5} direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                                         <Box>
                                             <Button variant="contained" size="large" href="/frontend/key-management" sx={{ borderRadius: 28 }} endIcon={<NavigateNextIcon />}>
@@ -55,7 +53,6 @@ function Information() {
                                             </Button>
                                         </Box>
                                     </Stack>
-
                                 </Box>
                             </Slide>
                         </Grid>
@@ -63,13 +60,11 @@ function Information() {
                             <Box mr={2} mt={5} mb={5} sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
                                 <Slide direction="left" in={true} timeout={1000} mountOnEnter unmountOnExit>
                                     <Paper square={false}>
-
                                         <CardMedia
                                             component="img"
                                             image="https://static.professorparakeet.com/image/show_case.png"
                                             sx={{ objectFit: "contain", borderRadius: '3px', }}
                                         />
-
                                     </Paper>
                                 </Slide>
                             </Box>
@@ -153,7 +148,6 @@ function Information() {
                                                         fontSize: { xs: "1em" }
                                                     }
                                                 }}>
-
                                                     <Paper variant="outlined">
                                                         <Typography variant='body1' style={{  display: 'block', padding: '10px', lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                                                             {t('introduction.example_1')}
@@ -178,7 +172,6 @@ function Information() {
 
                                                     </Paper>
                                                 </Box>
-
                                                 <Typography m={2}>
                                                     {t('introduction.example_chunk_2')}
                                                 </Typography>
@@ -212,7 +205,6 @@ function Information() {
                                                             speed={120}
                                                             deletionSpeed={90}
                                                         />
-
                                                     </Paper>
                                                 </Box>
                                             </Paper>

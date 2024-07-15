@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import PropTypes from 'prop-types'
 import { RandomReveal } from 'react-random-reveal';
 import React from 'react';
-import Textarea from '../custom_ui_component/customTextArea';
+import Textarea from '../custom_ui_component/CustomTextArea';
 import { saveAs } from "file-saver";
 
 function exportKey(keyfile) {

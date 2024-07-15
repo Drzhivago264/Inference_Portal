@@ -18,6 +18,7 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import CreateIcon from '@mui/icons-material/Create';
 import Divider from '@mui/material/Divider';
+import ErrorAlert from '../component/custom_ui_component/ErrorAlert.js';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
@@ -38,7 +39,7 @@ import Stack from '@mui/material/Stack';
 import StyledPaper from '../component/custom_ui_component/StyledPaper.js';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
-import Textarea from '../component/custom_ui_component/customTextArea.js';
+import Textarea from '../component/custom_ui_component/CustomTextArea.js';
 import Typography from '@mui/material/Typography';
 import { UserContext } from '../App.js'
 import Visibility from '@mui/icons-material/Visibility';
@@ -52,25 +53,8 @@ function KeyManagement() {
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
     const [product_objects, setProduct] = useState([]);
-    const [showPassword, setShowPassword] = React.useState(false);
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-    const handleMouseDownPassword = (event) => {
-        event.preventDefault();
-    };
+    const [showPassword, setShowPassword] = useState(false);
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
-
-    useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/products'),
-        ])
-            .then(axios.spread((server_object) => {
-                setProduct(server_object.data.products);
-            }))
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
-
     const [keycreateloading, setKeyCreateLoading] = useState(false);
     const [keycheckloading, setKeyCheckLoading] = useState(false);
     const [xmrretrieveloading, setXMRRetrieveLoading] = useState(false);
@@ -92,6 +76,24 @@ function KeyManagement() {
     const [xmrconfirmationerror, setXMRConfirmationError] = useState(null);
     const [xmrconfirmationresponse, setXMRConfirmationResponse] = useState(null);
     const [striperedirecterror, setStripeRedirectError] = useState(null);
+
+    useEffect(() => {
+        axios.all([
+            axios.get('/frontend-api/products'),
+        ])
+            .then(axios.spread((server_object) => {
+                setProduct(server_object.data.products);
+            }))
+            .catch(error => {
+                console.log(error);
+            });
+    }, []);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+    
     const handleCreateKey = (event) => {
         event.preventDefault()
         setKeyCreateLoading(true);
@@ -310,17 +312,7 @@ function KeyManagement() {
             </Box >
         );
     };
-    const ErrorAlert = ({ error }) => {
-        return (
-            <Box mt={2}>
-                <Box textAlign='center'>
-                    <Alert variant="filled" severity="error">
-                        {error}
-                    </Alert>
-                </Box>
-            </Box >
-        );
-    };
+
     return (
         <Container maxWidth={false} disableGutters>
             <title>Key Management</title>
@@ -580,7 +572,6 @@ function KeyManagement() {
                                 t={t}
                                 components={{ Link: <Link href="/frontend/manual/key" /> }}>
                             </Trans>
-
                         </Typography>
                     </StyledPaper>
                 </Box>

@@ -43,11 +43,11 @@ function Hub() {
     const [image_3_loaded, setImage3Load] = useState(false)
     const [image_4_loaded, setImage4Load] = useState(false)
     const [image_5_loaded, setImage5Load] = useState(false)
+    
     const handleCloseSnack = (event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
-
         setOpenSnack(false);
     };
 

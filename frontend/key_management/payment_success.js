@@ -32,7 +32,7 @@ import Stack from '@mui/material/Stack';
 import StyledPaper from '../component/custom_ui_component/StyledPaper';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
-import Textarea from '../component/custom_ui_component/customTextArea';
+import Textarea from '../component/custom_ui_component/CustomTextArea';
 import Typography from '@mui/material/Typography';
 import axios from 'axios';
 

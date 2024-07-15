@@ -10,6 +10,7 @@ import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
 import CreateIcon from '@mui/icons-material/Create';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ErrorAlert from '../component/custom_ui_component/ErrorAlert.js';
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -91,6 +92,7 @@ function TokenManagement() {
             allow_data_synthesis: false
         }
     )
+    const total_number_permissions = 10
     const [randomanimation, setRandomAnimation] = useState(false);
     const [tokenname, settokenName] = useState("")
     const [ttl, setTTL] = useState(10)
@@ -144,7 +146,6 @@ function TokenManagement() {
                     'X-CSRFToken': csrftoken,
                 }
             }
-
             const data = {
                 token_name: tokenname,
                 permission: permission,
@@ -161,7 +162,6 @@ function TokenManagement() {
                 });
         }
     }
-
     const deletePermission = (token_prefix, token_name, token_value, permission, token_index, perm_index) => {
         if (token_prefix && token_name && token_value && permission) {
             const csrftoken = getCookie('csrftoken');
@@ -176,7 +176,7 @@ function TokenManagement() {
                     permission: permission
                 }
             })
-                .then((response) => {
+                .then(() => {
                     setReloadToken(true)
                     setTokenList((prev) => {
                         const items = token_list[token_index].permissions.filter(
@@ -196,7 +196,6 @@ function TokenManagement() {
     const deleteToken = (token_prefix, token_name, token_value, index) => {
         if (token_prefix && token_name && token_value) {
             const csrftoken = getCookie('csrftoken');
-
             axios.delete("/frontend-api/invalidate-token", {
                 headers: {
                     'content-type': 'application/json',
@@ -208,27 +207,14 @@ function TokenManagement() {
                     first_and_last_char: token_value
                 }
             })
-                .then((response) => {
+                .then(() => {
                     setTokenList(prev => {
                         return prev.filter((_, i) => i !== index)
                     })
-
                 }).catch(error => {
                     settokenCreateError(error.response.data.detail)
                 });
         }
-    };
-
-    const ErrorAlert = ({ error }) => {
-        return (
-            <Box mt={2}>
-                <Box textAlign='center'>
-                    <Alert variant="filled" severity="error">
-                        {error}
-                    </Alert>
-                </Box>
-            </Box >
-        );
     };
     return (
         <Container maxWidth={false} disableGutters>
@@ -265,7 +251,6 @@ function TokenManagement() {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-
                                             {token_list.map((row, index) => (
                                                 <TableRow
                                                     key={row.created_at.toString()}
@@ -284,15 +269,19 @@ function TokenManagement() {
                                                                 </Grid>
 
                                                             ))}
-                                                            <Grid item > <AddPermissionDialog
-                                                                current_permission_list={row.permissions}
-                                                                full_permission_list={permission}
-                                                                token_name={row.name}
-                                                                token_value={row.value}
-                                                                token_prefix={row.prefix}
-                                                                setReloadToken={setReloadToken}
-                                                                settokenCreateError={settokenCreateError} />
-                                                            </Grid>
+                                                            {row.permissions.length < total_number_permissions &&
+                                                                <Grid item > <AddPermissionDialog
+                                                                    current_permission_list={row.permissions}
+                                                                    full_permission_dict={permission}
+                                                                    token_name={row.name}
+                                                                    token_value={row.value}
+                                                                    token_prefix={row.prefix}
+                                                                    settokenCreateError={settokenCreateError}
+                                                                    setTokenList={setTokenList}
+                                                                    token_list={token_list}
+                                                                    index={index} />
+                                                                </Grid>
+                                                            }
                                                         </Grid>
                                                     </TableCell>
                                                     <TableCell >
@@ -464,7 +453,6 @@ function TokenManagement() {
                                                         label={perm.label}
                                                     />
                                                 ))}
-
                                             </Stack>
                                         </Grid>
                                     </Grid>

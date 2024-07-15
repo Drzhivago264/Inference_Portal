@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Chip from '@mui/material/Chip';
+import CloseIcon from '@mui/icons-material/Close';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
@@ -16,7 +17,7 @@ const ListItem = styled('li')(({ theme }) => ({
 }));
 
 function PermissionDialog(props) {
-    const { onClose, open, notchoosenpermissionlist, token_name, token_value, token_prefix, setReloadToken, settokenCreateError } = props;
+    const { onClose, open, notchoosenpermissionlist, token_name, token_value, token_prefix, settokenCreateError, index, setTokenList, token_list } = props;
 
     const addPermission = (token_prefix, token_name, token_value, permission) => {
         if (token_prefix && token_name && token_value && permission) {
@@ -34,20 +35,34 @@ function PermissionDialog(props) {
                 permission: permission
             }
             axios.put("/frontend-api/add-permission", data, config)
-                .then((response) => {
-                    setReloadToken(true)
+                .then(() => {
+                    setTokenList((prev) => {
+                        const items = [...token_list[index].permissions, permission];
+                        const newState = prev;
+                        newState[index].permissions = items;
+                        return [...newState];
+                    });
                 }).catch(error => {
                     settokenCreateError(error.response.data.detail)
                 });
         }
         onClose()
     }
-
-
-
     return (
         <Dialog onClose={onClose} open={open}>
             <DialogTitle>Add Permission(s)</DialogTitle>
+            <IconButton
+                aria-label="close"
+                onClick={onClose}
+                sx={{
+                    position: 'absolute',
+                    right: 8,
+                    top: 8,
+                    color: (theme) => theme.palette.grey[500],
+                }}
+            >
+                <CloseIcon />
+            </IconButton>
             <Paper
                 sx={{
                     display: 'flex',
@@ -66,7 +81,6 @@ function PermissionDialog(props) {
 
                 ))}
             </Paper>
-
         </Dialog>
     );
 }
@@ -75,16 +89,23 @@ PermissionDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
     selectedValue: PropTypes.string.isRequired,
-    notchoosenpermissionlist: PropTypes.array.isRequired
+    notchoosenpermissionlist: PropTypes.array.isRequired,
+    token_name: PropTypes.string.isRequired,
+    token_value: PropTypes.string.isRequired,
+    token_prefix: PropTypes.string.isRequired,
+    settokenCreateError: PropTypes.func.isRequired,
+    index: PropTypes.number.isRequired,
+    setTokenList: PropTypes.func.isRequired,
+    token_list: PropTypes.array.isRequired
 };
 
-export default function AddPermissionDialog({ full_permission_list, current_permission_list, token_name, token_value, token_prefix, setReloadToken, settokenCreateError }) {
+export default function AddPermissionDialog({ full_permission_dict, current_permission_list, token_name, token_value, token_prefix, settokenCreateError, index, setTokenList, token_list }) {
     const [open, setOpen] = useState(false);
     const [notchoosenpermissionlist, setNotChoosenPermissionList] = useState([])
     const handleClickOpen = () => {
         setOpen(true);
         var not_choosen_permission_list = []
-        for (let i in full_permission_list) {
+        for (let i in full_permission_dict) {
             if (!current_permission_list.includes(i)) {
                 not_choosen_permission_list.push(i)
             }
@@ -92,7 +113,7 @@ export default function AddPermissionDialog({ full_permission_list, current_perm
         setNotChoosenPermissionList(not_choosen_permission_list)
     };
 
-    const handleClose = (value) => {
+    const handleClose = () => {
         setOpen(false);
     };
 
@@ -108,9 +129,24 @@ export default function AddPermissionDialog({ full_permission_list, current_perm
                 token_name={token_name}
                 token_value={token_value}
                 token_prefix={token_prefix}
-                setReloadToken={setReloadToken}
                 settokenCreateError={settokenCreateError}
+                setTokenList={setTokenList}
+                token_list={token_list}
+                index={index}
             />
         </div>
     );
 }
+
+
+AddPermissionDialog.propTypes = {
+    full_permission_dict: PropTypes.object.isRequired,
+    current_permission_list: PropTypes.array.isRequired,
+    token_name: PropTypes.string.isRequired,
+    token_value: PropTypes.string.isRequired,
+    token_prefix: PropTypes.string.isRequired,
+    settokenCreateError: PropTypes.func.isRequired,
+    index: PropTypes.number.isRequired,
+    setTokenList: PropTypes.func.isRequired,
+    token_list: PropTypes.array.isRequired
+};
