@@ -124,17 +124,18 @@ function TokenManagement() {
         setTokenNameError(false)
         setRandomAnimation(false)
         setTokenCreateError(null)
-        if (tokenname == '') {
-            setTokenCreateLoading(false)
-            setTokenNameError(true)
-        }
+
         var perm_count = 0;
         for (var key in permission) {
             if (permission[key]) {
                 perm_count++;
             }
         }
-        if (perm_count === 0) {
+        if (tokenname == '') {
+            setTokenCreateLoading(false)
+            setTokenNameError(true)
+        }
+        else if (perm_count === 0) {
             setTokenCreateError("You tried to create a token without any permission, the key will be unusable. Associate at least one permission for the token.")
             setTokenCreateLoading(false)
         }
@@ -183,10 +184,9 @@ function TokenManagement() {
                         setTokenCreateError(error.response.data.detail)
 
                     }
-                })
-                .finally(
                     setTokenCreateLoading(false)
-                );
+                })
+
         }
     }
     const deletePermission = (token_prefix, token_name, token_value, permission, token_index, perm_index) => {
