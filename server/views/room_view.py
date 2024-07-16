@@ -146,7 +146,7 @@ def post_user_instruction_tree_api(request):
             if current_user.groups.filter(name='master_user').exists():
                 hash_key = current_user.apikey.hashed_key
             elif current_user.groups.filter(name='slave_user').exists():
-                hash_key = current_user.finegrainapikey.hashed_key_
+                hash_key = current_user.finegrainapikey.hashed_key
             if UserInstructionTree.objects.filter(user=current_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
                 if parent_instruction.data['id'] is not None:
                     node = UserInstructionTree.objects.get(
