@@ -18,14 +18,15 @@ from asgiref.sync import sync_to_async
 
 class QueryDBMixin:
 
-    async def get_key_object(self):
+    async def get_master_key_and_master_user(self):
         if await sync_to_async(self.user.groups.filter(name='master_user').exists)():
             key_object = await sync_to_async(lambda: self.user.apikey)()
-            return key_object
+            return key_object, self.user
         elif await sync_to_async(self.user.groups.filter(name="slave_user").exists)():
             token = await sync_to_async(lambda: self.user.finegrainapikey)()
             key_object = await sync_to_async(lambda: token.master_key)()
-            return key_object
+            master_user = await sync_to_async(lambda: key_object.user)()
+            return key_object, master_user
         
 
     async def check_permission(self, permission_code, destination):
@@ -35,18 +36,19 @@ class QueryDBMixin:
             await self.send(text_data=json.dumps({"message": f"Your key is not authorised to use {destination}. Disconnected", "role": "Server", "time": self.time}))
             await self.disconnect(close_code={'code': 3000})
 
-    async def get_template(self, name, template_type):
+    async def get_template(self, name: str, template_type: str) -> InstructionTree | UserInstructionTree:
         try:
             if template_type == 'system':
                 template = await InstructionTree.objects.aget(name=name)
+                return template
             elif template_type == 'user_template':
-                template = await UserInstructionTree.objects.aget(displayed_name=name, user=self.user)
-            return template
+                template = await UserInstructionTree.objects.aget(displayed_name=name, user=self.master_user)
+                return template
         except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
             return False
 
     @database_sync_to_async
-    def get_child_template_list(self, template, template_type="system"):
+    def get_child_template_list(self, template: str, template_type: str ="system") -> dict:
         try:
             if template_type == 'system':
                 child_template = InstructionTree.objects.get(
@@ -54,7 +56,7 @@ class QueryDBMixin:
                 return {"name_list": [c.name for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
             elif template_type == 'user_template':
                 child_template = UserInstructionTree.objects.get(
-                    displayed_name=template.displayed_name).get_leafnodes()
+                    displayed_name=template.displayed_name, user=self.master_user).get_leafnodes()
                 if child_template:
                     return {"name_list": [c.displayed_name for c in child_template], "default_child": child_template[0].displayed_name, "default_instruct": child_template[0].instruct}
                 else:

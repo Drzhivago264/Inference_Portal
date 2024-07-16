@@ -5,6 +5,7 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
+import ErrorAlert from "../component/custom_ui_component/ErrorAlert.js";
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -50,7 +51,6 @@ function Contact() {
             setKeyError(true)
         }
         if (key) {
-            console.log(key)
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -66,26 +66,17 @@ function Contact() {
                     setIsAuthenticated(true)
                     navigate('/frontend/hub');
                 }).catch(error => {
-                    setLoginError(error.response.data.detail)
+                    console.log(error)
+                    if (error.response.data.hasOwnProperty("key")) {
+                        setLoginError(error.response.data.key[0])
+                    }
+                    else {
+                        setLoginError(error.response.data.detail)
+                    }
                 });
         }
         setLoading(false)
     }
-    const ErrorAlert = ({ error }) => {
-        return (
-            <Box mt={4}>
-                <Typography variant="body1"  >
-                    Request Failed!
-                </Typography>
-                <Box textAlign='center'>
-                    <Alert variant="filled" severity="error">
-                        {error}
-                    </Alert>
-                </Box>
-            </Box >
-        );
-    };
-
 
     return (
         <Container maxWidth={false} disableGutters>
@@ -107,7 +98,6 @@ function Contact() {
                                 <form autoComplete="off" onSubmit={handleLogin}>
                                     <FormControl defaultValue="" margin='normal' required>
                                         <Stack direction={{ xs: 'column' }} spacing={1}>
-
                                             <TextField
                                                 margin="normal"
                                                 fullWidth
@@ -138,19 +128,16 @@ function Contact() {
                                                     )
                                                 }}
                                             />
-
                                             <LoadingButton loading={loading} variant="contained" type="submit" endIcon={<LoginIcon />}>Login</LoadingButton>
                                         </Stack>
-
                                     </FormControl>
                                 </form>
                             </Box>
                             <Divider />
-                            <Box sx={{ pt: 4 }}>
+                            <Box sx={{ pt: 3 }}>
                                 <LoadingButton size="medium" variant="contained" component={Link} to='/frontend/key-management'>  Create New Key </LoadingButton>
                             </Box>
                         </Box>
-
                         {loginerror && <ErrorAlert error={loginerror} />}
                     </StyledPaper>
                 </Box>

@@ -418,7 +418,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
                   </AvatarWithHover>
                   <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '11rem' }}>
                     <Typography m={1.2} sx={{ fontWeight: 'bold' }} noWrap variant='body1'>
-                      Parent Key: {user_key_name}
+                      Key: {user_key_name}
                     </Typography>
                   </div>
                 </Stack>
