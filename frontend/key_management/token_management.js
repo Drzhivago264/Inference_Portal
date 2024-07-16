@@ -75,7 +75,7 @@ function TokenManagement() {
         setReloadToken(false)
 
     }, []);
-    const [tokencreateloading, settokenCreateLoading] = useState(false);
+    const [tokencreateloading, setTokenCreateLoading] = useState(false);
     const [token_list, setTokenList] = useState([])
     const [use_ttl, setUseTTL] = useState(true)
     const [permission, setPermission] = useState(
@@ -94,12 +94,12 @@ function TokenManagement() {
     )
     const total_number_permissions = 10
     const [randomanimation, setRandomAnimation] = useState(false);
-    const [tokenname, settokenName] = useState("")
+    const [tokenname, setTokenName] = useState("")
     const [ttl, setTTL] = useState(10)
     const [time_unit, setTimeUnit] = useState('day')
-    const [tokennameError, settokenNameError] = useState(false)
-    const [tokencreateresponse, settokenCreateResponse] = useState(null);
-    const [tokencreateerror, settokenCreateError] = useState(null);
+    const [tokennameError, setTokenNameError] = useState(false)
+    const [tokencreateresponse, setTokenCreateResponse] = useState(null);
+    const [tokencreateerror, setTokenCreateError] = useState(null);
 
     const setAllPermission = (value) => {
         setPermission({
@@ -119,14 +119,14 @@ function TokenManagement() {
 
     const handleCreateToken = (event) => {
         event.preventDefault()
-        settokenCreateLoading(true);
-        settokenCreateResponse(null)
-        settokenNameError(false)
+        setTokenCreateLoading(true);
+        setTokenCreateResponse(null)
+        setTokenNameError(false)
         setRandomAnimation(false)
-        settokenCreateError(null)
+        setTokenCreateError(null)
         if (tokenname == '') {
-            settokenCreateLoading(false)
-            settokenNameError(true)
+            setTokenCreateLoading(false)
+            setTokenNameError(true)
         }
         var perm_count = 0;
         for (var key in permission) {
@@ -135,10 +135,22 @@ function TokenManagement() {
             }
         }
         if (perm_count === 0) {
-            settokenCreateError("You tried to create a token without any permission, the key will be unusable. Associate at least one permission for the token.")
-            settokenCreateLoading(false)
+            setTokenCreateError("You tried to create a token without any permission, the key will be unusable. Associate at least one permission for the token.")
+            setTokenCreateLoading(false)
         }
-        if (tokenname && perm_count > 0) {
+        else if (tokenname.length > 100) {
+            setTokenCreateError("You tried to create a token name longer than 100 chars.")
+            setTokenCreateLoading(false)
+        }
+        else if (ttl <= 0 || ttl > 999999) {
+            setTokenCreateError("You tried to create a token with invalid time to live (0 < ttl < 999999).")
+            setTokenCreateLoading(false)
+        }
+        else if (!['day', 'hour', 'minute', 'second'].includes(time_unit)) {
+            setTokenCreateError("You tried to create a token with invalid time unit ['day', 'hour', 'minute', 'second'].")
+            setTokenCreateLoading(false)
+        }
+        else {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -155,11 +167,26 @@ function TokenManagement() {
             }
             axios.post("/frontend-api/generate-token", data, config)
                 .then((response) => {
-                    settokenCreateResponse(response.data)
-                }).catch(error => {
-                    settokenCreateError(error.response.data.detail)
-                    settokenCreateLoading(false)
-                });
+                    setTokenCreateResponse(response.data)
+                })
+                .catch(error => {
+                    if (error.response.data.hasOwnProperty("token_name")) {
+                        setTokenCreateError(error.response.data.token_name[0])
+                    }
+                    else if (error.response.data.hasOwnProperty("ttl")) {
+                        setTokenCreateError(error.response.data.ttl[0])
+                    }
+                    else if (error.response.data.hasOwnProperty("time_unit")) {
+                        setTokenCreateError(error.response.data.time_unit[0])
+                    }
+                    else {
+                        setTokenCreateError(error.response.data.detail)
+
+                    }
+                })
+                .finally(
+                    setTokenCreateLoading(false)
+                );
         }
     }
     const deletePermission = (token_prefix, token_name, token_value, permission, token_index, perm_index) => {
@@ -188,7 +215,7 @@ function TokenManagement() {
                     });
 
                 }).catch(error => {
-                    settokenCreateError(error.response.data.detail)
+                    setTokenCreateError(error.response.data.detail)
                 });
         }
     };
@@ -212,7 +239,7 @@ function TokenManagement() {
                         return prev.filter((_, i) => i !== index)
                     })
                 }).catch(error => {
-                    settokenCreateError(error.response.data.detail)
+                    setTokenCreateError(error.response.data.detail)
                 });
         }
     };
@@ -276,7 +303,7 @@ function TokenManagement() {
                                                                     token_name={row.name}
                                                                     token_value={row.value}
                                                                     token_prefix={row.prefix}
-                                                                    settokenCreateError={settokenCreateError}
+                                                                    setTokenCreateError={setTokenCreateError}
                                                                     setTokenList={setTokenList}
                                                                     token_list={token_list}
                                                                     index={index} />
@@ -330,7 +357,7 @@ function TokenManagement() {
                                                             label="Token Name"
                                                             type="text"
                                                             size="small"
-                                                            onChange={e => settokenName(e.target.value)}
+                                                            onChange={e => setTokenName(e.target.value)}
                                                             value={tokenname}
                                                             error={tokennameError}
                                                             autoComplete="off"
@@ -395,7 +422,7 @@ function TokenManagement() {
                                         permission={tokencreateresponse.permission}
                                         setRandomAnimation={setRandomAnimation}
                                         setReloadToken={setReloadToken}
-                                        settokenCreateLoading={settokenCreateLoading}
+                                        setTokenCreateLoading={setTokenCreateLoading}
                                         randomanimation={randomanimation}
                                     />
                                 }

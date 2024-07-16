@@ -73,7 +73,7 @@ def log_in(request: HttpRequest) -> Response:
                 return Response({"detail": f"Login Success!"}, status=status.HTTP_200_OK)
             else:
                 return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
-        except APIKEY.DoesNotExist or FineGrainAPIKEY.DoesNotExist or KeyError:
+        except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
             return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

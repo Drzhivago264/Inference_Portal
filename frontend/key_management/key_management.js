@@ -93,7 +93,7 @@ function KeyManagement() {
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
-    
+
     const handleCreateKey = (event) => {
         event.preventDefault()
         setKeyCreateLoading(true);
@@ -104,7 +104,11 @@ function KeyManagement() {
             setKeyCreateLoading(false)
             setKeyNameError(true)
         }
-        if (keyname) {
+        else if (keyname.length > 100) {
+            setKeyCreateError("You tried to create a key name longer than 100 chars.")
+            setKeyCreateLoading(false)
+        }
+        else {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {
@@ -118,9 +122,18 @@ function KeyManagement() {
             axios.post("/frontend-api/generate-key", data, config)
                 .then((response) => {
                     setKeyCreateResponse(response.data)
-                }).catch(error => {
-                    setKeyCreateError(error.response.data.detail)
-                });
+                })
+                .catch(error => {
+                    if (error.response.data.hasOwnProperty("key_name")) {
+                        setKeyCreateError(error.response.data.key_name[0])
+                    }
+                    else {
+                        setKeyCreateError(error.response.data.detail)
+                    }
+                })
+                .finally(
+                    setKeyCreateLoading(false)
+                );
         }
     }
     const handleCheckKey = (event) => {

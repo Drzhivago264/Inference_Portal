@@ -5,6 +5,7 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
+import ErrorAlert from "../component/custom_ui_component/ErrorAlert.js";
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
 import Grid from '@mui/material/Grid';
@@ -17,7 +18,6 @@ import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import { UserContext } from '../App.js'
 import axios from 'axios';
 import { getCookie } from '../component/getCookie.js';
@@ -43,7 +43,43 @@ function Hub() {
     const [image_3_loaded, setImage3Load] = useState(false)
     const [image_4_loaded, setImage4Load] = useState(false)
     const [image_5_loaded, setImage5Load] = useState(false)
-    
+    const cardData = [
+        {
+            image_link: "https://static.professorparakeet.com/image/robot_line.jpg",
+            destination: 'chat',
+            image_loaded: image_1_loaded,
+            setImageLoad: setImage1Load,
+            name: 'Chatbot_Mode',
+        },
+        {
+            image_link: "https://static.professorparakeet.com/image/Robot_folow_instruct.jpg",
+            destination: 'engineer',
+            image_loaded: image_2_loaded,
+            setImageLoad: setImage2Load,
+            name: 'Agent_Mode',
+        },
+        {
+            image_link: "https://static.professorparakeet.com/image/Robot_label.jpg",
+            destination: 'toolbox',
+            image_loaded: image_3_loaded,
+            setImageLoad: setImage3Load,
+            name: 'LLM_Functions',
+        },
+        {
+            image_link: "https://static.professorparakeet.com/image/face_to_face.jpeg",
+            destination: 'hotpot',
+            image_loaded: image_4_loaded,
+            setImageLoad: setImage4Load,
+            name: 'Hotpot_Mode',
+        },
+        {
+            image_link: "/static/image/data_synthesis.jpg",
+            destination: 'data-synthesis',
+            image_loaded: image_5_loaded,
+            setImageLoad: setImage5Load,
+            name: 'Data_Synthesis',
+        },
+    ];
     const handleCloseSnack = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -83,35 +119,7 @@ function Hub() {
         }
         setLoading(false)
     }
-    const LoginErrorAlert = ({ error }) => {
-        return (
-            <Box mt={4}>
-                <Typography variant="body1"  >
-                    Request Failed!
-                </Typography>
-                <Box textAlign='center'>
-                    <Alert variant="filled" severity="error">
-                        {error}
-                    </Alert>
-                </Box>
-            </Box >
-        );
-    };
 
-    const ErrorAlert = ({ error }) => {
-        return (
-            <Box mt={4}>
-                <Typography variant="body1"  >
-                    Request Failed!
-                </Typography>
-                <Box textAlign='center'>
-                    <Alert variant="filled" severity="error">
-                        {error}
-                    </Alert>
-                </Box>
-            </Box >
-        );
-    };
     const redirect = (destination) => {
         setKeyError(false)
         setLoginError(false)
@@ -155,7 +163,6 @@ function Hub() {
                     open={opensnack}
                     autoHideDuration={5000}
                     onClose={handleCloseSnack}
-                   
                 >
                     <Alert
                         onClose={handleCloseSnack}
@@ -203,60 +210,26 @@ function Hub() {
                                         <LoadingButton variant="contained" component={Link} to='/frontend/key-management'>  Create New Key </LoadingButton>
 
                                     </Stack>
-                                    {loginerror && <LoginErrorAlert error={loginerror} />}
+                                    {loginerror && <ErrorAlert error={loginerror} />}
                                     {redirecterror && <ErrorAlert error={redirecterror} />}
                                 </FormControl>
                             </form>
                         </Grid>
                         }
                         <Grid item md={12} lg={12}>
-                        <RedirectMediaCards
-                                image_link={"https://static.professorparakeet.com/image/robot_line.jpg"}
-                                redirect={redirect}
-                                destination={'chat'}
-                                image_loaded={image_1_loaded}
-                                setImageLoad={setImage1Load}
-                                t={t}
-                                name={'Chatbot_Mode'}
-                            />
-                            <RedirectMediaCards
-                                image_link={"https://static.professorparakeet.com/image/Robot_folow_instruct.jpg"}
-                                redirect={redirect}
-                                destination={'engineer'}
-                                image_loaded={image_2_loaded}
-                                setImageLoad={setImage2Load}
-                                t={t}
-                                name={'Agent_Mode'}
-                            />
-                            <RedirectMediaCards
-                                image_link={"https://static.professorparakeet.com/image/Robot_label.jpg"}
-                                redirect={redirect}
-                                destination={'toolbox'}
-                                image_loaded={image_3_loaded}
-                                setImageLoad={setImage3Load}
-                                t={t}
-                                name={'LLM_Functions'}
-                            />
-                            <RedirectMediaCards
-                                image_link={"https://static.professorparakeet.com/image/face_to_face.jpeg"}
-                                redirect={redirect}
-                                destination={'hotpot'}
-                                image_loaded={image_4_loaded}
-                                setImageLoad={setImage4Load}
-                                t={t}
-                                name={'Hotpot_Mode'}
-                            />
-                            <RedirectMediaCards
-                                image_link={"/static/image/data_synthesis.jpg"}
-                                redirect={redirect}
-                                destination={'data-synthesis'}
-                                image_loaded={image_5_loaded}
-                                setImageLoad={setImage5Load}
-                                t={t}
-                                name={'Data_Synthesis'}
-                            />
-                           
-
+                            {cardData.map((card) => (
+                                <RedirectMediaCards
+                                    key={card.destination}
+                                    image_link={card.image_link}
+                                    redirect={redirect}
+                                    destination={card.destination}
+                                    image_loaded={card.image_loaded}
+                                    setImageLoad={card.setImageLoad}
+                                    t={t}
+                                    name={card.name}
+                                />
+                            ))
+                            }
                         </Grid>
                     </Grid>
                 </Box>

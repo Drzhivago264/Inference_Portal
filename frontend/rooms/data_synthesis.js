@@ -50,7 +50,6 @@ const ChatInput = styled(TextField)(({ theme }) => ({
 }));
 
 function DataSynthesis() {
-
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const [chat_message, setChatMessage] = useState([]);
     const messagesEndRef = useRef(null)
@@ -338,10 +337,8 @@ function DataSynthesis() {
                                             event.defaultMuiPrevented = true;
                                         }
                                     }}
-
                                 />
                             </div>
-
                         </Grid>
                         <Grid item xs={3}>
                             <Box mr={2}>
@@ -378,9 +375,7 @@ function DataSynthesis() {
                                         <Box
                                             justifyContent="center"
                                             alignItems="center"
-
                                             sx={{
-
                                                 height: 522,
                                                 overflow: "hidden",
                                                 overflowY: "scroll"
@@ -391,7 +386,7 @@ function DataSynthesis() {
                                                         <Grid key={object.label} container>
                                                             <Grid item xs={11}>
                                                                 <TextField
-                                                                    id={index}
+                                                                    id={object.label}
                                                                     label={object.label}
                                                                     multiline
                                                                     maxRows={4}

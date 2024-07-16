@@ -47,7 +47,7 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                     await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
                 except httpx.ConnectError:
                     await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
-                except httpx.HTTPError as e:
+                except httpx.HTTPError:
                     await self.send(text_data=json.dumps({"message": "You messed up the parameter! Return to default", "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
             else:
                 await self.manage_ec2_on_inference(server_status, instance_id)
@@ -109,14 +109,12 @@ class AsyncInferenceOpenaiMixin:
                     data = chunk.choices[0].delta.content
                     if data != None:
                         clean_response += data
-                        response_json = [
-                            {'role': 'assistant', 'content': f'{clean_response}'}
-                        ]
-                        self.session_history.pop()
-                        self.session_history.extend(response_json)
-                        self.current_turn = self.current_turn
                         await self.send(text_data=json.dumps({"message": data,  "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
 
+            response_json = [
+                {'role': 'assistant', 'content': f'{clean_response}'}
+            ]
+            self.session_history.extend(response_json)
             action_list = action_parse_json(self.session_history[-1]['content'])
             if action_list:
                 for act in action_list:

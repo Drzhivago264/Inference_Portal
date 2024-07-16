@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from server.utils import constant
 from server.models import (
     LLM,
     InferenceServer,
@@ -10,26 +11,31 @@ from server.models import (
 
 )
 
+
 class CostSerializer(serializers.ModelSerializer):
     model = serializers.SlugRelatedField(
         read_only=True,
         slug_field='name'
     )
+
     class Meta:
         model = PromptResponse
         fields = ("number_input_tokens", "number_output_tokens",
                   "created_at", "model", "p_type")
+
 
 class InstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstructionTree
         fields = ('instruct', "name", "code", "default_editor_template")
 
+
 class UserInstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInstructionTree
         fields = ('instruct', "displayed_name",
                   "code", "default_editor_template")
+
 
 class MemoryTreeSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
@@ -42,6 +48,7 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
 
     def get_children(self, instance):
         return None
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -75,18 +82,25 @@ class RedirectSerializer(LoginSerializer):
 class CreateKeySerializer(serializers.Serializer):
     key_name = serializers.CharField()
 
+    def validate_key_name(self, value):
+        if len(value) > 100:
+            raise serializers.ValidationError(
+                "Key name is too long, keep it below 100 characters")
+        return value
+
 
 class PermissionSerializer(serializers.Serializer):
     allow_chat = serializers.BooleanField()
     allow_agent = serializers.BooleanField()
     allow_chat_api = serializers.BooleanField()
-    allow_agent_api = serializers.BooleanField()    
+    allow_agent_api = serializers.BooleanField()
     allow_toolbox = serializers.BooleanField()
-    allow_toolbox_api = serializers.BooleanField()    
+    allow_toolbox_api = serializers.BooleanField()
     allow_view_log = serializers.BooleanField()
     allow_view_cost = serializers.BooleanField()
     allow_create_template = serializers.BooleanField()
     allow_data_synthesis = serializers.BooleanField()
+
 
 class CreateTokenSerializer(serializers.Serializer):
     token_name = serializers.CharField()
@@ -95,11 +109,35 @@ class CreateTokenSerializer(serializers.Serializer):
     time_unit = serializers.CharField()
     permission = PermissionSerializer()
 
+    def validate_token_name(self, value):
+        if len(value) > 100:
+            raise serializers.ValidationError(
+                "Token name is too long, keep it below 100 characters")
+        return value
+
+    def validate_ttl(self, value):
+        if value <= 0 or value > 999999:
+            raise serializers.ValidationError(
+                "Time to live cannot be negative or larger than 999999")
+        return value
+
+    def validate_time_unit(self, value):
+        if value not in ['day', 'hour', 'minute', 'second']:
+            raise serializers.ValidationError("Time format is incorrect")
+        return value
+
+
 class ModifyTokenSerializer(serializers.Serializer):
     token_name = serializers.CharField()
     prefix = serializers.CharField()
     first_and_last_char = serializers.CharField()
-    permission = serializers.CharField(required = False)
+    permission = serializers.CharField(required=False)
+
+    def validate_permission(self, value):
+        if value and value not in constant.DEFAULT_PERMISSION_CODENAMES:
+            raise serializers.ValidationError("Cannot find permission")
+        return value
+
 
 class CheckKeySerializer(CreateKeySerializer):
     key = serializers.CharField()
@@ -126,6 +164,7 @@ class ServerSerializer(serializers.ModelSerializer):
     model_name = serializers.SerializerMethodField()
     model_price_input = serializers.SerializerMethodField()
     model_price_output = serializers.SerializerMethodField()
+
     class Meta:
         model = InferenceServer
         fields = ('id', 'status', 'availability', 'model_name',

@@ -224,7 +224,6 @@ def memory_tree_api(request):
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-
         paginator = PageNumberPagination()
         paginator.page_size = 1
         memory_object = MemoryTree.objects.filter(

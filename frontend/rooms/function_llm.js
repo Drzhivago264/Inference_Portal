@@ -66,7 +66,6 @@ function FunctionLLM() {
             .catch(error => {
                 console.log(error);
             });
-
     }, []);
 
     const scrollToBottom = () => {
