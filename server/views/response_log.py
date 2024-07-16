@@ -37,8 +37,10 @@ class LogListJson(BaseDatatableView):
 @throttle_classes([AnonRateThrottle])
 def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
     current_user = request.user
-    if current_user.id == None or not current_user.has_perm('server.allow_view_cost'):
+    if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    elif not current_user.has_perm('server.allow_view_cost'):
+        return Response({'detail': "Not authorised to view cost"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         log_by_date = PromptResponse.objects.filter(key=current_user.apikey, created_at__range=[startdate, enddate]).values('created_at__date', 'model__name').order_by(
             'created_at__date').annotate(sum_input_tokens = Sum('number_input_tokens'),sum_output_tokens = Sum('number_output_tokens'))

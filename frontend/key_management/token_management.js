@@ -182,7 +182,6 @@ function TokenManagement() {
                     }
                     else {
                         setTokenCreateError(error.response.data.detail)
-
                     }
                     setTokenCreateLoading(false)
                 })

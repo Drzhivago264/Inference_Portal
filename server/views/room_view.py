@@ -98,10 +98,20 @@ def user_instruction_tree_api(request):
     current_user = request.user
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    elif not current_user.has_perm('server.allow_create_template'):
+        return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         try:
             root_nodes = UserInstructionTree.objects.filter(
                 user=current_user, level=1)
+            if current_user.groups.filter(name='master_user').exists():
+                master_api_key = current_user.apikey
+                slave_api_key_list = FineGrainAPIKEY.objects.filter(master_key=master_api_key)
+                for slave in slave_api_key_list:
+                    slave_user = slave.user
+                    slave_user_nodes = UserInstructionTree.objects.filter(user=slave_user, level=1)
+                    root_nodes = root_nodes.union(slave_user_nodes, all=True)
+
             serializer = UserInstructionGetSerializer(root_nodes, many=True)
             return Response({'root_nodes': serializer.data,
                              'max_child_num': constant.MAX_CHILD_TEMPLATE_PER_USER,
@@ -121,6 +131,8 @@ def post_user_instruction_tree_api(request):
     current_user = request.user
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    elif not current_user.has_perm('server.allow_create_template'):
+        return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         serializer = NestedUserInstructionCreateSerializer(
             data=request.data)
@@ -131,6 +143,10 @@ def post_user_instruction_tree_api(request):
                 parent_instruction)
             childrens = UserInstructionCreateSerializer(
                 childrens, many=True)
+            if current_user.groups.filter(name='master_user').exists():
+                hash_key = current_user.apikey.hashed_key
+            elif current_user.groups.filter(name='slave_user').exists():
+                hash_key = current_user.finegrainapikey.hashed_key_
             if UserInstructionTree.objects.filter(user=current_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
                 if parent_instruction.data['id'] is not None:
                     node = UserInstructionTree.objects.get(
@@ -151,23 +167,22 @@ def post_user_instruction_tree_api(request):
                                 UserInstructionTree.objects.create(
                                     instruct=c['instruct'],
                                     displayed_name=c['displayed_name'],
-                                    name=current_user.apikey.hashed_key +
+                                    name=hash_key +
                                     str(uuid.uuid4()),
                                     parent=node,
                                     user=current_user,
                                     code=index)
                         else:
-                            return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
+                            return Response({'detail': "Saved parent and 3 childs"}, status=status.HTTP_200_OK)
                 else:
                     try:
                         grandparent_node = UserInstructionTree.objects.get(
                             user=current_user, level=0)
                     except UserInstructionTree.DoesNotExist:
                         grandparent_node = UserInstructionTree.objects.create(
-                            user=current_user, name=current_user.apikey.hashed_key)
-
+                            user=current_user, name=hash_key)
                     parent_node = UserInstructionTree.objects.create(user=current_user, parent=grandparent_node,
-                                                                     name=current_user.apikey.hashed_key +
+                                                                     name=hash_key +
                                                                      str(uuid.uuid4(
                                                                      )),
                                                                      displayed_name=parent_instruction.data[
@@ -179,15 +194,14 @@ def post_user_instruction_tree_api(request):
                             node = UserInstructionTree.objects.create(
                                 user=current_user,
                                 parent=parent_node,
-                                name=current_user.apikey.hashed_key +
+                                name=hash_key +
                                 str(uuid.uuid4()),
                                 displayed_name=c['displayed_name'],
                                 instruct=c['instruct'],
                                 code=index
                             )
                         else:
-                            return Response({'detail': "Saved parent and 3 closed childs"}, status=status.HTTP_200_OK)
-
+                            return Response({'detail': "Saved parent and 3 childs"}, status=status.HTTP_200_OK)
                 return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
             else:
                 return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
@@ -201,6 +215,8 @@ def delete_user_instruction_tree_api(request):
     current_user = request.user
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    elif not current_user.has_perm('server.allow_create_template'):
+        return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         serializer = UserInstructionDeleteCreateSerializer(
             data=request.data)
@@ -223,6 +239,8 @@ def memory_tree_api(request):
     current_user = request.user
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    elif not current_user.has_perm('server.allow_chat'):
+        return Response({'detail': "Not authorised to use chatbot"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         paginator = PageNumberPagination()
         paginator.page_size = 1
