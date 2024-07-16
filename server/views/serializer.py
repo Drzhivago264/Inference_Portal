@@ -71,7 +71,11 @@ class UserInstructionGetSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     key = serializers.CharField()
-
+    def validate_key(self, value):
+        if len(value) != 41 and len(value) !=73 and len(value) != 0:
+            raise serializers.ValidationError(
+                "Key is incorrect")
+        return value
 
 class RedirectSerializer(LoginSerializer):
     check_login = serializers.BooleanField()

@@ -4,6 +4,7 @@ from hashlib import sha256
 from django.contrib.auth import authenticate, login
 from django.views.decorators.cache import cache_page
 from django.http import HttpRequest
+from django.db.utils import IntegrityError
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -30,6 +31,7 @@ from server.models import (
     FineGrainAPIKEY,
     MemoryTree
 )
+from server.utils.sync_.manage_permissions import get_master_key_and_master_user
 from server.utils import constant
 
 
@@ -42,20 +44,22 @@ def hub_redirect_api(request: HttpRequest) -> Response:
         destination = serializer.data['destination']
         check_login = serializer.data['check_login']
         if not check_login:
+            model_dispatcher = {
+                '41': APIKEY,
+                '73': FineGrainAPIKEY
+            }
             try:
-                try:
-                    api_key = APIKEY.objects.get_from_key(key)
-                except APIKEY.DoesNotExist:
-                    api_key = FineGrainAPIKEY.objects.get_from_key(key)
+                key_object = model_dispatcher[str(
+                    len(key))].objects.get_from_key(key)
                 user = authenticate(
-                    request, username=api_key.hashed_key, password=api_key.hashed_key)
+                    request, username=key_object.hashed_key, password=key_object.hashed_key)
                 if user is not None:
                     login(request, user)
                     return Response({"redirect_link": f"/frontend/{destination}"}, status=status.HTTP_200_OK)
                 else:
                     return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
-            except FineGrainAPIKEY.DoesNotExist:
-                return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+            except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
+                return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)                
         else:
             if request.user.id is not None:
                 return Response({"redirect_link": f"/frontend/{destination}"}, status=status.HTTP_200_OK)
@@ -67,15 +71,15 @@ def hub_redirect_api(request: HttpRequest) -> Response:
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
-@cache_page(60 * 15)
 def instruction_tree_api(request):
     current_user = request.user
     if current_user.id == None:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
+        master_key, master_user = get_master_key_and_master_user(current_user=current_user)
         root_nodes = InstructionTree.objects.filter(level=0)
         user_root_nodes = UserInstructionTree.objects.filter(
-            level=1, user=current_user)
+            level=1, user=master_user)
         serializer = InstructionTreeSerializer(root_nodes, many=True)
         user_serializer = UserInstructionTreeSerializer(
             user_root_nodes, many=True)
@@ -101,17 +105,10 @@ def user_instruction_tree_api(request):
     elif not current_user.has_perm('server.allow_create_template'):
         return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        try:
+        try:    
+            master_key, master_user = get_master_key_and_master_user(current_user=current_user)                
             root_nodes = UserInstructionTree.objects.filter(
-                user=current_user, level=1)
-            if current_user.groups.filter(name='master_user').exists():
-                master_api_key = current_user.apikey
-                slave_api_key_list = FineGrainAPIKEY.objects.filter(master_key=master_api_key)
-                for slave in slave_api_key_list:
-                    slave_user = slave.user
-                    slave_user_nodes = UserInstructionTree.objects.filter(user=slave_user, level=1)
-                    root_nodes = root_nodes.union(slave_user_nodes, all=True)
-
+                user=master_user, level=1)
             serializer = UserInstructionGetSerializer(root_nodes, many=True)
             return Response({'root_nodes': serializer.data,
                              'max_child_num': constant.MAX_CHILD_TEMPLATE_PER_USER,
@@ -143,14 +140,14 @@ def post_user_instruction_tree_api(request):
                 parent_instruction)
             childrens = UserInstructionCreateSerializer(
                 childrens, many=True)
-            if current_user.groups.filter(name='master_user').exists():
-                hash_key = current_user.apikey.hashed_key
-            elif current_user.groups.filter(name='slave_user').exists():
-                hash_key = current_user.finegrainapikey.hashed_key
-            if UserInstructionTree.objects.filter(user=current_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
+
+            master_key, master_user = get_master_key_and_master_user(current_user=current_user)
+            hash_key = master_key.hashed_key
+
+            if UserInstructionTree.objects.filter(user=master_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
                 if parent_instruction.data['id'] is not None:
                     node = UserInstructionTree.objects.get(
-                        id=parent_instruction.data['id'], user=current_user)
+                        id=parent_instruction.data['id'], user=master_user)
                     node.instruct = parent_instruction.data['instruct']
                     node.displayed_name = parent_instruction.data['displayed_name']
                     node.save()
@@ -158,48 +155,57 @@ def post_user_instruction_tree_api(request):
                         if index < 4:
                             if c['id'] is not None:
                                 child_node = UserInstructionTree.objects.get(
-                                    id=c['id'], user=current_user)
+                                    id=c['id'], user=master_user)
                                 child_node.instruct = c['instruct']
                                 child_node.displayed_name = c['displayed_name']
                                 child_node.code = index
                                 child_node.save()
                             else:
-                                UserInstructionTree.objects.create(
-                                    instruct=c['instruct'],
-                                    displayed_name=c['displayed_name'],
-                                    name=hash_key +
-                                    str(uuid.uuid4()),
-                                    parent=node,
-                                    user=current_user,
-                                    code=index)
+                                try:
+                                    UserInstructionTree.objects.create(
+                                        instruct=c['instruct'],
+                                        displayed_name=c['displayed_name'],
+                                        name=hash_key +
+                                        str(uuid.uuid4()),
+                                        parent=node,
+                                        user=master_user,
+                                        code=index)
+                                except IntegrityError:
+                                    return Response({'detail': "Failed! You must ensure unique name for each template"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
                             return Response({'detail': "Saved parent and 3 childs"}, status=status.HTTP_200_OK)
                 else:
                     try:
                         grandparent_node = UserInstructionTree.objects.get(
-                            user=current_user, level=0)
+                            user=master_user, level=0)
                     except UserInstructionTree.DoesNotExist:
                         grandparent_node = UserInstructionTree.objects.create(
-                            user=current_user, name=hash_key)
-                    parent_node = UserInstructionTree.objects.create(user=current_user, parent=grandparent_node,
-                                                                     name=hash_key +
-                                                                     str(uuid.uuid4(
-                                                                     )),
-                                                                     displayed_name=parent_instruction.data[
-                                                                         'displayed_name'],
-                                                                     instruct=parent_instruction.data['instruct']
-                                                                     )
+                            user=master_user, name=hash_key)
+                    try:
+                        parent_node = UserInstructionTree.objects.create(user=master_user, parent=grandparent_node,
+                                                                        name=hash_key +
+                                                                        str(uuid.uuid4(
+                                                                        )),
+                                                                        displayed_name=parent_instruction.data[
+                                                                            'displayed_name'],
+                                                                        instruct=parent_instruction.data['instruct']
+                                                                        )
+                    except IntegrityError:
+                        return Response({'detail': "Failed! You must ensure unique name for each template"}, status=status.HTTP_400_BAD_REQUEST)
                     for index, c in enumerate(childrens.data):
                         if index < 4:
-                            node = UserInstructionTree.objects.create(
-                                user=current_user,
-                                parent=parent_node,
-                                name=hash_key +
-                                str(uuid.uuid4()),
-                                displayed_name=c['displayed_name'],
-                                instruct=c['instruct'],
-                                code=index
-                            )
+                            try:
+                                node = UserInstructionTree.objects.create(
+                                    user=master_user,
+                                    parent=parent_node,
+                                    name=hash_key +
+                                    str(uuid.uuid4()),
+                                    displayed_name=c['displayed_name'],
+                                    instruct=c['instruct'],
+                                    code=index
+                                )
+                            except IntegrityError:
+                                return Response({'detail': "Failed! You must ensure unique name for each template"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
                             return Response({'detail': "Saved parent and 3 childs"}, status=status.HTTP_200_OK)
                 return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
@@ -222,9 +228,10 @@ def delete_user_instruction_tree_api(request):
             data=request.data)
         if serializer.is_valid():
             id = serializer.data['id']
+            master_key, master_user = get_master_key_and_master_user(current_user=current_user)
             try:
                 node = UserInstructionTree.objects.get(
-                    id=id, user=current_user)
+                    id=id, user=master_user)
                 node.delete()
                 return Response({'detail': "Deleted"}, status=status.HTTP_200_OK)
             except UserInstructionTree.DoesNotExist:
@@ -244,8 +251,9 @@ def memory_tree_api(request):
     else:
         paginator = PageNumberPagination()
         paginator.page_size = 1
+        master_key, master_user = get_master_key_and_master_user(current_user=current_user)
         memory_object = MemoryTree.objects.filter(
-            key=current_user.apikey).order_by('-id')
+            key=master_key).order_by('-id')
         result_page = paginator.paginate_queryset(memory_object, request)
         try:
             result_page = result_page[0].get_ancestors(include_self=True)

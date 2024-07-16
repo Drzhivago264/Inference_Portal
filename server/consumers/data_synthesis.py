@@ -146,7 +146,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
             self.timezone)).strftime('%M:%S')
         self.room_group_name = "chat_%s" % self.url
         self.user = self.scope['user']
-        self.key_object = await self.get_key_object()
+        self.key_object, self.master_user = await self.get_master_key_and_master_user()
         self.p_type = "data_synthesis"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)

@@ -420,7 +420,7 @@ function Agent() {
                                     {use_user_template && default_user_child_template_list.map((instruct, index) => {
 
                                         return (
-                                            <ListItem key={instruct.displayed_name} disablePadding>
+                                            <ListItem key={instruct.displayed_name + index} disablePadding>
                                                 <ListItemButton
                                                     selected={selectedIndex === index}
                                                     onClick={(event) => { swap_child_instruction(instruct.displayed_name, 'user_template'), handleListItemClick(event, index) }} >

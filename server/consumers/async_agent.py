@@ -78,7 +78,7 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
         self.working_paragraph = ""
         self.is_session_start_node = None
         self.user = self.scope['user']
-        self.key_object = await self.get_key_object()
+        self.key_object, self.master_user = await self.get_master_key_and_master_user()
         self.choosen_model = ""
         self.room_group_name = "agent_%s" % self.url
         self.use_summary = False

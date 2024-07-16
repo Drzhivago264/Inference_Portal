@@ -205,7 +205,7 @@ class InstructionTree(MPTTModel):
 class UserInstructionTree(MPTTModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, unique=True)
-    displayed_name = models.TextField(default="")
+    displayed_name = models.TextField(unique=True)
     code = models.TextField(default="")
     instruct = models.TextField(default="")
     default_child = models.BooleanField(default=False)

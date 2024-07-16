@@ -195,7 +195,7 @@ function UserInstruction() {
         if (length < max_parent_num) {
             if (operation == "add") {
                 setIsSaved(false)
-                const new_template_list = [...template_list, { id: null, displayed_name: "Empty Template", instruct: "", children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] }];
+                const new_template_list = [...template_list, { id: null, displayed_name: `Empty Template ${length + 1}`, instruct: "", children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] }];
                 setTemplateList(new_template_list)
                 setChildInstructionList([])
                 setSelectedIndex(template_list.length)
@@ -248,7 +248,7 @@ function UserInstruction() {
         if (length < max_child_num) {
             setAddChildError(false)
             if (operation == "add") {
-                const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }];
+                const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: `Child ${nanoid(10)}`, instruct: "", unique: nanoid(), add: false }];
                 setChildInstructionList(new_children_instruction_list)
             }
             else if (operation == "delete") {
@@ -286,8 +286,9 @@ function UserInstruction() {
                     setMaxChildNum(template_object.data.max_child_num)
                     setMaxParentNum(template_object.data.max_parent_num)
                     let template_list = []
-                    if (template_object.data.root_nodes.length >= 10) {
+                    if (template_object.data.root_nodes.length >= 25) {
                         setAddParentError(true)
+
                     }
                     if (template_object.data.root_nodes.length == 0) {
                         setTemplateList([{
