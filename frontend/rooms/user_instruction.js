@@ -130,7 +130,13 @@ function UserInstruction() {
             }).catch(error => {
                 setLoading(false)
                 setSaveError(true)
-                setSaveErrorMessage(error.response.data.detail)
+                console.log(error)
+                if (error.code === "ERR_BAD_RESPONSE") {
+                    setSaveErrorMessage("Failed, Internal Server Error!")
+                }
+                else {
+                    setSaveErrorMessage(error.response.data.detail)
+                }
             });
     }
 
@@ -149,7 +155,12 @@ function UserInstruction() {
                 setDeleteSuccess(true)
             }).catch(error => {
                 setDeleteError(true)
-                setDeleteErrorMessage(error.response.data.detail)
+                if (error.code === "ERR_BAD_RESPONSE") {
+                    setSaveErrorMessage("Failed, Internal Server Error!")
+                }
+                else {
+                    setDeleteErrorMessage(error.response.data.detail)
+                }
             });
     }
 
@@ -161,7 +172,6 @@ function UserInstruction() {
         setChildInstructionList(new_children_instruction_list)
         updateParentTemplate(new_children_instruction_list, 'children')
     }
-
     const handleListItemClick = (event, index) => {
         let default_child_instruction = []
         if (template_list[index]['children'] === null) {
@@ -180,7 +190,6 @@ function UserInstruction() {
         }
         setSelectedIndex(index);
     };
-
     const addParent = (operation) => {
         let length = template_list.length
         if (length < max_parent_num) {

@@ -35,7 +35,7 @@ def contact_api(request: HttpRequest) -> Response:
             else:
                 return Response({'detail': 'Your Key Name is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         except APIKEY.DoesNotExist:
-            return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'detail': 'Your Key is incorrect, only master key is allowed to contact'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
