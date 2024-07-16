@@ -130,10 +130,8 @@ function KeyManagement() {
                     else {
                         setKeyCreateError(error.response.data.detail)
                     }
-                })
-                .finally(
                     setKeyCreateLoading(false)
-                );
+                })
         }
     }
     const handleCheckKey = (event) => {
