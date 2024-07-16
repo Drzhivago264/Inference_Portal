@@ -17,7 +17,7 @@ const ListItem = styled('li')(({ theme }) => ({
 }));
 
 function PermissionDialog(props) {
-    const { onClose, open, notchoosenpermissionlist, token_name, token_value, token_prefix, settokenCreateError, index, setTokenList, token_list } = props;
+    const { onClose, open, notchoosenpermissionlist, token_name, token_value, token_prefix, setTokenCreateError, index, setTokenList, token_list } = props;
 
     const addPermission = (token_prefix, token_name, token_value, permission) => {
         if (token_prefix && token_name && token_value && permission) {
@@ -43,7 +43,7 @@ function PermissionDialog(props) {
                         return [...newState];
                     });
                 }).catch(error => {
-                    settokenCreateError(error.response.data.detail)
+                    setTokenCreateError(error.response.data.detail)
                 });
         }
         onClose()
@@ -93,13 +93,13 @@ PermissionDialog.propTypes = {
     token_name: PropTypes.string.isRequired,
     token_value: PropTypes.string.isRequired,
     token_prefix: PropTypes.string.isRequired,
-    settokenCreateError: PropTypes.func.isRequired,
+    setTokenCreateError: PropTypes.func.isRequired,
     index: PropTypes.number.isRequired,
     setTokenList: PropTypes.func.isRequired,
     token_list: PropTypes.array.isRequired
 };
 
-export default function AddPermissionDialog({ full_permission_dict, current_permission_list, token_name, token_value, token_prefix, settokenCreateError, index, setTokenList, token_list }) {
+export default function AddPermissionDialog({ full_permission_dict, current_permission_list, token_name, token_value, token_prefix, setTokenCreateError, index, setTokenList, token_list }) {
     const [open, setOpen] = useState(false);
     const [notchoosenpermissionlist, setNotChoosenPermissionList] = useState([])
     const handleClickOpen = () => {
@@ -129,7 +129,7 @@ export default function AddPermissionDialog({ full_permission_dict, current_perm
                 token_name={token_name}
                 token_value={token_value}
                 token_prefix={token_prefix}
-                settokenCreateError={settokenCreateError}
+                setTokenCreateError={setTokenCreateError}
                 setTokenList={setTokenList}
                 token_list={token_list}
                 index={index}
@@ -145,7 +145,7 @@ AddPermissionDialog.propTypes = {
     token_name: PropTypes.string.isRequired,
     token_value: PropTypes.string.isRequired,
     token_prefix: PropTypes.string.isRequired,
-    settokenCreateError: PropTypes.func.isRequired,
+    setTokenCreateError: PropTypes.func.isRequired,
     index: PropTypes.number.isRequired,
     setTokenList: PropTypes.func.isRequired,
     token_list: PropTypes.array.isRequired

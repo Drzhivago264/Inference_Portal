@@ -31,7 +31,7 @@ class GlobalAuth(HttpBearer):
         try:
             key_object = model_dispatcher[str(len(token))].objects.get_from_key(token)
             return key_object
-        except APIKEY.DoesNotExist or FineGrainAPIKEY.DoesNotExist or KeyError:
+        except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
             pass
          
 

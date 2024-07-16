@@ -21,6 +21,9 @@ media
 # C extensions
 *.so
 
+#redis dump
+*.rdb
+
 # Distribution / packaging
 .Python
 build/

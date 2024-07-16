@@ -42,7 +42,7 @@ class QueryDBMixin:
             elif template_type == 'user_template':
                 template = await UserInstructionTree.objects.aget(displayed_name=name, user=self.user)
             return template
-        except InstructionTree.DoesNotExist or UserInstructionTree.DoesNotExist:
+        except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
             return False
 
     @database_sync_to_async
@@ -59,7 +59,7 @@ class QueryDBMixin:
                     return {"name_list": [c.displayed_name for c in child_template], "default_child": child_template[0].displayed_name, "default_instruct": child_template[0].instruct}
                 else:
                     return {"name_list": [], "default_child": "", "default_instruct": ""}
-        except InstructionTree.DoesNotExist or UserInstructionTree.DoesNotExist:
+        except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
             return False
 
     async def get_model(self, name=None) -> QuerySet[LLM] | bool:
