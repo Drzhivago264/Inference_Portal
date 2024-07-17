@@ -55,7 +55,7 @@ export function agentsocket(
                 else {
                     let new_child_template_list = []
                     for (var template_name in dataFromServer.child_template_name_list) {
-                        new_child_template_list.push({ 'displayed_name': dataFromServer.child_template_name_list[template_name] })
+                        new_child_template_list.push({ 'displayed_name': dataFromServer.child_template_displayed_name_list[template_name], 'name': dataFromServer.child_template_name_list[template_name] })
                     }
                     setUserParentInstruct(dataFromServer.swap_instruction)
                     setUserChildInstruct(dataFromServer.default_child_instruct)

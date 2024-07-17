@@ -27,7 +27,6 @@ class QueryDBMixin:
             key_object = await sync_to_async(lambda: token.master_key)()
             master_user = await sync_to_async(lambda: key_object.user)()
             return key_object, master_user
-        
 
     async def check_permission(self, permission_code, destination):
         if await sync_to_async(self.user.has_perm)(permission_code):
@@ -42,13 +41,13 @@ class QueryDBMixin:
                 template = await InstructionTree.objects.aget(name=name)
                 return template
             elif template_type == 'user_template':
-                template = await UserInstructionTree.objects.aget(displayed_name=name, user=self.master_user)
+                template = await UserInstructionTree.objects.aget(name=name, user=self.master_user)
                 return template
         except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
             return False
 
     @database_sync_to_async
-    def get_child_template_list(self, template: str, template_type: str ="system") -> dict:
+    def get_child_template_list(self, template: str, template_type: str = "system") -> dict:
         try:
             if template_type == 'system':
                 child_template = InstructionTree.objects.get(
@@ -56,11 +55,16 @@ class QueryDBMixin:
                 return {"name_list": [c.name for c in child_template], "default_child": child_template[0].name, "default_instruct": child_template[0].instruct}
             elif template_type == 'user_template':
                 child_template = UserInstructionTree.objects.get(
-                    displayed_name=template.displayed_name, user=self.master_user).get_leafnodes()
+                    name=template.name, user=self.master_user).get_leafnodes()
                 if child_template:
-                    return {"name_list": [c.displayed_name for c in child_template], "default_child": child_template[0].displayed_name, "default_instruct": child_template[0].instruct}
+                    return {
+                        "displayed_name_list": [c.displayed_name for c in child_template],
+                        "name_list": [c.name for c in child_template],
+                        "default_child": child_template[0].displayed_name,
+                        "default_instruct": child_template[0].instruct
+                    }
                 else:
-                    return {"name_list": [], "default_child": "", "default_instruct": ""}
+                    return {"name_list": [], "displayed_name_list": [], "default_child": "", "default_instruct": ""}
         except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
             return False
 

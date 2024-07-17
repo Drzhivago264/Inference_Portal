@@ -50,7 +50,7 @@ function Contact() {
         if (key == '') {
             setKeyError(true)
         }
-        if (key) {
+        else if (key) {
             const csrftoken = getCookie('csrftoken');
             const config = {
                 headers: {

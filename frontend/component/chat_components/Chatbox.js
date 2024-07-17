@@ -92,7 +92,6 @@ export const ChatBox = ({
                     })}
                     <div ref={messagesEndRef}> </div>
                 </Stack>
-
             </ChatPaper>
             {shownthinking && <LinearProgress />}
             <Box mt={2}>

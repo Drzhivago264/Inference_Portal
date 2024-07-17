@@ -3,7 +3,7 @@ import { UserContext, WebSocketContext } from '../App.js'
 
 import Box from '@mui/material/Box';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
-import { ChatExport } from '../component/import_export/chatExport.js';
+import { ChatExport } from '../component/import_export/ChatExport.js';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
 import Footer from '../component/nav/Footer.js';
@@ -205,20 +205,12 @@ function FunctionLLM() {
                                     />
                                 </Box>
                             </Paper>
-                            <Paper sx={{ m: 2 }} variant='outlined'>
-                                <Box m={1}>
-                                    <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
-                                </Box>
-                                <Divider />
-                                <Box mb={2} mt={2} ml={1} mr={2}>
-                                    <ChatExport
-                                        chat_message={chat_message}
-                                        number_of_remove_message={2}
-                                        setChatMessage={setChatMessage}
-                                    >
-                                    </ChatExport>
-                                </Box>
-                            </Paper>
+                            <ChatExport
+                                chat_message={chat_message}
+                                number_of_remove_message={2}
+                                setChatMessage={setChatMessage}
+                            >
+                            </ChatExport>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={6}>

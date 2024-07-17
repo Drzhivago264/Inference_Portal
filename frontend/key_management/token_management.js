@@ -33,7 +33,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import TimerIcon from '@mui/icons-material/Timer';
-import TokenCreateExport from '../component/import_export/tokenExport.js';
+import TokenCreateExport from '../component/import_export/TokenExport.js';
 import Typography from '@mui/material/Typography';
 import axios from 'axios';
 import { getCookie } from '../component/getCookie.js';

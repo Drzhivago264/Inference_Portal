@@ -70,7 +70,6 @@ function Hotpot() {
     const [useragentmessage, setUserAgentMessage] = useState("");
     const [useragentmessageError, setUserAgentMessageError] = useState(false);
     const [max_turn, setMaxTurn] = useState(4)
-
     const [template_list, setTemplateList] = useState([]);
     const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
     const [default_parent_instruct, setParentInstruct] = useState("");
@@ -412,7 +411,6 @@ function Hotpot() {
                                 setDuplicateMessage={setDuplicateMessage}
                                 swap_template={swap_template}
                             ></HotpotParameter>
-
                         </Grid>
                     </Grid>
                 </Box>
