@@ -39,8 +39,8 @@ async def predict_sentiment(request, data: BaseLLMSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
-    key_object =  request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object , user_object =  request.auth
+    
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
@@ -85,8 +85,8 @@ async def predict_emotion(request, data: ClassificationSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
-    key_object =  request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object , user_object =  request.auth
+    
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
@@ -138,8 +138,8 @@ async def paraphase(request, data: BaseLLMSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
-    key_object =  request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object , user_object =  request.auth
+    
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
@@ -187,8 +187,8 @@ async def summarize_document(request, data: SummarizeSchema):
     You can choose to classify the document in a specific number of words with **number_of_word** parameter. 
     This number of words is only respected if it is smaller than the number of words decided by the model and presented in your document.
     """
-    key_object =  request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object , user_object =  request.auth
+    
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
@@ -240,8 +240,8 @@ async def classify_document(request, data: ClassificationSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
-    key_object =  request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object , user_object =  request.auth
+    
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(
@@ -294,8 +294,8 @@ async def restyle_document(request, data: RestyleSchema):
 
      The new style can be an adjective (e.g., **sad**) or multiple strings of adjectives (e.g., **professional**, **serious**)
     """
-    key_object =  request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object , user_object =  request.auth
+    
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_toolbox_api', destination='toolbox')
     if is_ratelimited(

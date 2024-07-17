@@ -32,8 +32,7 @@ router = Router()
 
 @router.post("/chat", tags=["Inference"], summary="Infer Chatbots", response={200: ChatResponse, 401: Error, 442: Error, 404: Error, 429: Error})
 async def chatcompletion(request, data: ChatSchema):
-    key_object =  request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object, user_object =  request.auth
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_chat_api', destination='chat')
     
@@ -68,7 +67,7 @@ async def chatcompletion(request, data: ChatSchema):
                 inputs = tokeniser(data.prompt)
                 current_history_length = len(inputs['input_ids'])
                 if data.include_memory:
-                    chat_history = await sync_to_async(get_chat_context)(llm=model, key_object=request.auth, raw_prompt=data.prompt, current_history_length=current_history_length, tokeniser=tokeniser)
+                    chat_history = await sync_to_async(get_chat_context)(llm=model, key_object=key_object, raw_prompt=data.prompt, current_history_length=current_history_length, tokeniser=tokeniser)
                     chat = [
                         {"role": "system", "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}"}]
                     prompt_ = {"role": "user", "content": f"{data.prompt}"}
