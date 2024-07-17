@@ -16,6 +16,8 @@ import parameterexplainEN from './public/locales/en/parameter_explain.json'
 import parameterexplainVI from './public/locales/vi/parameter_explain.json'
 import redirectEN from './public/locales/en/redirect.json'
 import redirectVI from './public/locales/vi/redirect.json'
+import tokenmanagementEN from './public/locales/en/token_management.json'
+import tokenmanagementVI from './public/locales/vi/token_management.json'
 
 const resources = {
   en: {
@@ -26,7 +28,8 @@ const resources = {
       'manual': manualEN,
       'contact': contactEN,
       'redirect': redirectEN,
-      'parameter_explain': parameterexplainEN
+      'parameter_explain': parameterexplainEN,
+      'token_management': tokenmanagementEN
     }
   },
   vi: {
@@ -37,7 +40,8 @@ const resources = {
       'manual': manualVI,
       'contact': contactVI,
       'redirect': redirectVI,
-      'parameter_explain': parameterexplainVI
+      'parameter_explain': parameterexplainVI,
+      'token_management': tokenmanagementVI
     }
   }
 };

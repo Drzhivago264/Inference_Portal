@@ -16,6 +16,7 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import CreateIcon from '@mui/icons-material/Create';
 import Divider from '@mui/material/Divider';
+import ErrorAlert from '../component/custom_ui_component/ErrorAlert';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Footer from '../component/nav/Footer';
 import { FormControl } from '@mui/material';
@@ -47,8 +48,6 @@ function KeyManagement() {
         ])
             .then(axios.spread((server_object) => {
                 setProduct(server_object.data.products);
-
-
             }))
             .catch(error => {
                 console.log(error);
@@ -276,17 +275,7 @@ function KeyManagement() {
             </Box >
         );
     };
-    const ErrorAlert = ({ error }) => {
-        return (
-            <Box mt={4}>
-                <Box textAlign='center' my={2}>
-                    <Alert variant="filled" severity="error">
-                        {error}
-                    </Alert>
-                </Box>
-            </Box >
-        );
-    };
+
     return (
         <Container maxWidth={false} disableGutters>
             <title>Key Management</title>

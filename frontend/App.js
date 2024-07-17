@@ -113,7 +113,6 @@ export default function App() {
               <Routes>
                 <Route exact path="/" element={<InformationPage />} />
                 <Route exact path="" element={<InformationPage />} />
-
                 <Route path="/frontend/manual" element={<ManualPage />} />
                 <Route path="/frontend/cost-monitoring" element={<CostMonitoringPage />} />
                 <Route path="/frontend/user-instruction" element={<UserInstructionPage />} />

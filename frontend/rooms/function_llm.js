@@ -4,6 +4,7 @@ import { UserContext, WebSocketContext } from '../App.js'
 import Box from '@mui/material/Box';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { ChatExport } from '../component/import_export/ChatExport.js';
+import ChatInput from '../component/chat_components/ChatInput.js';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
 import Footer from '../component/nav/Footer.js';
@@ -15,7 +16,6 @@ import Paper from '@mui/material/Paper';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
@@ -30,10 +30,7 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2),
     ...theme.typography.body2,
 }));
-const ChatInput = styled(TextField)(({ theme }) => ({
-    width: '100%',
-    ...theme.typography.body2,
-}));
+
 
 function FunctionLLM() {
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
@@ -248,7 +245,6 @@ function FunctionLLM() {
                                 frequencypenalty={frequencypenalty}
                                 setFrequencyPenalty={setFrequencyPenalty}
                             >
-
                             </OpenAPIParameter>
                         </Grid>
                     </Grid>

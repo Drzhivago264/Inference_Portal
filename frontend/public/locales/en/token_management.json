@@ -1,0 +1,16 @@
+{
+    "table_info": "You do not have any access token. You can create maximum 10 access tokens.",
+    "form_info": "Access tokens authenticate allow trusted actors or applications to use the services based on permissions. Access tokens aims afford teams collaborating on the same project.",
+    "form_warning": "If you share your Access Tokens with anyone; you can configure permission & time to live to prevent potential misuses. It is IMPORTANT to note that you are paying for all usages from your access tokens.",
+    "allow_all": "Set All Permissions",
+    "allow_chat": "Use Chatroom via Websocket",
+    "allow_agent": "Use Agents via Websocket ",
+    "allow_toolbox": "Use Toolbox via Websocket ",
+    "allow_data_synthesis": "Use Data Synthesis",
+    "allow_chat_api": "Use Chat and Text Completion APIs",
+    "allow_agent_api": "Use Agent API",
+    "allow_toolbox_api": "Use Toolbox API",
+    "allow_view_log": "Access Log Data",
+    "allow_view_cost": "Access Cost Data",
+    "allow_create_template": "Create and Test Agent Template(s)"
+}

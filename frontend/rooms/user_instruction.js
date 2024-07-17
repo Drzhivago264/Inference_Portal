@@ -7,6 +7,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
+import ChatInput from '../component/chat_components/ChatInput.js';
 import Checkbox from '@mui/material/Checkbox';
 import Container from '@mui/material/Container';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -42,10 +43,6 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
     height: 500,
     overflow: 'auto',
     padding: theme.spacing(2),
-    ...theme.typography.body2,
-}));
-const ChatInput = styled(TextField)(({ theme }) => ({
-    width: '100%',
     ...theme.typography.body2,
 }));
 
@@ -130,7 +127,6 @@ function UserInstruction() {
             }).catch(error => {
                 setLoading(false)
                 setSaveError(true)
-                console.log(error)
                 if (error.code === "ERR_BAD_RESPONSE") {
                     setSaveErrorMessage("Failed, Internal Server Error!")
                 }

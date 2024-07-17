@@ -6,6 +6,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Box from '@mui/material/Box';
 import { ChatBoxHotpot } from '../component/chat_components/Chatbox.js';
+import ChatInput from '../component/chat_components/ChatInput.js';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -19,7 +20,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
 import axios from 'axios';
@@ -33,10 +33,6 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
     height: 700,
     overflow: 'auto',
     padding: theme.spacing(2),
-    ...theme.typography.body2,
-}));
-const ChatInput = styled(TextField)(({ theme }) => ({
-    width: '100%',
     ...theme.typography.body2,
 }));
 
@@ -110,11 +106,7 @@ function Hotpot() {
 
     useEffect(() => {
         scrollToBottom()
-    }, [chat_message]);
-
-    useEffect(() => {
-        scrollToBottom()
-    }, [agent_message]);
+    }, [chat_message, agent_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 

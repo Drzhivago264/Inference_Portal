@@ -1,0 +1,16 @@
+{
+    "table_info": "Bạn không có bất kỳ Access Token nào. Bạn có thể tạo tối đa 10 Access Token.",
+    "form_info": "Access Token cho phép xác thực các diễn viên hoặc ứng dụng đáng tin cậy để sử dụng các dịch vụ dựa trên quyền hạn. Mục tiêu của Access Token là hỗ trợ các nhóm cùng hợp tác trên cùng một dự án.",
+    "form_warning": "Nếu bạn chia sẻ Access Token của mình với bất kỳ ai; bạn có thể cấu hình quyền hạn & thời gian tồn tại để ngăn chặn tiềm năng lạm dụng. Điều QUAN TRỌNG cần lưu ý là bạn đang trả tiền cho tất cả các sử dụng từ Access Token của bạn.",
+    "allow_all": "Cho phép toàn quyền",
+    "allow_chat": "Sử dụng Chatbot qua Websocket",
+    "allow_agent": "Sử dụng Agent qua Websocket ",
+    "allow_toolbox": "Sử dụng Toolbox qua Websocket ",
+    "allow_data_synthesis": "Sử dụng Tổng hợp dữ liệu",
+    "allow_chat_api": "Sử dụng Chat và Text Completion APIs",
+    "allow_agent_api": "Sử dụng Agent API",
+    "allow_toolbox_api": "Sử dụng Toolbox API",
+    "allow_view_log": "Truy cập Dữ liệu Nhật ký",
+    "allow_view_cost": "Truy cập Dữ liệu Chi phí",
+    "allow_create_template": "Tạo và Thử nghiệm lệnh Agent"
+}
