@@ -3,7 +3,6 @@ import React, { useContext } from "react";
 import ApiIcon from '@mui/icons-material/Api';
 import ArticleIcon from '@mui/icons-material/Article';
 import ChatIcon from '@mui/icons-material/Chat';
-import Divider from '@mui/material/Divider';
 import EmailIcon from '@mui/icons-material/Email';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import KeyIcon from '@mui/icons-material/Key';
@@ -15,84 +14,36 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
+import PropTypes from 'prop-types'
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import RuleIcon from '@mui/icons-material/Rule';
 import SavingsIcon from '@mui/icons-material/Savings';
 import StorageIcon from '@mui/icons-material/Storage';
 import { UserContext } from "../../App.js";
-import axios from 'axios';
-import { getCookie } from '../getCookie.js'
 import { logout } from '../checkLogin.js';
 
 export const UserVeticalNav = ({ navigate }) => {
 
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const {  setIsAuthenticated } = useContext(UserContext);
     const log_out_ = (setIsAuthenticaed) => {
         logout(setIsAuthenticaed)
         navigate("/");
     }
-    const other_redirect = (destination) => {
-        navigate(destination)
-    }
-    const redirect = (destination) => {
-
-        if (destination) {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }
-            }
-            const data = {
-                key: "",
-                check_login: is_authenticated,
-                destination: destination
-            }
-            axios.post("/frontend-api/hub-redirect", data, config)
-                .then((response) => {
-                    navigate(response.data.redirect_link, { replace: true });
-                }).catch(error => {
-                    console.log(error)
-                });
-        }
-
-    }
-    const logredirect = () => {
-        const csrftoken = getCookie('csrftoken');
-        const config = {
-            headers: {
-                'content-type': 'application/json',
-                'X-CSRFToken': csrftoken,
-            }
-        }
-        const data = {
-            key: 'null',
-            check_login: is_authenticated,
-            destination: 'log'
-        }
-        axios.post("/frontend-api/hub-redirect", data, config)
-            .then((response) => {
-                navigate(response.data.redirect_link);
-            }).catch(error => {
-                console.log(error)
-            });
-    }
     const listItems = [
         {
-            onClick: () => redirect("user-instruction"),
+            onClick: () => navigate("/frontend/user-instruction"),
             icon: <HistoryEduIcon />,
             text: "Your Templates",
             disabled: false,
         },
         {
-            onClick: () => other_redirect("/frontend/token-management"),
+            onClick: () => navigate("/frontend/token-management"),
             icon: <RuleIcon />,
             text: "Your Access Token(s)",
             disabled: false,
         },
         {
-            onClick: logredirect,
+            onClick: () => navigate("/frontend/log"),
             icon: <StorageIcon />,
             text: "Your Logs",
             disabled: false,
@@ -104,7 +55,7 @@ export const UserVeticalNav = ({ navigate }) => {
             disabled: true,
         },
         {
-            onClick: () => other_redirect("/frontend/cost-monitoring"),
+            onClick: () => navigate("/frontend/cost-monitoring"),
             icon: <SavingsIcon />,
             text: "Cost Monitoring",
             disabled: false,
@@ -122,7 +73,6 @@ export const UserVeticalNav = ({ navigate }) => {
         },
     ];
     return (
-
         <List>
             {listItems.map((item, index) => (
                 <ListItemButton key={index} sx={{ height: 38 }} onClick={item.onClick} disabled={item.disabled}>
@@ -143,7 +93,9 @@ export const UserVeticalNav = ({ navigate }) => {
 
     )
 }
-
+UserVeticalNav.propTypes = {
+    navigate: PropTypes.func.isRequired,
+}
 export const VerticalNav = ({ navigate }) => {
     const other_redirect = (destination) => {
         navigate(destination)
@@ -174,3 +126,6 @@ export const VerticalNav = ({ navigate }) => {
     )
 };
 
+VerticalNav.propTypes = {
+    navigate: PropTypes.func.isRequired,
+}
