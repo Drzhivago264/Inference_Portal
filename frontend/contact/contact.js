@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CreateIcon from '@mui/icons-material/Create';
 import EmailIcon from '@mui/icons-material/Email';
+import ErrorAlert from '../component/custom_ui_component/ErrorAlert.js';
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
 import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
@@ -13,23 +14,16 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import KeyIcon from '@mui/icons-material/Key';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Stack from '@mui/material/Stack';
+import StyledPaper from '../component/custom_ui_component/StyledPaper.js';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import axios from 'axios';
 import { getCookie } from '../component/getCookie.js';
-import { styled } from '@mui/system';
 import { useTranslation } from 'react-i18next';
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-
-    padding: theme.spacing(4),
-    ...theme.typography.body2,
-}));
 
 function Contact() {
     const { t } = useTranslation();
@@ -96,20 +90,7 @@ function Contact() {
         }
         setSendLoading(false)
     }
-    const ErrorAlert = ({ error }) => {
-        return (
-            <Box mt={4}>
-                <Typography variant="body1"  >
-                    Request Failed!
-                </Typography>
-                <Box textAlign='center' my={2}>
-                    <Alert variant="filled" severity="error">
-                        {error}
-                    </Alert>
-                </Box>
-            </Box >
-        );
-    };
+
 
     const SuccessAlert = ({ detail }) => {
         return (

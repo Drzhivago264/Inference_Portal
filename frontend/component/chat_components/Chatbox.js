@@ -10,6 +10,10 @@ import React from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import Stack from '@mui/material/Stack';
 
+const copyToClipboard = (e) => {
+    navigator.clipboard.writeText(e);
+}
+
 export const ChatBox = ({
     inputsize,
     ChatPaper,
@@ -24,9 +28,6 @@ export const ChatBox = ({
     handleEnter
 }) => {
 
-    const copyToClipboard = (e) => {
-        navigator.clipboard.writeText(e);
-    }
     return (
         <Box>
             <ChatPaper id={'chat-log'} variant="outlined">
@@ -136,9 +137,6 @@ export const ChatBoxHotpot = ({
     handleEnter,
     check_duplicate_message
 }) => {
-    const copyToClipboard = (e) => {
-        navigator.clipboard.writeText(e);
-    }
     return (
         <Box>
             <ChatPaper id={id} variant="outlined">

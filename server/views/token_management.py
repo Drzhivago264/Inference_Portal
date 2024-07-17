@@ -1,4 +1,3 @@
-
 import datetime
 
 from django.contrib.auth.models import Group
@@ -7,8 +6,9 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest
 
 from rest_framework import status
-from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.decorators import api_view, throttle_classes, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from server.views.serializer import CreateTokenSerializer, ModifyTokenSerializer
 from server.api_throttling_rates import KeyCreateRateThrottle, UserRateThrottle
@@ -17,6 +17,7 @@ from server.utils import constant
 
 @api_view(['POST'])
 @throttle_classes([KeyCreateRateThrottle])
+@permission_classes([IsAuthenticated])
 def generate_token_api(request: HttpRequest) -> Response:
     serializer = CreateTokenSerializer(data=request.data)
     current_user = request.user
@@ -41,11 +42,9 @@ def generate_token_api(request: HttpRequest) -> Response:
             'second': datetime.timedelta(seconds=ttl_raw)
         }
         permission_list = list()
-        print(permission_dict)
         for perm, value in permission_dict.items():
             if value and perm != "allow_create_token": #Only Master User is allowed to create token
                 permission_list.append(perm)
-        print(permission_list)
         if len(permission_list) == 0:
             return Response({"detail": f"Cannot create a token with no permission!"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -82,24 +81,29 @@ def generate_token_api(request: HttpRequest) -> Response:
 
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated])
 def get_token_api(request: HttpRequest) -> Response:
     current_user = request.user
-    master_key_object = current_user.apikey
-    response = list()
-    for token in FineGrainAPIKEY.objects.filter(master_key=master_key_object):
-        response.append({
-            "prefix": token.prefix,
-            "value": token.first_three_char + "..." + token.last_three_char,
-            "name": token.name,
-            "created_at": token.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            "ttl": token.ttl,
-            "permissions": token.user.user_permissions.all().values_list('codename', flat=True)
-        })
-    return Response({"token_list": response}, status=status.HTTP_200_OK)
+    if current_user.groups.filter(name='master_user').exists():
+        master_key_object = current_user.apikey
+        response = list()
+        for token in FineGrainAPIKEY.objects.filter(master_key=master_key_object):
+            response.append({
+                "prefix": token.prefix,
+                "value": token.first_three_char + "..." + token.last_three_char,
+                "name": token.name,
+                "created_at": token.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                "ttl": token.ttl,
+                "permissions": token.user.user_permissions.all().values_list('codename', flat=True)
+            })
+        return Response({"token_list": response}, status=status.HTTP_200_OK)
+    else:
+        return Response({"detail": "Only master key is allowed to create Access Token"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['DELETE'])
 @throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated])
 def remove_permission(request: HttpRequest) -> Response:
     serializer = ModifyTokenSerializer(data=request.data)
     current_user = request.user
@@ -133,6 +137,7 @@ def remove_permission(request: HttpRequest) -> Response:
 
 @api_view(['PUT'])
 @throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated])
 def add_permission(request: HttpRequest) -> Response:
     serializer = ModifyTokenSerializer(data=request.data)
     current_user = request.user
@@ -166,6 +171,7 @@ def add_permission(request: HttpRequest) -> Response:
 
 @api_view(['DELETE'])
 @throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated])
 def invalidate_token(request: HttpRequest) -> Response:
     serializer = ModifyTokenSerializer(data=request.data)
     current_user = request.user

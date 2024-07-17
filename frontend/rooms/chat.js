@@ -6,6 +6,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { ChatExport } from '../component/import_export/ChatExport.js';
+import ChatInput from '../component/chat_components/ChatInput.js';
 import { ChatParameter } from '../component/chat_components/ChatroomParameters.js';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
@@ -15,8 +16,6 @@ import { MemoryTree } from '../component/chat_components/MemoryTree.js';
 import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import { Typography } from '@mui/material';
 import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
@@ -30,10 +29,7 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2),
     ...theme.typography.body2,
 }));
-const ChatInput = styled(TextField)(({ theme }) => ({
-    width: '100%',
-    ...theme.typography.body2,
-}));
+
 
 function Chat() {
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);

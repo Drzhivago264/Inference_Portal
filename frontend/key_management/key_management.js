@@ -124,7 +124,7 @@ function KeyManagement() {
                     setKeyCreateResponse(response.data)
                 })
                 .catch(error => {
-                    if (error.response.data.hasOwnProperty("key_name")) {
+                    if (Object.prototype.hasOwnProperty.call(error.response.data, "key_name")) {
                         setKeyCreateError(error.response.data.key_name[0])
                     }
                     else {

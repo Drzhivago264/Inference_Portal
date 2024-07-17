@@ -150,7 +150,6 @@ function CostMonitoring() {
           )
 
         }
-        console.log(datasets)
         let data_ = {
           labels,
           datasets

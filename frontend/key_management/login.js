@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useContext, useState } from 'react';
 
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
@@ -67,7 +66,7 @@ function Contact() {
                     navigate('/frontend/hub');
                 }).catch(error => {
                     console.log(error)
-                    if (error.response.data.hasOwnProperty("key")) {
+                    if (Object.prototype.hasOwnProperty.call(error.response.data, "key")) {
                         setLoginError(error.response.data.key[0])
                     }
                     else {

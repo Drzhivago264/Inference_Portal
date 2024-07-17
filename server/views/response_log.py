@@ -3,10 +3,15 @@ from django.views.decorators.cache import cache_page
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.db.models import Q, Sum
 
-from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.decorators import (
+    api_view, 
+    throttle_classes, 
+    permission_classes
+)
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from server.models import PromptResponse
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
@@ -35,6 +40,7 @@ class LogListJson(BaseDatatableView):
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
+@permission_classes([IsAuthenticated])
 def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
     current_user = request.user
     if current_user.id == None:

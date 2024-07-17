@@ -64,6 +64,7 @@ function Information() {
                                             component="img"
                                             image="https://static.professorparakeet.com/image/show_case.png"
                                             sx={{ objectFit: "contain", borderRadius: '3px', }}
+                                            alt='showcase_image'
                                         />
                                     </Paper>
                                 </Slide>

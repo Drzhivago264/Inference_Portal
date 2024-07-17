@@ -14,6 +14,7 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import ChatInput from '../component/chat_components/ChatInput.js';
 import Container from '@mui/material/Container';
 import CsvFileInput from '../component/import_export/CsvInput.js';
 import { DatasetExport } from '../component/import_export/DatasetExport.js';
@@ -41,13 +42,7 @@ import Typography from '@mui/material/Typography';
 import axios from 'axios';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
-import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
-
-const ChatInput = styled(TextField)(({ theme }) => ({
-    width: '100%',
-    ...theme.typography.body2,
-}));
 
 function DataSynthesis() {
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);

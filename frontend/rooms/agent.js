@@ -12,6 +12,7 @@ import AlignmentTuneTool from 'editorjs-text-alignment-blocktune';
 import Box from '@mui/material/Box';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { ChatExport } from '../component/import_export/ChatExport.js';
+import ChatInput from '../component/chat_components/ChatInput.js';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
 import EditorExport from '../component/import_export/EditorExport.js';
@@ -40,7 +41,6 @@ import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Underline from "@editorjs/underline"
 import { agentsocket } from '../component/websocket/AgentSocket.js';
@@ -55,10 +55,6 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
     height: 700,
     overflow: 'auto',
     padding: theme.spacing(2),
-    ...theme.typography.body2,
-}));
-const ChatInput = styled(TextField)(({ theme }) => ({
-    width: '100%',
     ...theme.typography.body2,
 }));
 
@@ -171,7 +167,6 @@ function Agent() {
                     setAgents(model_object.data.models_agent);
                     setTemplateList(instruction_object.data.root_nodes)
                     setUserTemplateList(instruction_object.data.user_root_nodes)
-                    console.log(instruction_object.data.user_root_nodes)
                     if (instruction_object.data.user_root_nodes.length > 0) {
                         setChoosenUserTemplate(instruction_object.data.user_root_nodes[0].displayed_name)
                         setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
@@ -180,10 +175,8 @@ function Agent() {
                     if (instruction_object.data.default_user_children.length > 0) {
                         setUserChildInstruct(instruction_object.data.default_user_children[0].instruct)
                     }
-                    console.log(instruction_object.data.default_user_children)
                     setDefaultChildTemplateList(instruction_object.data.default_children)
                     setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
-
                     editorref.current.isReady
                         .then(() => {
                             for (var node in instruction_object.data.root_nodes) {
@@ -401,7 +394,6 @@ function Agent() {
                                             variant="standard"
                                             InputProps={{
                                                 startAdornment: <InputAdornment position="start">   </InputAdornment>,
-
                                             }}
                                         />
                                     </Paper>

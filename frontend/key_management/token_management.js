@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 
 import AddPermissionDialog from '../component/custom_ui_component/MorePermissionDialog.js';
 import Alert from '@mui/material/Alert';
@@ -38,6 +37,7 @@ import Typography from '@mui/material/Typography';
 import axios from 'axios';
 import { getCookie } from '../component/getCookie.js';
 import { styled } from '@mui/system';
+import { useTranslation } from 'react-i18next';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2),
@@ -57,7 +57,7 @@ function TokenManagement() {
                     setTokenList(server_object.data.token_list)
                 }))
                 .catch(error => {
-                    console.log(error);
+                    setTokenCreateError(error.response.data.detail)
                 });
             setReloadToken(false)
         }
@@ -70,7 +70,7 @@ function TokenManagement() {
                 setTokenList(server_object.data.token_list)
             }))
             .catch(error => {
-                console.log(error);
+                setTokenCreateError(error.response.data.detail)
             });
         setReloadToken(false)
 
@@ -171,13 +171,13 @@ function TokenManagement() {
                     setTokenCreateResponse(response.data)
                 })
                 .catch(error => {
-                    if (error.response.data.hasOwnProperty("token_name")) {
+                    if (Object.prototype.hasOwnProperty.call(error.response.data, "token_name")) {
                         setTokenCreateError(error.response.data.token_name[0])
                     }
-                    else if (error.response.data.hasOwnProperty("ttl")) {
+                    else if (Object.prototype.hasOwnProperty.call(error.response.data, "ttl")) {
                         setTokenCreateError(error.response.data.ttl[0])
                     }
-                    else if (error.response.data.hasOwnProperty("time_unit")) {
+                    else if (Object.prototype.hasOwnProperty.call(error.response.data, "time_unit")) {
                         setTokenCreateError(error.response.data.time_unit[0])
                     }
                     else {
@@ -261,7 +261,7 @@ function TokenManagement() {
                                 {token_list.length === 0 &&
                                     <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
                                         <AlertTitle>Infor</AlertTitle>
-                                        You do not have any access token. You can create maximum 10 access tokens.
+                                        {t('token_management.table_info')}
                                     </Alert>
                                 }
                                 <TableContainer >
@@ -340,8 +340,8 @@ function TokenManagement() {
                                             justifyContent: 'center'
                                         }} xs={5}>
                                             <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
-                                                <AlertTitle>Infor</AlertTitle>
-                                                Access tokens authenticate allow trusted actors or applications to use the services based on permissions. Access tokens aims afford teams collaborating on the same project.
+                                                <AlertTitle>Info</AlertTitle>
+                                                {t('token_management.form_info')}
                                             </Alert>
                                         </Grid>
                                         <Grid style={{
@@ -428,7 +428,7 @@ function TokenManagement() {
                                 {tokencreateerror && <ErrorAlert error={tokencreateerror} />}
                                 <Alert severity="warning" sx={{ whiteSpace: 'pre-line' }}>
                                     <AlertTitle>Warning</AlertTitle>
-                                    If you share your Access Tokens with anyone; you can configure permission & time to live to prevent potential misuses. It is IMPORTANT to note that you are paying for all usages from your access tokens.
+                                    {t('token_management.form_warning')}
                                 </Alert>
                                 <Typography variant="h6" >
                                     <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>Token permissions</Box>
@@ -439,7 +439,7 @@ function TokenManagement() {
                                             sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}
                                             key='allow_all'
                                             control={<Checkbox size='small' onChange={(e) => { setAllPermission(e.target.checked) }} />}
-                                            label="Set all permissions"
+                                            label={t('token_management.allow_all')}
                                         />
                                     </Box>
                                     <Grid container spacing={2}>
@@ -447,13 +447,13 @@ function TokenManagement() {
                                             <Stack direction='column' >
                                                 <FormLabel component="legend">Inference permissions</FormLabel>
                                                 {[
-                                                    { key: 'allow_chat', label: 'Use Chatroom via Websocket ' },
-                                                    { key: 'allow_agent', label: 'Use Agents via Websocket ' },
-                                                    { key: 'allow_toolbox', label: 'Use Toolbox via Websocket ' },
-                                                    { key: 'allow_data_synthesis', label: 'Use Data Synthesis' },
-                                                    { key: 'allow_chat_api', label: 'Use Chat and Text Completion APIs' },
-                                                    { key: 'allow_agent_api', label: 'Use Agent API' },
-                                                    { key: 'allow_toolbox_api', label: 'Use Toolbox API' },
+                                                    { key: 'allow_chat', label: t('token_management.allow_chat') },
+                                                    { key: 'allow_agent', label: t('token_management.allow_agent') },
+                                                    { key: 'allow_toolbox', label: t('token_management.allow_toolbox') },
+                                                    { key: 'allow_data_synthesis', label: t('token_management.allow_data_synthesis') },
+                                                    { key: 'allow_chat_api', label: t('token_management.allow_chat_api') },
+                                                    { key: 'allow_agent_api', label: t('token_management.allow_agent_api')},
+                                                    { key: 'allow_toolbox_api', label: t('token_management.allow_toolbox_api') },
                                                 ].map((perm) => (
                                                     <FormControlLabel
                                                         sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}
@@ -468,9 +468,9 @@ function TokenManagement() {
                                             <Stack direction='column'>
                                                 <FormLabel component="legend">Data permissions</FormLabel>
                                                 {[
-                                                    { key: 'allow_view_log', label: 'Access Log Data' },
-                                                    { key: 'allow_view_cost', label: 'Access Cost Data' },
-                                                    { key: 'allow_create_template', label: 'Create and Test Agent Template(s)' },
+                                                    { key: 'allow_view_log', label: t('token_management.allow_view_log') },
+                                                    { key: 'allow_view_cost', label: t('token_management.allow_view_cost') },
+                                                    { key: 'allow_create_template', label: t('token_management.allow_create_template') },
                                                 ].map((perm) => (
                                                     <FormControlLabel
                                                         sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}

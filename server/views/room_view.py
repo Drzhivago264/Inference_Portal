@@ -1,5 +1,5 @@
 import uuid
-from hashlib import sha256
+
 
 from django.contrib.auth import authenticate, login
 from django.views.decorators.cache import cache_page
@@ -10,8 +10,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
-from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.decorators import api_view, throttle_classes, permission_classes
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 
 from server.views.serializer import (
     RedirectSerializer,
@@ -71,38 +72,35 @@ def hub_redirect_api(request: HttpRequest) -> Response:
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
+@permission_classes([IsAuthenticated])
 def instruction_tree_api(request):
     current_user = request.user
-    if current_user.id == None:
-        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
+    master_key, master_user = get_master_key_and_master_user(current_user=current_user)
+    root_nodes = InstructionTree.objects.filter(level=0)
+    user_root_nodes = UserInstructionTree.objects.filter(
+        level=1, user=master_user)
+    serializer = InstructionTreeSerializer(root_nodes, many=True)
+    user_serializer = UserInstructionTreeSerializer(
+        user_root_nodes, many=True)
+    for root in root_nodes:
+        if root.name == "Assignment Agent":
+            default_child_template = root.get_children()
+            serializer_children = InstructionTreeSerializer(
+                default_child_template, many=True)
+    if user_root_nodes.count() > 0:
+        user_serializer_children = UserInstructionTreeSerializer(
+            user_root_nodes[0].get_children(), many=True)
+        return Response({'root_nodes': serializer.data, 'user_root_nodes': user_serializer.data, 'default_children': serializer_children.data, 'default_user_children': user_serializer_children.data}, status=status.HTTP_200_OK)
     else:
-        master_key, master_user = get_master_key_and_master_user(current_user=current_user)
-        root_nodes = InstructionTree.objects.filter(level=0)
-        user_root_nodes = UserInstructionTree.objects.filter(
-            level=1, user=master_user)
-        serializer = InstructionTreeSerializer(root_nodes, many=True)
-        user_serializer = UserInstructionTreeSerializer(
-            user_root_nodes, many=True)
-        for root in root_nodes:
-            if root.name == "Assignment Agent":
-                default_child_template = root.get_children()
-                serializer_children = InstructionTreeSerializer(
-                    default_child_template, many=True)
-        if user_root_nodes.count() > 0:
-            user_serializer_children = UserInstructionTreeSerializer(
-                user_root_nodes[0].get_children(), many=True)
-            return Response({'root_nodes': serializer.data, 'user_root_nodes': user_serializer.data, 'default_children': serializer_children.data, 'default_user_children': user_serializer_children.data}, status=status.HTTP_200_OK)
-        else:
-            return Response({'root_nodes': serializer.data, 'user_root_nodes': user_serializer.data, 'default_children': serializer_children.data, 'default_user_children': []}, status=status.HTTP_200_OK)
+        return Response({'root_nodes': serializer.data, 'user_root_nodes': user_serializer.data, 'default_children': serializer_children.data, 'default_user_children': []}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
+@permission_classes([IsAuthenticated])
 def user_instruction_tree_api(request):
     current_user = request.user
-    if current_user.id == None:
-        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
-    elif not current_user.has_perm('server.allow_create_template'):
+    if not current_user.has_perm('server.allow_create_template'):
         return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         try:    
@@ -124,11 +122,10 @@ def user_instruction_tree_api(request):
 
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
+@permission_classes([IsAuthenticated])
 def post_user_instruction_tree_api(request):
     current_user = request.user
-    if current_user.id == None:
-        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
-    elif not current_user.has_perm('server.allow_create_template'):
+    if not current_user.has_perm('server.allow_create_template'):
         return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         serializer = NestedUserInstructionCreateSerializer(
@@ -217,11 +214,10 @@ def post_user_instruction_tree_api(request):
 
 @api_view(['DELETE'])
 @throttle_classes([AnonRateThrottle])
+@permission_classes([IsAuthenticated])
 def delete_user_instruction_tree_api(request):
     current_user = request.user
-    if current_user.id == None:
-        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
-    elif not current_user.has_perm('server.allow_create_template'):
+    if not current_user.has_perm('server.allow_create_template'):
         return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         serializer = UserInstructionDeleteCreateSerializer(
@@ -242,11 +238,10 @@ def delete_user_instruction_tree_api(request):
 
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
+@permission_classes([IsAuthenticated])
 def memory_tree_api(request):
     current_user = request.user
-    if current_user.id == None:
-        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
-    elif not current_user.has_perm('server.allow_chat'):
+    if not current_user.has_perm('server.allow_chat'):
         return Response({'detail': "Not authorised to use chatbot"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         paginator = PageNumberPagination()

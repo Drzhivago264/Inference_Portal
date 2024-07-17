@@ -10,6 +10,7 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
+import PropTypes from 'prop-types'
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -104,5 +105,10 @@ const EditorExport = ({ editorref }) => {
         </Paper>
     )
 }
-
+EditorExport.propTypes = {
+    editorref: PropTypes.oneOfType([
+        PropTypes.func,
+        PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+      ]),
+}
 export default EditorExport
