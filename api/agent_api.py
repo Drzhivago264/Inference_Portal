@@ -30,8 +30,8 @@ router = Router()
 
 @router.post("/agent", tags=["Inference"], summary="Infer Agents", response={200: AgentResponse, 401: Error, 442: Error, 404: Error, 429: Error})
 async def agentcompletion(request, data: AgentSchema):
-    key_object = request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object, user_object = request.auth
+
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_agent_api', destination='agent')
     if is_ratelimited(
@@ -64,8 +64,8 @@ async def agentcompletion(request, data: AgentSchema):
                 parent_template_name = data.parent_template_name
                 use_my_template = data.use_my_template
                 if use_my_template:
-                    parent_template = await get_user_template(name=parent_template_name, user_object=await sync_to_async(lambda: request.auth.user)()) if parent_template_name is not None else ""
-                    child_template = await get_user_template(name=child_template_name, user_object=await sync_to_async(lambda: request.auth.user)()) if child_template_name is not None else ""
+                    parent_template = await get_user_template(name=parent_template_name, user_object= user_object) if parent_template_name is not None else ""
+                    child_template = await get_user_template(name=child_template_name, user_object= user_object) if child_template_name is not None else ""
                 else:
                     parent_template = await get_system_template(name=parent_template_name) if parent_template_name is not None else ""
                     child_template = await get_system_template(name=child_template_name) if child_template_name is not None else ""

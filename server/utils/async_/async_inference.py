@@ -35,14 +35,12 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                                 try:
                                     c = json.loads(chunk)
                                     output = c['text'][0].replace(context['prompt'], "")
-                                    await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))
-                            
+                                    await self.send(text_data=json.dumps({"message": output.replace(full_response, ""), "stream_id":  self.unique_response_id, "credit": self.key_object.credit}))                            
                                 except json.decoder.JSONDecodeError:
                                     pass
                                 full_response = output
                     if full_response and isinstance(full_response, str):
                         celery_log_prompt_response.delay(is_session_start_node=self.is_session_start_node, key_object_id=self.key_object.id, llm_id=llm.id, prompt=self.message, response=full_response, type_=self.p_type)
-
                 except httpx.TimeoutException:
                     await self.send(text_data=json.dumps({"message": "Wait! Server is setting up.", "stream_id":  self.unique_response_id, "credit":  self.key_object.credit}))
                 except httpx.ConnectError:

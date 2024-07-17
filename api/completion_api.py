@@ -29,8 +29,7 @@ router = Router()
 
 @router.post("/completion", tags=["Inference"], summary="Text completion", response={200: PromptResponse, 401: Error, 442: Error, 404: Error, 429: Error})
 async def textcompletion(request, data: PromptSchema):
-    key_object =  request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
+    key_object, user_object =  request.auth
     query_db_mixin = QueryDBMixin()
     await check_permission(user_object=user_object, permission='server.allow_chat_api', destination='chat')
     if is_ratelimited(

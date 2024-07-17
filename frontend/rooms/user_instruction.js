@@ -195,7 +195,10 @@ function UserInstruction() {
         if (length < max_parent_num) {
             if (operation == "add") {
                 setIsSaved(false)
-                const new_template_list = [...template_list, { id: null, displayed_name: `Empty Template ${length + 1}`, instruct: "", children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] }];
+                const new_template_list = [...template_list, { id: null, 
+                    displayed_name: `Template ${nanoid(10)}`, 
+                    instruct: "", 
+                    children: [{ id: null, displayed_name: `Child ${nanoid(10)}`, instruct: "", unique: nanoid(), add: false }] }];
                 setTemplateList(new_template_list)
                 setChildInstructionList([])
                 setSelectedIndex(template_list.length)
@@ -210,16 +213,16 @@ function UserInstruction() {
                 }
                 new_template_list.splice(selectedIndex, 1);
                 setTemplateList(new_template_list)
-                if (new_template_list.length > 1) {
+                if (new_template_list.length > 0) {
                     handleListItemClick(null, 0)
                     setDeleteSuccess(true)
                 }
                 else {
                     handleListItemClick(null, 0)
-                    const new_template_list = [{ id: null, displayed_name: "Empty Template", instruct: "", children: null }];
+                    const new_template_list = [{ id: null, displayed_name: `Template ${nanoid(10)}`, instruct: "", children: null }];
                     setTemplateList(new_template_list)
                     setChildInstructionList([
-                        { id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false },
+                        { id: null, displayed_name: `Child ${nanoid(10)}`, instruct: "", unique: nanoid(), add: false },
                     ])
                 }
             }
