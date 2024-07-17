@@ -70,6 +70,6 @@ export const ChatExport = ({
 }
 
 ChatExport.propTypes = {
-    chat_message: PropTypes.array,
-    number_of_remove_message: PropTypes.number
+    chat_message: PropTypes.array.isRequired,
+    number_of_remove_message: PropTypes.number.isRequired
 }
