@@ -196,9 +196,9 @@ function UserInstruction() {
             if (operation == "add") {
                 setIsSaved(false)
                 const new_template_list = [...template_list, { id: null, 
-                    displayed_name: `Template ${nanoid(10)}`, 
+                    displayed_name: `Empty Template`, 
                     instruct: "", 
-                    children: [{ id: null, displayed_name: `Child ${nanoid(10)}`, instruct: "", unique: nanoid(), add: false }] }];
+                    children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] }];
                 setTemplateList(new_template_list)
                 setChildInstructionList([])
                 setSelectedIndex(template_list.length)
@@ -219,10 +219,10 @@ function UserInstruction() {
                 }
                 else {
                     handleListItemClick(null, 0)
-                    const new_template_list = [{ id: null, displayed_name: `Template ${nanoid(10)}`, instruct: "", children: null }];
+                    const new_template_list = [{ id: null, displayed_name: `Empty Template`, instruct: "", children: null }];
                     setTemplateList(new_template_list)
                     setChildInstructionList([
-                        { id: null, displayed_name: `Child ${nanoid(10)}`, instruct: "", unique: nanoid(), add: false },
+                        { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false },
                     ])
                 }
             }
@@ -251,7 +251,7 @@ function UserInstruction() {
         if (length < max_child_num) {
             setAddChildError(false)
             if (operation == "add") {
-                const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: `Child ${nanoid(10)}`, instruct: "", unique: nanoid(), add: false }];
+                const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false }];
                 setChildInstructionList(new_children_instruction_list)
             }
             else if (operation == "delete") {
@@ -297,7 +297,7 @@ function UserInstruction() {
                         setTemplateList([{
                             'template_list_index': 0,
                             'id': null,
-                            'displayed_name': "Empty template",
+                            'displayed_name': "Empty Template",
                             'instruct': "",
                             'children': [{
                                 'id': null,
@@ -491,7 +491,6 @@ function UserInstruction() {
                                     setFrequencyPenalty={setFrequencyPenalty}
                                     max_turn={max_turn}
                                     setMaxTurn={setMaxTurn}
-
                                 >
                                 </OpenAPIParameter>
                             </Box>
@@ -649,7 +648,6 @@ function UserInstruction() {
                             <Typography mt={1} mb={1} variant='body1'>
                                 Testbed
                             </Typography>
-
                             <ChatBox
                                 inputsize={300}
                                 chat_message={chat_message}

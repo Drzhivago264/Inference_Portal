@@ -131,10 +131,11 @@ class Consumer(AsyncWebsocketConsumer, AsyncInferenceOpenaiMixin, AsyncInference
                 self.current_turn = 0
                 self.session_history = []
 
-                await self.send(text_data=json.dumps({"message": f"Swap to {text_data_json['swap_template']}, what do you want me to write?", "role": "Server", "time": self.time}))
+                await self.send(text_data=json.dumps({"message": f"Swap to {swap_template.name if template_type == 'system' else swap_template.displayed_name}, what do you want me to write?", "role": "Server", "time": self.time}))
                 await self.send(text_data=json.dumps({"swap_instruction": swap_instruction,
                                                       "swap_template": swap_template_,
                                                       "child_template_name_list": child_template['name_list'],
+                                                      "child_template_displayed_name_list": [] if template_type == "system" else child_template['displayed_name_list'],
                                                       "default_child": child_template['default_child'],
                                                       "default_child_instruct": child_template['default_instruct']}))
             except ValidationError as e:

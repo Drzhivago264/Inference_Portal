@@ -33,7 +33,7 @@ class InstructionTreeSerializer(serializers.ModelSerializer):
 class UserInstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInstructionTree
-        fields = ('instruct', "displayed_name",
+        fields = ('instruct', "displayed_name", "name",
                   "code", "default_editor_template")
 
 

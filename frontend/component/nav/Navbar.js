@@ -26,6 +26,7 @@ import { Link } from "react-router-dom";
 import { Menu } from '@mui/base/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import { MenuItem } from '@mui/material';
+import PropTypes from 'prop-types'
 import Select from '@mui/material/Select';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -400,7 +401,6 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
                     {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
                   </AvatarWithHover>
                 </StyledBadge>
-
                 <Box>
                   <IconButton onClick={colorMode.toggleColorMode} color="inherit">
                     {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
@@ -431,12 +431,14 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               <Divider />
               {UserDrawerList}
             </Drawer>
-
-
           </Toolbar>
         </Container>
       </AppBarColored >
     </Fade>
   );
+}
+ResponsiveAppBar.propTypes = {
+  max_width: PropTypes.string.isRequired,
+  timeout: PropTypes.number
 }
 export default ResponsiveAppBar;

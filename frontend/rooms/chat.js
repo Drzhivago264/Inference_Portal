@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
-import { ChatExport } from '../component/import_export/chatExport.js';
+import { ChatExport } from '../component/import_export/ChatExport.js';
 import { ChatParameter } from '../component/chat_components/ChatroomParameters.js';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
@@ -58,11 +58,11 @@ function Chat() {
     const [lengthpenalty, setLengthPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-   
+
     const [socket_destination, setSocketDestination] = useState("/ws/chat-async/");
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const navigate = useNavigate();
-    const { is_authenticated} = useContext(UserContext);
+    const { is_authenticated } = useContext(UserContext);
 
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
@@ -149,20 +149,14 @@ function Chat() {
                         <Grid item xs={4}>
                             {MemoMemoryTree}
                             <Stack direction='row'>
-                                <Paper sx={{ mt: 2 }} variant='outlined'>
-                                    <Box m={1}>
-                                        <Typography sx={{ color: 'text.secondary' }}>Chat Log Export</Typography>
-                                    </Box>
-                                    <Divider />
-                                    <Box mb={2} mt={2} ml={1} mr={2}>
-                                        <ChatExport
-                                            chat_message={chat_message}
-                                            number_of_remove_message={1}
-                                            setChatMessage={setChatMessage}
-                                        >
-                                        </ChatExport>
-                                    </Box>
-                                </Paper>
+
+                                <ChatExport
+                                    chat_message={chat_message}
+                                    number_of_remove_message={1}
+                                    setChatMessage={setChatMessage}
+                                >
+                                </ChatExport>
+
                                 <Box mt={2}>
                                     <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
                                         <AlertTitle>Note: </AlertTitle>

@@ -90,16 +90,12 @@ export const UserVeticalNav = ({ navigate }) => {
                 </ListItemButton>
             ))}
         </List>
-
     )
 }
 UserVeticalNav.propTypes = {
     navigate: PropTypes.func.isRequired,
 }
 export const VerticalNav = ({ navigate }) => {
-    const other_redirect = (destination) => {
-        navigate(destination)
-    }
     const listItems = [
         { redirect: "/frontend/key-management", icon: KeyIcon, text: "Manage Key" },
         { redirect: "/frontend/api/docs", icon: ApiIcon, text: "APIs" },
@@ -113,7 +109,7 @@ export const VerticalNav = ({ navigate }) => {
         <List>
             {listItems.map((item, index) => (
                 <React.Fragment key={index}>
-                    <ListItemButton onClick={() => { item.redirect && other_redirect(item.redirect) }} component={item.href && Link} href={item.href}>
+                    <ListItemButton onClick={() => { item.redirect && navigate(item.redirect) }} component={item.href && Link} href={item.href}>
                         <ListItemIcon>
                             <item.icon />
                         </ListItemIcon>

@@ -16,7 +16,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import CsvFileInput from '../component/import_export/CsvInput.js';
-import { DatasetExport } from '../component/import_export/datasetExport.js';
+import { DatasetExport } from '../component/import_export/DatasetExport.js';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Divider from '@mui/material/Divider';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -67,7 +67,6 @@ function DataSynthesis() {
     const [filename, setFileName] = useState("No file loaded")
     const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Writer, you need to rewrite a given prompt following the instruction to produce a more complex version, you must directly provide the #Rewritten Prompt# and must not repeat the #Given Prompt#. You cannot omit the non-text parts such as the table and code in #Given Prompt#.\nInstruction:\n");
     const [default_extra_instruct, setExtraInstruct] = useState("Do not make #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#. You must not repeat the #Given Prompt#, #Given Prompt# must not appear in your answer.")
-
     const [default_child_instruct_list, setDefaultChildInstructList] = useState([
         { label: "Translating", default: "The #Rewritten Prompt# must be written in Vietnamese." },
         { label: "Concretizing", default: "Replace general concepts in the #Given Prompt# with more specific concepts." },
@@ -76,9 +75,7 @@ function DataSynthesis() {
         { label: "Deepening", default: "If #Given Prompt# contains inquiries about certain issues, the depth and breadth of the inquiry can be increased." },
         { label: "Breadth Evolving", default: "You should draw inspiration from the #Given Prompt# to create a brand new prompt.\nThis new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\nThe LENGTH and difficulty level of the #Created Prompt# should be similar to that of the #Given Prompt#." }
     ]);
-    
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-
     const [csv_row, setCSVRow] = useState([
         { id: 1, samplePrompt: 'A water well is an excavation or structure created in the ground by digging, driving, boring, or drilling to access groundwater in underground aquifers. The well water is drawn by a pump, or using containers, such as buckets, that are raised mechanically or by hand. Wells were first constructed at least eight thousand years ago and historically vary in construction from a simple scoop in the sediment of a dry watercourse to the stepwells of India, the qanats of Iran, and the shadoofs and sakiehs of India. Placing a lining in the well shaft helps create stability and linings of wood or wickerwork date back at least as far as the Iron Age. Where does water for a well come from?' },
         { id: 2, samplePrompt: 'Generate short a sentence that can be linguistically classified as acceptable (OPTIONS: - unacceptable - acceptable)' },
@@ -121,10 +118,8 @@ function DataSynthesis() {
             setChoosenPromptColumn(keys[1])
         }
     };
-
     const navigate = useNavigate();
     const { is_authenticated} = useContext(UserContext);
-
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
         axios.all([
@@ -137,9 +132,7 @@ function DataSynthesis() {
                 console.log(error);
             });
     }, []);
-
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-
     useEffect(() => {
         if (websocket.current) {
             websocket.current.close()
@@ -154,7 +147,6 @@ function DataSynthesis() {
             websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/data-synthesis/' + websocket_hash + '/' + timeZone + '/');
         }
     }, [socket_destination, websocket_hash]);
-
     useEffect(() => {
         row_ref.current = csv_row
     }, [csv_row]);
@@ -167,13 +159,11 @@ function DataSynthesis() {
             setThinking(false)
         }
     }, [is_running]);
-
     useEffect(() => {
         if (websocket_hash) {
             datasynthesissocket(websocket, setChatMessage, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref)
         }
     }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref, choosen_model, choosen_prompt_column, websocket_hash]);
-
     const submitSeed = (seed_prompt, row_no) => {
         var data = {
             'row_no': row_no,
@@ -223,7 +213,6 @@ function DataSynthesis() {
             );
         }
     }
-
     function* submitLoop() {
         for (let i in csv_row) {
             yield [csv_row[i][`${choosen_prompt_column}`], csv_row[i]['id']]
@@ -305,12 +294,10 @@ function DataSynthesis() {
                                         filename={`Processed_${filename}_from_${from_row}_to_${to_row}`}
                                     >
                                     </DatasetExport>
-
                                 </Box>
                             </Paper>
                             <LogBox chat_message={chat_message} messagesEndRef={messagesEndRef}/>
                         </Grid>
-
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={5}>
                             <div style={{ height: 875, width: '100%' }}>
@@ -434,7 +421,6 @@ function DataSynthesis() {
                                                     startAdornment: <InputAdornment position="start">   </InputAdornment>
                                                 }}
                                             />
-
                                         </Paper>
                                     </AccordionDetails>
                                 </Accordion>

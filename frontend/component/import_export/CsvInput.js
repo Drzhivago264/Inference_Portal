@@ -22,7 +22,6 @@ const VisuallyHiddenInput = styled('input')({
 
 
 const CsvFileInput = ({ onFileLoad, filename, setFileName, from_row, to_row, setFromRow, setToRow }) => {
-
     const inputFile = useRef(null);
     const handleFileChange = (e, is_fisrt_load) => {
         console.log(is_fisrt_load)
