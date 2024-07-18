@@ -32,7 +32,8 @@ from server.views.room_view import (
     instruction_tree_api,
     memory_tree_api,
     user_instruction_tree_api,
-    post_user_instruction_tree_api,
+    create_user_instruction_tree_api,
+    update_user_instruction_tree_api,
     delete_user_instruction_tree_api
 )
 
@@ -114,7 +115,9 @@ urlpatterns = [
     path('frontend-api/get-user-instruction',
          user_instruction_tree_api, name='user-instruction'),
     path('frontend-api/post-user-instruction',
-         post_user_instruction_tree_api, name='post-user-instruction'),
+          create_user_instruction_tree_api, name='post-user-instruction'),
+    path('frontend-api/update-user-instruction',
+          update_user_instruction_tree_api, name='update-user-instruction'),
     path('frontend-api/delete-user-instruction',
          delete_user_instruction_tree_api, name='delete-user-instruction'),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),

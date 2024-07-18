@@ -118,25 +118,46 @@ function UserInstruction() {
             "parent_instruction": template_list[selectedIndex],
             "childrens": children_instruction_list
         }
-        axios.post("/frontend-api/post-user-instruction", data, config)
-            .then(() => {
-                setReload(true)
-                setSaveSuccess(true)
-                setLoading(false)
-                setIsSaved(true)
 
-            }).catch(error => {
-                setLoading(false)
-                setSaveError(true)
-                if (error.code === "ERR_BAD_RESPONSE") {
-                    setSaveErrorMessage("Failed, Internal Server Error!")
-                }
-                else {
-                    setSaveErrorMessage(error.response.data.detail)
-                }
-            });
+        if (!template_list[selectedIndex]['id']) {
+            axios.post("/frontend-api/post-user-instruction", data, config)
+                .then(() => {
+                    setReload(true)
+                    setSaveSuccess(true)
+                    setLoading(false)
+                    setIsSaved(true)
+
+                }).catch(error => {
+                    setLoading(false)
+                    setSaveError(true)
+                    if (error.code === "ERR_BAD_RESPONSE") {
+                        setSaveErrorMessage("Failed, Internal Server Error!")
+                    }
+                    else {
+                        setSaveErrorMessage(error.response.data.detail)
+                    }
+                });
             setDisableSave(true)
-            setReload(true)
+        }
+        else {
+            axios.put("/frontend-api/update-user-instruction", data, config)
+                .then(() => {
+                    setSaveSuccess(true)
+                    setLoading(false)
+                    setIsSaved(true)
+
+                }).catch(error => {
+                    setLoading(false)
+                    setSaveError(true)
+                    if (error.code === "ERR_BAD_RESPONSE") {
+                        setSaveErrorMessage("Failed, Internal Server Error!")
+                    }
+                    else {
+                        setSaveErrorMessage(error.response.data.detail)
+                    }
+                });
+            setDisableSave(true)
+        }
     }
 
     const deleteTemplate = (id) => {
@@ -162,7 +183,6 @@ function UserInstruction() {
                 }
             });
     }
-
     const handleTextFieldChange = (index, property, value) => {
         const new_children_instruction_list = [...children_instruction_list];
         const new_instruction = { ...children_instruction_list[index] };
@@ -172,6 +192,7 @@ function UserInstruction() {
         updateParentTemplate(new_children_instruction_list, 'children')
     }
     const handleListItemClick = (event, index) => {
+        submitTemplate()
         let default_child_instruction = []
         if (template_list[index]['children'] === null) {
             setChildInstructionList([{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }])
@@ -194,10 +215,12 @@ function UserInstruction() {
         if (length < max_parent_num) {
             if (operation == "add") {
                 setIsSaved(false)
-                const new_template_list = [...template_list, { id: null, 
-                    displayed_name: "", 
-                    instruct: "", 
-                    children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] }];
+                const new_template_list = [...template_list, {
+                    id: null,
+                    displayed_name: "",
+                    instruct: "",
+                    children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }]
+                }];
                 setTemplateList(new_template_list)
                 setChildInstructionList([])
                 setSelectedIndex(template_list.length)
@@ -288,9 +311,8 @@ function UserInstruction() {
                     setMaxChildNum(template_object.data.max_child_num)
                     setMaxParentNum(template_object.data.max_parent_num)
                     let template_list = []
-                    if (template_object.data.root_nodes.length >= 25) {
+                    if (template_object.data.root_nodes.length >= template_object.data.max_parent_num) {
                         setAddParentError(true)
-
                     }
                     if (template_object.data.root_nodes.length == 0) {
                         setTemplateList([{
@@ -527,7 +549,7 @@ function UserInstruction() {
                                                                     minRows={6}
                                                                     maxRows={8}
                                                                     InputLabelProps={{ shrink: true }}
-                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'instruct'); setDisableSave(false)  }}
+                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'instruct'); setDisableSave(false) }}
                                                                     defaultValue={t['instruct']}
                                                                     inputProps={{ maxLength: 2500 }}
                                                                 />
@@ -567,7 +589,7 @@ function UserInstruction() {
                                                                                             defaultValue={child.displayed_name}
                                                                                             size="small"
                                                                                             InputLabelProps={{ shrink: true }}
-                                                                                            onChange={(e) => {handleTextFieldChange(index, "displayed_name", e.target.value); setDisableSave(false)}}
+                                                                                            onChange={(e) => { handleTextFieldChange(index, "displayed_name", e.target.value); setDisableSave(false) }}
                                                                                         />
                                                                                         <Box>
                                                                                             <FormControlLabel control={<Checkbox onChange={(e) => { handleTextFieldChange(index, 'add', e.target.checked) }} />} label="Add" />
@@ -586,9 +608,8 @@ function UserInstruction() {
                                                                                             fullWidth
                                                                                             maxRows={8}
                                                                                             defaultValue={child.instruct}
-                                                                                            onChange={(e) => {handleTextFieldChange(index, "instruct", e.target.value); setDisableSave(false)}}
+                                                                                            onChange={(e) => { handleTextFieldChange(index, "instruct", e.target.value); setDisableSave(false) }}
                                                                                         />
-
                                                                                     </FormControl>
                                                                                 </Box>
                                                                             </Stack>
