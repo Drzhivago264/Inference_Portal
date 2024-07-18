@@ -10,7 +10,7 @@ from asgiref.sync import sync_to_async
 from transformers import AutoTokenizer
 from decouple import config
 
-from server.consumers.pydantic_validator import DataSynthesisSchema
+from server.consumers.pydantic_validator import DataSynthesisSchema, AgentSchemaTemplate
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.async_.async_manage_ec2 import (
     ManageEC2Mixin,
@@ -28,7 +28,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                 [
                     {"role": "system",
                      "content": self.parent_instruction + "\n" +
-                     child_instruction['default'] + "\n"
+                     child_instruction['instruct'] + "\n"
                      },
                     {"role": "user",
                      "content":  "#Given Prompt#:\n" +
@@ -70,26 +70,27 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                                 if r.status_code == 200:
                                     response_list.append(r.json()['text'][0].replace(
                                         processed_instruction_list[index], ""))
-                                    await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}", 
-                                                                          "role": "Server", 
-                                                                          "time": self.time, 
+                                    await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}",
+                                                                          "role": "Server",
+                                                                          "time": self.time,
                                                                           "status": f"{r.status_code} Success"}))
-                                    celery_log_prompt_response.delay(is_session_start_node=None, 
-                                                                     key_object_id=self.key_object.id, 
-                                                                     llm_id=llm.id, 
+                                    celery_log_prompt_response.delay(is_session_start_node=None,
+                                                                     key_object_id=self.key_object.id,
+                                                                     llm_id=llm.id,
                                                                      prompt=processed_instruction_list[index],
-                                                                     response=r.json()['choices'][0]['message']['content'], 
+                                                                     response=r.json()[
+                                                                         'choices'][0]['message']['content'],
                                                                      type_="data_synthesis")
                                 elif r.status_code == 429:
                                     response_list.append(
                                         "Too many requests, slow down")
                                     await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}",
-                                                                           "role": "Server", 
-                                                                           "time": self.time, 
-                                                                           "status": f"{r.status_code} Failed-Too many request" }))
-                            await self.send(text_data=json.dumps({"response_list": response_list, 
-                                                                  "role": self.choosen_model, 
-                                                                  "time": self.time, 
+                                                                          "role": "Server",
+                                                                          "time": self.time,
+                                                                          "status": f"{r.status_code} Failed-Too many request"}))
+                            await self.send(text_data=json.dumps({"response_list": response_list,
+                                                                  "role": self.choosen_model,
+                                                                  "time": self.time,
                                                                   "row_no": self.row_no}))
                     else:
                         await self.manage_ec2_on_inference(server_status, instance_id)
@@ -120,24 +121,24 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                         if r.status_code == 200:
                             response_list.append(
                                 r.json()['choices'][0]['message']['content'])
-                            await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}", 
-                                                                  "role": "Server", 
-                                                                  "time": self.time, 
+                            await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}",
+                                                                  "role": "Server",
+                                                                  "time": self.time,
                                                                   "status": f"{r.status_code} Success"}))
                             celery_log_prompt_response.delay(is_session_start_node=None, key_object_id=self.key_object.id, llm_id=llm.id, prompt=processed_instruction_list[index][0]['content'] + processed_instruction_list[index][1]['content'],
                                                              response=r.json()['choices'][0]['message']['content'], type_="data_synthesis")
                         elif r.status_code == 429:
                             response_list.append(
                                 "Too many requests, slow down")
-                            await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}", 
+                            await self.send(text_data=json.dumps({"message": f"Row-{self.row_no} Instruct-{index}",
                                                                   "role": "Server",
-                                                                  "time": self.time, 
-                                                                  "status": f"{r.status_code} Failed-Too many request" }))
+                                                                  "time": self.time,
+                                                                  "status": f"{r.status_code} Failed-Too many request"}))
                     await self.send(text_data=json.dumps({"response_list": response_list, "role": self.choosen_model, "time": self.time, "row_no": self.row_no}))
         else:
             await self.send(text_data=json.dumps({"message": f"Cannot find the choosen model",
-                                                   "role": "Server", 
-                                                   "time": self.time}))
+                                                  "role": "Server",
+                                                  "time": self.time}))
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
@@ -157,34 +158,54 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
-        try:
-            validated = DataSynthesisSchema.model_validate_json(text_data)
-            if not self.key_object:
-                await self.send(text_data=json.dumps({"message": "Cannot find key, Disconnected! You need to login first", "role": "Server", "time": self.time}))
-                await self.disconnect({'code': 3003})
+        text_data_json = json.loads(text_data)
+        if 'swap_template' in text_data_json:
+            try:
+                data = AgentSchemaTemplate.model_validate_json(
+                    text_data)
+                swap = data.swap_template
+                template_type = data.template_type
+                swap_template = await self.get_template(swap, template_type)
+                child_template = await self.get_child_template_list(swap_template, template_type)
+                swap_instruction = swap_template.instruct
+                await self.send(text_data=json.dumps({"message": f"Swap to {swap_template.displayed_name}", "role": "Server", "time": self.time}))
+                await self.send(text_data=json.dumps({
+                    "swap_instruction": swap_instruction,
+                    "child_template_name_list": child_template['name_list'],
+                    "child_template_displayed_name_list":  child_template['displayed_name_list'],
+                    "child_template_instruct_list":child_template['instruct_list'],
+                }))
+            except ValidationError as e:
+                await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
+        else:
+            try:
+                validated = DataSynthesisSchema.model_validate_json(text_data)
+                if not self.key_object:
+                    await self.send(text_data=json.dumps({"message": "Cannot find key, Disconnected! You need to login first", "role": "Server", "time": self.time}))
+                    await self.disconnect({'code': 3003})
 
-            elif self.key_object:
-                self.seed_prompt = validated.seed_prompt
-                self.child_instruction_list = validated.child_instruction_list
-                self.parent_instruction = validated.parent_instruction
-                self.optional_instruction = validated.optional_instruction
-                self.top_p = validated.top_p
-                self.max_tokens = validated.max_tokens
-                self.frequency_penalty = validated.frequency_penalty
-                self.presence_penalty = validated.presence_penalty
-                self.temperature = validated.temperature
-                self.choosen_model = validated.choosen_model
-                self.row_no = validated.row_no
-                # Send message to room group
-                await self.channel_layer.group_send(
-                    self.room_group_name, {
-                        "type": "chat_message",
-                        "message": self.seed_prompt,
-                    }
-                )
+                elif self.key_object:
+                    self.seed_prompt = validated.seed_prompt
+                    self.child_instruction_list = validated.child_instruction_list
+                    self.parent_instruction = validated.parent_instruction
+                    self.optional_instruction = validated.optional_instruction
+                    self.top_p = validated.top_p
+                    self.max_tokens = validated.max_tokens
+                    self.frequency_penalty = validated.frequency_penalty
+                    self.presence_penalty = validated.presence_penalty
+                    self.temperature = validated.temperature
+                    self.choosen_model = validated.choosen_model
+                    self.row_no = validated.row_no
+                    # Send message to room group
+                    await self.channel_layer.group_send(
+                        self.room_group_name, {
+                            "type": "chat_message",
+                            "message": self.seed_prompt,
+                        }
+                    )
 
-        except ValidationError as e:
-            await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
+            except ValidationError as e:
+                await self.send(text_data=json.dumps({"message": f"Error: {e.errors()}", "role": "Server", "time": self.time}))
     # Receive message from room group
 
     async def chat_message(self, event):

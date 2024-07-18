@@ -60,11 +60,12 @@ class QueryDBMixin:
                     return {
                         "displayed_name_list": [c.displayed_name for c in child_template],
                         "name_list": [c.name for c in child_template],
+                        "instruct_list": [c.instruct for c in child_template],
                         "default_child": child_template[0].displayed_name,
                         "default_instruct": child_template[0].instruct
                     }
                 else:
-                    return {"name_list": [], "displayed_name_list": [], "default_child": "", "default_instruct": ""}
+                    return {"name_list": [], "displayed_name_list": [], "instruct_list": [] ,"default_child": "", "default_instruct": ""}
         except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
             return False
 

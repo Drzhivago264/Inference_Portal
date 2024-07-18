@@ -21,8 +21,6 @@ import EditorList from "@editorjs/list"
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Grid';
 import Header from "@editorjs/header";
 import InlineCode from '@editorjs/inline-code';
@@ -40,9 +38,9 @@ import Quote from "@editorjs/quote"
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import Underline from "@editorjs/underline"
+import UserTemplate from '../component/chat_components/UserTemplate.js';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
 import axios from 'axios';
 import editorjsCodecup from '@calumk/editorjs-codecup';
@@ -288,13 +286,6 @@ function Agent() {
         }
     }
     const swap_template = (template, type) => {
-        if (type === "user_template") {
-            for (let t in user_template_list) {
-                if (user_template_list[t]['displayed_name'] === template) {
-                    template = user_template_list[t]['name']
-                }
-            }
-        }
         websocket.current.send(JSON.stringify({
             'swap_template': template,
             'template_type': type
@@ -476,26 +467,15 @@ function Agent() {
                                     </Select>
                                 </FormControl>
                                 <Divider></Divider>
-                                <FormControl disabled={user_template_list.length === 0}>
-                                    <InputLabel id="use-agent-label">{`Users' Agents`}</InputLabel>
-                                    <Select
-                                        labelId="user-agent-label"
-                                        id="user-agent-select"
-                                        onChange={e => { setChoosenUserTemplate(e.target.value); swap_template(e.target.value, "user_template") }}
-                                        value={user_template_list.length === 0 ? "Empty Template" :choosen_user_template}
-                                        label="Users' Agents"
-                                        size="small"
-                                        disabled={!use_user_template}
-                                    >
-                                        {user_template_list.map((template) => {
-                                            return (
-                                                <MenuItem key={template.name} value={template.displayed_name}>{template.displayed_name}</MenuItem>
-                                            )
-                                        })}
-                                    </Select>
-                                    <FormControlLabel control={<Switch checked={use_user_template} onChange={handle_use_user_template} />} label="Use My Template" />
-                                    {user_template_list.length == 0 && <FormHelperText>{`No Users' Agent Found`}</FormHelperText>}
-                                </FormControl>
+                                <UserTemplate
+                                    use_user_template={use_user_template}
+                                    user_template_list={user_template_list}
+                                    setChoosenUserTemplate={setChoosenUserTemplate}
+                                    choosen_user_template={choosen_user_template}
+                                    handle_use_user_template={handle_use_user_template}
+                                    swap_template={swap_template}
+                                />
+
                                 <Divider></Divider>
                                 <FormControl defaultValue="">
                                     <InputLabel id="model-label">Backends</InputLabel>
