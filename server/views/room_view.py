@@ -60,7 +60,7 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                 else:
                     return Response({'detail': 'Unknown Key error!, Generate a new one'}, status=status.HTTP_401_UNAUTHORIZED)
             except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
-                return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)                
+                return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             if request.user.id is not None:
                 return Response({"redirect_link": f"/frontend/{destination}"}, status=status.HTTP_200_OK)
@@ -75,7 +75,8 @@ def hub_redirect_api(request: HttpRequest) -> Response:
 @permission_classes([IsAuthenticated])
 def instruction_tree_api(request):
     current_user = request.user
-    master_key, master_user = get_master_key_and_master_user(current_user=current_user)
+    master_key, master_user = get_master_key_and_master_user(
+        current_user=current_user)
     root_nodes = InstructionTree.objects.filter(level=0)
     user_root_nodes = UserInstructionTree.objects.filter(
         level=1, user=master_user)
@@ -103,8 +104,9 @@ def user_instruction_tree_api(request):
     if not current_user.has_perm('server.allow_create_template'):
         return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        try:    
-            master_key, master_user = get_master_key_and_master_user(current_user=current_user)                
+        try:
+            master_key, master_user = get_master_key_and_master_user(
+                current_user=current_user)
             root_nodes = UserInstructionTree.objects.filter(
                 user=master_user, level=1)
             serializer = UserInstructionGetSerializer(root_nodes, many=True)
@@ -120,10 +122,10 @@ def user_instruction_tree_api(request):
                             status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
-def post_user_instruction_tree_api(request):
+def update_user_instruction_tree_api(request):
     current_user = request.user
     if not current_user.has_perm('server.allow_create_template'):
         return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -138,73 +140,95 @@ def post_user_instruction_tree_api(request):
             childrens = UserInstructionCreateSerializer(
                 childrens, many=True)
 
-            master_key, master_user = get_master_key_and_master_user(current_user=current_user)
+            master_key, master_user = get_master_key_and_master_user(
+                current_user=current_user)
             hash_key = master_key.hashed_key
 
+            if len(childrens.data) > constant.MAX_CHILD_TEMPLATE_PER_USER:
+                return Response({'detail': f"Save Failed!, you have react maximun number of childens ({constant.MAX_CHILD_TEMPLATE_PER_USER})"}, status=status.HTTP_404_NOT_FOUND)
+
             if UserInstructionTree.objects.filter(user=master_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
-                if parent_instruction.data['id'] is not None:
-                    node = UserInstructionTree.objects.get(
-                        id=parent_instruction.data['id'], user=master_user)
-                    node.instruct = parent_instruction.data['instruct']
-                    node.displayed_name = parent_instruction.data['displayed_name']
-                    node.save()
-                    for index, c in enumerate(childrens.data):
-                        if index < 4:
-                            if c['id'] is not None:
-                                child_node = UserInstructionTree.objects.get(
-                                    id=c['id'], user=master_user)
-                                child_node.instruct = c['instruct']
-                                child_node.displayed_name = c['displayed_name']
-                                child_node.code = index
-                                child_node.save()
-                            else:
-                                try:
-                                    UserInstructionTree.objects.create(
-                                        instruct=c['instruct'],
-                                        displayed_name=c['displayed_name'],
-                                        name= sha512(hash_key.encode('utf-8')).hexdigest() +
-                                        str(uuid.uuid4()),
-                                        parent=node,
-                                        user=master_user,
-                                        code=index)
-                                except IntegrityError:
-                                    return Response({'detail': "Failed! You must ensure unique name for each template"}, status=status.HTTP_400_BAD_REQUEST)
-                        else:
-                            return Response({'detail': "Saved parent and 3 childs"}, status=status.HTTP_200_OK)
-                else:
-                    try:
-                        grandparent_node = UserInstructionTree.objects.get(
-                            user=master_user, level=0)
-                    except UserInstructionTree.DoesNotExist:
-                        grandparent_node = UserInstructionTree.objects.create(
-                            user=master_user, name=hash_key)
-                    try:
-                        parent_node = UserInstructionTree.objects.create(user=master_user, parent=grandparent_node,
-                                                                        name= sha512(hash_key.encode('utf-8')).hexdigest() +
-                                                                        str(uuid.uuid4(
-                                                                        )),
-                                                                        displayed_name=parent_instruction.data[
-                                                                            'displayed_name'],
-                                                                        instruct=parent_instruction.data['instruct']
-                                                                        )
-                    except IntegrityError:
-                        return Response({'detail': "Failed! You must ensure unique name for each template"}, status=status.HTTP_400_BAD_REQUEST)
-                    for index, c in enumerate(childrens.data):
-                        if index < 4:
-                            try:
-                                node = UserInstructionTree.objects.create(
-                                    user=master_user,
-                                    parent=parent_node,
-                                    name= sha512(hash_key.encode('utf-8')).hexdigest() +
-                                    str(uuid.uuid4()),
-                                    displayed_name=c['displayed_name'],
-                                    instruct=c['instruct'],
-                                    code=index
-                                )
-                            except IntegrityError:
-                                return Response({'detail': "Failed! You must ensure unique name for each template"}, status=status.HTTP_400_BAD_REQUEST)
-                        else:
-                            return Response({'detail': "Saved parent and 3 childs"}, status=status.HTTP_200_OK)
+                node = UserInstructionTree.objects.get(
+                    id=parent_instruction.data['id'], user=master_user)
+                node.instruct = parent_instruction.data['instruct']
+                node.displayed_name = parent_instruction.data['displayed_name']
+                node.save()
+                for index, c in enumerate(childrens.data):
+                    if c['id'] is not None:
+                        child_node = UserInstructionTree.objects.get(
+                            id=c['id'], user=master_user)
+                        child_node.instruct = c['instruct']
+                        child_node.displayed_name = c['displayed_name']
+                        child_node.code = index
+                        child_node.save()
+                    else:
+                        UserInstructionTree.objects.create(
+                            instruct=c['instruct'],
+                            displayed_name=c['displayed_name'],
+                            name=sha512(hash_key.encode('utf-8')).hexdigest() +
+                            str(uuid.uuid4()),
+                            parent=node,
+                            user=master_user,
+                            code=index)
+                return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
+            else:
+                return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@throttle_classes([AnonRateThrottle])
+@permission_classes([IsAuthenticated])
+def create_user_instruction_tree_api(request):
+    current_user = request.user
+    if not current_user.has_perm('server.allow_create_template'):
+        return Response({'detail': "Not authorised to create template"}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        serializer = NestedUserInstructionCreateSerializer(
+            data=request.data)
+        if serializer.is_valid():
+            parent_instruction = serializer.data['parent_instruction']
+            childrens = serializer.data['childrens']
+            parent_instruction = UserInstructionCreateSerializer(
+                parent_instruction)
+            childrens = UserInstructionCreateSerializer(
+                childrens, many=True)
+
+            master_key, master_user = get_master_key_and_master_user(
+                current_user=current_user)
+            hash_key = master_key.hashed_key
+
+            if len(childrens.data) > constant.MAX_CHILD_TEMPLATE_PER_USER:
+                return Response({'detail': f"Save Failed!, you have react maximun number of childens ({constant.MAX_CHILD_TEMPLATE_PER_USER})"}, status=status.HTTP_404_NOT_FOUND)
+
+            if UserInstructionTree.objects.filter(user=master_user).count() <= constant.MAX_PARENT_TEMPLATE_PER_USER*constant.MAX_CHILD_TEMPLATE_PER_USER:
+                try:
+                    grandparent_node = UserInstructionTree.objects.get(
+                        user=master_user, level=0)
+                except UserInstructionTree.DoesNotExist:
+                    grandparent_node = UserInstructionTree.objects.create(
+                        user=master_user, name=hash_key)
+
+                parent_node = UserInstructionTree.objects.create(user=master_user, parent=grandparent_node,
+                                                                 name=sha512(hash_key.encode('utf-8')).hexdigest() +
+                                                                 str(uuid.uuid4(
+                                                                 )),
+                                                                 displayed_name=parent_instruction.data[
+                                                                     'displayed_name'],
+                                                                 instruct=parent_instruction.data['instruct']
+                                                                 )
+                for index, c in enumerate(childrens.data):
+                    UserInstructionTree.objects.create(
+                        user=master_user,
+                        parent=parent_node,
+                        name=sha512(hash_key.encode('utf-8')).hexdigest() +
+                        str(uuid.uuid4()),
+                        displayed_name=c['displayed_name'],
+                        instruct=c['instruct'],
+                        code=index
+                    )
+
                 return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
             else:
                 return Response({'detail': "Save Failed!, you have react maximun number of templates"}, status=status.HTTP_404_NOT_FOUND)
@@ -224,7 +248,8 @@ def delete_user_instruction_tree_api(request):
             data=request.data)
         if serializer.is_valid():
             id = serializer.data['id']
-            master_key, master_user = get_master_key_and_master_user(current_user=current_user)
+            master_key, master_user = get_master_key_and_master_user(
+                current_user=current_user)
             try:
                 node = UserInstructionTree.objects.get(
                     id=id, user=master_user)
@@ -246,7 +271,8 @@ def memory_tree_api(request):
     else:
         paginator = PageNumberPagination()
         paginator.page_size = 1
-        master_key, master_user = get_master_key_and_master_user(current_user=current_user)
+        master_key, master_user = get_master_key_and_master_user(
+            current_user=current_user)
         memory_object = MemoryTree.objects.filter(
             key=master_key).order_by('-id')
         result_page = paginator.paginate_queryset(memory_object, request)
