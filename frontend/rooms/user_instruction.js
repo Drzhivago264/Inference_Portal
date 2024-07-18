@@ -80,6 +80,7 @@ function UserInstruction() {
     const [reload, setReload] = useState(false)
     const [max_parent_num, setMaxParentNum] = useState(null)
     const [max_child_num, setMaxChildNum] = useState(null)
+    const [disable_save, setDisableSave] = useState(true)
     const [children_instruction_list, setChildInstructionList] = useState([
         { id: null, dislayed_name: "", instruct: "", unique: nanoid(), add: false },
     ])
@@ -134,6 +135,8 @@ function UserInstruction() {
                     setSaveErrorMessage(error.response.data.detail)
                 }
             });
+            setDisableSave(true)
+            setReload(true)
     }
 
     const deleteTemplate = (id) => {
@@ -192,7 +195,7 @@ function UserInstruction() {
             if (operation == "add") {
                 setIsSaved(false)
                 const new_template_list = [...template_list, { id: null, 
-                    displayed_name: `Empty Template`, 
+                    displayed_name: "", 
                     instruct: "", 
                     children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] }];
                 setTemplateList(new_template_list)
@@ -215,7 +218,7 @@ function UserInstruction() {
                 }
                 else {
                     handleListItemClick(null, 0)
-                    const new_template_list = [{ id: null, displayed_name: `Empty Template`, instruct: "", children: null }];
+                    const new_template_list = [{ id: null, displayed_name: "", instruct: "", children: null }];
                     setTemplateList(new_template_list)
                     setChildInstructionList([
                         { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false },
@@ -512,7 +515,7 @@ function UserInstruction() {
                                                                     InputLabelProps={{ shrink: true }}
                                                                     size="small"
                                                                     defaultValue={t['displayed_name']}
-                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'displayed_name') }}
+                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'displayed_name'); setDisableSave(false) }}
                                                                     inputProps={{ maxLength: 35 }}
                                                                 />
                                                                 <FormControlLabel disabled control={<Checkbox defaultChecked />} label="Added" />
@@ -524,7 +527,7 @@ function UserInstruction() {
                                                                     minRows={6}
                                                                     maxRows={8}
                                                                     InputLabelProps={{ shrink: true }}
-                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'instruct') }}
+                                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'instruct'); setDisableSave(false)  }}
                                                                     defaultValue={t['instruct']}
                                                                     inputProps={{ maxLength: 2500 }}
                                                                 />
@@ -564,7 +567,7 @@ function UserInstruction() {
                                                                                             defaultValue={child.displayed_name}
                                                                                             size="small"
                                                                                             InputLabelProps={{ shrink: true }}
-                                                                                            onChange={(e) => handleTextFieldChange(index, "displayed_name", e.target.value)}
+                                                                                            onChange={(e) => {handleTextFieldChange(index, "displayed_name", e.target.value); setDisableSave(false)}}
                                                                                         />
                                                                                         <Box>
                                                                                             <FormControlLabel control={<Checkbox onChange={(e) => { handleTextFieldChange(index, 'add', e.target.checked) }} />} label="Add" />
@@ -583,7 +586,7 @@ function UserInstruction() {
                                                                                             fullWidth
                                                                                             maxRows={8}
                                                                                             defaultValue={child.instruct}
-                                                                                            onChange={(e) => handleTextFieldChange(index, "instruct", e.target.value)}
+                                                                                            onChange={(e) => {handleTextFieldChange(index, "instruct", e.target.value); setDisableSave(false)}}
                                                                                         />
 
                                                                                     </FormControl>
@@ -604,7 +607,7 @@ function UserInstruction() {
                                         justifyContent="center"
                                         alignItems="center">
                                         <Box mr={1}>
-                                            <LoadingButton size="small" loading={loading} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
+                                            <LoadingButton size="small" loading={loading} disabled={disable_save} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
                                         </Box>
                                         {add_child_error && <Alert severity="warning">Reaching the maximum number of child ({max_child_num}).</Alert>}
                                         {!add_child_error && <IconButton aria-label="add" onClick={() => { addChild("add", null) }}>

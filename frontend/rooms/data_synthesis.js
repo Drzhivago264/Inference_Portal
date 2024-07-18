@@ -39,12 +39,18 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import UserTemplate from '../component/chat_components/UserTemplate.js';
 import axios from 'axios';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useNavigate } from "react-router-dom";
 
 function DataSynthesis() {
+    const [user_template_list, setUserTemplateList] = useState([]);
+    const [default_user_child_template_list, setDefaultUserChildTemplateList] = useState([]);
+    const [default_user_parent_instruct, setUserParentInstruct] = useState("");
+    const [choosen_user_template, setChoosenUserTemplate] = useState("");
+    const [use_user_template, setUseUserTemplate] = useState(false)
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const [chat_message, setChatMessage] = useState([]);
     const messagesEndRef = useRef(null)
@@ -63,12 +69,12 @@ function DataSynthesis() {
     const [default_parent_instruct, setParentInstruct] = useState("You are a Prompt Writer, you need to rewrite a given prompt following the instruction to produce a more complex version, you must directly provide the #Rewritten Prompt# and must not repeat the #Given Prompt#. You cannot omit the non-text parts such as the table and code in #Given Prompt#.\nInstruction:\n");
     const [default_extra_instruct, setExtraInstruct] = useState("Do not make #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #Given Prompt#. You must not repeat the #Given Prompt#, #Given Prompt# must not appear in your answer.")
     const [default_child_instruct_list, setDefaultChildInstructList] = useState([
-        { label: "Translating", default: "The #Rewritten Prompt# must be written in Vietnamese." },
-        { label: "Concretizing", default: "Replace general concepts in the #Given Prompt# with more specific concepts." },
-        { label: "Increased Reasoning Steps", default: "If #Given Prompt# can be solved with just a few simple thinking processes, you can rewrite it to explicitly request multiple-step reasoning." },
-        { label: "Complicate Input", default: "You SHOULD complicate the given prompt using the following method:\nAdd one more constraints/requirements into #Given Prompt#" },
-        { label: "Deepening", default: "If #Given Prompt# contains inquiries about certain issues, the depth and breadth of the inquiry can be increased." },
-        { label: "Breadth Evolving", default: "You should draw inspiration from the #Given Prompt# to create a brand new prompt.\nThis new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\nThe LENGTH and difficulty level of the #Created Prompt# should be similar to that of the #Given Prompt#." }
+        { displayed_name: "Translating", instruct: "The #Rewritten Prompt# must be written in Vietnamese." },
+        { displayed_name: "Concretizing", instruct: "Replace general concepts in the #Given Prompt# with more specific concepts." },
+        { displayed_name: "Increased Reasoning Steps", instruct: "If #Given Prompt# can be solved with just a few simple thinking processes, you can rewrite it to explicitly request multiple-step reasoning." },
+        { displayed_name: "Complicate Input", instruct: "You SHOULD complicate the given prompt using the following method:\nAdd one more constraints/requirements into #Given Prompt#" },
+        { displayed_name: "Deepening", instruct: "If #Given Prompt# contains inquiries about certain issues, the depth and breadth of the inquiry can be increased." },
+        { displayed_name: "Breadth Evolving", instruct: "You should draw inspiration from the #Given Prompt# to create a brand new prompt.\nThis new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\nThe LENGTH and difficulty level of the #Created Prompt# should be similar to that of the #Given Prompt#." }
     ]);
     const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [csv_row, setCSVRow] = useState([
@@ -96,6 +102,16 @@ function DataSynthesis() {
             ...multilineColumn,
         }
     ]);
+    const handle_use_user_template = (event) => {
+        setUseUserTemplate(event.target.checked);
+    };
+    
+    const swap_template = (template, type) => {
+        websocket.current.send(JSON.stringify({
+            'swap_template': template,
+            'template_type': type
+        }));
+    }
     const handleFileLoad = (csvData) => {
         setCSVRow(csvData);
         if (csvData[0]) {
@@ -114,14 +130,21 @@ function DataSynthesis() {
         }
     };
     const navigate = useNavigate();
-    const { is_authenticated} = useContext(UserContext);
+    const { is_authenticated } = useContext(UserContext);
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
         axios.all([
             axios.get('/frontend-api/model'),
+            axios.get('/frontend-api/instruction-tree')
         ])
-            .then(axios.spread((model_object) => {
+            .then(axios.spread((model_object, instruction_object) => {
                 setAgents(model_object.data.models_agent);
+                setUserTemplateList(instruction_object.data.user_root_nodes)
+                if (instruction_object.data.user_root_nodes.length > 0) {
+                    setChoosenUserTemplate(instruction_object.data.user_root_nodes[0].displayed_name)
+                    setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
+                }
+                setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
             }))
             .catch(error => {
                 console.log(error);
@@ -156,15 +179,15 @@ function DataSynthesis() {
     }, [is_running]);
     useEffect(() => {
         if (websocket_hash) {
-            datasynthesissocket(websocket, setChatMessage, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref)
+            datasynthesissocket(websocket, setChatMessage, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref, setUserParentInstruct, setDefaultUserChildTemplateList)
         }
-    }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref, choosen_model, choosen_prompt_column, websocket_hash]);
+    }, [default_child_instruct_list, default_extra_instruct, default_parent_instruct, row_ref, column_ref, is_running_ref, choosen_model, choosen_prompt_column, websocket_hash, default_user_child_template_list, default_user_parent_instruct]);
     const submitSeed = (seed_prompt, row_no) => {
         var data = {
             'row_no': row_no,
             'seed_prompt': seed_prompt,
-            'child_instruction_list': default_child_instruct_list,
-            'parent_instruction': default_parent_instruct,
+            'child_instruction_list': use_user_template ? default_user_child_template_list : default_child_instruct_list,
+            'parent_instruction': use_user_template ? default_user_parent_instruct : default_parent_instruct,
             'optional_instruction': default_extra_instruct,
             'choosen_model': choosen_model,
             'top_p': top_p,
@@ -176,34 +199,33 @@ function DataSynthesis() {
         websocket.current.send(JSON.stringify(data))
         setThinking(true)
     }
-    const updateChildInstructList = (value, index_) => {
-        const new_child_instruct_list = default_child_instruct_list.map((instruct, index) => {
+    const updateChildInstructList = (value, index_, list_, func_) => {
+        const new_child_instruct_list = list_.map((instruct_, index) => {
             if (index === index_) {
                 return {
-                    ...instruct,
-                    default: value,
+                    ...instruct_,
+                    instruct: value,
                 }
             }
             else {
-                return instruct
+                return instruct_
             }
-
         });
-        setDefaultChildInstructList(new_child_instruct_list);
+        func_(new_child_instruct_list)
     }
-    const delete_child_instruct = (index_) => {
-        setDefaultChildInstructList(
-            default_child_instruct_list.filter((instruct, index) =>
+    const delete_child_instruct = (index_, list_, func_) => {
+        func_(
+            list_.filter((instruct, index) =>
                 index !== index_
             )
         )
     }
-    const add_child_instruct = () => {
-        if (default_child_instruct_list.length <= 10) {
-            setDefaultChildInstructList(
+    const add_child_instruct = (list_, func_) => {
+        if (list_.length <= 10) {
+            func_(
                 [
-                    ...default_child_instruct_list,
-                    { label: "User Defined", default: "" }
+                    ...list_,
+                    { displayed_name: `User Defined ${list_.length + 1}`, instruct: "" }
                 ]
             );
         }
@@ -260,7 +282,6 @@ function DataSynthesis() {
                                                 value={choosen_prompt_column}
                                                 label="Seed Prompt"
                                                 size="small"
-
                                             >
                                                 {csv_column.map((column) => {
                                                     return (
@@ -274,7 +295,7 @@ function DataSynthesis() {
                                         <LoadingButton loadingPosition="start" loading={shownthinking} color="success" fullWidth variant="contained" onClick={() => { startSubmit(), setIsRunning(true) }} startIcon={<PlayCircleOutlineIcon />} disabled={is_running ? true : false} >
                                             Run
                                         </LoadingButton>
-                                        <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false)}} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
+                                        <Button color="secondary" fullWidth variant="contained" onClick={() => { setIsRunning(false) }} startIcon={<PauseCircleOutlineIcon />} disabled={!is_running ? true : false}>Pause</Button>
                                     </Stack>
                                 </Box>
                             </Paper>
@@ -291,7 +312,7 @@ function DataSynthesis() {
                                     </DatasetExport>
                                 </Box>
                             </Paper>
-                            <LogBox chat_message={chat_message} messagesEndRef={messagesEndRef}/>
+                            <LogBox chat_message={chat_message} messagesEndRef={messagesEndRef} />
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={5}>
@@ -338,7 +359,7 @@ function DataSynthesis() {
                                                 id="parent-instruct"
                                                 multiline
                                                 maxRows={6}
-                                                value={default_parent_instruct}
+                                                value={use_user_template ? default_user_parent_instruct : default_parent_instruct}
                                                 onChange={e => { setParentInstruct(e.target.value) }}
                                                 variant="standard"
                                                 InputProps={{
@@ -362,23 +383,23 @@ function DataSynthesis() {
                                                 overflow: "hidden",
                                                 overflowY: "scroll"
                                             }}>
-                                            <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
+                                            {!use_user_template && <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
                                                 {default_child_instruct_list && default_child_instruct_list.map((object, index) => {
                                                     return (
-                                                        <Grid key={object.label} container>
+                                                        <Grid key={object.displayed_name} container>
                                                             <Grid item xs={11}>
                                                                 <TextField
-                                                                    id={object.label}
-                                                                    label={object.label}
+                                                                    id={object.displayed_name}
+                                                                    label={object.displayed_name}
                                                                     multiline
                                                                     maxRows={4}
-                                                                    defaultValue={object.default}
-                                                                    onChange={(e) => { updateChildInstructList(e.target.value, index) }}
+                                                                    defaultValue={object.instruct}
+                                                                    onChange={(e) => { updateChildInstructList(e.target.value, index, default_child_instruct_list, setDefaultChildInstructList) }}
                                                                     fullWidth
                                                                 />
                                                             </Grid>
                                                             <Grid item xs={1}>
-                                                                <IconButton aria-label="delete" onClick={() => { delete_child_instruct(index) }}>
+                                                                <IconButton aria-label="delete" onClick={() => { delete_child_instruct(index, default_child_instruct_list, setDefaultChildInstructList) }}>
                                                                     <DeleteIcon />
                                                                 </IconButton>
                                                             </Grid>
@@ -387,11 +408,45 @@ function DataSynthesis() {
                                                 })}
                                                 {default_child_instruct_list.length < 10 && <Box display="flex" justifyContent="center"
                                                     alignItems="center" >
-                                                    <IconButton aria-label="add" onClick={() => { add_child_instruct() }}>
+                                                    <IconButton aria-label="add" onClick={() => { add_child_instruct(default_child_instruct_list, setDefaultChildInstructList) }}>
                                                         <AddCircleOutlineIcon />
                                                     </IconButton>
-                                                </Box>}
+                                                </Box>
+                                                }
                                             </Stack>
+                                            }
+                                            {use_user_template && <Stack ml={2} mt={2} mb={2} mr={1} spacing={2}>
+                                                {default_user_child_template_list && default_user_child_template_list.map((object, index) => {
+                                                    return (
+                                                        <Grid key={object.displayed_name} container>
+                                                            <Grid item xs={11}>
+                                                                <TextField
+                                                                    id={object.name}
+                                                                    label={object.displayed_name}
+                                                                    multiline
+                                                                    maxRows={4}
+                                                                    defaultValue={object.instruct}
+                                                                    onChange={(e) => { updateChildInstructList(e.target.value, index, default_user_child_template_list, setDefaultUserChildTemplateList) }}
+                                                                    fullWidth
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={1}>
+                                                                <IconButton aria-label="delete" onClick={() => { delete_child_instruct(index, default_user_child_template_list, setDefaultUserChildTemplateList) }}>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </Grid>
+                                                        </Grid>
+                                                    );
+                                                })}
+                                                {default_child_instruct_list.length < 10 && <Box display="flex" justifyContent="center"
+                                                    alignItems="center" >
+                                                    <IconButton aria-label="add" onClick={() => { add_child_instruct(default_user_child_template_list, setDefaultUserChildTemplateList) }}>
+                                                        <AddCircleOutlineIcon />
+                                                    </IconButton>
+                                                </Box>
+                                                }
+                                            </Stack>
+                                            }
                                         </Box>
                                     </Paper>
                                 </Box>
@@ -410,7 +465,7 @@ function DataSynthesis() {
                                                 multiline
                                                 maxRows={4}
                                                 value={default_extra_instruct}
-                                                onChange={e => { setExtraInstruct(e.target.value)}}
+                                                onChange={e => { setExtraInstruct(e.target.value) }}
                                                 variant="standard"
                                                 InputProps={{
                                                     startAdornment: <InputAdornment position="start">   </InputAdornment>
@@ -438,6 +493,15 @@ function DataSynthesis() {
                                         <MenuItem key={"/ws/engineer-async/"} value={"/ws/engineer-async/"}>Async Backend</MenuItem>
                                     </Select>
                                 </FormControl>
+                                <Divider />
+                                <UserTemplate
+                                    use_user_template={use_user_template}
+                                    user_template_list={user_template_list}
+                                    setChoosenUserTemplate={setChoosenUserTemplate}
+                                    choosen_user_template={choosen_user_template}
+                                    swap_template={swap_template}
+                                    handle_use_user_template={handle_use_user_template} />
+                                <Divider />
                                 <OpenAPIParameter
                                     top_p={top_p}
                                     agent_objects={agent_objects}

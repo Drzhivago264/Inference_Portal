@@ -36,7 +36,6 @@ export function agentsocket(
         const dataFromServer = JSON.parse(message.data);
         if (dataFromServer) {
             if ((Object.prototype.hasOwnProperty.call( dataFromServer, "swap_template"))) {
-
                 if (!use_user_template){
                     let new_child_template_list = []
                     for (var new_child in dataFromServer.child_template_name_list) {

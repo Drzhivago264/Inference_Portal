@@ -1,7 +1,20 @@
 import dayjs from 'dayjs'
 import { multilineColumn } from "../custom_ui_component/MultipleLineEdittingDataGrid";
 
-export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, setCSVRow, genSubmit, submitSeed, setThinking, setIsRunning, row_ref, column_ref, is_running_ref) {
+export function datasynthesissocket(
+    websocket,
+    setChatMessage,
+    setCSVColumn,
+    setCSVRow,
+    genSubmit,
+    submitSeed,
+    setThinking,
+    setIsRunning,
+    row_ref,
+    column_ref,
+    is_running_ref,
+    setUserParentInstruct,
+    setDefaultUserChildTemplateList) {
 
     websocket.current.onopen = () => {
         setChatMessage(chat_message => [
@@ -33,7 +46,21 @@ export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, set
     };
     websocket.current.onmessage = (message) => {
         const dataFromServer = JSON.parse(message.data);
-        if (dataFromServer['role'] == "Server") {
+        if ((Object.prototype.hasOwnProperty.call(dataFromServer, "swap_instruction"))) {
+            let new_child_template_list = []
+            for (var template_name in dataFromServer.child_template_name_list) {
+                new_child_template_list.push({ 
+                    'displayed_name': dataFromServer.child_template_displayed_name_list[template_name], 
+                    'name': dataFromServer.child_template_name_list[template_name], 
+                    'instruct': dataFromServer.child_template_instruct_list[template_name] 
+                })
+            }
+            setUserParentInstruct(dataFromServer.swap_instruction)
+            setDefaultUserChildTemplateList(new_child_template_list)
+            console.log(new_child_template_list)
+            dataFromServer.message = ""
+        }
+        else if (dataFromServer['role'] == "Server") {
             setChatMessage(chat_message => [
                 ...chat_message,
                 {
@@ -47,10 +74,9 @@ export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, set
                 },
             ])
         }
-        else {
+        else if ((Object.prototype.hasOwnProperty.call(dataFromServer, "response_list"))) {
             var response_list = {}
             var additional_column = []
-            console.log(dataFromServer)
             if (dataFromServer['response_list'].length > 0) {
                 for (var i = 0; i < dataFromServer['response_list'].length; i++) {
                     if (!Object.prototype.hasOwnProperty.call(column_ref.current, `Evolved_Prompt_No_${i}`)) {
@@ -62,7 +88,6 @@ export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, set
                             editable: true,
                             ...multilineColumn
                         })
-
                         response_list[`Evolved_Prompt_No_${i}`] = dataFromServer['response_list'][i]
                     }
                 }
@@ -95,9 +120,6 @@ export function datasynthesissocket(websocket, setChatMessage, setCSVColumn, set
                     }
                 }
             }
-
         }
     }
 }
-
-

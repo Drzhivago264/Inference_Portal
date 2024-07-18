@@ -1,5 +1,5 @@
 import uuid
-
+from hashlib import sha512
 
 from django.contrib.auth import authenticate, login
 from django.views.decorators.cache import cache_page
@@ -162,7 +162,7 @@ def post_user_instruction_tree_api(request):
                                     UserInstructionTree.objects.create(
                                         instruct=c['instruct'],
                                         displayed_name=c['displayed_name'],
-                                        name=hash_key +
+                                        name= sha512(hash_key.encode('utf-8')).hexdigest() +
                                         str(uuid.uuid4()),
                                         parent=node,
                                         user=master_user,
@@ -180,7 +180,7 @@ def post_user_instruction_tree_api(request):
                             user=master_user, name=hash_key)
                     try:
                         parent_node = UserInstructionTree.objects.create(user=master_user, parent=grandparent_node,
-                                                                        name=hash_key +
+                                                                        name= sha512(hash_key.encode('utf-8')).hexdigest() +
                                                                         str(uuid.uuid4(
                                                                         )),
                                                                         displayed_name=parent_instruction.data[
@@ -195,7 +195,7 @@ def post_user_instruction_tree_api(request):
                                 node = UserInstructionTree.objects.create(
                                     user=master_user,
                                     parent=parent_node,
-                                    name=hash_key +
+                                    name= sha512(hash_key.encode('utf-8')).hexdigest() +
                                     str(uuid.uuid4()),
                                     displayed_name=c['displayed_name'],
                                     instruct=c['instruct'],
