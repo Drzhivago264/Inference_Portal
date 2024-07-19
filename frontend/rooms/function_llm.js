@@ -21,6 +21,7 @@ import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
+import { useGetModel } from '../component/api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -31,13 +32,11 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
     ...theme.typography.body2,
 }));
 
-
 function FunctionLLM() {
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const [shownthinking, setThinking] = useState(false);
     const messagesEndRef = useRef(null)
     const [chat_message, setChatMessage] = useState([]);
-    const [agent_objects, setAgents] = useState([]);
     const [choosen_model, setChoosenModel] = useState("gpt-4");
     const [top_p, setTopp] = useState(0.72);
     const [max_tokens, setMaxToken] = useState(null);
@@ -48,22 +47,15 @@ function FunctionLLM() {
     const [usermessageError, setUserMessageError] = useState(false);
     const [extrainstruction, setExtraInstruction] = useState("sadness, joy, love, anger, fear, surprise, neutral");
     const [llmfunction, setLLMFunction] = useState("emotion");
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+    
     const navigate = useNavigate();
-    const { is_authenticated } = useContext(UserContext);
+    const { is_authenticated, timeZone } = useContext(UserContext);
 
+    const {agent_objects} = useGetModel()
+    
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
-        axios.all([
-            axios.get('/frontend-api/model'),
-        ])
-            .then(axios.spread((model_object) => {
-                setAgents(model_object.data.models_agent);
-            }))
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
+    }, []);;
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })

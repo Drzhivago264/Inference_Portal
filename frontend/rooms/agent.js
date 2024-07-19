@@ -46,6 +46,8 @@ import axios from 'axios';
 import editorjsCodecup from '@calumk/editorjs-codecup';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
+import { useGetInstructionTree } from '../component/api_hook/useGetInstructionTree.js';
+import { useGetModel } from '../component/api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -61,11 +63,8 @@ function Agent() {
     const editorref = useRef();
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
-    const [chat_message, setChatMessage] = useState([]);
-    const [agent_objects, setAgents] = useState([]);
+    const [chat_message, setChatMessage] = useState([]);   
     const [choosen_model, setChoosenModel] = useState("gpt-4");
-    const [choosen_template, setChoosenTemplate] = useState("Assignment Agent");
-    const [choosen_user_template, setChoosenUserTemplate] = useState("");
     const [top_p, setTopp] = useState(0.72);
     const [max_tokens, setMaxToken] = useState(null);
     const [temperature, setTemperature] = useState(0.73);
@@ -78,19 +77,11 @@ function Agent() {
     const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
     const [default_editor_structure, setEditor] = useState(null);
     const [currentparagraph, setCurrentParagraph] = useState(1);
-    const [template_list, setTemplateList] = useState([]);
-    const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
-    const [default_parent_instruct, setParentInstruct] = useState("");
-    const [default_child_instruct, setChildInstruct] = useState("");
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-    const [user_template_list, setUserTemplateList] = useState([]);
     const [use_user_template, setUseUserTemplate] = useState(false)
-    const [default_user_child_template_list, setDefaultUserChildTemplateList] = useState([]);
-    const [default_user_parent_instruct, setUserParentInstruct] = useState("");
-    const [default_user_child_instruct, setUserChildInstruct] = useState("");
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
+    const [selectedIndex, setSelectedIndex] = useState(0);
     const navigate = useNavigate();
-    const { is_authenticated } = useContext(UserContext);
+    
+    const { is_authenticated, timeZone } = useContext(UserContext);
 
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
@@ -155,45 +146,32 @@ function Agent() {
             editorref.current = editor;
         }
     }, []);
-    useEffect(() => {
-        if (editorref.current) {
-            axios.all([
-                axios.get('/frontend-api/model'),
-                axios.get('/frontend-api/instruction-tree'),
-            ])
-                .then(axios.spread((model_object, instruction_object) => {
-                    setAgents(model_object.data.models_agent);
-                    setTemplateList(instruction_object.data.root_nodes)
-                    setUserTemplateList(instruction_object.data.user_root_nodes)
-                    if (instruction_object.data.user_root_nodes.length > 0) {
-                        setChoosenUserTemplate(instruction_object.data.user_root_nodes[0].displayed_name)
-                        setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
-                    }
-                    setChildInstruct(instruction_object.data.default_children[0].instruct)
-                    if (instruction_object.data.default_user_children.length > 0) {
-                        setUserChildInstruct(instruction_object.data.default_user_children[0].instruct)
-                    }
-                    setDefaultChildTemplateList(instruction_object.data.default_children)
-                    setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
-                    editorref.current.isReady
-                        .then(() => {
-                            for (var node in instruction_object.data.root_nodes) {
-                                if (instruction_object.data.root_nodes[node].name == choosen_template) {
-                                    setParentInstruct(instruction_object.data.root_nodes[node].instruct)
-                                    setEditor(JSON.parse(instruction_object.data.root_nodes[node].default_editor_template))
-                                    editorref.current.render(JSON.parse(instruction_object.data.root_nodes[node].default_editor_template))
-                                }
-                            }
-                        })
-                        .catch((reason) => {
-                            console.log(`Editor.js initialization failed because of ${reason}`)
-                        });
-                }))
-                .catch(error => {
-                    console.log(error);
-                });
-        }
-    }, []);
+
+    const {agent_objects} = useGetModel()
+
+    const {
+        template_list: template_list,
+        default_child_instruct: default_child_instruct,
+        setChildInstruct: setChildInstruct,
+        default_child_template_list: default_child_template_list,
+        setDefaultChildTemplateList: setDefaultChildTemplateList,
+        choosen_template: choosen_template,
+        setChoosenTemplate: setChoosenTemplate,
+        default_parent_instruct: default_parent_instruct,
+        setParentInstruct: setParentInstruct,
+        user_template_list: user_template_list,
+        default_user_child_template_list: default_user_child_template_list,
+        setDefaultUserChildTemplateList: setDefaultUserChildTemplateList,
+        default_user_parent_instruct: default_user_parent_instruct,
+        setUserParentInstruct: setUserParentInstruct,
+        choosen_user_template: choosen_user_template,
+        setChoosenUserTemplate: setChoosenUserTemplate,
+        default_user_child_instruct: default_user_child_instruct,
+        setUserChildInstruct: setUserChildInstruct,
+        error: error,
+        isLoading: isLoading
+    } = useGetInstructionTree(editorref, setEditor)
+     
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
     }

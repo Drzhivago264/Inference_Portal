@@ -47,12 +47,12 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import axios from 'axios';
 import { getCookie } from '../component/getCookie.js';
 import { logout } from '../component/checkLogin.js';
+import { useGetProduct } from '../component/api_hook/useGetProduct.js';
 
 function KeyManagement() {
     const { t } = useTranslation();
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
-    const [product_objects, setProduct] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
     const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
     const [keycreateloading, setKeyCreateLoading] = useState(false);
@@ -77,17 +77,7 @@ function KeyManagement() {
     const [xmrconfirmationresponse, setXMRConfirmationResponse] = useState(null);
     const [striperedirecterror, setStripeRedirectError] = useState(null);
 
-    useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/products'),
-        ])
-            .then(axios.spread((server_object) => {
-                setProduct(server_object.data.products);
-            }))
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
+    const {product_objects} = useGetProduct()
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {

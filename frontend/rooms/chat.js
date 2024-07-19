@@ -20,6 +20,7 @@ import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
+import { useGetModel } from '../component/api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -35,9 +36,7 @@ function Chat() {
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
-    const [model_objects, setModels] = useState([]);
     const [chat_message, setChatMessage] = useState([]);
-    const [agent_objects, setAgents] = useState([]);
     const [choosen_model, setChoosenModel] = useState("Llama 3 Instruct AWQ");
     const [top_p, setTopp] = useState(0.72);
     const [top_k, setTopk] = useState(-1);
@@ -54,25 +53,15 @@ function Chat() {
     const [lengthpenalty, setLengthPenalty] = useState(0);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
-
     const [socket_destination, setSocketDestination] = useState("/ws/chat-async/");
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+
     const navigate = useNavigate();
-    const { is_authenticated } = useContext(UserContext);
+    const { is_authenticated, timeZone } = useContext(UserContext);
+    
+    const {model_objects, agent_objects} = useGetModel()
 
     useEffect(() => {
-        redirect_anon_to_login(navigate, is_authenticated)
-        axios.all([
-            axios.get('/frontend-api/model'),
-        ])
-            .then(axios.spread((model_object) => {
-                setModels(model_object.data.models_bot);
-                setAgents(model_object.data.models_agent);
-
-            }))
-            .catch(error => {
-                console.log(error);
-            });
+        redirect_anon_to_login(navigate, is_authenticated)   
     }, []);
 
     const scrollToBottom = () => {
@@ -106,7 +95,6 @@ function Chat() {
         }
     }
     const submitChat = () => {
-
         if (usermessage == '') {
             setUserMessageError(true)
         }

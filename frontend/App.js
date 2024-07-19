@@ -45,6 +45,8 @@ export default function App() {
   const chat_websocket = useRef(null)
   const agent_websocket = useRef(null)
   const [websocket_hash, setWebsocketHash] = useState(null)
+  const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+  
   useEffect(() => {
     check_login(setIsAuthenticated, setUserHashKey, setUserKeyName, setWebsocketHash)
   }, [is_authenticated, user_hashed_key, user_key_name, websocket_hash]);
@@ -71,7 +73,7 @@ export default function App() {
   );
   return (
     <WebSocketContext.Provider value={{websocket, agent_websocket, chat_websocket, websocket_hash}}>
-      <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name }}>
+      <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name, timeZone }}>
         <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
           <GlobalStyles
             styles={{

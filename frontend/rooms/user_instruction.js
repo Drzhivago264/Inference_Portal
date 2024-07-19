@@ -36,6 +36,7 @@ import { getCookie } from '../component/getCookie';
 import { nanoid } from 'nanoid'
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
+import { useGetModel } from '../component/api_hook/useGetModel.js';
 import { useNavigate } from 'react-router-dom';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -53,7 +54,6 @@ function UserInstruction() {
     const [instruct_change, setInstructChange] = useState(false)
     const [choosen_model, setChoosenModel] = useState("gpt-4");
     const [choosen_template, setChoosenTemplate] = useState("Empty Template");
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [chat_message, setChatMessage] = useState([]);
     const [usermessage, setUserMessage] = useState("");
     const [usermessageError, setUserMessageError] = useState(false);
@@ -64,7 +64,6 @@ function UserInstruction() {
     const [frequencypenalty, setFrequencyPenalty] = useState(0);
     const [shownthinking, setThinking] = useState(false);
     const [max_turn, setMaxTurn] = useState(4)
-    const [agent_objects, setAgents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
     const [saveerror, setSaveError] = useState(false);
@@ -84,7 +83,7 @@ function UserInstruction() {
     const [children_instruction_list, setChildInstructionList] = useState([
         { id: null, dislayed_name: "", instruct: "", unique: nanoid(), add: false },
     ])
-    const { is_authenticated } = useContext(UserContext);
+    const { is_authenticated, timeZone } = useContext(UserContext);
 
     const handleOnDragEnd = (result) => {
         const items = Array.from(children_instruction_list);
@@ -192,7 +191,9 @@ function UserInstruction() {
         updateParentTemplate(new_children_instruction_list, 'children')
     }
     const handleListItemClick = (event, index) => {
-        submitTemplate()
+        if (!disable_save) {
+            submitTemplate()
+        }
         let default_child_instruction = []
         if (template_list[index]['children'] === null) {
             setChildInstructionList([{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }])
@@ -370,7 +371,6 @@ function UserInstruction() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
     useEffect(() => {
-        redirect_anon_to_login(navigate, is_authenticated)
         if (websocket.current) {
             websocket.current.close()
         }
@@ -438,17 +438,12 @@ function UserInstruction() {
             setInstructChange(false)
         }
     }
+    const {agent_objects} = useGetModel()
+
     useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/model'),
-        ])
-            .then(axios.spread((model_object) => {
-                setAgents(model_object.data.models_agent);
-            }))
-            .catch(error => {
-                console.log(error);
-            });
+        redirect_anon_to_login(navigate, is_authenticated)
     }, []);
+    
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>

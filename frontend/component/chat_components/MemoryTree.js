@@ -74,7 +74,6 @@ export const MemoryTree = () => {
                     setTotalNode(memory_object.data.count)
                 }
             }
-
         }))
             .catch(error => {
                 console.log(error);
