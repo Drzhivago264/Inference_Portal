@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 
-import axios from "axios";
+import { baseGet } from "./baseGet";
 import { useQuery } from "react-query";
-
-const retrieveModels = async () => {
-    const response = await axios.get(
-        "/frontend-api/model",
-    );
-    return response.data;
-};
 
 export const useGetModel = () => {
     const [agent_objects, setAgents] = useState([]);
@@ -19,7 +12,7 @@ export const useGetModel = () => {
         data: data,
         error: error,
         isLoading: isLoading,
-    } = useQuery("ModelData", retrieveModels, { staleTime: Infinity, retry: false });
+    } = useQuery("ModelData", () => baseGet("/frontend-api/model"), { staleTime: Infinity, retry: false });
 
     useEffect(() => {
         if (status == "success") {

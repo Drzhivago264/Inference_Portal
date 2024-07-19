@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 
-import axios from "axios";
+import { baseGet } from "./baseGet";
 import { useQuery } from "react-query";
-
-const retrieveModels = async () => {
-    const response = await axios.get(
-        "/frontend-api/products",
-    );
-    return response.data;
-};
 
 export const useGetProduct = () => {
     const [product_objects, setProduct] = useState([]);
@@ -17,7 +10,7 @@ export const useGetProduct = () => {
         data: data,
         error: error,
         isLoading: isLoading,
-    } = useQuery("ProductData", retrieveModels, { staleTime: Infinity, retry: false });
+    } = useQuery("ProductData", () => baseGet("/frontend-api/products"), { staleTime: Infinity, retry: false });
 
     useEffect(() => {
         if (status == "success") {

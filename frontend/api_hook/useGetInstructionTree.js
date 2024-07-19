@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 
-import axios from "axios";
+import { baseGet } from "./baseGet";
 import { useQuery } from "react-query";
 
-const retrieveInstructionTree = async () => {
-    const response = await axios.get(
-        '/frontend-api/instruction-tree',
-    );
-    return response.data;
-};
 export const useGetInstructionTree = (editorref, setEditor) => {
     const [template_list, setTemplateList] = useState([]);
     const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
@@ -25,7 +19,7 @@ export const useGetInstructionTree = (editorref, setEditor) => {
         data: data,
         error: error,
         isLoading: isLoading,
-    } = useQuery("InstructionTreeData", retrieveInstructionTree, { refetchOnWindowFocus: false, retry: true });
+    } = useQuery("InstructionTreeData", () => baseGet("/frontend-api/instruction-tree"), { refetchOnWindowFocus: false, retry: true });
     useEffect(() => {
         if (status == "success") {
             setTemplateList(data.root_nodes)

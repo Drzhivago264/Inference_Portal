@@ -13,7 +13,7 @@ import Grid from '@mui/material/Grid';
 import ResponsiveAppBar from '../component/nav/Navbar';
 import Skeleton from '@mui/material/Skeleton';
 import { Stack } from '@mui/material';
-import { useGetModel } from '../component/api_hook/useGetModel';
+import { useGetModel } from '../api_hook/useGetModel';
 
 function ModelInfor() {
     const {model_objects, server_objects, error} = useGetModel()

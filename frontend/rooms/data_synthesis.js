@@ -42,8 +42,8 @@ import Typography from '@mui/material/Typography';
 import UserTemplate from '../component/chat_components/UserTemplate.js';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
-import { useGetInstructionTree } from '../component/api_hook/useGetInstructionTree.js';
-import { useGetModel } from '../component/api_hook/useGetModel.js';
+import { useGetInstructionTree } from '../api_hook/useGetInstructionTree.js';
+import { useGetModel } from '../api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 function DataSynthesis() {
