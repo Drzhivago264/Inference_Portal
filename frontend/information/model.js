@@ -13,33 +13,10 @@ import Grid from '@mui/material/Grid';
 import ResponsiveAppBar from '../component/nav/Navbar';
 import Skeleton from '@mui/material/Skeleton';
 import { Stack } from '@mui/material';
-import axios from 'axios';
-import { useQuery } from "react-query";
-
-const retrieveModels = async () => {
-    const response = await axios.get(
-        "/frontend-api/model",
-    );
-    return response.data;
-};
+import { useGetModel } from '../component/api_hook/useGetModel';
 
 function ModelInfor() {
-    const [server_objects, setMessage] = useState([]);
-    const [model_objects, setMessage_model] = useState([]);
-    const {
-        status,
-        data,
-        error,
-        isLoading,
-    } = useQuery("ModelData", retrieveModels, { staleTime: Infinity, retry: false });
-
-    useEffect(() => {
-        if (status === 'success') {
-            setMessage(data.servers);
-            setMessage_model(data.models_info);
-        }
-
-    }, [status, data]);
+    const {model_objects, server_objects, error} = useGetModel()
     const columns = [
         { field: 'server', headerName: 'Server', width: 80 },
         { field: 'model', headerName: 'Model', width: 150 },

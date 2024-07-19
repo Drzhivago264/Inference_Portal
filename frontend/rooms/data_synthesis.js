@@ -40,22 +40,19 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import UserTemplate from '../component/chat_components/UserTemplate.js';
-import axios from 'axios';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
+import { useGetInstructionTree } from '../component/api_hook/useGetInstructionTree.js';
+import { useGetModel } from '../component/api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 function DataSynthesis() {
-    const [user_template_list, setUserTemplateList] = useState([]);
-    const [default_user_child_template_list, setDefaultUserChildTemplateList] = useState([]);
-    const [default_user_parent_instruct, setUserParentInstruct] = useState("");
-    const [choosen_user_template, setChoosenUserTemplate] = useState("");
+
     const [use_user_template, setUseUserTemplate] = useState(false)
     const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
     const [chat_message, setChatMessage] = useState([]);
     const messagesEndRef = useRef(null)
     const [choosen_prompt_column, setChoosenPromptColumn] = useState("samplePrompt");
-    const [agent_objects, setAgents] = useState([]);
     const [choosen_model, setChoosenModel] = useState("gpt-4");
     const [top_p, setTopp] = useState(0.72);
     const [max_tokens, setMaxToken] = useState(null);
@@ -76,7 +73,7 @@ function DataSynthesis() {
         { displayed_name: "Deepening", instruct: "If #Given Prompt# contains inquiries about certain issues, the depth and breadth of the inquiry can be increased." },
         { displayed_name: "Breadth Evolving", instruct: "You should draw inspiration from the #Given Prompt# to create a brand new prompt.\nThis new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\nThe LENGTH and difficulty level of the #Created Prompt# should be similar to that of the #Given Prompt#." }
     ]);
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+
     const [csv_row, setCSVRow] = useState([
         { id: 1, samplePrompt: 'A water well is an excavation or structure created in the ground by digging, driving, boring, or drilling to access groundwater in underground aquifers. The well water is drawn by a pump, or using containers, such as buckets, that are raised mechanically or by hand. Wells were first constructed at least eight thousand years ago and historically vary in construction from a simple scoop in the sediment of a dry watercourse to the stepwells of India, the qanats of Iran, and the shadoofs and sakiehs of India. Placing a lining in the well shaft helps create stability and linings of wood or wickerwork date back at least as far as the Iron Age. Where does water for a well come from?' },
         { id: 2, samplePrompt: 'Generate short a sentence that can be linguistically classified as acceptable (OPTIONS: - unacceptable - acceptable)' },
@@ -130,26 +127,24 @@ function DataSynthesis() {
         }
     };
     const navigate = useNavigate();
-    const { is_authenticated } = useContext(UserContext);
+    const { is_authenticated, timeZone } = useContext(UserContext);
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
-        axios.all([
-            axios.get('/frontend-api/model'),
-            axios.get('/frontend-api/instruction-tree')
-        ])
-            .then(axios.spread((model_object, instruction_object) => {
-                setAgents(model_object.data.models_agent);
-                setUserTemplateList(instruction_object.data.user_root_nodes)
-                if (instruction_object.data.user_root_nodes.length > 0) {
-                    setChoosenUserTemplate(instruction_object.data.user_root_nodes[0].displayed_name)
-                    setUserParentInstruct(instruction_object.data.user_root_nodes[0].instruct)
-                }
-                setDefaultUserChildTemplateList(instruction_object.data.default_user_children)
-            }))
-            .catch(error => {
-                console.log(error);
-            });
     }, []);
+    const {agent_objects} = useGetModel()
+
+    const {
+        user_template_list: user_template_list,
+        default_user_child_template_list: default_user_child_template_list,
+        setDefaultUserChildTemplateList: setDefaultUserChildTemplateList,
+        default_user_parent_instruct: default_user_parent_instruct,
+        setUserParentInstruct: setUserParentInstruct,
+        choosen_user_template: choosen_user_template,
+        setChoosenUserTemplate: setChoosenUserTemplate,
+        error: error,
+        isLoading: isLoading
+    } = useGetInstructionTree()
+        
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     useEffect(() => {
         if (websocket.current) {

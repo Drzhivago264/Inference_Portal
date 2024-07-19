@@ -26,6 +26,8 @@ import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
+import { useGetInstructionTree } from '../component/api_hook/useGetInstructionTree.js';
+import { useGetModel } from '../component/api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -41,11 +43,8 @@ function Hotpot() {
     const messagesEndRef = useRef(null)
     const [shownthinkingagent, setThinkingAgent] = useState(false);
     const [shownthinkingchat, setThinkingChat] = useState(false);
-    const [choosen_template, setChoosenTemplate] = useState("Assignment Agent");
-    const [model_objects, setModels] = useState([]);
     const [chat_message, setChatMessage] = useState([]);
     const [agent_message, setAgentMessage] = useState([]);
-    const [agent_objects, setAgents] = useState([]);
     const [choosen_agent_model, setChoosenAgentModel] = useState("gpt-4");
     const [choosen_chat_model, setChoosenChatModel] = useState("gpt-4");
     const [top_p, setTopp] = useState(0.72);
@@ -66,40 +65,35 @@ function Hotpot() {
     const [useragentmessage, setUserAgentMessage] = useState("");
     const [useragentmessageError, setUserAgentMessageError] = useState(false);
     const [max_turn, setMaxTurn] = useState(4)
-    const [template_list, setTemplateList] = useState([]);
-    const [default_child_template_list, setDefaultChildTemplateList] = useState([]);
-    const [default_parent_instruct, setParentInstruct] = useState("");
-    const [default_child_instruct, setChildInstruct] = useState("");
     const [duplicatemessage, setDuplicateMessage] = useState(true);
     const [instruct_change, setInstructChange] = useState(false)
     const [socket_destination, setSocketDestination] = useState("async");
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [selectedIndex, setSelectedIndex] = React.useState(0);
 
     const navigate = useNavigate();
-    const { is_authenticated } = useContext(UserContext);
+    const { is_authenticated, timeZone } = useContext(UserContext);
+    
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
-        axios.all([
-            axios.get('/frontend-api/model'),
-            axios.get('/frontend-api/instruction-tree'),
-        ])
-            .then(axios.spread((model_object, instruction_object) => {
-                setModels(model_object.data.models_bot);
-                setAgents(model_object.data.models_agent);
-                setTemplateList(instruction_object.data.root_nodes)
-                setChildInstruct(instruction_object.data.default_children[0].instruct)
-                setDefaultChildTemplateList(instruction_object.data.default_children)
-                for (var node in instruction_object.data.root_nodes) {
-                    if (instruction_object.data.root_nodes[node].name == choosen_template) {
-                        setParentInstruct(instruction_object.data.root_nodes[node].instruct)
-                    }
-                }
-            }))
-            .catch(error => {
-                console.log(error);
-            });
     }, []);
+    
+    const {agent_objects, model_objects} = useGetModel()
+
+    const {
+        template_list: template_list,
+        default_child_instruct: default_child_instruct,
+        setChildInstruct: setChildInstruct,
+        default_child_template_list: default_child_template_list,
+        setDefaultChildTemplateList: setDefaultChildTemplateList,
+        choosen_template: choosen_template,
+        setChoosenTemplate: setChoosenTemplate,
+        default_parent_instruct: default_parent_instruct,
+        setParentInstruct: setParentInstruct,
+        error: error,
+        isLoading: isLoading
+    } = useGetInstructionTree()
+    
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
     }

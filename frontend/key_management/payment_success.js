@@ -36,23 +36,12 @@ import TextField from '@mui/material/TextField';
 import Textarea from '../component/custom_ui_component/CustomTextArea';
 import Typography from '@mui/material/Typography';
 import axios from 'axios';
+import { useGetProduct } from '../component/api_hook/useGetProduct';
 
 function KeyManagement() {
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
-    const [product_objects, setProduct] = useState([]);
-
-    useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/products'),
-        ])
-            .then(axios.spread((server_object) => {
-                setProduct(server_object.data.products);
-            }))
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
+    const {product_objects} = useGetProduct()
 
 
     function getCookie(name) {
