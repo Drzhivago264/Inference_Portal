@@ -21,7 +21,7 @@ import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
-import { useGetModel } from '../component/api_hook/useGetModel.js';
+import { useGetModel } from '../api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({

@@ -22,12 +22,11 @@ import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Typography from '@mui/material/Typography';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
-import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
-import { useGetInstructionTree } from '../component/api_hook/useGetInstructionTree.js';
-import { useGetModel } from '../component/api_hook/useGetModel.js';
+import { useGetInstructionTree } from '../api_hook/useGetInstructionTree.js';
+import { useGetModel } from '../api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -72,7 +71,7 @@ function Hotpot() {
 
     const navigate = useNavigate();
     const { is_authenticated, timeZone } = useContext(UserContext);
-    
+
     useEffect(() => {
         redirect_anon_to_login(navigate, is_authenticated)
     }, []);

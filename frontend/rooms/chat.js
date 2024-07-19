@@ -9,18 +9,16 @@ import { ChatExport } from '../component/import_export/ChatExport.js';
 import ChatInput from '../component/chat_components/ChatInput.js';
 import { ChatParameter } from '../component/chat_components/ChatroomParameters.js';
 import Container from '@mui/material/Container';
-import Divider from '@mui/material/Divider';
 import Footer from '../component/nav/Footer.js';
 import Grid from '@mui/material/Grid';
 import { MemoryTree } from '../component/chat_components/MemoryTree.js';
 import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Stack from '@mui/material/Stack';
-import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
-import { useGetModel } from '../component/api_hook/useGetModel.js';
+import { useGetModel } from '../api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({

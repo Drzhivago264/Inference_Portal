@@ -42,12 +42,11 @@ import Typography from '@mui/material/Typography';
 import Underline from "@editorjs/underline"
 import UserTemplate from '../component/chat_components/UserTemplate.js';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
-import axios from 'axios';
 import editorjsCodecup from '@calumk/editorjs-codecup';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
-import { useGetInstructionTree } from '../component/api_hook/useGetInstructionTree.js';
-import { useGetModel } from '../component/api_hook/useGetModel.js';
+import { useGetInstructionTree } from '../api_hook/useGetInstructionTree.js';
+import { useGetModel } from '../api_hook/useGetModel.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
