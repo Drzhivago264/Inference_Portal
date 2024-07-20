@@ -6,10 +6,10 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import LinearProgress from '@mui/material/LinearProgress';
 import Paper from '@mui/material/Paper';
+import PropTypes from 'prop-types';
 import React from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import Stack from '@mui/material/Stack';
-
 const copyToClipboard = (e) => {
     navigator.clipboard.writeText(e);
 }
@@ -27,7 +27,6 @@ export const ChatBox = ({
     messagesEndRef,
     handleEnter
 }) => {
-
     return (
         <Box>
             <ChatPaper id={'chat-log'} variant="outlined">
@@ -121,6 +120,19 @@ export const ChatBox = ({
         </Box>
     )
 }
+ChatBox.propTypes = {
+    inputsize: PropTypes.string.isRequired,
+    ChatPaper: PropTypes.elementType.isRequired,
+    ChatInput: PropTypes.elementType.isRequired,
+    chat_message: PropTypes.array.isRequired,
+    shownthinking: PropTypes.bool.isRequired,
+    usermessage: PropTypes.string.isRequired,
+    setUserMessage: PropTypes.func.isRequired,
+    usermessageError: PropTypes.bool.isRequired,
+    submitChat: PropTypes.func.isRequired,
+    messagesEndRef: PropTypes.object.isRequired,
+    handleEnter: PropTypes.func.isRequired,
+};
 
 export const ChatBoxHotpot = ({
     id,
@@ -232,3 +244,19 @@ export const ChatBoxHotpot = ({
         </Box>
     )
 }
+
+ChatBoxHotpot.propTypes = {
+    id: PropTypes.string.isRequired,
+    inputsize: PropTypes.string.isRequired,
+    ChatPaper: PropTypes.elementType.isRequired,
+    ChatInput: PropTypes.elementType.isRequired,
+    chat_message: PropTypes.array.isRequired,
+    shownthinking: PropTypes.bool.isRequired,
+    usermessage: PropTypes.string.isRequired,
+    setUserMessage: PropTypes.func.isRequired,
+    usermessageError: PropTypes.bool.isRequired,
+    submitChat: PropTypes.func.isRequired,
+    messagesEndRef: PropTypes.object.isRequired,
+    handleEnter: PropTypes.func.isRequired,
+    check_duplicate_message: PropTypes.func.isRequired,
+};

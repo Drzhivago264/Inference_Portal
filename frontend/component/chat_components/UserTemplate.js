@@ -3,17 +3,17 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
+import PropTypes from 'prop-types';
 import React from 'react';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
-
-const UserTemplate = ({ 
+const UserTemplate = ({
     setChoosenUserTemplate,
     choosen_user_template,
     user_template_list,
     use_user_template,
     handle_use_user_template,
-    swap_template 
+    swap_template
 }) => {
 
     return (
@@ -22,7 +22,7 @@ const UserTemplate = ({
             <Select
                 labelId="user-agent-label"
                 id="user-agent-select"
-                onChange={(e, obj) => {setChoosenUserTemplate(e.target.value); swap_template(obj.props.name, "user_template") }}
+                onChange={(e, obj) => { setChoosenUserTemplate(e.target.value); swap_template(obj.props.name, "user_template") }}
                 value={user_template_list.length === 0 ? "Empty Template" : choosen_user_template}
                 label="Users' Agents"
                 size="small"
@@ -39,5 +39,12 @@ const UserTemplate = ({
         </FormControl>
     )
 }
-
+UserTemplate.propTypes = {
+    setChoosenUserTemplate: PropTypes.func.isRequired,
+    choosen_user_template: PropTypes.string.isRequired,
+    user_template_list: PropTypes.array.isRequired,
+    handle_use_user_template: PropTypes.func.isRequired,
+    swap_template: PropTypes.func.isRequired,
+    use_user_template: PropTypes.bool.isRequired,
+};
 export default UserTemplate

@@ -85,10 +85,7 @@ function Manual() {
     }, []);
     const docRequest = useQuery(["ManualDocData", destination_refs , doc, default_language], () => retrieveManual(destination_refs, doc, default_language), { staleTime: Infinity, retry: false });
 
-
-
     useEffect(() => {
-
         if (docRequest.status === 'success' && docRequest.data) {
             setDisplayDoc(docRequest.data);
         }
@@ -125,16 +122,12 @@ function Manual() {
                                             </ListItemButton>
                                         )
                                     })}
-
                                 </List>
-
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px", display: { xs: 'none', sm: 'block' } }} />
-                        <Grid item xs={12} md={8} lg={8}>
-                          
-                            <Box mt={3} sx={{ display: { sm: 'block ', md: 'none' } }} >
-                                
+                        <Grid item xs={12} md={8} lg={8}> 
+                            <Box mt={3} sx={{ display: { sm: 'block ', md: 'none' } }} >              
                                 <List dense={true}>
                                     <ListItemButton component={Link} to='/frontend/manual/key'> <Typography>{t('manual.Setting_Up_Your_API_Key')}  </Typography> </ListItemButton>
                                     <ListItemButton component={Link} to='/frontend/manual/authentication' ><Typography> {t('manual.Authentication')} </Typography> </ListItemButton>
@@ -182,5 +175,4 @@ function Manual() {
         </Container>
     );
 }
-
 export default Manual;

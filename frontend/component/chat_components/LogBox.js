@@ -4,6 +4,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import Box from '@mui/material/Box';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Paper from '@mui/material/Paper';
+import PropTypes from 'prop-types';
 import React from 'react';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -21,7 +22,6 @@ export const LogBox = ({
     messagesEndRef,
 
 }) => {
-
     return (
         <Box m={2}>
             <Accordion defaultExpanded>
@@ -55,3 +55,7 @@ export const LogBox = ({
         </Box>
     )
 }
+LogBox.propTypes = {
+    chat_message: PropTypes.array.isRequired,
+    messagesEndRef: PropTypes.object.isRequired,
+};

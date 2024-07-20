@@ -7,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import MuiInput from '@mui/material/Input';
+import PropTypes from 'prop-types';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import React from "react";
@@ -515,6 +516,38 @@ export const ChatParameter = ({
 
     )
 }
-
-
+ChatParameter.propTypes = {
+    setSocketDestination: PropTypes.func.isRequired,
+    socket_destination: PropTypes.string.isRequired,
+    setUseMemory: PropTypes.func.isRequired,
+    setUseMemoryCurrent: PropTypes.func.isRequired,
+    choosen_model: PropTypes.string.isRequired,
+    setChoosenModel: PropTypes.func.isRequired,
+    mode: PropTypes.string.isRequired,
+    setMode: PropTypes.func.isRequired,
+    top_k: PropTypes.number.isRequired,
+    setTopk: PropTypes.func.isRequired,
+    top_p: PropTypes.number.isRequired,
+    setTopp: PropTypes.func.isRequired,
+    temperature: PropTypes.number.isRequired,
+    setTemperature: PropTypes.func.isRequired,
+    bestof: PropTypes.number.isRequired,
+    setBestof: PropTypes.func.isRequired,
+    lengthpenalty: PropTypes.number.isRequired,
+    setLengthPenalty: PropTypes.func.isRequired,
+    frequencypenalty: PropTypes.number.isRequired,
+    setFrequencyPenalty: PropTypes.func.isRequired,
+    presencepenalty: PropTypes.number.isRequired,
+    setPresencePenalty: PropTypes.func.isRequired,
+    beam: PropTypes.number.isRequired,
+    setBeam: PropTypes.func.isRequired,
+    max_tokens: PropTypes.number.isRequired,
+    setMaxToken: PropTypes.func.isRequired,
+    model_objects: PropTypes.array.isRequired,
+    agent_objects: PropTypes.array.isRequired,
+    earlystopping: PropTypes.bool.isRequired,
+    setEarlyStopping: PropTypes.func.isRequired,
+    usememory: PropTypes.bool.isRequired,
+    usememorycurrent: PropTypes.bool.isRequired,
+};
 

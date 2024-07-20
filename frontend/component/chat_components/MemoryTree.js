@@ -21,7 +21,6 @@ export const MemoryTree = () => {
             axios.get('/frontend-api/memory-tree'),
         ])
             .then(axios.spread((memory_object) => {
-
                 if (memory_object.status != 204) {
                     var make_tree = treeify(memory_object.data.results)
                     setRootNode(make_tree[0])
@@ -40,7 +39,6 @@ export const MemoryTree = () => {
         if (!idAttr) idAttr = 'id';
         if (!parentAttr) parentAttr = 'parent';
         if (!childrenAttr) childrenAttr = 'children';
-
         var treeList = [];
         var nodeidList = []
         var lookup = {};

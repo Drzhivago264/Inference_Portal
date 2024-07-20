@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import MuiInput from '@mui/material/Input';
+import PropTypes from 'prop-types';
 import React from "react";
 import Select from '@mui/material/Select';
 import Slider from '@mui/material/Slider';
@@ -282,3 +283,20 @@ export const OpenAPIParameter = ({
             />
         </Stack >)
 }
+OpenAPIParameter.propTypes = {
+    choosen_model: PropTypes.string.isRequired,
+    setChoosenModel: PropTypes.func.isRequired,
+    frequencypenalty: PropTypes.number.isRequired,
+    setFrequencyPenalty: PropTypes.func.isRequired,
+    presencepenalty: PropTypes.number.isRequired,
+    setPresencePenalty: PropTypes.func.isRequired,
+    agent_objects: PropTypes.array.isRequired,
+    top_p: PropTypes.number.isRequired,
+    setTopp: PropTypes.func.isRequired,
+    temperature: PropTypes.number.isRequired,
+    setTemperature: PropTypes.func.isRequired,
+    max_tokens: PropTypes.number.isRequired,
+    setMaxToken: PropTypes.func.isRequired,
+    max_turn: PropTypes.number.isRequired,
+    setMaxTurn: PropTypes.func.isRequired,
+};

@@ -32,11 +32,14 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { agentsocket } from '../component/websocket/AgentSocket';
 import axios from 'axios';
-import { getCookie } from '../component/getCookie';
+import { baseDelete } from '../api_hook/baseDelete.js';
+import { basePost } from '../api_hook/basePost.js';
+import { basePut } from '../api_hook/basePut.js';
 import { nanoid } from 'nanoid'
 import { styled } from '@mui/material/styles';
 import { useGetModel } from '../api_hook/useGetModel.js';
 import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
+import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -103,84 +106,82 @@ function UserInstruction() {
             setChoosenTemplate(v)
         }
     }
-
+    const { mutate: templatepostemutate } = useMutation(basePost);
+    const { mutate: templateputemutate } = useMutation(basePut);
     const submitTemplate = () => {
         setLoading(true)
-        const csrftoken = getCookie('csrftoken');
-        const config = {
-            headers: {
-                'content-type': 'application/json',
-                'X-CSRFToken': csrftoken,
-            }
-        }
         const data = {
             "parent_instruction": template_list[selectedIndex],
             "childrens": children_instruction_list
         }
 
         if (!template_list[selectedIndex]['id']) {
-            axios.post("/frontend-api/post-user-instruction", data, config)
-                .then(() => {
-                    setReload(true)
-                    setSaveSuccess(true)
-                    setLoading(false)
-                    setIsSaved(true)
-
-                }).catch(error => {
-                    setLoading(false)
-                    setSaveError(true)
-                    if (error.code === "ERR_BAD_RESPONSE") {
-                        setSaveErrorMessage("Failed, Internal Server Error!")
+            templatepostemutate({ url: "/frontend-api/post-user-instruction", data: data },
+                {
+                    onSuccess: () => {
+                        setReload(true)
+                        setSaveSuccess(true)
+                        setLoading(false)
+                        setIsSaved(true)
                     }
-                    else {
-                        setSaveErrorMessage(error.response.data.detail)
+                    ,
+                    onError: (error) => {
+                        setLoading(false)
+                        setSaveError(true)
+                        if (error.code === "ERR_BAD_RESPONSE") {
+                            setSaveErrorMessage("Failed, Internal Server Error!")
+                        }
+                        else {
+                            setSaveErrorMessage(error.response.data.detail)
+                        }
                     }
-                });
+                }
+            )
             setDisableSave(true)
         }
         else {
-            axios.put("/frontend-api/update-user-instruction", data, config)
-                .then(() => {
-                    setSaveSuccess(true)
-                    setLoading(false)
-                    setIsSaved(true)
+            templateputemutate({ url: "/frontend-api/update-user-instruction", data: data },
+                {
+                    onSuccess: () => {
+                        setSaveSuccess(true)
+                        setLoading(false)
+                        setIsSaved(true)
+                    }
+                    ,
+                    onError: (error) => {
+                        setLoading(false)
+                        setSaveError(true)
+                        if (error.code === "ERR_BAD_RESPONSE") {
+                            setSaveErrorMessage("Failed, Internal Server Error!")
+                        }
+                        else {
+                            setSaveErrorMessage(error.response.data.detail)
+                        }
+                    }
+                })
 
-                }).catch(error => {
-                    setLoading(false)
-                    setSaveError(true)
+            setDisableSave(true)
+        }
+    }
+    const { mutate: templatedeletemutate } = useMutation(baseDelete);
+    const deleteTemplate = (id) => {
+        const data = {
+            'id': id
+        }
+        templatedeletemutate({ url: "/frontend-api/delete-user-instruction", data: data },
+            {
+                onSuccess: () =>
+                    setDeleteSuccess(true)
+                ,
+                onError: (error) => {
                     if (error.code === "ERR_BAD_RESPONSE") {
                         setSaveErrorMessage("Failed, Internal Server Error!")
                     }
                     else {
-                        setSaveErrorMessage(error.response.data.detail)
+                        setDeleteErrorMessage(error.response.data.detail)
                     }
-                });
-            setDisableSave(true)
-        }
-    }
-
-    const deleteTemplate = (id) => {
-        const csrftoken = getCookie('csrftoken');
-        axios.delete("/frontend-api/delete-user-instruction", {
-            data: {
-                'id': id
-            },
-            headers: {
-                'content-type': 'application/json',
-                'X-CSRFToken': csrftoken,
-            }
-        })
-            .then(() => {
-                setDeleteSuccess(true)
-            }).catch(error => {
-                setDeleteError(true)
-                if (error.code === "ERR_BAD_RESPONSE") {
-                    setSaveErrorMessage("Failed, Internal Server Error!")
                 }
-                else {
-                    setDeleteErrorMessage(error.response.data.detail)
-                }
-            });
+            })
     }
     const handleTextFieldChange = (index, property, value) => {
         const new_children_instruction_list = [...children_instruction_list];
@@ -438,8 +439,8 @@ function UserInstruction() {
             setInstructChange(false)
         }
     }
-    const {agent_objects} = useGetModel()
- 
+    const { agent_objects } = useGetModel()
+
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
@@ -626,30 +627,28 @@ function UserInstruction() {
                                             <AddCircleOutlineIcon />
                                         </IconButton>
                                         }
-                                        <Snackbar
-                                            open={savesuccess}
-                                            autoHideDuration={3000}
-                                            onClose={() => { setSaveSuccess(false) }}
-                                            message="Saved !"
-                                        />
-                                        <Snackbar
-                                            open={saveerror}
-                                            autoHideDuration={6000}
-                                            onClose={() => { setSaveError(false) }}
-                                            message={saveerrormessage}
-                                        />
-                                        <Snackbar
-                                            open={deletesuccess}
-                                            autoHideDuration={3000}
-                                            onClose={() => { setDeleteSuccess(false) }}
-                                            message="Deleted !"
-                                        />
-                                        <Snackbar
-                                            open={deleteerror}
-                                            autoHideDuration={6000}
-                                            onClose={() => { setDeleteError(false) }}
-                                            message={deleteerrormessage}
-                                        />
+                                        {
+                                            [
+                                                { open: savesuccess, autoHideDuration: 3000, onClose: () => setSaveSuccess(false), severity: "success", message: "Saved!" },
+                                                { open: saveerror, autoHideDuration: 6000, onClose: () => setSaveError(false), severity: "error", message: saveerrormessage },
+                                                { open: deletesuccess, autoHideDuration: 3000, onClose: () => setDeleteSuccess(false), severity: "success", message: "Deleted!" },
+                                                { open: deleteerror, autoHideDuration: 6000, onClose: () => setDeleteError(false), severity: "error", message: deleteerrormessage }
+                                            ].map((item, index) => (
+                                                <Snackbar
+                                                    key={index}
+                                                    open={item.open}
+                                                    autoHideDuration={item.autoHideDuration}
+                                                    onClose={item.onClose}
+                                                >
+                                                    <Alert
+                                                        severity={item.severity}
+                                                        sx={{ width: '100%' }}
+                                                    >
+                                                        {item.message}
+                                                    </Alert>
+                                                </Snackbar>
+                                            ))
+                                        }
                                     </Box>
                                 </FormControl>
                             </Box>
@@ -681,5 +680,4 @@ function UserInstruction() {
         </Container >
     );
 }
-
 export default UserInstruction;

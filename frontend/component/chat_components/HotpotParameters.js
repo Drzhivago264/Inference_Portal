@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import MuiInput from '@mui/material/Input';
+import PropTypes from 'prop-types';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import React from "react";
@@ -66,8 +67,10 @@ export const HotpotParameter = ({
     setFrequencyPenalty,
     presencepenalty,
     setPresencePenalty,
-    beam, setBeam,
-    max_tokens, setMaxToken,
+    beam, 
+    setBeam,
+    max_tokens, 
+    setMaxToken,
     model_objects,
     agent_objects,
     earlystopping,
@@ -591,3 +594,47 @@ export const HotpotParameter = ({
         </Stack>
     )
 }
+
+HotpotParameter.propTypes = {
+    template_list: PropTypes.array.isRequired,
+    setUseMemory: PropTypes.func.isRequired,
+    setUseMemoryCurrent: PropTypes.func.isRequired,
+    usememory: PropTypes.bool.isRequired,
+    usememorycurrent: PropTypes.bool.isRequired,
+    setDuplicateMessage: PropTypes.func.isRequired,
+    choosen_chat_model: PropTypes.string.isRequired,
+    choosen_template: PropTypes.string.isRequired,
+    setChoosenTemplate: PropTypes.func.isRequired,
+    setChoosenChatModel: PropTypes.func.isRequired,
+    choosen_agent_model: PropTypes.string.isRequired,
+    setChoosenAgentModel: PropTypes.func.isRequired,
+    mode: PropTypes.string.isRequired,
+    setMode: PropTypes.func.isRequired,
+    top_k: PropTypes.number.isRequired,
+    setTopk: PropTypes.func.isRequired,
+    top_p: PropTypes.number.isRequired,
+    setTopp: PropTypes.func.isRequired,
+    temperature: PropTypes.number.isRequired,
+    setTemperature: PropTypes.func.isRequired,
+    bestof: PropTypes.number.isRequired,
+    setBestof: PropTypes.func.isRequired,
+    lengthpenalty: PropTypes.number.isRequired,
+    setLengthPenalty: PropTypes.func.isRequired,
+    frequencypenalty: PropTypes.number.isRequired,
+    setFrequencyPenalty: PropTypes.func.isRequired,
+    presencepenalty: PropTypes.number.isRequired,
+    setPresencePenalty: PropTypes.func.isRequired,
+    beam: PropTypes.number.isRequired,
+    setBeam: PropTypes.func.isRequired,
+    max_tokens: PropTypes.number.isRequired,
+    setMaxToken: PropTypes.func.isRequired,
+    model_objects: PropTypes.array.isRequired,
+    agent_objects: PropTypes.array.isRequired,
+    earlystopping: PropTypes.bool.isRequired,
+    setEarlyStopping: PropTypes.func.isRequired,
+    socket_destination: PropTypes.string.isRequired,
+    setSocketDestination: PropTypes.func.isRequired,
+    swap_template: PropTypes.func.isRequired,
+    max_turn: PropTypes.number.isRequired,
+    setMaxTurn: PropTypes.func.isRequired,
+};
