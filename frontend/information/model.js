@@ -16,7 +16,7 @@ import { Stack } from '@mui/material';
 import { useGetModel } from '../api_hook/useGetModel';
 
 function ModelInfor() {
-    const {model_objects, server_objects, error} = useGetModel()
+    const {model_objects, server_objects, error, isLoading} = useGetModel()
     const columns = [
         { field: 'server', headerName: 'Server', width: 80 },
         { field: 'model', headerName: 'Model', width: 150 },

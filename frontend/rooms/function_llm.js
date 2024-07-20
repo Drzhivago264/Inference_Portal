@@ -18,9 +18,9 @@ import RadioGroup from '@mui/material/RadioGroup';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Typography from '@mui/material/Typography';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
-import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
 import { useGetModel } from '../api_hook/useGetModel.js';
+import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -52,9 +52,7 @@ function FunctionLLM() {
 
     const {agent_objects} = useGetModel()
     
-    useEffect(() => {
-        redirect_anon_to_login(navigate, is_authenticated)
-    }, []);;
+    useGetRedirectAnon(navigate, is_authenticated)
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })

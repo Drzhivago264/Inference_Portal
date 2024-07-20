@@ -2,9 +2,7 @@ import uuid
 from hashlib import sha512
 
 from django.contrib.auth import authenticate, login
-from django.views.decorators.cache import cache_page
 from django.http import HttpRequest
-from django.db.utils import IntegrityError
 
 from rest_framework import status
 from rest_framework.decorators import api_view

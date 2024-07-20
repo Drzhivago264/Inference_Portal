@@ -41,9 +41,9 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import UserTemplate from '../component/chat_components/UserTemplate.js';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
-import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { useGetInstructionTree } from '../api_hook/useGetInstructionTree.js';
 import { useGetModel } from '../api_hook/useGetModel.js';
+import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
 import { useNavigate } from "react-router-dom";
 
 function DataSynthesis() {
@@ -82,6 +82,7 @@ function DataSynthesis() {
         { id: 5, samplePrompt: 'Given a statement and question, generate the answer to the question such that the answer is contained in the statement. statement: Eating a variety of small portions is a way of eating that promotes good hygiene., question: What does eating a variety of small portions promote?' },
         { id: 6, samplePrompt: 'Two analogies that relate actions to the tools used to perform the action is given in the form "A : B. C : ?". "A : B" relates action A to tool B. Your task is to replace the question mark (?) with the appropriate tool for the given action C, following the "A : B" relation. vacuum : vacuum. drill : ?' },
     ]);
+    useGetRedirectAnon(navigate, is_authenticated)
     const row_ref = useRef(csv_row)
     const [from_row, setFromRow] = useState(0)
     const [to_row, setToRow] = useState(10000)
@@ -128,9 +129,7 @@ function DataSynthesis() {
     };
     const navigate = useNavigate();
     const { is_authenticated, timeZone } = useContext(UserContext);
-    useEffect(() => {
-        redirect_anon_to_login(navigate, is_authenticated)
-    }, []);
+
     const {agent_objects} = useGetModel()
 
     const {

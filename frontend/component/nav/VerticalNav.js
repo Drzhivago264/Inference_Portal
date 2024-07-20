@@ -20,13 +20,14 @@ import RuleIcon from '@mui/icons-material/Rule';
 import SavingsIcon from '@mui/icons-material/Savings';
 import StorageIcon from '@mui/icons-material/Storage';
 import { UserContext } from "../../App.js";
-import { logout } from '../checkLogin.js';
+import { useGetLogout } from "../../api_hook/useGetLogout.js";
 
 export const UserVeticalNav = ({ navigate }) => {
-
+    
     const {  setIsAuthenticated } = useContext(UserContext);
-    const log_out_ = (setIsAuthenticaed) => {
-        logout(setIsAuthenticaed)
+    const {refetch} = useGetLogout(setIsAuthenticated)
+    const log_out = () => {
+        refetch()
         navigate("/");
     }
     const listItems = [
@@ -61,7 +62,7 @@ export const UserVeticalNav = ({ navigate }) => {
             disabled: false,
         },
         {
-            onClick: () => log_out_(setIsAuthenticated),
+            onClick: () => log_out(),
             icon: <LogoutIcon color="error" />,
             text: "Log Out",
             disabled: false,

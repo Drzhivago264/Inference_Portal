@@ -18,7 +18,7 @@ import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import { UserContext } from '../App.js'
 import pdfFonts from "pdfmake/build/vfs_fonts";
-import { redirect_anon_to_login } from '../component/checkLogin.js';
+import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
 import { useNavigate } from "react-router-dom";
 
 window.JSZip = JSZip;
@@ -27,10 +27,11 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 function Log() {
     const navigate = useNavigate();
     const { is_authenticated } = useContext(UserContext);
+    useGetRedirectAnon(navigate, is_authenticated)
     $.DataTable = require('datatables.net')
     const tableRef = useRef()
     useEffect(() => {
-        redirect_anon_to_login(navigate, is_authenticated)
+     
         $.fn.dataTable.ext.errMode = () => alert('Your key is not authorised to view log!');
         const table = $(tableRef.current).DataTable(
             {

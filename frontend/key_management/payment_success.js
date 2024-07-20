@@ -108,7 +108,7 @@ function KeyManagement() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>Payment Success</title>
-            <ResponsiveAppBar max_width="xl" />
+            <ResponsiveAppBar max_width="lg" />
             <Container maxWidth="md">
                 <Box
                     my={1}

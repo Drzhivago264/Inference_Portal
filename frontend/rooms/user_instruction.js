@@ -34,9 +34,9 @@ import { agentsocket } from '../component/websocket/AgentSocket';
 import axios from 'axios';
 import { getCookie } from '../component/getCookie';
 import { nanoid } from 'nanoid'
-import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
 import { useGetModel } from '../api_hook/useGetModel.js';
+import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
 import { useNavigate } from 'react-router-dom';
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -84,7 +84,7 @@ function UserInstruction() {
         { id: null, dislayed_name: "", instruct: "", unique: nanoid(), add: false },
     ])
     const { is_authenticated, timeZone } = useContext(UserContext);
-
+    useGetRedirectAnon(navigate, is_authenticated)
     const handleOnDragEnd = (result) => {
         const items = Array.from(children_instruction_list);
         const [reorderedItem] = items.splice(result.source.index, 1);
@@ -439,11 +439,7 @@ function UserInstruction() {
         }
     }
     const {agent_objects} = useGetModel()
-
-    useEffect(() => {
-        redirect_anon_to_login(navigate, is_authenticated)
-    }, []);
-    
+ 
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
