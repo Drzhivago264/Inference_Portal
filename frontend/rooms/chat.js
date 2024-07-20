@@ -129,14 +129,12 @@ function Chat() {
                         <Grid item xs={4}>
                             {MemoMemoryTree}
                             <Stack direction='row'>
-
                                 <ChatExport
                                     chat_message={chat_message}
                                     number_of_remove_message={1}
                                     setChatMessage={setChatMessage}
                                 >
                                 </ChatExport>
-
                                 <Box mt={2}>
                                     <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
                                         <AlertTitle>Note: </AlertTitle>
@@ -144,8 +142,6 @@ function Chat() {
                                     </Alert>
                                 </Box>
                             </Stack>
-
-
                         </Grid>
                         <Grid item xs={5.5}>
                             <ChatBox
@@ -197,7 +193,6 @@ function Chat() {
                                 earlystopping={earlystopping}
                                 setEarlyStopping={setEarlyStopping}
                             ></ChatParameter>
-
                         </Grid>
                     </Grid>
                 </Box>

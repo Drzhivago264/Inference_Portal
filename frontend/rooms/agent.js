@@ -26,6 +26,7 @@ import Header from "@editorjs/header";
 import InlineCode from '@editorjs/inline-code';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
+import LinearProgress from '@mui/material/LinearProgress';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -62,7 +63,7 @@ function Agent() {
     const editorref = useRef();
     const messagesEndRef = useRef(null)
     const [shownthinking, setThinking] = useState(false);
-    const [chat_message, setChatMessage] = useState([]);   
+    const [chat_message, setChatMessage] = useState([]);
     const [choosen_model, setChoosenModel] = useState("gpt-4");
     const [top_p, setTopp] = useState(0.72);
     const [max_tokens, setMaxToken] = useState(null);
@@ -81,7 +82,7 @@ function Agent() {
     const navigate = useNavigate();
     const { is_authenticated, timeZone } = useContext(UserContext);
     useGetRedirectAnon(navigate, is_authenticated)
-    
+
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
     };
@@ -145,7 +146,7 @@ function Agent() {
         }
     }, []);
 
-    const {agent_objects} = useGetModel()
+    const { agent_objects } = useGetModel()
 
     const {
         template_list: template_list,
@@ -169,7 +170,7 @@ function Agent() {
         error: error,
         isLoading: isLoading
     } = useGetInstructionTree(editorref, setEditor)
-     
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
     }
@@ -351,6 +352,10 @@ function Agent() {
                                 </AccordionSummary>
                                 <AccordionDetails >
                                     <Paper variant="outlined">
+                                        {isLoading && <Box sx={{ width: '100%' }}>
+                                            <LinearProgress />
+                                        </Box>
+                                        }
                                         <ChatInput
                                             id="parent-instruct"
                                             multiline
@@ -376,6 +381,10 @@ function Agent() {
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     <Paper variant="outlined">
+                                    {isLoading && <Box sx={{ width: '100%' }}>
+                                            <LinearProgress />
+                                        </Box>
+                                        }
                                         <ChatInput
                                             id="child-instruct"
                                             multiline

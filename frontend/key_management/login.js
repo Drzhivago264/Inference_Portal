@@ -12,23 +12,16 @@ import InputAdornment from '@mui/material/InputAdornment';
 import KeyIcon from '@mui/icons-material/Key';
 import LoadingButton from '@mui/lab/LoadingButton';
 import LoginIcon from '@mui/icons-material/Login';
-import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Stack from '@mui/material/Stack';
+import StyledPaper from "../component/custom_ui_component/StyledPaper.js";
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { UserContext } from '../App.js'
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import axios from 'axios';
-import { getCookie } from '../component/getCookie.js';
-import { styled } from '@mui/system';
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-
-    padding: theme.spacing(4),
-    ...theme.typography.body2,
-}));
+import { basePost } from "../api_hook/basePost.js";
+import { useMutation } from "react-query";
 
 function Contact() {
     const [showPassword, setShowPassword] = useState(false);
@@ -41,8 +34,9 @@ function Contact() {
     const [loading, setLoading] = useState(false);
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
-
     const [loginerror, setLoginError] = useState(false);
+
+    const { mutate: loginmutate } = useMutation(basePost);
     const handleLogin = (event) => {
         event.preventDefault()
         setLoading(true)
@@ -50,23 +44,19 @@ function Contact() {
             setKeyError(true)
         }
         else if (key) {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }
-            }
             const data = {
                 key: key,
             }
-            axios.post("/frontend-api/login", data, config)
-                .then(() => {
+            loginmutate({url: "/frontend-api/login", data: data}, {
+                onSuccess:  () => {
                     setIsAuthenticated(true)
-                    navigate('/frontend/hub');
-                }).catch(error => {
+                    navigate('/frontend/hub')
+                },
+                onError: (error) =>  {
                     setLoginError(error.response.data.detail)
-                });
+                }
+            })
+
         }
         setLoading(false)
     }
