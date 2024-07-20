@@ -10,7 +10,7 @@ from server.models import (
     PromptResponse,
 
 )
-
+from server.utils import constant
 
 class CostSerializer(serializers.ModelSerializer):
     model = serializers.SlugRelatedField(
@@ -87,9 +87,9 @@ class CreateKeySerializer(serializers.Serializer):
     key_name = serializers.CharField()
 
     def validate_key_name(self, value):
-        if len(value) > 100:
+        if len(value) > constant.MAX_KEY_NAME_LENGTH:
             raise serializers.ValidationError(
-                "Key name is too long, keep it below 100 characters")
+                f"Key name is too long, keep it below {constant.MAX_KEY_NAME_LENGTH} characters")
         return value
 
 
@@ -114,9 +114,9 @@ class CreateTokenSerializer(serializers.Serializer):
     permission = PermissionSerializer()
 
     def validate_token_name(self, value):
-        if len(value) > 100:
+        if len(value) > constant.MAX_KEY_NAME_LENGTH:
             raise serializers.ValidationError(
-                "Token name is too long, keep it below 100 characters")
+                f"Token name is too long, keep it below {constant.MAX_KEY_NAME_LENGTH} characters")
         return value
 
     def validate_ttl(self, value):

@@ -1,4 +1,3 @@
-
 import typing
 import stripe
 import requests
@@ -74,11 +73,14 @@ def check_credit_api(request: HttpRequest) -> Response:
                 monero_credit = str(key.monero_credit)
                 return Response({"key_name": key_name, "key": key_, "fiat_balance": credit, "monero_balance": monero_credit}, status=status.HTTP_200_OK)
             else:
-                return Response({"detail": "Your Key Name is incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"detail": "Your Key Name and/or Key is/are incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
         except APIKEY.DoesNotExist:
-            return Response({"detail": "Your Key is incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"detail": "Your Key Name and/or Key is/are incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        message = str()
+        for error in serializer.errors:
+            message += serializer.errors[error][0] + "\n" 
+        return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -146,13 +148,16 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                     else:
                         return Response({"detail": f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations"}, status=status.HTTP_200_OK)
             else:
-                return Response({'detail': 'Your Key Name is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'detail': 'Your Key Name and/or Key is/are incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         except APIKEY.DoesNotExist:
-            return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'detail': 'Your Key Name and/or Key is/are incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         except requests.exceptions.ConnectionError:
             return Response({'detail': 'The Monero node is down, try again latter'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        message = str()
+        for error in serializer.errors:
+            message += serializer.errors[error][0] + "\n" 
+        return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -190,7 +195,10 @@ def generate_key_api(request: HttpRequest) -> Response:
                          'integrated_wallet': integrated_address
                          }, status=status.HTTP_200_OK)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        message = str()
+        for error in serializer.errors:
+            message += serializer.errors[error][0] + "\n" 
+        return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -234,13 +242,16 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
                         payment_id = ""
                     return Response({'detail': 'The Monero node is down, try again latter'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
             else:
-                return Response({'detail': 'Your Key Name is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'detail': 'Your Key Name and/or Key is/are incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         except APIKEY.DoesNotExist:
-            return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'detail': 'Your Key Name and/or Key is/are incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         except requests.exceptions.ConnectionError:
             return Response({'detail': 'The Monero node is down, try again latter'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        message = str()
+        for error in serializer.errors:
+            message += serializer.errors[error][0] + "\n" 
+        return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -277,11 +288,14 @@ def stripe_redirect(request: HttpRequest) -> Response:
                 )
                 return Response({"stripe_checkout_url": checkout_session.url}, status=status.HTTP_200_OK)
             else:
-                return Response({'detail': 'Your Key Name is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'detail': 'Your Key Name and/or Key is/are incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
         except APIKEY.DoesNotExist:
-            return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'detail': 'Your Key Name and/or Key is/are incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        message = str()
+        for error in serializer.errors:
+            message += serializer.errors[error][0] + "\n" 
+        return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SuccessView(TemplateView):

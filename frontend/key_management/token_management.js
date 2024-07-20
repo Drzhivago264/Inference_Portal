@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import AddPermissionDialog from '../component/custom_ui_component/MorePermissionDialog.js';
 import Alert from '@mui/material/Alert';
@@ -34,9 +34,11 @@ import TextField from '@mui/material/TextField';
 import TimerIcon from '@mui/icons-material/Timer';
 import TokenCreateExport from '../component/import_export/TokenExport.js';
 import Typography from '@mui/material/Typography';
-import axios from 'axios';
-import { getCookie } from '../component/getCookie.js';
+import { baseDelete } from '../api_hook/baseDelete.js';
+import { basePost } from '../api_hook/basePost.js';
 import { styled } from '@mui/system';
+import { useGetToken } from '../api_hook/useGetToken.js';
+import { useMutation } from 'react-query';
 import { useTranslation } from 'react-i18next';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -47,34 +49,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 
 function TokenManagement() {
     const { t } = useTranslation();
-    const [reload_token, setReloadToken] = useState(reload_token);
-    useEffect(() => {
-        if (reload_token) {
-            axios.all([
-                axios.get('/frontend-api/get-token'),
-            ])
-                .then(axios.spread((server_object) => {
-                    setTokenList(server_object.data.token_list)
-                }))
-                .catch(error => {
-                    setTokenCreateError(error.response.data.detail)
-                });
-            setReloadToken(false)
-        }
-    }, [reload_token]);
-    useEffect(() => {
-        axios.all([
-            axios.get('/frontend-api/get-token'),
-        ])
-            .then(axios.spread((server_object) => {
-                setTokenList(server_object.data.token_list)
-            }))
-            .catch(error => {
-                setTokenCreateError(error.response.data.detail)
-            });
-        setReloadToken(false)
 
-    }, []);
     const [tokencreateloading, setTokenCreateLoading] = useState(false);
     const [token_list, setTokenList] = useState([])
     const [use_ttl, setUseTTL] = useState(true)
@@ -98,9 +73,8 @@ function TokenManagement() {
     const [ttl, setTTL] = useState(10)
     const [time_unit, setTimeUnit] = useState('day')
     const [tokennameError, setTokenNameError] = useState(false)
-    const [tokencreateresponse, setTokenCreateResponse] = useState(null);
-    const [tokencreateerror, setTokenCreateError] = useState(null);
-
+    const [localtokencreateerror, setLocalTokenCreateError] = useState(null);
+    const [showkeycreateresponse, setShowKeyCreateResponse] = useState(false)
     const setAllPermission = (value) => {
         setPermission({
             ...permission,
@@ -117,14 +91,15 @@ function TokenManagement() {
         })
     }
 
+    const { mutate: tokencreatemutate, error: servertokencreateerror, data: servertokencreatedata, isSuccess: tokencreatesuccess } = useMutation(basePost);
     const handleCreateToken = (event) => {
+        console.log(tokencreatesuccess)
         event.preventDefault()
-        setTokenCreateLoading(true);
-        setTokenCreateResponse(null)
         setTokenNameError(false)
         setRandomAnimation(false)
-        setTokenCreateError(null)
-
+        setLocalTokenCreateError(null)
+        setTokenCreateLoading(true);
+        setShowKeyCreateResponse(false)
         var perm_count = 0;
         for (var key in permission) {
             if (permission[key]) {
@@ -136,29 +111,22 @@ function TokenManagement() {
             setTokenNameError(true)
         }
         else if (perm_count === 0) {
-            setTokenCreateError("You tried to create a token without any permission, the key will be unusable. Associate at least one permission for the token.")
+            setLocalTokenCreateError("You tried to create a token without any permission, the key will be unusable. Associate at least one permission for the token.")
             setTokenCreateLoading(false)
         }
-        else if (tokenname.length > 100) {
-            setTokenCreateError("You tried to create a token name longer than 100 chars.")
+        else if (tokenname.length > 50) {
+            setLocalTokenCreateError("You tried to create a token name longer than 50 chars.")
             setTokenCreateLoading(false)
         }
         else if (ttl <= 0 || ttl > 999999) {
-            setTokenCreateError("You tried to create a token with invalid time to live (0 < ttl < 999999).")
+            setLocalTokenCreateError("You tried to create a token with invalid time to live (0 < ttl < 999999).")
             setTokenCreateLoading(false)
         }
         else if (!['day', 'hour', 'minute', 'second'].includes(time_unit)) {
-            setTokenCreateError("You tried to create a token with invalid time unit ['day', 'hour', 'minute', 'second'].")
+            setLocalTokenCreateError("You tried to create a token with invalid time unit ['day', 'hour', 'minute', 'second'].")
             setTokenCreateLoading(false)
         }
         else {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }
-            }
             const data = {
                 token_name: tokenname,
                 permission: permission,
@@ -166,82 +134,65 @@ function TokenManagement() {
                 time_unit: time_unit,
                 use_ttl: use_ttl
             }
-            axios.post("/frontend-api/generate-token", data, config)
-                .then((response) => {
-                    setTokenCreateResponse(response.data)
-                })
-                .catch(error => {
-                    if (Object.prototype.hasOwnProperty.call(error.response.data, "token_name")) {
-                        setTokenCreateError(error.response.data.token_name[0])
-                    }
-                    else if (Object.prototype.hasOwnProperty.call(error.response.data, "ttl")) {
-                        setTokenCreateError(error.response.data.ttl[0])
-                    }
-                    else if (Object.prototype.hasOwnProperty.call(error.response.data, "time_unit")) {
-                        setTokenCreateError(error.response.data.time_unit[0])
-                    }
-                    else {
-                        setTokenCreateError(error.response.data.detail)
-                    }
-                    setTokenCreateLoading(false)
-                })
 
+            tokencreatemutate({ url: "/frontend-api/generate-token", data: data }, {
+                onSuccess: () => {
+                    setShowKeyCreateResponse(true)
+                    
+                }
+            })
         }
     }
+    const { mutate: permissiondeletemutate } = useMutation(baseDelete);
     const deletePermission = (token_prefix, token_name, token_value, permission, token_index, perm_index) => {
         if (token_prefix && token_name && token_value && permission) {
-            const csrftoken = getCookie('csrftoken');
-            axios.delete("/frontend-api/remove-permission", {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }, data: {
-                    token_name: token_name,
-                    prefix: token_prefix,
-                    first_and_last_char: token_value,
-                    permission: permission
+            const data = {
+                token_name: token_name,
+                prefix: token_prefix,
+                first_and_last_char: token_value,
+                permission: permission
+            }
+            permissiondeletemutate({ url: "/frontend-api/remove-permission", data: data },
+                {
+                    onSuccess: () => {
+                        refetch();
+                        setTokenList((prev) => {
+                            const items = token_list[token_index].permissions.filter(
+                                (perm) => perm.id !== perm_index
+                            );
+                            const newState = prev;
+                            newState[token_index].permissions = items;
+                            return [...newState];
+                        });
+                    },
+                    onError: (error) => {
+                        setLocalTokenCreateError(error.response.data.detail)
+                    }
                 }
-            })
-                .then(() => {
-                    setReloadToken(true)
-                    setTokenList((prev) => {
-                        const items = token_list[token_index].permissions.filter(
-                            (perm) => perm.id !== perm_index
-                        );
-                        const newState = prev;
-                        newState[token_index].permissions = items;
-                        return [...newState];
-                    });
-
-                }).catch(error => {
-                    setTokenCreateError(error.response.data.detail)
-                });
+            )
+        
         }
     };
-
+    const { mutate: tokendeletemutate } = useMutation(baseDelete);
     const deleteToken = (token_prefix, token_name, token_value, index) => {
         if (token_prefix && token_name && token_value) {
-            const csrftoken = getCookie('csrftoken');
-            axios.delete("/frontend-api/invalidate-token", {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                },
-                data: {
-                    token_name: token_name,
-                    prefix: token_prefix,
-                    first_and_last_char: token_value
-                }
-            })
-                .then(() => {
-                    setTokenList(prev => {
+            const data = {
+                token_name: token_name,
+                prefix: token_prefix,
+                first_and_last_char: token_value
+            }
+            tokendeletemutate({ url: "/frontend-api/invalidate-token", data: data },
+                {
+                    onSuccess: () => setTokenList(prev => {
                         return prev.filter((_, i) => i !== index)
-                    })
-                }).catch(error => {
-                    setTokenCreateError(error.response.data.detail)
-                });
+                    }),
+                    onError: (error) => setLocalTokenCreateError(error.response.data.detail)
+
+                })
+
         }
     };
+    const { refetch } = useGetToken(setTokenList, setLocalTokenCreateError)
     return (
         <Container maxWidth={false} disableGutters>
             <title>Token Management</title>
@@ -302,7 +253,7 @@ function TokenManagement() {
                                                                     token_name={row.name}
                                                                     token_value={row.value}
                                                                     token_prefix={row.prefix}
-                                                                    setTokenCreateError={setTokenCreateError}
+                                                                    setTokenCreateError={setLocalTokenCreateError}
                                                                     setTokenList={setTokenList}
                                                                     token_list={token_list}
                                                                     index={index} />
@@ -348,7 +299,7 @@ function TokenManagement() {
                                             alignItems: 'center',
                                             justifyContent: 'center'
                                         }} item xs={7} >
-                                            <form autoComplete="off" onSubmit={handleCreateToken}>
+                                            <form autoComplete="off" onSubmit={(e) => {handleCreateToken(e)}}>
                                                 <FormControl defaultValue="" required>
                                                     <Stack direction='column' spacing={1}>
                                                         <TextField
@@ -412,20 +363,21 @@ function TokenManagement() {
                                         </Grid>
                                     </Grid>
                                 </Box>
-                                {tokencreateresponse &&
+                                {showkeycreateresponse &&
                                     <TokenCreateExport
-                                        token_={tokencreateresponse.token}
-                                        token_name={tokencreateresponse.token_name}
-                                        ttl={tokencreateresponse.ttl}
-                                        created_at={tokencreateresponse.created_at}
-                                        permission={tokencreateresponse.permission}
+                                        token_={servertokencreatedata.token}
+                                        token_name={servertokencreatedata.token_name}
+                                        ttl={servertokencreatedata.ttl}
+                                        created_at={servertokencreatedata.created_at}
+                                        permission={servertokencreatedata.permission}
                                         setRandomAnimation={setRandomAnimation}
-                                        setReloadToken={setReloadToken}
                                         setTokenCreateLoading={setTokenCreateLoading}
                                         randomanimation={randomanimation}
+                                        refetch={refetch}
                                     />
                                 }
-                                {tokencreateerror && <ErrorAlert error={tokencreateerror} />}
+                                {localtokencreateerror && <ErrorAlert error={localtokencreateerror} />}
+                                {servertokencreateerror && <ErrorAlert error={servertokencreateerror.response.data.detail} />}
                                 <Alert severity="warning" sx={{ whiteSpace: 'pre-line' }}>
                                     <AlertTitle>Warning</AlertTitle>
                                     {t('token_management.form_warning')}
@@ -452,7 +404,7 @@ function TokenManagement() {
                                                     { key: 'allow_toolbox', label: t('token_management.allow_toolbox') },
                                                     { key: 'allow_data_synthesis', label: t('token_management.allow_data_synthesis') },
                                                     { key: 'allow_chat_api', label: t('token_management.allow_chat_api') },
-                                                    { key: 'allow_agent_api', label: t('token_management.allow_agent_api')},
+                                                    { key: 'allow_agent_api', label: t('token_management.allow_agent_api') },
                                                     { key: 'allow_toolbox_api', label: t('token_management.allow_toolbox_api') },
                                                 ].map((perm) => (
                                                     <FormControlLabel

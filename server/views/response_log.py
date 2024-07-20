@@ -43,9 +43,7 @@ class LogListJson(BaseDatatableView):
 @permission_classes([IsAuthenticated])
 def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
     current_user = request.user
-    if current_user.id == None:
-        return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
-    elif not current_user.has_perm('server.allow_view_cost'):
+    if not current_user.has_perm('server.allow_view_cost'):
         return Response({'detail': "Not authorised to view cost"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         master_key, master_user = get_master_key_and_master_user(current_user=current_user)

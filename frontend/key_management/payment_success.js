@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import { KeyCheckDisplay, XMRWConfirmationDisplay, XMRWalletDisplay } from '../component/custom_ui_component/KeyDisplay.js';
+import React, { useEffect, useState } from 'react';
 import {
     ThemeProvider,
     createTheme,
     responsiveFontSizes,
 } from '@mui/material/styles';
+import { Trans, useTranslation } from 'react-i18next';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -33,44 +35,26 @@ import Stack from '@mui/material/Stack';
 import StyledPaper from '../component/custom_ui_component/StyledPaper';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
-import Textarea from '../component/custom_ui_component/CustomTextArea';
 import Typography from '@mui/material/Typography';
-import axios from 'axios';
 import { basePost } from '../api_hook/basePost';
 import { useGetProduct } from '../api_hook/useGetProduct';
 import { useMutation } from 'react-query';
 
 function KeyManagement() {
+    const { t } = useTranslation();
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
     const { product_objects } = useGetProduct()
-
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
     const [keynamepay, setKeyNamePay] = useState("")
     const [keynamepayError, setKeyNamePayError] = useState(false)
     const [amount, setAmount] = useState(1)
-    const [striperedirecterror, setStripeRedirectError] = useState(null);
 
-    const { mutate: mutate, isLoading: isLoading, error: error, data: data } = useMutation(basePost);
-
-    const handlePostRequest = (event, url) => {
+    const { mutate: keycheckmutate, isLoading: keycheckisLoading, error: keycheckerror, data: keycheckdata } = useMutation(basePost);
+    const { mutate: xmrretrievemutate, isLoading: xmrretrieveisLoading, error: xmrretrieveerror, data: xmrretrievedata } = useMutation(basePost);
+    const { mutate: xmrconfirmmutate, isLoading: xmrconfirmisLoading, error: xmrconfirmerror, data: xmrconfirmdata } = useMutation(basePost);
+    const handlePostRequest = (event, url, type) => {
         event.preventDefault()
         setKeyNamePayError(false)
         if (keynamepay == '') {
@@ -84,9 +68,19 @@ function KeyManagement() {
                 key_name: keynamepay,
                 key: key
             }
-            mutate({ url: url, data: data })
+            if (type === "keycheck") {
+                keycheckmutate({ url: url, data: data })
+            }
+            else if (type === "xmrretrieve") {
+                xmrretrievemutate({ url: url, data: data })
+            }
+            else if (type === "xmrconfirm") {
+                xmrconfirmmutate({ url: url, data: data })
+            }
         }
     }
+    
+    const { mutate: stripemutate, isSuccess: stripeisSuccess, error: stripeerror, data: stripedata } = useMutation(basePost);
     const handleStripeRedirect = (event) => {
         event.preventDefault()
         setKeyNamePayError(false)
@@ -97,81 +91,23 @@ function KeyManagement() {
             setKeyError(true)
         }
         if (keynamepay && key && amount) {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }
-            }
             const data = {
                 key_name: keynamepay,
                 key: key,
                 product_id: amount,
             }
-            axios.post("/frontend-api/stripe-redirect", data, config)
-                .then((response) => {
-                    window.location.replace(response.data.stripe_checkout_url)
-                }).catch(error => {
-                    console.log(error.response.data.detail)
-                    setStripeRedirectError(error.response.data.detai)
-                });
+            stripemutate({ url: "/frontend-api/stripe-redirect", data: data })
         }
     }
-
-    const KeyCheckDisplay = ({ key_, key_name, monero_balance, fiat_balance }) => {
-        return (
-            <Box my={4}>
-                <Alert severity="success">
-                    Your Key and Key Name are correct!
-                </Alert>
-                <Box textAlign='center' mt={4}>
-                    <Textarea
-                        defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nMonero Balance: ${monero_balance} \nFiat Balance: ${fiat_balance}`}
-                        minRows={4}
-                        maxRows={10}
-                    />
-                </Box>
-            </Box >
-        );
-    };
-
-    const XMRWalletDisplay = ({ key_, key_name, integrated_wallet, payment_id }) => {
-        return (
-            <Box my={4}>
-                <Alert severity="success">
-                    Wallet Information:
-                </Alert>
-                <Box textAlign='center' mt={4}>
-                    <Textarea
-                        defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nIntergrated Wallet: ${integrated_wallet} \nPayment id: ${payment_id}`}
-                        minRows={4}
-                        maxRows={10}
-                    />
-                </Box>
-            </Box >
-        );
-    };
-    const XMRWConfirmationDisplay = ({ detail }) => {
-        return (
-            <Box my={4}>
-                <Alert severity="success">
-                    Confirmation Status:
-                </Alert>
-                <Box textAlign='center' mt={4}>
-                    <Textarea
-                        defaultValue={`${detail}`}
-                        minRows={2}
-                        maxRows={10}
-                    />
-                </Box>
-            </Box >
-        );
-    };
+    useEffect(() => {
+        if (stripeisSuccess) {
+            window.location.replace(stripedata.stripe_checkout_url);
+        }
+    }, [stripeisSuccess, stripedata]);
 
     return (
         <Container maxWidth={false} disableGutters>
-            <title>Key Management</title>
+            <title>Payment Success</title>
             <ResponsiveAppBar max_width="xl" />
             <Container maxWidth="md">
                 <Box
@@ -189,22 +125,18 @@ function KeyManagement() {
 
                         <Divider></Divider>
                         <Typography variant="h5" >
-                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>1. Check credit of your key</Box>
+                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}>{t('key_management.2_Add_credit_to_your_key')}</Box>
                         </Typography>
                         <Stack spacing={1}>
                             <Alert variant="outlined" severity="info">
-                                We offer 2 payment methods via Stripe or XMR transfer.  <br></br>
-                                <li> To pay by Stripe, include the Key and Key Name in the form below and click Stripe. </li>
-                                <li>{` To pay by XMR, transfer your desired amount into the intergrated address provided in your Key file (you don't need to matched the amount listed in the below form.) `}</li>
+                                {t('key_management.Info_1')}
                             </Alert>
                             <Alert variant="outlined" severity="warning">
-                                <li> If you pay by XMR, you need to click on confirm XMR payment after 10 confirmation blocks. </li>
-                                <li> To ensure that people with access to your computer or session cannot retrieve your wallet information, you are required to fill up the credit-related forms, even if you are logged in. </li>
+                                {t('key_management.Warning_1')}
                             </Alert>
                         </Stack>
                         <Box my={4} >
                             <form autoComplete="off" >
-
                                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2} justifyContent="center" alignItems="center" display="flex" >
                                     <TextField
                                         margin="normal" label="Key Name" type="text" size="small" onChange={e => setKeyNamePay(e.target.value)} value={keynamepay} error={keynamepayError} autoComplete="off"
@@ -257,18 +189,18 @@ function KeyManagement() {
                                         id="panel1-header"
                                     >
                                         <Typography variant="h6" >
-                                            1.1 Check credit balance
+                                            {t('key_management.21_Check_credit_balance')}
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                            Before paying, you may check your current balance (and Key and Key Name) to avoid undesirable accidents.
+                                            {t('key_management.21_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={isLoading} variant="contained" name="checkcredit" onClick={(e) => { handlePostRequest(e, "/frontend-api/check-credit") }} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
+                                            <LoadingButton loading={keycheckisLoading} variant="contained" name="checkcredit" onClick={(e) => { handlePostRequest(e, "/frontend-api/check-credit", "keycheck") }} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
                                         </Box>
-                                        {data && <KeyCheckDisplay key_={data.key} key_name={data.key_name} monero_balance={data.monero_balance} fiat_balance={data.fiat_balance} />}
-                                        {error && <ErrorAlert error={error.response.data.detail} />}
+                                        {keycheckdata && <KeyCheckDisplay t={t} key_={keycheckdata.key} key_name={keycheckdata.key_name} monero_balance={keycheckdata.monero_balance} fiat_balance={keycheckdata.fiat_balance} />}
+                                        {keycheckerror && <ErrorAlert error={keycheckerror.response.data.detail} />}
                                     </AccordionDetails>
                                 </Accordion>
                                 <Accordion>
@@ -278,17 +210,17 @@ function KeyManagement() {
                                         id="panel2-header"
                                     >
                                         <Typography variant="h6" >
-                                            1.2 Pay by Stripe
+                                            {t('key_management.22_Pay_by_Stripe')}
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                            You will be redirected to Stripe Payment portal by choosing this payment option.
+                                            {t('key_management.22_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <Button variant="contained" onClick={handleStripeRedirect.bind(this)} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
+                                            <Button variant="contained" onClick={(e) => { handleStripeRedirect(e) }} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
                                         </Box>
-                                        {striperedirecterror && <ErrorAlert error={striperedirecterror} />}
+                                        {stripeerror && <ErrorAlert error={stripeerror.response.data.detail} />}
                                     </AccordionDetails>
                                 </Accordion>
                                 <Accordion>
@@ -298,19 +230,18 @@ function KeyManagement() {
                                         id="panel3-header"
                                     >
                                         <Typography variant="h6" >
-                                            1.3 Retrieve XMR wallet
+                                            {t('key_management.23_Retrieve_XMR_wallet')}
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                            If (for issues with our XMR node) your Key is not associated with a XMR intergrated wallet, you can associate your Key with a Wallet here.
-                                            You can also use this function to retrieve your Wallet before payment.
+                                            {t('key_management.23_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={isLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/get-xmr-wallet") }} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
+                                            <LoadingButton loading={xmrretrieveisLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/get-xmr-wallet", "xmrretrieve") }} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
                                         </Box>
-                                        {data && <XMRWalletDisplay key_={data.key} key_name={data.key_name} payment_id={data.payment_id} integrated_wallet={data.integrated_wallet} />}
-                                        {error && <ErrorAlert error={error.response.data.detail} />}
+                                        {xmrretrievedata && <XMRWalletDisplay t={t} key_={xmrretrievedata.key} key_name={xmrretrievedata.key_name} payment_id={xmrretrievedata.payment_id} integrated_wallet={xmrretrievedata.integrated_wallet} />}
+                                        {xmrretrieveerror && <ErrorAlert error={xmrretrieveerror.response.data.detail} />}
                                     </AccordionDetails>
                                 </Accordion>
                                 <Accordion>
@@ -320,31 +251,32 @@ function KeyManagement() {
                                         id="panel4-header"
                                     >
                                         <Typography variant="h6" >
-                                            1.4 Confirm XMR Payment
+                                            {t('key_management.24_Confirm_XMR_Payment')}
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography>
-                                            Processing the XMR payment may take up to 30 minutes after it has been confirmed on the blockchain.
-                                            Use sufficient fees so the transactions gets confirmed on time.
+                                            {t('key_management.24_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={isLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/confirm-xmr-payment") }} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
+                                            <LoadingButton loading={xmrconfirmisLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/confirm-xmr-payment", "xmrconfirm") }} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
                                         </Box>
-                                        {data && <XMRWConfirmationDisplay detail={data.detail} />}
-                                        {error && <ErrorAlert error={error.response.data.detail} />}
+                                        {xmrconfirmdata && <XMRWConfirmationDisplay t={t} detail={xmrconfirmdata.detail} />}
+                                        {xmrconfirmerror && <ErrorAlert error={xmrconfirmerror.response.data.detail} />}
                                     </AccordionDetails>
                                 </Accordion>
                             </form>
                         </Box>
                         <Divider></Divider>
                         <Typography variant="h5" >
-                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> 2. Check user manual </Box>
+                            <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> {t('key_management.3_Check_user_manual')} </Box>
                         </Typography>
                         <Typography variant="body1" >
-                            Check the <Link href="/frontend/manual/key" variant="body1">
-                                {'User Manual'}
-                            </Link> to learn more about how to pay and use our services.
+                            <Trans
+                                i18nKey="key_management.3_infor"
+                                t={t}
+                                components={{ Link: <Link href="/frontend/manual/key" /> }}>
+                            </Trans>
                         </Typography>
                     </StyledPaper>
                 </Box>

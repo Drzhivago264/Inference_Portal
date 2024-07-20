@@ -65,13 +65,7 @@ function Contact() {
                     setIsAuthenticated(true)
                     navigate('/frontend/hub');
                 }).catch(error => {
-                    console.log(error)
-                    if (Object.prototype.hasOwnProperty.call(error.response.data, "key")) {
-                        setLoginError(error.response.data.key[0])
-                    }
-                    else {
-                        setLoginError(error.response.data.detail)
-                    }
+                    setLoginError(error.response.data.detail)
                 });
         }
         setLoading(false)
