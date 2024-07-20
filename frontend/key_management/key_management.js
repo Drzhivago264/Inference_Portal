@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react';
+import { KeyCheckDisplay, XMRWConfirmationDisplay, XMRWalletDisplay } from '../component/custom_ui_component/KeyDisplay.js';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     ThemeProvider,
     createTheme,
@@ -39,14 +40,11 @@ import Stack from '@mui/material/Stack';
 import StyledPaper from '../component/custom_ui_component/StyledPaper.js';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
-import Textarea from '../component/custom_ui_component/CustomTextArea.js';
 import Typography from '@mui/material/Typography';
 import { UserContext } from '../App.js'
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import axios from 'axios';
 import { basePost } from '../api_hook/basePost.js';
-import { getCookie } from '../component/getCookie.js';
 import { logout } from '../component/checkLogin.js';
 import { useGetProduct } from '../api_hook/useGetProduct.js';
 import { useMutation } from 'react-query';
@@ -65,33 +63,40 @@ function KeyManagement() {
     const [keyname, setKeyName] = useState("")
     const [keynameError, setKeyNameError] = useState(false)
     const [amount, setAmount] = useState(1)
-    const [striperedirecterror, setStripeRedirectError] = useState(null);
     const { product_objects } = useGetProduct()
     const [keycreateloading, setKeyCreateLoading] = useState(false)
+    const [localkeycreateerror, setLocalKeyCreateError] = useState("")
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
-    const { mutate: keycreatemutate, isLoading: keycreateisloading, error: keycreateerror, data: keycreatedata } = useMutation(basePost);
+    const { mutate: keycreatemutate, error: serverkeycreateerror, data: serverkeycreatedata } = useMutation(basePost);
     const handleCreateKey = (event, url) => {
         event.preventDefault()
         setKeyNameError(false)
         setKeyCreateLoading(true)
         setRandomAnimation(false)
+        setLocalKeyCreateError("")
         if (keyname == '') {
             setKeyNameError(true)
+            setKeyCreateLoading(false)
+        }
+        else if (keyname.length > 50) {
+            setLocalKeyCreateError("Key name exceeds max characters of 50")
+            setKeyNameError(true)
+            setKeyCreateLoading(false)
         }
         else {
             const data = {
                 key_name: keyname,
             }
             keycreatemutate({ url: url, data: data })
-   
         }
     }
-    const { mutate: mutate, isLoading: isLoading, error: error, data:data } = useMutation(basePost);
-
-    const handlePostRequest = (event, url) => {
+    const { mutate: keycheckmutate, isLoading: keycheckisLoading, error: keycheckerror, data: keycheckdata } = useMutation(basePost);
+    const { mutate: xmrretrievemutate, isLoading: xmrretrieveisLoading, error: xmrretrieveerror, data: xmrretrievedata } = useMutation(basePost);
+    const { mutate: xmrconfirmmutate, isLoading: xmrconfirmisLoading, error: xmrconfirmerror, data: xmrconfirmdata } = useMutation(basePost);
+    const handlePostRequest = (event, url, type) => {
         event.preventDefault()
         setKeyNamePayError(false)
         if (keynamepay == '') {
@@ -105,10 +110,18 @@ function KeyManagement() {
                 key_name: keynamepay,
                 key: key
             }
-            mutate({ url: url, data: data })
+            if (type === "keycheck") {
+                keycheckmutate({ url: url, data: data })
+            }
+            else if (type === "xmrretrieve") {
+                xmrretrievemutate({ url: url, data: data })
+            }
+            else if (type === "xmrconfirm") {
+                xmrconfirmmutate({ url: url, data: data })
+            }
         }
     }
-
+    const { mutate: stripemutate, isSuccess: stripeisSuccess, error: stripeerror, data: stripedata } = useMutation(basePost);
     const handleStripeRedirect = (event) => {
         event.preventDefault()
         setKeyNamePayError(false)
@@ -119,80 +132,23 @@ function KeyManagement() {
             setKeyError(true)
         }
         if (keynamepay && key && amount) {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }
-            }
             const data = {
                 key_name: keynamepay,
                 key: key,
                 product_id: amount,
             }
-            axios.post("/frontend-api/stripe-redirect", data, config)
-                .then((response) => {
-                    window.location.replace(response.data.stripe_checkout_url)
-                }).catch(error => {
-                    setStripeRedirectError(error.response.data.detai)
-                });
+            stripemutate({ url: "/frontend-api/stripe-redirect", data: data })
         }
     }
-
-    const KeyCheckDisplay = ({ key_, key_name, monero_balance, fiat_balance }) => {
-        return (
-            <Box my={4}>
-                <Alert severity="success">
-                    <AlertTitle>Success</AlertTitle>
-                    {t('key_management.key_check_success')}
-                </Alert>
-                <Box textAlign='center' mt={2}>
-                    <Textarea
-                        defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nMonero Balance: ${monero_balance} \nFiat Balance: ${fiat_balance}`}
-                        minRows={4}
-                        maxRows={10}
-                    />
-                </Box>
-            </Box >
-        );
+    useEffect(() => {
+        if (stripeisSuccess) {
+            window.location.replace(stripedata.stripe_checkout_url);
+        }
+    }, [stripeisSuccess, stripedata]);
+    const [expanded, setExpanded] = useState('panel1');
+    const handleAccordionExpand = (panel) => (event, newExpanded) => {
+        setExpanded(newExpanded ? panel : false);
     };
-
-    const XMRWalletDisplay = ({ key_, key_name, integrated_wallet, payment_id }) => {
-        return (
-            <Box my={4}>
-                <Alert severity="success">
-                    <AlertTitle>Success</AlertTitle>
-                    {t('key_management.xmr_check_success')}
-                </Alert>
-                <Box textAlign='center' mt={4}>
-                    <Textarea
-                        defaultValue={`Key: ${key_}\nKey Name: ${key_name}\nIntergrated Wallet: ${integrated_wallet} \nPayment id: ${payment_id}`}
-                        minRows={4}
-                        maxRows={10}
-                    />
-                </Box>
-            </Box >
-        );
-    };
-    const XMRWConfirmationDisplay = ({ detail }) => {
-        return (
-            <Box my={4}>
-                <Alert severity="success">
-                    <AlertTitle>Success</AlertTitle>
-                    {t('key_management.xmr_confirmation_success')}
-                </Alert>
-                <Box textAlign='center' mt={4}>
-                    <Textarea
-                        defaultValue={`${detail}`}
-                        minRows={2}
-                        maxRows={10}
-                    />
-                </Box>
-            </Box >
-        );
-    };
-
     return (
         <Container maxWidth={false} disableGutters>
             <title>Key Management</title>
@@ -217,7 +173,7 @@ function KeyManagement() {
                             {t('key_management.Start_by_generating_a_random_key_by_giving_it_a_name')}
                         </Typography>
                         <Box my={4} justifyContent="center" alignItems="center" display="flex" >
-                            <form autoComplete="off" onSubmit={(e)  =>  handleCreateKey(e, "/frontend-api/generate-key")}>
+                            <form autoComplete="off" onSubmit={(e) => handleCreateKey(e, "/frontend-api/generate-key")}>
                                 <FormControl defaultValue="" required>
                                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                                         <TextField
@@ -243,14 +199,13 @@ function KeyManagement() {
                                     </Stack>
                                 </FormControl>
                             </form>
-
                         </Box>
-                        {keycreatedata &&
+                        {serverkeycreatedata &&
                             <KeyCreateExport
-                                key_={keycreatedata.key}
-                                key_name={keycreatedata.key_name}
-                                payment_id={keycreatedata.payment_id}
-                                integrated_wallet={keycreatedata.integrated_wallet}
+                                key_={serverkeycreatedata.key}
+                                key_name={serverkeycreatedata.key_name}
+                                payment_id={serverkeycreatedata.payment_id}
+                                integrated_wallet={serverkeycreatedata.integrated_wallet}
                                 t={t}
                                 setIsAuthenticated={setIsAuthenticated}
                                 setKeyCreateLoading={setKeyCreateLoading}
@@ -258,7 +213,8 @@ function KeyManagement() {
                                 randomanimation={randomanimation}
                             />
                         }
-                        {keycreateerror && <ErrorAlert error={keycreateerror} />}
+                        {serverkeycreateerror && <ErrorAlert error={serverkeycreateerror.response.data.detail} />}
+                        {localkeycreateerror && <ErrorAlert error={localkeycreateerror} />}
                         <Divider></Divider>
                         <Typography variant="h5" >
                             <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> {t('key_management.2_Add_credit_to_your_key')}</Box>
@@ -275,7 +231,6 @@ function KeyManagement() {
                         </Stack>
                         <Box my={4} >
                             <form autoComplete="off" >
-
                                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2} justifyContent="center" alignItems="center" display="flex" >
                                     <TextField
                                         margin="normal" label="Key Name" type="text" size="small" onChange={e => setKeyNamePay(e.target.value)} value={keynamepay} error={keynamepayError} autoComplete="off"
@@ -334,7 +289,7 @@ function KeyManagement() {
                                         </Select>
                                     </FormControl>
                                 </Stack>
-                                <Accordion defaultExpanded>
+                                <Accordion expanded={expanded === 'panel1'} onChange={handleAccordionExpand('panel1')}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel1-content"
@@ -349,13 +304,13 @@ function KeyManagement() {
                                             {t('key_management.21_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={isLoading} variant="contained" name="checkcredit" onClick={(e) => { handlePostRequest(e, "/frontend-api/check-credit") }} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
+                                            <LoadingButton loading={keycheckisLoading} variant="contained" name="checkcredit" onClick={(e) => { handlePostRequest(e, "/frontend-api/check-credit", "keycheck") }} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
                                         </Box>
-                                        {data && <KeyCheckDisplay key_={data.key} key_name={data.key_name} monero_balance={data.monero_balance} fiat_balance={data.fiat_balance} />}
-                                        {error && <ErrorAlert error={error.response.data.detail} />}
+                                        {keycheckdata && <KeyCheckDisplay t={t} key_={keycheckdata.key} key_name={keycheckdata.key_name} monero_balance={keycheckdata.monero_balance} fiat_balance={keycheckdata.fiat_balance} />}
+                                        {keycheckerror && <ErrorAlert error={keycheckerror.response.data.detail} />}
                                     </AccordionDetails>
                                 </Accordion>
-                                <Accordion>
+                                <Accordion expanded={expanded === 'panel2'} onChange={handleAccordionExpand('panel2')}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel2-content"
@@ -370,12 +325,12 @@ function KeyManagement() {
                                             {t('key_management.22_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <Button variant="contained" onClick={handleStripeRedirect.bind(this)} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
+                                            <Button variant="contained" onClick={(e) => { handleStripeRedirect(e) }} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
                                         </Box>
-                                        {striperedirecterror && <ErrorAlert error={striperedirecterror} />}
+                                        {stripeerror && <ErrorAlert error={stripeerror.response.data.detail} />}
                                     </AccordionDetails>
                                 </Accordion>
-                                <Accordion>
+                                <Accordion expanded={expanded === 'panel3'} onChange={handleAccordionExpand('panel3')}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel3-content"
@@ -390,13 +345,13 @@ function KeyManagement() {
                                             {t('key_management.23_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={isLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/get-xmr-wallet") }} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
+                                            <LoadingButton loading={xmrretrieveisLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/get-xmr-wallet", "xmrretrieve") }} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
                                         </Box>
-                                        {data && <XMRWalletDisplay key_={data.key} key_name={data.key_name} payment_id={data.payment_id} integrated_wallet={data.integrated_wallet} />}
-                                        {error && <ErrorAlert error={error.response.data.detail} />}
+                                        {xmrretrievedata && <XMRWalletDisplay t={t} key_={xmrretrievedata.key} key_name={xmrretrievedata.key_name} payment_id={xmrretrievedata.payment_id} integrated_wallet={xmrretrievedata.integrated_wallet} />}
+                                        {xmrretrieveerror && <ErrorAlert error={xmrretrieveerror.response.data.detail} />}
                                     </AccordionDetails>
                                 </Accordion>
-                                <Accordion>
+                                <Accordion expanded={expanded === 'panel4'} onChange={handleAccordionExpand('panel4')}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel4-content"
@@ -412,10 +367,10 @@ function KeyManagement() {
                                             {t('key_management.24_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={isLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/confirm-xmr-payment") }} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
+                                            <LoadingButton loading={xmrconfirmisLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/confirm-xmr-payment", "xmrconfirm") }} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
                                         </Box>
-                                        {data && <XMRWConfirmationDisplay detail={data.detail} />}
-                                        {error && <ErrorAlert error={error.response.data.detail} />}
+                                        {xmrconfirmdata && <XMRWConfirmationDisplay t={t} detail={xmrconfirmdata.detail} />}
+                                        {xmrconfirmerror && <ErrorAlert error={xmrconfirmerror.response.data.detail} />}
                                     </AccordionDetails>
                                 </Accordion>
                             </form>

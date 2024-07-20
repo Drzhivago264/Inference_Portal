@@ -11,7 +11,7 @@ function exporttoken(tokenfile) {
     var blob = new Blob([tokenfile], { type: "text/plain;charset=utf-8" });
     saveAs(blob, "Token_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
 }
-const TokenCreateExport = ({ token_, token_name, ttl, created_at, permission, randomanimation, setRandomAnimation, setReloadToken, setTokenCreateLoading }) => {
+const TokenCreateExport = ({ token_, token_name, ttl, created_at, permission, randomanimation, setRandomAnimation, setTokenCreateLoading, refetch }) => {
     return (
         <Box my={4}>
             {!randomanimation && <Box style={{
@@ -24,7 +24,7 @@ const TokenCreateExport = ({ token_, token_name, ttl, created_at, permission, ra
                     duration={2}
                     revealDuration={1.6}
                     characters={token_}
-                    onComplete={() => (setRandomAnimation(true), setTokenCreateLoading(false), setReloadToken(true))}
+                    onComplete={() => (setRandomAnimation(true), setTokenCreateLoading(false), refetch())}
 
                 /></Alert>
             </Box>}
@@ -48,7 +48,7 @@ TokenCreateExport.propTypes = {
     ttl: PropTypes.string,
     created_at: PropTypes.string,
     permission: PropTypes.array,
-    setReloadToken: PropTypes.func,
+    refetch: PropTypes.func,
     setTokenCreateLoading: PropTypes.func,
     setRandomAnimation: PropTypes.func,
     randomanimation: PropTypes.bool, 

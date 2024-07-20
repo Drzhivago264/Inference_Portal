@@ -17,7 +17,6 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Typography from '@mui/material/Typography';
-import axios from 'axios';
 import { chatsocket } from '../component/websocket/ChatSocket.js';
 import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';

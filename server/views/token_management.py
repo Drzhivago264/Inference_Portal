@@ -76,7 +76,10 @@ def generate_token_api(request: HttpRequest) -> Response:
                          'permission': permission_list
                          }, status=status.HTTP_200_OK)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        message = str()
+        for error in serializer.errors:
+            message += serializer.errors[error][0] + "\n" 
+        return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])

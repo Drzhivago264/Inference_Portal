@@ -8,9 +8,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import PropTypes from 'prop-types';
-import axios from 'axios';
-import { getCookie } from '../getCookie';
+import { basePut } from '../../api_hook/basePut';
 import { styled } from '@mui/material/styles';
+import { useMutation } from 'react-query';
 
 const ListItem = styled('li')(({ theme }) => ({
     margin: theme.spacing(0.5),
@@ -19,45 +19,45 @@ const ListItem = styled('li')(({ theme }) => ({
 function PermissionDialog(props) {
     const { onClose, open, notchoosenpermissionlist, token_name, token_value, token_prefix, setTokenCreateError, index, setTokenList, token_list } = props;
 
+    const { mutate: addpermissionmutate } = useMutation(basePut);
     const addPermission = (token_prefix, token_name, token_value, permission) => {
         if (token_prefix && token_name && token_value && permission) {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }
-            }
+
             const data = {
                 token_name: token_name,
                 prefix: token_prefix,
                 first_and_last_char: token_value,
                 permission: permission
             }
-            axios.put("/frontend-api/add-permission", data, config)
-                .then(() => {
-                    setTokenList((prev) => {
+            addpermissionmutate({ url: "/frontend-api/add-permission", data: data },
+                {
+                    onSuccess: () => setTokenList((prev) => {
                         const items = [...token_list[index].permissions, permission];
                         const newState = prev;
                         newState[index].permissions = items;
                         return [...newState];
-                    });
-                }).catch(error => {
-                    setTokenCreateError(error.response.data.detail)
-                });
+                    }),
+
+                    onError: (error) => setTokenCreateError(error.response.data.detail)
+
+                })
         }
         onClose()
     }
     return (
-        <Dialog onClose={onClose} open={open}>
-            <DialogTitle>Add Permission(s)</DialogTitle>
+        <Dialog fullWidth={true}
+            maxWidth='xs'
+            onClose={onClose}
+            open={open}>
+            <DialogTitle >Add Permission(s)</DialogTitle>
             <IconButton
                 aria-label="close"
                 onClick={onClose}
+                size='small'
                 sx={{
                     position: 'absolute',
                     right: 8,
-                    top: 8,
+                    top: 12,
                     color: (theme) => theme.palette.grey[500],
                 }}
             >
@@ -69,7 +69,10 @@ function PermissionDialog(props) {
                     justifyContent: 'center',
                     flexWrap: 'wrap',
                     listStyle: 'none',
-                    p: 2,
+                    pt: 2,
+                    pb: 2,
+                    pl: 4,
+                    pr: 4,
                     m: 0,
                 }}
                 component="ul"
@@ -88,7 +91,6 @@ function PermissionDialog(props) {
 PermissionDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
-    selectedValue: PropTypes.string.isRequired,
     notchoosenpermissionlist: PropTypes.array.isRequired,
     token_name: PropTypes.string.isRequired,
     token_value: PropTypes.string.isRequired,

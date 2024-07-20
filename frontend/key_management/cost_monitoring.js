@@ -204,7 +204,7 @@ function CostMonitoring() {
     },
     plugins: {
       legend: {
-        position: 'bottom',       
+        position: 'bottom',
       },
       title: {
         display: true,

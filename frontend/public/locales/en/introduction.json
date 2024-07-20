@@ -15,10 +15,10 @@
     "tool_title": "Tools",
     "tool_chunk_1": "Regarding the tools incoporated in this website, we offer API endpoints and sandboxs to:",
     "tool_list": [
-        "Dataset labelling and or modifying.",
-        "Qualitative Interview Automation and Data Collection with Interview Agent.",
-        "Write or paraphase their assignments with Assignment Agent and LLM functions.",
-        "Agents building or testing with Construction Zone and Your Template."
+        "Label and or modify datasets.",
+        "Automate qualitative interview and data collection with Interview Agent.",
+        "Write or paraphase assignments with Assignment Agent and LLM functions.",
+        "Build and test Agents with Construction Zone and Your Template."
     ],
     "tool_chunk_2": "There is no sophisticated agenda or argument to be made here, we are playing the role of a parakeet, repeating other people voices.",
     "call_to_act_list": [

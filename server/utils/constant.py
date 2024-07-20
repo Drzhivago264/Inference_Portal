@@ -11,6 +11,7 @@ DEFAULT_PERMISSION_CODENAMES = [
     'allow_data_synthesis',
     'allow_create_token'
 ]
+MAX_KEY_NAME_LENGTH = 50
 SERVER_TTL = 1200
 MONITOR_ITERVAL = 5
 SHUTDOWN_INTERVAL = 60

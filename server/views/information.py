@@ -76,7 +76,10 @@ def log_in(request: HttpRequest) -> Response:
         except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
             return Response({'detail': 'Your Key is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        message = str()
+        for error in serializer.errors:
+            message += serializer.errors[error][0] + "\n" 
+        return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])

@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
+import PropTypes from 'prop-types';
 import React from 'react';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
@@ -50,3 +51,12 @@ export const RedirectMediaCards = ({ image_link, t, redirect, destination, image
         </Box>
     )
 }
+RedirectMediaCards.propTypes = {
+    t: PropTypes.func.isRequired,
+    image_link: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    redirect: PropTypes.func.isRequired,
+    setImageLoad: PropTypes.func.isRequired,
+    destination: PropTypes.string.isRequired,
+    image_loaded: PropTypes.bool.isRequired,
+};
