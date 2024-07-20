@@ -45,7 +45,7 @@ import { UserContext } from '../App.js'
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { basePost } from '../api_hook/basePost.js';
-import { logout } from '../component/checkLogin.js';
+import { useGetLogout } from '../api_hook/useGetLogout.js';
 import { useGetProduct } from '../api_hook/useGetProduct.js';
 import { useMutation } from 'react-query';
 
@@ -66,6 +66,9 @@ function KeyManagement() {
     const { product_objects } = useGetProduct()
     const [keycreateloading, setKeyCreateLoading] = useState(false)
     const [localkeycreateerror, setLocalKeyCreateError] = useState("")
+    
+    const {refetch} = useGetLogout(setIsAuthenticated)
+    
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
@@ -152,7 +155,7 @@ function KeyManagement() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>Key Management</title>
-            <ResponsiveAppBar max_width="xl" />
+            <ResponsiveAppBar max_width="lg" />
             <Container maxWidth="md">
                 <Box
                     my={1}
@@ -195,7 +198,7 @@ function KeyManagement() {
                                             }}
                                         />
                                         {!is_authenticated && <LoadingButton size="small" loading={keycreateloading} loadingPosition="end" variant="contained" type="submit" endIcon={<LockOpenIcon />}>Generate</LoadingButton>}
-                                        {is_authenticated && <Button variant="outlined" onClick={() => { logout(setIsAuthenticated) }} color="error" endIcon={<LogoutIcon />}>Logout</Button>}
+                                        {is_authenticated && <Button variant="outlined" onClick={refetch} color="error" endIcon={<LogoutIcon />}>Logout</Button>}
                                     </Stack>
                                 </FormControl>
                             </form>

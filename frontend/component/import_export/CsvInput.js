@@ -24,7 +24,7 @@ const VisuallyHiddenInput = styled('input')({
 const CsvFileInput = ({ onFileLoad, filename, setFileName, from_row, to_row, setFromRow, setToRow }) => {
     const inputFile = useRef(null);
     const handleFileChange = (e, is_fisrt_load) => {
-        console.log(is_fisrt_load)
+
         if (is_fisrt_load) {
             var file = e.target.files[0]
             setFileName(e.target.files[0].name)
@@ -34,7 +34,7 @@ const CsvFileInput = ({ onFileLoad, filename, setFileName, from_row, to_row, set
         }
         var preview_list = []
         var current_row = 0
-        console.log(file, from_row, to_row)
+
         if (file) {
             Papa.parse(file, {
                 step: function (result, parser) {

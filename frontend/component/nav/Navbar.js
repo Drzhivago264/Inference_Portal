@@ -1,5 +1,5 @@
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
-import { ColorModeContext, UserContext } from '../../App.js'
+import { ColorModeContext, UserContext, WebSocketContext } from '../../App.js'
 import { Divider, Stack } from '@mui/material';
 import React, { useContext, useEffect, useState } from "react";
 import { UserVeticalNav, VerticalNav } from './VerticalNav.js';
@@ -257,8 +257,8 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
     </Box>
   );
   const { colorMode, theme } = useContext(ColorModeContext);
-  const { is_authenticated, user_hashed_key, user_key_name } = useContext(UserContext);
-
+  const { is_authenticated, user_key_name } = useContext(UserContext);
+  const {websocket_hash} = useContext(WebSocketContext)
   return (
     <Fade in={true} timeout={timeout}>
       <AppBarColored position="sticky" elevation={0}>
@@ -281,7 +281,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
             <Avatar
               alt="logo"
               src="https://static.professorparakeet.com/image/android-chrome-192x192.png"
-              onClick={()=>{navigate("/")}}
+              onClick={() => { navigate("/") }}
               sx={{ width: 42, height: 42 }}
               variant="rounded"
             />
@@ -289,10 +289,10 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               variant="h6"
               noWrap
               component="a"
-              onClick={()=>{navigate("/")}}
+              onClick={() => { navigate("/") }}
               sx={{
                 mr: 1,
-                mt:0.55,
+                mt: 0.55,
                 fontWeight: 700,
                 color: 'inherit',
                 textDecoration: 'none',
@@ -310,7 +310,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               </Menu>
             </Dropdown>
             <Dropdown>
-              <MenuButton sx={{ display: { xs: 'none', sm: 'none', md: 'block'  } }}>{t('navbar.Modes')}</MenuButton>
+              <MenuButton sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>{t('navbar.Modes')}</MenuButton>
               <Menu slots={{ listbox: Listbox }}>
                 <MenuItem_DropBox ><NavLink to="/frontend/hub">{t('navbar.Bots_Agents')}</NavLink></MenuItem_DropBox>
                 <MenuItem_DropBox ><NavLink to="/frontend/api/docs">{t('navbar.API_Docs')}</NavLink></MenuItem_DropBox>
@@ -322,7 +322,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               onClick={(e) => redirect(e)}
               sx={{
                 textDecoration: 'none',
-                display: { xs: 'none', sm: 'none', md: 'block'  }
+                display: { xs: 'none', sm: 'none', md: 'block' }
               }}
             >
               {t('navbar.Manage_Key')}
@@ -333,7 +333,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               onClick={(e) => redirect(e)}
               sx={{
                 textDecoration: 'none',
-                display: { xs: 'none', sm: 'none', md: 'block'  }
+                display: { xs: 'none', sm: 'none', md: 'block' }
               }}
             >
               {t('navbar.Contact')}
@@ -398,7 +398,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
                   variant="dot"
                 >
                   <AvatarWithHover sx={{ width: 38, height: 38, cursor: 'pointer' }} onClick={toggleUserDrawer(true)} style={{ border: '1px solid lightgray' }} >
-                    {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
+                    {websocket_hash && <Jdenticon size="38" value={websocket_hash} />}
                   </AvatarWithHover>
                 </StyledBadge>
                 <Box>
@@ -414,7 +414,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
               <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }} mt={1.5} ml={1.5} mr={1.5} >
                   <AvatarWithHover sx={{ width: 38, height: 38, cursor: 'pointer' }} style={{ border: '1px solid lightgray' }} >
-                    {user_hashed_key && <Jdenticon size="38" value={user_hashed_key} />}
+                    {websocket_hash && <Jdenticon size="38" value={websocket_hash} />}
                   </AvatarWithHover>
                   <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '11rem' }}>
                     <Typography m={1.2} sx={{ fontWeight: 'bold' }} noWrap variant='body1'>
@@ -438,7 +438,10 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
   );
 }
 ResponsiveAppBar.propTypes = {
-  max_width: PropTypes.string.isRequired,
+  max_width: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.bool
+  ]).isRequired,
   timeout: PropTypes.number
 }
 export default ResponsiveAppBar;

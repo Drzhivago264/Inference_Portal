@@ -43,10 +43,10 @@ import Underline from "@editorjs/underline"
 import UserTemplate from '../component/chat_components/UserTemplate.js';
 import { agentsocket } from '../component/websocket/AgentSocket.js';
 import editorjsCodecup from '@calumk/editorjs-codecup';
-import { redirect_anon_to_login } from '../component/checkLogin.js';
 import { styled } from '@mui/material/styles';
 import { useGetInstructionTree } from '../api_hook/useGetInstructionTree.js';
 import { useGetModel } from '../api_hook/useGetModel.js';
+import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
 import { useNavigate } from "react-router-dom";
 
 const ChatPaper = styled(Paper)(({ theme }) => ({
@@ -79,9 +79,9 @@ function Agent() {
     const [use_user_template, setUseUserTemplate] = useState(false)
     const [selectedIndex, setSelectedIndex] = useState(0);
     const navigate = useNavigate();
-    
     const { is_authenticated, timeZone } = useContext(UserContext);
-
+    useGetRedirectAnon(navigate, is_authenticated)
+    
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
     };
@@ -93,7 +93,6 @@ function Agent() {
         editorref.current.render(default_editor)
     };
     useEffect(() => {
-        redirect_anon_to_login(navigate, is_authenticated)
         if (!editorref.current) {
             const editor = new EditorJS({
                 holderId: 'editorjs',

@@ -41,6 +41,7 @@ class LogListJson(BaseDatatableView):
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
+@cache_page(60 * 15)
 def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
     current_user = request.user
     if not current_user.has_perm('server.allow_view_cost'):

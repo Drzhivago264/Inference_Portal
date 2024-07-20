@@ -41,7 +41,6 @@ const EditorExport = ({ editorref }) => {
     const download = (mimeType, filename) => {
         editorref.current.save().then((outputData) => {
             let download_content = outputData
-            console.log(download_content)
             if (mimeType == "application/json") {
                 download_content = JSON.stringify(outputData, null, 4)
             }

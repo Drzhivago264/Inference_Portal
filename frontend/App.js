@@ -10,7 +10,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import GlobalStyles from "@mui/material/GlobalStyles";
 import LinearProgress from '@mui/material/LinearProgress';
-import { check_login } from './component/checkLogin.js';
+import { useGetLogin } from './api_hook/useGetLogin.js';
 
 const ModelInfor = lazy(() => import("./information/model.js"));
 const Hub = lazy(() => import("./rooms/redirect.js"));
@@ -39,7 +39,7 @@ export const WebSocketContext = createContext();
 export default function App() {
   const [mode, setMode] = useState('dark');
   const [is_authenticated, setIsAuthenticated] = useState(false)
-  const [user_hashed_key, setUserHashKey] = useState(null)
+
   const [user_key_name, setUserKeyName] = useState(null)
   const websocket = useRef(null)
   const chat_websocket = useRef(null)
@@ -47,9 +47,10 @@ export default function App() {
   const [websocket_hash, setWebsocketHash] = useState(null)
   const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
   
+  const {refetch} = useGetLogin(setIsAuthenticated,  setUserKeyName, setWebsocketHash)
   useEffect(() => {
-    check_login(setIsAuthenticated, setUserHashKey, setUserKeyName, setWebsocketHash)
-  }, [is_authenticated, user_hashed_key, user_key_name, websocket_hash]);
+      refetch()
+  }, [is_authenticated,  user_key_name, websocket_hash]);
 
   const colorMode = useMemo(
     () => ({
@@ -73,7 +74,7 @@ export default function App() {
   );
   return (
     <WebSocketContext.Provider value={{websocket, agent_websocket, chat_websocket, websocket_hash}}>
-      <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, user_hashed_key, user_key_name, timeZone }}>
+      <UserContext.Provider value={{ is_authenticated, setIsAuthenticated,  user_key_name, timeZone }}>
         <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
           <GlobalStyles
             styles={{
