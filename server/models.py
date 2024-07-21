@@ -76,6 +76,25 @@ class Crypto(models.Model):
     def __str__(self) -> str:
         return self.coin
 
+class Dataset(models.Model):
+    name = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self) -> str:
+        return self.name + " " + self.created_at
+
+class DatesetRecord(models.Model):
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    system_prompt = models.TextField()
+    prompt = models.TextField(max_length=128000, blank=True, null=True)
+    response = models.TextField(max_length=128000, blank=True, null=True)
+    evaluation = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self) -> str:
+        return self.dataset.name + " " + self.created_at
+    
 class PaymentHistory(models.Model):
     key =  models.ForeignKey(APIKEY, on_delete=models.CASCADE) 
     crypto  =  models.ForeignKey(Crypto, on_delete=models.CASCADE) 
@@ -207,7 +226,7 @@ class UserInstructionTree(MPTTModel):
     name = models.CharField(max_length=255, unique=True)
     displayed_name = models.TextField(default='')
     code = models.TextField(default="")
-    instruct = models.TextField(default="")
+    instruct = models.TextField(default="", max_length=128000)
     default_child = models.BooleanField(default=False)
     default_editor_template = models.TextField(default="")
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
