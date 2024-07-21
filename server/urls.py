@@ -36,13 +36,16 @@ from server.views.room_view import (
     update_user_instruction_tree_api,
     delete_user_instruction_tree_api
 )
-
+from server.views.prompt_writing import (
+    get_default_user_dataset_api
+)
 app_name = "server"
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual', TemplateView.as_view(template_name='frontend_index.html')),
-    path('frontend/prompt-writing', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/prompt-writing',
+         TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/user-instruction',
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/data-synthesis',
@@ -88,7 +91,8 @@ urlpatterns = [
     path('frontend-api/hub-redirect',  hub_redirect_api, name='hub-redirect'),
     path('frontend-api/instruction-tree',
          instruction_tree_api, name='instruction-tree'),
-
+    path('frontend-api/default-dataset',
+         get_default_user_dataset_api, name='default-dataset'),
     path('frontend-api/generate-key',  generate_key_api, name='generate-key'),
     path('frontend-api/generate-token',
          generate_token_api, name='generate-token'),
@@ -116,9 +120,9 @@ urlpatterns = [
     path('frontend-api/get-user-instruction',
          user_instruction_tree_api, name='user-instruction'),
     path('frontend-api/post-user-instruction',
-          create_user_instruction_tree_api, name='post-user-instruction'),
+         create_user_instruction_tree_api, name='post-user-instruction'),
     path('frontend-api/update-user-instruction',
-          update_user_instruction_tree_api, name='update-user-instruction'),
+         update_user_instruction_tree_api, name='update-user-instruction'),
     path('frontend-api/delete-user-instruction',
          delete_user_instruction_tree_api, name='delete-user-instruction'),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),

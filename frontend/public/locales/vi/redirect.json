@@ -9,6 +9,6 @@
     "Hotpot_Mode_Content": "Chế độ này đặt agent và chatbot vào 1 trang cho mục đích kiểm tra. Người dùng có thể cùng lúc gửi và lệnh đến bots và agents.",
     "LLM_Functions": "Chức năng LLM",
     "LLM_Functions_Content": "Chế độ này hiển thị các chức năng backend được sử dụng cho nhiều nhiệm vụ (ví dụ: phân loại, dự đoán tình cảm). Các chức năng backend được sử dụng trong cả chế độ chatbot và agent để cải thiện ngữ cảnh của lời nhắc của người dùng.",
-    "Data_Synthesis": "Chế độ Tổng Hợp Dữ Liệu (Đang làm dở)",
+    "Data_Synthesis": "Chế độ Tổng Hợp Dữ Liệu",
     "Data_Synthesis_Content": "Chế độ này cho phép người dùng hiệu lệnh mô hình ngôn ngữ để tổng hợp dữ liệu. Người dùng cần chuẩn bị một tệp CSV gồm một số câu lệnh và trả lời. Những câu lệnh của người dùng được nâng cao và phức tạp hóa bằng mô hình, sau đó câu trả lời cho lệnh được suy luận. Chế độ này cũng cho phép người dùng chỉnh sửa đầu ra của model để cải thiện dữ liệu."
   }

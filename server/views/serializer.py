@@ -8,9 +8,12 @@ from server.models import (
     MemoryTree,
     UserInstructionTree,
     PromptResponse,
+    Dataset,
+    DatasetRecord
 
 )
 from server.utils import constant
+
 
 class CostSerializer(serializers.ModelSerializer):
     model = serializers.SlugRelatedField(
@@ -28,6 +31,24 @@ class InstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstructionTree
         fields = ('instruct', "name", "code", "default_editor_template")
+
+
+class DatasetCreateSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
+class DatasetUpdateSerializer(DatasetCreateSerializer):
+    new_name = serializers.CharField()
+
+
+class DatasetRecordSerialzier(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    dataset = serializers.CharField()
+    system_prompt = serializers.CharField()
+    prompt = serializers.CharField()
+    response = serializers.CharField()
+    evaluation = serializers.JSONField()
 
 
 class UserInstructionTreeSerializer(serializers.ModelSerializer):
@@ -71,11 +92,13 @@ class UserInstructionGetSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     key = serializers.CharField()
+
     def validate_key(self, value):
-        if len(value) != 41 and len(value) !=73 and len(value) != 0:
+        if len(value) != 41 and len(value) != 73 and len(value) != 0:
             raise serializers.ValidationError(
                 "Key is incorrect")
         return value
+
 
 class RedirectSerializer(LoginSerializer):
     check_login = serializers.BooleanField()
