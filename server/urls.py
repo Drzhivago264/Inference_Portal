@@ -42,6 +42,7 @@ app_name = "server"
 urlpatterns = [
     path('', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/manual', TemplateView.as_view(template_name='frontend_index.html')),
+    path('frontend/prompt-writing', TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/user-instruction',
          TemplateView.as_view(template_name='frontend_index.html')),
     path('frontend/data-synthesis',

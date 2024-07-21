@@ -30,7 +30,7 @@ const Login = lazy(() => import("./key_management/login.js"))
 const UserInstruction = lazy(() => import("./rooms/user_instruction.js"))
 const CostMonitoring = lazy(() => import("./key_management/cost_monitoring.js"))
 const DataSynthesis = lazy(() => import("./rooms/data_synthesis.js"))
-
+const PromptWriting = lazy(() => import("./rooms/prompt_writing.js"))
 
 export const ColorModeContext = createContext({ toggleColorMode: () => { } });
 export const UserContext = createContext();
@@ -129,6 +129,7 @@ export default function App() {
                 <Route path="/frontend/payment-success" element={<PaymentSuccessPage />} />
                 <Route path="/frontend/chat" element={<ChatPage />} />
                 <Route path="/frontend/engineer" element={<AgentPage />} />
+                <Route path="/frontend/prompt-writing" element={<PromptWritingPage />} />
                 <Route path="/frontend/toolbox" element={<FunctionLLMPage />} />
                 <Route path="/frontend/hotpot" element={<HotpotPage />} />
                 <Route path="/frontend/log" element={<LogPage />} />
@@ -146,6 +147,12 @@ export default function App() {
 const AgentPage = () => (
   <Suspense fallback={<LinearProgress />}>
     <Agent />
+  </Suspense>
+);
+
+const PromptWritingPage = () => (
+  <Suspense fallback={<LinearProgress />}>
+    <PromptWriting />
   </Suspense>
 );
 
