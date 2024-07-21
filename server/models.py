@@ -38,7 +38,8 @@ class CustomPermissionWithoutContentType(models.Model):
             ('allow_view_cost', 'Global permission for viewing cost'),
             ('allow_create_template', 'Global permission for creating template'),
             ('allow_data_synthesis', 'Global permission for using data synthesis'),
-            ('allow_create_token', 'Global permission for creating token')
+            ('allow_create_token', 'Global permission for creating token'),
+            ('allow_create_dataset', 'Global permission for creating dataset')
         )
 
 class APIKEY(AbstractAPIKey):
@@ -84,7 +85,7 @@ class Dataset(models.Model):
     def __str__(self) -> str:
         return self.name + " " + self.created_at
 
-class DatesetRecord(models.Model):
+class DatasetRecord(models.Model):
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
     system_prompt = models.TextField()
     prompt = models.TextField(max_length=128000, blank=True, null=True)

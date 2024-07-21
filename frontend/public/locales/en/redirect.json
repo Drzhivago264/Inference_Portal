@@ -8,6 +8,6 @@
     "Hotpot_Mode_Content": "This mode puts agent and chatbot into 1 page for testing purposes. It allows user to duplicate message to both bots and agents to inference concurrently.",
     "LLM_Functions": "LLM Functions",
     "LLM_Functions_Content": "This mode displays the backend functions that are used for multiple tasks (e.g., classification, sentiment predictions).  The backend functions are used in both chatbot and agent modes to improve the context of users' prompts.",
-    "Data_Synthesis": "Data Synthesis (Work in Progress)",
+    "Data_Synthesis": "Data Synthesis",
     "Data_Synthesis_Content": "This mode allows users to prompt LLMs for synthetic data generation. Users need to prepare a CSV that include seed prompts and responses. The seeds prompts are then enhanced and complexify by the model which then provides the answer for the generated prompts. This mode also includes allow users to edit the final outputs of the models to further improve their dataset."
   }
