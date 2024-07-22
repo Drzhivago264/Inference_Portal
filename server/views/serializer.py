@@ -33,18 +33,22 @@ class InstructionTreeSerializer(serializers.ModelSerializer):
         fields = ('instruct', "name", "code", "default_editor_template")
 
 
-class DatasetCreateSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
+class DatasetCreateSerializer(serializers.Serializer):
     name = serializers.CharField()
 
+class DatasetDeleteSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
 
-class DatasetUpdateSerializer(DatasetCreateSerializer):
+class DatasetUpdateSerializer(DatasetDeleteSerializer):
     new_name = serializers.CharField()
 
+class DatasetGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dataset
+        fields = ('id', "name")
 
-class DatasetRecordSerialzier(serializers.ModelSerializer):
-    id = serializers.IntegerField()
-    dataset = serializers.CharField()
+class DatasetRecordSerialzier(serializers.Serializer):
+    dataset_id = serializers.CharField()
     system_prompt = serializers.CharField()
     prompt = serializers.CharField()
     response = serializers.CharField()
