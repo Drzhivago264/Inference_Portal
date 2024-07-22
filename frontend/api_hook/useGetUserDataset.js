@@ -1,15 +1,18 @@
 import { baseGet } from "./baseGet";
 import { useQuery } from "react-query";
 
-export const useGetUserDataset = (setDatasetList) => {
+export const useGetUserDataset = (setDatasetList, setMaxDatasetNum) => {
 
     const {
         error: error,
         isLoading: isLoading,
     } = useQuery("DatasetList", () => baseGet("/frontend-api/get-dataset"),
-        {
-            onSuccess: (data) => console.log(data),
-            onError: (error) => console.log(error)
+        {   
+            retry: false,
+            onSuccess: (data) => {
+                setDatasetList(data.dataset_list), 
+                setMaxDatasetNum(data.max_dataset_num)
+            },
         }
     );
 

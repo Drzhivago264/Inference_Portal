@@ -79,7 +79,6 @@ function UserInstruction() {
     const [add_child_error, setAddChildError] = useState(false)
     const [add_parent_error, setAddParentError] = useState(false)
     const [is_save, setIsSaved] = useState(true)
-
     const [max_parent_num, setMaxParentNum] = useState(null)
     const [max_child_num, setMaxChildNum] = useState(null)
     const [disable_save, setDisableSave] = useState(true)
@@ -212,8 +211,7 @@ function UserInstruction() {
         setSelectedIndex(index);
     };
     const addParent = () => {
-        let length = template_list.length
-        if (length < max_parent_num) {
+        if (template_list.length < max_parent_num) {
             setIsSaved(false)
             const new_template_list = [...template_list, {
                 id: null,
@@ -231,7 +229,6 @@ function UserInstruction() {
     }
 
     const deleteParent = () => {
-        let length = template_list.length
         const new_template_list = [...template_list];
         const node_to_delete = template_list[selectedIndex];
         if (node_to_delete.id !== null) {
@@ -241,19 +238,18 @@ function UserInstruction() {
         setIsSaved(true)
         new_template_list.splice(selectedIndex, 1);
         setTemplateList(new_template_list)
-        if (length < max_parent_num) {
+        if (template_list.length < max_parent_num) {
             if (new_template_list.length > 0) {
-                handleListItemClick(null, 0)
                 setDeleteSuccess(true)
             }
             else {
-                handleListItemClick(null, 0)
                 const new_template_list = [{ id: null, displayed_name: "", instruct: "", children: null }];
                 setTemplateList(new_template_list)
                 setChildInstructionList([
                     { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false },
                 ])
             }
+            handleListItemClick(null, 0)
         }
         else {
             setAddParentError(false)

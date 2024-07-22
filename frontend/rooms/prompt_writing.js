@@ -1,21 +1,18 @@
 import { Divider, List, Typography } from '@mui/material';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { UserContext, WebSocketContext } from '../App.js'
+import React, { useContext, useState } from 'react';
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Checkbox from '@mui/material/Checkbox';
 import Container from '@mui/material/Container';
 import DeleteIcon from '@mui/icons-material/Delete';
-import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FolderIcon from '@mui/icons-material/Folder';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import Footer from '../component/nav/Footer.js';
 import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
+import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -26,14 +23,10 @@ import SaveIcon from '@mui/icons-material/Save';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { agentsocket } from '../component/websocket/AgentSocket';
-import axios from 'axios';
+import { UserContext } from '../App.js'
 import { baseDelete } from '../api_hook/baseDelete.js';
 import { basePost } from '../api_hook/basePost.js';
 import { basePut } from '../api_hook/basePut.js';
-import { nanoid } from 'nanoid'
-import { styled } from '@mui/material/styles';
-import { useGetModel } from '../api_hook/useGetModel.js';
 import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
 import { useGetUserDataset } from '../api_hook/useGetUserDataset.js';
 import { useMutation } from 'react-query';
@@ -41,10 +34,14 @@ import { useNavigate } from 'react-router-dom';
 
 function PromptWriting() {
     const navigate = useNavigate();
-
     const [instruct_change, setInstructChange] = useState(false)
-    const [choosen_dataset, setChoosenDataset] = useState("Empty Dataset");
-
+    const [current_system_prompt, setCurrentSystemPrompt] = useState("")
+    const [current_evaluation, setCurrentEvaluation] = useState([{ evaluation_name: "Score", score: null }])
+    const [current_prompt, setCurrentPrompt] = useState("")
+    const [current_response, setCurrentResponse] = useState("")
+    const [current_record_id, setCurrentRecordId] = useState(null)
+    const [allow_save_dataset, setAllowSaveDataset] = useState(false)
+    const [allow_save_record, setAllowSaveRecord] = useState(false)
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
     const [saveerror, setSaveError] = useState(false);
@@ -52,95 +49,91 @@ function PromptWriting() {
     const [deletesuccess, setDeleteSuccess] = useState(false);
     const [deleteerror, setDeleteError] = useState(false);
     const [deleteerrormessage, setDeleteErrorMessage] = useState('');
-    const [dataset_list, setDatasetList] = useState([{ name: "Empty Dataset" }])
+    const [dataset_list, setDatasetList] = useState([])
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [add_child_error, setAddChildError] = useState(false)
     const [add_parent_error, setAddParentError] = useState(false)
-    const [is_save, setIsSaved] = useState(true)
-    const [reload, setReload] = useState(false)
+    const [allow_add_dataset, setAllowAddDataset] = useState(true)
+
     const [max_dataset_num, setMaxDatasetNum] = useState(10)
 
     const [disable_save, setDisableSave] = useState(true)
-    const [children_instruction_list, setChildInstructionList] = useState([
-        { id: null, dislayed_name: "", instruct: "", unique: nanoid(), add: false },
-    ])
+ 
     const { is_authenticated } = useContext(UserContext);
     useGetRedirectAnon(navigate, is_authenticated)
 
-    const updateParentTemplate = (v, property) => {
+
+    const handleDatasetChange = (v, property) => {
+        if (property !== 'id') {
+            setAllowSaveDataset(true)
+        }
         setInstructChange(true)
         const new_dataset_list = [...dataset_list]
         const new_template = { ...dataset_list[selectedIndex] }
         new_template[property] = v
         new_dataset_list[selectedIndex] = new_template
         setDatasetList(new_dataset_list)
-        if (property == "name") {
-            setChoosenDataset(v)
-        }
     }
-    const { mutate: templatepostemutate } = useMutation(basePost);
-    const { mutate: templateputemutate } = useMutation(basePut);
-    const submitTemplate = () => {
-        setLoading(true)
-        const data = {
-            "parent_instruction": dataset_list[selectedIndex],
-            "childrens": children_instruction_list
-        }
 
-        if (!dataset_list[selectedIndex]['id']) {
-            templatepostemutate({ url: "/frontend-api/post-user-instruction", data: data },
-                {
-                    onSuccess: () => {
-                        setReload(true)
-                        setSaveSuccess(true)
-                        setLoading(false)
-                        setIsSaved(true)
-                    }
-                    ,
-                    onError: (error) => {
-                        setLoading(false)
-                        setSaveError(true)
-                        if (error.code === "ERR_BAD_RESPONSE") {
-                            setSaveErrorMessage("Failed, Internal Server Error!")
-                        }
-                        else {
-                            setSaveErrorMessage(error.response.data.detail)
-                        }
-                    }
+    const updateEvaluationValue = (v, property, index) => {
+
+        const new_evaluation_list = [...current_evaluation]
+        const new_evaluation = { ...new_evaluation_list[index] }
+        new_evaluation[property] = v
+        new_evaluation_list[index] = new_evaluation
+        setCurrentEvaluation(new_evaluation_list)
+
+    }
+    const { mutate: postmutate } = useMutation(basePost);
+    const { mutate: putmutate } = useMutation(basePut);
+    const saveDataset = () => {
+        setLoading(true)
+        const dataset = dataset_list[selectedIndex]
+        if (!dataset.id) {
+            const data = {
+                'name': dataset.name
+            }
+            postmutate({ url: "/frontend-api/create-dataset", data: data }, {
+                onSuccess: (data) => {
+                    setSaveSuccess(true)
+                    setAllowAddDataset(true)
+                    handleDatasetChange(data.id, 'id')
+                    setAllowSaveDataset(false)
                 }
+            }
             )
-            setDisableSave(true)
         }
         else {
-            templateputemutate({ url: "/frontend-api/update-user-instruction", data: data },
-                {
-                    onSuccess: () => {
-                        setSaveSuccess(true)
-                        setLoading(false)
-                        setIsSaved(true)
+            const data = {
+                'id': dataset.id,
+                'new_name': dataset.name
+            }
+            putmutate({ url: "/frontend-api/update-dataset", data: data }, {
+                onSuccess: () => {
+                    setSaveSuccess(true)
+                    setAllowAddDataset(true)
+                    setAllowSaveDataset(false)
+                },
+                onError: (error) => {
+                    setSaveError(true)
+                    if (error.code === "ERR_BAD_RESPONSE") {
+                        setSaveErrorMessage("Failed, Internal Server Error!")
                     }
-                    ,
-                    onError: (error) => {
-                        setLoading(false)
-                        setSaveError(true)
-                        if (error.code === "ERR_BAD_RESPONSE") {
-                            setSaveErrorMessage("Failed, Internal Server Error!")
-                        }
-                        else {
-                            setSaveErrorMessage(error.response.data.detail)
-                        }
+                    else {
+                        setSaveErrorMessage(error.response.data.detail)
                     }
-                })
-
-            setDisableSave(true)
+                }
+            })
         }
+        setLoading(false)
     }
-    const { mutate: templatedeletemutate } = useMutation(baseDelete);
-    const deleteTemplate = (id) => {
+
+    const { mutate: deletemutate } = useMutation(baseDelete);
+    const deleteReq = (id) => {
         const data = {
             'id': id
         }
-        templatedeletemutate({ url: "/frontend-api/delete-user-instruction", data: data },
+        deletemutate({ url: "/frontend-api/delete-dataset", data: data },
             {
                 onSuccess: () =>
                     setDeleteSuccess(true)
@@ -155,59 +148,101 @@ function PromptWriting() {
                 }
             })
     }
-    const handleTextFieldChange = (index, property, value) => {
-        const new_children_instruction_list = [...children_instruction_list];
-        const new_instruction = { ...children_instruction_list[index] };
-        new_instruction[property] = value;
-        new_children_instruction_list[index] = new_instruction;
-        setChildInstructionList(new_children_instruction_list)
-        updateParentTemplate(new_children_instruction_list, 'children')
-    }
-    const handleListItemClick = (event, index) => {
-        if (!disable_save) {
-            submitTemplate()
+
+    const saveRecord = () => {
+        setLoading(true)
+        const dataset = dataset_list[selectedIndex]
+        if (!dataset.id) {
+            saveDataset()
         }
-        let default_child_instruction = []
-        if (dataset_list[index]['children'] === null) {
-            setChildInstructionList([{ id: null, name: "", instruct: "", unique: nanoid(), add: false }])
+        const current_evaluation_without_null = []
+        for (let i in current_evaluation) {
+            if (current_evaluation[i].evaluation_name && current_evaluation[i].score) {
+                current_evaluation_without_null.push(current_evaluation[i])
+            }
         }
-        else {
-            for (let c in dataset_list[index]['children']) {
-                default_child_instruction.push({
-                    'id': dataset_list[index]['children'][c]['id'],
-                    'name': dataset_list[index]['children'][c]['name'],
-                    'instruct': dataset_list[index]['children'][c]['instruct'],
-                    'add': false
+        if (current_prompt && current_response && current_system_prompt) {
+            if (!current_record_id) {
+
+                const data = {
+                    'dataset_id': dataset.id,
+                    'prompt': current_prompt,
+                    'response': current_response,
+                    'system_prompt': current_system_prompt,
+                    'evaluation': current_evaluation_without_null
+                }
+                postmutate({ url: "/frontend-api/create-record", data: data }, {
+                    onSuccess: (data) => {
+                        setSaveSuccess(true)
+                        setAllowSaveRecord(false)
+                        handleDatasetChange(data.id, 'id')
+                        setAllowSaveDataset(false)
+                    }
+                }
+                )
+            }
+            else {
+                const data = {
+                    'record_id': current_record_id,
+                    'dataset_id': dataset.id,
+                    'prompt': current_prompt,
+                    'response': current_response,
+                    'system_prompt': current_system_prompt,
+                    'evaluation': current_evaluation_without_null
+                }
+                putmutate({ url: "/frontend-api/update-record", data: data }, {
+                    onSuccess: () => {
+                        setAllowSaveRecord(false)
+                        setSaveSuccess(true)
+                        setAllowAddDataset(true)
+                        setAllowSaveDataset(false)
+                    },
+                    onError: (error) => {
+                        setSaveError(true)
+                        if (error.code === "ERR_BAD_RESPONSE") {
+                            setSaveErrorMessage("Failed, Internal Server Error!")
+                        }
+                        else {
+                            setSaveErrorMessage(error.response.data.detail)
+                        }
+                    }
                 })
             }
-            setChildInstructionList(default_child_instruction)
         }
+        else {
+            setSaveErrorMessage("Field is empty!")
+        }
+        setLoading(false)
+    }
+
+    const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
     };
+
     const deleteDataset = () => {
-        setIsSaved(true)
+        setAllowAddDataset(true)
         const new_dataset_list = [...dataset_list];
         const node_to_delete = dataset_list[selectedIndex]
         if (node_to_delete.id !== null) {
-            deleteTemplate(node_to_delete.id)
+            deleteReq(node_to_delete.id)
             setDeleteSuccess(true)
         }
-        new_dataset_list.splice(selectedIndex, 1);
-        setDatasetList(new_dataset_list)
-        if (new_dataset_list.length > 0) {
-            handleListItemClick(null, 0)
+        if (new_dataset_list.length > 1) {
+            setDatasetList(prev => {
+                return prev.filter((obj, i) => i !== selectedIndex)
+            })
             setDeleteSuccess(true)
         }
         else {
-            handleListItemClick(null, 0)
-            const new_dataset_list = [{ id: null, name: "", instruct: "", children: null }];
+            const new_dataset_list = [{ id: null, name: "Empty Template" }];
             setDatasetList(new_dataset_list)
         }
     }
+
     const addDataset = () => {
         let length = dataset_list.length
         if (length < max_dataset_num) {
-            setIsSaved(false)
+            setAllowAddDataset(false)
             const new_dataset_list = [...dataset_list, {
                 id: null,
                 name: "",
@@ -216,28 +251,27 @@ function PromptWriting() {
             setSelectedIndex(dataset_list.length)
         }
     }
-    const addRecord = () => {
-        setReload(false)
-        setAddChildError(false)
-        const new_children_instruction_list = [...children_instruction_list, { id: null, name: `` }];
-        setChildInstructionList(new_children_instruction_list)
-
-    }
-    const deleteRecord = (index) => {
-        var node_to_delete = null;
-        const new_children_instruction_list = [...children_instruction_list];
-        node_to_delete = children_instruction_list[index]
-        new_children_instruction_list.splice(index, 1);
-        setChildInstructionList(new_children_instruction_list)
-        if (node_to_delete.id !== null) {
-            deleteTemplate(node_to_delete.id)
-            setDeleteSuccess(true)
+    const addEvaluation = () => {
+        let length = current_evaluation.length
+        if (length < max_dataset_num) {
+            const new_evaluation = [...current_evaluation, {
+                evaluation_name: null,
+                score: null,
+            }];
+            setCurrentEvaluation(new_evaluation)
         }
     }
-    useGetUserDataset(setDatasetList)
+    const deleteEvaluation = (index) => {
+        setCurrentEvaluation(prev => {
+            return prev.filter((obj, i) => i !== index)
+        })
+    }
+
+
+    useGetUserDataset(setDatasetList, setMaxDatasetNum)
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
-            <title>Templates</title>
+            <title>Dataset</title>
             <ResponsiveAppBar max_width={false} />
             <Container maxWidth="xxl" >
                 <Box m={2}>
@@ -250,34 +284,45 @@ function PromptWriting() {
                                 <List>
                                     {dataset_list.map((t, index) => {
                                         return (
-                                            <ListItemButton sx={{ height: 38 }}
-                                                key={index}
-                                                selected={selectedIndex === index}
-                                                onClick={(event) => handleListItemClick(event, index)}
+                                            <ListItem
+                                                key={t.id}
+                                                disablePadding
                                             >
-                                                <ListItemIcon>
-                                                    {selectedIndex === index && <FolderOpenIcon />}
-                                                    {selectedIndex !== index && <FolderIcon />}
-                                                </ListItemIcon>
-                                                <ListItemText primaryTypographyProps={{
-                                                    fontWeight: 'medium',
-                                                    variant: 'body2',
-                                                    style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
-                                                }} primary={t.name} />
-                                            </ListItemButton>
+                                                <ListItemButton sx={{ height: 38 }}
+                                                    selected={selectedIndex === index}
+                                                    onClick={(event) => handleListItemClick(event, index)}
+                                                >
+                                                    <ListItemIcon >
+                                                        {selectedIndex === index && <FolderOpenIcon />}
+                                                        {selectedIndex !== index && <FolderIcon />}
+                                                    </ListItemIcon>
+                                                    <ListItemText primaryTypographyProps={{
+                                                        fontWeight: 'medium',
+                                                        variant: 'body2',
+                                                        style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
+                                                    }} primary={<TextField id="outlined-basic" defaultValue={t.name} size='small' variant="standard"
+                                                        onChange={(e) => handleDatasetChange(e.target.value, 'name')} />} />
+                                                </ListItemButton>
+                                            </ListItem>
                                         )
                                     })}
-                                    <Box display="flex" justifyContent="center"
-                                        alignItems="center">
+                                    <Box
+                                        display="flex"
+                                        justifyContent="center"
+                                        alignItems="center"
+                                        mt={1}>
                                         {add_parent_error && <Alert severity="warning">Reaching the maximum number of dataset ({max_dataset_num}).</Alert>}
-                                        {!add_parent_error && is_save &&
-                                            <IconButton aria-label="add" onClick={() => { addDataset("add") }}>
+                                        {!add_parent_error && allow_add_dataset && dataset_list.length < max_dataset_num &&
+                                            <IconButton aria-label="add" onClick={() => { addDataset() }}>
                                                 <AddCircleOutlineIcon />
                                             </IconButton>
                                         }
-                                        {dataset_list.length > 1 && <IconButton aria-label="delete" onClick={() => { deleteDataset("delete") }}>
+                                        {dataset_list.length > 1 && <IconButton aria-label="delete" onClick={() => { deleteDataset() }}>
                                             <DeleteIcon />
                                         </IconButton>}
+                                        <Box mr={1}>
+                                            <LoadingButton size="small" disabled={!allow_save_dataset} loading={loading} loadingPosition="end" variant="contained" onClick={() => saveDataset()} endIcon={<SaveIcon />}>Save Dataset</LoadingButton>
+                                        </Box>
                                     </Box>
                                 </List>
                             </Paper>
@@ -287,7 +332,7 @@ function PromptWriting() {
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                         <Grid item xs={6}>
                             <Box mr={4}>
-                                <Grid container>
+                                <Grid container spacing={1}>
                                     <Grid sm={12} md={8} item>
                                         <Typography ml={1} mb={1} mt={1} variant='body1'>
                                             Record
@@ -295,12 +340,21 @@ function PromptWriting() {
                                         <FormControl fullWidth sx={{ m: 1 }} variant="standard">
                                             <Stack direction='column' spacing={2}>
                                                 <TextField
+                                                    label="System Prompt"
+                                                    multiline
+                                                    minRows={4}
+                                                    maxRows={6}
+                                                    InputLabelProps={{ shrink: true }}
+                                                    onChange={(e) => { setCurrentSystemPrompt(e.target.value); setAllowSaveDataset(true) }}
+                                                    inputProps={{ maxLength: 2500 }}
+                                                />
+                                                <TextField
                                                     label="Prompt"
                                                     multiline
                                                     minRows={6}
                                                     maxRows={8}
                                                     InputLabelProps={{ shrink: true }}
-                                                    onChange={(e) => { updateParentTemplate(e.target.value, 'instruct'); setDisableSave(false) }}
+                                                    onChange={(e) => { setCurrentPrompt(e.target.value); setAllowSaveRecord(true) }}
                                                     inputProps={{ maxLength: 2500 }}
                                                 />
                                                 <TextField
@@ -311,7 +365,7 @@ function PromptWriting() {
                                                     InputLabelProps={{ shrink: true }}
                                                     fullWidth
                                                     maxRows={8}
-                                                    onChange={(e) => { handleTextFieldChange("instruct", e.target.value); setDisableSave(false) }}
+                                                    onChange={(e) => { setCurrentResponse(e.target.value); setAllowSaveRecord(true) }}
                                                 />
                                             </Stack>
                                         </FormControl>
@@ -320,6 +374,58 @@ function PromptWriting() {
                                         <Typography ml={1} mb={1} mt={1} variant='body1'>
                                             Evaluation
                                         </Typography>
+
+                                        <Stack spacing={1}>
+                                            {current_evaluation.map((ev, index) => {
+                                                return (
+                                                    <Grid key={ev.evaluation_name} container spacing={1}>
+                                                        <Grid sm={12} md={8} item>
+                                                            <TextField
+                                                                id="eval-name"
+                                                                size='small'
+                                                                label="Name"
+                                                                onChange={(e) => { updateEvaluationValue(e.target.value, "evaluation_name", index); setAllowSaveRecord(true) }}
+                                                                value={ev.evaluation_name}
+                                                                InputLabelProps={{
+                                                                    shrink: true,
+                                                                }}
+                                                            />
+                                                        </Grid>
+                                                        <Grid sm={11} md={3} item>
+                                                            <TextField
+                                                                id="eval-number"
+                                                                size='small'
+                                                                label={ev.evaluation_name}
+                                                                value={ev.score}
+                                                                onChange={(e) => { updateEvaluationValue(e.target.value, "score", index); setAllowSaveRecord(true) }}
+                                                                type="number"
+                                                                InputLabelProps={{
+                                                                    shrink: true,
+                                                                }}
+                                                            />
+                                                        </Grid>
+                                                        <Grid sm={1} md={1} item>
+                                                            <IconButton aria-label="delete" onClick={() => { deleteEvaluation(index); setAllowSaveRecord(true) }}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Grid>
+                                                    </Grid>
+                                                )
+                                            }
+                                            )}
+                                        </Stack>
+                                        <Box
+                                            display="flex"
+                                            justifyContent="center"
+                                            alignItems="center"
+                                            mt={1}>
+                                            {current_evaluation.length < max_dataset_num &&
+                                                <IconButton aria-label="add" onClick={() => { addEvaluation(); setAllowSaveRecord(true)}}>
+                                                    <AddCircleOutlineIcon />
+                                                </IconButton>
+                                            }
+                                        </Box>
+
                                     </Grid>
 
                                 </Grid>
@@ -327,12 +433,9 @@ function PromptWriting() {
                                     justifyContent="center"
                                     alignItems="center">
                                     <Box mr={1}>
-                                        <LoadingButton size="small" loading={loading} disabled={disable_save} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
+                                        <LoadingButton size="small" loading={loading} disabled={!allow_save_record} loadingPosition="end" variant="contained" onClick={() => { saveRecord() }} endIcon={<SaveIcon />}>Save</LoadingButton>
                                     </Box>
 
-                                    <IconButton aria-label="add" onClick={() => { addRecord() }}>
-                                        <AddCircleOutlineIcon />
-                                    </IconButton>
 
                                     {
                                         [
