@@ -8,7 +8,7 @@ export const useGetProduct = () => {
         error: error,
         isLoading: isLoading,
     } = useQuery("ProductData", () => baseGet("/frontend-api/products"), {
-        staleTime: Infinity, retry: false,
+        staleTime: Infinity, retry: true,
         onSuccess: (data) => setProduct(data.products)
     });
 
