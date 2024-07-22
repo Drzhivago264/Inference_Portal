@@ -1,13 +1,10 @@
 import { Divider, List, Typography } from '@mui/material';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import { ChatBox } from '../component/chat_components/Chatbox.js';
-import ChatInput from '../component/chat_components/ChatInput.js';
 import Checkbox from '@mui/material/Checkbox';
 import Container from '@mui/material/Container';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,7 +20,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { OpenAPIParameter } from '../component/chat_components/OpenaiParameters.js';
 import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import SaveIcon from '@mui/icons-material/Save';
@@ -39,22 +35,14 @@ import { nanoid } from 'nanoid'
 import { styled } from '@mui/material/styles';
 import { useGetModel } from '../api_hook/useGetModel.js';
 import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
+import { useGetUserDataset } from '../api_hook/useGetUserDataset.js';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-
-const ChatPaper = styled(Paper)(({ theme }) => ({
-    minWidth: 300,
-    height: 500,
-    overflow: 'auto',
-    padding: theme.spacing(2),
-    ...theme.typography.body2,
-}));
 
 function PromptWriting() {
     const navigate = useNavigate();
 
     const [instruct_change, setInstructChange] = useState(false)
-
     const [choosen_dataset, setChoosenDataset] = useState("Empty Dataset");
 
     const [loading, setLoading] = useState(false);
@@ -64,14 +52,14 @@ function PromptWriting() {
     const [deletesuccess, setDeleteSuccess] = useState(false);
     const [deleteerror, setDeleteError] = useState(false);
     const [deleteerrormessage, setDeleteErrorMessage] = useState('');
-    const [dataset_list, setDatasetList] = useState([{name:  "Empty Dataset"}])
+    const [dataset_list, setDatasetList] = useState([{ name: "Empty Dataset" }])
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [add_child_error, setAddChildError] = useState(false)
     const [add_parent_error, setAddParentError] = useState(false)
     const [is_save, setIsSaved] = useState(true)
     const [reload, setReload] = useState(false)
-    const [max_parent_num, setMaxParentNum] = useState(null)
-    const [max_child_num, setMaxChildNum] = useState(null)
+    const [max_dataset_num, setMaxDatasetNum] = useState(10)
+
     const [disable_save, setDisableSave] = useState(true)
     const [children_instruction_list, setChildInstructionList] = useState([
         { id: null, dislayed_name: "", instruct: "", unique: nanoid(), add: false },
@@ -196,98 +184,57 @@ function PromptWriting() {
         }
         setSelectedIndex(index);
     };
-    const addParent = (operation) => {
+    const deleteDataset = () => {
+        setIsSaved(true)
+        const new_dataset_list = [...dataset_list];
+        const node_to_delete = dataset_list[selectedIndex]
+        if (node_to_delete.id !== null) {
+            deleteTemplate(node_to_delete.id)
+            setDeleteSuccess(true)
+        }
+        new_dataset_list.splice(selectedIndex, 1);
+        setDatasetList(new_dataset_list)
+        if (new_dataset_list.length > 0) {
+            handleListItemClick(null, 0)
+            setDeleteSuccess(true)
+        }
+        else {
+            handleListItemClick(null, 0)
+            const new_dataset_list = [{ id: null, name: "", instruct: "", children: null }];
+            setDatasetList(new_dataset_list)
+        }
+    }
+    const addDataset = () => {
         let length = dataset_list.length
-        if (length < max_parent_num) {
-            if (operation == "add") {
-                setIsSaved(false)
-                const new_dataset_list = [...dataset_list, {
-                    id: null,
-                    name: "",
-                    instruct: "",
-                    children: [{ id: null, name: "", instruct: "", unique: nanoid(), add: false }]
-                }];
-                setDatasetList(new_dataset_list)
-                setChildInstructionList([])
-                setSelectedIndex(dataset_list.length)
-            }
-            else if (operation == "delete") {
-                setIsSaved(true)
-                const new_dataset_list = [...dataset_list];
-                const node_to_delete = dataset_list[selectedIndex]
-                if (node_to_delete.id !== null) {
-                    deleteTemplate(node_to_delete.id)
-                    setDeleteSuccess(true)
-                }
-                new_dataset_list.splice(selectedIndex, 1);
-                setDatasetList(new_dataset_list)
-                if (new_dataset_list.length > 0) {
-                    handleListItemClick(null, 0)
-                    setDeleteSuccess(true)
-                }
-                else {
-                    handleListItemClick(null, 0)
-                    const new_dataset_list = [{ id: null, name: "", instruct: "", children: null }];
-                    setDatasetList(new_dataset_list)
-                    setChildInstructionList([
-                        { id: null, name: ``, instruct: "", unique: nanoid(), add: false },
-                    ])
-                }
-            }
-        }
-        else {
-            setAddParentError(true)
-            if (operation == "delete") {
-                setIsSaved(true)
-                const new_dataset_list = [...dataset_list];
-                const node_to_delete = dataset_list[selectedIndex]
-                if (node_to_delete.id !== null) {
-                    deleteTemplate(node_to_delete.id)
-                    setDeleteSuccess(true)
-                }
-                new_dataset_list.splice(selectedIndex, 1);
-                setDatasetList(new_dataset_list)
-                setAddParentError(false)
-                handleListItemClick(null, 0)
-            }
+        if (length < max_dataset_num) {
+            setIsSaved(false)
+            const new_dataset_list = [...dataset_list, {
+                id: null,
+                name: "",
+            }];
+            setDatasetList(new_dataset_list)
+            setSelectedIndex(dataset_list.length)
         }
     }
-    const addChild = (operation, index) => {
-        let length = children_instruction_list.length
-        var node_to_delete = null;
+    const addRecord = () => {
         setReload(false)
-        if (length < max_child_num) {
-            setAddChildError(false)
-            if (operation == "add") {
-                const new_children_instruction_list = [...children_instruction_list, { id: null, name: ``, instruct: "", unique: nanoid(), add: false }];
-                setChildInstructionList(new_children_instruction_list)
-            }
-            else if (operation == "delete") {
-                const new_children_instruction_list = [...children_instruction_list];
-                node_to_delete = children_instruction_list[index]
-                new_children_instruction_list.splice(index, 1);
-                setChildInstructionList(new_children_instruction_list)
-                if (node_to_delete.id !== null) {
-                    deleteTemplate(node_to_delete.id)
-                    setDeleteSuccess(true)
-                }
-            }
-        }
-        else {
-            setAddChildError(true)
-            if (operation == "delete") {
-                const new_children_instruction_list = [...children_instruction_list];
-                node_to_delete = children_instruction_list[index]
-                new_children_instruction_list.splice(-1);
-                setChildInstructionList(new_children_instruction_list)
-                setAddChildError(false)
-                if (node_to_delete.id !== null) {
-                    deleteTemplate(node_to_delete.id)
-                    setDeleteSuccess(true)
-                }
-            }
+        setAddChildError(false)
+        const new_children_instruction_list = [...children_instruction_list, { id: null, name: `` }];
+        setChildInstructionList(new_children_instruction_list)
+
+    }
+    const deleteRecord = (index) => {
+        var node_to_delete = null;
+        const new_children_instruction_list = [...children_instruction_list];
+        node_to_delete = children_instruction_list[index]
+        new_children_instruction_list.splice(index, 1);
+        setChildInstructionList(new_children_instruction_list)
+        if (node_to_delete.id !== null) {
+            deleteTemplate(node_to_delete.id)
+            setDeleteSuccess(true)
         }
     }
+    useGetUserDataset(setDatasetList)
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
@@ -322,13 +269,13 @@ function PromptWriting() {
                                     })}
                                     <Box display="flex" justifyContent="center"
                                         alignItems="center">
-                                        {add_parent_error && <Alert severity="warning">Reaching the maximum number of dataset ({max_parent_num}).</Alert>}
+                                        {add_parent_error && <Alert severity="warning">Reaching the maximum number of dataset ({max_dataset_num}).</Alert>}
                                         {!add_parent_error && is_save &&
-                                            <IconButton aria-label="add" onClick={() => { addParent("add") }}>
+                                            <IconButton aria-label="add" onClick={() => { addDataset("add") }}>
                                                 <AddCircleOutlineIcon />
                                             </IconButton>
                                         }
-                                        {dataset_list.length > 1 && <IconButton aria-label="delete" onClick={() => { addParent("delete") }}>
+                                        {dataset_list.length > 1 && <IconButton aria-label="delete" onClick={() => { deleteDataset("delete") }}>
                                             <DeleteIcon />
                                         </IconButton>}
                                     </Box>
@@ -376,19 +323,17 @@ function PromptWriting() {
                                     </Grid>
 
                                 </Grid>
-
-
                                 <Box display="flex"
                                     justifyContent="center"
                                     alignItems="center">
                                     <Box mr={1}>
                                         <LoadingButton size="small" loading={loading} disabled={disable_save} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
                                     </Box>
-                                    {add_child_error && <Alert severity="warning">Reaching the maximum number of child ({max_child_num}).</Alert>}
-                                    {!add_child_error && <IconButton aria-label="add" onClick={() => { addChild("add", null) }}>
+
+                                    <IconButton aria-label="add" onClick={() => { addRecord() }}>
                                         <AddCircleOutlineIcon />
                                     </IconButton>
-                                    }
+
                                     {
                                         [
                                             { open: savesuccess, autoHideDuration: 3000, onClose: () => setSaveSuccess(false), severity: "success", message: "Saved!" },

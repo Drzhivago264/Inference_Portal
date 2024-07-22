@@ -9,7 +9,8 @@ DEFAULT_PERMISSION_CODENAMES = [
     'allow_view_cost',
     'allow_create_template',
     'allow_data_synthesis',
-    'allow_create_token'
+    'allow_create_token',
+    'allow_create_dataset'
 ]
 MAX_KEY_NAME_LENGTH = 50
 MAX_DATASET_PER_USER = 20

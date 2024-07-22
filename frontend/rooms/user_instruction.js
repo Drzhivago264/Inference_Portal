@@ -31,7 +31,6 @@ import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { agentsocket } from '../component/websocket/AgentSocket';
-import axios from 'axios';
 import { baseDelete } from '../api_hook/baseDelete.js';
 import { basePost } from '../api_hook/basePost.js';
 import { basePut } from '../api_hook/basePut.js';
@@ -39,6 +38,7 @@ import { nanoid } from 'nanoid'
 import { styled } from '@mui/material/styles';
 import { useGetModel } from '../api_hook/useGetModel.js';
 import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
+import { useGetUserInstruction } from '../api_hook/useGetUserInstruction.js';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 
@@ -79,7 +79,7 @@ function UserInstruction() {
     const [add_child_error, setAddChildError] = useState(false)
     const [add_parent_error, setAddParentError] = useState(false)
     const [is_save, setIsSaved] = useState(true)
-    const [reload, setReload] = useState(false)
+
     const [max_parent_num, setMaxParentNum] = useState(null)
     const [max_child_num, setMaxChildNum] = useState(null)
     const [disable_save, setDisableSave] = useState(true)
@@ -94,7 +94,6 @@ function UserInstruction() {
         items.splice(result.destination.index, 0, reorderedItem);
         setChildInstructionList(items);
     }
-
     const updateParentTemplate = (v, property) => {
         setInstructChange(true)
         const new_template_list = [...template_list]
@@ -119,7 +118,7 @@ function UserInstruction() {
             templatepostemutate({ url: "/frontend-api/post-user-instruction", data: data },
                 {
                     onSuccess: () => {
-                        setReload(true)
+                        refetch()
                         setSaveSuccess(true)
                         setLoading(false)
                         setIsSaved(true)
@@ -212,155 +211,91 @@ function UserInstruction() {
         }
         setSelectedIndex(index);
     };
-    const addParent = (operation) => {
+    const addParent = () => {
         let length = template_list.length
         if (length < max_parent_num) {
-            if (operation == "add") {
-                setIsSaved(false)
-                const new_template_list = [...template_list, {
-                    id: null,
-                    displayed_name: "",
-                    instruct: "",
-                    children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }]
-                }];
-                setTemplateList(new_template_list)
-                setChildInstructionList([])
-                setSelectedIndex(template_list.length)
-            }
-            else if (operation == "delete") {
-                setIsSaved(true)
-                const new_template_list = [...template_list];
-                const node_to_delete = template_list[selectedIndex]
-                if (node_to_delete.id !== null) {
-                    deleteTemplate(node_to_delete.id)
-                    setDeleteSuccess(true)
-                }
-                new_template_list.splice(selectedIndex, 1);
-                setTemplateList(new_template_list)
-                if (new_template_list.length > 0) {
-                    handleListItemClick(null, 0)
-                    setDeleteSuccess(true)
-                }
-                else {
-                    handleListItemClick(null, 0)
-                    const new_template_list = [{ id: null, displayed_name: "", instruct: "", children: null }];
-                    setTemplateList(new_template_list)
-                    setChildInstructionList([
-                        { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false },
-                    ])
-                }
-            }
+            setIsSaved(false)
+            const new_template_list = [...template_list, {
+                id: null,
+                displayed_name: "",
+                instruct: "",
+                children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }]
+            }];
+            setTemplateList(new_template_list)
+            setChildInstructionList([])
+            setSelectedIndex(template_list.length)
         }
         else {
             setAddParentError(true)
-            if (operation == "delete") {
-                setIsSaved(true)
-                const new_template_list = [...template_list];
-                const node_to_delete = template_list[selectedIndex]
-                if (node_to_delete.id !== null) {
-                    deleteTemplate(node_to_delete.id)
-                    setDeleteSuccess(true)
-                }
-                new_template_list.splice(selectedIndex, 1);
-                setTemplateList(new_template_list)
-                setAddParentError(false)
-                handleListItemClick(null, 0)
-            }
         }
     }
-    const addChild = (operation, index) => {
-        let length = children_instruction_list.length
-        var node_to_delete = null;
-        setReload(false)
-        if (length < max_child_num) {
-            setAddChildError(false)
-            if (operation == "add") {
-                const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false }];
-                setChildInstructionList(new_children_instruction_list)
+
+    const deleteParent = () => {
+        let length = template_list.length
+        const new_template_list = [...template_list];
+        const node_to_delete = template_list[selectedIndex];
+        if (node_to_delete.id !== null) {
+            deleteTemplate(node_to_delete.id)
+            setDeleteSuccess(true)
+        }
+        setIsSaved(true)
+        new_template_list.splice(selectedIndex, 1);
+        setTemplateList(new_template_list)
+        if (length < max_parent_num) {
+            if (new_template_list.length > 0) {
+                handleListItemClick(null, 0)
+                setDeleteSuccess(true)
             }
-            else if (operation == "delete") {
-                const new_children_instruction_list = [...children_instruction_list];
-                node_to_delete = children_instruction_list[index]
-                new_children_instruction_list.splice(index, 1);
-                setChildInstructionList(new_children_instruction_list)
-                if (node_to_delete.id !== null) {
-                    deleteTemplate(node_to_delete.id)
-                    setDeleteSuccess(true)
-                }
+            else {
+                handleListItemClick(null, 0)
+                const new_template_list = [{ id: null, displayed_name: "", instruct: "", children: null }];
+                setTemplateList(new_template_list)
+                setChildInstructionList([
+                    { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false },
+                ])
             }
         }
         else {
+            setAddParentError(false)
+            handleListItemClick(null, 0)
+        }
+    }
+    const addChild = () => {
+        let length = children_instruction_list.length
+        if (length < max_child_num) {
+            setAddChildError(false)
+            const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false }];
+            setChildInstructionList(new_children_instruction_list)
+        }
+        else {
             setAddChildError(true)
-            if (operation == "delete") {
-                const new_children_instruction_list = [...children_instruction_list];
-                node_to_delete = children_instruction_list[index]
-                new_children_instruction_list.splice(-1);
-                setChildInstructionList(new_children_instruction_list)
-                setAddChildError(false)
-                if (node_to_delete.id !== null) {
-                    deleteTemplate(node_to_delete.id)
-                    setDeleteSuccess(true)
-                }
+        }
+    }
+
+    const deleteChild = (index) => {
+        let length = children_instruction_list.length
+        var node_to_delete = null;
+        const new_children_instruction_list = [...children_instruction_list];
+        node_to_delete = children_instruction_list[index]
+        if (length < max_child_num) {
+            new_children_instruction_list.splice(index, 1);
+            setChildInstructionList(new_children_instruction_list)
+            if (node_to_delete.id !== null) {
+                deleteTemplate(node_to_delete.id)
+                setDeleteSuccess(true)
+            }
+        }
+        else {
+            new_children_instruction_list.splice(-1);
+            setChildInstructionList(new_children_instruction_list)
+            setAddChildError(false)
+            if (node_to_delete.id !== null) {
+                deleteTemplate(node_to_delete.id)
+                setDeleteSuccess(true)
             }
         }
     }
-    const request_instruction = (index) => {
-        axios.all([
-            axios.get('/frontend-api/get-user-instruction'),
-        ])
-            .then(axios.spread((template_object) => {
-                if (template_object.status != 204) {
-                    setMaxChildNum(template_object.data.max_child_num)
-                    setMaxParentNum(template_object.data.max_parent_num)
-                    let template_list = []
-                    if (template_object.data.root_nodes.length >= template_object.data.max_parent_num) {
-                        setAddParentError(true)
-                    }
-                    if (template_object.data.root_nodes.length == 0) {
-                        setTemplateList([{
-                            'template_list_index': 0,
-                            'id': null,
-                            'displayed_name': "Empty Template",
-                            'instruct': "",
-                            'children': [{
-                                'id': null,
-                                'displayed_name': "",
-                                'instruct': "",
-                                'unique': nanoid(),
-                                'add': false
-                            }],
-                        }])
-                    }
-                    else {
-                        for (let template in template_object.data.root_nodes) {
-                            if (template == index) {
-                                let default_child_instruction = []
-                                for (let c in template_object.data.root_nodes[template].children) {
-                                    default_child_instruction.push({
-                                        'id': template_object.data.root_nodes[template].children[c]['id'],
-                                        'displayed_name': template_object.data.root_nodes[template].children[c]['displayed_name'],
-                                        'instruct': template_object.data.root_nodes[template].children[c]['instruct'],
-                                        'add': false
-                                    })
-                                }
-                                setChildInstructionList(default_child_instruction)
-                            }
-                            template_list.push({
-                                'id': template_object.data.root_nodes[template]['id'],
-                                'displayed_name': template_object.data.root_nodes[template]['displayed_name'],
-                                'instruct': template_object.data.root_nodes[template]['instruct'],
-                                'children': template_object.data.root_nodes[template]['children']
-                            })
-                        }
-                        setTemplateList(template_list)
-                    }
-                }
-            }))
-            .catch(error => {
-                setMaxChildNum(error.response.data.max_child_num)
-                setMaxParentNum(error.response.data.max_parent_num)
-            });
-    }
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
     }
@@ -392,14 +327,6 @@ function UserInstruction() {
         }
     }, [websocket_hash]);
 
-    useEffect(() => {
-        if (reload) {
-            request_instruction(selectedIndex)
-        }
-    }, [reload]);
-    useEffect(() => {
-        request_instruction(0)
-    }, []);
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
             e.preventDefault()
@@ -440,7 +367,7 @@ function UserInstruction() {
         }
     }
     const { agent_objects } = useGetModel()
-
+    const { refetch } = useGetUserInstruction(selectedIndex, setMaxChildNum, setMaxParentNum, setAddParentError, setTemplateList, setChildInstructionList)
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Templates</title>
@@ -477,11 +404,11 @@ function UserInstruction() {
                                         alignItems="center">
                                         {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent ({max_parent_num}).</Alert>}
                                         {!add_parent_error && is_save &&
-                                            <IconButton aria-label="add" onClick={() => { addParent("add") }}>
+                                            <IconButton aria-label="add" onClick={() => { addParent() }}>
                                                 <AddCircleOutlineIcon />
                                             </IconButton>
                                         }
-                                        {template_list.length > 1 && <IconButton aria-label="delete" onClick={() => { addParent("delete") }}>
+                                        {template_list.length > 1 && <IconButton aria-label="delete" onClick={() => { deleteParent() }}>
                                             <DeleteIcon />
                                         </IconButton>}
                                     </Box>
@@ -545,7 +472,6 @@ function UserInstruction() {
                                                                     defaultValue={t['instruct']}
                                                                     inputProps={{ maxLength: 2500 }}
                                                                 />
-
                                                             </FormControl>
                                                         </Box>
                                                     </Paper>
@@ -585,7 +511,7 @@ function UserInstruction() {
                                                                                         />
                                                                                         <Box>
                                                                                             <FormControlLabel control={<Checkbox onChange={(e) => { handleTextFieldChange(index, 'add', e.target.checked) }} />} label="Add" />
-                                                                                            <IconButton aria-label="delete" onClick={() => { addChild("delete", index) }}>
+                                                                                            <IconButton aria-label="delete" onClick={() => { deleteChild(index) }}>
                                                                                                 <DeleteIcon />
                                                                                             </IconButton>
                                                                                         </Box>
@@ -623,7 +549,7 @@ function UserInstruction() {
                                             <LoadingButton size="small" loading={loading} disabled={disable_save} loadingPosition="end" variant="contained" onClick={submitTemplate} endIcon={<SaveIcon />}>Save</LoadingButton>
                                         </Box>
                                         {add_child_error && <Alert severity="warning">Reaching the maximum number of child ({max_child_num}).</Alert>}
-                                        {!add_child_error && <IconButton aria-label="add" onClick={() => { addChild("add", null) }}>
+                                        {!add_child_error && <IconButton aria-label="add" onClick={() => { addChild() }}>
                                             <AddCircleOutlineIcon />
                                         </IconButton>
                                         }

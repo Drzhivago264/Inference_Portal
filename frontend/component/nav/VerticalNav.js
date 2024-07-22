@@ -5,6 +5,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import ChatIcon from '@mui/icons-material/Chat';
 import EmailIcon from '@mui/icons-material/Email';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
+import InventoryIcon from '@mui/icons-material/Inventory';
 import KeyIcon from '@mui/icons-material/Key';
 import LayersIcon from '@mui/icons-material/Layers';
 import { Link } from "react-router-dom";
@@ -31,6 +32,12 @@ export const UserVeticalNav = ({ navigate }) => {
         navigate("/");
     }
     const listItems = [
+        {
+            onClick: () => navigate("/frontend/prompt-writing"),
+            icon: <InventoryIcon />,
+            text: "Your Dataset",
+            disabled: false,
+        },
         {
             onClick: () => navigate("/frontend/user-instruction"),
             icon: <HistoryEduIcon />,

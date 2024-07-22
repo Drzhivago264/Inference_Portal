@@ -46,26 +46,45 @@ def get_default_user_dataset_api(request):
         master_key, master_user = get_master_key_and_master_user(
             current_user=current_user)
         if Dataset.objects.filter(user=master_user).count() == 0:
-            return Response({'detail': "No Dataset"}, status=status.HTTP_200_OK)
+            return Response({'detail': "No Dataset"}, status=status.HTTP_404_NOT_FOUND)
         else:
             dataset_list = Dataset.objects.filter(user=master_user)
-            default_dataset = dataset_list.latest("id")
+            if dataset_list:
+                dataset_list_serializer = DatasetCreateSerializer(
+                    dataset_list, many=True)
+                return Response({
+                    dataset_list: dataset_list_serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                Response({'detail': "No dataset"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@throttle_classes([AnonRateThrottle])
+@permission_classes([IsAuthenticated])
+def get_user_records_api(request, id):
+    current_user = request.user
+    if not current_user.has_perm('server.allow_create_dataset'):
+        return Response({'detail': "Not authorised to create dataset"}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        master_key, master_user = get_master_key_and_master_user(
+            current_user=current_user)
+        if Dataset.objects.filter(user=master_user).count() == 0:
+            return Response({'detail': "No Dataset"}, status=status.HTTP_200_OK)
+        else:
+            try:
+                dataset = Dataset.objects.get(user=master_user, id= id)
+            except Dataset.DoesNotExist:
+                return Response({'detail': "Failed, Cannot fine your dataset"}, status=status.HTTP_404_NOT_FOUND)
             paginator = PageNumberPagination()
             paginator.page_size = 10
-            records = DatasetRecord.objects.filter(dataset=default_dataset)
+            records = DatasetRecord.objects.filter(dataset=dataset).order_by('-id')
             result_records = paginator.paginate_queryset(records, request)
             record_serializer = DatasetRecordSerialzier(
                 result_records, many=True)
-            dataset_serializer = DatasetCreateSerializer(default_dataset)
-            dataset_list_serializer = DatasetCreateSerializer(
-                default_dataset, many=True)
             return paginator.get_paginated_response({
-                dataset_list: dataset_list_serializer.data,
-                default_dataset: dataset_serializer.data,
                 record_serializer: record_serializer.data
             })
-
-
+        
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
