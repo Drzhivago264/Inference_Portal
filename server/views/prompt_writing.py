@@ -15,11 +15,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
 from server.views.serializer import (
+    DatasetRecordGetSerialzier,
     DatasetRecordSerialzier,
     DatasetUpdateSerializer,
     DatasetCreateSerializer,
     DatasetGetSerializer,
-    DatasetDeleteSerializer
+    DatasetDeleteSerializer,
+    DatasetDeleteRecordSerialzier
 
 )
 from server.models import (
@@ -57,7 +59,8 @@ def get_default_user_dataset_api(request):
 
                 return Response({
                     'dataset_list': dataset_list_serializer.data,
-                    'max_dataset_num': constant.MAX_DATASET_PER_USER
+                    'max_dataset_num': constant.MAX_DATASET_PER_USER,
+                    'max_evaluation_num': constant.MAX_EVALUATION_PER_RECORD
                 }, status=status.HTTP_200_OK)
             else:
                 Response({'detail': "No dataset"},
@@ -86,7 +89,7 @@ def get_user_records_api(request, id):
             records = DatasetRecord.objects.filter(
                 dataset=dataset).order_by('-id')
             result_records = paginator.paginate_queryset(records, request)
-            record_serializer = DatasetRecordSerialzier(
+            record_serializer = DatasetRecordGetSerialzier(
                 result_records, many=True)
             return paginator.get_paginated_response({
                 'record_serializer': record_serializer.data
@@ -195,6 +198,7 @@ def create_user_record_api(request):
             except Dataset.DoesNotExist:
                 return Response({'detail': "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND)
         else:
+            print(serializer.errors)
             return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -214,17 +218,17 @@ def update_user_record_api(request):
             prompt = serializer.data['prompt']
             response = serializer.data['response']
             evaluation = serializer.data['evaluation']
-            id = serializer.data['id']
+            record_id = serializer.data['record_id']
             master_key, master_user = get_master_key_and_master_user(
                 current_user=current_user)
             try:
                 dataset = Dataset.objects.get(
-                    user=master_key, id=dataset_id)
+                    user=master_user, id=dataset_id)
             except Dataset.DoesNotExist:
                 return Response({'detail': "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND)
             try:
                 record = DatasetRecord.objects.get(
-                    user=master_user, dataset=dataset, id=id)
+                    dataset=dataset, id=record_id)
                 record.system_prompt = system_prompt
                 record.prompt = prompt
                 record.response = response
@@ -245,22 +249,22 @@ def delete_user_record_api(request):
     if not current_user.has_perm('server.allow_create_dataset'):
         return Response({'detail': "Not authorised to create dataset"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        serializer = DatasetRecordSerialzier(
+        serializer = DatasetDeleteRecordSerialzier(
             data=request.data)
         if serializer.is_valid():
-            id = serializer.data['id']
-            dataset_name = serializer.data['dataset']
-
+            record_id = serializer.data['record_id']
+            dataset_id = serializer.data['dataset_id']
+            print(record_id, dataset_id)
             master_key, master_user = get_master_key_and_master_user(
                 current_user=current_user)
             try:
                 dataset = Dataset.objects.get(
-                    user=master_key, name=dataset_name)
+                    user=master_user, id=dataset_id)
             except Dataset.DoesNotExist:
                 return Response({'detail': "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND)
             try:
                 record = DatasetRecord.objects.get(
-                    user=master_user, dataset=dataset, id=id)
+                    dataset=dataset, id=record_id)
                 record.delete()
                 return Response({'detail': "Saved"}, status=status.HTTP_200_OK)
             except DatasetRecord.DoesNotExist:
