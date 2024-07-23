@@ -47,13 +47,24 @@ class DatasetGetSerializer(serializers.ModelSerializer):
         model = Dataset
         fields = ('id', "name")
 
-class DatasetRecordSerialzier(serializers.Serializer):
-    dataset_id = serializers.CharField()
+class DatasetRecordGetSerialzier(serializers.Serializer):
+    id = serializers.IntegerField()
     system_prompt = serializers.CharField()
     prompt = serializers.CharField()
     response = serializers.CharField()
     evaluation = serializers.JSONField()
 
+class DatasetRecordSerialzier(serializers.Serializer):
+    record_id = serializers.IntegerField(required=False)
+    dataset_id = serializers.IntegerField()
+    system_prompt = serializers.CharField()
+    prompt = serializers.CharField()
+    response = serializers.CharField()
+    evaluation = serializers.JSONField()
+
+class DatasetDeleteRecordSerialzier(serializers.Serializer):
+    record_id = serializers.IntegerField()
+    dataset_id = serializers.IntegerField()
 
 class UserInstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:

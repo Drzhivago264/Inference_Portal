@@ -1,26 +1,25 @@
 import { baseGet } from "./baseGet";
 import { useQuery } from "react-query";
 
-export const useGetLogin = (setLoginState, setUserKeyName, setWebsocketHash) => {
+export const useGetLogin = (setIsAuthenticated, is_authenticated, setUserKeyName, setWebsocketHash) => {
 
     const {
         error: error,
-        isLoading: isLoading,
-        refetch: refetch
-    } = useQuery("LoginState", () => baseGet('/frontend-api/check-login'), {
+        isLoading: isLoading
+
+    } = useQuery(["LoginState", is_authenticated], () => baseGet('/frontend-api/check-login'), {
         retry: false, refetchOnWindowFocus: false,
         onSuccess: (data) => {
-            setLoginState(true)
+            setIsAuthenticated(true)
             setUserKeyName(data.key_name)
             setWebsocketHash(data.websocket_hash)
         },
         onError: () => {
-            setLoginState(false)
+            setIsAuthenticated(false)
         }
     });
 
     return {
-        refetch: refetch,
         error: error,
         isLoading: isLoading
     }

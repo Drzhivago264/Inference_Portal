@@ -47,11 +47,7 @@ export default function App() {
   const [websocket_hash, setWebsocketHash] = useState(null)
   const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
   
-  const {refetch} = useGetLogin(setIsAuthenticated,  setUserKeyName, setWebsocketHash)
-  useEffect(() => {
-      refetch()
-  }, [is_authenticated,  user_key_name, websocket_hash]);
-
+  useGetLogin(setIsAuthenticated, is_authenticated ,setUserKeyName, setWebsocketHash)
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
