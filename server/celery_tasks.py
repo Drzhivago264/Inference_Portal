@@ -35,9 +35,11 @@ aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
+
 @shared_task
 def send_email_(subject: str, message: str, email_from: str, recipient_list: list) -> None:
     send_mail(subject, message, email_from, recipient_list)
+
 
 @shared_task
 def celery_log_prompt_response(is_session_start_node: bool | None, key_object_id: int, llm_id: int, prompt: str, response: str, type_: str) -> None:
@@ -53,7 +55,9 @@ def celery_log_prompt_response(is_session_start_node: bool | None, key_object_id
     llm = LLM.objects.get(id=llm_id)
     key_object = APIKEY.objects.get(id=key_object_id)
     log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=prompt,
-                                                response=response, type_=type_)
+                        response=response, type_=type_)
+
+
 @shared_task
 def update_crypto_rate(coin: str):
     if coin == "xmr":
@@ -127,7 +131,7 @@ def periodically_shutdown_EC2_instance() -> None:
             command_EC2.delay(server.name, region=region, action="off")
             server.status = "stopping"
             server.save()
-     
+
 
 @shared_task()
 def command_EC2(instance_id: str, region: str, action: str) -> None | str:
@@ -175,7 +179,8 @@ def command_EC2(instance_id: str, region: str, action: str) -> None | str:
             ec2.reboot_instances(InstanceIds=[instance_id], DryRun=False)
         except ClientError as e:
             return e
-    
+
+
 @shared_task
 def inference(unique: str,
               is_session_start_node: bool | None,
@@ -390,20 +395,21 @@ def agent_inference(key: str,
                 {'role': 'system', 'content': f'Response: {force_stop}'}
             ]
         session_history.extend(prompt)
-        clean_response = send_agent_request_openai(client=client,
-                                                   session_history=session_history,
-                                                   model=model,
-                                                   choosen_model=choosen_model,
-                                                   credit=credit,
-                                                   unique=unique,
-                                                   current_turn_inner=current_turn_inner,
-                                                   stream=stream,
-                                                   room_group_name=room_group_name,
-                                                   frequency_penalty=frequency_penalty,
-                                                   top_p=top_p,
-                                                   max_tokens=max_tokens,
-                                                   temperature=temperature,
-                                                   presence_penalty=presence_penalty)
+        clean_response = send_agent_request_openai(
+            client=client,
+            session_history=session_history,
+            model=model,
+            choosen_model=choosen_model,
+            credit=credit,
+            unique=unique,
+            current_turn_inner=current_turn_inner,
+            stream=stream,
+            room_group_name=room_group_name,
+            frequency_penalty=frequency_penalty,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            presence_penalty=presence_penalty)
         if clean_response and isinstance(clean_response, str):
             log_prompt_response(is_session_start_node=is_session_start_node, key_object=key_object, llm=llm, prompt=message,
                                 response=clean_response, type_=type_)

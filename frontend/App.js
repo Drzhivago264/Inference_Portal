@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useMemo, useRef, useState } from 'react';
 import {
   Route,
   BrowserRouter as Router,

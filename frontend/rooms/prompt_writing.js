@@ -385,42 +385,49 @@ function PromptWriting() {
                                     Dataset
                                 </Typography>
                                 <List>
-                                    {dataset_list && dataset_list.map((t, index) => {
-                                        return (
-                                            <ListItem
-                                                key={t.id}
-                                                disablePadding
-                                            >
-                                                <ListItemButton sx={{ height: 38 }}
-                                                    selected={selectedIndex === index}
-                                                    onClick={(event) => handleListItemClick(event, index)}
-                                                >
-                                                    <ListItemIcon >
-                                                        {selectedIndex === index && <FolderOpenIcon />}
-                                                        {selectedIndex !== index && <FolderIcon />}
-                                                    </ListItemIcon>
-                                                    <ListItemText primary={<TextField id="outlined-basic" defaultValue={t.name} size='small' variant="standard" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-                                                        onChange={(e) => handleDatasetChange(e.target.value, 'name')} />} />
-                                                </ListItemButton>
-                                            </ListItem>
-                                        )
-                                    })}
-                                    <Box
-                                        display="flex"
-                                        justifyContent="center"
-                                        alignItems="center"
-                                        mt={1}>
-                                        {add_parent_error && <Alert severity="warning">Reaching the maximum number of dataset ({max_dataset_num}).</Alert>}
-                                        {!add_parent_error && allow_add_dataset && dataset_list && dataset_list.length < max_dataset_num &&
-                                            <IconButton aria-label="add" onClick={() => { addDataset() }}>
+                                    {dataset_list && dataset_list.map((dataset, index) => (
+                                        <ListItem key={dataset.id} disablePadding>
+                                            <ListItemButton sx={{ height: 38 }} selected={selectedIndex === index} onClick={(event) => handleListItemClick(event, index)}>
+                                                <ListItemIcon>
+                                                    {selectedIndex === index ? <FolderOpenIcon /> : <FolderIcon />}
+                                                </ListItemIcon>
+                                                <ListItemText primary={
+                                                    <TextField
+                                                        id="outlined-basic"
+                                                        defaultValue={dataset.name}
+                                                        size='small'
+                                                        variant="standard"
+                                                        style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                                                        onChange={(e) => handleDatasetChange(e.target.value, 'name')}
+                                                    />
+                                                } />
+                                            </ListItemButton>
+                                        </ListItem>
+                                    ))}
+                                    <Box display="flex" justifyContent="center" alignItems="center" mt={1}>
+                                        {add_parent_error && <Alert severity="warning">Reaching the maximum number of datasets ({max_dataset_num}).</Alert>}
+                                        {!add_parent_error && allow_add_dataset && dataset_list && dataset_list.length < max_dataset_num && (
+                                            <IconButton aria-label="add" onClick={addDataset}>
                                                 <AddCircleOutlineIcon />
                                             </IconButton>
-                                        }
-                                        {dataset_list && dataset_list.length > 1 && <IconButton aria-label="delete" onClick={() => { deleteDataset() }}>
-                                            <DeleteIcon />
-                                        </IconButton>}
+                                        )}
+                                        {dataset_list && dataset_list.length > 1 && (
+                                            <IconButton aria-label="delete" onClick={deleteDataset}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        )}
                                         <Box mr={1}>
-                                            <LoadingButton size="small" disabled={!allow_save_dataset} loading={loading} loadingPosition="end" variant="contained" onClick={() => saveDataset()} endIcon={<SaveIcon />}>Save Dataset</LoadingButton>
+                                            <LoadingButton
+                                                size="small"
+                                                disabled={!allow_save_dataset}
+                                                loading={loading}
+                                                loadingPosition="end"
+                                                variant="contained"
+                                                onClick={saveDataset}
+                                                endIcon={<SaveIcon />}
+                                            >
+                                                Save Dataset
+                                            </LoadingButton>
                                         </Box>
                                     </Box>
                                 </List>

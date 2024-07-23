@@ -95,6 +95,7 @@ def get_user_records_api(request, id):
                 'record_serializer': record_serializer.data
             })
 
+
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])

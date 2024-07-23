@@ -89,9 +89,16 @@ function Agent() {
 
     const handle_use_user_template = (event) => {
         setUseUserTemplate(event.target.checked);
-        let default_editor = { "time": 1709749130861, "blocks": [{ "id": "1hYKvu7PTO", "type": "header", "data": { "text": "Response", "level": 2 } }, { "id": "SrV68agaen", "type": "paragraph", "data": { "text": "" } }], "version": "2.29.1" }
-        setEditor(default_editor)
-        editorref.current.render(default_editor)
+        const default_editor = {
+            time: 1709749130861,
+            blocks: [
+                { id: "1hYKvu7PTO", type: "header", data: { text: "Response", level: 2 } },
+                { id: "SrV68agaen", type: "paragraph", data: { text: "" } }
+            ],
+            version: "2.29.1"
+        };
+        setEditor(default_editor);
+        editorref.current.render(default_editor);
     };
     useEffect(() => {
         if (!editorref.current) {

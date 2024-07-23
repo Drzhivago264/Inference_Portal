@@ -1,6 +1,6 @@
 from hashlib import sha256
 
-from django.contrib.auth import authenticate, login, logout 
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.views.decorators.cache import cache_page
 from django.shortcuts import render
@@ -27,6 +27,7 @@ from server.models import (
     FineGrainAPIKEY
 )
 
+
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
 def check_login(request: HttpRequest) -> Response:
@@ -35,13 +36,16 @@ def check_login(request: HttpRequest) -> Response:
         return Response({'detail': "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         if current_user.groups.filter(name='master_user').exists():
-            unique_hash_seed = current_user.apikey.id + current_user.apikey.name + str(current_user.apikey.created_at) 
+            unique_hash_seed = current_user.apikey.id + \
+                current_user.apikey.name + str(current_user.apikey.created_at)
             key_name = current_user.apikey.prefix + "..."
-            return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': key_name}, status=status.HTTP_200_OK)
+            return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest(), 'key_name': key_name}, status=status.HTTP_200_OK)
         elif current_user.groups.filter(name='slave_user').exists():
-            unique_hash_seed = current_user.finegrainapikey.id + current_user.finegrainapikey.name + str(current_user.finegrainapikey.created_at) 
+            unique_hash_seed = current_user.finegrainapikey.id + \
+                current_user.finegrainapikey.name + \
+                str(current_user.finegrainapikey.created_at)
             key_name = current_user.finegrainapikey.prefix + "..."
-            return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest() ,'key_name': key_name}, status=status.HTTP_200_OK)
+            return Response({'websocket_hash': sha256(unique_hash_seed.encode('utf-8')).hexdigest(), 'key_name': key_name}, status=status.HTTP_200_OK)
         else:
             return Response({'detail': "User does not have permission, generate new key"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -61,10 +65,10 @@ def log_in(request: HttpRequest) -> Response:
         key = serializer.data['key']
         try:
             key_model = {
-                '41': APIKEY, #Master Key length
-                '73': FineGrainAPIKEY #Token length
+                '41': APIKEY,  # Master Key length
+                '73': FineGrainAPIKEY  # Token length
             }
-  
+
             api_key = key_model[str(len(key))].objects.get_from_key(key)
             user = authenticate(
                 request, username=api_key.hashed_key, password=api_key.hashed_key)
@@ -78,7 +82,7 @@ def log_in(request: HttpRequest) -> Response:
     else:
         message = str()
         for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n" 
+            message += serializer.errors[error][0] + "\n"
         return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -50,6 +50,7 @@ from server.utils import constant
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
 @api_view(['GET'])
 @throttle_classes([AnonRateThrottle])
 @cache_page(60 * 15)
@@ -79,7 +80,7 @@ def check_credit_api(request: HttpRequest) -> Response:
     else:
         message = str()
         for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n" 
+            message += serializer.errors[error][0] + "\n"
         return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -156,7 +157,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
     else:
         message = str()
         for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n" 
+            message += serializer.errors[error][0] + "\n"
         return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -182,10 +183,11 @@ def generate_key_api(request: HttpRequest) -> Response:
         user = User.objects.create_user(hashed_key, '', hashed_key)
         master_group.user_set.add(user)
 
-        #Adding all permission for master user
-        permissions = Permission.objects.filter(codename__in=constant.DEFAULT_PERMISSION_CODENAMES)
+        # Adding all permission for master user
+        permissions = Permission.objects.filter(
+            codename__in=constant.DEFAULT_PERMISSION_CODENAMES)
         user.user_permissions.add(*permissions)
-        
+
         created_key.user = user
         created_key.save()
         login(request, user)
@@ -197,7 +199,7 @@ def generate_key_api(request: HttpRequest) -> Response:
     else:
         message = str()
         for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n" 
+            message += serializer.errors[error][0] + "\n"
         return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -250,7 +252,7 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
     else:
         message = str()
         for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n" 
+            message += serializer.errors[error][0] + "\n"
         return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -294,7 +296,7 @@ def stripe_redirect(request: HttpRequest) -> Response:
     else:
         message = str()
         for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n" 
+            message += serializer.errors[error][0] + "\n"
         return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
