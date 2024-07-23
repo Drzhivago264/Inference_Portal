@@ -46,6 +46,12 @@ import { useGetModel } from '../api_hook/useGetModel.js';
 import { useGetRedirectAnon } from '../api_hook/useGetRedirectAnon.js';
 import { useNavigate } from "react-router-dom";
 
+/**
+ * React component for handling data synthesis operations.
+ * Manages loading CSV files, running data synthesis, exporting datasets, and displaying logs.
+ * Utilizes WebSocket for real-time communication and user templates for custom instructions.
+ * Allows users to interact with the backend and configure data synthesis parameters.
+ */
 function DataSynthesis() {
 
     const [use_user_template, setUseUserTemplate] = useState(false)
@@ -140,8 +146,6 @@ function DataSynthesis() {
         setUserParentInstruct: setUserParentInstruct,
         choosen_user_template: choosen_user_template,
         setChoosenUserTemplate: setChoosenUserTemplate,
-        error: error,
-        isLoading: isLoading
     } = useGetInstructionTree()
         
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -208,20 +212,13 @@ function DataSynthesis() {
         func_(new_child_instruct_list)
     }
     const delete_child_instruct = (index_, list_, func_) => {
-        func_(
-            list_.filter((instruct, index) =>
-                index !== index_
-            )
-        )
+        const updatedList = list_.filter((_, index) => index !== index_);
+        func_(updatedList);
     }
     const add_child_instruct = (list_, func_) => {
         if (list_.length <= 10) {
-            func_(
-                [
-                    ...list_,
-                    { displayed_name: `User Defined ${list_.length + 1}`, instruct: "" }
-                ]
-            );
+            const newObject = { displayed_name: `User Defined ${list_.length + 1}`, instruct: "" };
+            func_([...list_, newObject]);
         }
     }
     function* submitLoop() {

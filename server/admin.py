@@ -18,8 +18,10 @@ from .models import (
 )
 from mptt.admin import DraggableMPTTAdmin
 
+
 class PriceAdmin(admin.StackedInline):
     model = Price
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -33,9 +35,11 @@ class ProductAdmin(admin.ModelAdmin):
 class APIKEYModelAdmin(APIKeyModelAdmin):
     pass
 
+
 @admin.register(FineGrainAPIKEY)
 class FineGrainAPIKEYModelAdmin(APIKeyModelAdmin):
     pass
+
 
 admin.site.register(ProductTag)
 admin.site.register(Price)

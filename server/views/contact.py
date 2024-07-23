@@ -28,7 +28,8 @@ def contact_api(request: HttpRequest) -> Response:
                 email_from = settings.EMAIL_HOST_USER
                 recipient_list = [settings.EMAIL_HOST_USER,]
                 try:
-                    send_email_.delay(subject, message, email_from, recipient_list)
+                    send_email_.delay(subject, message,
+                                      email_from, recipient_list)
                     return Response({"detail": "Sent!"}, status=status.HTTP_200_OK)
                 except:
                     return Response({'detail': 'Mail Server Error'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -38,4 +39,3 @@ def contact_api(request: HttpRequest) -> Response:
             return Response({'detail': 'Your Key is incorrect, only master key is allowed to contact'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

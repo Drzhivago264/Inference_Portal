@@ -4,8 +4,8 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.db.models import Q, Sum
 
 from rest_framework.decorators import (
-    api_view, 
-    throttle_classes, 
+    api_view,
+    throttle_classes,
     permission_classes
 )
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from server.models import PromptResponse
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
+
 
 class LogListJson(BaseDatatableView):
     columns = ['prompt', 'response',
@@ -26,7 +27,8 @@ class LogListJson(BaseDatatableView):
     def get_initial_queryset(self):
         if self.request.user.has_perm('server.allow_view_log'):
             current_user = self.request.user
-            master_key, master_user = get_master_key_and_master_user(current_user=current_user)
+            master_key, master_user = get_master_key_and_master_user(
+                current_user=current_user)
             return PromptResponse.objects.filter(key=master_key).order_by('-id')
 
     def filter_queryset(self, qs):
@@ -47,7 +49,8 @@ def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
     if not current_user.has_perm('server.allow_view_cost'):
         return Response({'detail': "Not authorised to view cost"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        master_key, master_user = get_master_key_and_master_user(current_user=current_user)
+        master_key, master_user = get_master_key_and_master_user(
+            current_user=current_user)
         log_by_date = PromptResponse.objects.filter(key=master_key, created_at__range=[startdate, enddate]).values('created_at__date', 'model__name').order_by(
             'created_at__date').annotate(sum_input_tokens=Sum('number_input_tokens'), sum_output_tokens=Sum('number_output_tokens'))
         return Response({'cost_by_model': log_by_date}, status=status.HTTP_200_OK)

@@ -15,6 +15,7 @@ from server.api_throttling_rates import KeyCreateRateThrottle, UserRateThrottle
 from server.models import FineGrainAPIKEY
 from server.utils import constant
 
+
 @api_view(['POST'])
 @throttle_classes([KeyCreateRateThrottle])
 @permission_classes([IsAuthenticated])
@@ -31,10 +32,11 @@ def generate_token_api(request: HttpRequest) -> Response:
         time_unit = serializer.data['time_unit']
         use_ttl = serializer.data['use_ttl']
         slave_group, created = Group.objects.get_or_create(name="slave_user")
-        number_of_current_key = FineGrainAPIKEY.objects.filter(master_key = master_key_object).count()
+        number_of_current_key = FineGrainAPIKEY.objects.filter(
+            master_key=master_key_object).count()
         if number_of_current_key >= constant.MAX_TOKEN_PER_USER:
-             return Response({"detail": f"Exceeding max number of token ({constant.MAX_TOKEN_PER_USER}), cannot create more token!"}, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Response({"detail": f"Exceeding max number of token ({constant.MAX_TOKEN_PER_USER}), cannot create more token!"}, status=status.HTTP_400_BAD_REQUEST)
+
         time_dispatcher = {
             'day': datetime.timedelta(days=ttl_raw),
             'hour': datetime.timedelta(hours=ttl_raw),
@@ -43,7 +45,7 @@ def generate_token_api(request: HttpRequest) -> Response:
         }
         permission_list = list()
         for perm, value in permission_dict.items():
-            if value and perm != "allow_create_token": #Only Master User is allowed to create token
+            if value and perm != "allow_create_token":  # Only Master User is allowed to create token
                 permission_list.append(perm)
         if len(permission_list) == 0:
             return Response({"detail": f"Cannot create a token with no permission!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -78,7 +80,7 @@ def generate_token_api(request: HttpRequest) -> Response:
     else:
         message = str()
         for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n" 
+            message += serializer.errors[error][0] + "\n"
         return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -130,13 +132,14 @@ def remove_permission(request: HttpRequest) -> Response:
                 last_three_char=first_and_last_char[-3:]
             )
         except FineGrainAPIKEY.DoesNotExist:
-            return Response({'detail':'Error: token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Error: token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         token.user.user_permissions.remove(permission_object)
 
         return Response({
             "reponse": f"{permission_object.codename} is deleted",
             "value": first_and_last_char
         }, status=status.HTTP_200_OK)
+
 
 @api_view(['PUT'])
 @throttle_classes([UserRateThrottle])
@@ -163,7 +166,7 @@ def add_permission(request: HttpRequest) -> Response:
                 last_three_char=first_and_last_char[-3:]
             )
         except FineGrainAPIKEY.DoesNotExist:
-            return Response({'detail':'Error: token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Error: token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         token.user.user_permissions.add(permission_object)
 
         return Response({
