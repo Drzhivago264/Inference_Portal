@@ -108,15 +108,18 @@ def create_user_dataset_api(request):
             data=request.data)
         if serializer.is_valid():
             dataset_name = serializer.data['name']
+            default_evaluation = serializer.data['default_evaluation']
+            default_system_prompt = serializer.data['default_system_prompt']
             master_key, master_user = get_master_key_and_master_user(
                 current_user=current_user)
             if Dataset.objects.filter(user=master_user).count() <= constant.MAX_DATASET_PER_USER:
                 dataset = Dataset.objects.create(
-                    user=master_user, name=dataset_name)
-                return Response({'detail': "Saved", "id": dataset.id}, status=status.HTTP_200_OK)
+                    user=master_user, name=dataset_name, default_evaluation=default_evaluation, default_system_prompt=default_system_prompt)
+                return Response({'detail': "Saved", "id": dataset.id, 'name': dataset.name}, status=status.HTTP_200_OK)
             else:
                 return Response({'detail': "Save Failed!, you have react maximun number of datasets"}, status=status.HTTP_404_NOT_FOUND)
         else:
+            print(serializer.errors)
             return Response({'detail': "Save Failed!, ensure that fields do not contain empty string"}, status=status.HTTP_404_NOT_FOUND)
 
 

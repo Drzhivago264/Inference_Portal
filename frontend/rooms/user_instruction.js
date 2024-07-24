@@ -93,15 +93,16 @@ function UserInstruction() {
         items.splice(result.destination.index, 0, reorderedItem);
         setChildInstructionList(items);
     }
+
     const updateParentTemplate = (v, property) => {
-        setInstructChange(true)
-        const new_template_list = [...template_list]
-        const new_template = { ...template_list[selectedIndex] }
-        new_template[property] = v
-        new_template_list[selectedIndex] = new_template
-        setTemplateList(new_template_list)
-        if (property == "displayed_name") {
-            setChoosenTemplate(v)
+        setInstructChange(true);
+        const newTemplateList = [...template_list];
+        const newTemplate = { ...newTemplateList[selectedIndex] };
+        newTemplate[property] = v;
+        newTemplateList[selectedIndex] = newTemplate;
+        setTemplateList(newTemplateList);
+        if (property === "displayed_name") {
+            setChoosenTemplate(v);
         }
     }
     const { mutate: templatepostemutate } = useMutation(basePost);
@@ -182,112 +183,106 @@ function UserInstruction() {
             })
     }
     const handleTextFieldChange = (index, property, value) => {
-        const new_children_instruction_list = [...children_instruction_list];
-        const new_instruction = { ...children_instruction_list[index] };
-        new_instruction[property] = value;
-        new_children_instruction_list[index] = new_instruction;
-        setChildInstructionList(new_children_instruction_list)
-        updateParentTemplate(new_children_instruction_list, 'children')
-    }
+        const updatedList = children_instruction_list.map((instruction, idx) => {
+            if (idx === index) {
+                return { ...instruction, [property]: value };
+            }
+            return instruction;
+        });
+        setChildInstructionList(updatedList);
+        updateParentTemplate(updatedList, 'children');
+    };
+
     const handleListItemClick = (event, index) => {
         if (!disable_save) {
-            submitTemplate()
+            submitTemplate();
         }
-        let default_child_instruction = []
-        if (template_list[index]['children'] === null) {
-            setChildInstructionList([{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }])
-        }
-        else {
-            for (let c in template_list[index]['children']) {
-                default_child_instruction.push({
-                    'id': template_list[index]['children'][c]['id'],
-                    'displayed_name': template_list[index]['children'][c]['displayed_name'],
-                    'instruct': template_list[index]['children'][c]['instruct'],
-                    'add': false
-                })
-            }
-            setChildInstructionList(default_child_instruction)
-        }
+
+        const defaultChildInstructions = template_list[index]['children'] === null ? 
+            [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] : 
+            template_list[index]['children'].map(child => ({ ...child, add: false }));
+    
+        setChildInstructionList(defaultChildInstructions);
         setSelectedIndex(index);
     };
+
     const addParent = () => {
         if (template_list.length < max_parent_num) {
-            setIsSaved(false)
-            const new_template_list = [...template_list, {
+            setIsSaved(false);
+            const newTemplate = {
                 id: null,
                 displayed_name: "",
                 instruct: "",
                 children: [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }]
-            }];
-            setTemplateList(new_template_list)
-            setChildInstructionList([])
-            setSelectedIndex(template_list.length)
+            };
+            setTemplateList([...template_list, newTemplate]);
+            setChildInstructionList([]);
+            setSelectedIndex(template_list.length);
+        } else {
+            setAddParentError(true);
         }
-        else {
-            setAddParentError(true)
+    };
+
+    const deleteParent = () => {
+        const newTemplateList = [...template_list];
+        const nodeToDelete = template_list[selectedIndex];
+    
+        if (nodeToDelete.id !== null) {
+            deleteTemplate(nodeToDelete.id);
+            setDeleteSuccess(true);
+        }
+    
+        setIsSaved(true);
+        newTemplateList.splice(selectedIndex, 1);
+        setTemplateList(newTemplateList);
+    
+        if (template_list.length < max_parent_num) {
+            if (newTemplateList.length > 0) {
+                setDeleteSuccess(true);
+            } else {
+                const newTemplateList = [{ id: null, displayed_name: "", instruct: "", children: null }];
+                setTemplateList(newTemplateList);
+                setChildInstructionList([
+                    { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false },
+                ]);
+            }
+            handleListItemClick(null, 0);
+        } else {
+            setAddParentError(false);
+            handleListItemClick(null, 0);
         }
     }
 
-    const deleteParent = () => {
-        const new_template_list = [...template_list];
-        const node_to_delete = template_list[selectedIndex];
-        if (node_to_delete.id !== null) {
-            deleteTemplate(node_to_delete.id)
-            setDeleteSuccess(true)
-        }
-        setIsSaved(true)
-        new_template_list.splice(selectedIndex, 1);
-        setTemplateList(new_template_list)
-        if (template_list.length < max_parent_num) {
-            if (new_template_list.length > 0) {
-                setDeleteSuccess(true)
-            }
-            else {
-                const new_template_list = [{ id: null, displayed_name: "", instruct: "", children: null }];
-                setTemplateList(new_template_list)
-                setChildInstructionList([
-                    { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false },
-                ])
-            }
-            handleListItemClick(null, 0)
-        }
-        else {
-            setAddParentError(false)
-            handleListItemClick(null, 0)
-        }
-    }
     const addChild = () => {
-        let length = children_instruction_list.length
-        if (length < max_child_num) {
-            setAddChildError(false)
-            const new_children_instruction_list = [...children_instruction_list, { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false }];
-            setChildInstructionList(new_children_instruction_list)
-        }
-        else {
-            setAddChildError(true)
+        if (children_instruction_list.length < max_child_num) {
+            setAddChildError(false);
+            const newChildrenInstructionList = [...children_instruction_list, { id: null, displayed_name: ``, instruct: "", unique: nanoid(), add: false }];
+            setChildInstructionList(newChildrenInstructionList);
+        } else {
+            setAddChildError(true);
         }
     }
 
     const deleteChild = (index) => {
-        let length = children_instruction_list.length
-        var node_to_delete = null;
-        const new_children_instruction_list = [...children_instruction_list];
-        node_to_delete = children_instruction_list[index]
-        if (length < max_child_num) {
-            new_children_instruction_list.splice(index, 1);
-            setChildInstructionList(new_children_instruction_list)
-            if (node_to_delete.id !== null) {
-                deleteTemplate(node_to_delete.id)
-                setDeleteSuccess(true)
+        const newChildrenInstructionList = [...children_instruction_list];
+        const nodeToDelete = children_instruction_list[index];
+    
+        if (newChildrenInstructionList.length < max_child_num) {
+            newChildrenInstructionList.splice(index, 1);
+            setChildInstructionList(newChildrenInstructionList);
+        
+            if (nodeToDelete.id !== null) {
+                deleteTemplate(nodeToDelete.id);
+                setDeleteSuccess(true);
             }
-        }
-        else {
-            new_children_instruction_list.splice(-1);
-            setChildInstructionList(new_children_instruction_list)
-            setAddChildError(false)
-            if (node_to_delete.id !== null) {
-                deleteTemplate(node_to_delete.id)
-                setDeleteSuccess(true)
+        } else {
+            newChildrenInstructionList.splice(-1);
+            setChildInstructionList(newChildrenInstructionList);
+            setAddChildError(false);
+        
+            if (nodeToDelete.id !== null) {
+                deleteTemplate(nodeToDelete.id);
+                setDeleteSuccess(true);
             }
         }
     }
@@ -303,23 +298,24 @@ function UserInstruction() {
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
     useEffect(() => {
-        if (websocket.current) {
-            websocket.current.close()
-        }
-        if (agent_websocket.current) {
-            agent_websocket.current.close()
-        }
-        if (chat_websocket.current) {
-            chat_websocket.current.close()
-        }
+        const closeWebSocket = (socket) => {
+            if (socket.current) {
+                socket.current.close();
+            }
+        };
+
+        closeWebSocket(websocket);
+        closeWebSocket(agent_websocket);
+        closeWebSocket(chat_websocket);
+
         if (websocket_hash) {
-            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + "/ws/engineer-async/" + websocket_hash + '/' + timeZone + '/');
+            websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}/ws/engineer-async/${websocket_hash}/${timeZone}/`);
             agentsocket(
                 websocket,
                 setChatMessage,
                 setThinking,
                 document,
-            )
+            );
         }
     }, [websocket_hash]);
 
@@ -330,37 +326,37 @@ function UserInstruction() {
         }
     }
     const submitChat = () => {
-        if (usermessage == '') {
-            setUserMessageError(true)
+        if (usermessage === '') {
+            setUserMessageError(true);
+            return;
         }
-        else {
-            let user_child_instruct = ''
-            for (let i in children_instruction_list) {
-                if (children_instruction_list[i]['add']) {
-                    user_child_instruct = user_child_instruct + "\n" + children_instruction_list[i]['instruct']
-                }
-            }
-            let user_parent_instruct = template_list[selectedIndex]['instruct']
-            var data = {
-                'instruct_change': instruct_change,
-                'max_turn': max_turn,
-                'currentParagraph': 1,
-                'message': usermessage,
-                'choosen_model': choosen_model,
-                'choosen_template': choosen_template,
-                'role': 'Human',
-                'top_p': top_p,
-                'max_tokens': max_tokens,
-                'frequency_penalty': frequencypenalty,
-                'presence_penalty': presencepenalty,
-                'temperature': temperature,
-                'agent_instruction': user_parent_instruct,
-                'child_instruction': user_child_instruct
-            }
-            websocket.current.send(JSON.stringify(data))
-            setUserMessage("")
-            setInstructChange(false)
-        }
+        let user_child_instruct = children_instruction_list
+            .filter(child => child.add)
+            .map(child => child.instruct)
+            .join("\n");
+
+        let user_parent_instruct = template_list[selectedIndex].instruct;
+
+        const data = {
+            instruct_change,
+            max_turn,
+            currentParagraph: 1,
+            message: usermessage,
+            choosen_model,
+            choosen_template,
+            role: 'Human',
+            top_p,
+            max_tokens,
+            frequency_penalty: frequencypenalty,
+            presence_penalty: presencepenalty,
+            temperature,
+            agent_instruction: user_parent_instruct,
+            child_instruction: user_child_instruct
+        };
+
+        websocket.current.send(JSON.stringify(data));
+        setUserMessage("");
+        setInstructChange(false);
     }
     const { agent_objects } = useGetModel()
     const { refetch } = useGetUserInstruction(selectedIndex, setMaxChildNum, setMaxParentNum, setAddParentError, setTemplateList, setChildInstructionList)
@@ -377,36 +373,30 @@ function UserInstruction() {
                                     Instruction Template
                                 </Typography>
                                 <List>
-                                    {template_list.map((t, index) => {
-                                        return (
-                                            <ListItemButton sx={{ height: 38 }}
-                                                key={index}
-                                                selected={selectedIndex === index}
-                                                onClick={(event) => handleListItemClick(event, index)}
-                                            >
-                                                <ListItemIcon>
-                                                    {selectedIndex === index && <FolderOpenIcon />}
-                                                    {selectedIndex !== index && <FolderIcon />}
-                                                </ListItemIcon>
-                                                <ListItemText primaryTypographyProps={{
-                                                    fontWeight: 'medium',
-                                                    variant: 'body2',
-                                                    style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
-                                                }} primary={t.displayed_name} />
-                                            </ListItemButton>
-                                        )
-                                    })}
-                                    <Box display="flex" justifyContent="center"
-                                        alignItems="center">
+                                    {template_list.map((t, index) => (
+                                        <ListItemButton sx={{ height: 38 }} key={index} selected={selectedIndex === index} onClick={(event) => handleListItemClick(event, index)}>
+                                            <ListItemIcon>
+                                                {selectedIndex === index ? <FolderOpenIcon /> : <FolderIcon />}
+                                            </ListItemIcon>
+                                            <ListItemText primaryTypographyProps={{
+                                                fontWeight: 'medium',
+                                                variant: 'body2',
+                                                style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
+                                            }} primary={t.displayed_name} />
+                                        </ListItemButton>
+                                    ))}
+                                    <Box display="flex" justifyContent="center" alignItems="center">
                                         {add_parent_error && <Alert severity="warning">Reaching the maximum number of parent ({max_parent_num}).</Alert>}
-                                        {!add_parent_error && is_save &&
-                                            <IconButton aria-label="add" onClick={() => { addParent() }}>
+                                        {!add_parent_error && is_save && (
+                                            <IconButton aria-label="add" onClick={addParent}>
                                                 <AddCircleOutlineIcon />
                                             </IconButton>
-                                        }
-                                        {template_list.length > 1 && <IconButton aria-label="delete" onClick={() => { deleteParent() }}>
-                                            <DeleteIcon />
-                                        </IconButton>}
+                                        )}
+                                        {template_list.length > 1 && (
+                                            <IconButton aria-label="delete" onClick={deleteParent}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        )}
                                     </Box>
                                 </List>
                             </Paper>
@@ -478,61 +468,59 @@ function UserInstruction() {
                                     <DragDropContext onDragEnd={handleOnDragEnd}>
                                         <Droppable droppableId="childrens">
                                             {(provided) => (
-                                                <Box className="childrens"  {...provided.droppableProps} ref={provided.innerRef}>
-                                                    {children_instruction_list && children_instruction_list.map((child, index) => {
-                                                        return (
-                                                            <Draggable key={child.id !== null ? child.id : child.unique} draggableId={`${child.id !== null ? child.id : child.unique}`} index={index}>
-                                                                {(provided) => (
-                                                                    <Box mt={1} mb={1} display='flex' ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                                                        <Box mr={2} >
-                                                                            <Divider orientation="vertical" />
-                                                                        </Box>
-                                                                        <Paper elevation={2} style={{ width: '100%' }}>
-                                                                            <Stack direction="row" p={2} spacing={2} style={{ width: '100%' }}>
-                                                                                <Box>
-                                                                                    <IconButton aria-label="delete" >
-                                                                                        <DragHandleIcon />
-                                                                                    </IconButton>
-                                                                                </Box>
-                                                                                <Box mt={1} mb={1} style={{ width: '100%' }}>
-                                                                                    <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}  >
-                                                                                        <TextField
-                                                                                            label={`Children No.${index} Name`}
-                                                                                            inputProps={{ maxLength: 35 }}
-                                                                                            maxRows={1}
-                                                                                            defaultValue={child.displayed_name}
-                                                                                            size="small"
-                                                                                            InputLabelProps={{ shrink: true }}
-                                                                                            onChange={(e) => { handleTextFieldChange(index, "displayed_name", e.target.value); setDisableSave(false) }}
-                                                                                        />
-                                                                                        <Box>
-                                                                                            <FormControlLabel control={<Checkbox onChange={(e) => { handleTextFieldChange(index, 'add', e.target.checked) }} />} label="Add" />
-                                                                                            <IconButton aria-label="delete" onClick={() => { deleteChild(index) }}>
-                                                                                                <DeleteIcon />
-                                                                                            </IconButton>
-                                                                                        </Box>
-                                                                                    </Stack>
-                                                                                    <FormControl fullWidth sx={{ mt: 1 }} variant="standard">
-                                                                                        <TextField
-                                                                                            label={`Child No.${index} Instruction`}
-                                                                                            multiline
-                                                                                            minRows={6}
-                                                                                            inputProps={{ maxLength: 2500 }}
-                                                                                            InputLabelProps={{ shrink: true }}
-                                                                                            fullWidth
-                                                                                            maxRows={8}
-                                                                                            defaultValue={child.instruct}
-                                                                                            onChange={(e) => { handleTextFieldChange(index, "instruct", e.target.value); setDisableSave(false) }}
-                                                                                        />
-                                                                                    </FormControl>
-                                                                                </Box>
-                                                                            </Stack>
-                                                                        </Paper>
+                                                <Box className="childrens" {...provided.droppableProps} ref={provided.innerRef}>
+                                                    {children_instruction_list && children_instruction_list.map((child, index) => (
+                                                        <Draggable key={child.id ?? child.unique} draggableId={`${child.id ?? child.unique}`} index={index}>
+                                                            {(provided) => (
+                                                                <Box mt={1} mb={1} display='flex' ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                                                    <Box mr={2}>
+                                                                        <Divider orientation="vertical" />
                                                                     </Box>
-                                                                )}
-                                                            </Draggable>
-                                                        )
-                                                    })}
+                                                                    <Paper elevation={2} style={{ width: '100%' }}>
+                                                                        <Stack direction="row" p={2} spacing={2} style={{ width: '100%' }}>
+                                                                            <Box>
+                                                                                <IconButton aria-label="delete">
+                                                                                    <DragHandleIcon />
+                                                                                </IconButton>
+                                                                            </Box>
+                                                                            <Box mt={1} mb={1} style={{ width: '100%' }}>
+                                                                                <Stack direction='row' sx={{ display: "flex", justifyContent: "space-between" }}>
+                                                                                    <TextField
+                                                                                        label={`Children No.${index} Name`}
+                                                                                        inputProps={{ maxLength: 35 }}
+                                                                                        maxRows={1}
+                                                                                        defaultValue={child.displayed_name}
+                                                                                        size="small"
+                                                                                        InputLabelProps={{ shrink: true }}
+                                                                                        onChange={(e) => { handleTextFieldChange(index, "displayed_name", e.target.value); setDisableSave(false) }}
+                                                                                    />
+                                                                                    <Box>
+                                                                                        <FormControlLabel control={<Checkbox onChange={(e) => { handleTextFieldChange(index, 'add', e.target.checked) }} />} label="Add" />
+                                                                                        <IconButton aria-label="delete" onClick={() => { deleteChild(index) }}>
+                                                                                            <DeleteIcon />
+                                                                                        </IconButton>
+                                                                                    </Box>
+                                                                                </Stack>
+                                                                                <FormControl fullWidth sx={{ mt: 1 }} variant="standard">
+                                                                                    <TextField
+                                                                                        label={`Child No.${index} Instruction`}
+                                                                                        multiline
+                                                                                        minRows={6}
+                                                                                        inputProps={{ maxLength: 2500 }}
+                                                                                        InputLabelProps={{ shrink: true }}
+                                                                                        fullWidth
+                                                                                        maxRows={8}
+                                                                                        defaultValue={child.instruct}
+                                                                                        onChange={(e) => { handleTextFieldChange(index, "instruct", e.target.value); setDisableSave(false) }}
+                                                                                    />
+                                                                                </FormControl>
+                                                                            </Box>
+                                                                        </Stack>
+                                                                    </Paper>
+                                                                </Box>
+                                                            )}
+                                                        </Draggable>
+                                                    ))}
                                                     {provided.placeholder}
                                                 </Box>
                                             )}

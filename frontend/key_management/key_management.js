@@ -75,72 +75,58 @@ function KeyManagement() {
     };
     const { mutate: keycreatemutate, error: serverkeycreateerror, data: serverkeycreatedata } = useMutation(basePost);
     const handleCreateKey = (event, url) => {
-        event.preventDefault()
-        setKeyNameError(false)
-        setKeyCreateLoading(true)
-        setRandomAnimation(false)
-        setLocalKeyCreateError("")
-        if (keyname == '') {
-            setKeyNameError(true)
-            setKeyCreateLoading(false)
-        }
-        else if (keyname.length > 50) {
-            setLocalKeyCreateError("Key name exceeds max characters of 50")
-            setKeyNameError(true)
-            setKeyCreateLoading(false)
-        }
-        else {
-            const data = {
-                key_name: keyname,
-            }
-            keycreatemutate({ url: url, data: data })
+        event.preventDefault();
+        setKeyNameError(false);
+        setKeyCreateLoading(true);
+        setRandomAnimation(false);
+        setLocalKeyCreateError("");
+
+        if (keyname === '') {
+            setKeyNameError(true);
+            setKeyCreateLoading(false);
+        } else if (keyname.length > 50) {
+            setLocalKeyCreateError("Key name exceeds max characters of 50");
+            setKeyNameError(true);
+            setKeyCreateLoading(false);
+        } else {
+            const data = { key_name: keyname };
+            keycreatemutate({ url, data });
         }
     }
     const { mutate: keycheckmutate, isLoading: keycheckisLoading, error: keycheckerror, data: keycheckdata } = useMutation(basePost);
     const { mutate: xmrretrievemutate, isLoading: xmrretrieveisLoading, error: xmrretrieveerror, data: xmrretrievedata } = useMutation(basePost);
     const { mutate: xmrconfirmmutate, isLoading: xmrconfirmisLoading, error: xmrconfirmerror, data: xmrconfirmdata } = useMutation(basePost);
     const handlePostRequest = (event, url, type) => {
-        event.preventDefault()
-        setKeyNamePayError(false)
-        if (keynamepay == '') {
-            setKeyNamePayError(true)
-        }
-        if (key == '') {
-            setKeyError(true)
-        }
+        event.preventDefault();
+        setKeyNamePayError(keynamepay === '');
+        setKeyError(key === '');
+
         if (keynamepay && key) {
-            const data = {
-                key_name: keynamepay,
-                key: key
-            }
-            if (type === "keycheck") {
-                keycheckmutate({ url: url, data: data })
-            }
-            else if (type === "xmrretrieve") {
-                xmrretrievemutate({ url: url, data: data })
-            }
-            else if (type === "xmrconfirm") {
-                xmrconfirmmutate({ url: url, data: data })
+            const data = { key_name: keynamepay, key: key };
+            const mutateFunction = {
+                keycheck: keycheckmutate,
+                xmrretrieve: xmrretrievemutate,
+                xmrconfirm: xmrconfirmmutate
+            }[type];
+
+            if (mutateFunction) {
+                mutateFunction({ url, data });
             }
         }
     }
     const { mutate: stripemutate, isSuccess: stripeisSuccess, error: stripeerror, data: stripedata } = useMutation(basePost);
     const handleStripeRedirect = (event) => {
-        event.preventDefault()
-        setKeyNamePayError(false)
-        if (keynamepay == '') {
-            setKeyNamePayError(true)
-        }
-        if (key == '') {
-            setKeyError(true)
-        }
+        event.preventDefault();
+        setKeyNamePayError(false);  
+        setKeyNamePayError(keynamepay === '');
+        setKeyError(key === '');
         if (keynamepay && key && amount) {
             const data = {
                 key_name: keynamepay,
                 key: key,
                 product_id: amount,
-            }
-            stripemutate({ url: "/frontend-api/stripe-redirect", data: data })
+            };
+            stripemutate({ url: "/frontend-api/stripe-redirect", data });
         }
     }
     useEffect(() => {

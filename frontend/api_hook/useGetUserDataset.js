@@ -6,10 +6,13 @@ export const useGetUserDataset = (setDatasetList, setMaxDatasetNum, setMaxEvalua
     const {
         error: error,
         isLoading: isLoading,
+        refetch: refetch
+        
     } = useQuery("DatasetList", () => baseGet("/frontend-api/get-dataset"),
         {   
             retry: false,
             refetchOnWindowFocus: false,
+            
             onSuccess: (data) => {
                 setDatasetList(data.dataset_list), 
                 setMaxDatasetNum(data.max_dataset_num),
@@ -19,6 +22,7 @@ export const useGetUserDataset = (setDatasetList, setMaxDatasetNum, setMaxEvalua
     );
 
     return {
+        refetch: refetch,
         error: error,
         isLoading: isLoading
     }

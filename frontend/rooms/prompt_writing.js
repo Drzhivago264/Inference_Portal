@@ -1,15 +1,14 @@
-import {
-    DataGrid,
-    GridCellEditStopReasons,
-} from '@mui/x-data-grid';
 import { Divider, List, Typography } from '@mui/material';
 import React, { useContext, useState } from 'react';
-import { isKeyboardEvent, multilineColumn } from '../component/custom_ui_component/MultipleLineEdittingDataGrid.js';
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import {
+    DataGrid
+} from '@mui/x-data-grid';
+import DatasetMutateDialog from '../component/custom_ui_component/DatasetMutateDialog.js';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FolderIcon from '@mui/icons-material/Folder';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
@@ -51,13 +50,11 @@ function PromptWriting() {
     const [next_pagnation, setNextPaginationPage] = useState(null)
     const [previous_pagnation, setPreviousPaginationPage] = useState(null)
     const [rowSelectionModel, setRowSelectionModel] = useState([]);
-    const [instruct_change, setInstructChange] = useState(false)
     const [current_system_prompt, setCurrentSystemPrompt] = useState("")
     const [current_evaluation, setCurrentEvaluation] = useState([{ evaluation_name: "Score", score: "" }])
     const [current_prompt, setCurrentPrompt] = useState("")
     const [current_response, setCurrentResponse] = useState("")
     const [current_record_id, setCurrentRecordId] = useState(null)
-    const [allow_save_dataset, setAllowSaveDataset] = useState(false)
     const [allow_save_record, setAllowSaveRecord] = useState(false)
     const [loading, setLoading] = useState(false);
     const [savesuccess, setSaveSuccess] = useState(false);
@@ -68,9 +65,7 @@ function PromptWriting() {
     const [deleteerrormessage, setDeleteErrorMessage] = useState('');
     const [dataset_list, setDatasetList] = useState(null)
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const [add_parent_error, setAddParentError] = useState(false)
     const [allow_add_dataset, setAllowAddDataset] = useState(true)
-
     const [max_dataset_num, setMaxDatasetNum] = useState(10)
     const [max_evaluation_num, setMaxEvaluationNum] = useState(10)
 
@@ -87,109 +82,48 @@ function PromptWriting() {
         }
         setPaginationPage(new_pagnation_page)
     }
-
     const navigateRow = (direction) => {
-        var old_row_id = rowSelectionModel
-        var new_row = null
-        if (direction === "next" && typeof rowSelectionModel !== "number") {
-            new_row = dataset_row[0]
+        let old_row_id = rowSelectionModel;
+        let new_row = null;
 
-        }
-        else if (direction === "previous" && typeof rowSelectionModel !== "number") {
-            new_row = dataset_row[dataset_row.length - 1]
-        }
-        else if (direction === "next" && typeof rowSelectionModel === "number") {
-
-            for (let i in dataset_row) {
-                console.log(dataset_row[i].id, old_row_id)
+        if (typeof rowSelectionModel !== "number") {
+            if (direction === "next") {
+                new_row = dataset_row[0];
+            } else if (direction === "previous") {
+                new_row = dataset_row[dataset_row.length - 1];
+            }
+        } else {
+            for (let i = 0; i < dataset_row.length; i++) {
                 if (dataset_row[i].id === old_row_id) {
-                    new_row = dataset_row[Number(i) + 1] ? dataset_row[Number(i) + 1] : dataset_row[0]
+                    new_row = dataset_row[i + (direction === "next" ? 1 : -1)] || dataset_row[direction === "next" ? 0 : dataset_row.length - 1];
+                    break;
                 }
             }
         }
-        else if (direction === "previous" && typeof rowSelectionModel === "number") {
-            for (let i in dataset_row) {
-                if (dataset_row[i].id === old_row_id) {
-                    new_row = dataset_row[i - 1] ? dataset_row[i - 1] : dataset_row[dataset_row.length - 1]
-                }
-            }
-        }
-        setRowSelectionModel(new_row.id)
-        setCurrentRecordId(new_row.id)
-        setCurrentPrompt(new_row.prompt)
-        setCurrentResponse(new_row.response)
-        setCurrentSystemPrompt(new_row.system_prompt)
-        for (let i in record_list.results.record_serializer) {
+        setRowSelectionModel(new_row.id);
+        setCurrentRecordId(new_row.id);
+        setCurrentPrompt(new_row.prompt);
+        setCurrentResponse(new_row.response);
+        setCurrentSystemPrompt(new_row.system_prompt);
+        for (let i = 0; i < record_list.results.record_serializer.length; i++) {
             if (record_list.results.record_serializer[i].id === new_row.id) {
-                setCurrentEvaluation(record_list.results.record_serializer[i].evaluation)
+                setCurrentEvaluation(record_list.results.record_serializer[i].evaluation);
+                break;
             }
         }
-
-
     }
-    const handleDatasetChange = (v, property) => {
-        if (property !== 'id') {
-            setAllowSaveDataset(true)
-        }
-        setInstructChange(true)
-        const new_dataset_list = [...dataset_list]
-        const new_template = { ...dataset_list[selectedIndex] }
-        new_template[property] = v
-        new_dataset_list[selectedIndex] = new_template
-        setDatasetList(new_dataset_list)
-    }
-
     const updateEvaluationValue = (v, property, index) => {
-        const new_evaluation_list = [...current_evaluation]
-        const new_evaluation = { ...new_evaluation_list[index] }
-        new_evaluation[property] = v
-        new_evaluation_list[index] = new_evaluation
-        setCurrentEvaluation(new_evaluation_list)
-
+        const new_evaluation_list = current_evaluation.map((item, i) => {
+            if (i === index) {
+                return { ...item, [property]: v };
+            }
+            return item;
+        });
+        setCurrentEvaluation(new_evaluation_list);
     }
     const { mutate: postmutate } = useMutation(basePost);
     const { mutate: putmutate } = useMutation(basePut);
-    const saveDataset = () => {
-        setLoading(true)
-        const dataset = dataset_list[selectedIndex]
-        if (!dataset.id) {
-            const data = {
-                'name': dataset.name
-            }
-            postmutate({ url: "/frontend-api/create-dataset", data: data }, {
-                onSuccess: (data) => {
-                    setSaveSuccess(true)
-                    setAllowAddDataset(true)
-                    handleDatasetChange(data.id, 'id')
-                    setAllowSaveDataset(false)
-                }
-            }
-            )
-        }
-        else {
-            const data = {
-                'id': dataset.id,
-                'new_name': dataset.name
-            }
-            putmutate({ url: "/frontend-api/update-dataset", data: data }, {
-                onSuccess: () => {
-                    setSaveSuccess(true)
-                    setAllowAddDataset(true)
-                    setAllowSaveDataset(false)
-                },
-                onError: (error) => {
-                    setSaveError(true)
-                    if (error.code === "ERR_BAD_RESPONSE") {
-                        setSaveErrorMessage("Failed, Internal Server Error!")
-                    }
-                    else {
-                        setSaveErrorMessage(error.response.data.detail)
-                    }
-                }
-            })
-        }
-        setLoading(false)
-    }
+ 
 
     const { mutate: deletemutate } = useMutation(baseDelete);
     const deleteReq = (id) => {
@@ -214,17 +148,8 @@ function PromptWriting() {
 
     const saveRecord = () => {
         setLoading(true)
-
         const dataset = dataset_list[selectedIndex]
-        if (!dataset.id) {
-            saveDataset()
-        }
-        const current_evaluation_without_null = []
-        for (let i in current_evaluation) {
-            if (current_evaluation[i].evaluation_name && current_evaluation[i].score) {
-                current_evaluation_without_null.push(current_evaluation[i])
-            }
-        }
+        const current_evaluation_without_null = current_evaluation.filter(item => item.evaluation_name && item.score);
         if (current_prompt && current_response && current_system_prompt) {
             var data = {
                 'dataset_id': dataset.id,
@@ -239,7 +164,6 @@ function PromptWriting() {
                         record_refetch()
                         setSaveSuccess(true)
                         setAllowSaveRecord(false)
-                        setAllowSaveDataset(false)
                     }
                 }
                 )
@@ -252,7 +176,6 @@ function PromptWriting() {
                         setAllowSaveRecord(false)
                         setSaveSuccess(true)
                         setAllowAddDataset(true)
-                        setAllowSaveDataset(false)
                     },
                     onError: (error) => {
                         setSaveError(true)
@@ -275,103 +198,91 @@ function PromptWriting() {
 
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
+        setCurrentSystemPrompt(dataset_list[index].default_system_prompt)
+        setCurrentEvaluation(dataset_list[index].default_evaluation)
     };
 
     const deleteDataset = () => {
-        setAllowAddDataset(true)
-        const new_dataset_list = [...dataset_list];
-        const node_to_delete = dataset_list[selectedIndex]
-        if (node_to_delete.id !== null) {
-            deleteReq(node_to_delete.id)
-            setDeleteSuccess(true)
+        setAllowAddDataset(true);
+        const newDatasetList = [...dataset_list];
+        const nodeToDelete = dataset_list[selectedIndex];
+        if (nodeToDelete.id !== null) {
+            deleteReq(nodeToDelete.id);
+            setDeleteSuccess(true);
         }
-        if (new_dataset_list.length > 1) {
-            setDatasetList(prev => {
-                return prev.filter((obj, i) => i !== selectedIndex)
-            })
-            setDeleteSuccess(true)
-        }
-        else {
-            const new_dataset_list = [{ id: null, name: "Empty Template" }];
-            setDatasetList(new_dataset_list)
+
+        if (newDatasetList.length > 1) {
+            setDatasetList(prev => prev.filter((_, i) => i !== selectedIndex));
+            setDeleteSuccess(true);
+        } else {
+            setDatasetList([]);
         }
     }
     const deleteRecord = () => {
-        const dataset = dataset_list[selectedIndex]
-        if (current_record_id && dataset) {
+        if (current_record_id && dataset_list[selectedIndex]) {
             const data = {
                 'record_id': current_record_id,
-                'dataset_id': dataset.id
-            }
-            deletemutate({ url: "/frontend-api/delete-record", data: data },
-                {
-                    onSuccess: () => {
-                        setDeleteSuccess(true);
-                        record_refetch()
+                'dataset_id': dataset_list[selectedIndex].id
+            };
+
+            deletemutate({ url: "/frontend-api/delete-record", data: data }, {
+                onSuccess: () => {
+                    setDeleteSuccess(true);
+                    record_refetch();
+                },
+                onError: (error) => {
+                    if (error.code === "ERR_BAD_RESPONSE") {
+                        setSaveErrorMessage("Failed, Internal Server Error!");
+                    } else {
+                        setDeleteErrorMessage(error.response.data.detail);
                     }
-                    ,
-                    onError: (error) => {
-                        if (error.code === "ERR_BAD_RESPONSE") {
-                            setSaveErrorMessage("Failed, Internal Server Error!")
-                        }
-                        else {
-                            setDeleteErrorMessage(error.response.data.detail)
-                        }
-                    }
-                })
+                }
+            });
         }
-        setCurrentPrompt('')
-        setCurrentResponse('')
-        setCurrentRecordId(null)
-        setCurrentEvaluation([])
-        setCurrentSystemPrompt('')
+
+        setCurrentPrompt('');
+        setCurrentResponse('');
+        setCurrentRecordId(null);
+        setCurrentEvaluation(dataset_list[selectedIndex].default_evaluation);
+        setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt);
     }
 
-    const addDataset = () => {
-        if (dataset_list.length < max_dataset_num) {
-            setAllowAddDataset(false)
-            const new_dataset_list = [...dataset_list, {
-                id: null,
-                name: "",
-            }];
-            setDatasetList(new_dataset_list)
-            setSelectedIndex(dataset_list.length)
-        }
-    }
     const addEvaluation = () => {
-        let length = current_evaluation.length
-        if (length < max_evaluation_num) {
-            const new_evaluation = [...current_evaluation, {
+        if (current_evaluation.length < max_evaluation_num) {
+            const newEvaluation = {
                 evaluation_name: "",
                 score: "",
-            }];
-            setCurrentEvaluation(new_evaluation)
-        }
-    }
-    const deleteEvaluation = (index) => {
-        setCurrentEvaluation(prev => {
-            return prev.filter((obj, i) => i !== index)
-        })
-    }
-    useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum)
-    const { refetch: record_refetch } = useGetUserDatasetRecord(setRecordList, setNextPaginationPage, setPreviousPaginationPage, dataset_list, selectedIndex, pagnation_page, setDatasetColumn, setDatasetRow)
-
-    const handleRowClick = (params) => {
-        setCurrentRecordId(params.row.id)
-        setCurrentPrompt(params.row.prompt)
-        setCurrentResponse(params.row.response)
-        setCurrentSystemPrompt(params.row.system_prompt)
-        for (let i in record_list.results.record_serializer) {
-            if (record_list.results.record_serializer[i].id === params.row.id) {
-                setCurrentEvaluation(record_list.results.record_serializer[i].evaluation)
-            }
+            };
+            setCurrentEvaluation([...current_evaluation, newEvaluation]);
         }
     };
+
+    const deleteEvaluation = (index) => {
+        setCurrentEvaluation(prev => prev.filter((_, i) => i !== index));
+    };
+
+    useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, dataset_list)
+    const { refetch: record_refetch } = useGetUserDatasetRecord(setRecordList, setNextPaginationPage, setPreviousPaginationPage, dataset_list, selectedIndex, pagnation_page, setDatasetColumn, setDatasetRow)
+    const handleRowClick = (params) => {
+        const { id, prompt, response, system_prompt } = params.row;
+        setCurrentRecordId(id);
+        setCurrentPrompt(prompt);
+        setCurrentResponse(response);
+        setCurrentSystemPrompt(system_prompt);
+
+        const clickedRecord = record_list.results.record_serializer.find(record => record.id === id);
+        if (clickedRecord) {
+            setCurrentEvaluation(clickedRecord.evaluation);
+        }
+    };
+
     const addRecord = () => {
-        setCurrentPrompt('')
-        setCurrentResponse('')
-        setCurrentRecordId(null)
-    }
+        setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt)
+        setCurrentEvaluation(dataset_list[selectedIndex].default_evaluation)
+        setCurrentPrompt('');
+        setCurrentResponse('');
+        setCurrentRecordId(null);
+    };
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
             <title>Dataset</title>
@@ -391,44 +302,43 @@ function PromptWriting() {
                                                 <ListItemIcon>
                                                     {selectedIndex === index ? <FolderOpenIcon /> : <FolderIcon />}
                                                 </ListItemIcon>
-                                                <ListItemText primary={
-                                                    <TextField
-                                                        id="outlined-basic"
-                                                        defaultValue={dataset.name}
-                                                        size='small'
-                                                        variant="standard"
-                                                        style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-                                                        onChange={(e) => handleDatasetChange(e.target.value, 'name')}
-                                                    />
-                                                } />
+                                                <ListItemText primaryTypographyProps={{
+                                                    fontWeight: 'medium',
+                                                    variant: 'body2',
+                                                    style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
+                                                }} primary={dataset.name} />
+                                                <DatasetMutateDialog
+                                                    setAllowAddDataset={setAllowAddDataset}
+                                                    setDatasetList={setDatasetList}
+                                                    dataset_list={dataset_list}
+                                                    max_evaluation_num={max_dataset_num}
+                                                    method = "put"
+                                                    dataset_id = {dataset.id}
+                                                    old_dataset_name={dataset.name}
+                                                    old_default_evaluation={dataset.default_evaluation}
+                                                    old_default_system_prompt={dataset.default_system_prompt}
+                                                />
                                             </ListItemButton>
+
                                         </ListItem>
                                     ))}
                                     <Box display="flex" justifyContent="center" alignItems="center" mt={1}>
-                                        {add_parent_error && <Alert severity="warning">Reaching the maximum number of datasets ({max_dataset_num}).</Alert>}
-                                        {!add_parent_error && allow_add_dataset && dataset_list && dataset_list.length < max_dataset_num && (
-                                            <IconButton aria-label="add" onClick={addDataset}>
-                                                <AddCircleOutlineIcon />
-                                            </IconButton>
+
+                                        { allow_add_dataset && dataset_list && dataset_list.length < max_dataset_num && max_evaluation_num && (
+                                            <DatasetMutateDialog
+                                                setAllowAddDataset={setAllowAddDataset}
+                                                setDatasetList={setDatasetList}
+                                                dataset_list={dataset_list}
+                                                max_evaluation_num={max_dataset_num}
+                                                method="post"
+                                            />
                                         )}
                                         {dataset_list && dataset_list.length > 1 && (
                                             <IconButton aria-label="delete" onClick={deleteDataset}>
                                                 <DeleteIcon />
                                             </IconButton>
                                         )}
-                                        <Box mr={1}>
-                                            <LoadingButton
-                                                size="small"
-                                                disabled={!allow_save_dataset}
-                                                loading={loading}
-                                                loadingPosition="end"
-                                                variant="contained"
-                                                onClick={saveDataset}
-                                                endIcon={<SaveIcon />}
-                                            >
-                                                Save Dataset
-                                            </LoadingButton>
-                                        </Box>
+
                                     </Box>
                                 </List>
                             </Paper>
@@ -590,7 +500,7 @@ function PromptWriting() {
                                     rows={dataset_row}
                                     columns={dataset_column}
                                     hideFooter={true}
-                                    onRowSelectionModelChange={(newRowSelectionModel, params) => {
+                                    onRowSelectionModelChange={(newRowSelectionModel) => {
                                         setRowSelectionModel(newRowSelectionModel);
                                     }}
                                     rowSelectionModel={rowSelectionModel}
