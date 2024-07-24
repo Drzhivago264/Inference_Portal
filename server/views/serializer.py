@@ -35,17 +35,21 @@ class InstructionTreeSerializer(serializers.ModelSerializer):
 
 class DatasetCreateSerializer(serializers.Serializer):
     name = serializers.CharField()
+    default_system_prompt = serializers.CharField(allow_blank=True)
+    default_evaluation = serializers.JSONField()
 
 class DatasetDeleteSerializer(serializers.Serializer):
     id = serializers.IntegerField()
 
 class DatasetUpdateSerializer(DatasetDeleteSerializer):
     new_name = serializers.CharField()
+    new_default_system_prompt = serializers.CharField(allow_blank=True)
+    new_default_evaluation = serializers.JSONField()
 
 class DatasetGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
-        fields = ('id', "name")
+        fields = ('id', "name", "default_system_prompt", "default_evaluation")
 
 class DatasetRecordGetSerialzier(serializers.Serializer):
     id = serializers.IntegerField()

@@ -57,12 +57,9 @@ function KeyManagement() {
     const handlePostRequest = (event, url, type) => {
         event.preventDefault()
         setKeyNamePayError(false)
-        if (keynamepay == '') {
-            setKeyNamePayError(true)
-        }
-        if (key == '') {
-            setKeyError(true)
-        }
+        setKeyNamePayError(keynamepay === '');
+        setKeyError(key === '');
+
         if (keynamepay && key) {
             const data = {
                 key_name: keynamepay,
@@ -84,12 +81,9 @@ function KeyManagement() {
     const handleStripeRedirect = (event) => {
         event.preventDefault()
         setKeyNamePayError(false)
-        if (keynamepay == '') {
-            setKeyNamePayError(true)
-        }
-        if (key == '') {
-            setKeyError(true)
-        }
+        setKeyNamePayError(keynamepay === '');
+        setKeyError(key === '');
+
         if (keynamepay && key && amount) {
             const data = {
                 key_name: keynamepay,

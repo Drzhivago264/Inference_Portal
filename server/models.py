@@ -80,6 +80,8 @@ class Crypto(models.Model):
 class Dataset(models.Model):
     name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    default_system_prompt = models.TextField(max_length=128000, default="")
+    default_evaluation = models.JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self) -> str:

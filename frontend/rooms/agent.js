@@ -174,7 +174,6 @@ function Agent() {
         setChoosenUserTemplate: setChoosenUserTemplate,
         default_user_child_instruct: default_user_child_instruct,
         setUserChildInstruct: setUserChildInstruct,
-        error: error,
         isLoading: isLoading
     } = useGetInstructionTree(editorref, setEditor)
 
