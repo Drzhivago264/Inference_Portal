@@ -369,7 +369,7 @@ function UserInstruction() {
                     <Grid container spacing={2}>
                         <Grid item xs={2}>
                             <Paper sx={{ mr: 2 }} variant='outlined'>
-                                <Typography m={1} variant='body1' sx={{ color: 'text.secondary' }}>
+                                <Typography ml={2} mt={1} variant='body1' sx={{ color: 'text.secondary' }}>
                                     Instruction Template
                                 </Typography>
                                 <List>
