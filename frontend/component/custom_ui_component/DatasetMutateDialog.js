@@ -31,7 +31,9 @@ export default function DatasetMutateDialog({
     old_default_system_prompt,
     old_default_evaluation,
     old_dataset_name,
-    method
+    method,
+    setCurrentEvaluation,
+    setCurrentSystemPrompt
 
 }) {
     const [open, setOpen] = useState(false);
@@ -43,23 +45,23 @@ export default function DatasetMutateDialog({
     const [savesuccess, setSaveSuccess] = useState(false);
     const [allow_mutate, setAllowMutate] = useState(true)
     const { mutate: postmutate } = useMutation(basePost);
-    const {mutate: putmutate} = useMutation(basePut)
+    const { mutate: putmutate } = useMutation(basePut)
     const createDataset = () => {
         const default_evaluation_without_null = default_evaluation.filter(item => item.evaluation_name && item.score);
         setAllowMutate(false)
-        
         if (dataset_name) {
             const data = {
                 'name': dataset_name,
                 'default_system_prompt': default_system_prompt,
                 'default_evaluation': default_evaluation_without_null
             }
-
             postmutate({ url: "/frontend-api/create-dataset", data: data }, {
                 onSuccess: (data) => {
                     setSaveSuccess(true)
                     setAllowAddDataset(true)
                     setDatasetList([...dataset_list, { id: data.id, name: data.name, default_system_prompt: default_system_prompt, default_evaluation: default_evaluation_without_null }])
+                    setCurrentEvaluation(default_evaluation_without_null),
+                        setCurrentSystemPrompt(default_system_prompt)
                 },
                 onError: (error) => {
                     setSaveError(true)
@@ -101,8 +103,9 @@ export default function DatasetMutateDialog({
                         }
                         return item;
                     });
-                    console.log(new_dataset_list)
                     setDatasetList(new_dataset_list);
+                    setCurrentEvaluation(default_evaluation_without_null),
+                        setCurrentSystemPrompt(default_system_prompt)
                 },
                 onError: (error) => {
                     setSaveError(true)
@@ -129,6 +132,11 @@ export default function DatasetMutateDialog({
 
     const handleClose = () => {
         setOpen(false);
+        if (method === "post") {
+            setDatasetName('')
+            setDefaultEvaluation([{ evaluation_name: "", score: "" }])
+            setDefaultSystemPrompt('')
+        }
     };
     const deleteEvaluation = (index) => {
         setDefaultEvaluation(prev => prev.filter((_, i) => i !== index));
@@ -155,7 +163,7 @@ export default function DatasetMutateDialog({
     return (
         <React.Fragment>
             <IconButton aria-label="add" onClick={handleClickOpen}>
-                {method==="post" ? <AddCircleOutlineIcon /> : <EditIcon />}
+                {method === "post" ? <AddCircleOutlineIcon /> : <EditIcon />}
             </IconButton>
             <Dialog
                 open={open}
@@ -217,7 +225,6 @@ export default function DatasetMutateDialog({
                                             }}
                                         />
                                     </Grid>
-
                                     <Grid xs={1} item>
                                         <IconButton aria-label="delete" onClick={() => { deleteEvaluation(index) }}>
                                             <DeleteIcon />
@@ -284,5 +291,7 @@ DatasetMutateDialog.propTypes = {
     old_default_system_prompt: PropTypes.string,
     old_default_evaluation: PropTypes.array,
     old_dataset_name: PropTypes.string,
-    method: PropTypes.string.isRequired
+    method: PropTypes.string.isRequired,
+    setCurrentEvaluation: PropTypes.func.isRequired,
+    setCurrentSystemPrompt: PropTypes.func.isRequired,
 };

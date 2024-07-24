@@ -51,7 +51,7 @@ function PromptWriting() {
     const [previous_pagnation, setPreviousPaginationPage] = useState(null)
     const [rowSelectionModel, setRowSelectionModel] = useState([]);
     const [current_system_prompt, setCurrentSystemPrompt] = useState("")
-    const [current_evaluation, setCurrentEvaluation] = useState([{ evaluation_name: "Score", score: "" }])
+    const [current_evaluation, setCurrentEvaluation] = useState([{ evaluation_name: "", score: "" }])
     const [current_prompt, setCurrentPrompt] = useState("")
     const [current_response, setCurrentResponse] = useState("")
     const [current_record_id, setCurrentRecordId] = useState(null)
@@ -198,6 +198,9 @@ function PromptWriting() {
 
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
+        setCurrentRecordId(null)
+        setCurrentPrompt('')
+        setCurrentResponse('')
         setCurrentSystemPrompt(dataset_list[index].default_system_prompt)
         setCurrentEvaluation(dataset_list[index].default_evaluation)
     };
@@ -261,7 +264,7 @@ function PromptWriting() {
         setCurrentEvaluation(prev => prev.filter((_, i) => i !== index));
     };
 
-    useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, dataset_list)
+    useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation)
     const { refetch: record_refetch } = useGetUserDatasetRecord(setRecordList, setNextPaginationPage, setPreviousPaginationPage, dataset_list, selectedIndex, pagnation_page, setDatasetColumn, setDatasetRow)
     const handleRowClick = (params) => {
         const { id, prompt, response, system_prompt } = params.row;
@@ -292,7 +295,7 @@ function PromptWriting() {
                     <Grid container spacing={2}>
                         <Grid item xs={2}>
                             <Paper sx={{ mr: 2 }} variant='outlined'>
-                                <Typography m={1} variant='body1' sx={{ color: 'text.secondary' }}>
+                                <Typography ml={2} mt={1} variant='body1' sx={{ color: 'text.secondary' }}>
                                     Dataset
                                 </Typography>
                                 <List>
@@ -317,6 +320,8 @@ function PromptWriting() {
                                                     old_dataset_name={dataset.name}
                                                     old_default_evaluation={dataset.default_evaluation}
                                                     old_default_system_prompt={dataset.default_system_prompt}
+                                                    setCurrentEvaluation={setCurrentEvaluation}
+                                                    setCurrentSystemPrompt={setCurrentSystemPrompt}
                                                 />
                                             </ListItemButton>
 
@@ -331,6 +336,8 @@ function PromptWriting() {
                                                 dataset_list={dataset_list}
                                                 max_evaluation_num={max_dataset_num}
                                                 method="post"
+                                                setCurrentEvaluation={setCurrentEvaluation}
+                                                setCurrentSystemPrompt={setCurrentSystemPrompt}
                                             />
                                         )}
                                         {dataset_list && dataset_list.length > 1 && (
@@ -450,7 +457,7 @@ function PromptWriting() {
                                     alignItems="center">
                                     <Stack direction='row' spacing={1}>
                                         <LoadingButton size="small" loading={loading} disabled={!previous_pagnation} loadingPosition="start" variant="contained" onClick={() => { navigatePagination("previous") }} startIcon={<KeyboardDoubleArrowLeftIcon />}>Previous (10)</LoadingButton>
-                                        <LoadingButton size="small" loading={loading} loadingPosition="start" variant="contained" onClick={() => { navigateRow("previous") }} startIcon={<KeyboardArrowLeftIcon />}>Previous</LoadingButton>
+                                        <LoadingButton size="small" loading={loading} disabled = {!dataset_row.length} loadingPosition="start" variant="contained" onClick={() => { navigateRow("previous") }} startIcon={<KeyboardArrowLeftIcon />}>Previous</LoadingButton>
                                         <IconButton aria-label="add" onClick={() => { addRecord(); setAllowSaveRecord(true) }}>
                                             <AddCircleOutlineIcon />
                                         </IconButton>
@@ -459,7 +466,7 @@ function PromptWriting() {
                                         <IconButton aria-label="delete" onClick={() => { deleteRecord() }}>
                                             <DeleteIcon />
                                         </IconButton>
-                                        <LoadingButton size="small" loading={loading} loadingPosition="end" variant="contained" onClick={() => { navigateRow("next") }} endIcon={<KeyboardArrowRightIcon />}>Next </LoadingButton>
+                                        <LoadingButton size="small" loading={loading} disabled = {!dataset_row.length} loadingPosition="end" variant="contained" onClick={() => { navigateRow("next") }} endIcon={<KeyboardArrowRightIcon />}>Next </LoadingButton>
                                         <LoadingButton size="small" loading={loading} disabled={!next_pagnation} loadingPosition="end" variant="contained" onClick={() => { navigatePagination("next") }} endIcon={<KeyboardDoubleArrowRightIcon />}>Next (10)</LoadingButton>
                                     </Stack>
                                     {

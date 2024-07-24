@@ -4,7 +4,7 @@ import { useQuery } from "react-query";
 export const useGetUserDatasetRecord = (setRecordList, setNextPaginationPage, setPreviousPaginationPage, dataset_list, selectedIndex, pagnation_page, setDatasetColumn, setDatasetRow) => {
 
     const { error, isLoading, refetch } = useQuery(["RecordList", selectedIndex, pagnation_page ], () => baseGet(`/frontend-api/get-dataset-record/${dataset_list[selectedIndex].id}?page=${pagnation_page}`), {
-        enabled: !!dataset_list,
+        enabled: !!dataset_list[selectedIndex],
         refetchOnWindowFocus: false,
         onSuccess: (data) => {
             const column = [
