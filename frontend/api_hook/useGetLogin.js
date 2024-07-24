@@ -16,6 +16,8 @@ export const useGetLogin = (setIsAuthenticated, is_authenticated, setUserKeyName
         },
         onError: () => {
             setIsAuthenticated(false)
+            setUserKeyName(null)
+            setWebsocketHash(null)
         }
     });
 

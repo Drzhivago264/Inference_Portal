@@ -24,12 +24,11 @@ import { UserContext } from "../../App.js";
 import { useGetLogout } from "../../api_hook/useGetLogout.js";
 
 export const UserVeticalNav = ({ navigate }) => {
-    
-    const {  setIsAuthenticated } = useContext(UserContext);
-    const {refetch} = useGetLogout(setIsAuthenticated)
+
+    const { setIsAuthenticated, setUserKeyName, setWebsocketHash } = useContext(UserContext);
+    const { refetch } = useGetLogout(setIsAuthenticated, setUserKeyName, setWebsocketHash)
     const log_out = () => {
         refetch()
-        navigate("/");
     }
     const listItems = [
         {

@@ -1,8 +1,8 @@
 import { baseGet } from "./baseGet";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
-
-export const useGetLogout = (setLoginState) => {
-
+export const useGetLogout = (setLoginState, setUserKeyName, setWebsocketHash) => {
+    const navigate = useNavigate();
     const {
         error: error,
         isLoading: isLoading,
@@ -13,6 +13,10 @@ export const useGetLogout = (setLoginState) => {
         staleTime: Infinity,
         onSuccess: () => {
             setLoginState(false)
+            setUserKeyName(null)
+            setWebsocketHash(null)
+            navigate("/")
+            
         }
     });
 

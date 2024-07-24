@@ -54,7 +54,7 @@ function KeyManagement() {
     let fontsizetheme = createTheme();
     fontsizetheme = responsiveFontSizes(fontsizetheme);
     const [showPassword, setShowPassword] = useState(false);
-    const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+    const { is_authenticated, setIsAuthenticated, setUserKeyName, setWebsocketHash } = useContext(UserContext);
     const [randomanimation, setRandomAnimation] = useState(false);
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
@@ -67,7 +67,7 @@ function KeyManagement() {
     const [keycreateloading, setKeyCreateLoading] = useState(false)
     const [localkeycreateerror, setLocalKeyCreateError] = useState("")
     
-    const {refetch} = useGetLogout(setIsAuthenticated)
+    const {refetch} = useGetLogout(setIsAuthenticated, setUserKeyName, setWebsocketHash)
     
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {

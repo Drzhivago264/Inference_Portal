@@ -122,7 +122,8 @@ class AsyncInferenceOpenaiMixin:
                         full_result = full_result.replace('{"Action": "STOP"}', "")
                         full_result = full_result.replace("Final Answer:", "")
                         thought_match = re.findall("Thought: (.*)\n", full_result)
-                        full_result = full_result.replace(thought_match[0], "")
+                        if thought_match:
+                            full_result = full_result.replace(thought_match[0], "")
                         full_result = full_result.replace("Thought:", "")
                         full_result = full_result.replace("\n\n\n", "")
                         await self.send(text_data=json.dumps({"message": f"Your request is finished, the result is moved to the textbox on the left", "role": "Server", "time": self.time}))

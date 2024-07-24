@@ -70,7 +70,7 @@ export default function App() {
   );
   return (
     <WebSocketContext.Provider value={{websocket, agent_websocket, chat_websocket, websocket_hash}}>
-      <UserContext.Provider value={{ is_authenticated, setIsAuthenticated,  user_key_name, timeZone }}>
+      <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, setUserKeyName, setWebsocketHash, user_key_name, timeZone }}>
         <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
           <GlobalStyles
             styles={{
