@@ -59,7 +59,7 @@ export default function DatasetMutateDialog({
                 onSuccess: (data) => {
                     setSaveSuccess(true)
                     setAllowAddDataset(true)
-                    setDatasetList([...dataset_list, { id: data.id, name: data.name }])
+                    setDatasetList([...dataset_list, { id: data.id, name: data.name, default_system_prompt: default_system_prompt, default_evaluation: default_evaluation_without_null }])
                 },
                 onError: (error) => {
                     setSaveError(true)

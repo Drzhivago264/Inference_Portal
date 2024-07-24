@@ -63,7 +63,7 @@ function PromptWriting() {
     const [deletesuccess, setDeleteSuccess] = useState(false);
     const [deleteerror, setDeleteError] = useState(false);
     const [deleteerrormessage, setDeleteErrorMessage] = useState('');
-    const [dataset_list, setDatasetList] = useState(null)
+    const [dataset_list, setDatasetList] = useState([])
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [allow_add_dataset, setAllowAddDataset] = useState(true)
     const [max_dataset_num, setMaxDatasetNum] = useState(10)
