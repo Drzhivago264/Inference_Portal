@@ -74,14 +74,11 @@ def generate_token_api(request: HttpRequest) -> Response:
         return Response({"token_name": str(name),
                          'token': str(token),
                          'ttl': created_key.ttl,
-                         'created_at': created_key.created_at,
+                         'created_at': created_key.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                          'permission': permission_list
                          }, status=status.HTTP_200_OK)
     else:
-        message = str()
-        for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n"
-        return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Failed, ensure fields do not contain empty string"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['GET'])

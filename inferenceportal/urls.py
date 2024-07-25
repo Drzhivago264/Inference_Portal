@@ -3,10 +3,7 @@
 from django.contrib import admin
 from decouple import config
 from django.urls import include, path
-from server.views.information import (handler_403, 
-                                      handler_404, 
-                                      handler_429, 
-                                      handler_500)
+from server.views.information import handler_404
 from api.api import api
 
 urlpatterns = [
@@ -15,7 +12,5 @@ urlpatterns = [
     path("api/", api.urls)
 ]
 
-handler403 = handler_403
 handler404 = handler_404
-handler429 = handler_429
-handler500 = handler_500
+

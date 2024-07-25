@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 import {
     DataGrid
 } from '@mui/x-data-grid';
-import DatasetMutateDialog from '../component/custom_ui_component/DatasetMutateDialog.js';
+import DatasetMutateDialog from '../component/dialog/DatasetMutateDialog.js';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FolderIcon from '@mui/icons-material/Folder';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
@@ -123,8 +123,6 @@ function PromptWriting() {
     }
     const { mutate: postmutate } = useMutation(basePost);
     const { mutate: putmutate } = useMutation(basePut);
- 
-
     const { mutate: deletemutate } = useMutation(baseDelete);
     const deleteReq = (id) => {
         const data = {

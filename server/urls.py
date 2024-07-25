@@ -27,10 +27,12 @@ from server.views.token_management import (
     add_permission,
     invalidate_token
 )
-from server.views.room_view import (
+from server.views.chatroom_view import (
     hub_redirect_api,
     instruction_tree_api,
     memory_tree_api,
+)
+from server.views.template_writing import (
     user_instruction_tree_api,
     create_user_instruction_tree_api,
     update_user_instruction_tree_api,
@@ -96,7 +98,7 @@ urlpatterns = [
     path('frontend-api/stripe-redirect', stripe_redirect, name='stripe-payment'),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
     path("create-checkout-session/<int:pk>/<str:name>/<str:key>",
-        CreateStripeCheckoutSessionView.as_view(), name="create-checkout-session"),
+         CreateStripeCheckoutSessionView.as_view(), name="create-checkout-session"),
     path("success/", SuccessView.as_view(), name="success"),
     path("cancel/", CancelView.as_view(), name="cancel"),
     path('frontend-api/products', product_list_api, name='product-list'),

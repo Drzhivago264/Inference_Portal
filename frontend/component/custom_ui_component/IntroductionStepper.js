@@ -65,14 +65,16 @@ export default function IntroductionVerticalLinearStepper({ t }) {
                 </Button>
               }
               {index === 4 &&
+
                 <Button
                   variant="contained"
                   disabled={!is_authenticated}
-                  onClick={() => navigate("/frontend/contact")}
+                  onClick={() => navigate("/frontend/prompt-writing")}
                   sx={{ mt: 1, mr: 1 }}
                 >
-                  Contact Us
+                  Dataset
                 </Button>
+
               }
             </StepContent>
           </Step>

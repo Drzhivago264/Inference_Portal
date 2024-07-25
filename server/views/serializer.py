@@ -38,18 +38,22 @@ class DatasetCreateSerializer(serializers.Serializer):
     default_system_prompt = serializers.CharField(allow_blank=True)
     default_evaluation = serializers.JSONField()
 
+
 class DatasetDeleteSerializer(serializers.Serializer):
     id = serializers.IntegerField()
+
 
 class DatasetUpdateSerializer(DatasetDeleteSerializer):
     new_name = serializers.CharField()
     new_default_system_prompt = serializers.CharField(allow_blank=True)
     new_default_evaluation = serializers.JSONField()
 
+
 class DatasetGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
         fields = ('id', "name", "default_system_prompt", "default_evaluation")
+
 
 class DatasetRecordGetSerialzier(serializers.Serializer):
     id = serializers.IntegerField()
@@ -57,6 +61,7 @@ class DatasetRecordGetSerialzier(serializers.Serializer):
     prompt = serializers.CharField()
     response = serializers.CharField()
     evaluation = serializers.JSONField()
+
 
 class DatasetRecordSerialzier(serializers.Serializer):
     record_id = serializers.IntegerField(required=False)
@@ -66,9 +71,11 @@ class DatasetRecordSerialzier(serializers.Serializer):
     response = serializers.CharField()
     evaluation = serializers.JSONField()
 
+
 class DatasetDeleteRecordSerialzier(serializers.Serializer):
     record_id = serializers.IntegerField()
     dataset_id = serializers.IntegerField()
+
 
 class UserInstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -144,8 +151,19 @@ class PermissionSerializer(serializers.Serializer):
     allow_toolbox_api = serializers.BooleanField()
     allow_view_log = serializers.BooleanField()
     allow_view_cost = serializers.BooleanField()
-    allow_create_template = serializers.BooleanField()
     allow_data_synthesis = serializers.BooleanField()
+    add_userinstructiontree= serializers.BooleanField()
+    change_userinstructiontree= serializers.BooleanField()
+    delete_userinstructiontree= serializers.BooleanField()
+    view_userinstructiontree= serializers.BooleanField()
+    add_dataset= serializers.BooleanField()
+    change_dataset= serializers.BooleanField()
+    delete_dataset= serializers.BooleanField()
+    view_dataset= serializers.BooleanField()
+    add_datasetrecord= serializers.BooleanField()
+    change_datasetrecord= serializers.BooleanField()
+    delete_datasetrecord= serializers.BooleanField()
+    view_datasetrecord= serializers.BooleanField()
 
 
 class CreateTokenSerializer(serializers.Serializer):

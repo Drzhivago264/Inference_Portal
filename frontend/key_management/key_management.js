@@ -19,10 +19,9 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import CreateIcon from '@mui/icons-material/Create';
 import Divider from '@mui/material/Divider';
-import ErrorAlert from '../component/custom_ui_component/ErrorAlert.js';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Footer from '../component/nav/Footer.js';
-import { FormControl } from '@mui/material';
+import  FormControl  from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
@@ -38,6 +37,7 @@ import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import StyledPaper from '../component/custom_ui_component/StyledPaper.js';
+import SuccessErrorAlert from '../component/Alert/SuccessErrorAlert.js';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -202,8 +202,8 @@ function KeyManagement() {
                                 randomanimation={randomanimation}
                             />
                         }
-                        {serverkeycreateerror && <ErrorAlert error={serverkeycreateerror.response.data.detail} />}
-                        {localkeycreateerror && <ErrorAlert error={localkeycreateerror} />}
+                        {serverkeycreateerror && <SuccessErrorAlert detail={serverkeycreateerror.response.data.detail} type="error" />}
+                        {localkeycreateerror && <SuccessErrorAlert detail={localkeycreateerror} type="error"/>}
                         <Divider></Divider>
                         <Typography variant="h5" >
                             <Box sx={{ lineHeight: 2, fontWeight: '700', mt: 1 }}> {t('key_management.2_Add_credit_to_your_key')}</Box>
@@ -296,7 +296,7 @@ function KeyManagement() {
                                             <LoadingButton loading={keycheckisLoading} variant="contained" name="checkcredit" onClick={(e) => { handlePostRequest(e, "/frontend-api/check-credit", "keycheck") }} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
                                         </Box>
                                         {keycheckdata && <KeyCheckDisplay t={t} key_={keycheckdata.key} key_name={keycheckdata.key_name} monero_balance={keycheckdata.monero_balance} fiat_balance={keycheckdata.fiat_balance} />}
-                                        {keycheckerror && <ErrorAlert error={keycheckerror.response.data.detail} />}
+                                        {keycheckerror && <SuccessErrorAlert detail={keycheckerror.response.data.detail} type="error" />}
                                     </AccordionDetails>
                                 </Accordion>
                                 <Accordion expanded={expanded === 'panel2'} onChange={handleAccordionExpand('panel2')}>
@@ -316,7 +316,7 @@ function KeyManagement() {
                                         <Box mt={2}>
                                             <Button variant="contained" onClick={(e) => { handleStripeRedirect(e) }} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
                                         </Box>
-                                        {stripeerror && <ErrorAlert error={stripeerror.response.data.detail} />}
+                                        {stripeerror && <SuccessErrorAlert detail={stripeerror.response.data.detail} type="error" />}
                                     </AccordionDetails>
                                 </Accordion>
                                 <Accordion expanded={expanded === 'panel3'} onChange={handleAccordionExpand('panel3')}>
@@ -337,7 +337,7 @@ function KeyManagement() {
                                             <LoadingButton loading={xmrretrieveisLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/get-xmr-wallet", "xmrretrieve") }} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
                                         </Box>
                                         {xmrretrievedata && <XMRWalletDisplay t={t} key_={xmrretrievedata.key} key_name={xmrretrievedata.key_name} payment_id={xmrretrievedata.payment_id} integrated_wallet={xmrretrievedata.integrated_wallet} />}
-                                        {xmrretrieveerror && <ErrorAlert error={xmrretrieveerror.response.data.detail} />}
+                                        {xmrretrieveerror && <SuccessErrorAlert detail={xmrretrieveerror.response.data.detail} type="error"/>}
                                     </AccordionDetails>
                                 </Accordion>
                                 <Accordion expanded={expanded === 'panel4'} onChange={handleAccordionExpand('panel4')}>
@@ -359,7 +359,7 @@ function KeyManagement() {
                                             <LoadingButton loading={xmrconfirmisLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/confirm-xmr-payment", "xmrconfirm") }} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
                                         </Box>
                                         {xmrconfirmdata && <XMRWConfirmationDisplay t={t} detail={xmrconfirmdata.detail} />}
-                                        {xmrconfirmerror && <ErrorAlert error={xmrconfirmerror.response.data.detail} />}
+                                        {xmrconfirmerror && <SuccessErrorAlert detail={xmrconfirmerror.response.data.detail} type="error" />}
                                     </AccordionDetails>
                                 </Accordion>
                             </form>

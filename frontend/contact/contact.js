@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CreateIcon from '@mui/icons-material/Create';
 import EmailIcon from '@mui/icons-material/Email';
-import ErrorAlert from '../component/custom_ui_component/ErrorAlert.js';
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
 import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
@@ -17,12 +15,13 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Stack from '@mui/material/Stack';
 import StyledPaper from '../component/custom_ui_component/StyledPaper.js';
+import SuccessErrorAlert from '../component/Alert/SuccessErrorAlert.js';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import axios from 'axios';
-import { getCookie } from '../component/getCookie.js';
+import { basePost } from '../api_hook/basePost.js';
+import { useMutation } from 'react-query';
 import { useTranslation } from 'react-i18next';
 
 function Contact() {
@@ -32,7 +31,6 @@ function Contact() {
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
-
     const [sendloading, setSendLoading] = useState(false);
     const [key, setKey] = useState("")
     const [keyError, setKeyError] = useState(false)
@@ -47,6 +45,7 @@ function Contact() {
     const [mailsentresponse, setMailResponse] = useState(null);
     const [mailsenterror, setMailError] = useState(false);
 
+    const { mutate: postmutate } = useMutation(basePost);
     const handleSendMail = (event) => {
         event.preventDefault()
         setKeyNameError(false)
@@ -67,13 +66,7 @@ function Contact() {
             setMailFieldError(true)
         }
         if (keyname && key && username && message && mail) {
-            const csrftoken = getCookie('csrftoken');
-            const config = {
-                headers: {
-                    'content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                }
-            }
+
             const data = {
                 key_name: keyname,
                 key: key,
@@ -81,31 +74,14 @@ function Contact() {
                 message: message,
                 mail: mail
             }
-            axios.post("/frontend-api/send-mail", data, config)
-                .then((response) => {
-                    setMailResponse(response.data)
-                }).catch(error => {
-                    setMailError(error.response.data.detail)
-                });
+            postmutate({url: "/frontend-api/send-mail", data: data}, {
+                onSuccess: (data) => setMailResponse(data),
+                onError: (error) => setMailError(error.response.data.detail)
+            })
         }
         setSendLoading(false)
     }
 
-
-    const SuccessAlert = ({ detail }) => {
-        return (
-            <Box mt={4}>
-                <Typography variant="body1"  >
-                    Request Successed!
-                </Typography>
-                <Box textAlign='center' my={2}>
-                    <Alert variant="filled" severity="success">
-                        {detail}
-                    </Alert>
-                </Box>
-            </Box >
-        );
-    };
     return (
         <Container maxWidth={false} disableGutters>
             <title>{t('contact.Contact')}</title>
@@ -227,8 +203,8 @@ function Contact() {
                                 </FormControl>
                             </form>
                         </Box>
-                        {mailsentresponse && <SuccessAlert detail={mailsentresponse.detail} />}
-                        {mailsenterror && <ErrorAlert error={mailsenterror} />}
+                        {mailsentresponse && <SuccessErrorAlert detail={mailsentresponse.detail} type="success"/>}
+                        {mailsenterror && <SuccessErrorAlert detail={mailsenterror} type="error"/>}
                     </StyledPaper>
                 </Box>
             </Container >

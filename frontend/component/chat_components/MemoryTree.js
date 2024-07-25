@@ -9,7 +9,7 @@ import Paper from '@mui/material/Paper';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
-import { Typography } from '@mui/material';
+import Typography  from '@mui/material/Typography';
 import axios from 'axios';
 
 export const MemoryTree = () => {
