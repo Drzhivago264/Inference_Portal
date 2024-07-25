@@ -5,7 +5,6 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
-import ErrorAlert from "../component/custom_ui_component/ErrorAlert.js";
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
 import Grid from '@mui/material/Grid';
@@ -17,6 +16,7 @@ import { RedirectMediaCards } from '../component/custom_ui_component/RedirectMed
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
+import SuccessErrorAlert from "../component/Alert/SuccessErrorAlert.js";
 import TextField from '@mui/material/TextField';
 import { UserContext } from '../App.js'
 import axios from 'axios';
@@ -210,8 +210,8 @@ function Hub() {
                                         <LoadingButton variant="contained" component={Link} to='/frontend/key-management'>  Create New Key </LoadingButton>
 
                                     </Stack>
-                                    {loginerror && <ErrorAlert error={loginerror} />}
-                                    {redirecterror && <ErrorAlert error={redirecterror} />}
+                                    {loginerror && <SuccessErrorAlert detail={loginerror} type="error"/>}
+                                    {redirecterror && <SuccessErrorAlert detail={redirecterror} type="error"/>}
                                 </FormControl>
                             </form>
                         </Grid>

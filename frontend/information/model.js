@@ -11,7 +11,7 @@ import Grid from '@mui/material/Grid';
 import React from 'react';
 import ResponsiveAppBar from '../component/nav/Navbar';
 import Skeleton from '@mui/material/Skeleton';
-import { Stack } from '@mui/material';
+import  Stack  from '@mui/material/Stack';
 import { useGetModel } from '../api_hook/useGetModel';
 
 function ModelInfor() {

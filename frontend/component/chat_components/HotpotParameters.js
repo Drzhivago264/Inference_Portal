@@ -1,8 +1,8 @@
-import { FormControl, FormLabel } from '@mui/material';
-
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
+import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
 import HelpIcon from '@mui/icons-material/Help';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
@@ -19,6 +19,7 @@ import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
+import { swap_template } from './AgentSwapFunction';
 import { useTranslation } from 'react-i18next';
 
 const SmallInput = styled(MuiInput)`
@@ -77,9 +78,9 @@ export const HotpotParameter = ({
     setEarlyStopping,
     socket_destination,
     setSocketDestination,
-    swap_template,
     max_turn,
-    setMaxTurn
+    setMaxTurn,
+    agent_websocket
 }) => {
     const { t } = useTranslation();
     const toggleMemory = (value, memory_type) => {
@@ -157,7 +158,7 @@ export const HotpotParameter = ({
                     <Select
                         labelId="agent-label"
                         id="agent-select"
-                        onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value) }}
+                        onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value, 'system', agent_websocket) }}
                         value={choosen_template}
                         label="Agents"
                         size="small"
@@ -634,7 +635,7 @@ HotpotParameter.propTypes = {
     setEarlyStopping: PropTypes.func.isRequired,
     socket_destination: PropTypes.string.isRequired,
     setSocketDestination: PropTypes.func.isRequired,
-    swap_template: PropTypes.func.isRequired,
+    agent_websocket: PropTypes.object.isRequired,
     max_turn: PropTypes.number.isRequired,
     setMaxTurn: PropTypes.func.isRequired,
 };

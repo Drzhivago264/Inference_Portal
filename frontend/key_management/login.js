@@ -4,9 +4,9 @@ import React, { useContext, useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
-import ErrorAlert from "../component/custom_ui_component/ErrorAlert.js";
+import ErrorAlert from "../component/Alert/SuccessErrorAlert.js";
 import Footer from '../component/nav/Footer.js';
-import { FormControl } from '@mui/material';
+import  FormControl  from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import KeyIcon from '@mui/icons-material/Key';
@@ -121,7 +121,7 @@ function Contact() {
                                 <LoadingButton size="medium" variant="contained" component={Link} to='/frontend/key-management'>  Create New Key </LoadingButton>
                             </Box>
                         </Box>
-                        {loginerror && <ErrorAlert error={loginerror} />}
+                        {loginerror && <ErrorAlert detail={loginerror} type="error"/>}
                     </StyledPaper>
                 </Box>
             </Container >

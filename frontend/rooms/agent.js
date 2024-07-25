@@ -2,6 +2,7 @@ import '../component/css/editor-js.css';
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
+import { swap_child_instruction, swap_template } from '../component/chat_components/AgentSwapFunction.js';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -20,7 +21,7 @@ import EditorJS from "@editorjs/editorjs";
 import EditorList from "@editorjs/list"
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Footer from '../component/nav/Footer.js';
-import { FormControl } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
 import Header from "@editorjs/header";
 import InlineCode from '@editorjs/inline-code';
@@ -268,18 +269,7 @@ function Agent() {
             setInstructChange(false)
         }
     }
-    const swap_template = (template, type) => {
-        websocket.current.send(JSON.stringify({
-            'swap_template': template,
-            'template_type': type
-        }));
-    }
-    const swap_child_instruction = (child, type) => {
-        websocket.current.send(JSON.stringify({
-            'swap_child_instruct': child,
-            'template_type': type
-        }));
-    }
+
     useEffect(() => {
         const editorElement = document.getElementById('editorjs');
         const onClick = (e) => {
@@ -319,7 +309,7 @@ function Agent() {
                                             <ListItem key={instruct.name} disablePadding>
                                                 <ListItemButton
                                                     selected={selectedIndex === index}
-                                                    onClick={(event) => { swap_child_instruction(instruct.name, 'system'), handleListItemClick(event, index) }}   >
+                                                    onClick={(event) => { swap_child_instruction(instruct.name, 'system', websocket), handleListItemClick(event, index) }}   >
                                                     <ListItemText primary={instruct.name} />
                                                 </ListItemButton>
                                             </ListItem>
@@ -330,7 +320,7 @@ function Agent() {
                                             <ListItem key={instruct.name} disablePadding>
                                                 <ListItemButton
                                                     selected={selectedIndex === index}
-                                                    onClick={(event) => { swap_child_instruction(instruct.name, 'user_template'), handleListItemClick(event, index) }} >
+                                                    onClick={(event) => { swap_child_instruction(instruct.name, 'user_template', websocket), handleListItemClick(event, index) }} >
                                                     <ListItemText primary={instruct.displayed_name} />
                                                 </ListItemButton>
                                             </ListItem>
@@ -445,7 +435,7 @@ function Agent() {
                                     <Select
                                         labelId="agent-label"
                                         id="agent-select"
-                                        onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value, 'system') }}
+                                        onChange={e => { setChoosenTemplate(e.target.value); swap_template(e.target.value, 'system', websocket) }}
                                         value={choosen_template}
                                         label="Agents"
                                         size="small"
@@ -464,9 +454,8 @@ function Agent() {
                                     setChoosenUserTemplate={setChoosenUserTemplate}
                                     choosen_user_template={choosen_user_template}
                                     handle_use_user_template={handle_use_user_template}
-                                    swap_template={swap_template}
+                                    websocket={websocket}
                                 />
-
                                 <Divider></Divider>
                                 <FormControl defaultValue="">
                                     <InputLabel id="model-label">Backends</InputLabel>

@@ -11,7 +11,7 @@ function exporttoken(tokenfile) {
     var blob = new Blob([tokenfile], { type: "text/plain;charset=utf-8" });
     saveAs(blob, "Token_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
 }
-const TokenCreateExport = ({ token_, token_name, ttl, created_at, permission, randomanimation, setRandomAnimation, setTokenCreateLoading, refetch }) => {
+const TokenCreateExport = ({ token_, token_name, ttl, created_at, permission, randomanimation, setRandomAnimation, setTokenCreateLoading, setTokenList, token_list }) => {
     return (
         <Box my={4}>
             {!randomanimation && <Box style={{
@@ -24,7 +24,19 @@ const TokenCreateExport = ({ token_, token_name, ttl, created_at, permission, ra
                     duration={2}
                     revealDuration={1.6}
                     characters={token_}
-                    onComplete={() => (setRandomAnimation(true), setTokenCreateLoading(false), refetch())}
+                    onComplete={() => (setRandomAnimation(true), setTokenCreateLoading(false), setTokenList(
+                        [
+                            ...token_list,
+                            {
+                                prefix: token_.substring(0, 8),
+                                value: token_.substring(0, 3) + "..." + token_.substring(token_.length - 3),
+                                name: token_name,
+                                created_at: created_at,
+                                ttl: ttl,
+                                permissions: permission
+                            }
+                        ]
+                    ))}
 
                 /></Alert>
             </Box>}
@@ -43,14 +55,15 @@ const TokenCreateExport = ({ token_, token_name, ttl, created_at, permission, ra
     );
 };
 TokenCreateExport.propTypes = {
-    token_: PropTypes.string,
-    token_name: PropTypes.string,
-    ttl: PropTypes.string,
-    created_at: PropTypes.string,
-    permission: PropTypes.array,
-    refetch: PropTypes.func,
-    setTokenCreateLoading: PropTypes.func,
-    setRandomAnimation: PropTypes.func,
-    randomanimation: PropTypes.bool, 
+    token_: PropTypes.string.isRequired,
+    token_name: PropTypes.string.isRequired,
+    ttl: PropTypes.string.isRequired,
+    created_at: PropTypes.string.isRequired,
+    permission: PropTypes.array.isRequired,
+    setTokenCreateLoading: PropTypes.func.isRequired,
+    setRandomAnimation: PropTypes.func.isRequired,
+    randomanimation: PropTypes.bool.isRequired,
+    setTokenList: PropTypes.func.isRequired,
+    token_list: PropTypes.array.isRequired
 }
 export default TokenCreateExport

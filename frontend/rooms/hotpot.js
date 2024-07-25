@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
+import { swap_child_instruction, swap_template } from '../component/chat_components/AgentSwapFunction.js';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -67,13 +68,10 @@ function Hotpot() {
     const [duplicatemessage, setDuplicateMessage] = useState(true);
     const [instruct_change, setInstructChange] = useState(false)
     const [socket_destination, setSocketDestination] = useState("async");
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
-
+    const [selectedIndex, setSelectedIndex] = useState(0);
     const navigate = useNavigate();
     const { is_authenticated, timeZone } = useContext(UserContext);
-
     useGetRedirectAnon(navigate, is_authenticated)
-    
     const {agent_objects, model_objects} = useGetModel()
 
     const {
@@ -86,8 +84,6 @@ function Hotpot() {
         setChoosenTemplate: setChoosenTemplate,
         default_parent_instruct: default_parent_instruct,
         setParentInstruct: setParentInstruct,
-        error: error,
-        isLoading: isLoading
     } = useGetInstructionTree()
     
     const scrollToBottom = () => {
@@ -214,18 +210,7 @@ function Hotpot() {
             setUserChatMessage("")
         }
     }
-    const swap_template = (template) => {
-        agent_websocket.current.send(JSON.stringify({
-            'swap_template': template,
-            'template_type': 'system'
-        }));
-    }
-    const swap_child_instruction = (child) => {
-        agent_websocket.current.send(JSON.stringify({
-            'swap_child_instruct': child,
-            'template_type': 'system'
-        }));
-    }
+
     const handleListItemClick = (event, index) => {
         setSelectedIndex(index);
     };
@@ -248,7 +233,7 @@ function Hotpot() {
                                             <ListItem key={instruct.name} disablePadding>
                                                 <ListItemButton
                                                     selected={selectedIndex === index}
-                                                    onClick={(event) => { swap_child_instruction(instruct.name), handleListItemClick(event, index) }} >
+                                                    onClick={(event) => { swap_child_instruction(instruct.name, "system", agent_websocket), handleListItemClick(event, index) }} >
                                                     <ListItemText primary={instruct.name} />
                                                 </ListItemButton>
                                             </ListItem>
@@ -276,13 +261,11 @@ function Hotpot() {
                                             variant="standard"
                                             InputProps={{
                                                 startAdornment: <InputAdornment position="start">   </InputAdornment>,
-
                                             }}
                                         />
                                     </Paper>
                                 </AccordionDetails>
                             </Accordion>
-
                             <Accordion >
                                 <AccordionSummary
                                     expandIcon={<ExpandMoreIcon />}
@@ -293,7 +276,6 @@ function Hotpot() {
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     <Paper variant="outlined">
-
                                         <ChatInput
                                             id="child-instruct"
                                             multiline
@@ -311,7 +293,6 @@ function Hotpot() {
                                 </AccordionDetails>
                             </Accordion>
                         </Grid>
-
                         <Grid item xs={4}>
                             <ChatBoxHotpot
                                 id={'chat-log'}
@@ -347,10 +328,8 @@ function Hotpot() {
                                 check_duplicate_message={check_duplicate_message}
                             >
                             </ChatBoxHotpot>
-
                         </Grid>
                         <Grid item xs={2}>
-
                             <HotpotParameter
                                 socket_destination={socket_destination}
                                 setSocketDestination={setSocketDestination}
@@ -391,7 +370,7 @@ function Hotpot() {
                                 setChoosenAgentModel={setChoosenAgentModel}
                                 setChoosenChatModel={setChoosenChatModel}
                                 setDuplicateMessage={setDuplicateMessage}
-                                swap_template={swap_template}
+                                agent_websocket = {agent_websocket}
                             ></HotpotParameter>
                         </Grid>
                     </Grid>

@@ -3,21 +3,21 @@ import Box from '@mui/material/Box';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const ErrorAlert = ({ error }) => {
-    console.log(error)
+const SuccessErrorAlert = ({ detail, type }) => {
     return (
         <Box mt={2}>
             <Box textAlign='center'>
-                <Alert variant="filled" severity="error">
-                    {error}
+                <Alert variant="filled" severity={type}>
+                    {detail}
                 </Alert>
             </Box>
         </Box >
     );
 };
 
-ErrorAlert.propTypes = {
-    error: PropTypes.string.isRequired
+SuccessErrorAlert.propTypes = {
+    detail: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired
 };
 
-export default ErrorAlert
+export default SuccessErrorAlert

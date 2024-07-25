@@ -1,6 +1,5 @@
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
 import { ColorModeContext, UserContext, WebSocketContext } from '../../App.js'
-import { Divider, Stack } from '@mui/material';
 import React, { useContext, useEffect, useState } from "react";
 import { UserVeticalNav, VerticalNav } from './VerticalNav.js';
 
@@ -15,19 +14,21 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import CloseIcon from '@mui/icons-material/Close';
 import Constant_Colours from '../color.js'
 import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
-import { Dropdown } from '@mui/base/Dropdown';
+import { Dropdown } from '@mui/base';
 import Fade from '@mui/material/Fade';
-import { FormControl } from '@mui/material';
+import  FormControl  from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import Jdenticon from 'react-jdenticon';
 import { Link } from "react-router-dom";
 import { Menu } from '@mui/base/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import { MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/base/MenuItem';
 import PropTypes from 'prop-types'
 import Select from '@mui/material/Select';
+import Stack from '@mui/material/Stack'
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import i18next from "i18next";

@@ -36,10 +36,8 @@ class CustomPermissionWithoutContentType(models.Model):
             ('allow_agent_api', 'Global permission for using agent api'), 
             ('allow_toolbox_api', 'Global permission for using toolbox api'), 
             ('allow_view_cost', 'Global permission for viewing cost'),
-            ('allow_create_template', 'Global permission for creating template'),
             ('allow_data_synthesis', 'Global permission for using data synthesis'),
             ('allow_create_token', 'Global permission for creating token'),
-            ('allow_create_dataset', 'Global permission for creating dataset')
         )
 
 class APIKEY(AbstractAPIKey):

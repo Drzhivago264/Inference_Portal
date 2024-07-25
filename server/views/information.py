@@ -105,17 +105,6 @@ def model_api(request: HttpRequest) -> Response:
                      }, status=status.HTTP_200_OK)
 
 
-def handler_403(request: HttpRequest, exception: None = None) -> HttpResponse:
-    return render(request, 'error_html/403.html', status=403)
-
-
 def handler_404(request: HttpRequest, exception: None) -> HttpResponse:
     return render(request, 'error_html/404.html', status=404)
 
-
-def handler_500(request: HttpRequest,  *args, **argv) -> HttpResponse:
-    return render(request, 'error_html/500.html', status=500)
-
-
-def handler_429(request: HttpRequest, exception: None) -> HttpResponse:
-    return render(request, 'error_html/429.html', status=429)

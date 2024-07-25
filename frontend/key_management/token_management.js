@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import AddPermissionDialog from '../component/custom_ui_component/MorePermissionDialog.js';
+import AddPermissionDialog from '../component/dialog/MorePermissionDialog.js';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
@@ -9,7 +9,6 @@ import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
 import CreateIcon from '@mui/icons-material/Create';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ErrorAlert from '../component/custom_ui_component/ErrorAlert.js';
 import Footer from '../component/nav/Footer.js';
 import { FormControl } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -23,6 +22,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import ResponsiveAppBar from '../component/nav/Navbar.js';
 import Stack from '@mui/material/Stack';
+import SuccessErrorAlert from '../component/Alert/SuccessErrorAlert.js';
 import Switch from '@mui/material/Switch';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -63,8 +63,19 @@ function TokenManagement() {
             allow_view_cost: false,
             allow_toolbox: false,
             allow_toolbox_api: false,
-            allow_create_template: false,
-            allow_data_synthesis: false
+            allow_data_synthesis: false,
+            add_userinstructiontree: false,
+            change_userinstructiontree: false,
+            delete_userinstructiontree: false,
+            view_userinstructiontree: false,
+            add_dataset: false,
+            change_dataset: false,
+            delete_dataset: false,
+            view_dataset: false,
+            add_datasetrecord: false,
+            change_datasetrecord: false,
+            delete_datasetrecord: false,
+            view_datasetrecord: false
         }
     )
     const total_number_permissions = 10
@@ -76,24 +87,34 @@ function TokenManagement() {
     const [localtokencreateerror, setLocalTokenCreateError] = useState(null);
     const [showkeycreateresponse, setShowKeyCreateResponse] = useState(false)
     const setAllPermission = (value) => {
-        setPermission({
-            ...permission,
+        const updatedPermissions = {
             allow_chat: value,
             allow_agent: value,
             allow_chat_api: value,
             allow_agent_api: value,
             allow_toolbox: value,
-            allow_create_template: value,
             allow_toolbox_api: value,
             allow_data_synthesis: value,
             allow_view_log: value,
-            allow_view_cost: value
-        })
-    }
+            allow_view_cost: value,
+            add_userinstructiontree: value,
+            change_userinstructiontree: value,
+            delete_userinstructiontree: value,
+            view_userinstructiontree: value,
+            add_dataset: value,
+            change_dataset: value,
+            delete_dataset: value,
+            view_dataset: value,
+            add_datasetrecord: value,
+            change_datasetrecord: value,
+            delete_datasetrecord: value,
+            view_datasetrecord: value
+        };
 
-    const { mutate: tokencreatemutate, error: servertokencreateerror, data: servertokencreatedata, isSuccess: tokencreatesuccess } = useMutation(basePost);
+        setPermission(updatedPermissions);
+    }
+    const { mutate: tokencreatemutate, error: servertokencreateerror, data: servertokencreatedata} = useMutation(basePost);
     const handleCreateToken = (event) => {
-        console.log(tokencreatesuccess)
         event.preventDefault()
         setTokenNameError(false)
         setRandomAnimation(false)
@@ -138,7 +159,7 @@ function TokenManagement() {
             tokencreatemutate({ url: "/frontend-api/generate-token", data: data }, {
                 onSuccess: () => {
                     setShowKeyCreateResponse(true)
-                    
+
                 }
             })
         }
@@ -155,10 +176,9 @@ function TokenManagement() {
             permissiondeletemutate({ url: "/frontend-api/remove-permission", data: data },
                 {
                     onSuccess: () => {
-                        refetch();
                         setTokenList((prev) => {
                             const items = token_list[token_index].permissions.filter(
-                                (perm) => perm.id !== perm_index
+                                (_, permIndex) => permIndex !== perm_index
                             );
                             const newState = prev;
                             newState[token_index].permissions = items;
@@ -170,7 +190,7 @@ function TokenManagement() {
                     }
                 }
             )
-        
+
         }
     };
     const { mutate: tokendeletemutate } = useMutation(baseDelete);
@@ -192,7 +212,7 @@ function TokenManagement() {
 
         }
     };
-    const { refetch } = useGetToken(setTokenList, setLocalTokenCreateError)
+    useGetToken(setTokenList, setLocalTokenCreateError)
     return (
         <Container maxWidth={false} disableGutters>
             <title>Token Management</title>
@@ -299,7 +319,7 @@ function TokenManagement() {
                                             alignItems: 'center',
                                             justifyContent: 'center'
                                         }} item xs={7} >
-                                            <form autoComplete="off" onSubmit={(e) => {handleCreateToken(e)}}>
+                                            <form autoComplete="off" onSubmit={(e) => { handleCreateToken(e) }}>
                                                 <FormControl defaultValue="" required>
                                                     <Stack direction='column' spacing={1}>
                                                         <TextField
@@ -373,11 +393,12 @@ function TokenManagement() {
                                         setRandomAnimation={setRandomAnimation}
                                         setTokenCreateLoading={setTokenCreateLoading}
                                         randomanimation={randomanimation}
-                                        refetch={refetch}
+                                        setTokenList={setTokenList}
+                                        token_list={token_list}
                                     />
                                 }
-                                {localtokencreateerror && <ErrorAlert error={localtokencreateerror} />}
-                                {servertokencreateerror && <ErrorAlert error={servertokencreateerror.response.data.detail} />}
+                                {localtokencreateerror && <SuccessErrorAlert detail={localtokencreateerror} type='error' />}
+                                {servertokencreateerror && <SuccessErrorAlert detail={servertokencreateerror.response.data.detail} type='error' />}
                                 <Alert severity="warning" sx={{ whiteSpace: 'pre-line' }}>
                                     <AlertTitle>Warning</AlertTitle>
                                     {t('token_management.form_warning')}
@@ -415,14 +436,61 @@ function TokenManagement() {
                                                     />
                                                 ))}
                                             </Stack>
+                                            <Stack direction='column' >
+                                                <FormLabel component="legend">Dataset permissions</FormLabel>
+                                                {[
+                                                    { key: 'add_dataset', label: "Allow add Dataset(s)" },
+                                                    { key: 'change_dataset', label: "Allow update Dataset(s)" },
+                                                    { key: 'view_dataset', label: "Allow view Dataset(s)" },
+                                                    { key: 'delete_dataset', label: "Allow delete Dataset(s)" },
+                                                ].map((perm) => (
+                                                    <FormControlLabel
+                                                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}
+                                                        key={perm.key}
+                                                        control={<Checkbox size='small' checked={permission[perm.key]} onChange={(e) => { setPermission({ ...permission, [perm.key]: e.target.checked }) }} />}
+                                                        label={perm.label}
+                                                    />
+                                                ))}
+                                            </Stack>
                                         </Grid>
                                         <Grid item sm={12} md={6}>
-                                            <Stack direction='column'>
-                                                <FormLabel component="legend">Data permissions</FormLabel>
+                                            <Stack mt={1} direction='column'>
+                                                <FormLabel component="legend">Log permissions</FormLabel>
                                                 {[
                                                     { key: 'allow_view_log', label: t('token_management.allow_view_log') },
                                                     { key: 'allow_view_cost', label: t('token_management.allow_view_cost') },
-                                                    { key: 'allow_create_template', label: t('token_management.allow_create_template') },
+                                                ].map((perm) => (
+                                                    <FormControlLabel
+                                                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}
+                                                        key={perm.key}
+                                                        control={<Checkbox size='small' checked={permission[perm.key]} onChange={(e) => { setPermission({ ...permission, [perm.key]: e.target.checked }) }} />}
+                                                        label={perm.label}
+                                                    />
+                                                ))}
+                                            </Stack>
+                                            <Stack direction='column' >
+                                                <FormLabel component="legend">Template permissions</FormLabel>
+                                                {[
+                                                    { key: 'add_userinstructiontree', label: "Allow add template(s)" },
+                                                    { key: 'change_userinstructiontree', label: "Allow update template(s)" },
+                                                    { key: 'view_userinstructiontree', label: "Allow view template(s)" },
+                                                    { key: 'delete_userinstructiontree', label: "Allow delete template(s)" },
+                                                ].map((perm) => (
+                                                    <FormControlLabel
+                                                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}
+                                                        key={perm.key}
+                                                        control={<Checkbox size='small' checked={permission[perm.key]} onChange={(e) => { setPermission({ ...permission, [perm.key]: e.target.checked }) }} />}
+                                                        label={perm.label}
+                                                    />
+                                                ))}
+                                            </Stack>
+                                            <Stack direction='column' >
+                                                <FormLabel component="legend">Dataset Record permissions</FormLabel>
+                                                {[
+                                                    { key: 'add_datasetrecord', label: "Allow add Dataset Record(s)" },
+                                                    { key: 'change_datasetrecord', label: "Allow update Dataset Record(s)" },
+                                                    { key: 'view_datasetrecord', label: "Allow view Dataset Record(s)" },
+                                                    { key: 'delete_datasetrecord', label: "Allow delete Dataset Records(s)" },
                                                 ].map((perm) => (
                                                     <FormControlLabel
                                                         sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px' } }}

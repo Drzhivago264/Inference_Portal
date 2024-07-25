@@ -7,10 +7,20 @@ DEFAULT_PERMISSION_CODENAMES = [
     'allow_agent_api',
     'allow_toolbox_api',
     'allow_view_cost',
-    'allow_create_template',
     'allow_data_synthesis',
     'allow_create_token',
-    'allow_create_dataset'
+    'add_userinstructiontree',
+    'change_userinstructiontree',
+    'delete_userinstructiontree',
+    'view_userinstructiontree',
+    'add_dataset',
+    'change_dataset',
+    'delete_dataset',
+    'view_dataset',
+    'add_datasetrecord',
+    'change_datasetrecord',
+    'delete_datasetrecord',
+    'view_datasetrecord'
 ]
 MAX_KEY_NAME_LENGTH = 50
 
