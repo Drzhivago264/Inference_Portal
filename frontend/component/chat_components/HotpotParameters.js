@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
@@ -209,8 +208,6 @@ export const HotpotParameter = ({
             >
                 <FormControlLabel key="chat" value='chat' control={<Radio size="small" />} label="Chat Bot Mode" />
                 <FormControlLabel key="generate" value='generate' control={<Radio size="small" />} label="Text Completion" />
-                <Divider></Divider>
-
             </RadioGroup>
             <Stack direction="row" spacing={1}>
                 <Typography style={{ flex: 1 }} gutterBottom>Max_turns
@@ -493,7 +490,6 @@ export const HotpotParameter = ({
                 value={frequencypenalty}
                 valueLabelDisplay="off"
             />
-            <Divider></Divider>
             <Stack direction="row" spacing={1}>
                 <FormControlLabel control={<Switch
                     onChange={e => setBeam(e.target.checked)}

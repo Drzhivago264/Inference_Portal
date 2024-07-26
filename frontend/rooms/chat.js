@@ -107,7 +107,7 @@ function Chat() {
             setUserMessage("")
         }
     }
-    const MemoMemoryTree = useMemo(() => <MemoryTree></MemoryTree>, [])
+    const MemoMemoryTree = useMemo(() => <MemoryTree ></MemoryTree>, [])
     return (
         <Container maxWidth={false} sx={{ minWidth: 1350 }} disableGutters>
             <title>Chat</title>
@@ -117,7 +117,7 @@ function Chat() {
                     <Grid container spacing={2}>
                         <Grid item xs={4}>
                             {MemoMemoryTree}
-                            <Stack direction='row'>
+                            <Stack direction='row' mt={1} spacing={1}>
                                 <ChatExport
                                     chat_message={chat_message}
                                     number_of_remove_message={1}

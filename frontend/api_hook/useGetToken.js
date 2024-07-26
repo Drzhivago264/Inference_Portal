@@ -2,11 +2,9 @@ import { baseGet } from "./baseGet";
 import { useQuery } from "react-query";
 
 export const useGetToken = (setTokenList, setLocalTokenCreateError) => {
-
     const {
         error: error,
         isLoading: isLoading,
-
     } = useQuery("TokenData", () => baseGet('/frontend-api/get-token'),
         {
             retry: false,
@@ -19,7 +17,6 @@ export const useGetToken = (setTokenList, setLocalTokenCreateError) => {
             }
         });
     return {
-
         error: error,
         isLoading: isLoading
     }

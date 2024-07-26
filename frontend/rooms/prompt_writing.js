@@ -54,6 +54,11 @@ function PromptWriting() {
     const [current_evaluation, setCurrentEvaluation] = useState([{ evaluation_name: "", score: "" }])
     const [current_prompt, setCurrentPrompt] = useState("")
     const [current_response, setCurrentResponse] = useState("")
+
+    const [current_system_prompt_error, setCurrentSystemPromptError] = useState("")
+    const [current_prompt_error, setCurrentPromptError] = useState("")
+    const [current_response_error, setCurrentResponseError] = useState("")
+
     const [current_record_id, setCurrentRecordId] = useState(null)
     const [allow_save_record, setAllowSaveRecord] = useState(false)
     const [loading, setLoading] = useState(false);
@@ -148,6 +153,18 @@ function PromptWriting() {
         setLoading(true)
         const dataset = dataset_list[selectedIndex]
         const current_evaluation_without_null = current_evaluation.filter(item => item.evaluation_name && item.score);
+        setCurrentPromptError(false)
+        setCurrentResponseError(false)
+        setCurrentSystemPromptError(false)
+        if (!current_prompt) {
+            setCurrentPromptError(true)
+        }
+        if (!current_response) {
+            setCurrentResponseError(true)
+        }
+        if (!current_system_prompt) {
+            setCurrentSystemPromptError(true)
+        }
         if (current_prompt && current_response && current_system_prompt) {
             var data = {
                 'dataset_id': dataset.id,
@@ -240,7 +257,6 @@ function PromptWriting() {
                 }
             });
         }
-
         setCurrentPrompt('');
         setCurrentResponse('');
         setCurrentRecordId(null);
@@ -270,13 +286,11 @@ function PromptWriting() {
         setCurrentPrompt(prompt);
         setCurrentResponse(response);
         setCurrentSystemPrompt(system_prompt);
-
         const clickedRecord = record_list.results.record_serializer.find(record => record.id === id);
         if (clickedRecord) {
             setCurrentEvaluation(clickedRecord.evaluation);
         }
     };
-
     const addRecord = () => {
         setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt)
         setCurrentEvaluation(dataset_list[selectedIndex].default_evaluation)
@@ -322,7 +336,6 @@ function PromptWriting() {
                                                     setCurrentSystemPrompt={setCurrentSystemPrompt}
                                                 />
                                             </ListItemButton>
-
                                         </ListItem>
                                     ))}
                                     <Box display="flex" justifyContent="center" alignItems="center" mt={1}>
@@ -363,6 +376,7 @@ function PromptWriting() {
                                                 <TextField
                                                     label="System Prompt"
                                                     multiline
+                                                    error={current_system_prompt_error}
                                                     minRows={4}
                                                     maxRows={6}
                                                     value={current_system_prompt}
@@ -372,6 +386,7 @@ function PromptWriting() {
                                                 />
                                                 <TextField
                                                     label="Prompt"
+                                                    error={current_prompt_error}
                                                     multiline
                                                     minRows={6}
                                                     maxRows={8}
@@ -382,6 +397,7 @@ function PromptWriting() {
                                                 />
                                                 <TextField
                                                     label="Response"
+                                                    error={current_response_error}
                                                     multiline
                                                     minRows={6}
                                                     value={current_response}
@@ -453,15 +469,14 @@ function PromptWriting() {
                                 <Box display="flex"
                                     justifyContent="center"
                                     alignItems="center">
-                                    <Stack direction='row' spacing={1}>
+                                    <Stack direction='row' mt={1} spacing={1}>
                                         <LoadingButton size="small" loading={loading} disabled={!previous_pagnation} loadingPosition="start" variant="contained" onClick={() => { navigatePagination("previous") }} startIcon={<KeyboardDoubleArrowLeftIcon />}>Previous (10)</LoadingButton>
                                         <LoadingButton size="small" loading={loading} disabled = {!dataset_row.length} loadingPosition="start" variant="contained" onClick={() => { navigateRow("previous") }} startIcon={<KeyboardArrowLeftIcon />}>Previous</LoadingButton>
-                                        <IconButton aria-label="add" onClick={() => { addRecord(); setAllowSaveRecord(true) }}>
+                                        <IconButton aria-label="add" size='small' onClick={() => { addRecord(); setAllowSaveRecord(true) }}>
                                             <AddCircleOutlineIcon />
                                         </IconButton>
-
                                         <LoadingButton size="small" loading={loading} disabled={!allow_save_record} loadingPosition="end" variant="contained" onClick={() => { saveRecord() }} endIcon={<SaveIcon />}>Save</LoadingButton>
-                                        <IconButton aria-label="delete" onClick={() => { deleteRecord() }}>
+                                        <IconButton aria-label="delete" size='small' onClick={() => { deleteRecord() }}>
                                             <DeleteIcon />
                                         </IconButton>
                                         <LoadingButton size="small" loading={loading} disabled = {!dataset_row.length} loadingPosition="end" variant="contained" onClick={() => { navigateRow("next") }} endIcon={<KeyboardArrowRightIcon />}>Next </LoadingButton>

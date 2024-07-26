@@ -2,6 +2,7 @@ import React, { useCallback, useLayoutEffect, useState } from 'react';
 
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
+import PropTypes from 'prop-types';
 import TextField from '@mui/material/TextField';
 import { useGridApiContext } from '@mui/x-data-grid';
 
@@ -71,4 +72,11 @@ function EditTextarea(props) {
 export const multilineColumn = {
     type: 'string',
     renderEditCell: (params) => <EditTextarea {...params} />,
+};
+EditTextarea.propTypes = {
+    colDef: PropTypes.object.isRequired,
+    id: PropTypes.number.isRequired,
+    field: PropTypes.string.isRequired,
+    hasFocus: PropTypes.bool.isRequired,
+    value: PropTypes.string.isRequired,
 };

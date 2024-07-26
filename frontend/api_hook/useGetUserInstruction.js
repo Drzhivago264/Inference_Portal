@@ -3,7 +3,6 @@ import { nanoid } from 'nanoid'
 import { useQuery } from "react-query";
 
 export const useGetUserInstruction = (selectedIndex,  setMaxChildNum, setMaxParentNum, setAddParentError, setTemplateList, setChildInstructionList) => {
-
     const {
         error: error,
         isLoading: isLoading,
@@ -66,7 +65,6 @@ export const useGetUserInstruction = (selectedIndex,  setMaxChildNum, setMaxPare
             }
         }
     );
-
     return {
         error: error,
         isLoading: isLoading,

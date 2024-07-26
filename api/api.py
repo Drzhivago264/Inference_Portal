@@ -1,6 +1,7 @@
 from ninja import NinjaAPI
 from ninja.security import HttpBearer
 from ninja.errors import HttpError
+from ninja import Redoc
 
 from django_ratelimit.core import is_ratelimited
 
@@ -40,7 +41,7 @@ class GlobalAuth(HttpBearer):
          
 
 
-api = NinjaAPI(auth=GlobalAuth(),
+api = NinjaAPI(auth=GlobalAuth(), docs=Redoc(),
                title="Professor Parakeet API")
 
 api.add_router("/", completion_router)
