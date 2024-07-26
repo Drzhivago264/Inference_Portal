@@ -52,10 +52,8 @@ def log_prompt_response(is_session_start_node: bool | None, key_object: APIKEY, 
         )
         pair_save.save()
         build_memory_tree(key_object=key_object, prompt=prompt, response=response, llm=llm, type_= type_, is_session_start_node=is_session_start_node)
-    except DataError:
-        pass 
-    except IndexError:
-        pass 
+    except (DataError, IndexError):
+            pass
 
 def build_memory_tree(key_object: APIKEY, prompt: str, response: str, llm: LLM, type_: str, is_session_start_node: bool) -> None:
     if is_session_start_node is not None and type_ == "chatbot":

@@ -73,17 +73,15 @@ export const ChatParameter = ({
 }) => {
     const { t } = useTranslation();
     const toggleMemory = (value, memory_type) => {
-        if (memory_type == "usememory" && value) {
-            setUseMemory(value)
-            setUseMemoryCurrent(!value)
-        }
-        else if (memory_type == "usememorycurrent" && value) {
-            setUseMemory(!value)
-            setUseMemoryCurrent(value)
-        }
-        else {
-            setUseMemory(false)
-            setUseMemoryCurrent(false)
+        if (memory_type === "usememory") {
+            setUseMemory(value);
+            setUseMemoryCurrent(!value);
+        } else if (memory_type === "usememorycurrent") {
+            setUseMemory(!value);
+            setUseMemoryCurrent(value);
+        } else {
+            setUseMemory(false);
+            setUseMemoryCurrent(false);
         }
     }
     return (

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
-import { swap_child_instruction, swap_template } from '../component/chat_components/AgentSwapFunction.js';
+import { closeWebSocket, handleListItemClick, scrollToBottom, swap_child_instruction } from '../component/chat_components/chatUtils.js';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -86,55 +86,49 @@ function Hotpot() {
         setParentInstruct: setParentInstruct,
     } = useGetInstructionTree()
     
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
-    }
 
     useEffect(() => {
-        scrollToBottom()
+        scrollToBottom(messagesEndRef)
     }, [chat_message, agent_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
     useEffect(() => {
-        if (websocket.current) {
-            websocket.current.close()
-        }
-        if (agent_websocket.current) {
-            agent_websocket.current.close()
-        }
-        if (chat_websocket.current) {
-            chat_websocket.current.close()
-        }
-        if (websocket_hash) {
-            if (socket_destination == 'async') {
-                Promise.all([
-                    agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer-async/' + websocket_hash + '/' + timeZone + '/'),
-                    chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat-async/' + websocket_hash + '/' + timeZone + '/')
-                ])
+        const closeAndOpenWebSockets = async () => {
+            closeWebSocket(websocket);
+            closeWebSocket(agent_websocket);
+            closeWebSocket(chat_websocket);
+
+            if (websocket_hash) {
+                const pathPrefix = socket_destination === 'async' ? '-async' : '';
+
+                const [agentSocket, chatSocket] = await Promise.all([
+                    new WebSocket(`${ws_scheme}://${window.location.host}/ws/engineer${pathPrefix}/${websocket_hash}/${timeZone}/`),
+                    new WebSocket(`${ws_scheme}://${window.location.host}/ws/chat${pathPrefix}/${websocket_hash}/${timeZone}/`)
+                ]);
+
+                agent_websocket.current = agentSocket;
+                chat_websocket.current = chatSocket;
+
+                await Promise.all([
+                    chatsocket(
+                        chat_websocket,
+                        setChatMessage,
+                        setThinkingChat,
+                        document),
+                    agentsocket(
+                        agent_websocket,
+                        setAgentMessage,
+                        setThinkingAgent,
+                        document,
+                        setParentInstruct,
+                        setChildInstruct,
+                        setDefaultChildTemplateList,)
+                ]);
             }
-            else {
-                Promise.all([
-                    agent_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/engineer/' + websocket_hash + '/' + timeZone + '/'),
-                    chat_websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/chat/' + websocket_hash + '/' + timeZone + '/')
-                ])
-            }
-            Promise.all([
-                chatsocket(
-                    chat_websocket,
-                    setChatMessage,
-                    setThinkingChat,
-                    document),
-                agentsocket(
-                    agent_websocket,
-                    setAgentMessage,
-                    setThinkingAgent,
-                    document,
-                    setParentInstruct,
-                    setChildInstruct,
-                    setDefaultChildTemplateList,)
-            ])
-        }
+        };
+
+        closeAndOpenWebSockets();
     }, [socket_destination, websocket_hash]);
     const handleEnter = (e) => {
         if (e.key == "Enter" && !e.shiftKey) {
@@ -211,9 +205,6 @@ function Hotpot() {
         }
     }
 
-    const handleListItemClick = (event, index) => {
-        setSelectedIndex(index);
-    };
     return (
         <Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
             <title>Hotpot</title>
@@ -233,7 +224,7 @@ function Hotpot() {
                                             <ListItem key={instruct.name} disablePadding>
                                                 <ListItemButton
                                                     selected={selectedIndex === index}
-                                                    onClick={(event) => { swap_child_instruction(instruct.name, "system", agent_websocket), handleListItemClick(event, index) }} >
+                                                    onClick={(event) => { swap_child_instruction(instruct.name, "system", agent_websocket), handleListItemClick(event, index, setSelectedIndex) }} >
                                                     <ListItemText primary={instruct.name} />
                                                 </ListItemButton>
                                             </ListItem>

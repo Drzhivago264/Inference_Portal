@@ -11,24 +11,20 @@ from server.models import (
     APIKEY
 )
 from server.utils import constant
-
 def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
     try:
         server_list = cache.get(f"{model}_link_list")
         if server_list is None:
             server_list = list(InferenceServer.objects.filter(
                 hosted_model=model, availability="Available"))
-            cache.set(f"{model}_link_list", server_list,
-                      constant.CACHE_SERVER_LINK_RETRIVAL)
+            cache.set(f"{model}_link_list", server_list, constant.CACHE_SERVER_LINK_RETRIVAL)
+        
         if server_list:
             random_url = random.choice(server_list)
-            url = random_url.url
-            instance_id = random_url.name
-            server_status = random_url.status
-            return url, instance_id, server_status
+            return random_url.url, random_url.name, random_url.status
         else:
             return False, False, False
-    except IndexError:
+    except (IndexError, AttributeError):
         return False, False, False
 
 

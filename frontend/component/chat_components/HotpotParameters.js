@@ -19,7 +19,7 @@ import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-import { swap_template } from './AgentSwapFunction';
+import { swap_template } from './chatUtils';
 import { useTranslation } from 'react-i18next';
 
 const SmallInput = styled(MuiInput)`

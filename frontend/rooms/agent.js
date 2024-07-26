@@ -2,15 +2,14 @@ import '../component/css/editor-js.css';
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
-import { swap_child_instruction, swap_template } from '../component/chat_components/AgentSwapFunction.js';
+import { closeWebSocket, handleListItemClick, scrollToBottom, swap_child_instruction, swap_template } from '../component/chat_components/chatUtils.js';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
 import AlignmentTuneTool from 'editorjs-text-alignment-blocktune';
 import Box from '@mui/material/Box';
+import { CeleryAlert } from '../component/Alert/CeleryAlert.js';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { ChatExport } from '../component/import_export/ChatExport.js';
 import ChatInput from '../component/chat_components/ChatInput.js';
@@ -83,10 +82,6 @@ function Agent() {
     const navigate = useNavigate();
     const { is_authenticated, timeZone } = useContext(UserContext);
     useGetRedirectAnon(navigate, is_authenticated)
-
-    const handleListItemClick = (event, index) => {
-        setSelectedIndex(index);
-    };
 
     const handle_use_user_template = (event) => {
         setUseUserTemplate(event.target.checked);
@@ -178,24 +173,15 @@ function Agent() {
         isLoading: isLoading
     } = useGetInstructionTree(editorref, setEditor)
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
-    }
-
     useEffect(() => {
-        scrollToBottom()
+        scrollToBottom(messagesEndRef)
     }, [chat_message]);
+    
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     useEffect(() => {
-        if (websocket.current) {
-            websocket.current.close()
-        }
-        if (agent_websocket.current) {
-            agent_websocket.current.close()
-        }
-        if (chat_websocket.current) {
-            chat_websocket.current.close()
-        }
+        closeWebSocket(websocket);
+        closeWebSocket(agent_websocket);
+        closeWebSocket(chat_websocket);
         if (websocket_hash) {
             websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + websocket_hash + '/' + timeZone + '/');
             agentsocket(
@@ -303,29 +289,24 @@ function Agent() {
                                     </Typography>
                                 </Box>
                                 <Divider />
-                                <List dense={true}>
-                                    {!use_user_template && default_child_template_list.map((instruct, index) => {
-                                        return (
-                                            <ListItem key={instruct.name} disablePadding>
-                                                <ListItemButton
-                                                    selected={selectedIndex === index}
-                                                    onClick={(event) => { swap_child_instruction(instruct.name, 'system', websocket), handleListItemClick(event, index) }}   >
-                                                    <ListItemText primary={instruct.name} />
-                                                </ListItemButton>
-                                            </ListItem>
-                                        )
-                                    })}
-                                    {use_user_template && default_user_child_template_list.map((instruct, index) => {
-                                        return (
-                                            <ListItem key={instruct.name} disablePadding>
-                                                <ListItemButton
-                                                    selected={selectedIndex === index}
-                                                    onClick={(event) => { swap_child_instruction(instruct.name, 'user_template', websocket), handleListItemClick(event, index) }} >
-                                                    <ListItemText primary={instruct.displayed_name} />
-                                                </ListItemButton>
-                                            </ListItem>
-                                        )
-                                    })}
+                                <List dense>
+                                    {use_user_template ? default_user_child_template_list.map((instruct, index) => (
+                                        <ListItem key={instruct.name} disablePadding>
+                                            <ListItemButton
+                                                selected={selectedIndex === index}
+                                                onClick={(event) => { swap_child_instruction(instruct.name, 'user_template', websocket); handleListItemClick(event, index, setSelectedIndex); }}>
+                                                <ListItemText primary={instruct.displayed_name} />
+                                            </ListItemButton>
+                                        </ListItem>
+                                    )) : default_child_template_list.map((instruct, index) => (
+                                        <ListItem key={instruct.name} disablePadding>
+                                            <ListItemButton
+                                                selected={selectedIndex === index}
+                                                onClick={(event) => { swap_child_instruction(instruct.name, 'system', websocket); handleListItemClick(event, index, setSelectedIndex); }}>
+                                                <ListItemText primary={instruct.name} />
+                                            </ListItemButton>
+                                        </ListItem>
+                                    ))}
                                 </List>
                             </Paper>
                             <EditorExport editorref={editorref} />
@@ -489,10 +470,7 @@ function Agent() {
                                     setMaxTurn={setMaxTurn}
                                 >
                                 </OpenAPIParameter>
-                                <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
-                                    <AlertTitle>Note: </AlertTitle>
-                                    {`Celery Backend is deprecated, Async Backend supports newest features.`}
-                                </Alert>
+                                <CeleryAlert/>
                             </Stack>
                         </Grid>
                     </Grid>
