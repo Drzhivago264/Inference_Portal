@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
-import { swap_template } from './AgentSwapFunction';
+import { swap_template } from './chatUtils';
 
 const UserTemplate = ({
     setChoosenUserTemplate,

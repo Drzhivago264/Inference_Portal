@@ -2,6 +2,7 @@ import { Divider, List, Typography } from '@mui/material';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
+import { closeWebSocket, scrollToBottom } from '../component/chat_components/chatUtils.js';
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import Alert from '@mui/material/Alert';
@@ -197,7 +198,6 @@ function UserInstruction() {
         if (!disable_save) {
             submitTemplate();
         }
-
         const defaultChildInstructions = template_list[index]['children'] === null ? 
             [{ id: null, displayed_name: "", instruct: "", unique: nanoid(), add: false }] : 
             template_list[index]['children'].map(child => ({ ...child, add: false }));
@@ -226,7 +226,6 @@ function UserInstruction() {
     const deleteParent = () => {
         const newTemplateList = [...template_list];
         const nodeToDelete = template_list[selectedIndex];
-    
         if (nodeToDelete.id !== null) {
             deleteTemplate(nodeToDelete.id);
             setDeleteSuccess(true);
@@ -266,7 +265,6 @@ function UserInstruction() {
     const deleteChild = (index) => {
         const newChildrenInstructionList = [...children_instruction_list];
         const nodeToDelete = children_instruction_list[index];
-    
         if (newChildrenInstructionList.length < max_child_num) {
             newChildrenInstructionList.splice(index, 1);
             setChildInstructionList(newChildrenInstructionList);
@@ -279,7 +277,6 @@ function UserInstruction() {
             newChildrenInstructionList.splice(-1);
             setChildInstructionList(newChildrenInstructionList);
             setAddChildError(false);
-        
             if (nodeToDelete.id !== null) {
                 deleteTemplate(nodeToDelete.id);
                 setDeleteSuccess(true);
@@ -287,27 +284,16 @@ function UserInstruction() {
         }
     }
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
-    }
-
     useEffect(() => {
-        scrollToBottom()
+        scrollToBottom(messagesEndRef)
     }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
     useEffect(() => {
-        const closeWebSocket = (socket) => {
-            if (socket.current) {
-                socket.current.close();
-            }
-        };
-
         closeWebSocket(websocket);
         closeWebSocket(agent_websocket);
         closeWebSocket(chat_websocket);
-
         if (websocket_hash) {
             websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}/ws/engineer-async/${websocket_hash}/${timeZone}/`);
             agentsocket(

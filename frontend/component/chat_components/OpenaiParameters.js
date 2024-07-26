@@ -24,12 +24,10 @@ const BigInput = styled(MuiInput)`
   max-width: 60px;
 `;
 const handleBlur = (value, hook, min, max) => {
-    if (value) {
-        if (value < min) {
-            hook(min);
-        } else if (value > max) {
-            hook(max);
-        }
+    if (value < min) {
+        hook(min);
+    } else if (value > max) {
+        hook(max);
     }
 };
 export const OpenAPIParameter = ({

@@ -98,7 +98,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                     "get_payments", {"payment_id": key.payment_id})
                 if "error" in json.loads(payment_check.text):
                     return Response({'detail': "Payment id is incorrect"}, status=status.HTTP_404_NOT_FOUND)
-                elif len(json.loads(payment_check.text)["result"]) == 0:
+                elif not json.loads(payment_check.text)["result"]:
                     return Response({'detail': "No transaction detected"}, status=status.HTTP_404_NOT_FOUND)
                 else:
                     payment_id_response = json.loads(payment_check.text)[
@@ -118,7 +118,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                     crypto = Crypto.objects.get(coin="xmr")
                     if int(unlock_time) == 0 and not locked:
                         try:
-                            PaymentHistory.objects.get(
+                            _, created = PaymentHistory.objects.get_or_create(
                                 key=key,
                                 crypto=crypto,
                                 amount=amount/1e+12,
@@ -128,22 +128,12 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                                 transaction_hash=tx_hash,
                                 block_height=block_height,
                             )
-                            return Response({"detail": f"The lastest tx_hash is {tx_hash}, no change to xmr credit of key: {key_}"}, status=status.HTTP_200_OK)
-
-                        except PaymentHistory.DoesNotExist:
-                            PaymentHistory.objects.create(
-                                key=key,
-                                crypto=crypto,
-                                amount=amount/1e+12,
-                                integrated_address=address_response,
-                                payment_id=payment_id_response,
-                                locked=locked,
-                                transaction_hash=tx_hash,
-                                block_height=block_height,
-                            )
-                            key.monero_credit += amount/1e+12
-                            key.save()
-                            return Response({"detail": f"Transaction is success, add {amount/1e+12} XMR to key {key_}"}, status=status.HTTP_200_OK)
+                            if not created:
+                                return Response({"detail": f"The lastest tx_hash is {tx_hash}, no change to xmr credit of key: {key_}"}, status=status.HTTP_200_OK)
+                            else:
+                                key.monero_credit += amount/1e+12
+                                key.save()
+                                return Response({"detail": f"Transaction is success, add {amount/1e+12} XMR to key {key_}"}, status=status.HTTP_200_OK)
                         except Exception:
                             return Response({"detail": f"An internal error has occurred!"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
                     else:
@@ -167,7 +157,7 @@ def generate_key_api(request: HttpRequest) -> Response:
     serializer = CreateKeySerializer(data=request.data)
     if serializer.is_valid():
         key_name = serializer.data['key_name']
-        master_group, created = Group.objects.get_or_create(name="master_user")
+        master_group, _ = Group.objects.get_or_create(name="master_user")
         try:
             wallet = manage_monero("make_integrated_address")
             integrated_address = json.loads(

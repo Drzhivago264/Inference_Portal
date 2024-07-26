@@ -10,10 +10,9 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import { CeleryAlert } from '../component/Alert/CeleryAlert.js';
 import ChatInput from '../component/chat_components/ChatInput.js';
 import Container from '@mui/material/Container';
 import CsvFileInput from '../component/import_export/CsvInput.js';
@@ -40,6 +39,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import UserTemplate from '../component/chat_components/UserTemplate.js';
+import { closeWebSocket } from '../component/chat_components/chatUtils.js';
 import { datasynthesissocket } from '../component/websocket/DataSynthesisSocket.js';
 import { useGetInstructionTree } from '../api_hook/useGetInstructionTree.js';
 import { useGetModel } from '../api_hook/useGetModel.js';
@@ -150,15 +150,9 @@ function DataSynthesis() {
         
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     useEffect(() => {
-        if (websocket.current) {
-            websocket.current.close()
-        }
-        if (agent_websocket.current) {
-            agent_websocket.current.close()
-        }
-        if (chat_websocket.current) {
-            chat_websocket.current.close()
-        }
+        closeWebSocket(websocket);
+        closeWebSocket(agent_websocket);
+        closeWebSocket(chat_websocket);
         if (websocket_hash) {
             websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/data-synthesis/' + websocket_hash + '/' + timeZone + '/');
         }
@@ -509,13 +503,9 @@ function DataSynthesis() {
                                     setFrequencyPenalty={setFrequencyPenalty}
                                     max_turn={max_turn}
                                     setMaxTurn={setMaxTurn}
-
                                 >
                                 </OpenAPIParameter>
-                                <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
-                                    <AlertTitle>Note: </AlertTitle>
-                                    {`Celery Backend is deprecated, Async Backend supports newest features.`}
-                                </Alert>
+                                <CeleryAlert />
                             </Stack>
                         </Grid>
                     </Grid>

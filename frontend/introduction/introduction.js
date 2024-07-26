@@ -220,14 +220,11 @@ function Information() {
                                     </Box>
                                 </Slide>
                             </Grid>
-
                         </Grid>
                     </Box>
                 </Box>
-
             </Container >
             <Footer />
-
         </Container >
     );
 }

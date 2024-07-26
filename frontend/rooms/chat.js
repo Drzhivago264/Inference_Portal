@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
+import { closeWebSocket, scrollToBottom } from '../component/chat_components/chatUtils.js';
 
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
+import { CeleryAlert } from '../component/Alert/CeleryAlert.js';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
 import { ChatExport } from '../component/import_export/ChatExport.js';
 import ChatInput from '../component/chat_components/ChatInput.js';
@@ -55,32 +55,22 @@ function Chat() {
 
     const navigate = useNavigate();
     const { is_authenticated, timeZone } = useContext(UserContext);
-    
     const {model_objects, agent_objects} = useGetModel()
 
     useGetRedirectAnon(navigate, is_authenticated)
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
-    }
     useEffect(() => {
-        scrollToBottom()
+        scrollToBottom(messagesEndRef)
     }, [chat_message]);
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-
     useEffect(() => {
-        if (websocket.current) {
-            websocket.current.close()
-        }
-        if (agent_websocket.current) {
-            agent_websocket.current.close()
-        }
-        if (chat_websocket.current) {
-            chat_websocket.current.close()
-        }
+        closeWebSocket(websocket);
+        closeWebSocket(agent_websocket);
+        closeWebSocket(chat_websocket);
+
         if (websocket_hash) {
-            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + socket_destination + websocket_hash + '/' + timeZone + '/');
-            chatsocket(websocket, setChatMessage, setThinking, document)
+            websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}${socket_destination}${websocket_hash}/${timeZone}/`);
+            chatsocket(websocket, setChatMessage, setThinking, document);
         }
     }, [socket_destination, websocket_hash]);
 
@@ -118,7 +108,6 @@ function Chat() {
         }
     }
     const MemoMemoryTree = useMemo(() => <MemoryTree></MemoryTree>, [])
-
     return (
         <Container maxWidth={false} sx={{ minWidth: 1350 }} disableGutters>
             <title>Chat</title>
@@ -136,10 +125,7 @@ function Chat() {
                                 >
                                 </ChatExport>
                                 <Box mt={2}>
-                                    <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
-                                        <AlertTitle>Note: </AlertTitle>
-                                        {`Celery Backend is deprecated, Async Backend supports newest features.`}
-                                    </Alert>
+                                    <CeleryAlert />
                                 </Box>
                             </Stack>
                         </Grid>
@@ -201,5 +187,4 @@ function Chat() {
         </Container >
     );
 }
-
 export default Chat;

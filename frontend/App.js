@@ -1,8 +1,8 @@
 import React, { createContext, useMemo, useRef, useState } from 'react';
 import {
-  Route,
-  BrowserRouter as Router,
-  Routes,
+    Route,
+    BrowserRouter as Router,
+    Routes,
 } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -37,221 +37,130 @@ export const UserContext = createContext();
 export const WebSocketContext = createContext();
 
 export default function App() {
-  const [mode, setMode] = useState('dark');
-  const [is_authenticated, setIsAuthenticated] = useState(false)
+    const [mode, setMode] = useState('dark');
+    const [is_authenticated, setIsAuthenticated] = useState(false)
 
-  const [user_key_name, setUserKeyName] = useState(null)
-  const websocket = useRef(null)
-  const chat_websocket = useRef(null)
-  const agent_websocket = useRef(null)
-  const [websocket_hash, setWebsocketHash] = useState(null)
-  const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-  
-  useGetLogin(setIsAuthenticated, is_authenticated ,setUserKeyName, setWebsocketHash)
-  const colorMode = useMemo(
-    () => ({
-      toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
-      },
-    }),
-    [],
-  );
-  const theme = useMemo(
-    () =>
-      createTheme({
-        
-        palette: {
-          mode,
-        },
-        
-      },
-    ),
-    [mode],
-  );
-  return (
-    <WebSocketContext.Provider value={{websocket, agent_websocket, chat_websocket, websocket_hash}}>
-      <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, setUserKeyName, setWebsocketHash, user_key_name, timeZone }}>
-        <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
-          <GlobalStyles
-            styles={{
-              '::-webkit-scrollbar': {
-                width: '12px' /* Scrollbar width */
-              },
+    const [user_key_name, setUserKeyName] = useState(null)
+    const websocket = useRef(null)
+    const chat_websocket = useRef(null)
+    const agent_websocket = useRef(null)
+    const [websocket_hash, setWebsocketHash] = useState(null)
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
-              /* Scrollbar track */
-              '::-webkit-scrollbar-track': {
-                background: '#333' /* Track color */
-              },
+    useGetLogin(setIsAuthenticated, is_authenticated, setUserKeyName, setWebsocketHash)
+    const colorMode = useMemo(
+        () => ({
+            toggleColorMode: () => {
+                setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+            },
+        }),
+        [],
+    );
+    const theme = useMemo(
+        () =>
+            createTheme({
 
-              /* Scrollbar thumb */
-              "::-webkit-scrollbar-thumb": {
-                background: '#666', /* Thumb color */
-                borderRadius: '10px' /* Thumb border-radius */
-              },
+                palette: {
+                    mode,
+                },
 
-              /* Scrollbar thumb states */
-              "::-webkit-scrollbar-thumb:hover": {
-                background: '#555' /* Hover thumb color */
-              },
+            },
+            ),
+        [mode],
+    );
+    return (
+        <WebSocketContext.Provider value={{ websocket, agent_websocket, chat_websocket, websocket_hash }}>
+            <UserContext.Provider value={{ is_authenticated, setIsAuthenticated, setUserKeyName, setWebsocketHash, user_key_name, timeZone }}>
+                <ColorModeContext.Provider value={{ colorMode, mode, theme }}>
+                    <GlobalStyles
+                        styles={{
+                            '::-webkit-scrollbar': {
+                                width: '12px' /* Scrollbar width */
+                            },
 
-              "::-webkit-scrollbar-thumb:active": {
-                background: '#444', /* Active thumb color */
-              },
-              '*::-webkit-scrollbar': {
-                width: '0.2em',
-              },
+                            /* Scrollbar track */
+                            '::-webkit-scrollbar-track': {
+                                background: '#333' /* Track color */
+                            },
 
-              '*::-webkit-scrollbar-thumb': {
-                outline: '1px solid slategrey',
-              },
-            }}
-          />
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Router>
-              <Routes>
-                <Route exact path="/" element={<InformationPage />} />
-                <Route exact path="" element={<InformationPage />} />
-                <Route path="/frontend/manual" element={<ManualPage />} />
-                <Route path="/frontend/cost-monitoring" element={<CostMonitoringPage />} />
-                <Route path="/frontend/user-instruction" element={<UserInstructionPage />} />
-                <Route path="/frontend/data-synthesis" element={<DataSynthesisPage />} />
-                <Route path="/frontend/manual/:doc" element={<ManualPage />} />
-                <Route path="/frontend/api/docs" element={<APIDocPage />} />
-                <Route path="/frontend/model" element={<ModelInforPage />} />
-                <Route path="/frontend/key-management" element={<KeyManagementPage />} />
-                <Route path="/frontend/token-management" element={<TokenManagementPage />} />
-                <Route path="/frontend/hub" element={<HubPage />} />
-                <Route path="/frontend/payment-success" element={<PaymentSuccessPage />} />
-                <Route path="/frontend/chat" element={<ChatPage />} />
-                <Route path="/frontend/engineer" element={<AgentPage />} />
-                <Route path="/frontend/prompt-writing" element={<PromptWritingPage />} />
-                <Route path="/frontend/toolbox" element={<FunctionLLMPage />} />
-                <Route path="/frontend/hotpot" element={<HotpotPage />} />
-                <Route path="/frontend/log" element={<LogPage />} />
-                <Route path="/frontend/contact" element={<ContactPage />} />
-                <Route path="/frontend/login" element={<LoginPage />} />
-              </Routes>
-            </Router>
-          </ThemeProvider>
-        </ColorModeContext.Provider>
-      </UserContext.Provider>
-    </WebSocketContext.Provider>
-  );
+                            /* Scrollbar thumb */
+                            "::-webkit-scrollbar-thumb": {
+                                background: '#666', /* Thumb color */
+                                borderRadius: '10px' /* Thumb border-radius */
+                            },
+
+                            /* Scrollbar thumb states */
+                            "::-webkit-scrollbar-thumb:hover": {
+                                background: '#555' /* Hover thumb color */
+                            },
+
+                            "::-webkit-scrollbar-thumb:active": {
+                                background: '#444', /* Active thumb color */
+                            },
+                            '*::-webkit-scrollbar': {
+                                width: '0.2em',
+                            },
+
+                            '*::-webkit-scrollbar-thumb': {
+                                outline: '1px solid slategrey',
+                            },
+                        }}
+                    />
+                    <ThemeProvider theme={theme}>
+                        <CssBaseline />
+                        <Router>
+                            <Routes>
+                                <Route exact path="/" element={<InformationPage />} />
+                                <Route path="/frontend/manual" element={<ManualPage />} />
+                                <Route path="/frontend/cost-monitoring" element={<CostMonitoringPage />} />
+                                <Route path="/frontend/user-instruction" element={<UserInstructionPage />} />
+                                <Route path="/frontend/data-synthesis" element={<DataSynthesisPage />} />
+                                <Route path="/frontend/manual/:doc" element={<ManualPage />} />
+                                <Route path="/frontend/api/docs" element={<APIDocPage />} />
+                                <Route path="/frontend/model" element={<ModelInforPage />} />
+                                <Route path="/frontend/key-management" element={<KeyManagementPage />} />
+                                <Route path="/frontend/token-management" element={<TokenManagementPage />} />
+                                <Route path="/frontend/hub" element={<HubPage />} />
+                                <Route path="/frontend/payment-success" element={<PaymentSuccessPage />} />
+                                <Route path="/frontend/chat" element={<ChatPage />} />
+                                <Route path="/frontend/engineer" element={<AgentPage />} />
+                                <Route path="/frontend/prompt-writing" element={<PromptWritingPage />} />
+                                <Route path="/frontend/toolbox" element={<FunctionLLMPage />} />
+                                <Route path="/frontend/hotpot" element={<HotpotPage />} />
+                                <Route path="/frontend/log" element={<LogPage />} />
+                                <Route path="/frontend/contact" element={<ContactPage />} />
+                                <Route path="/frontend/login" element={<LoginPage />} />
+                            </Routes>
+                        </Router>
+                    </ThemeProvider>
+                </ColorModeContext.Provider>
+            </UserContext.Provider>
+        </WebSocketContext.Provider>
+    );
 }
 
-const AgentPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Agent />
-  </Suspense>
+const withSuspense = (Component) => () => (
+    <Suspense fallback={<LinearProgress />}>
+        <Component />
+    </Suspense>
 );
 
-const PromptWritingPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <PromptWriting />
-  </Suspense>
-);
-
-const ManualPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Manual />
-  </Suspense>
-);
-
-const APIDocPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <APIDoc />
-  </Suspense>
-);
-
-const LogPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Log />
-  </Suspense>
-);
-
-const ChatPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Chat />
-  </Suspense>
-);
-
-const ContactPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Contact />
-  </Suspense>
-);
-
-const HotpotPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Hotpot />
-  </Suspense>
-);
-
-const KeyManagementPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <KeyManagement />
-  </Suspense>
-);
-
-const TokenManagementPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <TokenManagement />
-  </Suspense>
-);
-
-
-const FunctionLLMPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <FunctionLLM />
-  </Suspense>
-);
-
-const InformationPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Information />
-  </Suspense>
-);
-
-const ModelInforPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <ModelInfor />
-  </Suspense>
-);
-
-const HubPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Hub />
-  </Suspense>
-);
-
-const PaymentSuccessPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <PaymentSuccess />
-  </Suspense>
-);
-
-
-const LoginPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <Login />
-  </Suspense>
-);
-
-const UserInstructionPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <UserInstruction />
-  </Suspense>
-);
-
-const CostMonitoringPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <CostMonitoring />
-  </Suspense>
-);
-
-const DataSynthesisPage = () => (
-  <Suspense fallback={<LinearProgress />}>
-    <DataSynthesis />
-  </Suspense>
-);
+const AgentPage = withSuspense(Agent);
+const PromptWritingPage = withSuspense(PromptWriting);
+const ManualPage = withSuspense(Manual);
+const APIDocPage = withSuspense(APIDoc);
+const LogPage = withSuspense(Log);
+const ChatPage = withSuspense(Chat);
+const ContactPage = withSuspense(Contact);
+const HotpotPage = withSuspense(Hotpot);
+const KeyManagementPage = withSuspense(KeyManagement);
+const TokenManagementPage = withSuspense(TokenManagement);
+const FunctionLLMPage = withSuspense(FunctionLLM);
+const InformationPage = withSuspense(Information);
+const ModelInforPage = withSuspense(ModelInfor);
+const HubPage = withSuspense(Hub);
+const PaymentSuccessPage = withSuspense(PaymentSuccess);
+const LoginPage = withSuspense(Login);
+const UserInstructionPage = withSuspense(UserInstruction);
+const CostMonitoringPage = withSuspense(CostMonitoring);
+const DataSynthesisPage = withSuspense(DataSynthesis);

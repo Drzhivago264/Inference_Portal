@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext, WebSocketContext } from '../App.js'
+import { closeWebSocket, scrollToBottom } from '../component/chat_components/chatUtils.js';
 
 import Box from '@mui/material/Box';
 import { ChatBox } from '../component/chat_components/Chatbox.js';
@@ -46,36 +47,22 @@ function FunctionLLM() {
     const [usermessageError, setUserMessageError] = useState(false);
     const [extrainstruction, setExtraInstruction] = useState("sadness, joy, love, anger, fear, surprise, neutral");
     const [llmfunction, setLLMFunction] = useState("emotion");
-    
     const navigate = useNavigate();
     const { is_authenticated, timeZone } = useContext(UserContext);
-
     const {agent_objects} = useGetModel()
-    
     useGetRedirectAnon(navigate, is_authenticated)
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'nearest' })
-    }
-
     useEffect(() => {
-        scrollToBottom()
+        scrollToBottom(messagesEndRef)
     }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
     useEffect(() => {
-        if (websocket.current) {
-            websocket.current.close()
-        }
-        if (agent_websocket.current) {
-            agent_websocket.current.close()
-        }
-        if (chat_websocket.current) {
-            chat_websocket.current.close()
-        }
+        closeWebSocket(websocket);
+        closeWebSocket(agent_websocket);
+        closeWebSocket(chat_websocket);
         if (websocket_hash) {
-            websocket.current = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/toolbox/' + websocket_hash + '/' + timeZone + '/');
+            websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}/ws/toolbox/${websocket_hash}/${timeZone}/`);
             chatsocket(websocket, setChatMessage, setThinking, document)
         }
     }, [websocket_hash]);
@@ -87,7 +74,6 @@ function FunctionLLM() {
         }
     }
     const submitChat = () => {
-
         if (usermessage == '') {
             setUserMessageError(true)
         }
@@ -112,18 +98,16 @@ function FunctionLLM() {
         }
     }
     const swap_extra_instruction = (e) => {
-        if (e == 'restyle') {
-            setExtraInstruction("sad, serious")
-        }
-        else if (e == 'emotion') {
-            setExtraInstruction("sadness, joy, love, anger, fear, surprise, neutral")
-        }
-        else if (e == 'summary') {
-            setExtraInstruction(100)
-        }
-        else if (e == 'topic' || e == 'paraphrase' || e == 'sentiment') {
-            setExtraInstruction("")
-        }
+        const instructions = {
+            'restyle': "sad, serious",
+            'emotion': "sadness, joy, love, anger, fear, surprise, neutral",
+            'summary': 100,
+            'topic': "",
+            'paraphrase': "",
+            'sentiment': ""
+        };
+
+        setExtraInstruction(instructions[e] || "");
     }
     return (
         <Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>

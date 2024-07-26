@@ -36,9 +36,9 @@ import SuccessErrorAlert from '../component/Alert/SuccessErrorAlert.js';
 import SvgIcon from '@mui/material/SvgIcon';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { basePost } from '../api_hook/basePost';
 import { useGetProduct } from '../api_hook/useGetProduct';
-import { useMutation } from 'react-query';
+import { usePostKeyCheck } from '../api_hook/usePostKeyCheck.js';
+import { usePostStripeRedirect } from '../api_hook/usePostStripeRedirect.js';
 
 function KeyManagement() {
     const { t } = useTranslation();
@@ -51,48 +51,11 @@ function KeyManagement() {
     const [keynamepayError, setKeyNamePayError] = useState(false)
     const [amount, setAmount] = useState(1)
 
-    const { mutate: keycheckmutate, isLoading: keycheckisLoading, error: keycheckerror, data: keycheckdata } = useMutation(basePost);
-    const { mutate: xmrretrievemutate, isLoading: xmrretrieveisLoading, error: xmrretrieveerror, data: xmrretrievedata } = useMutation(basePost);
-    const { mutate: xmrconfirmmutate, isLoading: xmrconfirmisLoading, error: xmrconfirmerror, data: xmrconfirmdata } = useMutation(basePost);
-    const handlePostRequest = (event, url, type) => {
-        event.preventDefault()
-        setKeyNamePayError(false)
-        setKeyNamePayError(keynamepay === '');
-        setKeyError(key === '');
-
-        if (keynamepay && key) {
-            const data = {
-                key_name: keynamepay,
-                key: key
-            }
-            if (type === "keycheck") {
-                keycheckmutate({ url: url, data: data })
-            }
-            else if (type === "xmrretrieve") {
-                xmrretrievemutate({ url: url, data: data })
-            }
-            else if (type === "xmrconfirm") {
-                xmrconfirmmutate({ url: url, data: data })
-            }
-        }
-    }
-    
-    const { mutate: stripemutate, isSuccess: stripeisSuccess, error: stripeerror, data: stripedata } = useMutation(basePost);
-    const handleStripeRedirect = (event) => {
-        event.preventDefault()
-        setKeyNamePayError(false)
-        setKeyNamePayError(keynamepay === '');
-        setKeyError(key === '');
-
-        if (keynamepay && key && amount) {
-            const data = {
-                key_name: keynamepay,
-                key: key,
-                product_id: amount,
-            }
-            stripemutate({ url: "/frontend-api/stripe-redirect", data: data })
-        }
-    }
+    const { fetch: postKeyCheck, isLoading: keycheckisLoading, error: keycheckerror, data: keycheckdata } = usePostKeyCheck({setKeyError, setKeyNamePayError, key, keynamepay})
+    const { fetch: xmrretrieve, isLoading: xmrretrieveisLoading, error: xmrretrieveerror, data: xmrretrievedata } = usePostKeyCheck({setKeyError, setKeyNamePayError, key, keynamepay});
+    const { fetch: xmrconfirm, isLoading: xmrconfirmisLoading, error: xmrconfirmerror, data: xmrconfirmdata } = usePostKeyCheck({setKeyError, setKeyNamePayError, key, keynamepay});
+    const { fetch: stripepostredirect, isSuccess: stripeisSuccess, error: stripeerror, data: stripedata } = usePostStripeRedirect({setKeyError, setKeyNamePayError, key, keynamepay, amount});
+       
     useEffect(() => {
         if (stripeisSuccess) {
             window.location.replace(stripedata.stripe_checkout_url);
@@ -191,7 +154,7 @@ function KeyManagement() {
                                             {t('key_management.21_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={keycheckisLoading} variant="contained" name="checkcredit" onClick={(e) => { handlePostRequest(e, "/frontend-api/check-credit", "keycheck") }} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
+                                            <LoadingButton loading={keycheckisLoading} variant="contained" name="checkcredit" onClick={(e) => { postKeyCheck(e, "/frontend-api/check-credit") }} type="submit" endIcon={<LocalAtmIcon />}>Check Credit</LoadingButton>
                                         </Box>
                                         {keycheckdata && <KeyCheckDisplay t={t} key_={keycheckdata.key} key_name={keycheckdata.key_name} monero_balance={keycheckdata.monero_balance} fiat_balance={keycheckdata.fiat_balance} />}
                                         {keycheckerror && <SuccessErrorAlert type="error" detail={keycheckerror.response.data.detail} />}
@@ -212,7 +175,7 @@ function KeyManagement() {
                                             {t('key_management.22_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <Button variant="contained" onClick={(e) => { handleStripeRedirect(e) }} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
+                                            <Button variant="contained" onClick={(e) => { stripepostredirect(e) }} name="topup" type="submit" endIcon={<AccountBalanceIcon />}>Stripe</Button>
                                         </Box>
                                         {stripeerror && <SuccessErrorAlert type="error" detail={stripeerror.response.data.detail} />}
                                     </AccordionDetails>
@@ -232,7 +195,7 @@ function KeyManagement() {
                                             {t('key_management.23_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={xmrretrieveisLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/get-xmr-wallet", "xmrretrieve") }} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
+                                            <LoadingButton loading={xmrretrieveisLoading} variant="contained" type="submit" onClick={(e) => { xmrretrieve(e, "/frontend-api/get-xmr-wallet") }} endIcon={<AccountBalanceWalletIcon />}>Check XMR Wallet</LoadingButton>
                                         </Box>
                                         {xmrretrievedata && <XMRWalletDisplay t={t} key_={xmrretrievedata.key} key_name={xmrretrievedata.key_name} payment_id={xmrretrievedata.payment_id} integrated_wallet={xmrretrievedata.integrated_wallet} />}
                                         {xmrretrieveerror && <SuccessErrorAlert detail={xmrretrieveerror.response.data.detail} type="error"/>}
@@ -253,7 +216,7 @@ function KeyManagement() {
                                             {t('key_management.24_info')}
                                         </Typography>
                                         <Box mt={2}>
-                                            <LoadingButton loading={xmrconfirmisLoading} variant="contained" type="submit" onClick={(e) => { handlePostRequest(e, "/frontend-api/confirm-xmr-payment", "xmrconfirm") }} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
+                                            <LoadingButton loading={xmrconfirmisLoading} variant="contained" type="submit" onClick={(e) => { xmrconfirm(e, "/frontend-api/confirm-xmr-payment") }} endIcon={<SvgIcon><svg xmlns="http://www.w3.org/2000/svg" width="226.777" height="226.777" viewBox="0 0 226.777 226.777"><path d="M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z" /><path d="M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z" /></svg></SvgIcon>}>Confirm XMR Payment</LoadingButton>
                                         </Box>
                                         {xmrconfirmdata && <XMRWConfirmationDisplay t={t} detail={xmrconfirmdata.detail} />}
                                         {xmrconfirmerror && <SuccessErrorAlert detail={xmrconfirmerror.response.data.detail} type="error" />}

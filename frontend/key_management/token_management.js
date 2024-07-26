@@ -34,11 +34,11 @@ import TextField from '@mui/material/TextField';
 import TimerIcon from '@mui/icons-material/Timer';
 import TokenCreateExport from '../component/import_export/TokenExport.js';
 import Typography from '@mui/material/Typography';
-import { baseDelete } from '../api_hook/baseDelete.js';
-import { basePost } from '../api_hook/basePost.js';
 import { styled } from '@mui/system';
+import { useDeletePermission } from '../api_hook/useDeletePermission.js';
+import { useDeleteToken } from '../api_hook/useDeleteToken.js';
 import { useGetToken } from '../api_hook/useGetToken.js';
-import { useMutation } from 'react-query';
+import { usePostTokenCreate } from '../api_hook/usePostTokenCreate.js';
 import { useTranslation } from 'react-i18next';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -49,7 +49,6 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 
 function TokenManagement() {
     const { t } = useTranslation();
-
     const [tokencreateloading, setTokenCreateLoading] = useState(false);
     const [token_list, setTokenList] = useState([])
     const [use_ttl, setUseTTL] = useState(true)
@@ -78,7 +77,6 @@ function TokenManagement() {
             view_datasetrecord: false
         }
     )
-    const total_number_permissions = 10
     const [randomanimation, setRandomAnimation] = useState(false);
     const [tokenname, setTokenName] = useState("")
     const [ttl, setTTL] = useState(10)
@@ -110,108 +108,11 @@ function TokenManagement() {
             delete_datasetrecord: value,
             view_datasetrecord: value
         };
-
         setPermission(updatedPermissions);
     }
-    const { mutate: tokencreatemutate, error: servertokencreateerror, data: servertokencreatedata} = useMutation(basePost);
-    const handleCreateToken = (event) => {
-        event.preventDefault()
-        setTokenNameError(false)
-        setRandomAnimation(false)
-        setLocalTokenCreateError(null)
-        setTokenCreateLoading(true);
-        setShowKeyCreateResponse(false)
-        var perm_count = 0;
-        for (var key in permission) {
-            if (permission[key]) {
-                perm_count++;
-            }
-        }
-        if (tokenname == '') {
-            setTokenCreateLoading(false)
-            setTokenNameError(true)
-        }
-        else if (perm_count === 0) {
-            setLocalTokenCreateError("You tried to create a token without any permission, the key will be unusable. Associate at least one permission for the token.")
-            setTokenCreateLoading(false)
-        }
-        else if (tokenname.length > 50) {
-            setLocalTokenCreateError("You tried to create a token name longer than 50 chars.")
-            setTokenCreateLoading(false)
-        }
-        else if (ttl <= 0 || ttl > 999999) {
-            setLocalTokenCreateError("You tried to create a token with invalid time to live (0 < ttl < 999999).")
-            setTokenCreateLoading(false)
-        }
-        else if (!['day', 'hour', 'minute', 'second'].includes(time_unit)) {
-            setLocalTokenCreateError("You tried to create a token with invalid time unit ['day', 'hour', 'minute', 'second'].")
-            setTokenCreateLoading(false)
-        }
-        else {
-            const data = {
-                token_name: tokenname,
-                permission: permission,
-                ttl: ttl,
-                time_unit: time_unit,
-                use_ttl: use_ttl
-            }
-
-            tokencreatemutate({ url: "/frontend-api/generate-token", data: data }, {
-                onSuccess: () => {
-                    setShowKeyCreateResponse(true)
-
-                }
-            })
-        }
-    }
-    const { mutate: permissiondeletemutate } = useMutation(baseDelete);
-    const deletePermission = (token_prefix, token_name, token_value, permission, token_index, perm_index) => {
-        if (token_prefix && token_name && token_value && permission) {
-            const data = {
-                token_name: token_name,
-                prefix: token_prefix,
-                first_and_last_char: token_value,
-                permission: permission
-            }
-            permissiondeletemutate({ url: "/frontend-api/remove-permission", data: data },
-                {
-                    onSuccess: () => {
-                        setTokenList((prev) => {
-                            const items = token_list[token_index].permissions.filter(
-                                (_, permIndex) => permIndex !== perm_index
-                            );
-                            const newState = prev;
-                            newState[token_index].permissions = items;
-                            return [...newState];
-                        });
-                    },
-                    onError: (error) => {
-                        setLocalTokenCreateError(error.response.data.detail)
-                    }
-                }
-            )
-
-        }
-    };
-    const { mutate: tokendeletemutate } = useMutation(baseDelete);
-    const deleteToken = (token_prefix, token_name, token_value, index) => {
-        if (token_prefix && token_name && token_value) {
-            const data = {
-                token_name: token_name,
-                prefix: token_prefix,
-                first_and_last_char: token_value
-            }
-            tokendeletemutate({ url: "/frontend-api/invalidate-token", data: data },
-                {
-                    onSuccess: () => setTokenList(prev => {
-                        return prev.filter((_, i) => i !== index)
-                    }),
-                    onError: (error) => setLocalTokenCreateError(error.response.data.detail)
-
-                })
-
-        }
-    };
+    const { fetch: postCreateToken, error: servertokencreateerror, data: servertokencreatedata } = usePostTokenCreate({ setTokenNameError, setTokenCreateLoading, setShowKeyCreateResponse, setRandomAnimation, setLocalTokenCreateError, tokenname, permission, ttl, time_unit, use_ttl });
+    const { fetch: deletePermission } = useDeletePermission({ setTokenList, setLocalTokenCreateError, token_list });
+    const { fetch: deleteToken } = useDeleteToken({ setTokenList, setLocalTokenCreateError });
     useGetToken(setTokenList, setLocalTokenCreateError)
     return (
         <Container maxWidth={false} disableGutters>
@@ -266,7 +167,7 @@ function TokenManagement() {
                                                                 </Grid>
 
                                                             ))}
-                                                            {row.permissions.length < total_number_permissions &&
+                                                            {row.permissions.length < Object.keys(permission).length &&
                                                                 <Grid item > <AddPermissionDialog
                                                                     current_permission_list={row.permissions}
                                                                     full_permission_dict={permission}
@@ -319,7 +220,7 @@ function TokenManagement() {
                                             alignItems: 'center',
                                             justifyContent: 'center'
                                         }} item xs={7} >
-                                            <form autoComplete="off" onSubmit={(e) => { handleCreateToken(e) }}>
+                                            <form autoComplete="off" onSubmit={(e) => { postCreateToken(e) }}>
                                                 <FormControl defaultValue="" required>
                                                     <Stack direction='column' spacing={1}>
                                                         <TextField
