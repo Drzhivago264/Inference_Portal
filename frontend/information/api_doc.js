@@ -16,15 +16,13 @@ function APIDoc() {
     return (
         <Container maxWidth={false} disableGutters>
             <title>API Doc</title>
-            <ResponsiveAppBar max_width="xl" />
-            <Container maxWidth='xl'>
-                <Box>
-                    <Box p={1} m={5} sx={{ bgcolor: 'white', borderRadius: 2 }}>
-                        {ui}
-                    </Box>
+            <ResponsiveAppBar max_width="xxl" />
+            <Container maxWidth='xxl'>
+                <Box p={1} sx={{ bgcolor: 'white', borderRadius: 2 }}>
+                    {ui}
                 </Box>
             </Container>
-            <Footer/>
+            <Footer />
         </Container>
     );
 }

@@ -56,7 +56,6 @@ function FunctionLLM() {
     }, [chat_message]);
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-
     useEffect(() => {
         closeWebSocket(websocket);
         closeWebSocket(agent_websocket);
@@ -106,7 +105,6 @@ function FunctionLLM() {
             'paraphrase': "",
             'sentiment': ""
         };
-
         setExtraInstruction(instructions[e] || "");
     }
     return (
@@ -171,7 +169,6 @@ function FunctionLLM() {
                                         sx={{ p: '2px 4px', display: 'flex', minWidth: 200 }}
                                         onChange={e => setExtraInstruction(e.target.value)}
                                         minRows={4}
-
                                     />
                                 </Box>
                             </Paper>

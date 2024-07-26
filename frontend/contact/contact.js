@@ -81,11 +81,10 @@ function Contact() {
         }
         setSendLoading(false)
     }
-
     return (
         <Container maxWidth={false} disableGutters>
             <title>{t('contact.Contact')}</title>
-            <ResponsiveAppBar max_width="xl"  />
+            <ResponsiveAppBar max_width="lg"  />
             <Container maxWidth="md">
                 <Box
                     my={1}
