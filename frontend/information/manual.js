@@ -1,6 +1,6 @@
-import { Highlight, themes } from "prism-react-renderer";
-import { MuiMarkdown, getOverrides } from "mui-markdown";
-import React, { useEffect, useState } from "react";
+import {Highlight, themes} from "prism-react-renderer";
+import {MuiMarkdown, getOverrides} from "mui-markdown";
+import React, {useEffect, useState} from "react";
 
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -8,7 +8,7 @@ import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Footer from "../component/nav/Footer";
 import Grid from "@mui/material/Grid";
-import { Link } from "react-router-dom";
+import {Link} from "react-router-dom";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import Paper from "@mui/material/Paper";
@@ -29,9 +29,9 @@ import inference_en from "../../docs/Manual/en/inference_en.md";
 import inference_vi from "../../docs/Manual/vi/inference_vi.md";
 import key_en from "../../docs/Manual/en/create_key_en.md";
 import key_vi from "../../docs/Manual/vi/create_key_vi.md";
-import { useParams } from "react-router";
-import { useQuery } from "react-query";
-import { useTranslation } from "react-i18next";
+import {useParams} from "react-router";
+import {useQuery} from "react-query";
+import {useTranslation} from "react-i18next";
 
 const retrieveManual = async (destination_refs, doc, default_language) => {
 	const response = await axios.get(destination_refs[doc][default_language]);
@@ -42,7 +42,7 @@ function Manual() {
 	useEffect(() => {
 		Prism.highlightAll();
 	});
-	const { doc } = useParams();
+	const {doc} = useParams();
 	const [default_language, setDefaultLanguage] = useState(i18next.language);
 	const [displaydoc, setDisplayDoc] = useState("");
 
@@ -73,7 +73,7 @@ function Manual() {
 			vi: behavior_vi,
 		},
 	};
-	const { t, i18n } = useTranslation();
+	const {t, i18n} = useTranslation();
 
 	useEffect(() => {
 		setDefaultLanguage(i18n.language);
@@ -81,11 +81,10 @@ function Manual() {
 	useEffect(() => {
 		setSelectedIndex(Object.keys(destination_refs).indexOf(doc));
 	}, []);
-	const docRequest = useQuery(
-		["ManualDocData", destination_refs, doc, default_language],
-		() => retrieveManual(destination_refs, doc, default_language),
-		{ staleTime: Infinity, retry: false }
-	);
+	const docRequest = useQuery(["ManualDocData", destination_refs, doc, default_language], () => retrieveManual(destination_refs, doc, default_language), {
+		staleTime: Infinity,
+		retry: false,
+	});
 
 	useEffect(() => {
 		if (docRequest.status === "success" && docRequest.data) {
@@ -114,8 +113,7 @@ function Manual() {
 									{[
 										{
 											link: "/frontend/manual/key",
-											tranlate:
-												"manual.Setting_Up_Your_API_Key",
+											tranlate: "manual.Setting_Up_Your_API_Key",
 										},
 										{
 											link: "/frontend/manual/authentication",
@@ -127,32 +125,21 @@ function Manual() {
 										},
 										{
 											link: "/frontend/manual/errorlimit",
-											tranlate:
-												"manual.Common_Errors_and_Ratelimits",
+											tranlate: "manual.Common_Errors_and_Ratelimits",
 										},
 										{
 											link: "/frontend/manual/behavior",
-											tranlate:
-												"manual.The_Behaviors_of_This_Website",
+											tranlate: "manual.The_Behaviors_of_This_Website",
 										},
 									].map((object, index) => {
 										return (
 											<ListItemButton
-												selected={
-													selectedIndex === index
-												}
-												onClick={(event) =>
-													handleListItemClick(
-														event,
-														index
-													)
-												}
+												selected={selectedIndex === index}
+												onClick={(event) => handleListItemClick(event, index)}
 												key={object.link}
 												component={Link}
 												to={object.link}>
-												<Typography
-													component='span'
-													variant='body2'>
+												<Typography component='span' variant='body2'>
 													{" "}
 													{t(object.tranlate)}{" "}
 												</Typography>
@@ -167,74 +154,35 @@ function Manual() {
 							flexItem
 							sx={{
 								mr: "-1px",
-								display: { xs: "none", sm: "block" },
+								display: {xs: "none", sm: "block"},
 							}}
 						/>
 						<Grid item xs={12} md={8} lg={8}>
-							<Box
-								mt={3}
-								sx={{ display: { sm: "block ", md: "none" } }}>
+							<Box mt={3} sx={{display: {sm: "block ", md: "none"}}}>
 								<List dense={true}>
-									<ListItemButton
-										component={Link}
-										to='/frontend/manual/key'>
+									<ListItemButton component={Link} to='/frontend/manual/key'>
 										{" "}
-										<Typography>
-											{t(
-												"manual.Setting_Up_Your_API_Key"
-											)}{" "}
-										</Typography>{" "}
+										<Typography>{t("manual.Setting_Up_Your_API_Key")} </Typography>{" "}
 									</ListItemButton>
-									<ListItemButton
-										component={Link}
-										to='/frontend/manual/authentication'>
-										<Typography>
-											{" "}
-											{t("manual.Authentication")}{" "}
-										</Typography>{" "}
+									<ListItemButton component={Link} to='/frontend/manual/authentication'>
+										<Typography> {t("manual.Authentication")} </Typography>{" "}
 									</ListItemButton>
-									<ListItemButton
-										component={Link}
-										to='/frontend/manual/inference'>
-										<Typography>
-											{" "}
-											{t("manual.Inference")}{" "}
-										</Typography>{" "}
+									<ListItemButton component={Link} to='/frontend/manual/inference'>
+										<Typography> {t("manual.Inference")} </Typography>{" "}
 									</ListItemButton>
-									<ListItemButton
-										component={Link}
-										to='/frontend/manual/errorlimit'>
-										<Typography>
-											{" "}
-											{t(
-												"manual.Common_Errors_and_Ratelimits"
-											)}{" "}
-										</Typography>{" "}
+									<ListItemButton component={Link} to='/frontend/manual/errorlimit'>
+										<Typography> {t("manual.Common_Errors_and_Ratelimits")} </Typography>{" "}
 									</ListItemButton>
-									<ListItemButton
-										component={Link}
-										to='/frontend/manual/behavior'>
-										<Typography>
-											{" "}
-											{t(
-												"manual.The_Behaviors_of_This_Website"
-											)}{" "}
-										</Typography>{" "}
+									<ListItemButton component={Link} to='/frontend/manual/behavior'>
+										<Typography> {t("manual.The_Behaviors_of_This_Website")} </Typography>{" "}
 									</ListItemButton>
 								</List>
 							</Box>
 							<Box m={3}>
-								{docRequest.isLoading && (
-									<Skeleton
-										variant='rounded'
-										animation='wave'
-										height={350}
-									/>
-								)}
+								{docRequest.isLoading && <Skeleton variant='rounded' animation='wave' height={350} />}
 								{docRequest.error && (
 									<Alert variant='outlined' severity='error'>
-										Cannot find the manual from server!
-										Contact us ...
+										Cannot find the manual from server! Contact us ...
 									</Alert>
 								)}
 								{!docRequest.isLoading && (
@@ -297,9 +245,7 @@ function Manual() {
 										<Divider />
 										<Box mr={2}>
 											{" "}
-											<TableOfContents
-												mdfile={displaydoc}
-											/>{" "}
+											<TableOfContents mdfile={displaydoc} />{" "}
 										</Box>
 									</Paper>
 								)}

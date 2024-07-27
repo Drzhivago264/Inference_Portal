@@ -2,13 +2,13 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import PropTypes from "prop-types";
-import { RandomReveal } from "react-random-reveal";
+import {RandomReveal} from "react-random-reveal";
 import React from "react";
 import Textarea from "../custom_ui_component/CustomTextArea";
-import { saveAs } from "file-saver";
+import {saveAs} from "file-saver";
 
 function exporttoken(tokenfile) {
-	var blob = new Blob([tokenfile], { type: "text/plain;charset=utf-8" });
+	var blob = new Blob([tokenfile], {type: "text/plain;charset=utf-8"});
 	saveAs(blob, "Token_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
 }
 const TokenCreateExport = ({
@@ -49,10 +49,7 @@ const TokenCreateExport = ({
 									...token_list,
 									{
 										prefix: token_.substring(0, 8),
-										value:
-											token_.substring(0, 3) +
-											"..." +
-											token_.substring(token_.length - 3),
+										value: token_.substring(0, 3) + "..." + token_.substring(token_.length - 3),
 										name: token_name,
 										created_at: created_at,
 										ttl: ttl,
@@ -77,9 +74,7 @@ const TokenCreateExport = ({
 							size='small'
 							variant='outlined'
 							onClick={() =>
-								exporttoken(
-									`Token: ${token_}\nToken Name: ${token_name}\nTTL: ${ttl}\nCreated at: ${created_at}\nPermission(s): ${permission}`
-								)
+								exporttoken(`Token: ${token_}\nToken Name: ${token_name}\nTTL: ${ttl}\nCreated at: ${created_at}\nPermission(s): ${permission}`)
 							}>
 							Export token
 						</Button>

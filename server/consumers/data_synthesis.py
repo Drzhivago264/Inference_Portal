@@ -11,11 +11,10 @@ from pydantic import ValidationError
 from transformers import AutoTokenizer
 
 from server.celery_tasks import celery_log_prompt_response
-from server.consumers.pydantic_validator import AgentSchemaTemplate, DataSynthesisSchema
+from server.consumers.pydantic_validator import (AgentSchemaTemplate,
+                                                 DataSynthesisSchema)
 from server.utils.async_.async_manage_ec2 import (
-    ManageEC2Mixin,
-    update_server_status_in_db_async,
-)
+    ManageEC2Mixin, update_server_status_in_db_async)
 from server.utils.async_.async_query_database import QueryDBMixin
 
 

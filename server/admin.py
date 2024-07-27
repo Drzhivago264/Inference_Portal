@@ -2,21 +2,9 @@ from django.contrib import admin
 from mptt.admin import DraggableMPTTAdmin
 from rest_framework_api_key.admin import APIKeyModelAdmin
 
-from .models import (
-    APIKEY,
-    LLM,
-    Crypto,
-    FineGrainAPIKEY,
-    InferenceServer,
-    InstructionTree,
-    MemoryTree,
-    PaymentHistory,
-    Price,
-    Product,
-    ProductTag,
-    PromptResponse,
-    UserInstructionTree,
-)
+from .models import (APIKEY, LLM, Crypto, FineGrainAPIKEY, InferenceServer,
+                     InstructionTree, MemoryTree, PaymentHistory, Price,
+                     Product, ProductTag, PromptResponse, UserInstructionTree)
 
 
 class PriceAdmin(admin.StackedInline):

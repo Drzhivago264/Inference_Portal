@@ -1,24 +1,19 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { UserContext, WebSocketContext } from "../App.js";
-import {
-	closeWebSocket,
-	handleListItemClick,
-	scrollToBottom,
-	swap_child_instruction,
-} from "../component/chat_components/chatUtils.js";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {UserContext, WebSocketContext} from "../App.js";
+import {closeWebSocket, handleListItemClick, scrollToBottom, swap_child_instruction} from "../component/chat_components/chatUtils.js";
 
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
-import { ChatBoxHotpot } from "../component/chat_components/Chatbox.js";
+import {ChatBoxHotpot} from "../component/chat_components/Chatbox.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Footer from "../component/nav/Footer.js";
 import Grid from "@mui/material/Grid";
-import { HotpotParameter } from "../component/chat_components/HotpotParameters.js";
+import {HotpotParameter} from "../component/chat_components/HotpotParameters.js";
 import InputAdornment from "@mui/material/InputAdornment";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -27,15 +22,15 @@ import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Typography from "@mui/material/Typography";
-import { agentsocket } from "../component/websocket/AgentSocket.js";
-import { chatsocket } from "../component/websocket/ChatSocket.js";
-import { styled } from "@mui/material/styles";
-import { useGetInstructionTree } from "../api_hook/useGetInstructionTree.js";
-import { useGetModel } from "../api_hook/useGetModel.js";
-import { useGetRedirectAnon } from "../api_hook/useGetRedirectAnon.js";
-import { useNavigate } from "react-router-dom";
+import {agentsocket} from "../component/websocket/AgentSocket.js";
+import {chatsocket} from "../component/websocket/ChatSocket.js";
+import {styled} from "@mui/material/styles";
+import {useGetInstructionTree} from "../api_hook/useGetInstructionTree.js";
+import {useGetModel} from "../api_hook/useGetModel.js";
+import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
+import {useNavigate} from "react-router-dom";
 
-const ChatPaper = styled(Paper)(({ theme }) => ({
+const ChatPaper = styled(Paper)(({theme}) => ({
 	minWidth: 300,
 	height: 700,
 	overflow: "auto",
@@ -44,8 +39,7 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function Hotpot() {
-	const { websocket, agent_websocket, chat_websocket, websocket_hash } =
-		useContext(WebSocketContext);
+	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
 	const messagesEndRef = useRef(null);
 	const [shownthinkingagent, setThinkingAgent] = useState(false);
 	const [shownthinkingchat, setThinkingChat] = useState(false);
@@ -76,9 +70,9 @@ function Hotpot() {
 	const [socket_destination, setSocketDestination] = useState("async");
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const navigate = useNavigate();
-	const { is_authenticated, timeZone } = useContext(UserContext);
+	const {is_authenticated, timeZone} = useContext(UserContext);
 	useGetRedirectAnon(navigate, is_authenticated);
-	const { agent_objects, model_objects } = useGetModel();
+	const {agent_objects, model_objects} = useGetModel();
 
 	const {
 		template_list: template_list,
@@ -105,37 +99,19 @@ function Hotpot() {
 			closeWebSocket(chat_websocket);
 
 			if (websocket_hash) {
-				const pathPrefix =
-					socket_destination === "async" ? "-async" : "";
+				const pathPrefix = socket_destination === "async" ? "-async" : "";
 
 				const [agentSocket, chatSocket] = await Promise.all([
-					new WebSocket(
-						`${ws_scheme}://${window.location.host}/ws/engineer${pathPrefix}/${websocket_hash}/${timeZone}/`
-					),
-					new WebSocket(
-						`${ws_scheme}://${window.location.host}/ws/chat${pathPrefix}/${websocket_hash}/${timeZone}/`
-					),
+					new WebSocket(`${ws_scheme}://${window.location.host}/ws/engineer${pathPrefix}/${websocket_hash}/${timeZone}/`),
+					new WebSocket(`${ws_scheme}://${window.location.host}/ws/chat${pathPrefix}/${websocket_hash}/${timeZone}/`),
 				]);
 
 				agent_websocket.current = agentSocket;
 				chat_websocket.current = chatSocket;
 
 				await Promise.all([
-					chatsocket(
-						chat_websocket,
-						setChatMessage,
-						setThinkingChat,
-						document
-					),
-					agentsocket(
-						agent_websocket,
-						setAgentMessage,
-						setThinkingAgent,
-						document,
-						setParentInstruct,
-						setChildInstruct,
-						setDefaultChildTemplateList
-					),
+					chatsocket(chat_websocket, setChatMessage, setThinkingChat, document),
+					agentsocket(agent_websocket, setAgentMessage, setThinkingAgent, document, setParentInstruct, setChildInstruct, setDefaultChildTemplateList),
 				]);
 			}
 		};
@@ -214,66 +190,38 @@ function Hotpot() {
 	};
 
 	return (
-		<Container maxWidth={false} sx={{ minWidth: 1500 }} disableGutters>
+		<Container maxWidth={false} sx={{minWidth: 1500}} disableGutters>
 			<title>Hotpot</title>
 			<ResponsiveAppBar max_width={false} />
-			<Container maxWidth={false} sx={{ minWidth: 1500 }}>
+			<Container maxWidth={false} sx={{minWidth: 1500}}>
 				<Box m={1}>
 					<Grid container spacing={2}>
 						<Grid item xs={2}>
 							<Paper variant='outlined'>
 								<Box m={1}>
-									<Typography
-										sx={{ color: "text.secondary" }}>
-										Template Structure
-									</Typography>
+									<Typography sx={{color: "text.secondary"}}>Template Structure</Typography>
 								</Box>
 								<Divider />
 								<List dense={true}>
-									{default_child_template_list.map(
-										(instruct, index) => {
-											return (
-												<ListItem
-													key={instruct.name}
-													disablePadding>
-													<ListItemButton
-														selected={
-															selectedIndex ===
-															index
-														}
-														onClick={(event) => {
-															swap_child_instruction(
-																instruct.name,
-																"system",
-																agent_websocket
-															),
-																handleListItemClick(
-																	event,
-																	index,
-																	setSelectedIndex
-																);
-														}}>
-														<ListItemText
-															primary={
-																instruct.name
-															}
-														/>
-													</ListItemButton>
-												</ListItem>
-											);
-										}
-									)}
+									{default_child_template_list.map((instruct, index) => {
+										return (
+											<ListItem key={instruct.name} disablePadding>
+												<ListItemButton
+													selected={selectedIndex === index}
+													onClick={(event) => {
+														swap_child_instruction(instruct.name, "system", agent_websocket),
+															handleListItemClick(event, index, setSelectedIndex);
+													}}>
+													<ListItemText primary={instruct.name} />
+												</ListItemButton>
+											</ListItem>
+										);
+									})}
 								</List>
 							</Paper>
 							<Accordion>
-								<AccordionSummary
-									expandIcon={<ExpandMoreIcon />}
-									aria-controls='child-content'
-									id='child-header'>
-									<Typography
-										sx={{ color: "text.secondary" }}>
-										Parent Instruction
-									</Typography>
+								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='child-content' id='child-header'>
+									<Typography sx={{color: "text.secondary"}}>Parent Instruction</Typography>
 								</AccordionSummary>
 								<AccordionDetails>
 									<Paper variant='outlined'>
@@ -283,33 +231,20 @@ function Hotpot() {
 											maxRows={8}
 											value={default_parent_instruct}
 											onChange={(e) => {
-												setParentInstruct(
-													e.target.value
-												),
-													setInstructChange(true);
+												setParentInstruct(e.target.value), setInstructChange(true);
 											}}
 											minRows={6}
 											variant='standard'
 											InputProps={{
-												startAdornment: (
-													<InputAdornment position='start'>
-														{" "}
-													</InputAdornment>
-												),
+												startAdornment: <InputAdornment position='start'> </InputAdornment>,
 											}}
 										/>
 									</Paper>
 								</AccordionDetails>
 							</Accordion>
 							<Accordion>
-								<AccordionSummary
-									expandIcon={<ExpandMoreIcon />}
-									aria-controls='child-content'
-									id='child-header'>
-									<Typography
-										sx={{ color: "text.secondary" }}>
-										Child Instruction
-									</Typography>
+								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='child-content' id='child-header'>
+									<Typography sx={{color: "text.secondary"}}>Child Instruction</Typography>
 								</AccordionSummary>
 								<AccordionDetails>
 									<Paper variant='outlined'>
@@ -319,19 +254,12 @@ function Hotpot() {
 											maxRows={8}
 											value={default_child_instruct}
 											onChange={(e) => {
-												setChildInstruct(
-													e.target.value
-												),
-													setInstructChange(true);
+												setChildInstruct(e.target.value), setInstructChange(true);
 											}}
 											minRows={6}
 											variant='standard'
 											InputProps={{
-												startAdornment: (
-													<InputAdornment position='start'>
-														{" "}
-													</InputAdornment>
-												),
+												startAdornment: <InputAdornment position='start'> </InputAdornment>,
 											}}
 										/>
 									</Paper>
@@ -352,9 +280,7 @@ function Hotpot() {
 								messagesEndRef={messagesEndRef}
 								shownthinking={shownthinkingchat}
 								handleEnter={handleEnter}
-								check_duplicate_message={
-									check_duplicate_message
-								}></ChatBoxHotpot>
+								check_duplicate_message={check_duplicate_message}></ChatBoxHotpot>
 						</Grid>
 						<Grid item xs={4}>
 							<ChatBoxHotpot
@@ -370,9 +296,7 @@ function Hotpot() {
 								messagesEndRef={messagesEndRef}
 								shownthinking={shownthinkingagent}
 								handleEnter={handleEnter}
-								check_duplicate_message={
-									check_duplicate_message
-								}></ChatBoxHotpot>
+								check_duplicate_message={check_duplicate_message}></ChatBoxHotpot>
 						</Grid>
 						<Grid item xs={2}>
 							<HotpotParameter
@@ -415,9 +339,7 @@ function Hotpot() {
 								setChoosenAgentModel={setChoosenAgentModel}
 								setChoosenChatModel={setChoosenChatModel}
 								setDuplicateMessage={setDuplicateMessage}
-								agent_websocket={
-									agent_websocket
-								}></HotpotParameter>
+								agent_websocket={agent_websocket}></HotpotParameter>
 						</Grid>
 					</Grid>
 				</Box>

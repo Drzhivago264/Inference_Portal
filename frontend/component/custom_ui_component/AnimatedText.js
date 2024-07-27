@@ -1,18 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 
 import PropTypes from "prop-types";
-import { TypeAnimation } from "react-type-animation";
+import {TypeAnimation} from "react-type-animation";
 
-export const TypeWriterText = ({
-	sequence,
-	wrapper,
-	cursor,
-	repeat,
-	speed,
-	deletionSpeed,
-	style,
-	className = "",
-}) => {
+export const TypeWriterText = ({sequence, wrapper, cursor, repeat, speed, deletionSpeed, style, className = ""}) => {
 	const animationFlag = useOnChangeSequence(sequence);
 
 	function useOnChangeSequence(sequence) {

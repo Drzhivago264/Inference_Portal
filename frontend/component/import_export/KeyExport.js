@@ -3,26 +3,16 @@ import AlertTitle from "@mui/material/AlertTitle";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import PropTypes from "prop-types";
-import { RandomReveal } from "react-random-reveal";
+import {RandomReveal} from "react-random-reveal";
 import React from "react";
 import Textarea from "../custom_ui_component/CustomTextArea";
-import { saveAs } from "file-saver";
+import {saveAs} from "file-saver";
 
 function exportKey(keyfile) {
-	var blob = new Blob([keyfile], { type: "text/plain;charset=utf-8" });
+	var blob = new Blob([keyfile], {type: "text/plain;charset=utf-8"});
 	saveAs(blob, "Master_Key_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
 }
-const KeyCreateExport = ({
-	key_,
-	key_name,
-	integrated_wallet,
-	payment_id,
-	setIsAuthenticated,
-	setKeyCreateLoading,
-	setRandomAnimation,
-	randomanimation,
-	t,
-}) => {
+const KeyCreateExport = ({key_, key_name, integrated_wallet, payment_id, setIsAuthenticated, setKeyCreateLoading, setRandomAnimation, randomanimation, t}) => {
 	return (
 		<Box my={4}>
 			{!randomanimation && (
@@ -35,24 +25,19 @@ const KeyCreateExport = ({
 					textAlign='center'
 					my={1}>
 					<Alert severity='info'>
-						{" "}
-						Key:{" "}
+						Key:
 						<RandomReveal
 							isPlaying
 							duration={4}
 							revealDuration={1.6}
 							characters={key_}
-							onComplete={() => (
-								setRandomAnimation(true),
-								setKeyCreateLoading(false),
-								setIsAuthenticated(true)
-							)}
+							onComplete={() => (setRandomAnimation(true), setKeyCreateLoading(false), setIsAuthenticated(true))}
 						/>
 					</Alert>
 				</Box>
 			)}
 			{randomanimation && (
-				<Alert severity='success' sx={{ whiteSpace: "pre-line" }}>
+				<Alert severity='success' sx={{whiteSpace: "pre-line"}}>
 					<AlertTitle>Success</AlertTitle>
 					{t("key_management.key_create_success")}
 				</Alert>
@@ -68,11 +53,7 @@ const KeyCreateExport = ({
 						<Button
 							size='small'
 							variant='outlined'
-							onClick={() =>
-								exportKey(
-									`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`
-								)
-							}>
+							onClick={() => exportKey(`Key: ${key_}\nKey Name: ${key_name}\nWallet: ${integrated_wallet} \nPayment id: ${payment_id}`)}>
 							Export Key
 						</Button>
 					</Box>

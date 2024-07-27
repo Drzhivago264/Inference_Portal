@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import React, { useContext, useState } from "react";
+import {Link, useNavigate} from "react-router-dom";
+import React, {useContext, useState} from "react";
 
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -17,15 +17,15 @@ import Stack from "@mui/material/Stack";
 import StyledPaper from "../component/custom_ui_component/StyledPaper.js";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { UserContext } from "../App.js";
+import {UserContext} from "../App.js";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { basePost } from "../api_hook/basePost.js";
-import { useMutation } from "react-query";
+import {basePost} from "../api_hook/basePost.js";
+import {useMutation} from "react-query";
 
 function Contact() {
 	const [showPassword, setShowPassword] = useState(false);
-	const { setIsAuthenticated } = useContext(UserContext);
+	const {setIsAuthenticated} = useContext(UserContext);
 	const navigate = useNavigate();
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
 	const handleMouseDownPassword = (event) => {
@@ -36,7 +36,7 @@ function Contact() {
 	const [keyError, setKeyError] = useState(false);
 	const [loginerror, setLoginError] = useState(false);
 
-	const { mutate: loginmutate } = useMutation(basePost);
+	const {mutate: loginmutate} = useMutation(basePost);
 	const handleLogin = (event) => {
 		event.preventDefault();
 		setLoading(true);
@@ -47,7 +47,7 @@ function Contact() {
 				key: key,
 			};
 			loginmutate(
-				{ url: "/frontend-api/login", data: data },
+				{url: "/frontend-api/login", data: data},
 				{
 					onSuccess: () => {
 						setIsAuthenticated(true);
@@ -71,32 +71,19 @@ function Contact() {
 					<StyledPaper variant='outlined'>
 						<Box textAlign='center' my={1}>
 							<Typography variant='h4'>
-								<Box sx={{ mb: 1, fontWeight: "bold" }}>
-									Login
-								</Box>
+								<Box sx={{mb: 1, fontWeight: "bold"}}>Login</Box>
 							</Typography>
-							<Box sx={{ p: 2 }}>
+							<Box sx={{p: 2}}>
 								<form autoComplete='off' onSubmit={handleLogin}>
-									<FormControl
-										defaultValue=''
-										margin='normal'
-										required>
-										<Stack
-											direction={{ xs: "column" }}
-											spacing={1}>
+									<FormControl defaultValue='' margin='normal' required>
+										<Stack direction={{xs: "column"}} spacing={1}>
 											<TextField
 												margin='normal'
 												fullWidth
 												label='Key'
-												type={
-													showPassword
-														? "text"
-														: "password"
-												}
+												type={showPassword ? "text" : "password"}
 												size='small'
-												onChange={(e) =>
-													setKey(e.target.value)
-												}
+												onChange={(e) => setKey(e.target.value)}
 												value={key}
 												error={keyError}
 												autoComplete='off'
@@ -110,28 +97,16 @@ function Contact() {
 														<InputAdornment position='end'>
 															<IconButton
 																aria-label='toggle password visibility'
-																onClick={
-																	handleClickShowPassword
-																}
-																onMouseDown={
-																	handleMouseDownPassword
-																}
+																onClick={handleClickShowPassword}
+																onMouseDown={handleMouseDownPassword}
 																edge='end'>
-																{showPassword ? (
-																	<VisibilityOff />
-																) : (
-																	<Visibility />
-																)}
+																{showPassword ? <VisibilityOff /> : <Visibility />}
 															</IconButton>
 														</InputAdornment>
 													),
 												}}
 											/>
-											<LoadingButton
-												loading={loading}
-												variant='contained'
-												type='submit'
-												endIcon={<LoginIcon />}>
+											<LoadingButton loading={loading} variant='contained' type='submit' endIcon={<LoginIcon />}>
 												Login
 											</LoadingButton>
 										</Stack>
@@ -139,20 +114,14 @@ function Contact() {
 								</form>
 							</Box>
 							<Divider />
-							<Box sx={{ pt: 3 }}>
-								<LoadingButton
-									size='medium'
-									variant='contained'
-									component={Link}
-									to='/frontend/key-management'>
+							<Box sx={{pt: 3}}>
+								<LoadingButton size='medium' variant='contained' component={Link} to='/frontend/key-management'>
 									{" "}
 									Create New Key{" "}
 								</LoadingButton>
 							</Box>
 						</Box>
-						{loginerror && (
-							<ErrorAlert detail={loginerror} type='error' />
-						)}
+						{loginerror && <ErrorAlert detail={loginerror} type='error' />}
 					</StyledPaper>
 				</Box>
 			</Container>

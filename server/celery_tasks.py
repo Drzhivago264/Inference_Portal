@@ -1,3 +1,5 @@
+import csv
+import io
 import json
 
 import boto3
@@ -13,14 +15,13 @@ from django.utils import timezone
 from django.utils.timezone import datetime, timedelta
 from openai import OpenAI
 
-from server.models import APIKEY, LLM, Crypto, Dataset, DatasetRecord, InferenceServer
+from server.models import (APIKEY, LLM, Crypto, Dataset, DatasetRecord,
+                           InferenceServer)
 from server.utils import constant
-from server.utils.sync_.inference import (
-    inference_mode,
-    send_agent_request_openai,
-    send_chat_request_openai,
-    send_request,
-)
+from server.utils.sync_.inference import (inference_mode,
+                                          send_agent_request_openai,
+                                          send_chat_request_openai,
+                                          send_request)
 from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
 from server.utils.sync_.query_database import get_model_url
@@ -28,6 +29,9 @@ from server.utils.sync_.query_database import get_model_url
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
+r2 = config("r2_access_key_id")
+r2_account_id = config("r2_account_id")
+r2_secret = config("r2_secret_access_key")
 region = constant.REGION
 
 
@@ -39,8 +43,39 @@ def send_email_(
 
 
 @shared_task
-def export_large_dataset(dataset_id: int, dataset_name: str) -> str:
-    pass
+def export_large_dataset(
+    dataset_id: int, url_safe_datasetname: str, unique: str, extension: str
+) -> str:
+    r2_client = boto3.client(
+        "s3",
+        endpoint_url=f"https://{r2_account_id}.r2.cloudflarestorage.com/professorparakeetmediafiles",
+        aws_access_key_id=r2,
+        aws_secret_access_key=r2,
+        region_name="auto",
+    )
+    dataset = Dataset.objects.get(id=dataset_id)
+    result_records = DatasetRecord.objects.filter(dataset=dataset)
+    buffer = io.StringIO()
+    for r in result_records.iterator(chunk_size=1000):
+        if extension == "csv":
+            writer = csv.writer(buffer)
+            writer.writerow(
+                [r.system_prompt, r.prompt, r.response] + [ev for ev in r.evaluation]
+            )
+        elif extension == "json":
+            data = {
+                "system_prompt": r.system_prompt,
+                "prompt": r.prompt,
+                "response": r.response,
+                "evaluation": r.evaluation,
+            }
+            buffer.write(data)
+        r2_client.put_object(
+            Bucket="professorparakeetmediafiles",
+            Key=f"{url_safe_datasetname}_{unique}{extension}",
+            Body=buffer.getvalue(),
+        )
+        buffer.truncate(0)
 
 
 @shared_task

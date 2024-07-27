@@ -9,10 +9,8 @@ from pydantic import ValidationError
 
 from server.consumers.pydantic_validator import ChatSchema
 from server.utils import constant
-from server.utils.async_.async_inference import (
-    AsyncInferenceOpenaiMixin,
-    AsyncInferenceVllmMixin,
-)
+from server.utils.async_.async_inference import (AsyncInferenceOpenaiMixin,
+                                                 AsyncInferenceVllmMixin)
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.inference import inference_mode
 

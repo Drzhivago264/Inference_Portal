@@ -1,12 +1,12 @@
-import React, { createContext, useMemo, useRef, useState } from "react";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { Suspense, lazy } from "react";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import React, {createContext, useMemo, useRef, useState} from "react";
+import {Route, BrowserRouter as Router, Routes} from "react-router-dom";
+import {Suspense, lazy} from "react";
+import {ThemeProvider, createTheme} from "@mui/material/styles";
 
 import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import LinearProgress from "@mui/material/LinearProgress";
-import { useGetLogin } from "./api_hook/useGetLogin.js";
+import {useGetLogin} from "./api_hook/useGetLogin.js";
 
 const ModelInfor = lazy(() => import("./information/model.js"));
 const Hub = lazy(() => import("./rooms/redirect.js"));
@@ -15,52 +15,38 @@ const Agent = lazy(() => import("./rooms/agent.js"));
 const Chat = lazy(() => import("./rooms/chat.js"));
 const Contact = lazy(() => import("./contact/contact.js"));
 const KeyManagement = lazy(() => import("./key_management/key_management.js"));
-const TokenManagement = lazy(() =>
-	import("./key_management/token_management.js")
-);
+const TokenManagement = lazy(() => import("./key_management/token_management.js"));
 const Hotpot = lazy(() => import("./rooms/hotpot.js"));
 const FunctionLLM = lazy(() => import("./rooms/function_llm.js"));
 const Manual = lazy(() => import("./information/manual.js"));
 const APIDoc = lazy(() => import("./information/api_doc.js"));
 const Log = lazy(() => import("./rooms/log.js"));
-const PaymentSuccess = lazy(() =>
-	import("./key_management/payment_success.js")
-);
+const PaymentSuccess = lazy(() => import("./key_management/payment_success.js"));
 const Login = lazy(() => import("./key_management/login.js"));
 const UserInstruction = lazy(() => import("./rooms/user_instruction.js"));
-const CostMonitoring = lazy(() =>
-	import("./key_management/cost_monitoring.js")
-);
+const CostMonitoring = lazy(() => import("./key_management/cost_monitoring.js"));
 const DataSynthesis = lazy(() => import("./rooms/data_synthesis.js"));
 const PromptWriting = lazy(() => import("./rooms/prompt_writing.js"));
 
-export const ColorModeContext = createContext({ toggleColorMode: () => {} });
+export const ColorModeContext = createContext({toggleColorMode: () => {}});
 export const UserContext = createContext();
 export const WebSocketContext = createContext();
 
 export default function App() {
 	const [mode, setMode] = useState("dark");
 	const [is_authenticated, setIsAuthenticated] = useState(false);
-
 	const [user_key_name, setUserKeyName] = useState(null);
 	const websocket = useRef(null);
 	const chat_websocket = useRef(null);
 	const agent_websocket = useRef(null);
 	const [websocket_hash, setWebsocketHash] = useState(null);
-	const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+	const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
 
-	useGetLogin(
-		setIsAuthenticated,
-		is_authenticated,
-		setUserKeyName,
-		setWebsocketHash
-	);
+	useGetLogin(setIsAuthenticated, is_authenticated, setUserKeyName, setWebsocketHash);
 	const colorMode = useMemo(
 		() => ({
 			toggleColorMode: () => {
-				setMode((prevMode) =>
-					prevMode === "light" ? "dark" : "light"
-				);
+				setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
 			},
 		}),
 		[]
@@ -91,7 +77,7 @@ export default function App() {
 					user_key_name,
 					timeZone,
 				}}>
-				<ColorModeContext.Provider value={{ colorMode, mode, theme }}>
+				<ColorModeContext.Provider value={{colorMode, mode, theme}}>
 					<GlobalStyles
 						styles={{
 							"::-webkit-scrollbar": {
@@ -130,87 +116,26 @@ export default function App() {
 						<CssBaseline />
 						<Router>
 							<Routes>
-								<Route
-									exact
-									path='/'
-									element={<InformationPage />}
-								/>
-								<Route
-									path='/frontend/manual'
-									element={<ManualPage />}
-								/>
-								<Route
-									path='/frontend/cost-monitoring'
-									element={<CostMonitoringPage />}
-								/>
-								<Route
-									path='/frontend/user-instruction'
-									element={<UserInstructionPage />}
-								/>
-								<Route
-									path='/frontend/data-synthesis'
-									element={<DataSynthesisPage />}
-								/>
-								<Route
-									path='/frontend/manual/:doc'
-									element={<ManualPage />}
-								/>
-								<Route
-									path='/frontend/api/docs'
-									element={<APIDocPage />}
-								/>
-								<Route
-									path='/frontend/model'
-									element={<ModelInforPage />}
-								/>
-								<Route
-									path='/frontend/key-management'
-									element={<KeyManagementPage />}
-								/>
-								<Route
-									path='/frontend/token-management'
-									element={<TokenManagementPage />}
-								/>
-								<Route
-									path='/frontend/hub'
-									element={<HubPage />}
-								/>
-								<Route
-									path='/frontend/payment-success'
-									element={<PaymentSuccessPage />}
-								/>
-								<Route
-									path='/frontend/chat'
-									element={<ChatPage />}
-								/>
-								<Route
-									path='/frontend/engineer'
-									element={<AgentPage />}
-								/>
-								<Route
-									path='/frontend/prompt-writing'
-									element={<PromptWritingPage />}
-								/>
-								<Route
-									path='/frontend/toolbox'
-									element={<FunctionLLMPage />}
-								/>
-								<Route
-									path='/frontend/hotpot'
-									element={<HotpotPage />}
-								/>
-								<Route
-									path='/frontend/log'
-									element={<LogPage />}
-								/>
-								<Route
-									path='/frontend/contact'
-									element={<ContactPage />}
-								/>
-								<Route
-									path='/frontend/login'
-									element={<LoginPage />}
-								/>
+								<Route exact path='/' element={<InformationPage />} />
+								<Route path='/frontend/manual' element={<ManualPage />} />
+								<Route path='/frontend/cost-monitoring' element={<CostMonitoringPage />} />
+								<Route path='/frontend/user-instruction' element={<UserInstructionPage />} />
+								<Route path='/frontend/data-synthesis' element={<DataSynthesisPage />} />
+								<Route path='/frontend/manual/:doc' element={<ManualPage />} />
+								<Route path='/frontend/api/docs' element={<APIDocPage />} />
+								<Route path='/frontend/model' element={<ModelInforPage />} />
+								<Route path='/frontend/key-management' element={<KeyManagementPage />} />
+								<Route path='/frontend/token-management' element={<TokenManagementPage />} />
+								<Route path='/frontend/hub' element={<HubPage />} />
+								<Route path='/frontend/payment-success' element={<PaymentSuccessPage />} />
+								<Route path='/frontend/chat' element={<ChatPage />} />
+								<Route path='/frontend/engineer' element={<AgentPage />} />
+								<Route path='/frontend/prompt-writing' element={<PromptWritingPage />} />
+								<Route path='/frontend/toolbox' element={<FunctionLLMPage />} />
+								<Route path='/frontend/hotpot' element={<HotpotPage />} />
+								<Route path='/frontend/log' element={<LogPage />} />
+								<Route path='/frontend/contact' element={<ContactPage />} />
+								<Route path='/frontend/login' element={<LoginPage />} />
 							</Routes>
 						</Router>
 					</ThemeProvider>

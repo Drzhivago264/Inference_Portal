@@ -1,26 +1,20 @@
 from django.contrib.auth import authenticate, login
 from django.http import HttpRequest
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.decorators import (api_view, permission_classes,
+                                       throttle_classes)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.models import (
-    APIKEY,
-    FineGrainAPIKEY,
-    InstructionTree,
-    MemoryTree,
-    UserInstructionTree,
-)
-from server.utils.sync_.manage_permissions import get_master_key_and_master_user
-from server.views.serializer import (
-    InstructionTreeSerializer,
-    MemoryTreeSerializer,
-    RedirectSerializer,
-    UserInstructionTreeSerializer,
-)
+from server.models import (APIKEY, FineGrainAPIKEY, InstructionTree,
+                           MemoryTree, UserInstructionTree)
+from server.utils.sync_.manage_permissions import \
+    get_master_key_and_master_user
+from server.views.serializer import (InstructionTreeSerializer,
+                                     MemoryTreeSerializer, RedirectSerializer,
+                                     UserInstructionTreeSerializer)
 
 
 @api_view(["POST"])

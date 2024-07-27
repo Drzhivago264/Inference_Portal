@@ -23,7 +23,11 @@ export const useDeletePermission = ({ setTokenList, setLocalTokenCreateError, to
                         });
                     },
                     onError: (error) => {
-                        setLocalTokenCreateError(error.response.data.detail)
+                        if (error.code === "ERR_BAD_RESPONSE") {
+                            setLocalTokenCreateError("Failed, Internal Server Error!");
+                        } else {
+                            setLocalTokenCreateError(error.response.data.detail)
+                        }                 
                     }
                 }
             )

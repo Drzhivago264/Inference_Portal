@@ -9,12 +9,10 @@ from django.utils import timezone
 from pydantic import ValidationError
 
 from server.celery_tasks import agent_inference
-from server.consumers.pydantic_validator import (
-    AgentSchemaInstruct,
-    AgentSchemaMessage,
-    AgentSchemaParagraph,
-    AgentSchemaTemplate,
-)
+from server.consumers.pydantic_validator import (AgentSchemaInstruct,
+                                                 AgentSchemaMessage,
+                                                 AgentSchemaParagraph,
+                                                 AgentSchemaTemplate)
 from server.utils.async_.async_query_database import QueryDBMixin
 
 

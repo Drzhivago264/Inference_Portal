@@ -4,7 +4,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import { DataGrid } from "@mui/x-data-grid";
+import {DataGrid} from "@mui/x-data-grid";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Footer from "../component/nav/Footer";
 import Grid from "@mui/material/Grid";
@@ -12,17 +12,17 @@ import React from "react";
 import ResponsiveAppBar from "../component/nav/Navbar";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
-import { useGetModel } from "../api_hook/useGetModel";
+import {useGetModel} from "../api_hook/useGetModel";
 
 function ModelInfor() {
-	const { model_objects, server_objects, error, isLoading } = useGetModel();
+	const {model_objects, server_objects, error, isLoading} = useGetModel();
 	const columns = [
-		{ field: "server", headerName: "Server", width: 80 },
-		{ field: "model", headerName: "Model", width: 150 },
-		{ field: "status", headerName: "Status", width: 80 },
-		{ field: "availability", headerName: "Availability", width: 140 },
-		{ field: "input_price_usd", headerName: "Input (USD)", width: 100 },
-		{ field: "output_price_usd", headerName: "Output (USD)", width: 100 },
+		{field: "server", headerName: "Server", width: 80},
+		{field: "model", headerName: "Model", width: 150},
+		{field: "status", headerName: "Status", width: 80},
+		{field: "availability", headerName: "Availability", width: 140},
+		{field: "input_price_usd", headerName: "Input (USD)", width: 100},
+		{field: "output_price_usd", headerName: "Output (USD)", width: 100},
 	];
 	let i = 0;
 	let rows = [];
@@ -46,12 +46,7 @@ function ModelInfor() {
 				<Box my={4} display='flex' alignItems='center' gap={4} p={2}>
 					<Grid container spacing={2}>
 						<Grid item md={6}>
-							{error && (
-								<div>
-									An error occurred: {error.message}. Contact
-									us and try again later
-								</div>
-							)}
+							{error && <div>An error occurred: {error.message}. Contact us and try again later</div>}
 							{isLoading && (
 								<Stack direction='column' spacing={1}>
 									<Skeleton animation='wave' height={60} />
@@ -63,12 +58,8 @@ function ModelInfor() {
 							{model_objects.map((model_object) => {
 								if (model_object.name == "Reddit Helper 2.7B") {
 									return (
-										<Accordion
-											key={model_object.id}
-											defaultExpanded>
-											<AccordionSummary
-												expandIcon={<ExpandMoreIcon />}
-												id={model_object.id}>
+										<Accordion key={model_object.id} defaultExpanded>
+											<AccordionSummary expandIcon={<ExpandMoreIcon />} id={model_object.id}>
 												{model_object.name}
 											</AccordionSummary>
 											<AccordionDetails
@@ -82,9 +73,7 @@ function ModelInfor() {
 								} else {
 									return (
 										<Accordion key={model_object.id}>
-											<AccordionSummary
-												expandIcon={<ExpandMoreIcon />}
-												id={model_object.id}>
+											<AccordionSummary expandIcon={<ExpandMoreIcon />} id={model_object.id}>
 												{model_object.name}
 											</AccordionSummary>
 											<AccordionDetails
@@ -100,7 +89,7 @@ function ModelInfor() {
 						</Grid>
 						<Grid item md={6}>
 							<Stack spacing={1}>
-								<div style={{ height: 400, width: "100%" }}>
+								<div style={{height: 400, width: "100%"}}>
 									<DataGrid
 										rows={rows}
 										columns={columns}

@@ -1,30 +1,27 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { UserContext, WebSocketContext } from "../App.js";
-import {
-	closeWebSocket,
-	scrollToBottom,
-} from "../component/chat_components/chatUtils.js";
+import React, {useContext, useEffect, useMemo, useRef, useState} from "react";
+import {UserContext, WebSocketContext} from "../App.js";
+import {closeWebSocket, scrollToBottom} from "../component/chat_components/chatUtils.js";
 
 import Box from "@mui/material/Box";
-import { CeleryAlert } from "../component/Alert/CeleryAlert.js";
-import { ChatBox } from "../component/chat_components/Chatbox.js";
-import { ChatExport } from "../component/import_export/ChatExport.js";
+import {CeleryAlert} from "../component/Alert/CeleryAlert.js";
+import {ChatBox} from "../component/chat_components/Chatbox.js";
+import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
-import { ChatParameter } from "../component/chat_components/ChatroomParameters.js";
+import {ChatParameter} from "../component/chat_components/ChatroomParameters.js";
 import Container from "@mui/material/Container";
 import Footer from "../component/nav/Footer.js";
 import Grid from "@mui/material/Grid";
-import { MemoryTree } from "../component/chat_components/MemoryTree.js";
+import {MemoryTree} from "../component/chat_components/MemoryTree.js";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Stack from "@mui/material/Stack";
-import { chatsocket } from "../component/websocket/ChatSocket.js";
-import { styled } from "@mui/material/styles";
-import { useGetModel } from "../api_hook/useGetModel.js";
-import { useGetRedirectAnon } from "../api_hook/useGetRedirectAnon.js";
-import { useNavigate } from "react-router-dom";
+import {chatsocket} from "../component/websocket/ChatSocket.js";
+import {styled} from "@mui/material/styles";
+import {useGetModel} from "../api_hook/useGetModel.js";
+import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
+import {useNavigate} from "react-router-dom";
 
-const ChatPaper = styled(Paper)(({ theme }) => ({
+const ChatPaper = styled(Paper)(({theme}) => ({
 	minWidth: 550,
 	height: 700,
 	overflow: "auto",
@@ -33,8 +30,7 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function Chat() {
-	const { websocket, agent_websocket, chat_websocket, websocket_hash } =
-		useContext(WebSocketContext);
+	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
 	const messagesEndRef = useRef(null);
 	const [shownthinking, setThinking] = useState(false);
 	const [chat_message, setChatMessage] = useState([]);
@@ -54,12 +50,11 @@ function Chat() {
 	const [lengthpenalty, setLengthPenalty] = useState(0);
 	const [usermessage, setUserMessage] = useState("");
 	const [usermessageError, setUserMessageError] = useState(false);
-	const [socket_destination, setSocketDestination] =
-		useState("/ws/chat-async/");
+	const [socket_destination, setSocketDestination] = useState("/ws/chat-async/");
 
 	const navigate = useNavigate();
-	const { is_authenticated, timeZone } = useContext(UserContext);
-	const { model_objects, agent_objects } = useGetModel();
+	const {is_authenticated, timeZone} = useContext(UserContext);
+	const {model_objects, agent_objects} = useGetModel();
 
 	useGetRedirectAnon(navigate, is_authenticated);
 
@@ -73,9 +68,7 @@ function Chat() {
 		closeWebSocket(chat_websocket);
 
 		if (websocket_hash) {
-			websocket.current = new WebSocket(
-				`${ws_scheme}://${window.location.host}${socket_destination}${websocket_hash}/${timeZone}/`
-			);
+			websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}${socket_destination}${websocket_hash}/${timeZone}/`);
 			chatsocket(websocket, setChatMessage, setThinking, document);
 		}
 	}, [socket_destination, websocket_hash]);
@@ -114,21 +107,16 @@ function Chat() {
 	};
 	const MemoMemoryTree = useMemo(() => <MemoryTree></MemoryTree>, []);
 	return (
-		<Container maxWidth={false} sx={{ minWidth: 1350 }} disableGutters>
+		<Container maxWidth={false} sx={{minWidth: 1350}} disableGutters>
 			<title>Chat</title>
 			<ResponsiveAppBar max_width={"xl"} />
-			<Container maxWidth='xl' sx={{ minWidth: 1350 }}>
+			<Container maxWidth='xl' sx={{minWidth: 1350}}>
 				<Box m={2}>
 					<Grid container spacing={2}>
 						<Grid item xs={4}>
 							{MemoMemoryTree}
 							<Stack direction='row' mt={1} spacing={1}>
-								<ChatExport
-									chat_message={chat_message}
-									number_of_remove_message={1}
-									setChatMessage={
-										setChatMessage
-									}></ChatExport>
+								<ChatExport chat_message={chat_message} number_of_remove_message={1} setChatMessage={setChatMessage}></ChatExport>
 								<Box mt={2}>
 									<CeleryAlert />
 								</Box>
@@ -180,9 +168,7 @@ function Chat() {
 								usememory={usememory}
 								usememorycurrent={usememorycurrent}
 								earlystopping={earlystopping}
-								setEarlyStopping={
-									setEarlyStopping
-								}></ChatParameter>
+								setEarlyStopping={setEarlyStopping}></ChatParameter>
 						</Grid>
 					</Grid>
 				</Box>

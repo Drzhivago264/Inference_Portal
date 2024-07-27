@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 
 import AddPermissionDialog from "../component/dialog/MorePermissionDialog.js";
 import Alert from "@mui/material/Alert";
@@ -10,7 +10,7 @@ import Container from "@mui/material/Container";
 import CreateIcon from "@mui/icons-material/Create";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Footer from "../component/nav/Footer.js";
-import { FormControl } from "@mui/material";
+import {FormControl} from "@mui/material";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import Grid from "@mui/material/Grid";
@@ -34,21 +34,21 @@ import TextField from "@mui/material/TextField";
 import TimerIcon from "@mui/icons-material/Timer";
 import TokenCreateExport from "../component/import_export/TokenExport.js";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/system";
-import { useDeletePermission } from "../api_hook/useDeletePermission.js";
-import { useDeleteToken } from "../api_hook/useDeleteToken.js";
-import { useGetToken } from "../api_hook/useGetToken.js";
-import { usePostTokenCreate } from "../api_hook/usePostTokenCreate.js";
-import { useTranslation } from "react-i18next";
+import {styled} from "@mui/system";
+import {useDeletePermission} from "../api_hook/useDeletePermission.js";
+import {useDeleteToken} from "../api_hook/useDeleteToken.js";
+import {useGetToken} from "../api_hook/useGetToken.js";
+import {usePostTokenCreate} from "../api_hook/usePostTokenCreate.js";
+import {useTranslation} from "react-i18next";
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
+const StyledPaper = styled(Paper)(({theme}) => ({
 	padding: theme.spacing(2),
 	height: "100%",
 	...theme.typography.body2,
 }));
 
 function TokenManagement() {
-	const { t } = useTranslation();
+	const {t} = useTranslation();
 	const [tokencreateloading, setTokenCreateLoading] = useState(false);
 	const [token_list, setTokenList] = useState([]);
 	const [use_ttl, setUseTTL] = useState(true);
@@ -124,12 +124,12 @@ function TokenManagement() {
 		time_unit,
 		use_ttl,
 	});
-	const { fetch: deletePermission } = useDeletePermission({
+	const {fetch: deletePermission} = useDeletePermission({
 		setTokenList,
 		setLocalTokenCreateError,
 		token_list,
 	});
-	const { fetch: deleteToken } = useDeleteToken({
+	const {fetch: deleteToken} = useDeleteToken({
 		setTokenList,
 		setLocalTokenCreateError,
 	});
@@ -141,7 +141,7 @@ function TokenManagement() {
 			<Container maxWidth='xxl'>
 				<Grid p={2} container spacing={1}>
 					<Grid item md={12} lg={7}>
-						<Box my={1} alignItems='center' sx={{ height: "100%" }}>
+						<Box my={1} alignItems='center' sx={{height: "100%"}}>
 							<StyledPaper variant='outlined'>
 								<Typography mb={2} variant='h6'>
 									<Box
@@ -153,9 +153,7 @@ function TokenManagement() {
 									</Box>
 								</Typography>
 								{token_list.length === 0 && (
-									<Alert
-										severity='info'
-										sx={{ whiteSpace: "pre-line" }}>
+									<Alert severity='info' sx={{whiteSpace: "pre-line"}}>
 										<AlertTitle>Infor</AlertTitle>
 										{t("token_management.table_info")}
 									</Alert>
@@ -172,17 +170,9 @@ function TokenManagement() {
 											<TableRow>
 												<TableCell>Name</TableCell>
 												<TableCell>Value</TableCell>
-												<TableCell
-													sx={{ width: "20%" }}>
-													Created at
-												</TableCell>
-												<TableCell>
-													TTL (seconds)
-												</TableCell>
-												<TableCell
-													sx={{ width: "35%" }}>
-													Permissions
-												</TableCell>
+												<TableCell sx={{width: "20%"}}>Created at</TableCell>
+												<TableCell>TTL (seconds)</TableCell>
+												<TableCell sx={{width: "35%"}}>Permissions</TableCell>
 												<TableCell
 													sx={{
 														width: "8%",
@@ -194,90 +184,37 @@ function TokenManagement() {
 												<TableRow
 													key={row.created_at.toString()}
 													sx={{
-														"&:last-child td, &:last-child th":
-															{ border: 0 },
+														"&:last-child td, &:last-child th": {border: 0},
 													}}>
+													<TableCell>{row.name}</TableCell>
+													<TableCell>{row.value}</TableCell>
+													<TableCell>{row.created_at.toString()}</TableCell>
+													<TableCell>{row.ttl ? row.ttl : Infinity}</TableCell>
 													<TableCell>
-														{row.name}
-													</TableCell>
-													<TableCell>
-														{row.value}
-													</TableCell>
-													<TableCell>
-														{row.created_at.toString()}
-													</TableCell>
-													<TableCell>
-														{row.ttl
-															? row.ttl
-															: Infinity}
-													</TableCell>
-													<TableCell>
-														<Grid
-															container
-															spacing={1}>
-															{row.permissions.map(
-																(
-																	perm,
-																	perm_index
-																) => (
-																	<Grid
-																		key={
-																			perm
-																		}
-																		item>
-																		<Chip
-																			label={
-																				perm
-																			}
-																			onDelete={() => {
-																				deletePermission(
-																					row.prefix,
-																					row.name,
-																					row.value,
-																					perm,
-																					index,
-																					perm_index
-																				);
-																			}}
-																		/>
-																	</Grid>
-																)
-															)}
-															{row.permissions
-																.length <
-																Object.keys(
-																	permission
-																).length && (
+														<Grid container spacing={1}>
+															{row.permissions.map((perm, perm_index) => (
+																<Grid key={perm} item>
+																	<Chip
+																		label={perm}
+																		onDelete={() => {
+																			deletePermission(row.prefix, row.name, row.value, perm, index, perm_index);
+																		}}
+																	/>
+																</Grid>
+															))}
+															{row.permissions.length < Object.keys(permission).length && (
 																<Grid item>
 																	{" "}
 																	<AddPermissionDialog
-																		current_permission_list={
-																			row.permissions
-																		}
-																		full_permission_dict={
-																			permission
-																		}
-																		token_name={
-																			row.name
-																		}
-																		token_value={
-																			row.value
-																		}
-																		token_prefix={
-																			row.prefix
-																		}
-																		setTokenCreateError={
-																			setLocalTokenCreateError
-																		}
-																		setTokenList={
-																			setTokenList
-																		}
-																		token_list={
-																			token_list
-																		}
-																		index={
-																			index
-																		}
+																		current_permission_list={row.permissions}
+																		full_permission_dict={permission}
+																		token_name={row.name}
+																		token_value={row.value}
+																		token_prefix={row.prefix}
+																		setTokenCreateError={setLocalTokenCreateError}
+																		setTokenList={setTokenList}
+																		token_list={token_list}
+																		index={index}
 																	/>
 																</Grid>
 															)}
@@ -287,14 +224,7 @@ function TokenManagement() {
 														<IconButton
 															aria-label='delete'
 															size='large'
-															onClick={() =>
-																deleteToken(
-																	row.prefix,
-																	row.name,
-																	row.value,
-																	index
-																)
-															}>
+															onClick={() => deleteToken(row.prefix, row.name, row.value, index)}>
 															<DeleteIcon />
 														</IconButton>
 													</TableCell>
@@ -307,7 +237,7 @@ function TokenManagement() {
 						</Box>
 					</Grid>
 					<Grid item md={12} lg={5}>
-						<Box my={1} alignItems='center' sx={{ height: "100%" }}>
+						<Box my={1} alignItems='center' sx={{height: "100%"}}>
 							<StyledPaper variant='outlined'>
 								<Typography variant='h6'>
 									<Box
@@ -319,11 +249,7 @@ function TokenManagement() {
 										Create New Access Token{" "}
 									</Box>
 								</Typography>
-								<Box
-									my={2}
-									justifyContent='center'
-									alignItems='center'
-									display='flex'>
+								<Box my={2} justifyContent='center' alignItems='center' display='flex'>
 									<Grid container direction='row' spacing={1}>
 										<Grid
 											item
@@ -332,13 +258,9 @@ function TokenManagement() {
 												justifyContent: "center",
 											}}
 											xs={5}>
-											<Alert
-												severity='info'
-												sx={{ whiteSpace: "pre-line" }}>
+											<Alert severity='info' sx={{whiteSpace: "pre-line"}}>
 												<AlertTitle>Info</AlertTitle>
-												{t(
-													"token_management.form_info"
-												)}
+												{t("token_management.form_info")}
 											</Alert>
 										</Grid>
 										<Grid
@@ -353,54 +275,27 @@ function TokenManagement() {
 												onSubmit={(e) => {
 													postCreateToken(e);
 												}}>
-												<FormControl
-													defaultValue=''
-													required>
-													<Stack
-														direction='column'
-														spacing={1}>
+												<FormControl defaultValue='' required>
+													<Stack direction='column' spacing={1}>
 														<TextField
 															margin='normal'
 															label='Token Name'
 															type='text'
 															size='small'
-															onChange={(e) =>
-																setTokenName(
-																	e.target
-																		.value
-																)
-															}
+															onChange={(e) => setTokenName(e.target.value)}
 															value={tokenname}
-															error={
-																tokennameError
-															}
+															error={tokennameError}
 															autoComplete='off'
 															InputProps={{
-																startAdornment:
-																	(
-																		<InputAdornment position='start'>
-																			<CreateIcon />
-																		</InputAdornment>
-																	),
+																startAdornment: (
+																	<InputAdornment position='start'>
+																		<CreateIcon />
+																	</InputAdornment>
+																),
 															}}
 														/>
 														<FormControlLabel
-															control={
-																<Switch
-																	checked={
-																		use_ttl
-																	}
-																	onChange={(
-																		e
-																	) =>
-																		setUseTTL(
-																			e
-																				.target
-																				.checked
-																		)
-																	}
-																/>
-															}
+															control={<Switch checked={use_ttl} onChange={(e) => setUseTTL(e.target.checked)} />}
 															label='Use TTL'
 														/>
 														<Stack
@@ -412,95 +307,45 @@ function TokenManagement() {
 															<TextField
 																id='ttl'
 																label='Time To Live'
-																disabled={
-																	!use_ttl
-																}
+																disabled={!use_ttl}
 																type='number'
 																size='small'
-																value={
-																	use_ttl
-																		? ttl
-																		: ""
-																}
-																onChange={(e) =>
-																	setTTL(
-																		e.target
-																			.value
-																	)
-																}
+																value={use_ttl ? ttl : ""}
+																onChange={(e) => setTTL(e.target.value)}
 																InputLabelProps={{
 																	shrink: true,
 																}}
 																InputProps={{
-																	startAdornment:
-																		(
-																			<InputAdornment position='start'>
-																				<TimerIcon />
-																			</InputAdornment>
-																		),
+																	startAdornment: (
+																		<InputAdornment position='start'>
+																			<TimerIcon />
+																		</InputAdornment>
+																	),
 																}}
 															/>
 															<TextField
 																id='time-unit'
 																select
-																disabled={
-																	!use_ttl
-																}
+																disabled={!use_ttl}
 																label='Unit'
-																value={
-																	time_unit
-																}
-																onChange={(e) =>
-																	setTimeUnit(
-																		e.target
-																			.value
-																	)
-																}
+																value={time_unit}
+																onChange={(e) => setTimeUnit(e.target.value)}
 																size='small'>
-																{[
-																	"day",
-																	"hour",
-																	"minute",
-																	"second",
-																].map(
-																	(
-																		option
-																	) => (
-																		<MenuItem
-																			key={
-																				option
-																			}
-																			token={
-																				option
-																			}
-																			value={
-																				option
-																			}>
-																			{
-																				option
-																			}
-																		</MenuItem>
-																	)
-																)}
+																{["day", "hour", "minute", "second"].map((option) => (
+																	<MenuItem key={option} token={option} value={option}>
+																		{option}
+																	</MenuItem>
+																))}
 															</TextField>
 														</Stack>
 														<LoadingButton
 															size='small'
-															disabled={
-																token_list.length >=
-																10
-																	? true
-																	: false
-															}
-															loading={
-																tokencreateloading
-															}
+															disabled={token_list.length >= 10 ? true : false}
+															loading={tokencreateloading}
 															loadingPosition='end'
 															variant='contained'
 															type='submit'
-															endIcon={
-																<LockOpenIcon />
-															}>
+															endIcon={<LockOpenIcon />}>
 															Generate
 														</LoadingButton>
 													</Stack>
@@ -512,43 +357,20 @@ function TokenManagement() {
 								{showkeycreateresponse && (
 									<TokenCreateExport
 										token_={servertokencreatedata.token}
-										token_name={
-											servertokencreatedata.token_name
-										}
+										token_name={servertokencreatedata.token_name}
 										ttl={servertokencreatedata.ttl}
-										created_at={
-											servertokencreatedata.created_at
-										}
-										permission={
-											servertokencreatedata.permission
-										}
+										created_at={servertokencreatedata.created_at}
+										permission={servertokencreatedata.permission}
 										setRandomAnimation={setRandomAnimation}
-										setTokenCreateLoading={
-											setTokenCreateLoading
-										}
+										setTokenCreateLoading={setTokenCreateLoading}
 										randomanimation={randomanimation}
 										setTokenList={setTokenList}
 										token_list={token_list}
 									/>
 								)}
-								{localtokencreateerror && (
-									<SuccessErrorAlert
-										detail={localtokencreateerror}
-										type='error'
-									/>
-								)}
-								{servertokencreateerror && (
-									<SuccessErrorAlert
-										detail={
-											servertokencreateerror.response.data
-												.detail
-										}
-										type='error'
-									/>
-								)}
-								<Alert
-									severity='warning'
-									sx={{ whiteSpace: "pre-line" }}>
+								{localtokencreateerror && <SuccessErrorAlert detail={localtokencreateerror} type='error' />}
+								{servertokencreateerror && <SuccessErrorAlert detail={servertokencreateerror.response.data.detail} type='error' />}
+								<Alert severity='warning' sx={{whiteSpace: "pre-line"}}>
 									<AlertTitle>Warning</AlertTitle>
 									{t("token_management.form_warning")}
 								</Alert>
@@ -566,104 +388,70 @@ function TokenManagement() {
 									<Box mb={1}>
 										<FormControlLabel
 											sx={{
-												"& .MuiFormControlLabel-label":
-													{ fontSize: "14px" },
+												"& .MuiFormControlLabel-label": {fontSize: "14px"},
 											}}
 											key='allow_all'
 											control={
 												<Checkbox
 													size='small'
 													onChange={(e) => {
-														setAllPermission(
-															e.target.checked
-														);
+														setAllPermission(e.target.checked);
 													}}
 												/>
 											}
-											label={t(
-												"token_management.allow_all"
-											)}
+											label={t("token_management.allow_all")}
 										/>
 									</Box>
 									<Grid container spacing={2}>
 										<Grid item sm={12} md={6}>
 											<Stack direction='column'>
-												<FormLabel component='legend'>
-													Inference permissions
-												</FormLabel>
+												<FormLabel component='legend'>Inference permissions</FormLabel>
 												{[
 													{
 														key: "allow_chat",
-														label: t(
-															"token_management.allow_chat"
-														),
+														label: t("token_management.allow_chat"),
 													},
 													{
 														key: "allow_agent",
-														label: t(
-															"token_management.allow_agent"
-														),
+														label: t("token_management.allow_agent"),
 													},
 													{
 														key: "allow_toolbox",
-														label: t(
-															"token_management.allow_toolbox"
-														),
+														label: t("token_management.allow_toolbox"),
 													},
 													{
 														key: "allow_data_synthesis",
-														label: t(
-															"token_management.allow_data_synthesis"
-														),
+														label: t("token_management.allow_data_synthesis"),
 													},
 													{
 														key: "allow_chat_api",
-														label: t(
-															"token_management.allow_chat_api"
-														),
+														label: t("token_management.allow_chat_api"),
 													},
 													{
 														key: "allow_agent_api",
-														label: t(
-															"token_management.allow_agent_api"
-														),
+														label: t("token_management.allow_agent_api"),
 													},
 													{
 														key: "allow_toolbox_api",
-														label: t(
-															"token_management.allow_toolbox_api"
-														),
+														label: t("token_management.allow_toolbox_api"),
 													},
 												].map((perm) => (
 													<FormControlLabel
 														sx={{
-															"& .MuiFormControlLabel-label":
-																{
-																	fontSize:
-																		"14px",
-																},
+															"& .MuiFormControlLabel-label": {
+																fontSize: "14px",
+															},
 														}}
 														key={perm.key}
 														control={
 															<Checkbox
 																size='small'
-																checked={
-																	permission[
-																		perm.key
-																	]
-																}
-																onChange={(
-																	e
-																) => {
-																	setPermission(
-																		{
-																			...permission,
-																			[perm.key]:
-																				e
-																					.target
-																					.checked,
-																		}
-																	);
+																checked={permission[perm.key]}
+																onChange={(e) => {
+																	setPermission({
+																		...permission,
+																		[perm.key]: e.target.checked,
+																	});
 																}}
 															/>
 														}
@@ -672,9 +460,7 @@ function TokenManagement() {
 												))}
 											</Stack>
 											<Stack direction='column'>
-												<FormLabel component='legend'>
-													Dataset permissions
-												</FormLabel>
+												<FormLabel component='legend'>Dataset permissions</FormLabel>
 												{[
 													{
 														key: "add_dataset",
@@ -695,33 +481,20 @@ function TokenManagement() {
 												].map((perm) => (
 													<FormControlLabel
 														sx={{
-															"& .MuiFormControlLabel-label":
-																{
-																	fontSize:
-																		"14px",
-																},
+															"& .MuiFormControlLabel-label": {
+																fontSize: "14px",
+															},
 														}}
 														key={perm.key}
 														control={
 															<Checkbox
 																size='small'
-																checked={
-																	permission[
-																		perm.key
-																	]
-																}
-																onChange={(
-																	e
-																) => {
-																	setPermission(
-																		{
-																			...permission,
-																			[perm.key]:
-																				e
-																					.target
-																					.checked,
-																		}
-																	);
+																checked={permission[perm.key]}
+																onChange={(e) => {
+																	setPermission({
+																		...permission,
+																		[perm.key]: e.target.checked,
+																	});
 																}}
 															/>
 														}
@@ -732,52 +505,33 @@ function TokenManagement() {
 										</Grid>
 										<Grid item sm={12} md={6}>
 											<Stack mt={1} direction='column'>
-												<FormLabel component='legend'>
-													Log permissions
-												</FormLabel>
+												<FormLabel component='legend'>Log permissions</FormLabel>
 												{[
 													{
 														key: "allow_view_log",
-														label: t(
-															"token_management.allow_view_log"
-														),
+														label: t("token_management.allow_view_log"),
 													},
 													{
 														key: "allow_view_cost",
-														label: t(
-															"token_management.allow_view_cost"
-														),
+														label: t("token_management.allow_view_cost"),
 													},
 												].map((perm) => (
 													<FormControlLabel
 														sx={{
-															"& .MuiFormControlLabel-label":
-																{
-																	fontSize:
-																		"14px",
-																},
+															"& .MuiFormControlLabel-label": {
+																fontSize: "14px",
+															},
 														}}
 														key={perm.key}
 														control={
 															<Checkbox
 																size='small'
-																checked={
-																	permission[
-																		perm.key
-																	]
-																}
-																onChange={(
-																	e
-																) => {
-																	setPermission(
-																		{
-																			...permission,
-																			[perm.key]:
-																				e
-																					.target
-																					.checked,
-																		}
-																	);
+																checked={permission[perm.key]}
+																onChange={(e) => {
+																	setPermission({
+																		...permission,
+																		[perm.key]: e.target.checked,
+																	});
 																}}
 															/>
 														}
@@ -786,9 +540,7 @@ function TokenManagement() {
 												))}
 											</Stack>
 											<Stack direction='column'>
-												<FormLabel component='legend'>
-													Template permissions
-												</FormLabel>
+												<FormLabel component='legend'>Template permissions</FormLabel>
 												{[
 													{
 														key: "add_userinstructiontree",
@@ -809,33 +561,20 @@ function TokenManagement() {
 												].map((perm) => (
 													<FormControlLabel
 														sx={{
-															"& .MuiFormControlLabel-label":
-																{
-																	fontSize:
-																		"14px",
-																},
+															"& .MuiFormControlLabel-label": {
+																fontSize: "14px",
+															},
 														}}
 														key={perm.key}
 														control={
 															<Checkbox
 																size='small'
-																checked={
-																	permission[
-																		perm.key
-																	]
-																}
-																onChange={(
-																	e
-																) => {
-																	setPermission(
-																		{
-																			...permission,
-																			[perm.key]:
-																				e
-																					.target
-																					.checked,
-																		}
-																	);
+																checked={permission[perm.key]}
+																onChange={(e) => {
+																	setPermission({
+																		...permission,
+																		[perm.key]: e.target.checked,
+																	});
 																}}
 															/>
 														}
@@ -844,9 +583,7 @@ function TokenManagement() {
 												))}
 											</Stack>
 											<Stack direction='column'>
-												<FormLabel component='legend'>
-													Dataset Record permissions
-												</FormLabel>
+												<FormLabel component='legend'>Dataset Record permissions</FormLabel>
 												{[
 													{
 														key: "add_datasetrecord",
@@ -867,33 +604,20 @@ function TokenManagement() {
 												].map((perm) => (
 													<FormControlLabel
 														sx={{
-															"& .MuiFormControlLabel-label":
-																{
-																	fontSize:
-																		"14px",
-																},
+															"& .MuiFormControlLabel-label": {
+																fontSize: "14px",
+															},
 														}}
 														key={perm.key}
 														control={
 															<Checkbox
 																size='small'
-																checked={
-																	permission[
-																		perm.key
-																	]
-																}
-																onChange={(
-																	e
-																) => {
-																	setPermission(
-																		{
-																			...permission,
-																			[perm.key]:
-																				e
-																					.target
-																					.checked,
-																		}
-																	);
+																checked={permission[perm.key]}
+																onChange={(e) => {
+																	setPermission({
+																		...permission,
+																		[perm.key]: e.target.checked,
+																	});
 																}}
 															/>
 														}

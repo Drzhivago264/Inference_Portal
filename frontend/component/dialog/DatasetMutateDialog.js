@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
@@ -17,9 +17,9 @@ import PropTypes from "prop-types";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import { basePost } from "../../api_hook/basePost";
-import { basePut } from "../../api_hook/basePut";
-import { useMutation } from "react-query";
+import {basePost} from "../../api_hook/basePost";
+import {basePut} from "../../api_hook/basePut";
+import {useMutation} from "react-query";
 
 export default function DatasetMutateDialog({
 	setAllowAddDataset,
@@ -36,26 +36,16 @@ export default function DatasetMutateDialog({
 }) {
 	const [open, setOpen] = useState(false);
 	const [saveerror, setSaveError] = useState(false);
-	const [default_system_prompt, setDefaultSystemPrompt] = useState(
-		method === "put" ? old_default_system_prompt : ""
-	);
-	const [default_evaluation, setDefaultEvaluation] = useState(
-		method === "put"
-			? old_default_evaluation
-			: [{ evaluation_name: "", score: "" }]
-	);
-	const [dataset_name, setDatasetName] = useState(
-		method === "put" ? old_dataset_name : ""
-	);
+	const [default_system_prompt, setDefaultSystemPrompt] = useState(method === "put" ? old_default_system_prompt : "");
+	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [{evaluation_name: "", score: ""}]);
+	const [dataset_name, setDatasetName] = useState(method === "put" ? old_dataset_name : "");
 	const [saveerrormessage, setSaveErrorMessage] = useState("");
 	const [savesuccess, setSaveSuccess] = useState(false);
 	const [allow_mutate, setAllowMutate] = useState(true);
-	const { mutate: postmutate } = useMutation(basePost);
-	const { mutate: putmutate } = useMutation(basePut);
+	const {mutate: postmutate} = useMutation(basePost);
+	const {mutate: putmutate} = useMutation(basePut);
 	const createDataset = () => {
-		const default_evaluation_without_null = default_evaluation.filter(
-			(item) => item.evaluation_name && item.score
-		);
+		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name && item.score);
 		setAllowMutate(false);
 		if (dataset_name) {
 			const data = {
@@ -64,7 +54,7 @@ export default function DatasetMutateDialog({
 				default_evaluation: default_evaluation_without_null,
 			};
 			postmutate(
-				{ url: "/frontend-api/create-dataset", data: data },
+				{url: "/frontend-api/create-dataset", data: data},
 				{
 					onSuccess: (data) => {
 						setSaveSuccess(true);
@@ -75,19 +65,15 @@ export default function DatasetMutateDialog({
 								id: data.id,
 								name: data.name,
 								default_system_prompt: default_system_prompt,
-								default_evaluation:
-									default_evaluation_without_null,
+								default_evaluation: default_evaluation_without_null,
 							},
 						]);
-						setCurrentEvaluation(default_evaluation_without_null),
-							setCurrentSystemPrompt(default_system_prompt);
+						setCurrentEvaluation(default_evaluation_without_null), setCurrentSystemPrompt(default_system_prompt);
 					},
 					onError: (error) => {
 						setSaveError(true);
 						if (error.code === "ERR_BAD_RESPONSE") {
-							setSaveErrorMessage(
-								"Failed, Internal Server Error!"
-							);
+							setSaveErrorMessage("Failed, Internal Server Error!");
 						} else {
 							setSaveErrorMessage(error.response.data.detail);
 						}
@@ -103,9 +89,7 @@ export default function DatasetMutateDialog({
 	};
 
 	const updateDataset = () => {
-		const default_evaluation_without_null = default_evaluation.filter(
-			(item) => item.evaluation_name && item.score
-		);
+		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name && item.score);
 		setAllowMutate(false);
 		if (dataset_name) {
 			const data = {
@@ -116,7 +100,7 @@ export default function DatasetMutateDialog({
 			};
 
 			putmutate(
-				{ url: "/frontend-api/update-dataset", data: data },
+				{url: "/frontend-api/update-dataset", data: data},
 				{
 					onSuccess: () => {
 						setSaveSuccess(true);
@@ -126,24 +110,19 @@ export default function DatasetMutateDialog({
 								return {
 									id: dataset_id,
 									name: dataset_name,
-									default_system_prompt:
-										default_system_prompt,
-									default_evaluation:
-										default_evaluation_without_null,
+									default_system_prompt: default_system_prompt,
+									default_evaluation: default_evaluation_without_null,
 								};
 							}
 							return item;
 						});
 						setDatasetList(new_dataset_list);
-						setCurrentEvaluation(default_evaluation_without_null),
-							setCurrentSystemPrompt(default_system_prompt);
+						setCurrentEvaluation(default_evaluation_without_null), setCurrentSystemPrompt(default_system_prompt);
 					},
 					onError: (error) => {
 						setSaveError(true);
 						if (error.code === "ERR_BAD_RESPONSE") {
-							setSaveErrorMessage(
-								"Failed, Internal Server Error!"
-							);
+							setSaveErrorMessage("Failed, Internal Server Error!");
 						} else {
 							setSaveErrorMessage(error.response.data.detail);
 						}
@@ -166,7 +145,7 @@ export default function DatasetMutateDialog({
 		setOpen(false);
 		if (method === "post") {
 			setDatasetName("");
-			setDefaultEvaluation([{ evaluation_name: "", score: "" }]);
+			setDefaultEvaluation([{evaluation_name: "", score: ""}]);
 			setDefaultSystemPrompt("");
 		}
 	};
@@ -186,7 +165,7 @@ export default function DatasetMutateDialog({
 	const updateEvaluationValue = (v, index) => {
 		const new_evaluation_list = default_evaluation.map((item, i) => {
 			if (i === index) {
-				return { ...item, ["evaluation_name"]: v };
+				return {...item, ["evaluation_name"]: v};
 			}
 			return item;
 		});
@@ -197,21 +176,11 @@ export default function DatasetMutateDialog({
 			<IconButton aria-label='add' onClick={handleClickOpen}>
 				{method === "post" ? <AddCircleOutlineIcon /> : <EditIcon />}
 			</IconButton>
-			<Dialog
-				open={open}
-				onClose={handleClose}
-				aria-labelledby='alert-dialog-title'
-				aria-describedby='alert-dialog-description'>
-				<DialogTitle id='alert-dialog-title'>
-					{method === "post"
-						? "Create a new dataset"
-						: "Update your dataset"}
-				</DialogTitle>
+			<Dialog open={open} onClose={handleClose} aria-labelledby='alert-dialog-title' aria-describedby='alert-dialog-description'>
+				<DialogTitle id='alert-dialog-title'>{method === "post" ? "Create a new dataset" : "Update your dataset"}</DialogTitle>
 				<DialogContent>
 					<DialogContentText mb={1} id='alert-dialog-description'>
-						{method === "put"
-							? `Change your Dataset's name`
-							: `Give a name for your Dataset`}
+						{method === "put" ? `Change your Dataset's name` : `Give a name for your Dataset`}
 					</DialogContentText>
 					<TextField
 						fullWidth
@@ -239,11 +208,11 @@ export default function DatasetMutateDialog({
 							minRows={4}
 							maxRows={6}
 							value={default_system_prompt}
-							InputLabelProps={{ shrink: true }}
+							InputLabelProps={{shrink: true}}
 							onChange={(e) => {
 								setDefaultSystemPrompt(e.target.value);
 							}}
-							inputProps={{ maxLength: 2500 }}
+							inputProps={{maxLength: 2500}}
 						/>
 					</Box>
 					<DialogContentText mt={2} id='alert-dialog-description'>
@@ -261,10 +230,7 @@ export default function DatasetMutateDialog({
 												size='small'
 												label='Name'
 												onChange={(e) => {
-													updateEvaluationValue(
-														e.target.value,
-														index
-													);
+													updateEvaluationValue(e.target.value, index);
 												}}
 												value={ev.evaluation_name}
 												InputLabelProps={{
@@ -285,30 +251,23 @@ export default function DatasetMutateDialog({
 								);
 							})}
 					</Stack>
-					<Box
-						display='flex'
-						justifyContent='center'
-						alignItems='center'
-						mt={1}>
-						{default_evaluation &&
-							default_evaluation.length < max_evaluation_num && (
-								<IconButton
-									aria-label='add'
-									onClick={() => {
-										addEvaluation();
-									}}>
-									<AddCircleOutlineIcon />
-								</IconButton>
-							)}
+					<Box display='flex' justifyContent='center' alignItems='center' mt={1}>
+						{default_evaluation && default_evaluation.length < max_evaluation_num && (
+							<IconButton
+								aria-label='add'
+								onClick={() => {
+									addEvaluation();
+								}}>
+								<AddCircleOutlineIcon />
+							</IconButton>
+						)}
 					</Box>
 					{[
 						{
 							open: savesuccess,
 							autoHideDuration: 500,
 							onClose: () => {
-								setSaveSuccess(false),
-									handleClose(),
-									setAllowMutate(true);
+								setSaveSuccess(false), handleClose(), setAllowMutate(true);
 							},
 							severity: "success",
 							message: "Saved!",
@@ -321,38 +280,23 @@ export default function DatasetMutateDialog({
 							message: saveerrormessage,
 						},
 					].map((item, index) => (
-						<Snackbar
-							key={index}
-							open={item.open}
-							autoHideDuration={item.autoHideDuration}
-							onClose={item.onClose}>
-							<Alert
-								severity={item.severity}
-								sx={{ width: "100%" }}>
+						<Snackbar key={index} open={item.open} autoHideDuration={item.autoHideDuration} onClose={item.onClose}>
+							<Alert severity={item.severity} sx={{width: "100%"}}>
 								{item.message}
 							</Alert>
 						</Snackbar>
 					))}
 				</DialogContent>
 				<DialogActions>
-					<Button
-						onClick={handleClose}
-						disabled={!allow_mutate}
-						autoFocus>
+					<Button onClick={handleClose} disabled={!allow_mutate} autoFocus>
 						Cancel
 					</Button>
 					{method === "post" ? (
-						<Button
-							onClick={createDataset}
-							disabled={!allow_mutate}
-							autoFocus>
+						<Button onClick={createDataset} disabled={!allow_mutate} autoFocus>
 							Create
 						</Button>
 					) : (
-						<Button
-							onClick={updateDataset}
-							disabled={!allow_mutate}
-							autoFocus>
+						<Button onClick={updateDataset} disabled={!allow_mutate} autoFocus>
 							Update
 						</Button>
 					)}

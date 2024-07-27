@@ -14,7 +14,13 @@ export const useDeleteToken = ({ setTokenList, setLocalTokenCreateError }) => {
                     onSuccess: () => setTokenList(prev => {
                         return prev.filter((_, i) => i !== index)
                     }),
-                    onError: (error) => setLocalTokenCreateError(error.response.data.detail)
+                    onError: (error) => {
+                        if (error.code === "ERR_BAD_RESPONSE") {
+                            setLocalTokenCreateError("Failed, Internal Server Error!");
+                        } else {
+                            setLocalTokenCreateError(error.response.data.detail)
+                        }  
+                    }
 
                 })
 

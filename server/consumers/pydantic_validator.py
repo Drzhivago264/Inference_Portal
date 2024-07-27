@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ValidationInfo, field_validator, model_validator
+from pydantic import (BaseModel, ValidationInfo, field_validator,
+                      model_validator)
 from typing_extensions import Self
 
 from server.utils import constant

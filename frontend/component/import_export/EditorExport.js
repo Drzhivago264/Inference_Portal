@@ -1,11 +1,11 @@
 import * as pdfMake from "pdfmake/build/pdfmake.min";
 
-import React, { useState } from "react";
+import React, {useState} from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import { FormControl } from "@mui/material";
+import {FormControl} from "@mui/material";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -17,9 +17,9 @@ import Typography from "@mui/material/Typography";
 import edjsParser from "editorjs-parser";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 
-const { convert } = require("html-to-text");
+const {convert} = require("html-to-text");
 
-const EditorExport = ({ editorref }) => {
+const EditorExport = ({editorref}) => {
 	const [choosen_export_format, setChoosenExportFormat] = useState(".json");
 	const handleExport = (event) => {
 		event.preventDefault();
@@ -46,21 +46,19 @@ const EditorExport = ({ editorref }) => {
 					download_content = parser.parse(download_content);
 				} else if (mimeType == "text/plain") {
 					let html = parser.parse(download_content);
-					let text = convert(html, { wordwrap: 130 });
+					let text = convert(html, {wordwrap: 130});
 					download_content = text;
 				} else if (mimeType == "application/pdf") {
 					let html = parser.parse(download_content);
 					var htmlToPdfmake = require("html-to-pdfmake");
 					var html_to_pdf = htmlToPdfmake(html);
-					var pdf = { content: html_to_pdf };
+					var pdf = {content: html_to_pdf};
 					pdfMake.vfs = pdfFonts.pdfMake.vfs;
-					pdfMake
-						.createPdf(pdf)
-						.download("Written_By_Professor_Parakeet.pdf");
+					pdfMake.createPdf(pdf).download("Written_By_Professor_Parakeet.pdf");
 				}
 				if (mimeType != "application/pdf") {
 					var a = document.createElement("a");
-					var blob = new Blob([download_content], { type: mimeType });
+					var blob = new Blob([download_content], {type: mimeType});
 					var url = URL.createObjectURL(blob);
 					a.setAttribute("href", url);
 					a.setAttribute("download", filename);
@@ -72,11 +70,9 @@ const EditorExport = ({ editorref }) => {
 			});
 	};
 	return (
-		<Paper sx={{ m: 2 }} variant='outlined'>
+		<Paper sx={{m: 2}} variant='outlined'>
 			<Box m={1}>
-				<Typography sx={{ color: "text.secondary" }}>
-					Editor Export
-				</Typography>
+				<Typography sx={{color: "text.secondary"}}>Editor Export</Typography>
 			</Box>
 			<Divider />
 			<Box mb={2} mt={2} ml={1} mr={2}>
@@ -86,29 +82,20 @@ const EditorExport = ({ editorref }) => {
 						<Select
 							labelId='export-label'
 							id='export-select'
-							onChange={(e) =>
-								setChoosenExportFormat(e.target.value)
-							}
+							onChange={(e) => setChoosenExportFormat(e.target.value)}
 							value={choosen_export_format}
 							label='Export'
 							size='small'
 							fullWidth>
-							{[".json", ".txt", ".html", ".pdf"].map(
-								(format) => {
-									return (
-										<MenuItem key={format} value={format}>
-											{format}
-										</MenuItem>
-									);
-								}
-							)}
+							{[".json", ".txt", ".html", ".pdf"].map((format) => {
+								return (
+									<MenuItem key={format} value={format}>
+										{format}
+									</MenuItem>
+								);
+							})}
 						</Select>
-						<Button
-							size='small'
-							fullWidth
-							variant='contained'
-							onClick={handleExport}
-							endIcon={<GetAppIcon />}>
+						<Button size='small' fullWidth variant='contained' onClick={handleExport} endIcon={<GetAppIcon />}>
 							Export
 						</Button>
 					</Stack>
@@ -118,9 +105,6 @@ const EditorExport = ({ editorref }) => {
 	);
 };
 EditorExport.propTypes = {
-	editorref: PropTypes.oneOfType([
-		PropTypes.func,
-		PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
-	]),
+	editorref: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({current: PropTypes.instanceOf(Element)})]),
 };
 export default EditorExport;

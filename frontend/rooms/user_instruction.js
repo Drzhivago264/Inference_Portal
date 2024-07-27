@@ -2,10 +2,7 @@ import { Divider, List, Typography } from "@mui/material";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { UserContext, WebSocketContext } from "../App.js";
-import {
-	closeWebSocket,
-	scrollToBottom,
-} from "../component/chat_components/chatUtils.js";
+import { closeWebSocket, scrollToBottom } from "../component/chat_components/chatUtils.js";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
@@ -56,8 +53,7 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
 
 function UserInstruction() {
 	const navigate = useNavigate();
-	const { websocket, agent_websocket, chat_websocket, websocket_hash } =
-		useContext(WebSocketContext);
+	const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
 	const messagesEndRef = useRef(null);
 	const [instruct_change, setInstructChange] = useState(false);
 	const [choosen_model, setChoosenModel] = useState("gpt-4");
@@ -139,9 +135,7 @@ function UserInstruction() {
 						setLoading(false);
 						setSaveError(true);
 						if (error.code === "ERR_BAD_RESPONSE") {
-							setSaveErrorMessage(
-								"Failed, Internal Server Error!"
-							);
+							setSaveErrorMessage("Failed, Internal Server Error!");
 						} else {
 							setSaveErrorMessage(error.response.data.detail);
 						}
@@ -162,9 +156,7 @@ function UserInstruction() {
 						setLoading(false);
 						setSaveError(true);
 						if (error.code === "ERR_BAD_RESPONSE") {
-							setSaveErrorMessage(
-								"Failed, Internal Server Error!"
-							);
+							setSaveErrorMessage("Failed, Internal Server Error!");
 						} else {
 							setSaveErrorMessage(error.response.data.detail);
 						}
@@ -195,14 +187,12 @@ function UserInstruction() {
 		);
 	};
 	const handleTextFieldChange = (index, property, value) => {
-		const updatedList = children_instruction_list.map(
-			(instruction, idx) => {
-				if (idx === index) {
-					return { ...instruction, [property]: value };
-				}
-				return instruction;
+		const updatedList = children_instruction_list.map((instruction, idx) => {
+			if (idx === index) {
+				return { ...instruction, [property]: value };
 			}
-		);
+			return instruction;
+		});
 		setChildInstructionList(updatedList);
 		updateParentTemplate(updatedList, "children");
 	};
@@ -350,9 +340,7 @@ function UserInstruction() {
 		closeWebSocket(agent_websocket);
 		closeWebSocket(chat_websocket);
 		if (websocket_hash) {
-			websocket.current = new WebSocket(
-				`${ws_scheme}://${window.location.host}/ws/engineer-async/${websocket_hash}/${timeZone}/`
-			);
+			websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}/ws/engineer-async/${websocket_hash}/${timeZone}/`);
 			agentsocket(websocket, setChatMessage, setThinking, document);
 		}
 	}, [websocket_hash]);
@@ -397,14 +385,7 @@ function UserInstruction() {
 		setInstructChange(false);
 	};
 	const { agent_objects } = useGetModel();
-	const { refetch } = useGetUserInstruction(
-		selectedIndex,
-		setMaxChildNum,
-		setMaxParentNum,
-		setAddParentError,
-		setTemplateList,
-		setChildInstructionList
-	);
+	const { refetch } = useGetUserInstruction(selectedIndex, setMaxChildNum, setMaxParentNum, setAddParentError, setTemplateList, setChildInstructionList);
 	return (
 		<Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
 			<title>Templates</title>
@@ -414,11 +395,7 @@ function UserInstruction() {
 					<Grid container spacing={2}>
 						<Grid item xs={2}>
 							<Paper sx={{ mr: 2 }} variant='outlined'>
-								<Typography
-									ml={2}
-									mt={1}
-									variant='body1'
-									sx={{ color: "text.secondary" }}>
+								<Typography ml={2} mt={1} variant='body1' sx={{ color: "text.secondary" }}>
 									Instruction Template
 								</Typography>
 								<List>
@@ -427,19 +404,8 @@ function UserInstruction() {
 											sx={{ height: 38 }}
 											key={index}
 											selected={selectedIndex === index}
-											onClick={(event) =>
-												handleListItemClick(
-													event,
-													index
-												)
-											}>
-											<ListItemIcon>
-												{selectedIndex === index ? (
-													<FolderOpenIcon />
-												) : (
-													<FolderIcon />
-												)}
-											</ListItemIcon>
+											onClick={(event) => handleListItemClick(event, index)}>
+											<ListItemIcon>{selectedIndex === index ? <FolderOpenIcon /> : <FolderIcon />}</ListItemIcon>
 											<ListItemText
 												primaryTypographyProps={{
 													fontWeight: "medium",
@@ -447,35 +413,22 @@ function UserInstruction() {
 													style: {
 														whiteSpace: "nowrap",
 														overflow: "hidden",
-														textOverflow:
-															"ellipsis",
+														textOverflow: "ellipsis",
 													},
 												}}
 												primary={t.displayed_name}
 											/>
 										</ListItemButton>
 									))}
-									<Box
-										display='flex'
-										justifyContent='center'
-										alignItems='center'>
-										{add_parent_error && (
-											<Alert severity='warning'>
-												Reaching the maximum number of
-												parent ({max_parent_num}).
-											</Alert>
-										)}
+									<Box display='flex' justifyContent='center' alignItems='center'>
+										{add_parent_error && <Alert severity='warning'>Reaching the maximum number of parent ({max_parent_num}).</Alert>}
 										{!add_parent_error && is_save && (
-											<IconButton
-												aria-label='add'
-												onClick={addParent}>
+											<IconButton aria-label='add' onClick={addParent}>
 												<AddCircleOutlineIcon />
 											</IconButton>
 										)}
 										{template_list.length > 1 && (
-											<IconButton
-												aria-label='delete'
-												onClick={deleteParent}>
+											<IconButton aria-label='delete' onClick={deleteParent}>
 												<DeleteIcon />
 											</IconButton>
 										)}
@@ -501,24 +454,13 @@ function UserInstruction() {
 									setMaxTurn={setMaxTurn}></OpenAPIParameter>
 							</Box>
 						</Grid>
-						<Divider
-							orientation='vertical'
-							flexItem
-							sx={{ mr: "-1px" }}
-						/>
+						<Divider orientation='vertical' flexItem sx={{ mr: "-1px" }} />
 						<Grid item xs={6}>
 							<Box mr={4}>
-								<Typography
-									ml={1}
-									mb={1}
-									mt={1}
-									variant='body1'>
+								<Typography ml={1} mb={1} mt={1} variant='body1'>
 									Template
 								</Typography>
-								<FormControl
-									fullWidth
-									sx={{ m: 1 }}
-									variant='standard'>
+								<FormControl fullWidth sx={{ m: 1 }} variant='standard'>
 									{template_list.map((t, index) => {
 										if (selectedIndex == index) {
 											return (
@@ -533,9 +475,7 @@ function UserInstruction() {
 															style={{
 																width: "100%",
 															}}>
-															<Stack
-																direction='row'
-																justifyContent='space-between'>
+															<Stack direction='row' justifyContent='space-between'>
 																<TextField
 																	label='Template Name'
 																	multiline
@@ -544,42 +484,18 @@ function UserInstruction() {
 																		shrink: true,
 																	}}
 																	size='small'
-																	defaultValue={
-																		t[
-																			"displayed_name"
-																		]
-																	}
-																	onChange={(
-																		e
-																	) => {
-																		updateParentTemplate(
-																			e
-																				.target
-																				.value,
-																			"displayed_name"
-																		);
-																		setDisableSave(
-																			false
-																		);
+																	defaultValue={t["displayed_name"]}
+																	onChange={(e) => {
+																		updateParentTemplate(e.target.value, "displayed_name");
+																		setDisableSave(false);
 																	}}
 																	inputProps={{
 																		maxLength: 35,
 																	}}
 																/>
-																<FormControlLabel
-																	disabled
-																	control={
-																		<Checkbox
-																			defaultChecked
-																		/>
-																	}
-																	label='Added'
-																/>
+																<FormControlLabel disabled control={<Checkbox defaultChecked />} label='Added' />
 															</Stack>
-															<FormControl
-																fullWidth
-																sx={{ mt: 1 }}
-																variant='standard'>
+															<FormControl fullWidth sx={{ mt: 1 }} variant='standard'>
 																<TextField
 																	label='Parent Instruction'
 																	multiline
@@ -588,24 +504,11 @@ function UserInstruction() {
 																	InputLabelProps={{
 																		shrink: true,
 																	}}
-																	onChange={(
-																		e
-																	) => {
-																		updateParentTemplate(
-																			e
-																				.target
-																				.value,
-																			"instruct"
-																		);
-																		setDisableSave(
-																			false
-																		);
+																	onChange={(e) => {
+																		updateParentTemplate(e.target.value, "instruct");
+																		setDisableSave(false);
 																	}}
-																	defaultValue={
-																		t[
-																			"instruct"
-																		]
-																	}
+																	defaultValue={t["instruct"]}
 																	inputProps={{
 																		maxLength: 2500,
 																	}}
@@ -617,210 +520,131 @@ function UserInstruction() {
 											);
 										}
 									})}
-									<DragDropContext
-										onDragEnd={handleOnDragEnd}>
+									<DragDropContext onDragEnd={handleOnDragEnd}>
 										<Droppable droppableId='childrens'>
 											{(provided) => (
-												<Box
-													className='childrens'
-													{...provided.droppableProps}
-													ref={provided.innerRef}>
+												<Box className='childrens' {...provided.droppableProps} ref={provided.innerRef}>
 													{children_instruction_list &&
-														children_instruction_list.map(
-															(child, index) => (
-																<Draggable
-																	key={
-																		child.id ??
-																		child.unique
-																	}
-																	draggableId={`${
-																		child.id ??
-																		child.unique
-																	}`}
-																	index={
-																		index
-																	}>
-																	{(
-																		provided
-																	) => (
-																		<Box
-																			mt={
-																				1
-																			}
-																			mb={
-																				1
-																			}
-																			display='flex'
-																			ref={
-																				provided.innerRef
-																			}
-																			{...provided.draggableProps}
-																			{...provided.dragHandleProps}>
-																			<Box
-																				mr={
-																					2
-																				}>
-																				<Divider orientation='vertical' />
-																			</Box>
-																			<Paper
-																				elevation={
-																					2
-																				}
+														children_instruction_list.map((child, index) => (
+															<Draggable key={child.id ?? child.unique} draggableId={`${child.id ?? child.unique}`} index={index}>
+																{(provided) => (
+																	<Box
+																		mt={1}
+																		mb={1}
+																		display='flex'
+																		ref={provided.innerRef}
+																		{...provided.draggableProps}
+																		{...provided.dragHandleProps}>
+																		<Box mr={2}>
+																			<Divider orientation='vertical' />
+																		</Box>
+																		<Paper
+																			elevation={2}
+																			style={{
+																				width: "100%",
+																			}}>
+																			<Stack
+																				direction='row'
+																				p={2}
+																				spacing={2}
 																				style={{
 																					width: "100%",
 																				}}>
-																				<Stack
-																					direction='row'
-																					p={
-																						2
-																					}
-																					spacing={
-																						2
-																					}
+																				<Box>
+																					<IconButton aria-label='delete'>
+																						<DragHandleIcon />
+																					</IconButton>
+																				</Box>
+																				<Box
+																					mt={1}
+																					mb={1}
 																					style={{
 																						width: "100%",
 																					}}>
-																					<Box>
-																						<IconButton aria-label='delete'>
-																							<DragHandleIcon />
-																						</IconButton>
-																					</Box>
-																					<Box
-																						mt={
-																							1
-																						}
-																						mb={
-																							1
-																						}
-																						style={{
-																							width: "100%",
+																					<Stack
+																						direction='row'
+																						sx={{
+																							display: "flex",
+																							justifyContent: "space-between",
 																						}}>
-																						<Stack
-																							direction='row'
-																							sx={{
-																								display:
-																									"flex",
-																								justifyContent:
-																									"space-between",
-																							}}>
-																							<TextField
-																								label={`Children No.${index} Name`}
-																								inputProps={{
-																									maxLength: 35,
-																								}}
-																								maxRows={
-																									1
-																								}
-																								defaultValue={
-																									child.displayed_name
-																								}
-																								size='small'
-																								InputLabelProps={{
-																									shrink: true,
-																								}}
-																								onChange={(
-																									e
-																								) => {
-																									handleTextFieldChange(
-																										index,
-																										"displayed_name",
-																										e
-																											.target
-																											.value
-																									);
-																									setDisableSave(
-																										false
-																									);
-																								}}
-																							/>
-																							<Box>
-																								<FormControlLabel
-																									control={
-																										<Checkbox
-																											onChange={(
-																												e
-																											) => {
-																												handleTextFieldChange(
-																													index,
-																													"add",
-																													e
-																														.target
-																														.checked
-																												);
-																											}}
-																										/>
-																									}
-																									label='Add'
-																								/>
-																								<IconButton
-																									aria-label='delete'
-																									onClick={() => {
-																										deleteChild(
-																											index
-																										);
-																									}}>
-																									<DeleteIcon />
-																								</IconButton>
-																							</Box>
-																						</Stack>
-																						<FormControl
-																							fullWidth
-																							sx={{
-																								mt: 1,
+																						<TextField
+																							label={`Children No.${index} Name`}
+																							inputProps={{
+																								maxLength: 35,
 																							}}
-																							variant='standard'>
-																							<TextField
-																								label={`Child No.${index} Instruction`}
-																								multiline
-																								minRows={
-																									6
+																							maxRows={1}
+																							defaultValue={child.displayed_name}
+																							size='small'
+																							InputLabelProps={{
+																								shrink: true,
+																							}}
+																							onChange={(e) => {
+																								handleTextFieldChange(index, "displayed_name", e.target.value);
+																								setDisableSave(false);
+																							}}
+																						/>
+																						<Box>
+																							<FormControlLabel
+																								control={
+																									<Checkbox
+																										onChange={(e) => {
+																											handleTextFieldChange(
+																												index,
+																												"add",
+																												e.target.checked
+																											);
+																										}}
+																									/>
 																								}
-																								inputProps={{
-																									maxLength: 2500,
-																								}}
-																								InputLabelProps={{
-																									shrink: true,
-																								}}
-																								fullWidth
-																								maxRows={
-																									8
-																								}
-																								defaultValue={
-																									child.instruct
-																								}
-																								onChange={(
-																									e
-																								) => {
-																									handleTextFieldChange(
-																										index,
-																										"instruct",
-																										e
-																											.target
-																											.value
-																									);
-																									setDisableSave(
-																										false
-																									);
-																								}}
+																								label='Add'
 																							/>
-																						</FormControl>
-																					</Box>
-																				</Stack>
-																			</Paper>
-																		</Box>
-																	)}
-																</Draggable>
-															)
-														)}
+																							<IconButton
+																								aria-label='delete'
+																								onClick={() => {
+																									deleteChild(index);
+																								}}>
+																								<DeleteIcon />
+																							</IconButton>
+																						</Box>
+																					</Stack>
+																					<FormControl
+																						fullWidth
+																						sx={{
+																							mt: 1,
+																						}}
+																						variant='standard'>
+																						<TextField
+																							label={`Child No.${index} Instruction`}
+																							multiline
+																							minRows={6}
+																							inputProps={{
+																								maxLength: 2500,
+																							}}
+																							InputLabelProps={{
+																								shrink: true,
+																							}}
+																							fullWidth
+																							maxRows={8}
+																							defaultValue={child.instruct}
+																							onChange={(e) => {
+																								handleTextFieldChange(index, "instruct", e.target.value);
+																								setDisableSave(false);
+																							}}
+																						/>
+																					</FormControl>
+																				</Box>
+																			</Stack>
+																		</Paper>
+																	</Box>
+																)}
+															</Draggable>
+														))}
 													{provided.placeholder}
 												</Box>
 											)}
 										</Droppable>
 									</DragDropContext>
-									<Box
-										display='flex'
-										justifyContent='center'
-										alignItems='center'>
+									<Box display='flex' justifyContent='center' alignItems='center'>
 										<Box mr={1}>
 											<LoadingButton
 												size='small'
@@ -833,12 +657,7 @@ function UserInstruction() {
 												Save
 											</LoadingButton>
 										</Box>
-										{add_child_error && (
-											<Alert severity='warning'>
-												Reaching the maximum number of
-												child ({max_child_num}).
-											</Alert>
-										)}
+										{add_child_error && <Alert severity='warning'>Reaching the maximum number of child ({max_child_num}).</Alert>}
 										{!add_child_error && (
 											<IconButton
 												aria-label='add'
@@ -852,46 +671,34 @@ function UserInstruction() {
 											{
 												open: savesuccess,
 												autoHideDuration: 3000,
-												onClose: () =>
-													setSaveSuccess(false),
+												onClose: () => setSaveSuccess(false),
 												severity: "success",
 												message: "Saved!",
 											},
 											{
 												open: saveerror,
 												autoHideDuration: 6000,
-												onClose: () =>
-													setSaveError(false),
+												onClose: () => setSaveError(false),
 												severity: "error",
 												message: saveerrormessage,
 											},
 											{
 												open: deletesuccess,
 												autoHideDuration: 3000,
-												onClose: () =>
-													setDeleteSuccess(false),
+												onClose: () => setDeleteSuccess(false),
 												severity: "success",
 												message: "Deleted!",
 											},
 											{
 												open: deleteerror,
 												autoHideDuration: 6000,
-												onClose: () =>
-													setDeleteError(false),
+												onClose: () => setDeleteError(false),
 												severity: "error",
 												message: deleteerrormessage,
 											},
 										].map((item, index) => (
-											<Snackbar
-												key={index}
-												open={item.open}
-												autoHideDuration={
-													item.autoHideDuration
-												}
-												onClose={item.onClose}>
-												<Alert
-													severity={item.severity}
-													sx={{ width: "100%" }}>
+											<Snackbar key={index} open={item.open} autoHideDuration={item.autoHideDuration} onClose={item.onClose}>
+												<Alert severity={item.severity} sx={{ width: "100%" }}>
 													{item.message}
 												</Alert>
 											</Snackbar>
@@ -900,11 +707,7 @@ function UserInstruction() {
 								</FormControl>
 							</Box>
 						</Grid>
-						<Divider
-							orientation='vertical'
-							flexItem
-							sx={{ mr: "-1px" }}
-						/>
+						<Divider orientation='vertical' flexItem sx={{ mr: "-1px" }} />
 						<Grid item xs={4}>
 							<Typography mt={1} mb={1} variant='body1'>
 								Testbed

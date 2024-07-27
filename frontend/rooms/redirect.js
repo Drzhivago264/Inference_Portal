@@ -1,37 +1,35 @@
-import { Link, useNavigate } from "react-router-dom";
-import React, { useContext, useState } from "react";
+import {Link, useNavigate} from "react-router-dom";
+import React, {useContext, useState} from "react";
 
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Footer from "../component/nav/Footer.js";
-import { FormControl } from "@mui/material";
+import {FormControl} from "@mui/material";
 import Grid from "@mui/material/Grid";
 import InputAdornment from "@mui/material/InputAdornment";
 import KeyIcon from "@mui/icons-material/Key";
 import LoadingButton from "@mui/lab/LoadingButton";
 import LoginIcon from "@mui/icons-material/Login";
-import { RedirectMediaCards } from "../component/custom_ui_component/RedirectMediaCard.js";
+import {RedirectMediaCards} from "../component/custom_ui_component/RedirectMediaCard.js";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import SuccessErrorAlert from "../component/Alert/SuccessErrorAlert.js";
 import TextField from "@mui/material/TextField";
-import { UserContext } from "../App.js";
+import {UserContext} from "../App.js";
 import axios from "axios";
-import { getCookie } from "../component/getCookie.js";
+import {getCookie} from "../component/getCookie.js";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material";
-import { useTranslation } from "react-i18next";
+import {useTheme} from "@mui/material";
+import {useTranslation} from "react-i18next";
 
 function Hub() {
-	const { is_authenticated, setIsAuthenticated } = useContext(UserContext);
+	const {is_authenticated, setIsAuthenticated} = useContext(UserContext);
 	const theme = useTheme();
-	const check_orientation = useMediaQuery(theme.breakpoints.down("md"))
-		? "horizontal"
-		: "vertical";
-	const { t } = useTranslation();
+	const check_orientation = useMediaQuery(theme.breakpoints.down("md")) ? "horizontal" : "vertical";
+	const {t} = useTranslation();
 
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
@@ -47,32 +45,28 @@ function Hub() {
 	const [image_5_loaded, setImage5Load] = useState(false);
 	const cardData = [
 		{
-			image_link:
-				"https://static.professorparakeet.com/image/robot_line.jpg",
+			image_link: "https://static.professorparakeet.com/image/robot_line.jpg",
 			destination: "chat",
 			image_loaded: image_1_loaded,
 			setImageLoad: setImage1Load,
 			name: "Chatbot_Mode",
 		},
 		{
-			image_link:
-				"https://static.professorparakeet.com/image/Robot_folow_instruct.jpg",
+			image_link: "https://static.professorparakeet.com/image/Robot_folow_instruct.jpg",
 			destination: "engineer",
 			image_loaded: image_2_loaded,
 			setImageLoad: setImage2Load,
 			name: "Agent_Mode",
 		},
 		{
-			image_link:
-				"https://static.professorparakeet.com/image/Robot_label.jpg",
+			image_link: "https://static.professorparakeet.com/image/Robot_label.jpg",
 			destination: "toolbox",
 			image_loaded: image_3_loaded,
 			setImageLoad: setImage3Load,
 			name: "LLM_Functions",
 		},
 		{
-			image_link:
-				"https://static.professorparakeet.com/image/face_to_face.jpeg",
+			image_link: "https://static.professorparakeet.com/image/face_to_face.jpeg",
 			destination: "hotpot",
 			image_loaded: image_4_loaded,
 			setImageLoad: setImage4Load,
@@ -169,25 +163,13 @@ function Hub() {
 			<title>Hub</title>
 			<ResponsiveAppBar max_width='xl' />
 			<Container maxWidth='lg'>
-				<Snackbar
-					open={opensnack}
-					autoHideDuration={5000}
-					onClose={handleCloseSnack}>
-					<Alert
-						onClose={handleCloseSnack}
-						severity='error'
-						variant='filled'
-						sx={{ width: "100%" }}>
+				<Snackbar open={opensnack} autoHideDuration={5000} onClose={handleCloseSnack}>
+					<Alert onClose={handleCloseSnack} severity='error' variant='filled' sx={{width: "100%"}}>
 						You need an API key!
 					</Alert>
 				</Snackbar>
 				<Box my={1} display='flex' alignItems='center' gap={4} p={2}>
-					<Grid
-						container
-						alignItems='center'
-						justify='center'
-						direction='column'
-						spacing={2}>
+					<Grid container alignItems='center' justify='center' direction='column' spacing={2}>
 						{!is_authenticated && (
 							<Grid item md={12} lg={12}>
 								<form autoComplete='off' onSubmit={handleLogin}>
@@ -199,15 +181,13 @@ function Hub() {
 												xs: "column",
 												md: "row",
 											}}
-											spacing={{ xs: 1, md: 1 }}>
+											spacing={{xs: 1, md: 1}}>
 											<TextField
 												margin='normal'
 												label='Key'
 												type='password'
 												size='small'
-												onChange={(e) =>
-													setKey(e.target.value)
-												}
+												onChange={(e) => setKey(e.target.value)}
 												value={key}
 												error={keyError}
 												autoComplete='off'
@@ -219,38 +199,18 @@ function Hub() {
 													),
 												}}
 											/>
-											<LoadingButton
-												loading={loading}
-												variant='contained'
-												type='submit'
-												endIcon={<LoginIcon />}>
+											<LoadingButton loading={loading} variant='contained' type='submit' endIcon={<LoginIcon />}>
 												Login
 											</LoadingButton>
-											<Divider
-												orientation={check_orientation}
-												flexItem={true}
-											/>
+											<Divider orientation={check_orientation} flexItem={true} />
 
-											<LoadingButton
-												variant='contained'
-												component={Link}
-												to='/frontend/key-management'>
+											<LoadingButton variant='contained' component={Link} to='/frontend/key-management'>
 												{" "}
 												Create New Key{" "}
 											</LoadingButton>
 										</Stack>
-										{loginerror && (
-											<SuccessErrorAlert
-												detail={loginerror}
-												type='error'
-											/>
-										)}
-										{redirecterror && (
-											<SuccessErrorAlert
-												detail={redirecterror}
-												type='error'
-											/>
-										)}
+										{loginerror && <SuccessErrorAlert detail={loginerror} type='error' />}
+										{redirecterror && <SuccessErrorAlert detail={redirecterror} type='error' />}
 									</FormControl>
 								</form>
 							</Grid>
