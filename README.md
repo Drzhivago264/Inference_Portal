@@ -101,7 +101,7 @@ Next you need to set up .env file and setup the following key:
     PAYMENT_CANCEL_URL=""
     STRIPE_WEBHOOK_SECRET="" 
     EMAIL_ADDRESS = "" (The EMAIL_ADDRESS that fowards contact form)
-    MAIL = "" (The password for EMAIL_ADDRESS that fowards contact form)
+    EMAIL_PASSWORD = "" (The password for EMAIL_ADDRESS that fowards contact form)
     DJANGO_SETTINGS_MODULE="inferenceportal.settings"
     aws_access_key_id="" (The AWS key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
     aws_secret_access_key="" (The AWS secret key that can perform boot/stop/reboot/terminiate operation on your GPU instances)

@@ -1,22 +1,22 @@
-
-from rest_framework_api_key.admin import APIKeyModelAdmin
 from django.contrib import admin
+from mptt.admin import DraggableMPTTAdmin
+from rest_framework_api_key.admin import APIKeyModelAdmin
+
 from .models import (
+    APIKEY,
+    LLM,
+    Crypto,
+    FineGrainAPIKEY,
+    InferenceServer,
+    InstructionTree,
+    MemoryTree,
+    PaymentHistory,
     Price,
     Product,
     ProductTag,
-    LLM,
-    InferenceServer,
     PromptResponse,
-    APIKEY,
-    Crypto,
-    PaymentHistory,
-    MemoryTree,
-    InstructionTree,
     UserInstructionTree,
-    FineGrainAPIKEY
 )
-from mptt.admin import DraggableMPTTAdmin
 
 
 class PriceAdmin(admin.StackedInline):
@@ -49,28 +49,31 @@ admin.site.register(LLM)
 admin.site.register(InferenceServer)
 admin.site.register(PromptResponse)
 
-admin.site.register(MemoryTree, DraggableMPTTAdmin, list_display=(
-    'tree_actions',
-    'indented_title',
-),
-    list_display_links=(
-    'indented_title',
-),
+admin.site.register(
+    MemoryTree,
+    DraggableMPTTAdmin,
+    list_display=(
+        "tree_actions",
+        "indented_title",
+    ),
+    list_display_links=("indented_title",),
 )
-admin.site.register(InstructionTree, DraggableMPTTAdmin, list_display=(
-    'tree_actions',
-    'indented_title',
-),
-    list_display_links=(
-    'indented_title',
-),
+admin.site.register(
+    InstructionTree,
+    DraggableMPTTAdmin,
+    list_display=(
+        "tree_actions",
+        "indented_title",
+    ),
+    list_display_links=("indented_title",),
 )
 
-admin.site.register(UserInstructionTree, DraggableMPTTAdmin, list_display=(
-    'tree_actions',
-    'indented_title',
-),
-    list_display_links=(
-    'indented_title',
-),
+admin.site.register(
+    UserInstructionTree,
+    DraggableMPTTAdmin,
+    list_display=(
+        "tree_actions",
+        "indented_title",
+    ),
+    list_display_links=("indented_title",),
 )

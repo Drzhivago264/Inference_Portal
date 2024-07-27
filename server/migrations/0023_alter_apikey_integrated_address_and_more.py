@@ -6,73 +6,73 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('server', '0022_alter_crypto_coin_and_more'),
+        ("server", "0022_alter_crypto_coin_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='apikey',
-            name='integrated_address',
+            model_name="apikey",
+            name="integrated_address",
             field=models.TextField(max_length=400),
         ),
         migrations.AlterField(
-            model_name='apikey',
-            name='payment_id',
+            model_name="apikey",
+            name="payment_id",
             field=models.TextField(max_length=400),
         ),
         migrations.AlterField(
-            model_name='crypto',
-            name='address',
+            model_name="crypto",
+            name="address",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='crypto',
-            name='coin',
+            model_name="crypto",
+            name="coin",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='instructiontree',
-            name='code',
+            model_name="instructiontree",
+            name="code",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='memorytree',
-            name='p_type',
-            field=models.CharField(default='prompt', max_length=255),
+            model_name="memorytree",
+            name="p_type",
+            field=models.CharField(default="prompt", max_length=255),
         ),
         migrations.AlterField(
-            model_name='memorytree',
-            name='prompt',
+            model_name="memorytree",
+            name="prompt",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='memorytree',
-            name='response',
+            model_name="memorytree",
+            name="response",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='promptresponse',
-            name='p_type',
-            field=models.CharField(default='prompt', max_length=255),
+            model_name="promptresponse",
+            name="p_type",
+            field=models.CharField(default="prompt", max_length=255),
         ),
         migrations.AlterField(
-            model_name='promptresponse',
-            name='prompt',
+            model_name="promptresponse",
+            name="prompt",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='promptresponse',
-            name='response',
+            model_name="promptresponse",
+            name="response",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='userinstructiontree',
-            name='code',
-            field=models.TextField(default=''),
+            model_name="userinstructiontree",
+            name="code",
+            field=models.TextField(default=""),
         ),
         migrations.AlterField(
-            model_name='userinstructiontree',
-            name='displayed_name',
-            field=models.TextField(default=''),
+            model_name="userinstructiontree",
+            name="displayed_name",
+            field=models.TextField(default=""),
         ),
     ]

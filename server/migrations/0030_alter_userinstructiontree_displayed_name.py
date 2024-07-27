@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('server', '0029_alter_custompermissionwithoutcontenttype_options'),
+        ("server", "0029_alter_custompermissionwithoutcontenttype_options"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userinstructiontree',
-            name='displayed_name',
-            field=models.TextField(default='', unique=True),
+            model_name="userinstructiontree",
+            name="displayed_name",
+            field=models.TextField(default="", unique=True),
         ),
     ]

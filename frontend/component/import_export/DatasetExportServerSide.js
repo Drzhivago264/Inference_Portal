@@ -7,48 +7,23 @@ import FormControl from "@mui/material/FormControl";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import Papa from "papaparse";
 import Paper from "@mui/material/Paper";
 import PropTypes from "prop-types";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-export const DatasetExport = ({ filename, data }) => {
+export const DatasetExportServerSide = ({ dataset_id }) => {
 	const [choosen_export_format, setChoosenExportFormat] = useState(".json");
-	const handleExportChatLog = (event) => {
+	const handleExportServerSide = (event) => {
 		event.preventDefault();
-
-		var data_clone = [...data];
-		var a = document.createElement("a");
-		if (choosen_export_format == ".json") {
-			let download_content = JSON.stringify(data_clone);
-			let blob = new Blob([download_content], {
-				type: "application/json",
-			});
-			let url = URL.createObjectURL(blob);
-			a.setAttribute("href", url);
-			a.setAttribute("download", `${filename}.json`);
-		} else if (choosen_export_format == ".csv") {
-			let download_content = Papa.unparse(data);
-			let blob = new Blob([download_content]);
-			if (window.navigator.msSaveOrOpenBlob)
-				window.navigator.msSaveBlob(blob, `${filename}.csv`);
-			else {
-				a.href = window.URL.createObjectURL(blob, {
-					type: "text/plain",
-				});
-				a.download = `${filename}.csv`;
-				document.body.appendChild(a);
-				a.click();
-				document.body.removeChild(a);
-			}
+		if (dataset_id) {
+			console.log(dataset_id);
 		}
-		a.click();
 	};
 	return (
-		<Paper sx={{ m: 2 }} variant='outlined'>
-			<Box m={1}>
+		<Paper variant='outlined'>
+			<Box ml={2} mt={1} mb={1}>
 				<Typography sx={{ color: "text.secondary" }}>
 					Dataset Export
 				</Typography>
@@ -83,7 +58,7 @@ export const DatasetExport = ({ filename, data }) => {
 								fullWidth
 								size='small'
 								variant='contained'
-								onClick={handleExportChatLog}
+								onClick={handleExportServerSide}
 								endIcon={<GetAppIcon />}>
 								Export
 							</Button>
@@ -95,7 +70,6 @@ export const DatasetExport = ({ filename, data }) => {
 	);
 };
 
-DatasetExport.propTypes = {
-	data: PropTypes.array.isRequired,
-	filename: PropTypes.string.isRequired,
+DatasetExportServerSide.propTypes = {
+	dataset_id: PropTypes.number.isRequired,
 };

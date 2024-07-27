@@ -109,7 +109,7 @@ function DataSynthesis() {
     const handle_use_user_template = (event) => {
         setUseUserTemplate(event.target.checked);
     };
-    
+
     const swap_template = (template, type) => {
         websocket.current.send(JSON.stringify({
             'swap_template': template,
@@ -136,7 +136,7 @@ function DataSynthesis() {
     const navigate = useNavigate();
     const { is_authenticated, timeZone } = useContext(UserContext);
 
-    const {agent_objects} = useGetModel()
+    const { agent_objects } = useGetModel()
 
     const {
         user_template_list: user_template_list,
@@ -147,7 +147,7 @@ function DataSynthesis() {
         choosen_user_template: choosen_user_template,
         setChoosenUserTemplate: setChoosenUserTemplate,
     } = useGetInstructionTree()
-        
+
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     useEffect(() => {
         closeWebSocket(websocket);
@@ -284,19 +284,13 @@ function DataSynthesis() {
                                     </Stack>
                                 </Box>
                             </Paper>
-                            <Paper sx={{ m: 2 }} variant='outlined'>
-                                <Box m={1}>
-                                    <Typography sx={{ color: 'text.secondary' }}>Dataset Export</Typography>
-                                </Box>
-                                <Divider />
-                                <Box mb={2} mt={2} ml={1} mr={2}>
-                                    <DatasetExport
-                                        data={csv_row}
-                                        filename={`Processed_${filename}_from_${from_row}_to_${to_row}`}
-                                    >
-                                    </DatasetExport>
-                                </Box>
-                            </Paper>
+
+                            <DatasetExport
+                                data={csv_row}
+                                filename={`Processed_${filename}_from_${from_row}_to_${to_row}`}
+                            >
+                            </DatasetExport>
+
                             <LogBox chat_message={chat_message} messagesEndRef={messagesEndRef} />
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />

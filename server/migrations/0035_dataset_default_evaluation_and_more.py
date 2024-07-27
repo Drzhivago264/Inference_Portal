@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('server', '0034_rename_datesetrecord_datasetrecord_and_more'),
+        ("server", "0034_rename_datesetrecord_datasetrecord_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='dataset',
-            name='default_evaluation',
+            model_name="dataset",
+            name="default_evaluation",
             field=models.JSONField(default=[]),
         ),
         migrations.AddField(
-            model_name='dataset',
-            name='default_system_prompt',
-            field=models.TextField(default='', max_length=128000),
+            model_name="dataset",
+            name="default_system_prompt",
+            field=models.TextField(default="", max_length=128000),
         ),
     ]

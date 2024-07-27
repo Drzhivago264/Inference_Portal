@@ -1,11 +1,11 @@
 from django.urls import path
 
 import server.consumers.agent as agent
-import server.consumers.chatbot as chatbot
-import server.consumers.async_chatbot as async_bot
 import server.consumers.async_agent as async_agent
-import server.consumers.toolbox as toolbox
+import server.consumers.async_chatbot as async_bot
+import server.consumers.chatbot as chatbot
 import server.consumers.data_synthesis as data_synthesis
+import server.consumers.toolbox as toolbox
 
 websocket_urlpatterns = [
     path("ws/chat-async/<str:key>/<path:tz>/", async_bot.Consumer.as_asgi()),

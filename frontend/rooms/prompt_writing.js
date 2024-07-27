@@ -8,6 +8,7 @@ import Container from '@mui/material/Container';
 import {
     DataGrid
 } from '@mui/x-data-grid';
+import { DatasetExportServerSide } from '../component/import_export/DatasetExportServerSide.js';
 import DatasetMutateDialog from '../component/dialog/DatasetMutateDialog.js';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FolderIcon from '@mui/icons-material/Folder';
@@ -54,11 +55,9 @@ function PromptWriting() {
     const [current_evaluation, setCurrentEvaluation] = useState([{ evaluation_name: "", score: "" }])
     const [current_prompt, setCurrentPrompt] = useState("")
     const [current_response, setCurrentResponse] = useState("")
-
     const [current_system_prompt_error, setCurrentSystemPromptError] = useState("")
     const [current_prompt_error, setCurrentPromptError] = useState("")
     const [current_response_error, setCurrentResponseError] = useState("")
-
     const [current_record_id, setCurrentRecordId] = useState(null)
     const [allow_save_record, setAllowSaveRecord] = useState(false)
     const [loading, setLoading] = useState(false);
@@ -165,7 +164,7 @@ function PromptWriting() {
         if (!current_system_prompt) {
             setCurrentSystemPromptError(true)
         }
-        if (current_prompt && current_response && current_system_prompt) {
+        if (current_prompt && current_response && current_system_prompt && dataset) {
             var data = {
                 'dataset_id': dataset.id,
                 'prompt': current_prompt,
@@ -204,6 +203,10 @@ function PromptWriting() {
                 })
             }
         }
+        else if (!dataset) {
+            setSaveError(true)
+            setSaveErrorMessage("You need to create a dataset first!")
+        }
         else {
             setSaveError(true)
             setSaveErrorMessage("Record contains empty Field(s)!")
@@ -211,7 +214,7 @@ function PromptWriting() {
         setLoading(false)
     }
 
-    const handleListItemClick = (event, index) => {
+    const handleListItemClick = (index) => {
         setSelectedIndex(index);
         setCurrentRecordId(null)
         setCurrentPrompt('')
@@ -313,7 +316,7 @@ function PromptWriting() {
                                 <List>
                                     {dataset_list && dataset_list.map((dataset, index) => (
                                         <ListItem key={dataset.id} disablePadding>
-                                            <ListItemButton sx={{ height: 38 }} selected={selectedIndex === index} onClick={(event) => handleListItemClick(event, index)}>
+                                            <ListItemButton sx={{ height: 38 }} selected={selectedIndex === index} onClick={() => handleListItemClick(index)}>
                                                 <ListItemIcon>
                                                     {selectedIndex === index ? <FolderOpenIcon /> : <FolderIcon />}
                                                 </ListItemIcon>
@@ -361,6 +364,7 @@ function PromptWriting() {
                                 </List>
                             </Paper>
                             <Box sx={{ mr: 2, mt: 2 }} >
+                                <DatasetExportServerSide dataset_id={dataset_list[selectedIndex] ? dataset_list[selectedIndex].id : null }/>
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />

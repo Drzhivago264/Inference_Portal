@@ -1,9 +1,11 @@
-from django.utils import timezone
-from server.models import InferenceServer
-from server.utils import constant
-from decouple import config
 import boto3
 from celery.utils.log import get_task_logger
+from decouple import config
+from django.utils import timezone
+
+from server.models import InferenceServer
+from server.utils import constant
+
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
 aws_secret = config("aws_secret_access_key")
@@ -21,13 +23,17 @@ def get_EC2_status(instance_id: str, region: str) -> str:
         _type_: _description_
     """
     ec2_resource = boto3.resource(
-        'ec2', region_name=region, aws_access_key_id=aws, aws_secret_access_key=aws_secret)
+        "ec2",
+        region_name=region,
+        aws_access_key_id=aws,
+        aws_secret_access_key=aws_secret,
+    )
     try:
         instance = ec2_resource.Instance(instance_id)
-        return instance.state['Name']
+        return instance.state["Name"]
     except Exception as e:
         return e
-    
+
 
 def update_server_status_in_db(instance_id: str, update_type: str) -> None:
     """_summary_
