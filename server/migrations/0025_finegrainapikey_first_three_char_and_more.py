@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('server', '0024_finegrainapikey'),
+        ("server", "0024_finegrainapikey"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='finegrainapikey',
-            name='first_three_char',
-            field=models.TextField(default='???'),
+            model_name="finegrainapikey",
+            name="first_three_char",
+            field=models.TextField(default="???"),
         ),
         migrations.AddField(
-            model_name='finegrainapikey',
-            name='last_three_char',
-            field=models.TextField(default='???'),
+            model_name="finegrainapikey",
+            name="last_three_char",
+            field=models.TextField(default="???"),
         ),
     ]

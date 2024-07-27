@@ -1,12 +1,11 @@
-from ninja import Schema
 import datetime
+
+from ninja import Schema
+from pydantic import ValidationInfo, field_validator, model_validator
 from typing_extensions import Self
+
 from server.utils import constant
-from pydantic import (
-    ValidationInfo,
-    field_validator,
-    model_validator
-)
+
 
 class PromptSchema(Schema):
     prompt: str = ""
@@ -22,38 +21,43 @@ class PromptSchema(Schema):
     length_penalty: float = constant.DEFAULT_LENGTH_PENALTY
     early_stopping: bool = constant.DEFAULT_EARLY_STOPPING
     n: int = constant.DEFAULT_N
-    @field_validator('frequency_penalty', 'presence_penalty')
+
+    @field_validator("frequency_penalty", "presence_penalty")
     @classmethod
     def check_range_fre_pre(cls, v: float, info: ValidationInfo):
-        if not (-2 <= v <= 2): raise ValueError(f'{v} is not a valid {info.field_name}.')
+        if not (-2 <= v <= 2):
+            raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
 
-    @field_validator('top_p', 'temperature')
+    @field_validator("top_p", "temperature")
     @classmethod
     def check_range_top_p_tem(cls, v: float, info: ValidationInfo):
-        if not (0 <= v <= 1): raise ValueError(f'{v} is not a valid {info.field_name}.')
+        if not (0 <= v <= 1):
+            raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
-    
-    @field_validator('max_tokens')
+
+    @field_validator("max_tokens")
     @classmethod
     def check_range_tokens(cls, v: int | None, info: ValidationInfo):
         if v is not None:
-            if not (0 <= v <= 8192): raise ValueError(f'{v} is not a valid {info.field_name}.')
+            if not (0 <= v <= 8192):
+                raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
-    
-    @field_validator('top_k')
+
+    @field_validator("top_k")
     @classmethod
     def check_range_top_k(cls, v: int | None, info: ValidationInfo):
-        if not (-1 <= v <= 100): 
-            raise ValueError(f'{v} is not a valid {info.field_name}.')
+        if not (-1 <= v <= 100):
+            raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
-    
-    @model_validator(mode='after')
+
+    @model_validator(mode="after")
     def validate_context_length(self) -> Self:
         message = self.prompt
         if len(message) > constant.DEFAULT_MAX_INPUT_LENGTH:
-            raise ValueError('Your message exceeds the maximum context')
+            raise ValueError("Your message exceeds the maximum context")
         return self
+
 
 class ChatSchema(PromptSchema):
     prompt: str | list = ""
@@ -61,29 +65,31 @@ class ChatSchema(PromptSchema):
     include_memory: bool = constant.DEFAULT_MEMORY
     include_current_memory: bool = not constant.DEFAULT_MEMORY
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_context_length(self) -> Self:
         message = self.prompt
         if len(message) > constant.DEFAULT_MAX_INPUT_LENGTH:
-            raise ValueError('Your message exceeds the maximum context')
+            raise ValueError("Your message exceeds the maximum context")
         return self
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def only_one_memory_type(self) -> Self:
         include_memory = self.include_memory
         include_current_memory = self.include_current_memory
         if include_current_memory and include_memory:
-            raise ValueError('Only use one type of memory at a time, set include_memory or include_current_memory or both False')
+            raise ValueError(
+                "Only use one type of memory at a time, set include_memory or include_current_memory or both False"
+            )
         return self
 
 
-       
 class AgentSchema(PromptSchema):
     stream: bool = False
     working_memory: list = []
     parent_template_name: str | None = "Assignment Agent"
     child_template_name: str | None = "Introduction"
     use_my_template: bool = False
+
 
 class ResponseLogRequest(Schema):
     quantity: int = 10
@@ -112,12 +118,14 @@ class ChatResponse(Schema):
     response: str
     context: ChatSchema
 
+
 class AgentResponse(Schema):
     working_memory: list
     context: ChatSchema
-    parent_template_name: str |None 
+    parent_template_name: str | None
     child_template_name: str | None
-    use_my_template: bool 
+    use_my_template: bool
+
 
 class BaseLLMSchema(Schema):
     prompt: str = ""
@@ -127,51 +135,63 @@ class BaseLLMSchema(Schema):
     max_tokens: int = constant.DEFAULT_MAX_TOKENS
     presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
     frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
-    @field_validator('frequency_penalty', 'presence_penalty')
+
+    @field_validator("frequency_penalty", "presence_penalty")
     @classmethod
     def check_range_fre_pre(cls, v: float, info: ValidationInfo):
-        if not (-2 <= v <= 2): raise ValueError(f'{v} is not a valid {info.field_name}.')
+        if not (-2 <= v <= 2):
+            raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
 
-    @field_validator('top_p', 'temperature')
+    @field_validator("top_p", "temperature")
     @classmethod
     def check_range_top_p_tem(cls, v: float, info: ValidationInfo):
-        if not (0 <= v <= 1): raise ValueError(f'{v} is not a valid {info.field_name}.')
+        if not (0 <= v <= 1):
+            raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
-    
-    @field_validator('max_tokens')
+
+    @field_validator("max_tokens")
     @classmethod
     def check_range_tokens(cls, v: int | None, info: ValidationInfo):
         if v is not None:
-            if not (0 <= v <= 8192): raise ValueError(f'{v} is not a valid {info.field_name}.')
+            if not (0 <= v <= 8192):
+                raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
 
-    @field_validator('model')
+    @field_validator("model")
     @classmethod
     def check_model(cls, v: str, info: ValidationInfo):
-        if not v in constant.OPEN_AI_MODEL_LIST: raise ValueError(f'{v} is not a valid {info.field_name}.')
+        if not v in constant.OPEN_AI_MODEL_LIST:
+            raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
+
 
 class ClassificationSchema(BaseLLMSchema):
     classification_list: str | None = None
 
+
 class SummarizeSchema(BaseLLMSchema):
     number_of_word: int | None = 50
 
+
 class RestyleSchema(BaseLLMSchema):
     style_list: str | None = None
+
 
 class SummarizeResponseSchema(Schema):
     response: str
     context: SummarizeSchema
 
+
 class BaseLLMResponseSchema(Schema):
     response: str
     context: BaseLLMSchema
 
+
 class RestyleResponseSchema(Schema):
     response: str
     context: RestyleSchema
+
 
 class ClassificationResponseSchema(Schema):
     response: str

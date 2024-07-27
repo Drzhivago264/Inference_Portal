@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-from decouple import config
+
 from pathlib import Path
+
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -18,27 +20,37 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', "professorparakeet.com", "www.professorparakeet.com", "static.professorparakeet.com"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://professorparakeet.com", "https://www.professorparakeet.com"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "professorparakeet.com",
+    "www.professorparakeet.com",
+    "static.professorparakeet.com",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "https://professorparakeet.com",
+    "https://www.professorparakeet.com",
+]
 
 # Application definition
 
 INSTALLED_APPS = [
     "daphne",
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'server',
-    'django_bleach',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "corsheaders",
+    "server",
+    "django_bleach",
     "rest_framework_api_key",
-    'vectordb',
-    'ninja',
-    'mptt',
+    "vectordb",
+    "ninja",
+    "mptt",
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 CHANNEL_LAYERS = {
@@ -65,26 +77,29 @@ DJANGO_VECTOR_DB = {
 }
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-ROOT_URLCONF = 'inferenceportal.urls'
+ROOT_URLCONF = "inferenceportal.urls"
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["inferenceportal/server/templates", "frontend/templates",],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            "inferenceportal/server/templates",
+            "frontend/templates",
+        ],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -94,58 +109,56 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": "redis://127.0.0.1:6380",
     }
-
 }
 ASGI_APPLICATION = "inferenceportal.asgi.application"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'professorparakeet', 
-        'USER': config("POSTGRES_USER"),
-        'PASSWORD': config("POSTGRES_PASSWORD"),
-        'HOST': '127.0.0.1', 
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "professorparakeet",
+        "USER": config("POSTGRES_USER"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
     }
 }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
 
 if DEBUG:
-  STATIC_URL = 'static/' # Don't break local dev
+    STATIC_URL = "static/"  # Don't break local dev
 else:
-  STATIC_URL = 'https://static.professorparakeet.com/'
+    STATIC_URL = "https://static.professorparakeet.com/"
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Stripe
-STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
 BACKEND_DOMAIN = config("BACKEND_DOMAIN")
 PAYMENT_SUCCESS_URL = config("PAYMENT_SUCCESS_URL")
 PAYMENT_CANCEL_URL = config("PAYMENT_CANCEL_URL")
@@ -156,30 +169,26 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = config("EMAIL_ADDRESS")
-EMAIL_HOST_PASSWORD = config("MAIL")
+EMAIL_HOST_PASSWORD = config("EMAIL_PASSWORD")
 
-STATIC_ROOT = 'staticfiles'
+STATIC_ROOT = "staticfiles"
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6380'
+CELERY_BROKER_URL = "redis://127.0.0.1:6380"
 
 REST_FRAMEWORK = {
-
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
-        'server.api_throttling_rates.KeyCreateRateThrottle',
-        'server.api_throttling_rates.CreditCheckRateThrottle',
-        'server.api_throttling_rates.XMRConfirmationRateThrottle'
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "server.api_throttling_rates.KeyCreateRateThrottle",
+        "server.api_throttling_rates.CreditCheckRateThrottle",
+        "server.api_throttling_rates.XMRConfirmationRateThrottle",
     ],
-
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '20/s',
-        'user': '20/s',
-        'create_key': '50/day',
-        'check_key': '100/hour',
-        'confirm_monero': '100/hour'
-    }
-
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "20/s",
+        "user": "20/s",
+        "create_key": "50/day",
+        "check_key": "100/hour",
+        "confirm_monero": "100/hour",
+    },
 }
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
-

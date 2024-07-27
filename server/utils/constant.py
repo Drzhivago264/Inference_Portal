@@ -1,26 +1,26 @@
 DEFAULT_PERMISSION_CODENAMES = [
-    'allow_chat',
-    'allow_agent',
-    'allow_toolbox',
-    'allow_view_log',
-    'allow_chat_api',
-    'allow_agent_api',
-    'allow_toolbox_api',
-    'allow_view_cost',
-    'allow_data_synthesis',
-    'allow_create_token',
-    'add_userinstructiontree',
-    'change_userinstructiontree',
-    'delete_userinstructiontree',
-    'view_userinstructiontree',
-    'add_dataset',
-    'change_dataset',
-    'delete_dataset',
-    'view_dataset',
-    'add_datasetrecord',
-    'change_datasetrecord',
-    'delete_datasetrecord',
-    'view_datasetrecord'
+    "allow_chat",
+    "allow_agent",
+    "allow_toolbox",
+    "allow_view_log",
+    "allow_chat_api",
+    "allow_agent_api",
+    "allow_toolbox_api",
+    "allow_view_cost",
+    "allow_data_synthesis",
+    "allow_create_token",
+    "add_userinstructiontree",
+    "change_userinstructiontree",
+    "delete_userinstructiontree",
+    "view_userinstructiontree",
+    "add_dataset",
+    "change_dataset",
+    "delete_dataset",
+    "view_dataset",
+    "add_datasetrecord",
+    "change_datasetrecord",
+    "delete_datasetrecord",
+    "view_datasetrecord",
 ]
 MAX_KEY_NAME_LENGTH = 50
 
@@ -40,14 +40,20 @@ DEFAULT_SELF_HOST = "Llama 3 Instruct AWQ"
 TIMEOUT = 10.0
 RETRY = 0
 REGION = "us-east-1"
-SYSTEM_INSTRUCT_TABLE = {"Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.",
-                         "Llama 2  Chat 13B": "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
-                         "4Chan /Pol 2.7B": "",
-                         "Reddit Helper 2.7B": "",
-                         "Llama 3 Instruct AWQ": "You are a helpful AI assistant that needs to answer people questions"}
+SYSTEM_INSTRUCT_TABLE = {
+    "Mistral Chat 13B": "Below is an instruction that describes a task. Write a response that appropriately completes the request.",
+    "Llama 2  Chat 13B": "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
+    "4Chan /Pol 2.7B": "",
+    "Reddit Helper 2.7B": "",
+    "Llama 3 Instruct AWQ": "You are a helpful AI assistant that needs to answer people questions",
+}
 
-OPEN_AI_MODEL_LIST = ['gpt-4', 'gpt-3.5-turbo-0125',
-                      'gpt-3.5-turbo-instruct', 'gpt-4-0125-preview']
+OPEN_AI_MODEL_LIST = [
+    "gpt-4",
+    "gpt-3.5-turbo-0125",
+    "gpt-3.5-turbo-instruct",
+    "gpt-4-0125-preview",
+]
 DEFAULT_TOP_P = 0.73
 DEFAULT_BEST_OF = 1
 DEFAULT_TOP_K = -1

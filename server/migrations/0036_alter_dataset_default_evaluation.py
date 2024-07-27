@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('server', '0035_dataset_default_evaluation_and_more'),
+        ("server", "0035_dataset_default_evaluation_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='dataset',
-            name='default_evaluation',
+            model_name="dataset",
+            name="default_evaluation",
             field=models.JSONField(default=list),
         ),
     ]

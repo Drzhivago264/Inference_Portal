@@ -1,36 +1,37 @@
 from rest_framework import serializers
-from server.utils import constant
+
 from server.models import (
     LLM,
+    Dataset,
+    DatasetRecord,
     InferenceServer,
-    Product,
     InstructionTree,
     MemoryTree,
-    UserInstructionTree,
+    Product,
     PromptResponse,
-    Dataset,
-    DatasetRecord
-
+    UserInstructionTree,
 )
 from server.utils import constant
 
 
 class CostSerializer(serializers.ModelSerializer):
-    model = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='name'
-    )
+    model = serializers.SlugRelatedField(read_only=True, slug_field="name")
 
     class Meta:
         model = PromptResponse
-        fields = ("number_input_tokens", "number_output_tokens",
-                  "created_at", "model", "p_type")
+        fields = (
+            "number_input_tokens",
+            "number_output_tokens",
+            "created_at",
+            "model",
+            "p_type",
+        )
 
 
 class InstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstructionTree
-        fields = ('instruct', "name", "code", "default_editor_template")
+        fields = ("instruct", "name", "code", "default_editor_template")
 
 
 class DatasetCreateSerializer(serializers.Serializer):
@@ -52,7 +53,7 @@ class DatasetUpdateSerializer(DatasetDeleteSerializer):
 class DatasetGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
-        fields = ('id', "name", "default_system_prompt", "default_evaluation")
+        fields = ("id", "name", "default_system_prompt", "default_evaluation")
 
 
 class DatasetRecordGetSerialzier(serializers.Serializer):
@@ -80,8 +81,13 @@ class DatasetDeleteRecordSerialzier(serializers.Serializer):
 class UserInstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInstructionTree
-        fields = ('instruct', "displayed_name", "name",
-                  "code", "default_editor_template")
+        fields = (
+            "instruct",
+            "displayed_name",
+            "name",
+            "code",
+            "default_editor_template",
+        )
 
 
 class MemoryTreeSerializer(serializers.ModelSerializer):
@@ -89,8 +95,17 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MemoryTree
-        fields = ('id', 'prompt', 'response', 'p_type',
-                  'created_at', 'level', 'children', 'parent')
+        fields = (
+            "id",
+            "prompt",
+            "response",
+            "p_type",
+            "created_at",
+            "level",
+            "children",
+            "parent",
+        )
+
     # Return None for lazy loading from the frontend
 
     def get_children(self, instance):
@@ -100,19 +115,26 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('name', 'id')
+        fields = ("name", "id")
 
 
 class UserInstructionGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInstructionTree
-        fields = ('id', 'name', 'displayed_name', 'code',
-                  'parent', 'level', 'children', 'instruct')
+        fields = (
+            "id",
+            "name",
+            "displayed_name",
+            "code",
+            "parent",
+            "level",
+            "children",
+            "instruct",
+        )
 
     def get_fields(self):
         fields = super(UserInstructionGetSerializer, self).get_fields()
-        fields['children'] = UserInstructionGetSerializer(
-            many=True, required=False)
+        fields["children"] = UserInstructionGetSerializer(many=True, required=False)
         return fields
 
 
@@ -121,8 +143,7 @@ class LoginSerializer(serializers.Serializer):
 
     def validate_key(self, value):
         if len(value) != 41 and len(value) != 73 and len(value) != 0:
-            raise serializers.ValidationError(
-                "Key is incorrect")
+            raise serializers.ValidationError("Key is incorrect")
         return value
 
 
@@ -138,7 +159,8 @@ class CreateKeySerializer(serializers.Serializer):
     def validate_key_name(self, value):
         if len(value) > constant.MAX_KEY_NAME_LENGTH:
             raise serializers.ValidationError(
-                f"Key name is too long, keep it below {constant.MAX_KEY_NAME_LENGTH} characters")
+                f"Key name is too long, keep it below {constant.MAX_KEY_NAME_LENGTH} characters"
+            )
         return value
 
 
@@ -152,18 +174,18 @@ class PermissionSerializer(serializers.Serializer):
     allow_view_log = serializers.BooleanField()
     allow_view_cost = serializers.BooleanField()
     allow_data_synthesis = serializers.BooleanField()
-    add_userinstructiontree= serializers.BooleanField()
-    change_userinstructiontree= serializers.BooleanField()
-    delete_userinstructiontree= serializers.BooleanField()
-    view_userinstructiontree= serializers.BooleanField()
-    add_dataset= serializers.BooleanField()
-    change_dataset= serializers.BooleanField()
-    delete_dataset= serializers.BooleanField()
-    view_dataset= serializers.BooleanField()
-    add_datasetrecord= serializers.BooleanField()
-    change_datasetrecord= serializers.BooleanField()
-    delete_datasetrecord= serializers.BooleanField()
-    view_datasetrecord= serializers.BooleanField()
+    add_userinstructiontree = serializers.BooleanField()
+    change_userinstructiontree = serializers.BooleanField()
+    delete_userinstructiontree = serializers.BooleanField()
+    view_userinstructiontree = serializers.BooleanField()
+    add_dataset = serializers.BooleanField()
+    change_dataset = serializers.BooleanField()
+    delete_dataset = serializers.BooleanField()
+    view_dataset = serializers.BooleanField()
+    add_datasetrecord = serializers.BooleanField()
+    change_datasetrecord = serializers.BooleanField()
+    delete_datasetrecord = serializers.BooleanField()
+    view_datasetrecord = serializers.BooleanField()
 
 
 class CreateTokenSerializer(serializers.Serializer):
@@ -176,17 +198,19 @@ class CreateTokenSerializer(serializers.Serializer):
     def validate_token_name(self, value):
         if len(value) > constant.MAX_KEY_NAME_LENGTH:
             raise serializers.ValidationError(
-                f"Token name is too long, keep it below {constant.MAX_KEY_NAME_LENGTH} characters")
+                f"Token name is too long, keep it below {constant.MAX_KEY_NAME_LENGTH} characters"
+            )
         return value
 
     def validate_ttl(self, value):
         if value <= 0 or value > 999999:
             raise serializers.ValidationError(
-                "Time to live cannot be negative or larger than 999999")
+                "Time to live cannot be negative or larger than 999999"
+            )
         return value
 
     def validate_time_unit(self, value):
-        if value not in ['day', 'hour', 'minute', 'second']:
+        if value not in ["day", "hour", "minute", "second"]:
             raise serializers.ValidationError("Time format is incorrect")
         return value
 
@@ -220,8 +244,7 @@ class StripePaymentSerializer(CheckKeySerializer):
 class ModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LLM
-        fields = ('id', 'name', 'desc', 'input_price',
-                  'output_price', 'context_length')
+        fields = ("id", "name", "desc", "input_price", "output_price", "context_length")
 
 
 class ServerSerializer(serializers.ModelSerializer):
@@ -231,17 +254,23 @@ class ServerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InferenceServer
-        fields = ('id', 'status', 'availability', 'model_name',
-                  'model_price_input', 'model_price_output')
+        fields = (
+            "id",
+            "status",
+            "availability",
+            "model_name",
+            "model_price_input",
+            "model_price_output",
+        )
 
     def get_model_name(self, instance):
-        return instance.hosted_model.name if instance.hosted_model else ''
+        return instance.hosted_model.name if instance.hosted_model else ""
 
     def get_model_price_input(self, instance):
-        return instance.hosted_model.input_price if instance.hosted_model else ''
+        return instance.hosted_model.input_price if instance.hosted_model else ""
 
     def get_model_price_output(self, instance):
-        return instance.hosted_model.output_price if instance.hosted_model else ''
+        return instance.hosted_model.output_price if instance.hosted_model else ""
 
 
 class UserInstructionCreateSerializer(serializers.Serializer):
@@ -252,9 +281,11 @@ class UserInstructionCreateSerializer(serializers.Serializer):
 
 class NestedUserInstructionCreateSerializer(serializers.Serializer):
     parent_instruction = UserInstructionCreateSerializer(
-        required=False, allow_null=True)
+        required=False, allow_null=True
+    )
     childrens = UserInstructionCreateSerializer(
-        many=True, required=False, allow_null=True)
+        many=True, required=False, allow_null=True
+    )
 
 
 class UserInstructionDeleteCreateSerializer(serializers.Serializer):

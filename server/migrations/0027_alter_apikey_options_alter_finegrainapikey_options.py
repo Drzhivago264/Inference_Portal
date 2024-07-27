@@ -6,16 +6,22 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('server', '0026_custompermissionwithoutcontenttype_and_more'),
+        ("server", "0026_custompermissionwithoutcontenttype_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='apikey',
-            options={'verbose_name': 'Master API Key', 'verbose_name_plural': 'Master API Keys'},
+            name="apikey",
+            options={
+                "verbose_name": "Master API Key",
+                "verbose_name_plural": "Master API Keys",
+            },
         ),
         migrations.AlterModelOptions(
-            name='finegrainapikey',
-            options={'verbose_name': 'FineGrain API Key', 'verbose_name_plural': 'FineGrain API Keys'},
+            name="finegrainapikey",
+            options={
+                "verbose_name": "FineGrain API Key",
+                "verbose_name_plural": "FineGrain API Keys",
+            },
         ),
     ]
