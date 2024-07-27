@@ -3,7 +3,7 @@ import "./i18n";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 
-import { QueryClient, QueryClientProvider } from "react-query";
+import {QueryClient, QueryClientProvider} from "react-query";
 
 import App from "./App";
 

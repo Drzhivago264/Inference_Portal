@@ -9,15 +9,12 @@ from ninja.errors import HttpError
 from transformers import AutoTokenizer
 
 from api.api_schema import ChatResponse, ChatSchema, Error
-from api.utils import (
-    check_permission,
-    get_model_url,
-    send_request_async,
-    send_stream_request_async,
-)
+from api.utils import (check_permission, get_model_url, send_request_async,
+                       send_stream_request_async)
 from server.celery_tasks import celery_log_prompt_response, command_EC2
 from server.utils import constant
-from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
+from server.utils.async_.async_manage_ec2 import \
+    update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.query_database import get_chat_context
 

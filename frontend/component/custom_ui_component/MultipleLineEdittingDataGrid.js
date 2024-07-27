@@ -1,17 +1,17 @@
-import React, { useCallback, useLayoutEffect, useState } from "react";
+import React, {useCallback, useLayoutEffect, useState} from "react";
 
 import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
 import PropTypes from "prop-types";
 import TextField from "@mui/material/TextField";
-import { useGridApiContext } from "@mui/x-data-grid";
+import {useGridApiContext} from "@mui/x-data-grid";
 
 export function isKeyboardEvent(event) {
 	return !!event.key;
 }
 
 function EditTextarea(props) {
-	const { id, field, value, colDef, hasFocus } = props;
+	const {id, field, value, colDef, hasFocus} = props;
 	const [valueState, setValueState] = useState(value);
 	const [anchorEl, setAnchorEl] = useState();
 	const [inputRef, setInputRef] = useState(null);
@@ -31,16 +31,13 @@ function EditTextarea(props) {
 		(event) => {
 			const newValue = event.target.value;
 			setValueState(newValue);
-			apiRef.current.setEditCellValue(
-				{ id, field, value: newValue, debounceMs: 200 },
-				event
-			);
+			apiRef.current.setEditCellValue({id, field, value: newValue, debounceMs: 200}, event);
 		},
 		[apiRef, field, id]
 	);
 
 	return (
-		<div style={{ position: "relative", alignSelf: "flex-start" }}>
+		<div style={{position: "relative", alignSelf: "flex-start"}}>
 			<div
 				ref={handleRef}
 				style={{
@@ -53,14 +50,12 @@ function EditTextarea(props) {
 			/>
 			{anchorEl && (
 				<Popper open anchorEl={anchorEl} placement='bottom-start'>
-					<Paper
-						elevation={12}
-						sx={{ minWidth: colDef.computedWidth }}>
+					<Paper elevation={12} sx={{minWidth: colDef.computedWidth}}>
 						<TextField
 							id='outlined-multiline-edit'
 							multiline
 							value={valueState}
-							sx={{ width: "600px" }}
+							sx={{width: "600px"}}
 							onChange={handleChange}
 							inputRef={(ref) => setInputRef(ref)}
 						/>

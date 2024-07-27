@@ -5,13 +5,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import Textarea from "./CustomTextArea.js";
 
-export const KeyCheckDisplay = ({
-	t,
-	key_,
-	key_name,
-	monero_balance,
-	fiat_balance,
-}) => {
+export const KeyCheckDisplay = ({t, key_, key_name, monero_balance, fiat_balance}) => {
 	return (
 		<Box my={4}>
 			<Alert severity='success'>
@@ -36,13 +30,7 @@ KeyCheckDisplay.propTypes = {
 	monero_balance: PropTypes.number.isRequired,
 	fiat_balance: PropTypes.number.isRequired,
 };
-export const XMRWalletDisplay = ({
-	t,
-	key_,
-	key_name,
-	integrated_wallet,
-	payment_id,
-}) => {
+export const XMRWalletDisplay = ({t, key_, key_name, integrated_wallet, payment_id}) => {
 	return (
 		<Box my={4}>
 			<Alert severity='success'>
@@ -66,7 +54,7 @@ XMRWalletDisplay.propTypes = {
 	integrated_wallet: PropTypes.string.isRequired,
 	payment_id: PropTypes.string.isRequired,
 };
-export const XMRWConfirmationDisplay = ({ t, detail }) => {
+export const XMRWConfirmationDisplay = ({t, detail}) => {
 	return (
 		<Box my={4}>
 			<Alert severity='success'>

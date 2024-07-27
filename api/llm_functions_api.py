@@ -5,26 +5,15 @@ from django_ratelimit.core import is_ratelimited
 from ninja import Router
 from ninja.errors import HttpError
 
-from api.api_schema import (
-    BaseLLMResponseSchema,
-    BaseLLMSchema,
-    ClassificationResponseSchema,
-    ClassificationSchema,
-    Error,
-    RestyleResponseSchema,
-    RestyleSchema,
-    SummarizeResponseSchema,
-    SummarizeSchema,
-)
+from api.api_schema import (BaseLLMResponseSchema, BaseLLMSchema,
+                            ClassificationResponseSchema, ClassificationSchema,
+                            Error, RestyleResponseSchema, RestyleSchema,
+                            SummarizeResponseSchema, SummarizeSchema)
 from api.utils import check_permission
 from server.utils.async_.async_query_database import QueryDBMixin
-from server.utils.llm_toolbox import (
-    ChangeWrittingStyle,
-    Emotion,
-    ParaphaseDocument,
-    SummarizeDocument,
-    TopicClassification,
-)
+from server.utils.llm_toolbox import (ChangeWrittingStyle, Emotion,
+                                      ParaphaseDocument, SummarizeDocument,
+                                      TopicClassification)
 
 router = Router()
 

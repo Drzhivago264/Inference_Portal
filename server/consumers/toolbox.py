@@ -11,17 +11,11 @@ from pydantic import ValidationError
 
 from server.consumers.pydantic_validator import ToolSchema
 from server.utils.async_.async_manage_ec2 import (
-    ManageEC2Mixin,
-    update_server_status_in_db_async,
-)
+    ManageEC2Mixin, update_server_status_in_db_async)
 from server.utils.async_.async_query_database import QueryDBMixin
-from server.utils.llm_toolbox import (
-    ChangeWrittingStyle,
-    Emotion,
-    ParaphaseDocument,
-    SummarizeDocument,
-    TopicClassification,
-)
+from server.utils.llm_toolbox import (ChangeWrittingStyle, Emotion,
+                                      ParaphaseDocument, SummarizeDocument,
+                                      TopicClassification)
 
 
 class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):

@@ -1,7 +1,6 @@
 from hashlib import sha256
 
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import Permission, User
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
@@ -11,7 +10,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
 from server.models import APIKEY, LLM, FineGrainAPIKEY, InferenceServer
-from server.views.serializer import LoginSerializer, ModelSerializer, ServerSerializer
+from server.views.serializer import (LoginSerializer, ModelSerializer,
+                                     ServerSerializer)
 
 
 @api_view(["GET"])

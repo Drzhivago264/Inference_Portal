@@ -1,4 +1,4 @@
-import { Button, CardActionArea, CardActions } from "@mui/material";
+import {Button, CardActionArea, CardActions} from "@mui/material";
 
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -9,24 +9,16 @@ import React from "react";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 
-export const RedirectMediaCards = ({
-	image_link,
-	t,
-	redirect,
-	destination,
-	image_loaded,
-	setImageLoad,
-	name,
-}) => {
+export const RedirectMediaCards = ({image_link, t, redirect, destination, image_loaded, setImageLoad, name}) => {
 	return (
 		<Box m={1}>
 			<CardActionArea
 				onClick={() => {
 					redirect(destination);
 				}}>
-				<Card sx={{ display: "flex" }}>
-					<Box sx={{ display: "flex", flexDirection: "column" }}>
-						<CardContent sx={{ flex: "1 0 auto" }}>
+				<Card sx={{display: "flex"}}>
+					<Box sx={{display: "flex", flexDirection: "column"}}>
+						<CardContent sx={{flex: "1 0 auto"}}>
 							<Typography component='div' variant='h5'>
 								{t(`redirect.${name}`)}
 							</Typography>
@@ -45,21 +37,14 @@ export const RedirectMediaCards = ({
 						</CardContent>
 
 						<CardActions>
-							<Button
-								component='span'
-								size='small'
-								color='primary'>
+							<Button component='span' size='small' color='primary'>
 								{t("redirect.Redirect")}
 							</Button>
 						</CardActions>
 					</Box>
 					{!image_loaded && (
-						<CardMedia sx={{ width: 200, height: 200 }}>
-							<Skeleton
-								animation='wave'
-								height={200}
-								width={200}
-							/>
+						<CardMedia sx={{width: 200, height: 200}}>
+							<Skeleton animation='wave' height={200} width={200} />
 						</CardMedia>
 					)}
 					<CardMedia

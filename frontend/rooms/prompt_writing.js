@@ -55,9 +55,9 @@ function PromptWriting() {
     const [current_evaluation, setCurrentEvaluation] = useState([{ evaluation_name: "", score: "" }])
     const [current_prompt, setCurrentPrompt] = useState("")
     const [current_response, setCurrentResponse] = useState("")
-    const [current_system_prompt_error, setCurrentSystemPromptError] = useState("")
-    const [current_prompt_error, setCurrentPromptError] = useState("")
-    const [current_response_error, setCurrentResponseError] = useState("")
+    const [current_system_prompt_error, setCurrentSystemPromptError] = useState(false)
+    const [current_prompt_error, setCurrentPromptError] = useState(false)
+    const [current_response_error, setCurrentResponseError] = useState(false)
     const [current_record_id, setCurrentRecordId] = useState(null)
     const [allow_save_record, setAllowSaveRecord] = useState(false)
     const [loading, setLoading] = useState(false);
@@ -364,7 +364,7 @@ function PromptWriting() {
                                 </List>
                             </Paper>
                             <Box sx={{ mr: 2, mt: 2 }} >
-                                <DatasetExportServerSide dataset_id={dataset_list[selectedIndex] ? dataset_list[selectedIndex].id : null }/>
+                                <DatasetExportServerSide dataset_id={dataset_list[selectedIndex] ? dataset_list[selectedIndex].id : null } dataset_name={dataset_list[selectedIndex] ? dataset_list[selectedIndex].name : null} setSaveError={setSaveError} setSaveErrorMessage={setSaveErrorMessage}/>
                             </Box>
                         </Grid>
                         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
@@ -483,7 +483,7 @@ function PromptWriting() {
                                         <IconButton aria-label="delete" size='small' onClick={() => { deleteRecord() }}>
                                             <DeleteIcon />
                                         </IconButton>
-                                        <LoadingButton size="small" loading={loading} disabled = {!dataset_row.length} loadingPosition="end" variant="contained" onClick={() => { navigateRow("next") }} endIcon={<KeyboardArrowRightIcon />}>Next </LoadingButton>
+                                        <LoadingButton size="small" loading={loading} disabled = {!dataset_row.length} loadingPosition="end" variant="contained" onClick={() => { navigateRow("next") }} endIcon={<KeyboardArrowRightIcon />}>Next </LoadingButton> 
                                         <LoadingButton size="small" loading={loading} disabled={!next_pagnation} loadingPosition="end" variant="contained" onClick={() => { navigatePagination("next") }} endIcon={<KeyboardDoubleArrowRightIcon />}>Next (10)</LoadingButton>
                                     </Stack>
                                     {

@@ -3,14 +3,16 @@ import datetime
 from django.contrib.auth.models import Group, Permission, User
 from django.http import HttpRequest
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.decorators import (api_view, permission_classes,
+                                       throttle_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from server.api_throttling_rates import KeyCreateRateThrottle, UserRateThrottle
 from server.models import FineGrainAPIKEY
 from server.utils import constant
-from server.views.serializer import CreateTokenSerializer, ModifyTokenSerializer
+from server.views.serializer import (CreateTokenSerializer,
+                                     ModifyTokenSerializer)
 
 
 @api_view(["POST"])

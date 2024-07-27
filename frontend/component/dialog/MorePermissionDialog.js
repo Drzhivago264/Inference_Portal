@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Chip from "@mui/material/Chip";
@@ -8,35 +8,19 @@ import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import PropTypes from "prop-types";
-import { basePut } from "../../api_hook/basePut";
-import { styled } from "@mui/material/styles";
-import { useMutation } from "react-query";
+import {basePut} from "../../api_hook/basePut";
+import {styled} from "@mui/material/styles";
+import {useMutation} from "react-query";
 
-const ListItem = styled("li")(({ theme }) => ({
+const ListItem = styled("li")(({theme}) => ({
 	margin: theme.spacing(0.5),
 }));
 
 function PermissionDialog(props) {
-	const {
-		onClose,
-		open,
-		notchoosenpermissionlist,
-		token_name,
-		token_value,
-		token_prefix,
-		setTokenCreateError,
-		index,
-		setTokenList,
-		token_list,
-	} = props;
+	const {onClose, open, notchoosenpermissionlist, token_name, token_value, token_prefix, setTokenCreateError, index, setTokenList, token_list} = props;
 
-	const { mutate: addpermissionmutate } = useMutation(basePut);
-	const addPermission = (
-		token_prefix,
-		token_name,
-		token_value,
-		permission
-	) => {
+	const {mutate: addpermissionmutate} = useMutation(basePut);
+	const addPermission = (token_prefix, token_name, token_value, permission) => {
 		if (token_prefix && token_name && token_value && permission) {
 			const data = {
 				token_name: token_name,
@@ -45,21 +29,17 @@ function PermissionDialog(props) {
 				permission: permission,
 			};
 			addpermissionmutate(
-				{ url: "/frontend-api/add-permission", data: data },
+				{url: "/frontend-api/add-permission", data: data},
 				{
 					onSuccess: () =>
 						setTokenList((prev) => {
-							const items = [
-								...token_list[index].permissions,
-								permission,
-							];
+							const items = [...token_list[index].permissions, permission];
 							const newState = prev;
 							newState[index].permissions = items;
 							return [...newState];
 						}),
 
-					onError: (error) =>
-						setTokenCreateError(error.response.data.detail),
+					onError: (error) => setTokenCreateError(error.response.data.detail),
 				}
 			);
 		}
@@ -99,12 +79,7 @@ function PermissionDialog(props) {
 							icon={<AddCircleIcon />}
 							label={perm}
 							onClick={() => {
-								addPermission(
-									token_prefix,
-									token_name,
-									token_value,
-									perm
-								);
+								addPermission(token_prefix, token_name, token_value, perm);
 							}}
 						/>
 					</ListItem>
@@ -139,9 +114,7 @@ export default function AddPermissionDialog({
 	token_list,
 }) {
 	const [open, setOpen] = useState(false);
-	const [notchoosenpermissionlist, setNotChoosenPermissionList] = useState(
-		[]
-	);
+	const [notchoosenpermissionlist, setNotChoosenPermissionList] = useState([]);
 	const handleClickOpen = () => {
 		setOpen(true);
 		var not_choosen_permission_list = [];
@@ -159,10 +132,7 @@ export default function AddPermissionDialog({
 
 	return (
 		<div>
-			<IconButton
-				aria-label='delete'
-				onClick={handleClickOpen}
-				size='small'>
+			<IconButton aria-label='delete' onClick={handleClickOpen} size='small'>
 				<AddCircleIcon />
 			</IconButton>
 			<PermissionDialog

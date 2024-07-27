@@ -1,16 +1,8 @@
 from rest_framework import serializers
 
-from server.models import (
-    LLM,
-    Dataset,
-    DatasetRecord,
-    InferenceServer,
-    InstructionTree,
-    MemoryTree,
-    Product,
-    PromptResponse,
-    UserInstructionTree,
-)
+from server.models import (LLM, Dataset, DatasetRecord, InferenceServer,
+                           InstructionTree, MemoryTree, Product,
+                           PromptResponse, UserInstructionTree)
 from server.utils import constant
 
 
@@ -42,6 +34,10 @@ class DatasetCreateSerializer(serializers.Serializer):
 
 class DatasetDeleteSerializer(serializers.Serializer):
     id = serializers.IntegerField()
+
+
+class DatasetExportSerializer(DatasetDeleteSerializer):
+    extension = serializers.CharField()
 
 
 class DatasetUpdateSerializer(DatasetDeleteSerializer):

@@ -29,6 +29,7 @@ export const DatasetExport = ({ filename, data }) => {
 			let url = URL.createObjectURL(blob);
 			a.setAttribute("href", url);
 			a.setAttribute("download", `${filename}.json`);
+            a.click();
 		} else if (choosen_export_format == ".csv") {
 			let download_content = Papa.unparse(data);
 			let blob = new Blob([download_content]);
@@ -44,7 +45,7 @@ export const DatasetExport = ({ filename, data }) => {
 				document.body.removeChild(a);
 			}
 		}
-		a.click();
+		
 	};
 	return (
 		<Paper sx={{ m: 2 }} variant='outlined'>

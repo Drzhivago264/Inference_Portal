@@ -2,9 +2,15 @@ import React, { useState } from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import CloseIcon from "@mui/icons-material/Close";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import GetAppIcon from "@mui/icons-material/GetApp";
+import IconButton  from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
@@ -12,15 +18,39 @@ import PropTypes from "prop-types";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { usePostLargeDatasetExport } from "../../api_hook/usePostLargeDatasetExport";
 
-export const DatasetExportServerSide = ({ dataset_id }) => {
-	const [choosen_export_format, setChoosenExportFormat] = useState(".json");
+export const DatasetExportServerSide = ({
+	dataset_id,
+	dataset_name,
+	setSaveErrorMessage,
+	setSaveError,
+}) => {
+	const [extension, setExtension] = useState(".csv");
+	const [show_download_link, setShowDownloadLink] = useState(false);
+	const [download_link, setDownloadLink] = useState("");
+	const { fetch: postLargedatasetExport } = usePostLargeDatasetExport({
+		dataset_id,
+		dataset_name,
+		extension,
+		setSaveErrorMessage,
+		setSaveError,
+		setDownloadLink,
+		setShowDownloadLink,
+	});
+	const handleClose = () => {
+		setShowDownloadLink(false);
+	};
 	const handleExportServerSide = (event) => {
 		event.preventDefault();
-		if (dataset_id) {
-			console.log(dataset_id);
+		if (dataset_id && dataset_name) {
+			postLargedatasetExport();
+		} else {
+			setSaveError(true);
+			setSaveErrorMessage("No dataset to export!");
 		}
 	};
+
 	return (
 		<Paper variant='outlined'>
 			<Box ml={2} mt={1} mb={1}>
@@ -39,10 +69,8 @@ export const DatasetExportServerSide = ({ dataset_id }) => {
 							<Select
 								labelId='export-label-chatlog'
 								id='export-select-chatlog'
-								onChange={(e) =>
-									setChoosenExportFormat(e.target.value)
-								}
-								value={choosen_export_format}
+								onChange={(e) => setExtension(e.target.value)}
+								value={extension}
 								label='Export'
 								size='small'
 								fullWidth>
@@ -64,6 +92,44 @@ export const DatasetExportServerSide = ({ dataset_id }) => {
 							</Button>
 						</Stack>
 					</FormControl>
+					<Dialog
+						open={show_download_link}
+						onClose={handleClose}
+						aria-labelledby='alert-dialog-title'
+						aria-describedby='alert-dialog-description'
+						fullWidth
+						maxWidth='md'>
+						<DialogTitle id='alert-dialog-title'>
+							{"Download Link"}
+						</DialogTitle>
+						<IconButton
+							aria-label='close'
+							onClick={handleClose}
+							size='small'
+							sx={{
+								position: "absolute",
+								right: 8,
+								top: 12,
+								color: (theme) => theme.palette.grey[500],
+							}}>
+							<CloseIcon />
+						</IconButton>
+						<DialogContent>
+							<DialogContentText id='alert-dialog-description'>
+								You dataset export has been scheduled. Depend on
+								the the size of your dataset, it can take a few
+								minutes. You can download the file via this
+								link:
+								<Box mt={2}>
+									<Paper>
+										<Typography m={1} p={1} variant='body1'>
+											{download_link}
+										</Typography>
+									</Paper>
+								</Box>
+							</DialogContentText>
+						</DialogContent>
+					</Dialog>
 				</Box>
 			</Box>
 		</Paper>
@@ -71,5 +137,8 @@ export const DatasetExportServerSide = ({ dataset_id }) => {
 };
 
 DatasetExportServerSide.propTypes = {
-	dataset_id: PropTypes.number.isRequired,
+	dataset_id: PropTypes.number,
+	dataset_name: PropTypes.string,
+	setSaveError: PropTypes.func.isRequired,
+	setSaveErrorMessage: PropTypes.func.isRequired,
 };

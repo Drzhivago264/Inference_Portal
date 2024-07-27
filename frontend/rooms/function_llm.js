@@ -1,33 +1,30 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { UserContext, WebSocketContext } from "../App.js";
-import {
-	closeWebSocket,
-	scrollToBottom,
-} from "../component/chat_components/chatUtils.js";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {UserContext, WebSocketContext} from "../App.js";
+import {closeWebSocket, scrollToBottom} from "../component/chat_components/chatUtils.js";
 
 import Box from "@mui/material/Box";
-import { ChatBox } from "../component/chat_components/Chatbox.js";
-import { ChatExport } from "../component/import_export/ChatExport.js";
+import {ChatBox} from "../component/chat_components/Chatbox.js";
+import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Footer from "../component/nav/Footer.js";
-import { FormControl } from "@mui/material";
+import {FormControl} from "@mui/material";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
-import { OpenAPIParameter } from "../component/chat_components/OpenaiParameters.js";
+import {OpenAPIParameter} from "../component/chat_components/OpenaiParameters.js";
 import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Typography from "@mui/material/Typography";
-import { chatsocket } from "../component/websocket/ChatSocket.js";
-import { styled } from "@mui/material/styles";
-import { useGetModel } from "../api_hook/useGetModel.js";
-import { useGetRedirectAnon } from "../api_hook/useGetRedirectAnon.js";
-import { useNavigate } from "react-router-dom";
+import {chatsocket} from "../component/websocket/ChatSocket.js";
+import {styled} from "@mui/material/styles";
+import {useGetModel} from "../api_hook/useGetModel.js";
+import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
+import {useNavigate} from "react-router-dom";
 
-const ChatPaper = styled(Paper)(({ theme }) => ({
+const ChatPaper = styled(Paper)(({theme}) => ({
 	minWidth: 300,
 	height: 700,
 	overflow: "auto",
@@ -36,8 +33,7 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
 }));
 
 function FunctionLLM() {
-	const { websocket, agent_websocket, chat_websocket, websocket_hash } =
-		useContext(WebSocketContext);
+	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
 	const [shownthinking, setThinking] = useState(false);
 	const messagesEndRef = useRef(null);
 	const [chat_message, setChatMessage] = useState([]);
@@ -49,13 +45,11 @@ function FunctionLLM() {
 	const [frequencypenalty, setFrequencyPenalty] = useState(0);
 	const [usermessage, setUserMessage] = useState("");
 	const [usermessageError, setUserMessageError] = useState(false);
-	const [extrainstruction, setExtraInstruction] = useState(
-		"sadness, joy, love, anger, fear, surprise, neutral"
-	);
+	const [extrainstruction, setExtraInstruction] = useState("sadness, joy, love, anger, fear, surprise, neutral");
 	const [llmfunction, setLLMFunction] = useState("emotion");
 	const navigate = useNavigate();
-	const { is_authenticated, timeZone } = useContext(UserContext);
-	const { agent_objects } = useGetModel();
+	const {is_authenticated, timeZone} = useContext(UserContext);
+	const {agent_objects} = useGetModel();
 	useGetRedirectAnon(navigate, is_authenticated);
 	useEffect(() => {
 		scrollToBottom(messagesEndRef);
@@ -67,9 +61,7 @@ function FunctionLLM() {
 		closeWebSocket(agent_websocket);
 		closeWebSocket(chat_websocket);
 		if (websocket_hash) {
-			websocket.current = new WebSocket(
-				`${ws_scheme}://${window.location.host}/ws/toolbox/${websocket_hash}/${timeZone}/`
-			);
+			websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}/ws/toolbox/${websocket_hash}/${timeZone}/`);
 			chatsocket(websocket, setChatMessage, setThinking, document);
 		}
 	}, [websocket_hash]);
@@ -94,22 +86,10 @@ function FunctionLLM() {
 				frequency_penalty: frequencypenalty,
 				presence_penalty: presencepenalty,
 				temperature: temperature,
-				emotion_list:
-					typeof extrainstruction === "string"
-						? extrainstruction
-						: null,
-				topic_list:
-					typeof extrainstruction === "string"
-						? extrainstruction
-						: null,
-				style_list:
-					typeof extrainstruction === "string"
-						? extrainstruction
-						: null,
-				number_of_word:
-					typeof extrainstruction === "number"
-						? extrainstruction
-						: null,
+				emotion_list: typeof extrainstruction === "string" ? extrainstruction : null,
+				topic_list: typeof extrainstruction === "string" ? extrainstruction : null,
+				style_list: typeof extrainstruction === "string" ? extrainstruction : null,
+				number_of_word: typeof extrainstruction === "number" ? extrainstruction : null,
 			};
 			websocket.current.send(JSON.stringify(data));
 			setUserMessage("");
@@ -127,19 +107,16 @@ function FunctionLLM() {
 		setExtraInstruction(instructions[e] || "");
 	};
 	return (
-		<Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
+		<Container maxWidth={false} sx={{minWidth: 1200}} disableGutters>
 			<title>Tools</title>
 			<ResponsiveAppBar max_width='xl' />
-			<Container maxWidth='xl' sx={{ minWidth: 1200 }}>
+			<Container maxWidth='xl' sx={{minWidth: 1200}}>
 				<Box m={1}>
 					<Grid container spacing={2}>
 						<Grid item xs={4}>
-							<Paper sx={{ ml: 2, mr: 2 }} variant='outlined'>
+							<Paper sx={{ml: 2, mr: 2}} variant='outlined'>
 								<Box m={1}>
-									<Typography
-										sx={{ color: "text.secondary" }}>
-										Toolbox
-									</Typography>
+									<Typography sx={{color: "text.secondary"}}>Toolbox</Typography>
 								</Box>
 								<Divider />
 								<Box m={2}>
@@ -149,9 +126,7 @@ function FunctionLLM() {
 											name='radio-buttons-group'
 											onChange={(e) => {
 												setLLMFunction(e.target.value);
-												swap_extra_instruction(
-													e.target.value
-												);
+												swap_extra_instruction(e.target.value);
 											}}
 											value={llmfunction}>
 											{[
@@ -180,51 +155,21 @@ function FunctionLLM() {
 													value: "restyle",
 												},
 											].map((func) => {
-												if (
-													func.value ==
-														"paraphrase" ||
-													func.value == "setiment"
-												) {
-													return (
-														<FormControlLabel
-															key={func.label}
-															value={func.value}
-															control={<Radio />}
-															label={func.label}
-														/>
-													);
-												} else if (
-													func.value == "summary"
-												) {
-													return (
-														<FormControlLabel
-															key={func.label}
-															value={func.value}
-															control={<Radio />}
-															label={func.label}
-														/>
-													);
+												if (func.value == "paraphrase" || func.value == "setiment") {
+													return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
+												} else if (func.value == "summary") {
+													return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
 												} else {
-													return (
-														<FormControlLabel
-															key={func.label}
-															value={func.value}
-															control={<Radio />}
-															label={func.label}
-														/>
-													);
+													return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
 												}
 											})}
 										</RadioGroup>
 									</FormControl>
 								</Box>
 							</Paper>
-							<Paper sx={{ m: 2 }} variant='outlined'>
+							<Paper sx={{m: 2}} variant='outlined'>
 								<Box m={1}>
-									<Typography
-										sx={{ color: "text.secondary" }}>
-										Extra Instruction
-									</Typography>
+									<Typography sx={{color: "text.secondary"}}>Extra Instruction</Typography>
 								</Box>
 								<Divider />
 								<Box m={2}>
@@ -237,23 +182,14 @@ function FunctionLLM() {
 											display: "flex",
 											minWidth: 200,
 										}}
-										onChange={(e) =>
-											setExtraInstruction(e.target.value)
-										}
+										onChange={(e) => setExtraInstruction(e.target.value)}
 										minRows={4}
 									/>
 								</Box>
 							</Paper>
-							<ChatExport
-								chat_message={chat_message}
-								number_of_remove_message={2}
-								setChatMessage={setChatMessage}></ChatExport>
+							<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
 						</Grid>
-						<Divider
-							orientation='vertical'
-							flexItem
-							sx={{ mr: "-1px" }}
-						/>
+						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
 						<Grid item xs={6}>
 							<Box mr={2}>
 								<ChatBox
@@ -270,11 +206,7 @@ function FunctionLLM() {
 									handleEnter={handleEnter}></ChatBox>
 							</Box>
 						</Grid>
-						<Divider
-							orientation='vertical'
-							flexItem
-							sx={{ mr: "-1px" }}
-						/>
+						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
 						<Grid item xs={2}>
 							<OpenAPIParameter
 								top_p={top_p}
@@ -289,9 +221,7 @@ function FunctionLLM() {
 								presencepenalty={presencepenalty}
 								setPresencePenalty={setPresencePenalty}
 								frequencypenalty={frequencypenalty}
-								setFrequencyPenalty={
-									setFrequencyPenalty
-								}></OpenAPIParameter>
+								setFrequencyPenalty={setFrequencyPenalty}></OpenAPIParameter>
 						</Grid>
 					</Grid>
 				</Box>

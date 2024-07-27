@@ -3,20 +3,20 @@ from hashlib import sha512
 
 from django.contrib.auth.decorators import permission_required
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.decorators import (api_view, permission_classes,
+                                       throttle_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
 from server.models import UserInstructionTree
 from server.utils import constant
-from server.utils.sync_.manage_permissions import get_master_key_and_master_user
-from server.views.serializer import (
-    NestedUserInstructionCreateSerializer,
-    UserInstructionCreateSerializer,
-    UserInstructionDeleteCreateSerializer,
-    UserInstructionGetSerializer,
-)
+from server.utils.sync_.manage_permissions import \
+    get_master_key_and_master_user
+from server.views.serializer import (NestedUserInstructionCreateSerializer,
+                                     UserInstructionCreateSerializer,
+                                     UserInstructionDeleteCreateSerializer,
+                                     UserInstructionGetSerializer)
 
 
 @api_view(["GET"])

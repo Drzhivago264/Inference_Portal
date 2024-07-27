@@ -1,49 +1,35 @@
 from django.urls import path, re_path
 from django.views.generic import TemplateView
 
-from server.views.chatroom_view import (
-    hub_redirect_api,
-    instruction_tree_api,
-    memory_tree_api,
-)
+from server.views.chatroom_view import (hub_redirect_api, instruction_tree_api,
+                                        memory_tree_api)
 from server.views.contact import contact_api
+from server.views.export_dataset import export_user_dataset_api
 from server.views.information import check_login, log_in, log_out, model_api
-from server.views.key_management import (
-    CancelView,
-    CreateStripeCheckoutSessionView,
-    StripeWebhookView,
-    SuccessView,
-    check_credit_api,
-    confirm_xmr_payment_api,
-    generate_key_api,
-    product_list_api,
-    retrive_xmr_wallet_api,
-    stripe_redirect,
-)
-from server.views.prompt_writing import (
-    create_user_dataset_api,
-    create_user_record_api,
-    delete_user_dataset_api,
-    delete_user_record_api,
-    get_default_user_dataset_api,
-    get_user_records_api,
-    update_user_dataset_api,
-    update_user_record_api,
-)
+from server.views.key_management import (CancelView,
+                                         CreateStripeCheckoutSessionView,
+                                         StripeWebhookView, SuccessView,
+                                         check_credit_api,
+                                         confirm_xmr_payment_api,
+                                         generate_key_api, product_list_api,
+                                         retrive_xmr_wallet_api,
+                                         stripe_redirect)
+from server.views.prompt_writing import (create_user_dataset_api,
+                                         create_user_record_api,
+                                         delete_user_dataset_api,
+                                         delete_user_record_api,
+                                         get_default_user_dataset_api,
+                                         get_user_records_api,
+                                         update_user_dataset_api,
+                                         update_user_record_api)
 from server.views.response_log import LogListJson, cost_api
-from server.views.template_writing import (
-    create_user_instruction_tree_api,
-    delete_user_instruction_tree_api,
-    update_user_instruction_tree_api,
-    user_instruction_tree_api,
-)
-from server.views.token_management import (
-    add_permission,
-    generate_token_api,
-    get_token_api,
-    invalidate_token,
-    remove_permission,
-)
+from server.views.template_writing import (create_user_instruction_tree_api,
+                                           delete_user_instruction_tree_api,
+                                           update_user_instruction_tree_api,
+                                           user_instruction_tree_api)
+from server.views.token_management import (add_permission, generate_token_api,
+                                           get_token_api, invalidate_token,
+                                           remove_permission)
 
 app_name = "server"
 
@@ -65,6 +51,7 @@ urlpatterns = [
     path("frontend-api/create-record", create_user_record_api, name="create-record"),
     path("frontend-api/delete-record", delete_user_record_api, name="delete-record"),
     path("frontend-api/update-record", update_user_record_api, name="update-record"),
+    path("frontend-api/export-dataset", export_user_dataset_api, name="export-dataset"),
     # ENDPOINTS FOR KEYS AND TOKENS MANAGEMENT
     path("frontend-api/generate-key", generate_key_api, name="generate-key"),
     path("frontend-api/generate-token", generate_token_api, name="generate-token"),
