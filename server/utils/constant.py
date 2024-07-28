@@ -23,10 +23,9 @@ DEFAULT_PERMISSION_CODENAMES = [
     "view_datasetrecord",
 ]
 MAX_KEY_NAME_LENGTH = 50
-
 MAX_DATASET_PER_USER = 20
 MAX_EVALUATION_PER_RECORD = 20
-
+MAX_ROW_NUMBER_FOR_DIRECT_EXPORT = 10000  # if the number of row in the db higher than this number then celery task will be scheduled to export the dataset.
 SERVER_TTL = 1200
 MONITOR_ITERVAL = 5
 SHUTDOWN_INTERVAL = 60

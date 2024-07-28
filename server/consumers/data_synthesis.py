@@ -1,9 +1,8 @@
 import asyncio
 import json
-
 import httpx
 import pytz
-from asgiref.sync import sync_to_async
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from decouple import config
 from django.utils import timezone

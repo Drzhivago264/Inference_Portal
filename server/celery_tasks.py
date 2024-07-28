@@ -1,5 +1,4 @@
 import csv
-import io
 import json
 
 import boto3
@@ -14,6 +13,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from django.utils.timezone import datetime, timedelta
 from openai import OpenAI
+from smart_open import open
 
 from server.models import (APIKEY, LLM, Crypto, Dataset, DatasetRecord,
                            InferenceServer)
@@ -42,40 +42,48 @@ def send_email_(
     send_mail(subject, message, email_from, recipient_list)
 
 
-@shared_task
+@shared_task(time_limit=3600)
 def export_large_dataset(
     dataset_id: int, url_safe_datasetname: str, unique: str, extension: str
 ) -> str:
-    r2_client = boto3.client(
+    session = boto3.Session(
+        aws_access_key_id=r2,
+        aws_secret_access_key=r2_secret,
+    )
+    r2_client = session.client(
         "s3",
         endpoint_url=f"https://{r2_account_id}.r2.cloudflarestorage.com/professorparakeetmediafiles",
-        aws_access_key_id=r2,
-        aws_secret_access_key=r2,
         region_name="auto",
     )
     dataset = Dataset.objects.get(id=dataset_id)
     result_records = DatasetRecord.objects.filter(dataset=dataset)
-    buffer = io.StringIO()
-    for r in result_records.iterator(chunk_size=1000):
-        if extension == "csv":
-            writer = csv.writer(buffer)
-            writer.writerow(
-                [r.system_prompt, r.prompt, r.response] + [ev for ev in r.evaluation]
-            )
-        elif extension == "json":
-            data = {
-                "system_prompt": r.system_prompt,
-                "prompt": r.prompt,
-                "response": r.response,
-                "evaluation": r.evaluation,
-            }
-            buffer.write(data)
-        r2_client.put_object(
-            Bucket="professorparakeetmediafiles",
-            Key=f"{url_safe_datasetname}_{unique}{extension}",
-            Body=buffer.getvalue(),
-        )
-        buffer.truncate(0)
+    i = 0
+    with open(
+        f"s3://download/{url_safe_datasetname}_{unique}{extension}",
+        "w",
+        transport_params={"client": r2_client},
+    ) as fout:
+        for r in result_records.iterator(chunk_size=2000):
+            if extension == ".csv":
+                writer = csv.writer(fout)
+                if i == 0:
+                    writer.writerow(
+                        ["system_prompt", "prompt", "response", "evaluation"]
+                    )
+                    i += 1
+                writer.writerow(
+                    [r.system_prompt, r.prompt, r.response, json.dumps(r.evaluation)]
+                )
+
+            elif extension == ".jsonl":
+                data = {
+                    "system_prompt": r.system_prompt,
+                    "prompt": r.prompt,
+                    "response": r.response,
+                    "evaluation": r.evaluation,
+                }
+                json.dump(data, fout)
+                fout.write("\n")
 
 
 @shared_task

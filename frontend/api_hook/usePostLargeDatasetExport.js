@@ -1,30 +1,17 @@
 import Papa from "papaparse";
-import { basePost } from "./basePost";
+import {basePost} from "./basePost";
 import dayjs from "dayjs";
-import { useMutation } from "react-query";
+import {useMutation} from "react-query";
 
-export const usePostLargeDatasetExport = ({
-	dataset_id,
-	dataset_name,
-	extension,
-	setSaveErrorMessage,
-	setSaveError,
-	setDownloadLink,
-	setShowDownloadLink,
-}) => {
-	const {
-		mutate: mutate,
-		isLoading: isLoading,
-		error: error,
-		data: data,
-	} = useMutation(basePost);
-    const format_to_hour = "YYYY-MM-DD HH:mm";
+export const usePostLargeDatasetExport = ({dataset_id, dataset_name, extension, setSaveErrorMessage, setSaveError, setDownloadLink, setShowDownloadLink}) => {
+	const {mutate: mutate, isLoading: isLoading, error: error, data: data} = useMutation(basePost);
+	const format_to_hour = "YYYY-MM-DD HH:mm";
 	const now = dayjs();
 	const postLargedatasetExport = () => {
 		if (dataset_id && extension) {
-			const data = { id: dataset_id, extension: extension };
+			const data = {id: dataset_id, extension: extension};
 			mutate(
-				{ url: "/frontend-api/export-dataset", data: data },
+				{url: "/frontend-api/export-dataset", data: data},
 				{
 					onSuccess: (data) => {
 						if (data.export_type === "celery") {
@@ -32,31 +19,23 @@ export const usePostLargeDatasetExport = ({
 							setDownloadLink(data.download_link);
 						} else if (data.export_type === "direct") {
 							var a = document.createElement("a");
-							if (extension == ".json") {
-								let download_content = JSON.stringify(
-									data.records
-								);
-                                console.log(download_content)
+							if (extension == ".jsonl") {
+								let download_content = data.records.map((x) => JSON.stringify(x)).join("\n");
 								let blob = new Blob([download_content], {
-									type: "application/json",
+									type: "application/jsonl",
 								});
 								let url = URL.createObjectURL(blob);
 								a.setAttribute("href", url);
-								a.setAttribute(
-									"download",
-									`${dataset_name}_${now.format(format_to_hour)}.json`
-								);
-                                a.click();
+								a.setAttribute("download", `${dataset_name}_${now.format(format_to_hour)}.jsonl`);
+								a.click();
 							} else if (extension == ".csv") {
-								let download_content = Papa.unparse(
-									data.records
-								);
+								
+								let stringify_nesed_json = data.records.map(function (val) {
+									return {prompt: val.prompt, response: val.response, system_prompt: val.system_prompt, evaluation: JSON.stringify(val.evaluation) };
+								});
+                                let download_content = Papa.unparse(stringify_nesed_json);
 								let blob = new Blob([download_content]);
-								if (window.navigator.msSaveOrOpenBlob)
-									window.navigator.msSaveBlob(
-										blob,
-										`${dataset_name}.csv`
-									);
+								if (window.navigator.msSaveOrOpenBlob) window.navigator.msSaveBlob(blob, `${dataset_name}.csv`);
 								else {
 									a.href = window.URL.createObjectURL(blob, {
 										type: "text/plain",
@@ -71,11 +50,11 @@ export const usePostLargeDatasetExport = ({
 					},
 					onError: (error) => {
 						setSaveError(true);
-                        if (error.code === "ERR_BAD_RESPONSE") {
-                            setSaveErrorMessage("Failed, Internal Server Error!");
-                        } else {
-                            setSaveErrorMessage(error.response.data.detail);
-                        }
+						if (error.code === "ERR_BAD_RESPONSE") {
+							setSaveErrorMessage("Failed, Internal Server Error!");
+						} else {
+							setSaveErrorMessage(error.response.data.detail);
+						}
 					},
 				}
 			);
