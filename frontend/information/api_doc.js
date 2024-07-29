@@ -1,26 +1,32 @@
-import "swagger-ui-react/swagger-ui.css";
+import "rapidoc";
 
-import Box from "@mui/material/Box";
+import React, {useContext} from "react";
+
+import {ColorModeContext} from "../App";
 import Container from "@mui/material/Container";
 import Footer from "../component/nav/Footer";
-import React from "react";
 import ResponsiveAppBar from "../component/nav/Navbar";
-import SwaggerUI from "swagger-ui-react";
 
 function APIDoc() {
-	const ui = SwaggerUI({
-		dom_id: "#swaggerContainer",
-		url: "/api/openapi.json",
-	});
-
+	const { theme} = useContext(ColorModeContext);
+	window.onbeforeunload = function () {
+		window.scrollTo(0, 0);
+	};
 	return (
 		<Container maxWidth={false} disableGutters>
 			<title>API Doc</title>
 			<ResponsiveAppBar max_width='xxl' />
-			<Container maxWidth='xxl'>
-				<Box p={1} sx={{ bgcolor: "white", borderRadius: 2 }}>
-					{ui}
-				</Box>
+			<Container maxWidth='xxl' disableGutters>
+				<rapi-doc
+					spec-url='/api/openapi.json'
+					server-url='https://professorparakeet.com/'
+					render-style='view'
+					show-header={false}
+                    theme={theme.palette.mode}
+					schema-description-expanded={true}
+					primary-color={theme.palette.mode === "dark" ? "#fff" : "#121212"}
+					style={{height: "1000px", width: "100%"}}
+					bg-color={theme.palette.mode === "dark" ? "#121212" : "#fff"}></rapi-doc>
 			</Container>
 			<Footer />
 		</Container>

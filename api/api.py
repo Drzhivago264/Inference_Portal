@@ -2,7 +2,7 @@ from typing import List
 
 from asgiref.sync import sync_to_async
 from django_ratelimit.core import is_ratelimited
-from ninja import NinjaAPI, Redoc
+from ninja import NinjaAPI, Swagger
 from ninja.errors import HttpError
 from ninja.security import HttpBearer
 
@@ -30,7 +30,7 @@ class GlobalAuth(HttpBearer):
             pass
 
 
-api = NinjaAPI(auth=GlobalAuth(), docs=Redoc(), title="Professor Parakeet API")
+api = NinjaAPI(auth=GlobalAuth(), docs=Swagger(), title="Professor Parakeet API")
 
 api.add_router("/", completion_router)
 api.add_router("/", chat_router)

@@ -29,6 +29,10 @@ router = Router()
     response={200: AgentResponse, 401: Error, 442: Error, 404: Error, 429: Error},
 )
 async def agentcompletion(request, data: AgentSchema):
+    """
+    To use agent please choose the following model:
+     - **"Llama 3 Instruct AWQ"**
+    """
     key_object, user_object = request.auth
 
     query_db_mixin = QueryDBMixin()
