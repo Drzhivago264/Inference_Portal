@@ -94,7 +94,7 @@ class Dataset(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.name + " " + self.created_at
+        return self.name 
 
 
 class DatasetRecord(models.Model):
@@ -107,7 +107,7 @@ class DatasetRecord(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.dataset.name + " " + self.created_at
+        return self.dataset.name
 
 
 class PaymentHistory(models.Model):

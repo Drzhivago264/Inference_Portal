@@ -25,6 +25,7 @@ export default function DatasetMutateDialog({
 	setAllowAddDataset,
 	max_evaluation_num,
 	setDatasetList,
+	setSelectedIndex,
 	dataset_list,
 	dataset_id,
 	old_default_system_prompt,
@@ -45,7 +46,7 @@ export default function DatasetMutateDialog({
 	const {mutate: postmutate} = useMutation(basePost);
 	const {mutate: putmutate} = useMutation(basePut);
 	const createDataset = () => {
-		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name && item.score);
+		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name);
 		setAllowMutate(false);
 		if (dataset_name) {
 			const data = {
@@ -68,6 +69,7 @@ export default function DatasetMutateDialog({
 								default_evaluation: default_evaluation_without_null,
 							},
 						]);
+						setSelectedIndex(dataset_list.length);
 						setCurrentEvaluation(default_evaluation_without_null), setCurrentSystemPrompt(default_system_prompt);
 					},
 					onError: (error) => {
@@ -117,7 +119,8 @@ export default function DatasetMutateDialog({
 							return item;
 						});
 						setDatasetList(new_dataset_list);
-						setCurrentEvaluation(default_evaluation_without_null), setCurrentSystemPrompt(default_system_prompt);
+						setCurrentEvaluation(default_evaluation_without_null);
+						setCurrentSystemPrompt(default_system_prompt);
 					},
 					onError: (error) => {
 						setSaveError(true);
@@ -309,6 +312,7 @@ DatasetMutateDialog.propTypes = {
 	setAllowAddDataset: PropTypes.func.isRequired,
 	max_evaluation_num: PropTypes.number.isRequired,
 	setDatasetList: PropTypes.func.isRequired,
+	setSelectedIndex: PropTypes.func.isRequired,
 	dataset_list: PropTypes.array.isRequired,
 	dataset_id: PropTypes.number,
 	old_default_system_prompt: PropTypes.string,
