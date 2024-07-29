@@ -6,7 +6,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
-import {ChatBoxHotpot} from "../component/chat_components/Chatbox.js";
+import {ChatBox} from "../component/chat_components/Chatbox.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
@@ -267,7 +267,7 @@ function Hotpot() {
 							</Accordion>
 						</Grid>
 						<Grid item xs={4}>
-							<ChatBoxHotpot
+							<ChatBox
 								id={"chat-log"}
 								inputsize={660}
 								chat_message={chat_message}
@@ -280,10 +280,10 @@ function Hotpot() {
 								messagesEndRef={messagesEndRef}
 								shownthinking={shownthinkingchat}
 								handleEnter={handleEnter}
-								check_duplicate_message={check_duplicate_message}></ChatBoxHotpot>
+								check_duplicate_message={check_duplicate_message}></ChatBox>
 						</Grid>
 						<Grid item xs={4}>
-							<ChatBoxHotpot
+							<ChatBox
 								id={"chat-log-agent"}
 								inputsize={660}
 								chat_message={agent_message}
@@ -296,7 +296,7 @@ function Hotpot() {
 								messagesEndRef={messagesEndRef}
 								shownthinking={shownthinkingagent}
 								handleEnter={handleEnter}
-								check_duplicate_message={check_duplicate_message}></ChatBoxHotpot>
+								check_duplicate_message={check_duplicate_message}></ChatBox>
 						</Grid>
 						<Grid item xs={2}>
 							<HotpotParameter

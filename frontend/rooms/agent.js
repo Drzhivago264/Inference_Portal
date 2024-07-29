@@ -389,6 +389,7 @@ function Agent() {
 						<Grid item xs={4}>
 							<Box mr={2}>
 								<ChatBox
+									id={"chat-log-agent"}
 									inputsize={300}
 									chat_message={chat_message}
 									usermessage={usermessage}
