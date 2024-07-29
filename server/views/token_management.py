@@ -7,8 +7,8 @@ from rest_framework.decorators import (api_view, permission_classes,
                                        throttle_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from server.api_throttling_rates import KeyCreateRateThrottle, UserRateThrottle
+from rest_framework.throttling import UserRateThrottle
+from server.api_throttling_rates import KeyCreateRateThrottle
 from server.models import FineGrainAPIKEY
 from server.utils import constant
 from server.views.serializer import (CreateTokenSerializer,
