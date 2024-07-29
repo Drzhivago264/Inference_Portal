@@ -1,26 +1,18 @@
 import csv
 import json
 
-import boto3
-import requests
 from asgiref.sync import async_to_sync
-from botocore.exceptions import ClientError
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from celery.exceptions import SoftTimeLimitExceeded
 from channels.layers import get_channel_layer
 from decouple import config
-from django.core.mail import send_mail
-from django.utils import timezone
-from django.utils.timezone import datetime, timedelta
-from django.core.cache import cache
 
 from openai import OpenAI
-from smart_open import open
 
-from server.models import (APIKEY, LLM, Crypto, Dataset, DatasetRecord,
-                           InferenceServer)
+from server.models import (APIKEY, LLM)
 from server.utils import constant
+from server.queue.ec2_manage import command_EC2
 from server.utils.sync_.inference import (inference_mode,
                                           send_agent_request_openai,
                                           send_chat_request_openai,
@@ -28,272 +20,9 @@ from server.utils.sync_.inference import (inference_mode,
 from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
 from server.utils.sync_.query_database import get_model_url
-
-logger = get_task_logger(__name__)
-aws = config("aws_access_key_id")
-aws_secret = config("aws_secret_access_key")
-r2 = config("r2_access_key_id")
-r2_account_id = config("r2_account_id")
-r2_secret = config("r2_secret_access_key")
 region = constant.REGION
-
-
-@shared_task
-def send_email_(
-    subject: str, message: str, email_from: str, recipient_list: list
-) -> None:
-    send_mail(subject, message, email_from, recipient_list)
-
-
-@shared_task(soft_time_limit=3600, time_limit=3650)
-def export_large_dataset(
-    dataset_id: int, url_safe_datasetname: str, unique: str, extension: str, hashed_key: str
-) -> str:
-    """
-    Export a dataset from a database to either a CSV or JSONL file stored in an S3-compatible storage service.
-
-    Args:
-        dataset_id (int): ID of the dataset to be exported.
-        url_safe_datasetname (str): URL-safe name for the dataset.
-        unique (str): Unique identifier for the export file.
-        extension (str): File extension, either '.csv' or '.jsonl'.
-        hashed_key (str): Hashed key for caching purposes.
-
-    Returns:
-        str: String indicating the success or failure of the export operation.
-    """
-    try:
-        session = boto3.Session(
-            aws_access_key_id=r2,
-            aws_secret_access_key=r2_secret,
-        )
-        r2_client = session.client(
-            "s3",
-            endpoint_url=f"https://{r2_account_id}.r2.cloudflarestorage.com/professorparakeetmediafiles",
-            region_name="auto",
-        )
-        dataset = Dataset.objects.get(id=dataset_id)
-        result_records = DatasetRecord.objects.filter(dataset=dataset)
-        i = 0
-        with open(
-            f"s3://download/{url_safe_datasetname}_{unique}{extension}",
-            "w",
-            transport_params={"client": r2_client},
-        ) as fout:
-            for r in result_records.iterator(chunk_size=2000):
-                if extension == ".csv":
-                    writer = csv.writer(fout)
-                    if i == 0:
-                        writer.writerow(
-                            ["system_prompt", "prompt", "response", "evaluation"]
-                        )
-                        i += 1
-                    writer.writerow(
-                        [r.system_prompt, r.prompt, r.response,
-                            json.dumps(r.evaluation)]
-                    )
-
-                elif extension == ".jsonl":
-                    data = {
-                        "system_prompt": r.system_prompt,
-                        "prompt": r.prompt,
-                        "response": r.response,
-                        "evaluation": r.evaluation,
-                    }
-                    json.dump(data, fout)
-                    fout.write("\n")
-        cache.set(
-            f"allow_export_large_dataset_for_user_{hashed_key}", True, 3600)
-    except SoftTimeLimitExceeded:
-        cache.set(
-            f"allow_export_large_dataset_for_user_{hashed_key}", True, 3600)
-
-
-@shared_task
-def celery_log_prompt_response(
-    is_session_start_node: bool | None,
-    key_object_id: int,
-    llm_id: int,
-    prompt: str,
-    response: str,
-    type_: str,
-) -> None:
-    """
-    This function stores a log entry in the database and builds a memory tree of chat history.
-
-    Args:
-        is_session_start_node (bool | None): Indicates if this is the start of a session.
-        key_object_id (int): The ID of the API key object.
-        llm_id (int): The ID of the language model.
-        prompt (str): The prompt text.
-        response (str): The response text.
-        type_ (str): The type of interaction.
-    """
-    llm = LLM.objects.get(id=llm_id)
-    key_object = APIKEY.objects.get(id=key_object_id)
-    log_prompt_response(
-        is_session_start_node=is_session_start_node,
-        key_object=key_object,
-        llm=llm,
-        prompt=prompt,
-        response=response,
-        type_=type_,
-    )
-
-
-@shared_task
-def update_crypto_rate(coin: str):
-    """
-    Update the USD rate for a specific cryptocurrency.
-
-    Parameters:
-    - coin (str): The abbreviation of the cryptocurrency to update.
-
-    Raises:
-    - KeyError: If the required data for updating the rate is not found in the API responses.
-
-    Notes:
-    - This task fetches the current USD rate for the specified cryptocurrency from external APIs and updates the rate in the database.
-    """
-    if coin == "xmr":
-        try:
-            url = "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd"
-            response = requests.get(url)
-            price = float(json.loads(response.text)["monero"]["usd"])
-            crypto = Crypto.objects.get(coin=coin)
-            crypto.coin_usd_rate = price
-            crypto.save()
-        except KeyError:
-            try:
-                url = (
-                    "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest"
-                )
-                headers = {
-                    "Accepts": "application/json",
-                    "X-CMC_PRO_API_KEY": config("CMC_API"),
-                }
-                params = {
-                    "id": "328",
-                    "convert": "USD",
-                }
-                response = requests.get(url, headers=headers, params=params)
-                price = json.loads(response.text)["data"]["328"]["quote"]["USD"][
-                    "price"
-                ]
-                crypto = Crypto.objects.get(coin=coin)
-                crypto.coin_usd_rate = price
-                crypto.save()
-            except KeyError:
-                pass
-
-
-@shared_task
-def periodically_delete_unused_key():
-    APIKEY.objects.filter(
-        created_at__lte=datetime.now() - timedelta(days=constant.KEY_TTL),
-        credit=0.0,
-        monero_credit=0.0,
-    ).delete()
-
-
+logger = get_task_logger(__name__)
 @shared_task()
-def periodically_monitor_EC2_instance() -> str:
-    """This is a func to periodically update EC2 status of GPU server
-
-    Returns:
-        str : the status of the server
-    """
-    available_server = InferenceServer.objects.filter(availability="Available")
-    for server in available_server:
-        ec2_resource = boto3.resource(
-            "ec2",
-            region_name=region,
-            aws_access_key_id=aws,
-            aws_secret_access_key=aws_secret,
-        )
-        try:
-            instance = ec2_resource.Instance(server.name)
-            server.status = instance.state["Name"]
-            server.private_ip = instance.private_ip_address
-            server.url = "http://" + instance.private_ip_address + ":80/generate"
-            if instance.public_ip_address:
-                server.public_ip = instance.public_ip_address
-                server.alternative_url = (
-                    "http://" + instance.public_ip_address + ":80/generate"
-                )
-            server.save()
-            return instance.state["Name"]
-        except Exception as e:
-            return e
-
-
-@shared_task()
-def periodically_shutdown_EC2_instance() -> None:
-    """This is a func to shutdown unuse EC2 GPU instance every 1200 secs"""
-    available_server = InferenceServer.objects.filter(availability="Available")
-    for server in available_server:
-        un_used_time = timezone.now() - server.last_message_time
-        if un_used_time.total_seconds() > constant.SERVER_TTL and (
-            server.status != "stopped" or server.status != "stopping"
-        ):
-            command_EC2.delay(server.name, region=region, action="off")
-            server.status = "stopping"
-            server.save()
-
-
-@shared_task()
-def command_EC2(instance_id: str, region: str, action: str) -> None | str:
-    """This func is used to turn on, off, or reboot ec2 instances
-
-    Args:
-        instance_id (string): the id of EC2 instance
-        region (string): the region of EC2 instances
-        action (string): either turn on, off or reboot instance
-
-    Returns:
-        string or None: either return error or nothing
-    """
-    aws = config("aws_access_key_id")
-    aws_secret = config("aws_secret_access_key")
-    ec2 = boto3.client(
-        "ec2",
-        region_name=region,
-        aws_access_key_id=aws,
-        aws_secret_access_key=aws_secret,
-    )
-    if action == "on":
-        try:
-            ec2.start_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if "DryRunOperation" not in str(e):
-                raise
-        try:
-            ec2.start_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-    elif action == "off":
-        try:
-            ec2.stop_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if "DryRunOperation" not in str(e):
-                raise
-        try:
-            ec2.stop_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-    elif action == "reboot":
-        try:
-            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=True)
-        except ClientError as e:
-            if "DryRunOperation" not in str(e):
-                raise
-        try:
-            ec2.reboot_instances(InstanceIds=[instance_id], DryRun=False)
-        except ClientError as e:
-            return e
-
-
-@shared_task
 def inference(
     unique: str,
     is_session_start_node: bool | None,
@@ -475,7 +204,7 @@ def inference(
             )
 
 
-@shared_task
+@shared_task()
 def agent_inference(
     key: str,
     is_session_start_node: bool | None,

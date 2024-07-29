@@ -3,7 +3,6 @@ import React, {useState} from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CloseIcon from "@mui/icons-material/Close";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
@@ -18,6 +17,7 @@ import Paper from "@mui/material/Paper";
 import PropTypes from "prop-types";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
+import { TextCopy } from "../custom_ui_component/TextCopy";
 import Typography from "@mui/material/Typography";
 import {usePostLargeDatasetExport} from "../../api_hook/usePostLargeDatasetExport";
 
@@ -25,7 +25,6 @@ export const DatasetExportServerSide = ({dataset_id, dataset_name, setSaveErrorM
 	const [extension, setExtension] = useState(".csv");
 	const [show_download_link, setShowDownloadLink] = useState(false);
 	const [download_link, setDownloadLink] = useState("");
-	const [copied, setCopied] = useState(false);
 	const {fetch: postLargedatasetExport} = usePostLargeDatasetExport({
 		dataset_id,
 		dataset_name,
@@ -35,10 +34,7 @@ export const DatasetExportServerSide = ({dataset_id, dataset_name, setSaveErrorM
 		setDownloadLink,
 		setShowDownloadLink,
 	});
-	const copyToClipboard = (e) => {
-		setCopied(true);
-		navigator.clipboard.writeText(e);
-	};
+
 	const handleClose = () => {
 		setShowDownloadLink(false);
 	};
@@ -118,12 +114,7 @@ export const DatasetExportServerSide = ({dataset_id, dataset_name, setSaveErrorM
 											<Typography component={'span'} variant='body1'>{download_link}</Typography>
 										</Box>
 										<Box align='right'>
-											<Stack alignItems="center"  direction='row'>
-												{copied && <Typography component={'span'} variant='subtitle2'>Copied!</Typography>}
-												<IconButton onClick={() => copyToClipboard(`${download_link}`)} aria-label='copy' size='small'>
-													<ContentCopyIcon fontSize='small' />
-												</IconButton>
-											</Stack>
+                                            <TextCopy message={download_link}/>
 										</Box>
 									</Paper>
 								</Box>

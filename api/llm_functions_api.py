@@ -1,5 +1,5 @@
 import dspy
-from asgiref.sync import sync_to_async
+
 from decouple import config
 from django_ratelimit.core import is_ratelimited
 from ninja import Router

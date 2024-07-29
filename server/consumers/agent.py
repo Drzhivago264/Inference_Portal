@@ -8,7 +8,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils import timezone
 from pydantic import ValidationError
 
-from server.celery_tasks import agent_inference
+from server.queue.model_inference import agent_inference
 from server.consumers.pydantic_validator import (AgentSchemaInstruct,
                                                  AgentSchemaMessage,
                                                  AgentSchemaParagraph,

@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from server.api_throttling_rates import DatasetExportRateThrottle
 
-from server.celery_tasks import export_large_dataset
+from server.queue.export_dataset import export_large_dataset
 from server.models import Dataset, DatasetRecord
 from server.utils import constant
 from server.utils.sync_.manage_permissions import \

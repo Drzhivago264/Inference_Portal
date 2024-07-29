@@ -2,7 +2,7 @@ import json
 
 from django.utils import timezone
 
-from server.celery_tasks import command_EC2
+from server.queue.ec2_manage import command_EC2
 from server.models import InferenceServer
 from server.utils.constant import REGION
 

@@ -1,8 +1,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
@@ -10,9 +8,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import SendIcon from "@mui/icons-material/Send";
 import Stack from "@mui/material/Stack";
-const copyToClipboard = (e) => {
-	navigator.clipboard.writeText(e);
-};
+import { TextCopy } from "../custom_ui_component/TextCopy";
 
 export const ChatBox = ({
 	inputsize,
@@ -50,16 +46,7 @@ export const ChatBox = ({
 												justifyContent: "space-between",
 											}}>
 											<Box align='left'>
-												<IconButton
-													onClick={() =>
-														copyToClipboard(
-															`${mess.role} (${mess.time})\n\n${mess.message}`
-														)
-													}
-													aria-label='copy'
-													size='small'>
-													<ContentCopyIcon fontSize='small' />
-												</IconButton>
+                                                <TextCopy message={`${mess.role} (${mess.time})\n\n${mess.message}`}/>
 											</Box>
 											<Box pt={0.8}>
 												<Box textAlign='right'>
@@ -112,16 +99,7 @@ export const ChatBox = ({
 												</span>
 											</Box>
 											<Box align='right'>
-												<IconButton
-													onClick={() =>
-														copyToClipboard(
-															`${mess.role} - ${mess.time}:\n\n${mess.message}`
-														)
-													}
-													aria-label='copy'
-													size='small'>
-													<ContentCopyIcon fontSize='small' />
-												</IconButton>
+                                                <TextCopy message={`${mess.role} - ${mess.time}:\n\n${mess.message}`}/>
 											</Box>
 										</Grid>
 									</Box>
@@ -153,16 +131,7 @@ export const ChatBox = ({
 												</span>
 											</Box>
 											<Box align='right'>
-												<IconButton
-													onClick={() =>
-														copyToClipboard(
-															`${mess.message} (${mess.role} - ${mess.time})`
-														)
-													}
-													aria-label='copy'
-													size='small'>
-													<ContentCopyIcon fontSize='small' />
-												</IconButton>
+                                            <TextCopy message={`${mess.role} - ${mess.time}:\n\n${mess.message}`}/>
 											</Box>
 										</Grid>
 									</Box>
@@ -276,16 +245,7 @@ export const ChatBoxHotpot = ({
 												justifyContent: "space-between",
 											}}>
 											<Box align='left'>
-												<IconButton
-													onClick={() =>
-														copyToClipboard(
-															`${mess.role} (${mess.time})\n\n${mess.message}`
-														)
-													}
-													aria-label='copy'
-													size='small'>
-													<ContentCopyIcon fontSize='small' />
-												</IconButton>
+                                            <TextCopy message={`${mess.role} - ${mess.time}:\n\n${mess.message}`}/>
 											</Box>
 											<Box pt={0.8}>
 												<Box textAlign='right'>
@@ -337,16 +297,8 @@ export const ChatBoxHotpot = ({
 												</span>
 											</Box>
 											<Box align='right'>
-												<IconButton
-													onClick={() =>
-														copyToClipboard(
-															`${mess.role} - ${mess.time}:\n\n${mess.message}`
-														)
-													}
-													aria-label='copy'
-													size='small'>
-													<ContentCopyIcon fontSize='small' />
-												</IconButton>
+                                            <TextCopy message={`${mess.role} - ${mess.time}:\n\n${mess.message}`}/>
+												
 											</Box>
 										</Grid>
 									</Box>
@@ -378,16 +330,7 @@ export const ChatBoxHotpot = ({
 												</span>
 											</Box>
 											<Box align='right'>
-												<IconButton
-													onClick={() =>
-														copyToClipboard(
-															`${mess.message} (${mess.role} - ${mess.time})`
-														)
-													}
-													aria-label='copy'
-													size='small'>
-													<ContentCopyIcon fontSize='small' />
-												</IconButton>
+											<TextCopy message={`${mess.role} - ${mess.time}:\n\n${mess.message}`}/>
 											</Box>
 										</Grid>
 									</Box>
