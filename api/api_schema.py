@@ -1,6 +1,6 @@
 import datetime
 
-from ninja import Schema
+from ninja import Schema, Field
 from pydantic import ValidationInfo, field_validator, model_validator
 from typing_extensions import Self
 
@@ -9,18 +9,29 @@ from server.utils import constant
 
 class PromptSchema(Schema):
     prompt: str = ""
-    model: str = constant.DEFAULT_SELF_HOST
-    top_p: float = constant.DEFAULT_TOP_P
-    top_k: int = constant.DEFAULT_TOP_K
-    temperature: float = constant.DEFAULT_TEMPERATURE
-    beam: bool = constant.DEFAULT_BEAM
-    best_of: int = constant.DEFAULT_BEST_OF
-    max_tokens: int = constant.DEFAULT_MAX_TOKENS
-    presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
-    frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
-    length_penalty: float = constant.DEFAULT_LENGTH_PENALTY
-    early_stopping: bool = constant.DEFAULT_EARLY_STOPPING
-    n: int = constant.DEFAULT_N
+    model: str = Field(default=constant.DEFAULT_SELF_HOST,
+                       examples=[constant.DEFAULT_SELF_HOST])
+    top_p: float = Field(default=constant.DEFAULT_TOP_P,
+                         examples=[constant.DEFAULT_TOP_P])
+    top_k: int = Field(default=constant.DEFAULT_TOP_K,
+                       examples=[constant.DEFAULT_TOP_K])
+    temperature: float = Field(default=constant.DEFAULT_TEMPERATURE, examples=[
+                               constant.DEFAULT_TEMPERATURE])
+    beam: bool = Field(default=constant.DEFAULT_BEAM,
+                       examples=[constant.DEFAULT_BEAM])
+    best_of: int = Field(default=constant.DEFAULT_BEST_OF,
+                         examples=[constant.DEFAULT_BEST_OF])
+    max_tokens: int = Field(default=constant.DEFAULT_MAX_TOKENS, examples=[
+                            constant.DEFAULT_MAX_TOKENS])
+    presence_penalty: float = Field(default=constant.DEFAULT_PRESENCE_PENALTY, examples=[
+                                    constant.DEFAULT_PRESENCE_PENALTY])
+    frequency_penalty: float = Field(default=constant.DEFAULT_FREQUENCY_PENALTY, examples=[
+                                     constant.DEFAULT_FREQUENCY_PENALTY])
+    length_penalty: float = Field(default=constant.DEFAULT_LENGTH_PENALTY, examples=[
+                                  constant.DEFAULT_LENGTH_PENALTY])
+    early_stopping: bool = Field(default=constant.DEFAULT_EARLY_STOPPING, examples=[
+                                 constant.DEFAULT_EARLY_STOPPING])
+    n: int = Field(default=constant.DEFAULT_N, examples=[constant.DEFAULT_N])
 
     @field_validator("frequency_penalty", "presence_penalty")
     @classmethod
@@ -61,9 +72,12 @@ class PromptSchema(Schema):
 
 class ChatSchema(PromptSchema):
     prompt: str | list = ""
-    stream: bool = False
-    include_memory: bool = constant.DEFAULT_MEMORY
-    include_current_memory: bool = not constant.DEFAULT_MEMORY
+    stream: bool = Field(default=False,
+                         examples=[False])
+    include_memory: bool = Field(default=constant.DEFAULT_MEMORY,
+                                 examples=[constant.DEFAULT_MEMORY])
+    include_current_memory: bool = Field(default=not constant.DEFAULT_MEMORY,
+                                         examples=[not constant.DEFAULT_MEMORY])
 
     @model_validator(mode="after")
     def validate_context_length(self) -> Self:
@@ -84,17 +98,26 @@ class ChatSchema(PromptSchema):
 
 
 class AgentSchema(PromptSchema):
-    stream: bool = False
-    working_memory: list = []
-    parent_template_name: str | None = "Assignment Agent"
-    child_template_name: str | None = "Introduction"
-    use_my_template: bool = False
+    stream: bool = Field(default=False,
+                       examples=[False])
+    working_memory: list = Field(default=[],
+                       examples=[[]])
+    parent_template_name: str = Field(default="Assignment Agent",
+                       examples=["Assignment Agent"]) 
+    child_template_name: str = Field(default="Introduction",
+                       examples=["Introduction"])  
+    use_my_template: bool = Field(default=False,
+                       examples=[False])
 
 
 class ResponseLogRequest(Schema):
-    quantity: int = 10
-    lastest: bool = True
-    filter_by: list = ["chatroom", "prompt", "open_ai", "chat_api", "agent_api"]
+    quantity: int = Field(default=10,
+                       examples=[10])
+    lastest: bool = Field(default=True,
+                       examples=[True])
+    filter_by: list = Field(default=["chatroom", "prompt",
+                       "open_ai", "chat_api", "agent_api"], examples=[["chatroom", "prompt",
+                       "open_ai", "chat_api", "agent_api"]]) 
 
 
 class ResponseLogResponse(Schema):
@@ -129,12 +152,18 @@ class AgentResponse(Schema):
 
 class BaseLLMSchema(Schema):
     prompt: str = ""
-    model: str = "gpt-4"
-    top_p: float = constant.DEFAULT_TOP_P
-    temperature: float = constant.DEFAULT_TEMPERATURE
-    max_tokens: int = constant.DEFAULT_MAX_TOKENS
-    presence_penalty: float = constant.DEFAULT_PRESENCE_PENALTY
-    frequency_penalty: float = constant.DEFAULT_FREQUENCY_PENALTY
+    model: str = Field(default="gpt-4",
+                         examples=["gpt-4"])
+    top_p: float = Field(default=constant.DEFAULT_TOP_P,
+                         examples=[constant.DEFAULT_TOP_P])
+    temperature: float = Field(default=constant.DEFAULT_TEMPERATURE, examples=[
+                               constant.DEFAULT_TEMPERATURE])
+    max_tokens: int = Field(default=constant.DEFAULT_MAX_TOKENS, examples=[
+                            constant.DEFAULT_MAX_TOKENS])
+    presence_penalty: float = Field(default=constant.DEFAULT_PRESENCE_PENALTY, examples=[
+                                    constant.DEFAULT_PRESENCE_PENALTY])
+    frequency_penalty: float = Field(default=constant.DEFAULT_FREQUENCY_PENALTY, examples=[
+                                     constant.DEFAULT_FREQUENCY_PENALTY])
 
     @field_validator("frequency_penalty", "presence_penalty")
     @classmethod
