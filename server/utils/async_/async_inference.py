@@ -1,14 +1,10 @@
 import json
-import random
-
 import httpx
 import openai
 import regex as re
-from asgiref.sync import sync_to_async
 from decouple import config
-
 import server.utils.constant as constant
-from server.celery_tasks import celery_log_prompt_response
+from server.queue.log_prompt_response import celery_log_prompt_response
 from server.models import LLM
 from server.utils.async_.async_manage_ec2 import (
     ManageEC2Mixin, update_server_status_in_db_async)

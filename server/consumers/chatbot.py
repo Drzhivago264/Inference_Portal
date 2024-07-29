@@ -6,7 +6,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils import timezone
 from pydantic import ValidationError
 
-from server.celery_tasks import inference
+from server.queue.model_inference import inference
 from server.consumers.pydantic_validator import ChatSchema
 from server.utils import constant
 from server.utils.async_.async_query_database import QueryDBMixin

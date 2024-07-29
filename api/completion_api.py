@@ -9,7 +9,8 @@ from transformers import AutoTokenizer
 
 from api.api_schema import Error, PromptResponse, PromptSchema
 from api.utils import check_permission, get_model_url, send_request_async
-from server.celery_tasks import celery_log_prompt_response, command_EC2
+from server.queue.log_prompt_response import celery_log_prompt_response
+from server.queue.ec2_manage import command_EC2
 from server.utils import constant
 from server.utils.async_.async_manage_ec2 import \
     update_server_status_in_db_async

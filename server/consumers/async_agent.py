@@ -2,7 +2,7 @@ import json
 import uuid
 
 import pytz
-from asgiref.sync import sync_to_async
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils import timezone
 from pydantic import ValidationError

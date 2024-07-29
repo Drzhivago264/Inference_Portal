@@ -9,7 +9,7 @@ from django.utils import timezone
 from pydantic import ValidationError
 from transformers import AutoTokenizer
 
-from server.celery_tasks import celery_log_prompt_response
+from server.queue.log_prompt_response import celery_log_prompt_response
 from server.consumers.pydantic_validator import (AgentSchemaTemplate,
                                                  DataSynthesisSchema)
 from server.utils.async_.async_manage_ec2 import (
