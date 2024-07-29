@@ -7,11 +7,14 @@ from asgiref.sync import async_to_sync
 from botocore.exceptions import ClientError
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from celery.exceptions import SoftTimeLimitExceeded
 from channels.layers import get_channel_layer
 from decouple import config
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.utils.timezone import datetime, timedelta
+from django.core.cache import cache
+
 from openai import OpenAI
 from smart_open import open
 
@@ -42,48 +45,68 @@ def send_email_(
     send_mail(subject, message, email_from, recipient_list)
 
 
-@shared_task(time_limit=3600)
+@shared_task(soft_time_limit=3600, time_limit=3650)
 def export_large_dataset(
-    dataset_id: int, url_safe_datasetname: str, unique: str, extension: str
+    dataset_id: int, url_safe_datasetname: str, unique: str, extension: str, hashed_key: str
 ) -> str:
-    session = boto3.Session(
-        aws_access_key_id=r2,
-        aws_secret_access_key=r2_secret,
-    )
-    r2_client = session.client(
-        "s3",
-        endpoint_url=f"https://{r2_account_id}.r2.cloudflarestorage.com/professorparakeetmediafiles",
-        region_name="auto",
-    )
-    dataset = Dataset.objects.get(id=dataset_id)
-    result_records = DatasetRecord.objects.filter(dataset=dataset)
-    i = 0
-    with open(
-        f"s3://download/{url_safe_datasetname}_{unique}{extension}",
-        "w",
-        transport_params={"client": r2_client},
-    ) as fout:
-        for r in result_records.iterator(chunk_size=2000):
-            if extension == ".csv":
-                writer = csv.writer(fout)
-                if i == 0:
-                    writer.writerow(
-                        ["system_prompt", "prompt", "response", "evaluation"]
-                    )
-                    i += 1
-                writer.writerow(
-                    [r.system_prompt, r.prompt, r.response, json.dumps(r.evaluation)]
-                )
+    """
+    Export a dataset from a database to either a CSV or JSONL file stored in an S3-compatible storage service.
 
-            elif extension == ".jsonl":
-                data = {
-                    "system_prompt": r.system_prompt,
-                    "prompt": r.prompt,
-                    "response": r.response,
-                    "evaluation": r.evaluation,
-                }
-                json.dump(data, fout)
-                fout.write("\n")
+    Args:
+        dataset_id (int): ID of the dataset to be exported.
+        url_safe_datasetname (str): URL-safe name for the dataset.
+        unique (str): Unique identifier for the export file.
+        extension (str): File extension, either '.csv' or '.jsonl'.
+        hashed_key (str): Hashed key for caching purposes.
+
+    Returns:
+        str: String indicating the success or failure of the export operation.
+    """
+    try:
+        session = boto3.Session(
+            aws_access_key_id=r2,
+            aws_secret_access_key=r2_secret,
+        )
+        r2_client = session.client(
+            "s3",
+            endpoint_url=f"https://{r2_account_id}.r2.cloudflarestorage.com/professorparakeetmediafiles",
+            region_name="auto",
+        )
+        dataset = Dataset.objects.get(id=dataset_id)
+        result_records = DatasetRecord.objects.filter(dataset=dataset)
+        i = 0
+        with open(
+            f"s3://download/{url_safe_datasetname}_{unique}{extension}",
+            "w",
+            transport_params={"client": r2_client},
+        ) as fout:
+            for r in result_records.iterator(chunk_size=2000):
+                if extension == ".csv":
+                    writer = csv.writer(fout)
+                    if i == 0:
+                        writer.writerow(
+                            ["system_prompt", "prompt", "response", "evaluation"]
+                        )
+                        i += 1
+                    writer.writerow(
+                        [r.system_prompt, r.prompt, r.response,
+                            json.dumps(r.evaluation)]
+                    )
+
+                elif extension == ".jsonl":
+                    data = {
+                        "system_prompt": r.system_prompt,
+                        "prompt": r.prompt,
+                        "response": r.response,
+                        "evaluation": r.evaluation,
+                    }
+                    json.dump(data, fout)
+                    fout.write("\n")
+        cache.set(
+            f"allow_export_large_dataset_for_user_{hashed_key}", True, 3600)
+    except SoftTimeLimitExceeded:
+        cache.set(
+            f"allow_export_large_dataset_for_user_{hashed_key}", True, 3600)
 
 
 @shared_task
@@ -95,14 +118,16 @@ def celery_log_prompt_response(
     response: str,
     type_: str,
 ) -> None:
-    """This function store log into a db then build a memory tree of chat history
+    """
+    This function stores a log entry in the database and builds a memory tree of chat history.
+
     Args:
-        is_session_start_node (bool | None): _description_
-        key_object (object): _description_
-        model (str): _description_
-        prompt (str): _description_
-        response (str): _description_
-        type_ (str): _description_
+        is_session_start_node (bool | None): Indicates if this is the start of a session.
+        key_object_id (int): The ID of the API key object.
+        llm_id (int): The ID of the language model.
+        prompt (str): The prompt text.
+        response (str): The response text.
+        type_ (str): The type of interaction.
     """
     llm = LLM.objects.get(id=llm_id)
     key_object = APIKEY.objects.get(id=key_object_id)
@@ -118,6 +143,18 @@ def celery_log_prompt_response(
 
 @shared_task
 def update_crypto_rate(coin: str):
+    """
+    Update the USD rate for a specific cryptocurrency.
+
+    Parameters:
+    - coin (str): The abbreviation of the cryptocurrency to update.
+
+    Raises:
+    - KeyError: If the required data for updating the rate is not found in the API responses.
+
+    Notes:
+    - This task fetches the current USD rate for the specified cryptocurrency from external APIs and updates the rate in the database.
+    """
     if coin == "xmr":
         try:
             url = "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd"
@@ -192,7 +229,7 @@ def periodically_monitor_EC2_instance() -> str:
 
 @shared_task()
 def periodically_shutdown_EC2_instance() -> None:
-    """This is a func to shutdown unuse EC2 GPU instance ever 1200 secs"""
+    """This is a func to shutdown unuse EC2 GPU instance every 1200 secs"""
     available_server = InferenceServer.objects.filter(availability="Available")
     for server in available_server:
         un_used_time = timezone.now() - server.last_message_time
@@ -280,29 +317,32 @@ def inference(
     prompt: str,
     include_memory: bool,
 ) -> None:
-    """_summary_
-
+    """
+    Perform inference using a specified model and generate a response based on the given prompt and context. 
     Args:
-        unique (str): _description_
-        mode (str): _description_
-        type_ (str): _description_
-        key (str): _description_
-        credit (float): _description_
-        room_group_name (str): _description_
-        model (str): _description_
-        stream (bool): _description_
-        top_k (int): _description_
-        top_p (float): _description_
-        best_of (int): _description_
-        temperature (float): _description_
-        max_tokens (int): _description_
-        presence_penalty (float): _description_
-        frequency_penalty (float): _description_
-        length_penalty (float): _description_
-        early_stopping (bool): _description_
-        beam (bool): _description_
-        prompt (str): _description_
-        include_memory (bool): _description_
+        unique (str): Unique identifier for the inference request.
+        is_session_start_node (bool | None): Indicates if the current prompt is the start of a new session.
+        mode (str): Mode of operation for the inference process.
+        type_ (str): Type of the inference request.
+        key (str): Hashed key for authentication.
+        credit (float): Credit available for the inference request.
+        room_group_name (str): Name of the group where the chat messages are sent.
+        model (str): Name of the model used for inference.
+        stream (bool): Flag indicating if streaming is enabled.
+        top_k (int): Top-k value for sampling.
+        top_p (float): Top-p value for sampling.
+        best_of (int): Number of best results to consider.
+        temperature (float): Temperature value for sampling.
+        max_tokens (int): Maximum number of tokens to generate.
+        presence_penalty (float): Presence penalty for sampling.
+        frequency_penalty (float): Frequency penalty for sampling.
+        length_penalty (float): Length penalty for sampling.
+        early_stopping (bool): Flag indicating if early stopping is enabled.
+        beam (bool): Flag indicating if beam search is used.
+        prompt (str): Input prompt for the inference.
+        include_memory (bool): Flag indicating if memory should be included in the inference process.
+    Returns:
+        None
     """
     channel_layer = get_channel_layer()
     key_object = APIKEY.objects.get(hashed_key=key)
@@ -341,7 +381,8 @@ def inference(
         }
         """ Query a list of inference servers for a given model, pick a random one """
         if url:
-            update_server_status_in_db(instance_id=instance_id, update_type="time")
+            update_server_status_in_db(
+                instance_id=instance_id, update_type="time")
             if server_status == "running":
                 response = send_request(
                     stream=True, url=url, instance_id=instance_id, context=context
@@ -456,49 +497,51 @@ def agent_inference(
     presence_penalty: float,
     type_: str,
 ) -> None:
-    """_summary_
+    """
+    Interacts with the OpenAI API to generate responses based on the conversation turn and session history.
 
     Args:
-        key (str): _description_
-        current_turn_inner (int): _description_
-        stream (bool): _description_
-        model (str): _description_
-        unique (str): _description_
-        credit (float): _description_
-        room_group_name (int): _description_
-        agent_instruction (str): _description_
-        message (str): _description_
-        session_history (list): _description_
-        choosen_model (str): _description_
-        max_turns (int): _description_
-        temperature (float): _description_
-        max_tokens (int): _description_
-        top_p (float): _description_
-        frequency_penalty (float): _description_
-        presence_penalty (float): _description_
+        key (str): API key for authentication.
+        is_session_start_node (bool | None): Boolean indicating if it's the start of a session.
+        current_turn_inner (int): Current turn in the conversation.
+        stream (bool): Indicates if streaming is enabled.
+        model (str): Model name.
+        unique (str): Unique identifier for the session.
+        credit (float): Available credit.
+        room_group_name (int): Room group name.
+        agent_instruction (str): Instruction for the agent.
+        message (str): User's message.
+        session_history (list): Previous conversation turns.
+        choosen_model (str): Chosen model.
+        max_turns (int): Maximum number of turns allowed.
+        temperature (float): Temperature setting of the model.
+        max_tokens (int): Maximum number of tokens for the response.
+        top_p (float): Top-p sampling.
+        frequency_penalty (float): Frequency penalty.
+        presence_penalty (float): Presence penalty.
+        type_ (str): Type of the interaction.
     """
     client = OpenAI(
         api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY
     )
     key_object = APIKEY.objects.get(hashed_key=key)
     llm = LLM.objects.get(name=model)
-    if current_turn_inner >= 0 and current_turn_inner <= (max_turns - 1):
+
+    if 0 <= current_turn_inner < max_turns:
         if current_turn_inner == 0:
             prompt = [
                 {"role": "system", "content": f"{agent_instruction}"},
                 {"role": "user", "content": f"{message}"},
             ]
-        elif current_turn_inner > 0 and current_turn_inner < (max_turns - 1):
+        elif 0 < current_turn_inner < max_turns - 1:
             prompt = [{"role": "user", "content": f"Response: {message}"}]
-
-        elif current_turn_inner == (max_turns - 1):
-            force_stop = (
-                "You should directly give results based on history information."
-            )
+        else:
+            force_stop = "You should directly give results based on history information."
             prompt = [
                 {"role": "user", "content": f"Response: {message}"},
                 {"role": "system", "content": f"Response: {force_stop}"},
             ]
+
         session_history.extend(prompt)
         clean_response = send_agent_request_openai(
             client=client,
@@ -516,6 +559,7 @@ def agent_inference(
             temperature=temperature,
             presence_penalty=presence_penalty,
         )
+
         if clean_response and isinstance(clean_response, str):
             log_prompt_response(
                 is_session_start_node=is_session_start_node,

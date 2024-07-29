@@ -1,4 +1,4 @@
-from rest_framework.throttling import AnonRateThrottle
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 
 class KeyCreateRateThrottle(AnonRateThrottle):
@@ -13,5 +13,5 @@ class XMRConfirmationRateThrottle(AnonRateThrottle):
     scope = "confirm_monero"
 
 
-class UserRateThrottle(AnonRateThrottle):
-    scope = "user"
+class DatasetExportRateThrottle(UserRateThrottle):
+    scope = "dataset_export"

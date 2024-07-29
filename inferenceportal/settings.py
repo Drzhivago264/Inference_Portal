@@ -182,13 +182,15 @@ REST_FRAMEWORK = {
         "server.api_throttling_rates.KeyCreateRateThrottle",
         "server.api_throttling_rates.CreditCheckRateThrottle",
         "server.api_throttling_rates.XMRConfirmationRateThrottle",
+        "server.api_throttling_rates.DatasetExportRateThrottle"
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "20/s",
+        "anon": "10/s",
         "user": "20/s",
         "create_key": "50/day",
         "check_key": "100/hour",
         "confirm_monero": "100/hour",
+        "dataset_export": "10/hour"
     },
 }
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
