@@ -77,25 +77,25 @@ async def agentcompletion(request, data: AgentSchema):
                         await get_user_template(
                             name=parent_template_name, user_object=user_object
                         )
-                        if parent_template_name is not None
+                        if parent_template_name 
                         else ""
                     )
                     child_template = (
                         await get_user_template(
                             name=child_template_name, user_object=user_object
                         )
-                        if child_template_name is not None
+                        if child_template_name 
                         else ""
                     )
                 else:
                     parent_template = (
                         await get_system_template(name=parent_template_name)
-                        if parent_template_name is not None
+                        if parent_template_name 
                         else ""
                     )
                     child_template = (
                         await get_system_template(name=child_template_name)
-                        if child_template_name is not None
+                        if child_template_name 
                         else ""
                     )
 
