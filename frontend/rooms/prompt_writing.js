@@ -328,6 +328,7 @@ function PromptWriting() {
                                                 <DatasetMutateDialog
                                                     setAllowAddDataset={setAllowAddDataset}
                                                     setDatasetList={setDatasetList}
+                                                    setSelectedIndex={setSelectedIndex}
                                                     dataset_list={dataset_list}
                                                     max_evaluation_num={max_dataset_num}
                                                     method = "put"
@@ -347,6 +348,7 @@ function PromptWriting() {
                                             <DatasetMutateDialog
                                                 setAllowAddDataset={setAllowAddDataset}
                                                 setDatasetList={setDatasetList}
+                                                setSelectedIndex={setSelectedIndex}
                                                 dataset_list={dataset_list}
                                                 max_evaluation_num={max_dataset_num}
                                                 method="post"

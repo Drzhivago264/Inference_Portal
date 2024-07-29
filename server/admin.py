@@ -4,7 +4,7 @@ from rest_framework_api_key.admin import APIKeyModelAdmin
 
 from .models import (APIKEY, LLM, Crypto, FineGrainAPIKEY, InferenceServer,
                      InstructionTree, MemoryTree, PaymentHistory, Price,
-                     Product, ProductTag, PromptResponse, UserInstructionTree)
+                     Product, ProductTag, PromptResponse, UserInstructionTree, Dataset, DatasetRecord)
 
 
 class PriceAdmin(admin.StackedInline):
@@ -36,7 +36,8 @@ admin.site.register(PaymentHistory)
 admin.site.register(LLM)
 admin.site.register(InferenceServer)
 admin.site.register(PromptResponse)
-
+admin.site.register(DatasetRecord)
+admin.site.register(Dataset)
 admin.site.register(
     MemoryTree,
     DraggableMPTTAdmin,
