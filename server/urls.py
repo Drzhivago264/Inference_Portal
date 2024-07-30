@@ -29,7 +29,7 @@ from server.views.template_writing import (create_user_instruction_tree_api,
                                            user_instruction_tree_api)
 from server.views.token_management import (add_permission, generate_token_api,
                                            get_token_api, invalidate_token,
-                                           remove_permission)
+                                           remove_permission, update_ratelimit)
 
 app_name = "server"
 
@@ -55,10 +55,11 @@ urlpatterns = [
     # ENDPOINTS FOR KEYS AND TOKENS MANAGEMENT
     path("frontend-api/generate-key", generate_key_api, name="generate-key"),
     path("frontend-api/generate-token", generate_token_api, name="generate-token"),
-    path("frontend-api/get-token", get_token_api, name="generate-get"),
+    path("frontend-api/get-token", get_token_api, name="get-token"),
     path("frontend-api/remove-permission", remove_permission, name="remove_permission"),
     path("frontend-api/add-permission", add_permission, name="add_permission"),
     path("frontend-api/invalidate-token", invalidate_token, name="invalidate-token"),
+    path("frontend-api/update-ratelimit", update_ratelimit, name="update-ratelimit"),
     # ENDPOINTS FOR PAYMENTS AND WALLETS
     path("frontend-api/check-credit", check_credit_api, name="check-key"),
     path("frontend-api/get-xmr-wallet", retrive_xmr_wallet_api, name="get-xmr-wallet"),

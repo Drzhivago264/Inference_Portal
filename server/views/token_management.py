@@ -32,8 +32,10 @@ def generate_token_api(request: HttpRequest) -> Response:
         permission_dict = serializer.data["permission"]
         ttl_raw = serializer.data["ttl"]
         time_unit = serializer.data["time_unit"]
+        ratelimit = serializer.data['ratelimit']
+        ratelimit_time_unit = serializer.data['ratelimit_time_unit']
         use_ttl = serializer.data["use_ttl"]
-        slave_group, created = Group.objects.get_or_create(name="slave_user")
+        slave_group, _ = Group.objects.get_or_create(name="slave_user")
         number_of_current_key = FineGrainAPIKEY.objects.filter(
             master_key=master_key_object
         ).count()
@@ -64,13 +66,14 @@ def generate_token_api(request: HttpRequest) -> Response:
             )
         try:
             ttl = time_dispatcher[time_unit] if use_ttl else None
+            time_dispatcher[ratelimit_time_unit]
         except KeyError:
             return Response(
                 "Time Unit is Incorrect!", status=status.HTTP_400_BAD_REQUEST
             )
 
         name, token = FineGrainAPIKEY.objects.create_key(
-            name=token_name, master_key=master_key_object, ttl=ttl
+            name=token_name, master_key=master_key_object, ttl=ttl, ratelimit = f"{ratelimit}/{ratelimit_time_unit}"
         )
 
         created_key = FineGrainAPIKEY.objects.get_from_key(token)
@@ -94,6 +97,7 @@ def generate_token_api(request: HttpRequest) -> Response:
                 "ttl": created_key.ttl,
                 "created_at": created_key.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "permission": permission_list,
+                "ratelimit": f"{ratelimit}/{ratelimit_time_unit}"
             },
             status=status.HTTP_200_OK,
         )
@@ -120,6 +124,7 @@ def get_token_api(request: HttpRequest) -> Response:
                     "name": token.name,
                     "created_at": token.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     "ttl": token.ttl,
+                    "ratelimit": token.ratelimit,
                     "permissions": token.user.user_permissions.all().values_list(
                         "codename", flat=True
                     ),
@@ -217,7 +222,42 @@ def add_permission(request: HttpRequest) -> Response:
             status=status.HTTP_200_OK,
         )
 
+@api_view(["PUT"])
+@throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated])
+def update_ratelimit(request: HttpRequest) -> Response:
+    serializer = ModifyTokenSerializer(data=request.data)
+    current_user = request.user
+    master_key_object = current_user.apikey
+    if serializer.is_valid():
+        token_name = serializer.data["token_name"]
+        ratelimit = serializer.data["ratelimit"]
+        ratelimit_time_unit = serializer.data["ratelimit_time_unit"]
+        first_and_last_char = serializer.data["first_and_last_char"]
+        prefix = serializer.data["prefix"]
+        try:
+            token = FineGrainAPIKEY.objects.get(
+                master_key=master_key_object,
+                name=token_name,
+                prefix=prefix,
+                first_three_char=first_and_last_char[:3],
+                last_three_char=first_and_last_char[-3:],
+            )
+        except FineGrainAPIKEY.DoesNotExist:
+            return Response(
+                {"detail": "Error: token does not exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        token.ratelimit = f"{ratelimit}/{ratelimit_time_unit}"
+        token.save()
 
+        return Response(
+            {
+                "reponse": f"Ratelimit is update to {ratelimit}/{ratelimit_time_unit}",
+                "value": first_and_last_char,
+            },
+            status=status.HTTP_200_OK,
+        )
 @api_view(["DELETE"])
 @throttle_classes([UserRateThrottle])
 @permission_classes([IsAuthenticated])

@@ -22,10 +22,9 @@ class GlobalAuth(HttpBearer):
         try:
             key_object = model_dispatcher[str(len(token))].objects.get_from_key(token)
             if key_object.user.groups.filter(name="master_user").exists():
-                user = key_object.user
-                return key_object, user
+                return key_object, key_object.user, None
             elif key_object.user.groups.filter(name="slave_user").exists():
-                return key_object, key_object.master_key.user
+                return key_object.master_key, key_object.master_key.user, key_object
         except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
             pass
 

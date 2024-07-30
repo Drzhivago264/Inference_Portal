@@ -16,12 +16,12 @@ class QueryDBMixin:
     async def get_master_key_and_master_user(self):
         if await sync_to_async(self.user.groups.filter(name="master_user").exists)():
             key_object = await sync_to_async(lambda: self.user.apikey)()
-            return key_object, self.user
+            return key_object, self.user, None
         elif await sync_to_async(self.user.groups.filter(name="slave_user").exists)():
             token = await sync_to_async(lambda: self.user.finegrainapikey)()
             key_object = await sync_to_async(lambda: token.master_key)()
             master_user = await sync_to_async(lambda: key_object.user)()
-            return key_object, master_user
+            return key_object, master_user, token
 
     async def check_permission(self, permission_code, destination):
         if await sync_to_async(self.user.has_perm)(permission_code):

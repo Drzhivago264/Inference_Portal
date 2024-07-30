@@ -15,11 +15,10 @@ function APIDoc() {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<title>API Doc</title>
-			<ResponsiveAppBar max_width='xxl' />
-			<Container maxWidth='xxl' disableGutters>
+			<ResponsiveAppBar max_width='xxl' />            
 				<rapi-doc
 					spec-url='/api/openapi.json'
-					server-url='https://professorparakeet.com/'
+					server-url={window.location.origin}
 					render-style='view'
 					show-header={false}
                     theme={theme.palette.mode}
@@ -27,7 +26,7 @@ function APIDoc() {
 					primary-color={theme.palette.mode === "dark" ? "#fff" : "#121212"}
 					style={{height: "1000px", width: "100%"}}
 					bg-color={theme.palette.mode === "dark" ? "#121212" : "#fff"}></rapi-doc>
-			</Container>
+	
 			<Footer />
 		</Container>
 	);

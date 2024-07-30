@@ -47,6 +47,7 @@ class APIKEY(AbstractAPIKey):
     updated_at = models.DateTimeField(auto_now=True)
     integrated_address = models.TextField(max_length=400)
     payment_id = models.TextField(max_length=400)
+    ratelimit = models.TextField(default="5000/minute")
 
     class Meta:
         verbose_name = "Master API Key"
@@ -55,6 +56,7 @@ class APIKEY(AbstractAPIKey):
 
 class FineGrainAPIKeyManager(BaseAPIKeyManager):
     key_generator = KeyGenerator(prefix_length=8, secret_key_length=64)
+
 
 
 class FineGrainAPIKEY(AbstractAPIKey):
@@ -69,6 +71,7 @@ class FineGrainAPIKEY(AbstractAPIKey):
     ttl = models.DurationField(default=datetime.timedelta(days=10), null=True)
     first_three_char = models.TextField(default="???")
     last_three_char = models.TextField(default="???")
+    ratelimit = models.TextField(default="30/minute")
 
     class Meta:
         verbose_name = "FineGrain API Key"

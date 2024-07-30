@@ -10,11 +10,12 @@ from server.queue.model_inference import inference
 from server.consumers.pydantic_validator import ChatSchema
 from server.utils import constant
 from server.utils.async_.async_query_database import QueryDBMixin
-
+from server.rate_limit import rate_limit_initializer, RateLimitError
 
 class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
 
     async def connect(self):
+        
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
         self.time = timezone.localtime(
@@ -23,8 +24,10 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = True
         self.user = self.scope["user"]
-        self.key_object, self.master_user = await self.get_master_key_and_master_user()
         self.p_type = "chatbot"
+        self.key_object, self.master_user, self.slave_key_object = await self.get_master_key_and_master_user()
+        self.rate_limiter = await rate_limit_initializer(key_object=self.key_object, strategy="moving_windown", slave_key_object=self.slave_key_object, namespace=self.p_type, timezone=self.timezone)
+        
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -50,6 +53,21 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
 
     async def receive(self, text_data):
         try:
+            await self.rate_limiter.check_rate_limit()
+            await self.send_message_if_not_rate_limited(text_data)
+        except RateLimitError as e:
+            await self.send(
+                    text_data=json.dumps(
+                        {
+                            "message": e.message,
+                            "role": "Server",
+                            "time": self.time,
+                        }
+                    )
+                )
+    
+    async def send_message_if_not_rate_limited(self, text_data):
+        try:
             validated = ChatSchema.model_validate_json(text_data)
             if not self.key_object:
                 await self.send(
@@ -73,7 +91,6 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
                     )
                 )
             elif self.key_object and validated.message.strip():
-
                 mode = validated.mode
                 message = validated.message
                 top_p = validated.top_p

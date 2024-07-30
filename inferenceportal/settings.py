@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+from limits.storage import storage_from_string
 from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -110,6 +110,9 @@ CACHES = {
         "LOCATION": "redis://127.0.0.1:6380",
     }
 }
+
+RATE_LIMIT_STORAGE = storage_from_string("async+redis://localhost:6380")
+
 ASGI_APPLICATION = "inferenceportal.asgi.application"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
