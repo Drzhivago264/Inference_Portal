@@ -14,7 +14,7 @@ from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.llm_toolbox import (ChangeWrittingStyle, Emotion,
                                       ParaphaseDocument, SummarizeDocument,
                                       TopicClassification)
-
+from server.rate_limit import rate_limit_initializer, RateLimitError
 router = Router()
 
 
@@ -37,7 +37,8 @@ async def predict_sentiment(request, data: BaseLLMSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
-    key_object, user_object = request.auth
+    key_object, user_object, slave_key_object = request.auth
+    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -45,18 +46,8 @@ async def predict_sentiment(request, data: BaseLLMSchema):
         permission="server.allow_toolbox_api",
         destination="toolbox",
     )
-    if is_ratelimited(
-        request,
-        group="text_completion",
-        key="header:X-API-KEY",
-        rate="5/s",
-        increment=True,
-    ):
-        raise HttpError(
-            429,
-            "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.",
-        )
-    else:
+    try:
+        await rate_limiter.check_rate_limit()
         model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
@@ -80,7 +71,11 @@ async def predict_sentiment(request, data: BaseLLMSchema):
             predict = dspy.Predict("document -> sentiment")
             response = predict(document=prompt)
             return 200, {"response": response.sentiment, "context": data}
-
+    except RateLimitError as e:
+        raise HttpError(
+            429,
+            e.message,
+        )
 
 @router.post(
     "/predict/emotion",
@@ -101,7 +96,8 @@ async def predict_emotion(request, data: ClassificationSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
-    key_object, user_object = request.auth
+    key_object, user_object, slave_key_object = request.auth
+    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -109,18 +105,8 @@ async def predict_emotion(request, data: ClassificationSchema):
         permission="server.allow_toolbox_api",
         destination="toolbox",
     )
-    if is_ratelimited(
-        request,
-        group="text_completion",
-        key="header:X-API-KEY",
-        rate="5/s",
-        increment=True,
-    ):
-        raise HttpError(
-            429,
-            "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.",
-        )
-    else:
+    try:
+        rate_limiter.check_rate_limit()
         model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
@@ -151,7 +137,11 @@ async def predict_emotion(request, data: ClassificationSchema):
             response = predict(sentence=prompt)
 
             return 200, {"response": response.emotion, "context": data}
-
+    except RateLimitError as e:
+        raise HttpError(
+            429,
+            e.message,
+        )
 
 @router.post(
     "/tasks/paraphase",
@@ -172,7 +162,8 @@ async def paraphase(request, data: BaseLLMSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
-    key_object, user_object = request.auth
+    key_object, user_object, slave_key_object = request.auth
+    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -180,18 +171,8 @@ async def paraphase(request, data: BaseLLMSchema):
         permission="server.allow_toolbox_api",
         destination="toolbox",
     )
-    if is_ratelimited(
-        request,
-        group="text_completion",
-        key="header:X-API-KEY",
-        rate="5/s",
-        increment=True,
-    ):
-        raise HttpError(
-            429,
-            "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.",
-        )
-    else:
+    try:
+        await rate_limiter.check_rate_limit()
         model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
@@ -215,7 +196,11 @@ async def paraphase(request, data: BaseLLMSchema):
             paraphaser = dspy.ChainOfThought(ParaphaseDocument)
             response = paraphaser(document=prompt)
             return 200, {"response": response.paraphased, "context": data}
-
+    except RateLimitError as e:
+        raise HttpError(
+            429,
+            e.message,
+        )
 
 @router.post(
     "/tasks/summarize",
@@ -239,7 +224,8 @@ async def summarize_document(request, data: SummarizeSchema):
     You can choose to classify the document in a specific number of words with **number_of_word** parameter.
     This number of words is only respected if it is smaller than the number of words decided by the model and presented in your document.
     """
-    key_object, user_object = request.auth
+    key_object, user_object, slave_key_object = request.auth
+    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -247,19 +233,8 @@ async def summarize_document(request, data: SummarizeSchema):
         permission="server.allow_toolbox_api",
         destination="toolbox",
     )
-    if is_ratelimited(
-        request,
-        group="text_completion",
-        key="header:X-API-KEY",
-        rate="5/s",
-        increment=True,
-    ):
-        raise HttpError(
-            429,
-            "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.",
-        )
-
-    else:
+    try:
+        await rate_limiter.check_rate_limit()
         model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
@@ -289,7 +264,11 @@ async def summarize_document(request, data: SummarizeSchema):
             summarize = dspy.ChainOfThought(Summarizer_)
             response = summarize(document=prompt)
             return 200, {"response": response.summary, "context": data}
-
+    except RateLimitError as e:
+        raise HttpError(
+            429,
+            e.message,
+        )
 
 @router.post(
     "/tasks/classify",
@@ -310,7 +289,8 @@ async def classify_document(request, data: ClassificationSchema):
      - **gpt-3.5-turbo-0125**
      - **gpt-4-0125-preview**
     """
-    key_object, user_object = request.auth
+    key_object, user_object, slave_key_object = request.auth
+    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -318,18 +298,8 @@ async def classify_document(request, data: ClassificationSchema):
         permission="server.allow_toolbox_api",
         destination="toolbox",
     )
-    if is_ratelimited(
-        request,
-        group="text_completion",
-        key="header:X-API-KEY",
-        rate="5/s",
-        increment=True,
-    ):
-        raise HttpError(
-            429,
-            "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.",
-        )
-    else:
+    try:
+        rate_limiter.check_rate_limit()
         model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
@@ -359,7 +329,11 @@ async def classify_document(request, data: ClassificationSchema):
             predict = dspy.Predict(Topic_)
             response = predict(document=prompt)
             return 200, {"response": response.topic, "context": data}
-
+    except RateLimitError as e:
+        raise HttpError(
+            429,
+            e.message,
+        )
 
 @router.post(
     "/tasks/restyle",
@@ -382,7 +356,8 @@ async def restyle_document(request, data: RestyleSchema):
 
      The new style can be an adjective (e.g., **sad**) or multiple strings of adjectives (e.g., **professional**, **serious**)
     """
-    key_object, user_object = request.auth
+    key_object, user_object, slave_key_object = request.auth
+    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -390,18 +365,8 @@ async def restyle_document(request, data: RestyleSchema):
         permission="server.allow_toolbox_api",
         destination="toolbox",
     )
-    if is_ratelimited(
-        request,
-        group="text_completion",
-        key="header:X-API-KEY",
-        rate="5/s",
-        increment=True,
-    ):
-        raise HttpError(
-            429,
-            "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.",
-        )
-    else:
+    try:
+        rate_limiter.check_rate_limit()
         model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
@@ -431,3 +396,8 @@ async def restyle_document(request, data: RestyleSchema):
             restyler = dspy.ChainOfThought(Restyler_)
             response = restyler(document=prompt)
             return 200, {"response": response.styled, "context": data}
+    except RateLimitError as e:
+        raise HttpError(
+            429,
+            e.message,
+        )

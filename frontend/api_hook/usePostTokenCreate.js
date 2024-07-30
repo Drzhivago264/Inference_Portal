@@ -1,6 +1,6 @@
 import { basePost } from "./basePost";
 import { useMutation } from "react-query";
-export const usePostTokenCreate = ({ setTokenNameError, setTokenCreateLoading, setShowKeyCreateResponse, setRandomAnimation, setLocalTokenCreateError, tokenname, permission, ttl, time_unit, use_ttl }) => {
+export const usePostTokenCreate = ({ setTokenNameError, setTokenCreateLoading, setShowKeyCreateResponse, setRandomAnimation, setLocalTokenCreateError, tokenname, permission, ratelimit, ratelimit_time_unit, ttl, time_unit, use_ttl }) => {
     const { mutate: tokencreatemutate, error: servertokencreateerror, data: servertokencreatedata} = useMutation(basePost);
     const postCreateToken = (event) => {
         event.preventDefault()
@@ -31,7 +31,11 @@ export const usePostTokenCreate = ({ setTokenNameError, setTokenCreateLoading, s
             setLocalTokenCreateError("You tried to create a token with invalid time to live (0 < ttl < 999999).")
             setTokenCreateLoading(false)
         }
-        else if (!['day', 'hour', 'minute', 'second'].includes(time_unit)) {
+        else if (ratelimit <= 0 || ratelimit > 999999) {
+            setLocalTokenCreateError("You tried to create a token with invalid rate limit (0 < rate limit < 999999).")
+            setTokenCreateLoading(false)
+        }
+        else if (!['day', 'hour', 'minute', 'second'].includes(time_unit) || !['day', 'hour', 'minute', 'second'].includes(ratelimit_time_unit) ) {
             setLocalTokenCreateError("You tried to create a token with invalid time unit ['day', 'hour', 'minute', 'second'].")
             setTokenCreateLoading(false)
         }
@@ -41,7 +45,9 @@ export const usePostTokenCreate = ({ setTokenNameError, setTokenCreateLoading, s
                 permission: permission,
                 ttl: ttl,
                 time_unit: time_unit,
-                use_ttl: use_ttl
+                use_ttl: use_ttl,
+                ratelimit: ratelimit,
+                ratelimit_time_unit: ratelimit_time_unit
             }
             tokencreatemutate({ url: "/frontend-api/generate-token", data: data }, {
                 onSuccess: () => {

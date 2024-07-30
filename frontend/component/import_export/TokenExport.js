@@ -22,6 +22,7 @@ const TokenCreateExport = ({
 	setTokenCreateLoading,
 	setTokenList,
 	token_list,
+    ratelimit
 }) => {
 	return (
 		<Box my={4}>
@@ -35,8 +36,7 @@ const TokenCreateExport = ({
 					textAlign='center'
 					my={1}>
 					<Alert severity='info'>
-						{" "}
-						Token:{" "}
+						Token:
 						<RandomReveal
 							isPlaying
 							duration={2}
@@ -54,6 +54,7 @@ const TokenCreateExport = ({
 										created_at: created_at,
 										ttl: ttl,
 										permissions: permission,
+                                        ratelimit: ratelimit
 									},
 								])
 							)}
@@ -65,7 +66,7 @@ const TokenCreateExport = ({
 			{randomanimation && (
 				<Box textAlign='center' my={4}>
 					<Textarea
-						defaultValue={`Token: ${token_}\nToken Name: ${token_name}\nTTL: ${ttl}\nCreated at: ${created_at}\nPermission(s): ${permission}`}
+						defaultValue={`Token: ${token_}\nToken Name: ${token_name}\nTTL: ${ttl}\nCreated at: ${created_at}\nRatelimit: ${ratelimit}\nPermission(s): ${permission}`}
 						minRows={4}
 						maxRows={10}
 					/>
@@ -74,7 +75,7 @@ const TokenCreateExport = ({
 							size='small'
 							variant='outlined'
 							onClick={() =>
-								exporttoken(`Token: ${token_}\nToken Name: ${token_name}\nTTL: ${ttl}\nCreated at: ${created_at}\nPermission(s): ${permission}`)
+								exporttoken(`Token: ${token_}\nToken Name: ${token_name}\nTTL: ${ttl}\nCreated at: ${created_at}\nRatelimit: ${ratelimit}\nPermission(s): ${permission}`)
 							}>
 							Export token
 						</Button>
@@ -86,6 +87,7 @@ const TokenCreateExport = ({
 };
 TokenCreateExport.propTypes = {
 	token_: PropTypes.string.isRequired,
+    ratelimit: PropTypes.string.isRequired,
 	token_name: PropTypes.string.isRequired,
 	ttl: PropTypes.string.isRequired,
 	created_at: PropTypes.string.isRequired,

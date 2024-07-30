@@ -188,6 +188,8 @@ class CreateTokenSerializer(serializers.Serializer):
     token_name = serializers.CharField()
     use_ttl = serializers.BooleanField()
     ttl = serializers.IntegerField()
+    ratelimit = serializers.IntegerField()
+    ratelimit_time_unit = serializers.CharField()
     time_unit = serializers.CharField()
     permission = PermissionSerializer()
 
@@ -216,13 +218,14 @@ class ModifyTokenSerializer(serializers.Serializer):
     prefix = serializers.CharField()
     first_and_last_char = serializers.CharField()
     permission = serializers.CharField(required=False)
-
+    ratelimit = serializers.IntegerField(required=False)
+    ratelimit_time_unit = serializers.CharField(required=False)
     def validate_permission(self, value):
         if value and value not in constant.DEFAULT_PERMISSION_CODENAMES:
             raise serializers.ValidationError("Cannot find permission")
         return value
 
-
+    
 class CheckKeySerializer(CreateKeySerializer):
     key = serializers.CharField()
 

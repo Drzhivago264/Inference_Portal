@@ -21,6 +21,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
+import SpeedIcon from "@mui/icons-material/Speed";
 import Stack from "@mui/material/Stack";
 import SuccessErrorAlert from "../component/Alert/SuccessErrorAlert.js";
 import Switch from "@mui/material/Switch";
@@ -34,6 +35,7 @@ import TextField from "@mui/material/TextField";
 import TimerIcon from "@mui/icons-material/Timer";
 import TokenCreateExport from "../component/import_export/TokenExport.js";
 import Typography from "@mui/material/Typography";
+import UpdateRateLimitDialog from "../component/dialog/AdjustRateLimitDialog.js";
 import {styled} from "@mui/system";
 import {useDeletePermission} from "../api_hook/useDeletePermission.js";
 import {useDeleteToken} from "../api_hook/useDeleteToken.js";
@@ -52,7 +54,17 @@ function TokenManagement() {
 	const [tokencreateloading, setTokenCreateLoading] = useState(false);
 	const [token_list, setTokenList] = useState([]);
 	const [use_ttl, setUseTTL] = useState(true);
-	const [permission, setPermission] = useState({
+	const [ratelimit, setRateLimit] = useState(30);
+	const [ratelimit_time_unit, setRateLimitTimeUnit] = useState("minute");
+	const [randomanimation, setRandomAnimation] = useState(false);
+	const [tokenname, setTokenName] = useState("");
+	const [ttl, setTTL] = useState(10);
+	const [time_unit, setTimeUnit] = useState("day");
+	const [tokennameError, setTokenNameError] = useState(false);
+	const [localtokencreateerror, setLocalTokenCreateError] = useState(null);
+	const [showkeycreateresponse, setShowKeyCreateResponse] = useState(false);
+
+	const initialPermissionState = {
 		allow_chat: false,
 		allow_agent: false,
 		allow_chat_api: false,
@@ -74,39 +86,12 @@ function TokenManagement() {
 		change_datasetrecord: false,
 		delete_datasetrecord: false,
 		view_datasetrecord: false,
-	});
-	const [randomanimation, setRandomAnimation] = useState(false);
-	const [tokenname, setTokenName] = useState("");
-	const [ttl, setTTL] = useState(10);
-	const [time_unit, setTimeUnit] = useState("day");
-	const [tokennameError, setTokenNameError] = useState(false);
-	const [localtokencreateerror, setLocalTokenCreateError] = useState(null);
-	const [showkeycreateresponse, setShowKeyCreateResponse] = useState(false);
+	};
+
+	const [permission, setPermission] = useState(initialPermissionState);
+
 	const setAllPermission = (value) => {
-		const updatedPermissions = {
-			allow_chat: value,
-			allow_agent: value,
-			allow_chat_api: value,
-			allow_agent_api: value,
-			allow_toolbox: value,
-			allow_toolbox_api: value,
-			allow_data_synthesis: value,
-			allow_view_log: value,
-			allow_view_cost: value,
-			add_userinstructiontree: value,
-			change_userinstructiontree: value,
-			delete_userinstructiontree: value,
-			view_userinstructiontree: value,
-			add_dataset: value,
-			change_dataset: value,
-			delete_dataset: value,
-			view_dataset: value,
-			add_datasetrecord: value,
-			change_datasetrecord: value,
-			delete_datasetrecord: value,
-			view_datasetrecord: value,
-		};
-		setPermission(updatedPermissions);
+		setPermission(Object.fromEntries(Object.keys(initialPermissionState).map((key) => [key, value])));
 	};
 	const {
 		fetch: postCreateToken,
@@ -120,6 +105,8 @@ function TokenManagement() {
 		setLocalTokenCreateError,
 		tokenname,
 		permission,
+		ratelimit,
+		ratelimit_time_unit,
 		ttl,
 		time_unit,
 		use_ttl,
@@ -144,13 +131,7 @@ function TokenManagement() {
 						<Box my={1} alignItems='center' sx={{height: "100%"}}>
 							<StyledPaper variant='outlined'>
 								<Typography mb={2} variant='h6'>
-									<Box
-										sx={{
-											lineHeight: 2,
-											fontWeight: "700",
-										}}>
-										Access Tokens
-									</Box>
+									<Box sx={{lineHeight: 2, fontWeight: "700"}}>Access Tokens</Box>
 								</Typography>
 								{token_list.length === 0 && (
 									<Alert severity='info' sx={{whiteSpace: "pre-line"}}>
@@ -168,15 +149,12 @@ function TokenManagement() {
 										aria-label='simple table'>
 										<TableHead>
 											<TableRow>
-												<TableCell>Name</TableCell>
 												<TableCell>Value</TableCell>
-												<TableCell sx={{width: "20%"}}>Created at</TableCell>
-												<TableCell>TTL (seconds)</TableCell>
-												<TableCell sx={{width: "35%"}}>Permissions</TableCell>
-												<TableCell
-													sx={{
-														width: "8%",
-													}}></TableCell>
+												<TableCell>Created at</TableCell>
+												<TableCell sx={{width: "15%"}}>TTL (seconds)</TableCell>
+												<TableCell sx={{width: "40%"}}>Permissions</TableCell>
+												<TableCell sx={{width: "15%"}}>Ratelimit</TableCell>
+												<TableCell sx={{width: "6%"}}></TableCell>
 											</TableRow>
 										</TableHead>
 										<TableBody>
@@ -186,7 +164,6 @@ function TokenManagement() {
 													sx={{
 														"&:last-child td, &:last-child th": {border: 0},
 													}}>
-													<TableCell>{row.name}</TableCell>
 													<TableCell>{row.value}</TableCell>
 													<TableCell>{row.created_at.toString()}</TableCell>
 													<TableCell>{row.ttl ? row.ttl : Infinity}</TableCell>
@@ -204,7 +181,6 @@ function TokenManagement() {
 															))}
 															{row.permissions.length < Object.keys(permission).length && (
 																<Grid item>
-																	{" "}
 																	<AddPermissionDialog
 																		current_permission_list={row.permissions}
 																		full_permission_dict={permission}
@@ -219,6 +195,21 @@ function TokenManagement() {
 																</Grid>
 															)}
 														</Grid>
+													</TableCell>
+													<TableCell>
+                                                        <Stack direction='row' alignItems="center" spacing={2}>
+                                                        {row.ratelimit}
+														<UpdateRateLimitDialog
+															token_name={row.name}
+															token_value={row.value}
+															token_prefix={row.prefix}
+															setTokenCreateError={setLocalTokenCreateError}
+															setTokenList={setTokenList}
+															token_list={token_list}
+															index={index}
+														/>
+                                                        </Stack>
+							
 													</TableCell>
 													<TableCell>
 														<IconButton
@@ -245,8 +236,7 @@ function TokenManagement() {
 											lineHeight: 2,
 											fontWeight: "700",
 										}}>
-										{" "}
-										Create New Access Token{" "}
+										Create New Access Token
 									</Box>
 								</Typography>
 								<Box my={2} justifyContent='center' alignItems='center' display='flex'>
@@ -275,8 +265,8 @@ function TokenManagement() {
 												onSubmit={(e) => {
 													postCreateToken(e);
 												}}>
-												<FormControl defaultValue='' required>
-													<Stack direction='column' spacing={1}>
+												<FormControl defaultValue='' fullWidth required>
+													<Stack direction='column' spacing={2}>
 														<TextField
 															margin='normal'
 															label='Token Name'
@@ -294,16 +284,16 @@ function TokenManagement() {
 																),
 															}}
 														/>
-														<FormControlLabel
-															control={<Switch checked={use_ttl} onChange={(e) => setUseTTL(e.target.checked)} />}
-															label='Use TTL'
-														/>
+
 														<Stack
-															mb={1}
 															direction={{
 																xs: "row",
 															}}
 															spacing={1}>
+															<FormControlLabel
+																control={<Switch checked={use_ttl} onChange={(e) => setUseTTL(e.target.checked)} />}
+																label='TTL'
+															/>
 															<TextField
 																id='ttl'
 																label='Time To Live'
@@ -330,6 +320,45 @@ function TokenManagement() {
 																label='Unit'
 																value={time_unit}
 																onChange={(e) => setTimeUnit(e.target.value)}
+																size='small'>
+																{["day", "hour", "minute", "second"].map((option) => (
+																	<MenuItem key={option} token={option} value={option}>
+																		{option}
+																	</MenuItem>
+																))}
+															</TextField>
+														</Stack>
+														<Stack
+															direction={{
+																xs: "row",
+															}}
+															spacing={1}>
+															<TextField
+																id='ratelimit'
+																label='Ratelimit'
+																fullWidth
+																type='number'
+																size='small'
+																value={ratelimit}
+																onChange={(e) => setRateLimit(e.target.value)}
+																InputLabelProps={{
+																	shrink: true,
+																}}
+																InputProps={{
+																	startAdornment: (
+																		<InputAdornment position='start'>
+																			<SpeedIcon />
+																		</InputAdornment>
+																	),
+																}}
+															/>
+															<TextField
+																id='rate-limit-time-unit'
+																select
+																fullWidth
+																label='Unit'
+																value={ratelimit_time_unit}
+																onChange={(e) => setRateLimitTimeUnit(e.target.value)}
 																size='small'>
 																{["day", "hour", "minute", "second"].map((option) => (
 																	<MenuItem key={option} token={option} value={option}>

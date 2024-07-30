@@ -18,6 +18,7 @@ from server.utils import constant
 from server.utils.async_.async_manage_ec2 import \
     update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
+from server.rate_limit import rate_limit_initializer, RateLimitError
 
 router = Router()
 
@@ -33,7 +34,8 @@ async def agentcompletion(request, data: AgentSchema):
     To use agent please choose the following model:
      - **"Llama 3 Instruct AWQ"**
     """
-    key_object, user_object = request.auth
+    key_object, user_object, slave_key_object = request.auth
+    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -41,18 +43,8 @@ async def agentcompletion(request, data: AgentSchema):
         permission="server.allow_agent_api",
         destination="agent",
     )
-    if is_ratelimited(
-        request,
-        group="text_completion",
-        key="header:X-API-KEY",
-        rate="5/s",
-        increment=True,
-    ):
-        raise HttpError(
-            429,
-            "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.",
-        )
-    else:
+    try:
+        await rate_limiter.check_rate_limit()
         model = await query_db_mixin.get_model(data.model)
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
@@ -195,3 +187,8 @@ async def agentcompletion(request, data: AgentSchema):
                     raise HttpError(
                         442, "Server is setting up, try again in 300 seconds"
                     )
+    except RateLimitError as e:
+        raise HttpError(
+            429,
+            e.message,
+        )
