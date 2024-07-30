@@ -8,6 +8,7 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import LinearProgress from "@mui/material/LinearProgress";
 import {useGetLogin} from "./api_hook/useGetLogin.js";
 
+const ErrorPage = lazy(() => import("./404.js"));
 const ModelInfor = lazy(() => import("./information/model.js"));
 const Hub = lazy(() => import("./rooms/redirect.js"));
 const Information = lazy(() => import("./introduction/introduction.js"));
@@ -136,6 +137,7 @@ export default function App() {
 								<Route path='/frontend/log' element={<LogPage />} />
 								<Route path='/frontend/contact' element={<ContactPage />} />
 								<Route path='/frontend/login' element={<LoginPage />} />
+								<Route path='*' element={<Error404Page />} />
 							</Routes>
 						</Router>
 					</ThemeProvider>
@@ -171,3 +173,4 @@ const LoginPage = withSuspense(Login);
 const UserInstructionPage = withSuspense(UserInstruction);
 const CostMonitoringPage = withSuspense(CostMonitoring);
 const DataSynthesisPage = withSuspense(DataSynthesis);
+const Error404Page = withSuspense(ErrorPage);

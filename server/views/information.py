@@ -128,4 +128,4 @@ def model_api(request: HttpRequest) -> Response:
 
 
 def handler_404(request: HttpRequest, exception: None) -> HttpResponse:
-    return render(request, "error_html/404.html", status=404)
+    return render(request, "frontend_index.html", status=404)
