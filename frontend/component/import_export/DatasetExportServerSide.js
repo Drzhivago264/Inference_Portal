@@ -57,7 +57,7 @@ export const DatasetExportServerSide = ({dataset_id, dataset_name, setSaveErrorM
 			<Box mb={2} mt={2} ml={1} mr={2}>
 				<Box mt={2}>
 					<FormControl fullWidth>
-						<Stack direction={"row"} spacing={1}>
+						<Stack direction={{lg: "row", md: "column"}} spacing={1}>
 							<InputLabel id='export-label-chatlog'>Formats</InputLabel>
 							<Select
 								labelId='export-label-chatlog'

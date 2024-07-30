@@ -1,13 +1,13 @@
-import { Divider, List, Typography } from "@mui/material";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { UserContext, WebSocketContext } from "../App.js";
-import { closeWebSocket, scrollToBottom } from "../component/chat_components/chatUtils.js";
+import {Divider, List, Typography} from "@mui/material";
+import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {UserContext, WebSocketContext} from "../App.js";
+import {closeWebSocket, scrollToBottom} from "../component/chat_components/chatUtils.js";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import { ChatBox } from "../component/chat_components/Chatbox.js";
+import {ChatBox} from "../component/chat_components/Chatbox.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
 import Checkbox from "@mui/material/Checkbox";
 import Container from "@mui/material/Container";
@@ -24,26 +24,26 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { OpenAPIParameter } from "../component/chat_components/OpenaiParameters.js";
+import {OpenAPIParameter} from "../component/chat_components/OpenaiParameters.js";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import SaveIcon from "@mui/icons-material/Save";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import { agentsocket } from "../component/websocket/AgentSocket";
-import { baseDelete } from "../api_hook/baseDelete.js";
-import { basePost } from "../api_hook/basePost.js";
-import { basePut } from "../api_hook/basePut.js";
-import { nanoid } from "nanoid";
-import { styled } from "@mui/material/styles";
-import { useGetModel } from "../api_hook/useGetModel.js";
-import { useGetRedirectAnon } from "../api_hook/useGetRedirectAnon.js";
-import { useGetUserInstruction } from "../api_hook/useGetUserInstruction.js";
-import { useMutation } from "react-query";
-import { useNavigate } from "react-router-dom";
+import {agentsocket} from "../component/websocket/AgentSocket";
+import {baseDelete} from "../api_hook/baseDelete.js";
+import {basePost} from "../api_hook/basePost.js";
+import {basePut} from "../api_hook/basePut.js";
+import {nanoid} from "nanoid";
+import {styled} from "@mui/material/styles";
+import {useGetModel} from "../api_hook/useGetModel.js";
+import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
+import {useGetUserInstruction} from "../api_hook/useGetUserInstruction.js";
+import {useMutation} from "react-query";
+import {useNavigate} from "react-router-dom";
 
-const ChatPaper = styled(Paper)(({ theme }) => ({
+const ChatPaper = styled(Paper)(({theme}) => ({
 	minWidth: 300,
 	height: 500,
 	overflow: "auto",
@@ -53,7 +53,7 @@ const ChatPaper = styled(Paper)(({ theme }) => ({
 
 function UserInstruction() {
 	const navigate = useNavigate();
-	const { websocket, agent_websocket, chat_websocket, websocket_hash } = useContext(WebSocketContext);
+	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
 	const messagesEndRef = useRef(null);
 	const [instruct_change, setInstructChange] = useState(false);
 	const [choosen_model, setChoosenModel] = useState("gpt-4");
@@ -92,7 +92,7 @@ function UserInstruction() {
 			add: false,
 		},
 	]);
-	const { is_authenticated, timeZone } = useContext(UserContext);
+	const {is_authenticated, timeZone} = useContext(UserContext);
 	useGetRedirectAnon(navigate, is_authenticated);
 	const handleOnDragEnd = (result) => {
 		const items = Array.from(children_instruction_list);
@@ -104,7 +104,7 @@ function UserInstruction() {
 	const updateParentTemplate = (v, property) => {
 		setInstructChange(true);
 		const newTemplateList = [...template_list];
-		const newTemplate = { ...newTemplateList[selectedIndex] };
+		const newTemplate = {...newTemplateList[selectedIndex]};
 		newTemplate[property] = v;
 		newTemplateList[selectedIndex] = newTemplate;
 		setTemplateList(newTemplateList);
@@ -112,8 +112,8 @@ function UserInstruction() {
 			setChoosenTemplate(v);
 		}
 	};
-	const { mutate: templatepostemutate } = useMutation(basePost);
-	const { mutate: templateputemutate } = useMutation(basePut);
+	const {mutate: templatepostemutate} = useMutation(basePost);
+	const {mutate: templateputemutate} = useMutation(basePut);
 	const submitTemplate = () => {
 		setLoading(true);
 		const data = {
@@ -123,7 +123,7 @@ function UserInstruction() {
 
 		if (!template_list[selectedIndex]["id"]) {
 			templatepostemutate(
-				{ url: "/frontend-api/post-user-instruction", data: data },
+				{url: "/frontend-api/post-user-instruction", data: data},
 				{
 					onSuccess: () => {
 						refetch();
@@ -145,7 +145,7 @@ function UserInstruction() {
 			setDisableSave(true);
 		} else {
 			templateputemutate(
-				{ url: "/frontend-api/update-user-instruction", data: data },
+				{url: "/frontend-api/update-user-instruction", data: data},
 				{
 					onSuccess: () => {
 						setSaveSuccess(true);
@@ -167,13 +167,13 @@ function UserInstruction() {
 			setDisableSave(true);
 		}
 	};
-	const { mutate: templatedeletemutate } = useMutation(baseDelete);
+	const {mutate: templatedeletemutate} = useMutation(baseDelete);
 	const deleteTemplate = (id) => {
 		const data = {
 			id: id,
 		};
 		templatedeletemutate(
-			{ url: "/frontend-api/delete-user-instruction", data: data },
+			{url: "/frontend-api/delete-user-instruction", data: data},
 			{
 				onSuccess: () => setDeleteSuccess(true),
 				onError: (error) => {
@@ -189,7 +189,7 @@ function UserInstruction() {
 	const handleTextFieldChange = (index, property, value) => {
 		const updatedList = children_instruction_list.map((instruction, idx) => {
 			if (idx === index) {
-				return { ...instruction, [property]: value };
+				return {...instruction, [property]: value};
 			}
 			return instruction;
 		});
@@ -384,24 +384,24 @@ function UserInstruction() {
 		setUserMessage("");
 		setInstructChange(false);
 	};
-	const { agent_objects } = useGetModel();
-	const { refetch } = useGetUserInstruction(selectedIndex, setMaxChildNum, setMaxParentNum, setAddParentError, setTemplateList, setChildInstructionList);
+	const {agent_objects} = useGetModel();
+	const {refetch} = useGetUserInstruction(selectedIndex, setMaxChildNum, setMaxParentNum, setAddParentError, setTemplateList, setChildInstructionList);
 	return (
-		<Container maxWidth={false} sx={{ minWidth: 1200 }} disableGutters>
+		<Container maxWidth={false} sx={{minWidth: 1350}} disableGutters>
 			<title>Templates</title>
 			<ResponsiveAppBar max_width={false} />
-			<Container maxWidth='xxl'>
+			<Container maxWidth='xxl' disableGutters>
 				<Box m={2}>
 					<Grid container spacing={2}>
-						<Grid item xs={2}>
-							<Paper sx={{ mr: 2 }} variant='outlined'>
-								<Typography ml={2} mt={1} variant='body1' sx={{ color: "text.secondary" }}>
+						<Grid item sm={3} md={2}>
+							<Paper sx={{mr: 2}} variant='outlined'>
+								<Typography ml={2} mt={1} variant='body1' sx={{color: "text.secondary"}}>
 									Instruction Template
 								</Typography>
 								<List>
 									{template_list.map((t, index) => (
 										<ListItemButton
-											sx={{ height: 38 }}
+											sx={{height: 38}}
 											key={index}
 											selected={selectedIndex === index}
 											onClick={(event) => handleListItemClick(event, index)}>
@@ -435,7 +435,7 @@ function UserInstruction() {
 									</Box>
 								</List>
 							</Paper>
-							<Box sx={{ mr: 2, mt: 2 }}>
+							<Box sx={{mr: 2, mt: 2}}>
 								<OpenAPIParameter
 									top_p={top_p}
 									agent_objects={agent_objects}
@@ -454,13 +454,13 @@ function UserInstruction() {
 									setMaxTurn={setMaxTurn}></OpenAPIParameter>
 							</Box>
 						</Grid>
-						<Divider orientation='vertical' flexItem sx={{ mr: "-1px" }} />
-						<Grid item xs={6}>
+						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
+						<Grid item sm={5} md={6}>
 							<Box mr={4}>
 								<Typography ml={1} mb={1} mt={1} variant='body1'>
 									Template
 								</Typography>
-								<FormControl fullWidth sx={{ m: 1 }} variant='standard'>
+								<FormControl fullWidth sx={{m: 1}} variant='standard'>
 									{template_list.map((t, index) => {
 										if (selectedIndex == index) {
 											return (
@@ -495,7 +495,7 @@ function UserInstruction() {
 																/>
 																<FormControlLabel disabled control={<Checkbox defaultChecked />} label='Added' />
 															</Stack>
-															<FormControl fullWidth sx={{ mt: 1 }} variant='standard'>
+															<FormControl fullWidth sx={{mt: 1}} variant='standard'>
 																<TextField
 																	label='Parent Instruction'
 																	multiline
@@ -546,7 +546,6 @@ function UserInstruction() {
 																			<Stack
 																				direction='row'
 																				p={2}
-																				spacing={2}
 																				style={{
 																					width: "100%",
 																				}}>
@@ -599,11 +598,12 @@ function UserInstruction() {
 																								label='Add'
 																							/>
 																							<IconButton
+																								size='small'
 																								aria-label='delete'
 																								onClick={() => {
 																									deleteChild(index);
 																								}}>
-																								<DeleteIcon />
+																								<DeleteIcon size='small' />
 																							</IconButton>
 																						</Box>
 																					</Stack>
@@ -698,7 +698,7 @@ function UserInstruction() {
 											},
 										].map((item, index) => (
 											<Snackbar key={index} open={item.open} autoHideDuration={item.autoHideDuration} onClose={item.onClose}>
-												<Alert severity={item.severity} sx={{ width: "100%" }}>
+												<Alert severity={item.severity} sx={{width: "100%"}}>
 													{item.message}
 												</Alert>
 											</Snackbar>
@@ -707,7 +707,7 @@ function UserInstruction() {
 								</FormControl>
 							</Box>
 						</Grid>
-						<Divider orientation='vertical' flexItem sx={{ mr: "-1px" }} />
+						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
 						<Grid item xs={4}>
 							<Typography mt={1} mb={1} variant='body1'>
 								Testbed
