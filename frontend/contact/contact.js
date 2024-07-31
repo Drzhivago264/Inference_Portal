@@ -15,7 +15,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Stack from "@mui/material/Stack";
 import StyledPaper from "../component/custom_ui_component/StyledPaper.js";
-import SuccessErrorAlert from "../component/Alert/SuccessErrorAlert.js";
+import SuccessErrorAlert from "../component/alert/SuccessErrorAlert.js";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Visibility from "@mui/icons-material/Visibility";

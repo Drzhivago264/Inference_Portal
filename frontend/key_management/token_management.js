@@ -23,7 +23,7 @@ import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import SpeedIcon from "@mui/icons-material/Speed";
 import Stack from "@mui/material/Stack";
-import SuccessErrorAlert from "../component/Alert/SuccessErrorAlert.js";
+import SuccessErrorAlert from "../component/alert/SuccessErrorAlert.js";
 import Switch from "@mui/material/Switch";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";

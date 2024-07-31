@@ -33,7 +33,7 @@ import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import StyledPaper from "../component/custom_ui_component/StyledPaper.js";
-import SuccessErrorAlert from "../component/Alert/SuccessErrorAlert.js";
+import SuccessErrorAlert from "../component/alert/SuccessErrorAlert.js";
 import SvgIcon from "@mui/material/SvgIcon";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";

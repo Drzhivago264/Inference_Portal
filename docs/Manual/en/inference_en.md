@@ -3,7 +3,7 @@ Inference Modes
 
 ---
 
-## 1. API Endpoints
+##  API Endpoints
 
 - Visit [API Docs](https://professorparakeet.com/frontend/api/docs) to view specific request and response schemas of each endpoint.
 
@@ -56,27 +56,12 @@ for chunk in response.iter_lines():
         print(chunk)
 ```
 
-- Sample Stream Output:
-
-
-```python
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1']}, 'delta': '1'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 +']}, 'delta': '1 +'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1']}, 'delta': '1 + 1'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is']}, 'delta': '1 + 1 is'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal']}, 'delta': '1 + 1 is equal'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to']}, 'delta': '1 + 1 is equal to'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to ']}, 'delta': '1 + 1 is equal to '}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to 2']}, 'delta': '1 + 1 is equal to 2'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to 2.']}, 'delta': '1 + 1 is equal to 2.'}"
-```
-
 > - Streamming is only available in chat mode.
 > - If the server is currently offline, you should send a warm up request to boot it up, otherwise you will get a lot a status reponses for your prompts.
 
 ---
 
-## 2. Chat Bot Mode
+##  Chat Bot Mode
 - We offer standard chatbot mode with custom chat template. We use a vectorised database and query 3 previous model's responses what are the most relevant to answer your questions.
 - The maximum context length is 4096 tokens, please do not input a 10000-page book into the chatroom, the model will give you nothing.
 - Visit [Bots & Agents](https://professorparakeet.com/frontend/hub) and choose `Chat Bots` to talk to our bots.
@@ -93,7 +78,7 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
   - Early Stopping
   - Length Penalty
 
-## 3. Hard Core Prompt Engineering Mode
+##  Hard Core Prompt Engineering Mode
 
 > To test both Chatbots and Agents user can choose `Hotpot Mode` in [Chat & Log](https://professorparakeet.com/frontend/hub)
 
@@ -110,7 +95,7 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
   - Frequency Penalty
   
 
-## 4. Backend LLM Functions
+##  Backend LLM Functions
 
 We offer multiple language functions, including:
 - Emotion prediction: predict the emotion of the users' prompts among the configurable list of emotions.

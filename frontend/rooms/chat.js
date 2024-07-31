@@ -3,7 +3,7 @@ import {UserContext, WebSocketContext} from "../App.js";
 import {closeWebSocket, scrollToBottom} from "../component/chat_components/chatUtils.js";
 
 import Box from "@mui/material/Box";
-import {CeleryAlert} from "../component/Alert/CeleryAlert.js";
+import {CeleryAlert} from "../component/alert/CeleryAlert.js";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";

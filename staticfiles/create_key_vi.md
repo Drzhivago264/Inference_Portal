@@ -22,7 +22,7 @@
 
 ---
 
-## 3. Báo Cáo Sử Dụng API
+##  Báo Cáo Sử Dụng API
 
 - Hiện tại, bạn có thể xem lại nhật ký lời nhắc-phản hồi trước đó của mình với điểm cuối api/responselog nơi chi phí của mỗi lời gọi API được chỉ định.
 - Báo cáo sử dụng đầy đủ là một tính năng tương lai.

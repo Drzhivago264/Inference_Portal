@@ -4,7 +4,7 @@
 
 ---
 
-## 1. Xác Thực
+##  Xác Thực
 
 >Bạn được khuyến nghị lưu trữ khóa API một cách an toàn trong backend của riêng bạn.
 
@@ -13,7 +13,7 @@
 
 ---
 
-## 2. Số Dư Sử Dụng Khóa API
+##  Số Dư Sử Dụng Khóa API
 
 - Số lượng token trong từng lời nhắc và phản hồi được token hóa (từ các mô hình được chọn) và đeém.
 - Số lượng token trong các lời nhắc và phản hồi sẽ được nhân với bảng giá từ trang [Thông Tin/Mô Hình](https://professorparakeet.com/frontend/model) để tính số dư đã sử dụng.

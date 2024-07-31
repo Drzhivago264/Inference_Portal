@@ -9,7 +9,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AlignmentTuneTool from "editorjs-text-alignment-blocktune";
 import Box from "@mui/material/Box";
-import {CeleryAlert} from "../component/Alert/CeleryAlert.js";
+import {CeleryAlert} from "../component/alert/CeleryAlert.js";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";

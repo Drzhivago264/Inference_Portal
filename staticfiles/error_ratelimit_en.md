@@ -3,7 +3,7 @@ Common Errors and Ratelimits
 
 ---
 
-## 1. Common Errors
+##  Common Errors
 
 The server responds to a user’s request by issuing status codes when the request is made to the server. Kindly refer to the table below to further understand the status codes when indicating the success or failure of an API call.
 
@@ -19,12 +19,12 @@ The server responds to a user’s request by issuing status codes when the reque
 
 ---
 
-## 2. Ratelimits
+##  Ratelimits
 
 There are multiple ratelimits applied for different endpoints
 
 
-### 2.1 Frontend endpoints
+###  Frontend endpoints
 
 >Frontend endpoints are intended to be used via web browser. However, if you insist, you can supply the cookie taken from your browser to programmatically generate and manage your Key(s).
 
@@ -37,7 +37,7 @@ There are multiple ratelimits applied for different endpoints
 | /frontend-api/confirm-xmr-payment | Confirm payment sent to the your XMR integrated wallet                | 100/day   |
 | /frontend-api/send-mail           | Contact us email                                                      | 1/day     |
 
-### 2.2 Inference endpoints
+###  Inference endpoints
 
 
 | Endpoint               | Description                                                 | Ratelimit |
