@@ -1,8 +1,12 @@
 import json
+
 import requests
 from celery import shared_task
 from decouple import config
+
 from server.models import Crypto
+
+
 @shared_task()
 def update_crypto_rate(coin: str):
     """
@@ -47,5 +51,3 @@ def update_crypto_rate(coin: str):
                 crypto.save()
             except KeyError:
                 pass
-
-

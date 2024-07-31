@@ -1,8 +1,16 @@
 from rest_framework import serializers
 
-from server.models import (LLM, Dataset, DatasetRecord, InferenceServer,
-                           InstructionTree, MemoryTree, Product,
-                           PromptResponse, UserInstructionTree)
+from server.models import (
+    LLM,
+    Dataset,
+    DatasetRecord,
+    InferenceServer,
+    InstructionTree,
+    MemoryTree,
+    Product,
+    PromptResponse,
+    UserInstructionTree,
+)
 from server.utils import constant
 
 
@@ -220,12 +228,13 @@ class ModifyTokenSerializer(serializers.Serializer):
     permission = serializers.CharField(required=False)
     ratelimit = serializers.IntegerField(required=False)
     ratelimit_time_unit = serializers.CharField(required=False)
+
     def validate_permission(self, value):
         if value and value not in constant.DEFAULT_PERMISSION_CODENAMES:
             raise serializers.ValidationError("Cannot find permission")
         return value
 
-    
+
 class CheckKeySerializer(CreateKeySerializer):
     key = serializers.CharField()
 

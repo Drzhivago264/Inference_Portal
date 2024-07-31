@@ -2,13 +2,11 @@ import boto3
 from botocore.exceptions import ClientError
 from celery import shared_task
 from celery.utils.log import get_task_logger
-
 from decouple import config
-
 from django.utils import timezone
+
 from server.models import InferenceServer
 from server.utils import constant
-
 
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
@@ -51,11 +49,13 @@ def periodically_monitor_EC2_instance() -> str:
 @shared_task()
 def periodically_shutdown_EC2_instance() -> None:
     """Periodically shutdown unused EC2 GPU instances every 1200 seconds."""
-    available_servers = InferenceServer.objects.filter(
-        availability="Available")
+    available_servers = InferenceServer.objects.filter(availability="Available")
     for server in available_servers:
         unused_time = timezone.now() - server.last_message_time
-        if unused_time.total_seconds() > constant.SERVER_TTL and server.status not in ["stopped", "stopping"]:
+        if unused_time.total_seconds() > constant.SERVER_TTL and server.status not in [
+            "stopped",
+            "stopping",
+        ]:
             command_EC2.delay(server.name, region=region, action="off")
             server.status = "stopping"
             server.save()

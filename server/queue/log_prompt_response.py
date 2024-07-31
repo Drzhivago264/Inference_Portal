@@ -1,5 +1,6 @@
 from celery import shared_task
-from server.models import (APIKEY, LLM)
+
+from server.models import APIKEY, LLM
 from server.utils.sync_.log_database import log_prompt_response
 
 

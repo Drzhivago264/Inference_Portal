@@ -5,8 +5,8 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
 from server.api_throttling_rates import KeyCreateRateThrottle
-from server.queue.send_mail import send_email_
 from server.models import APIKEY
+from server.queue.send_mail import send_email_
 from server.views.serializer import SendMailSerializer
 
 

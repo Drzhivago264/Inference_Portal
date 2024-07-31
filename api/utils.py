@@ -5,9 +5,15 @@ from asgiref.sync import sync_to_async
 from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
+from server.models import (
+    APIKEY,
+    LLM,
+    InferenceServer,
+    InstructionTree,
+    PromptResponse,
+    UserInstructionTree,
+)
 from server.queue.log_prompt_response import celery_log_prompt_response
-from server.models import (APIKEY, LLM, InferenceServer, InstructionTree,
-                           PromptResponse, UserInstructionTree)
 from server.utils import constant
 
 

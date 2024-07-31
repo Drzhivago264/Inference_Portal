@@ -10,8 +10,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
 from server.models import APIKEY, LLM, FineGrainAPIKEY, InferenceServer
-from server.views.serializer import (LoginSerializer, ModelSerializer,
-                                     ServerSerializer)
+from server.views.serializer import LoginSerializer, ModelSerializer, ServerSerializer
 
 
 @api_view(["GET"])

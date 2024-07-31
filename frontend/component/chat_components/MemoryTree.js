@@ -84,7 +84,7 @@ export const MemoryTree = () => {
 			</Box>
 			<Divider />
 			<Alert severity='info'>
-				The memory tree includes all ancestors for a given prompt.{" "}
+				The memory tree includes all ancestors for a given prompt.
 				<br></br>
 				You can travel left or right to periodically move to the next
 				prompt.
@@ -103,12 +103,14 @@ export const MemoryTree = () => {
 					justifyContent='center'
 					alignItems='center'
 					m={1}>
-					{" "}
+
 					<Pagination
 						count={total_node}
 						showFirstButton
 						showLastButton
 						onChange={getnextnode}
+                        variant="outlined" 
+                        shape="rounded" 
 					/>
 				</Box>
 			)}

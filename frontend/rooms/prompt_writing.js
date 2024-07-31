@@ -17,13 +17,12 @@ import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LoadingButton from "@mui/lab/LoadingButton";
+import Pagination from "@mui/material/Pagination";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import SaveIcon from "@mui/icons-material/Save";
@@ -46,8 +45,6 @@ function PromptWriting() {
 	const [dataset_column, setDatasetColumn] = useState([]);
 	const [record_list, setRecordList] = useState([]);
 	const [pagnation_page, setPaginationPage] = useState(1);
-	const [next_pagnation, setNextPaginationPage] = useState(null);
-	const [previous_pagnation, setPreviousPaginationPage] = useState(null);
 	const [rowSelectionModel, setRowSelectionModel] = useState([]);
 	const [current_system_prompt, setCurrentSystemPrompt] = useState("");
 	const [current_evaluation, setCurrentEvaluation] = useState([{evaluation_name: "", score: ""}]);
@@ -70,19 +67,14 @@ function PromptWriting() {
 	const [allow_add_dataset, setAllowAddDataset] = useState(true);
 	const [max_dataset_num, setMaxDatasetNum] = useState(10);
 	const [max_evaluation_num, setMaxEvaluationNum] = useState(10);
-
+	const [total_node, setTotalNode] = useState(0);
 	const {is_authenticated} = useContext(UserContext);
 	useGetRedirectAnon(navigate, is_authenticated);
 
-	const navigatePagination = (direction) => {
-		var new_pagnation_page = pagnation_page;
-		if (direction === "next" && next_pagnation) {
-			new_pagnation_page += 1;
-		} else if (direction === "previous" && previous_pagnation) {
-			new_pagnation_page -= 1;
-		}
-		setPaginationPage(new_pagnation_page);
+	const navigatePagination = (_, value) => {
+		setPaginationPage(value);
 	};
+
 	const navigateRow = (direction) => {
 		let old_row_id = rowSelectionModel;
 		let new_row = null;
@@ -148,65 +140,48 @@ function PromptWriting() {
 		setLoading(true);
 		const dataset = dataset_list[selectedIndex];
 		const current_evaluation_without_null = current_evaluation.filter((item) => item.evaluation_name && item.score);
-		setCurrentPromptError(false);
-		setCurrentResponseError(false);
-		setCurrentSystemPromptError(false);
-		if (!current_prompt) {
-			setCurrentPromptError(true);
-		}
-		if (!current_response) {
-			setCurrentResponseError(true);
-		}
-		if (!current_system_prompt) {
-			setCurrentSystemPromptError(true);
-		}
+		const validateAndSetError = (field, setError) => {
+			if (!field) {
+				setError(true);
+			}
+		};
+		validateAndSetError(current_prompt, setCurrentPromptError);
+		validateAndSetError(current_response, setCurrentResponseError);
+		validateAndSetError(current_system_prompt, setCurrentSystemPromptError);
 		if (current_prompt && current_response && current_system_prompt && dataset) {
-			var data = {
+			const data = {
 				dataset_id: dataset.id,
 				prompt: current_prompt,
 				response: current_response,
 				system_prompt: current_system_prompt,
 				evaluation: current_evaluation_without_null,
 			};
-			if (!current_record_id) {
-				postmutate(
-					{url: "/frontend-api/create-record", data: data},
-					{
-						onSuccess: () => {
-							record_refetch();
-							setSaveSuccess(true);
-							setAllowSaveRecord(false);
-						},
-					}
-				);
-			} else {
-				data["record_id"] = current_record_id;
-				putmutate(
-					{url: "/frontend-api/update-record", data: data},
-					{
-						onSuccess: () => {
-							record_refetch();
-							setAllowSaveRecord(false);
-							setSaveSuccess(true);
-							setAllowAddDataset(true);
-						},
-						onError: (error) => {
-							setSaveError(true);
-							if (error.code === "ERR_BAD_RESPONSE") {
-								setSaveErrorMessage("Failed, Internal Server Error!");
-							} else {
-								setSaveErrorMessage(error.response.data.detail);
-							}
-						},
-					}
-				);
-			}
-		} else if (!dataset) {
-			setSaveError(true);
-			setSaveErrorMessage("You need to create a dataset first!");
+			const handleSuccess = () => {
+				record_refetch();
+				setSaveSuccess(true);
+				setAllowSaveRecord(false);
+			};
+			const handleError = (error) => {
+				setSaveError(true);
+				if (error.code === "ERR_BAD_RESPONSE") {
+					setSaveErrorMessage("Failed, Internal Server Error!");
+				} else {
+					setSaveErrorMessage(error.response.data.detail);
+				}
+			};
+
+			const requestData = {
+				url: current_record_id ? "/frontend-api/update-record" : "/frontend-api/create-record",
+				data: current_record_id ? {...data, record_id: current_record_id} : data,
+			};
+			const requestConfig = {
+				onSuccess: handleSuccess,
+				onError: handleError,
+			};
+			current_record_id ? putmutate(requestData, requestConfig) : postmutate(requestData, requestConfig);
 		} else {
 			setSaveError(true);
-			setSaveErrorMessage("Record contains empty Field(s)!");
+			setSaveErrorMessage(!dataset ? "You need to create a dataset first!" : "Record contains empty Field(s)!");
 		}
 		setLoading(false);
 	};
@@ -284,13 +259,12 @@ function PromptWriting() {
 	useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation);
 	const {refetch: record_refetch} = useGetUserDatasetRecord(
 		setRecordList,
-		setNextPaginationPage,
-		setPreviousPaginationPage,
 		dataset_list,
 		selectedIndex,
 		pagnation_page,
 		setDatasetColumn,
-		setDatasetRow
+		setDatasetRow,
+		setTotalNode
 	);
 	const handleRowClick = (params) => {
 		const {id, prompt, response, system_prompt} = params.row;
@@ -514,12 +488,11 @@ function PromptWriting() {
 									disabled={!dataset_row.length}
 									loadingPosition='start'
 									variant='contained'
-									onClick={() => {
-										navigateRow("previous");
-									}}
+									onClick={() => navigateRow("previous")}
 									startIcon={<KeyboardArrowLeftIcon />}>
 									Previous
 								</LoadingButton>
+
 								<IconButton
 									aria-label='add'
 									size='small'
@@ -529,24 +502,18 @@ function PromptWriting() {
 									}}>
 									<AddCircleOutlineIcon />
 								</IconButton>
+
 								<LoadingButton
 									size='small'
 									loading={loading}
 									disabled={!allow_save_record}
 									loadingPosition='end'
 									variant='contained'
-									onClick={() => {
-										saveRecord();
-									}}
+									onClick={saveRecord}
 									endIcon={<SaveIcon />}>
 									Save
 								</LoadingButton>
-								<IconButton
-									aria-label='delete'
-									size='small'
-									onClick={() => {
-										deleteRecord();
-									}}>
+								<IconButton aria-label='delete' size='small' onClick={deleteRecord}>
 									<DeleteIcon />
 								</IconButton>
 								<LoadingButton
@@ -555,9 +522,7 @@ function PromptWriting() {
 									disabled={!dataset_row.length}
 									loadingPosition='end'
 									variant='contained'
-									onClick={() => {
-										navigateRow("next");
-									}}
+									onClick={() => navigateRow("next")}
 									endIcon={<KeyboardArrowRightIcon />}>
 									Next
 								</LoadingButton>
@@ -590,7 +555,7 @@ function PromptWriting() {
 					</Grid>
 					<Grid item xs={4}>
 						<Typography mt={1} mb={2} variant='body1'>
-							{`Dataset Page: ${pagnation_page}`}
+							{`Dataset`}
 						</Typography>
 						<div style={{height: 637, width: "100%"}}>
 							<DataGrid
@@ -606,32 +571,9 @@ function PromptWriting() {
 								rowSelectionModel={rowSelectionModel}
 							/>
 						</div>
-						<Stack m={2} direction='row' justifyContent='center' spacing={1}>
-							<LoadingButton
-								size='small'
-								loading={loading}
-								disabled={!previous_pagnation}
-								loadingPosition='start'
-								variant='contained'
-								onClick={() => {
-									navigatePagination("previous");
-								}}
-								startIcon={<KeyboardDoubleArrowLeftIcon />}>
-								Previous (10)
-							</LoadingButton>
-							<LoadingButton
-								size='small'
-								loading={loading}
-								disabled={!next_pagnation}
-								loadingPosition='end'
-								variant='contained'
-								onClick={() => {
-									navigatePagination("next");
-								}}
-								endIcon={<KeyboardDoubleArrowRightIcon />}>
-								Next (10)
-							</LoadingButton>
-						</Stack>
+						<Box display='flex' justifyContent='center' alignItems='center' m={1}>
+							<Pagination count={total_node} showFirstButton showLastButton onChange={navigatePagination} variant='outlined' shape='rounded' />
+						</Box>
 					</Grid>
 				</Grid>
 			</Container>

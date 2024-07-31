@@ -18,33 +18,36 @@ export const usePostLargeDatasetExport = ({dataset_id, dataset_name, extension, 
 							setShowDownloadLink(true);
 							setDownloadLink(data.download_link);
 						} else if (data.export_type === "direct") {
-							var a = document.createElement("a");
-							if (extension == ".jsonl") {
-								let download_content = data.records.map((x) => JSON.stringify(x)).join("\n");
-								let blob = new Blob([download_content], {
-									type: "application/jsonl",
-								});
-								let url = URL.createObjectURL(blob);
+							let a = document.createElement("a");
+							let download_content;
+							let blob;
+							let url;
+							if (extension === ".jsonl") {
+								download_content = data.records.map((x) => JSON.stringify(x)).join("\n");
+								blob = new Blob([download_content], {type: "application/jsonl"});
+								url = URL.createObjectURL(blob);
 								a.setAttribute("href", url);
 								a.setAttribute("download", `${dataset_name}_${now.format(format_to_hour)}.jsonl`);
-								a.click();
-							} else if (extension == ".csv") {
-								
-								let stringify_nesed_json = data.records.map(function (val) {
-									return {prompt: val.prompt, response: val.response, system_prompt: val.system_prompt, evaluation: JSON.stringify(val.evaluation) };
-								});
-                                let download_content = Papa.unparse(stringify_nesed_json);
-								let blob = new Blob([download_content]);
-								if (window.navigator.msSaveOrOpenBlob) window.navigator.msSaveBlob(blob, `${dataset_name}.csv`);
-								else {
-									a.href = window.URL.createObjectURL(blob, {
-										type: "text/plain",
-									});
+							} else if (extension === ".csv") {
+								let stringify_nested_json = data.records.map((val) => ({
+									prompt: val.prompt,
+									response: val.response,
+									system_prompt: val.system_prompt,
+									evaluation: JSON.stringify(val.evaluation),
+								}));
+								download_content = Papa.unparse(stringify_nested_json);
+								blob = new Blob([download_content]);
+								if (window.navigator.msSaveOrOpenBlob) {
+									window.navigator.msSaveBlob(blob, `${dataset_name}.csv`);
+								} else {
+									a.href = window.URL.createObjectURL(blob, {type: "text/plain"});
 									a.download = `${dataset_name}_${now.format(format_to_hour)}.csv`;
 									document.body.appendChild(a);
-									a.click();
-									document.body.removeChild(a);
 								}
+							}
+							a.click();
+							if (!window.navigator.msSaveOrOpenBlob) {
+								document.body.removeChild(a);
 							}
 						}
 					},

@@ -8,13 +8,13 @@ from transformers import AutoTokenizer
 
 from api.api_schema import Error, PromptResponse, PromptSchema
 from api.utils import check_permission, get_model_url, send_request_async
-from server.queue.log_prompt_response import celery_log_prompt_response
 from server.queue.ec2_manage import command_EC2
+from server.queue.log_prompt_response import celery_log_prompt_response
+from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils import constant
-from server.utils.async_.async_manage_ec2 import \
-    update_server_status_in_db_async
+from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
-from server.rate_limit import rate_limit_initializer, RateLimitError
+
 router = Router()
 
 
@@ -30,8 +30,14 @@ async def textcompletion(request, data: PromptSchema):
      - **"Llama 3 Instruct AWQ"**
     """
     key_object, user_object, slave_key_object = request.auth
-    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
-    
+    rate_limiter = await rate_limit_initializer(
+        key_object=key_object,
+        strategy="moving_windown",
+        slave_key_object=slave_key_object,
+        namespace="api",
+        timezone="none",
+    )
+
     query_db_mixin = QueryDBMixin()
     await check_permission(
         user_object=user_object, permission="server.allow_chat_api", destination="chat"

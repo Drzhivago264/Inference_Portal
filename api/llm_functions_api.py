@@ -1,20 +1,31 @@
 import dspy
-
 from decouple import config
 from django_ratelimit.core import is_ratelimited
 from ninja import Router
 from ninja.errors import HttpError
 
-from api.api_schema import (BaseLLMResponseSchema, BaseLLMSchema,
-                            ClassificationResponseSchema, ClassificationSchema,
-                            Error, RestyleResponseSchema, RestyleSchema,
-                            SummarizeResponseSchema, SummarizeSchema)
+from api.api_schema import (
+    BaseLLMResponseSchema,
+    BaseLLMSchema,
+    ClassificationResponseSchema,
+    ClassificationSchema,
+    Error,
+    RestyleResponseSchema,
+    RestyleSchema,
+    SummarizeResponseSchema,
+    SummarizeSchema,
+)
 from api.utils import check_permission
+from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_query_database import QueryDBMixin
-from server.utils.llm_toolbox import (ChangeWrittingStyle, Emotion,
-                                      ParaphaseDocument, SummarizeDocument,
-                                      TopicClassification)
-from server.rate_limit import rate_limit_initializer, RateLimitError
+from server.utils.llm_toolbox import (
+    ChangeWrittingStyle,
+    Emotion,
+    ParaphaseDocument,
+    SummarizeDocument,
+    TopicClassification,
+)
+
 router = Router()
 
 
@@ -38,7 +49,13 @@ async def predict_sentiment(request, data: BaseLLMSchema):
      - **gpt-4-0125-preview**
     """
     key_object, user_object, slave_key_object = request.auth
-    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
+    rate_limiter = await rate_limit_initializer(
+        key_object=key_object,
+        strategy="moving_windown",
+        slave_key_object=slave_key_object,
+        namespace="api",
+        timezone="none",
+    )
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -77,6 +94,7 @@ async def predict_sentiment(request, data: BaseLLMSchema):
             e.message,
         )
 
+
 @router.post(
     "/predict/emotion",
     tags=["LLM Functions"],
@@ -97,7 +115,13 @@ async def predict_emotion(request, data: ClassificationSchema):
      - **gpt-4-0125-preview**
     """
     key_object, user_object, slave_key_object = request.auth
-    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
+    rate_limiter = await rate_limit_initializer(
+        key_object=key_object,
+        strategy="moving_windown",
+        slave_key_object=slave_key_object,
+        namespace="api",
+        timezone="none",
+    )
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -143,6 +167,7 @@ async def predict_emotion(request, data: ClassificationSchema):
             e.message,
         )
 
+
 @router.post(
     "/tasks/paraphase",
     tags=["LLM Functions"],
@@ -163,7 +188,13 @@ async def paraphase(request, data: BaseLLMSchema):
      - **gpt-4-0125-preview**
     """
     key_object, user_object, slave_key_object = request.auth
-    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
+    rate_limiter = await rate_limit_initializer(
+        key_object=key_object,
+        strategy="moving_windown",
+        slave_key_object=slave_key_object,
+        namespace="api",
+        timezone="none",
+    )
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -202,6 +233,7 @@ async def paraphase(request, data: BaseLLMSchema):
             e.message,
         )
 
+
 @router.post(
     "/tasks/summarize",
     tags=["LLM Functions"],
@@ -225,7 +257,13 @@ async def summarize_document(request, data: SummarizeSchema):
     This number of words is only respected if it is smaller than the number of words decided by the model and presented in your document.
     """
     key_object, user_object, slave_key_object = request.auth
-    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
+    rate_limiter = await rate_limit_initializer(
+        key_object=key_object,
+        strategy="moving_windown",
+        slave_key_object=slave_key_object,
+        namespace="api",
+        timezone="none",
+    )
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -270,6 +308,7 @@ async def summarize_document(request, data: SummarizeSchema):
             e.message,
         )
 
+
 @router.post(
     "/tasks/classify",
     tags=["LLM Functions"],
@@ -290,7 +329,13 @@ async def classify_document(request, data: ClassificationSchema):
      - **gpt-4-0125-preview**
     """
     key_object, user_object, slave_key_object = request.auth
-    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
+    rate_limiter = await rate_limit_initializer(
+        key_object=key_object,
+        strategy="moving_windown",
+        slave_key_object=slave_key_object,
+        namespace="api",
+        timezone="none",
+    )
 
     query_db_mixin = QueryDBMixin()
     await check_permission(
@@ -335,6 +380,7 @@ async def classify_document(request, data: ClassificationSchema):
             e.message,
         )
 
+
 @router.post(
     "/tasks/restyle",
     tags=["LLM Functions"],
@@ -357,7 +403,13 @@ async def restyle_document(request, data: RestyleSchema):
      The new style can be an adjective (e.g., **sad**) or multiple strings of adjectives (e.g., **professional**, **serious**)
     """
     key_object, user_object, slave_key_object = request.auth
-    rate_limiter = await rate_limit_initializer(key_object=key_object, strategy="moving_windown", slave_key_object=slave_key_object, namespace='api', timezone='none')
+    rate_limiter = await rate_limit_initializer(
+        key_object=key_object,
+        strategy="moving_windown",
+        slave_key_object=slave_key_object,
+        namespace="api",
+        timezone="none",
+    )
 
     query_db_mixin = QueryDBMixin()
     await check_permission(

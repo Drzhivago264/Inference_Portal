@@ -13,8 +13,8 @@ import Slider from "@mui/material/Slider";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
-import { useTranslation } from "react-i18next";
+import {styled} from "@mui/material/styles";
+import {useTranslation} from "react-i18next";
 
 const SmallInput = styled(MuiInput)`
 	max-width: 50px;
@@ -48,7 +48,7 @@ export const OpenAPIParameter = ({
 	max_turn,
 	setMaxTurn,
 }) => {
-	const { t } = useTranslation();
+	const {t} = useTranslation();
 	return (
 		<Stack direction='column' spacing={0}>
 			<FormControl>
@@ -62,9 +62,7 @@ export const OpenAPIParameter = ({
 					size='small'>
 					{agent_objects.map((agent_object_) => {
 						return (
-							<MenuItem
-								key={agent_object_.name}
-								value={agent_object_.name}>
+							<MenuItem key={agent_object_.name} value={agent_object_.name}>
 								{agent_object_.name}
 							</MenuItem>
 						);
@@ -77,16 +75,9 @@ export const OpenAPIParameter = ({
 			{max_turn && (
 				<Box>
 					<Stack direction='row' spacing={1}>
-						<Typography style={{ flex: 1 }} gutterBottom>
+						<Typography style={{flex: 1}} gutterBottom>
 							Max_turns
-							<Tooltip
-								title={
-									<div style={{ whiteSpace: "pre-line" }}>
-										{t("parameter_explain.max_turn")}
-									</div>
-								}
-								arrow
-								placement='top'>
+							<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.max_turn")}</div>} arrow placement='top'>
 								<IconButton size='small'>
 									<HelpIcon fontSize='small' />
 								</IconButton>
@@ -95,13 +86,7 @@ export const OpenAPIParameter = ({
 						<SmallInput
 							value={max_turn}
 							size='small'
-							onChange={(event) =>
-								setMaxTurn(
-									event.target.value === ""
-										? 0
-										: Number(event.target.value)
-								)
-							}
+							onChange={(event) => setMaxTurn(event.target.value === "" ? 0 : Number(event.target.value))}
 							onBlur={handleBlur(max_turn, setMaxTurn, 1, 10)}
 							inputProps={{
 								step: 1,
@@ -112,29 +97,14 @@ export const OpenAPIParameter = ({
 							}}
 						/>
 					</Stack>
-					<Slider
-						step={1}
-						min={1}
-						max={10}
-						marks
-						valueLabelDisplay='off'
-						onChange={(e) => setMaxTurn(e.target.value)}
-						value={max_turn}
-					/>
+					<Slider step={1} min={1} max={10} marks valueLabelDisplay='off' onChange={(e) => setMaxTurn(e.target.value)} value={max_turn} />
 				</Box>
 			)}
 
 			<Stack direction='row' spacing={1}>
-				<Typography style={{ flex: 1 }} gutterBottom>
+				<Typography style={{flex: 1}} gutterBottom>
 					Top_p
-					<Tooltip
-						title={
-							<div style={{ whiteSpace: "pre-line" }}>
-								{t("parameter_explain.top_p")}
-							</div>
-						}
-						arrow
-						placement='top'>
+					<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.top_p")}</div>} arrow placement='top'>
 						<IconButton size='small'>
 							<HelpIcon fontSize='small' />
 						</IconButton>
@@ -143,13 +113,7 @@ export const OpenAPIParameter = ({
 				<SmallInput
 					value={top_p}
 					size='small'
-					onChange={(event) =>
-						setTopp(
-							event.target.value === ""
-								? 0
-								: Number(event.target.value)
-						)
-					}
+					onChange={(event) => setTopp(event.target.value === "" ? 0 : Number(event.target.value))}
 					onBlur={handleBlur(top_p, setTopp, 0, 1)}
 					inputProps={{
 						step: 0.01,
@@ -160,20 +124,13 @@ export const OpenAPIParameter = ({
 					}}
 				/>
 			</Stack>
-			<Slider
-				step={0.01}
-				min={0}
-				max={1}
-				valueLabelDisplay='off'
-				onChange={(e) => setTopp(e.target.value)}
-				value={top_p}
-			/>
+			<Slider step={0.01} min={0} max={1} valueLabelDisplay='off' onChange={(e) => setTopp(e.target.value)} value={top_p} />
 			{agent_objects.map((agent_object_) => {
 				if (agent_object_.name == choosen_model) {
 					return (
 						<Box key={agent_object_.name}>
 							<Stack direction='row' spacing={1}>
-								<Typography style={{ flex: 1 }} gutterBottom>
+								<Typography style={{flex: 1}} gutterBottom>
 									Max_tokens
 									<Tooltip
 										title={
@@ -181,9 +138,7 @@ export const OpenAPIParameter = ({
 												style={{
 													whiteSpace: "pre-line",
 												}}>
-												{t(
-													"parameter_explain.max_token"
-												)}
+												{t("parameter_explain.max_token")}
 											</div>
 										}
 										arrow
@@ -194,25 +149,10 @@ export const OpenAPIParameter = ({
 									</Tooltip>
 								</Typography>
 								<BigInput
-									value={
-										!max_tokens
-											? agent_object_.context_length
-											: max_tokens
-									}
+									value={!max_tokens ? agent_object_.context_length : max_tokens}
 									size='small'
-									onChange={(event) =>
-										setMaxToken(
-											event.target.value === ""
-												? 0
-												: Number(event.target.value)
-										)
-									}
-									onBlur={handleBlur(
-										max_tokens,
-										setMaxToken,
-										1,
-										agent_object_.context_length
-									)}
+									onChange={(event) => setMaxToken(event.target.value === "" ? 0 : Number(event.target.value))}
+									onBlur={handleBlur(max_tokens, setMaxToken, 1, agent_object_.context_length)}
 									inputProps={{
 										step: 1,
 										min: 1,
@@ -235,16 +175,9 @@ export const OpenAPIParameter = ({
 				}
 			})}
 			<Stack direction='row' spacing={1}>
-				<Typography style={{ flex: 1 }} gutterBottom>
+				<Typography style={{flex: 1}} gutterBottom>
 					Temperature
-					<Tooltip
-						title={
-							<div style={{ whiteSpace: "pre-line" }}>
-								{t("parameter_explain.temperature")}
-							</div>
-						}
-						arrow
-						placement='top'>
+					<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.temperature")}</div>} arrow placement='top'>
 						<IconButton size='small'>
 							<HelpIcon fontSize='small' />
 						</IconButton>
@@ -253,13 +186,7 @@ export const OpenAPIParameter = ({
 				<SmallInput
 					value={temperature}
 					size='small'
-					onChange={(event) =>
-						setTemperature(
-							event.target.value === ""
-								? 0
-								: Number(event.target.value)
-						)
-					}
+					onChange={(event) => setTemperature(event.target.value === "" ? 0 : Number(event.target.value))}
 					onBlur={handleBlur(temperature, setTemperature, 0, 1)}
 					inputProps={{
 						step: 0.01,
@@ -280,16 +207,9 @@ export const OpenAPIParameter = ({
 				valueLabelDisplay='off'
 			/>
 			<Stack direction='row' spacing={1}>
-				<Typography style={{ flex: 1 }} gutterBottom>
+				<Typography style={{flex: 1}} gutterBottom>
 					Presence penalty
-					<Tooltip
-						title={
-							<div style={{ whiteSpace: "pre-line" }}>
-								{t("parameter_explain.presence_penalty")}
-							</div>
-						}
-						arrow
-						placement='top'>
+					<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.presence_penalty")}</div>} arrow placement='top'>
 						<IconButton size='small'>
 							<HelpIcon fontSize='small' />
 						</IconButton>
@@ -298,19 +218,8 @@ export const OpenAPIParameter = ({
 				<SmallInput
 					value={presencepenalty}
 					size='small'
-					onChange={(event) =>
-						setPresencePenalty(
-							event.target.value === ""
-								? 0
-								: Number(event.target.value)
-						)
-					}
-					onBlur={handleBlur(
-						presencepenalty,
-						setPresencePenalty,
-						-2,
-						2
-					)}
+					onChange={(event) => setPresencePenalty(event.target.value === "" ? 0 : Number(event.target.value))}
+					onBlur={handleBlur(presencepenalty, setPresencePenalty, -2, 2)}
 					inputProps={{
 						step: 0.01,
 						min: -2,
@@ -331,16 +240,9 @@ export const OpenAPIParameter = ({
 				valueLabelDisplay='off'
 			/>
 			<Stack direction='row' spacing={1}>
-				<Typography style={{ flex: 1 }} gutterBottom>
+				<Typography style={{flex: 1}} gutterBottom>
 					Frequency penalty
-					<Tooltip
-						title={
-							<div style={{ whiteSpace: "pre-line" }}>
-								{t("parameter_explain.frequency_penalty")}
-							</div>
-						}
-						arrow
-						placement='top'>
+					<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.frequency_penalty")}</div>} arrow placement='top'>
 						<IconButton size='small'>
 							<HelpIcon fontSize='small' />
 						</IconButton>
@@ -349,19 +251,8 @@ export const OpenAPIParameter = ({
 				<SmallInput
 					value={frequencypenalty}
 					size='small'
-					onChange={(event) =>
-						setFrequencyPenalty(
-							event.target.value === ""
-								? 0
-								: Number(event.target.value)
-						)
-					}
-					onBlur={handleBlur(
-						frequencypenalty,
-						setFrequencyPenalty,
-						-2,
-						2
-					)}
+					onChange={(event) => setFrequencyPenalty(event.target.value === "" ? 0 : Number(event.target.value))}
+					onBlur={handleBlur(frequencypenalty, setFrequencyPenalty, -2, 2)}
 					inputProps={{
 						step: 0.01,
 						min: -2,

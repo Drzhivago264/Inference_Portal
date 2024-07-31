@@ -2,26 +2,29 @@ import csv
 import json
 
 from asgiref.sync import async_to_sync
-
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from channels.layers import get_channel_layer
 from decouple import config
-
 from openai import OpenAI
 
-from server.models import (APIKEY, LLM)
-from server.utils import constant
+from server.models import APIKEY, LLM
 from server.queue.ec2_manage import command_EC2
-from server.utils.sync_.inference import (inference_mode,
-                                          send_agent_request_openai,
-                                          send_chat_request_openai,
-                                          send_request)
+from server.utils import constant
+from server.utils.sync_.inference import (
+    inference_mode,
+    send_agent_request_openai,
+    send_chat_request_openai,
+    send_request,
+)
 from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
 from server.utils.sync_.query_database import get_model_url
+
 region = constant.REGION
 logger = get_task_logger(__name__)
+
+
 @shared_task()
 def inference(
     unique: str,
@@ -47,7 +50,7 @@ def inference(
     include_memory: bool,
 ) -> None:
     """
-    Perform inference using a specified model and generate a response based on the given prompt and context. 
+    Perform inference using a specified model and generate a response based on the given prompt and context.
     Args:
         unique (str): Unique identifier for the inference request.
         is_session_start_node (bool | None): Indicates if the current prompt is the start of a new session.
@@ -110,8 +113,7 @@ def inference(
         }
         """ Query a list of inference servers for a given model, pick a random one """
         if url:
-            update_server_status_in_db(
-                instance_id=instance_id, update_type="time")
+            update_server_status_in_db(instance_id=instance_id, update_type="time")
             if server_status == "running":
                 response = send_request(
                     stream=True, url=url, instance_id=instance_id, context=context
@@ -265,7 +267,9 @@ def agent_inference(
         elif 0 < current_turn_inner < max_turns - 1:
             prompt = [{"role": "user", "content": f"Response: {message}"}]
         else:
-            force_stop = "You should directly give results based on history information."
+            force_stop = (
+                "You should directly give results based on history information."
+            )
             prompt = [
                 {"role": "user", "content": f"Response: {message}"},
                 {"role": "system", "content": f"Response: {force_stop}"},
