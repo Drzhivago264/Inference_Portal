@@ -1,12 +1,13 @@
 import { baseGet } from "./baseGet";
 import { useQuery } from "react-query";
 
-export const useGetUserDatasetRecord = (setRecordList, setNextPaginationPage, setPreviousPaginationPage, dataset_list, selectedIndex, pagnation_page, setDatasetColumn, setDatasetRow) => {
+export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedIndex, pagnation_page, setDatasetColumn, setDatasetRow, setTotalNode) => {
 
     const { error, isLoading, refetch } = useQuery(["RecordList", selectedIndex, pagnation_page ], () => baseGet(`/frontend-api/get-dataset-record/${dataset_list[selectedIndex].id}?page=${pagnation_page}`), {
         enabled: !!dataset_list[selectedIndex],
         refetchOnWindowFocus: false,
         onSuccess: (data) => {
+            setTotalNode(data.total_pages)
             const column = [
                 { field: 'system_prompt', headerName: 'System Prompt', width: 350, editable: false, disableColumnMenu: true },
                 { field: 'prompt', headerName: 'Prompt', width: 350, editable: false, disableColumnMenu: true },
@@ -41,10 +42,7 @@ export const useGetUserDatasetRecord = (setRecordList, setNextPaginationPage, se
 
                 row.push(temp_row);
             });
-
             setRecordList(data);
-            setNextPaginationPage(data.next);
-            setPreviousPaginationPage(data.previous);
             setDatasetColumn(column);
             setDatasetRow(row);
         }

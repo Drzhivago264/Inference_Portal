@@ -1,24 +1,29 @@
 import csv
 import json
+
 import boto3
-
 from celery import shared_task
-from celery.utils.log import get_task_logger
 from celery.exceptions import SoftTimeLimitExceeded
-
+from celery.utils.log import get_task_logger
 from decouple import config
 from django.core.cache import cache
 from smart_open import open
 
-from server.models import (Dataset, DatasetRecord)
+from server.models import Dataset, DatasetRecord
 
 logger = get_task_logger(__name__)
 r2 = config("r2_access_key_id")
 r2_account_id = config("r2_account_id")
 r2_secret = config("r2_secret_access_key")
+
+
 @shared_task(soft_time_limit=3600, time_limit=3650)
 def export_large_dataset(
-    dataset_id: int, url_safe_datasetname: str, unique: str, extension: str, hashed_key: str
+    dataset_id: int,
+    url_safe_datasetname: str,
+    unique: str,
+    extension: str,
+    hashed_key: str,
 ) -> str:
     """
     Export a dataset from a database to either a CSV or JSONL file stored in an S3-compatible storage service.
@@ -60,8 +65,12 @@ def export_large_dataset(
                         )
                         i += 1
                     writer.writerow(
-                        [r.system_prompt, r.prompt, r.response,
-                            json.dumps(r.evaluation)]
+                        [
+                            r.system_prompt,
+                            r.prompt,
+                            r.response,
+                            json.dumps(r.evaluation),
+                        ]
                     )
 
                 elif extension == ".jsonl":
@@ -73,8 +82,6 @@ def export_large_dataset(
                     }
                     json.dump(data, fout)
                     fout.write("\n")
-        cache.set(
-            f"allow_export_large_dataset_for_user_{hashed_key}", True, 3600)
+        cache.set(f"allow_export_large_dataset_for_user_{hashed_key}", True, 3600)
     except SoftTimeLimitExceeded:
-        cache.set(
-            f"allow_export_large_dataset_for_user_{hashed_key}", True, 3600)
+        cache.set(f"allow_export_large_dataset_for_user_{hashed_key}", True, 3600)

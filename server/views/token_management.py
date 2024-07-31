@@ -3,16 +3,15 @@ import datetime
 from django.contrib.auth.models import Group, Permission, User
 from django.http import HttpRequest
 from rest_framework import status
-from rest_framework.decorators import (api_view, permission_classes,
-                                       throttle_classes)
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
+
 from server.api_throttling_rates import KeyCreateRateThrottle
 from server.models import FineGrainAPIKEY
 from server.utils import constant
-from server.views.serializer import (CreateTokenSerializer,
-                                     ModifyTokenSerializer)
+from server.views.serializer import CreateTokenSerializer, ModifyTokenSerializer
 
 
 @api_view(["POST"])
@@ -32,8 +31,8 @@ def generate_token_api(request: HttpRequest) -> Response:
         permission_dict = serializer.data["permission"]
         ttl_raw = serializer.data["ttl"]
         time_unit = serializer.data["time_unit"]
-        ratelimit = serializer.data['ratelimit']
-        ratelimit_time_unit = serializer.data['ratelimit_time_unit']
+        ratelimit = serializer.data["ratelimit"]
+        ratelimit_time_unit = serializer.data["ratelimit_time_unit"]
         use_ttl = serializer.data["use_ttl"]
         slave_group, _ = Group.objects.get_or_create(name="slave_user")
         number_of_current_key = FineGrainAPIKEY.objects.filter(
@@ -73,7 +72,10 @@ def generate_token_api(request: HttpRequest) -> Response:
             )
 
         name, token = FineGrainAPIKEY.objects.create_key(
-            name=token_name, master_key=master_key_object, ttl=ttl, ratelimit = f"{ratelimit}/{ratelimit_time_unit}"
+            name=token_name,
+            master_key=master_key_object,
+            ttl=ttl,
+            ratelimit=f"{ratelimit}/{ratelimit_time_unit}",
         )
 
         created_key = FineGrainAPIKEY.objects.get_from_key(token)
@@ -97,7 +99,7 @@ def generate_token_api(request: HttpRequest) -> Response:
                 "ttl": created_key.ttl,
                 "created_at": created_key.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "permission": permission_list,
-                "ratelimit": f"{ratelimit}/{ratelimit_time_unit}"
+                "ratelimit": f"{ratelimit}/{ratelimit_time_unit}",
             },
             status=status.HTTP_200_OK,
         )
@@ -222,6 +224,7 @@ def add_permission(request: HttpRequest) -> Response:
             status=status.HTTP_200_OK,
         )
 
+
 @api_view(["PUT"])
 @throttle_classes([UserRateThrottle])
 @permission_classes([IsAuthenticated])
@@ -258,6 +261,8 @@ def update_ratelimit(request: HttpRequest) -> Response:
             },
             status=status.HTTP_200_OK,
         )
+
+
 @api_view(["DELETE"])
 @throttle_classes([UserRateThrottle])
 @permission_classes([IsAuthenticated])

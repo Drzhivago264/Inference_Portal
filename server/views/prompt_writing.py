@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import permission_required
 from rest_framework import status
-from rest_framework.decorators import (api_view, permission_classes,
-                                       throttle_classes)
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,15 +8,17 @@ from rest_framework.throttling import AnonRateThrottle
 
 from server.models import Dataset, DatasetRecord
 from server.utils import constant
-from server.utils.sync_.manage_permissions import \
-    get_master_key_and_master_user
-from server.views.serializer import (DatasetCreateSerializer,
-                                     DatasetDeleteRecordSerialzier,
-                                     DatasetDeleteSerializer,
-                                     DatasetGetSerializer,
-                                     DatasetRecordGetSerialzier,
-                                     DatasetRecordSerialzier,
-                                     DatasetUpdateSerializer)
+from server.utils.sync_.manage_permissions import get_master_key_and_master_user
+from server.views.custom_paginator import PaginatorWithPageNum
+from server.views.serializer import (
+    DatasetCreateSerializer,
+    DatasetDeleteRecordSerialzier,
+    DatasetDeleteSerializer,
+    DatasetGetSerializer,
+    DatasetRecordGetSerialzier,
+    DatasetRecordSerialzier,
+    DatasetUpdateSerializer,
+)
 
 
 @api_view(["GET"])
@@ -64,7 +65,7 @@ def get_user_records_api(request, id):
                 {"detail": "Failed, Cannot fine your dataset"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        paginator = PageNumberPagination()
+        paginator = PaginatorWithPageNum()
         paginator.page_size = 10
         records = DatasetRecord.objects.filter(dataset=dataset).order_by("-id")
         result_records = paginator.paginate_queryset(records, request)

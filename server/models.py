@@ -58,7 +58,6 @@ class FineGrainAPIKeyManager(BaseAPIKeyManager):
     key_generator = KeyGenerator(prefix_length=8, secret_key_length=64)
 
 
-
 class FineGrainAPIKEY(AbstractAPIKey):
     objects = FineGrainAPIKeyManager()
     master_key = models.ForeignKey(
@@ -97,7 +96,7 @@ class Dataset(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.name 
+        return self.name
 
 
 class DatasetRecord(models.Model):

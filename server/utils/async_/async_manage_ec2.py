@@ -2,8 +2,8 @@ import json
 
 from django.utils import timezone
 
-from server.queue.ec2_manage import command_EC2
 from server.models import InferenceServer
+from server.queue.ec2_manage import command_EC2
 from server.utils.constant import REGION
 
 

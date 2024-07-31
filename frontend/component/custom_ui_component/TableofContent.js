@@ -3,6 +3,7 @@ import "../css/TableofContent.css";
 import React, {useContext, useEffect, useRef, useState} from "react";
 
 import {ColorModeContext} from "../../App";
+import PropTypes from "prop-types";
 
 const useHeadingsData = (mdfile) => {
 	const [nestedHeadings, setNestedHeadings] = useState([]);
@@ -103,7 +104,11 @@ const Headings = ({headings, activeId, mode}) => (
 		))}
 	</ul>
 );
-
+Headings.propTypes = {
+	headings: PropTypes.array.isRequired,
+    activeId: PropTypes.string.isRequired,
+    mode: PropTypes.string.isRequired
+};
 const TableOfContents = ({mdfile}) => {
 	const {mode} = useContext(ColorModeContext);
 	const [activeId, setActiveId] = useState();
@@ -114,6 +119,9 @@ const TableOfContents = ({mdfile}) => {
 			<Headings headings={nestedHeadings} activeId={activeId} mode={mode} />
 		</nav>
 	);
+};
+TableOfContents.propTypes = {
+	mdfile: PropTypes.string.isRequired,
 };
 
 export default TableOfContents;

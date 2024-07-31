@@ -1,13 +1,13 @@
-import { MenuItem as BaseMenuItem, menuItemClasses } from "@mui/base/MenuItem";
-import { ColorModeContext, UserContext, WebSocketContext } from "../../App.js";
-import React, { useContext, useEffect, useState } from "react";
-import { UserVeticalNav, VerticalNav } from "./VerticalNav.js";
+import {MenuItem as BaseMenuItem, menuItemClasses} from "@mui/base/MenuItem";
+import {ColorModeContext, UserContext, WebSocketContext} from "../../App.js";
+import React, {useContext, useEffect, useState} from "react";
+import {UserVeticalNav, VerticalNav} from "./VerticalNav.js";
 
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
-import { Button as BaseButton } from "@mui/base/Button";
-import { MenuButton as BaseMenuButton } from "@mui/base/MenuButton";
+import {Button as BaseButton} from "@mui/base/Button";
+import {MenuButton as BaseMenuButton} from "@mui/base/MenuButton";
 import Box from "@mui/material/Box";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
@@ -16,31 +16,31 @@ import Constant_Colours from "../color.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
-import { Dropdown } from "@mui/base";
+import {Dropdown} from "@mui/base";
 import Fade from "@mui/material/Fade";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import Jdenticon from "react-jdenticon";
-import { Link } from "react-router-dom";
-import { Menu } from "@mui/base/Menu";
+import {Link} from "react-router-dom";
+import {Menu} from "@mui/base/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
-import { MenuItem } from "@mui/base/MenuItem";
+import {MenuItem} from "@mui/base/MenuItem";
 import PropTypes from "prop-types";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import i18next from "i18next";
-import { styled } from "@mui/system";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import {styled} from "@mui/system";
+import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const blue = Constant_Colours.blue;
 const grey = Constant_Colours.grey;
 
 const Listbox = styled("ul")(
-	({ theme }) => `
+	({theme}) => `
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.875rem;
   box-sizing: border-box;
@@ -53,16 +53,12 @@ const Listbox = styled("ul")(
   background: ${theme.palette.mode === "dark" ? grey[900] : "#fff"};
   border: 1px solid ${theme.palette.mode === "dark" ? grey[700] : grey[200]};
   color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
-  box-shadow: 0px 4px 6px ${
-		theme.palette.mode === "dark"
-			? "rgba(0,0,0, 0.50)"
-			: "rgba(0,0,0, 0.05)"
-  };
+  box-shadow: 0px 4px 6px ${theme.palette.mode === "dark" ? "rgba(0,0,0, 0.50)" : "rgba(0,0,0, 0.05)"};
   z-index: 1;
   `
 );
 const MenuItem_DropBox = styled(BaseMenuItem)(
-	({ theme }) => `
+	({theme}) => `
   list-style: none;
   padding: 8px;
   border-radius: 8px;
@@ -85,10 +81,11 @@ const MenuItem_DropBox = styled(BaseMenuItem)(
   `
 );
 const NavLink = styled(Link)(
-	({ theme }) => `
+	({theme}) => `
     display: flex;
     align-items: center;
     text-decoration: none;
+    font-size: 10;
     width:100%;
     cursor: pointer;
     color: ${theme.palette.mode === "dark" ? grey[200] : grey[900]};
@@ -98,7 +95,7 @@ const NavLink = styled(Link)(
 `
 );
 const Button = styled(BaseButton)(
-	({ theme }) => `
+	({theme}) => `
   font-size: 14px;
   line-height: 1;
   padding-top: 8px;
@@ -125,9 +122,7 @@ const Button = styled(BaseButton)(
   }
 
   &:focus-visible {
-    box-shadow: 0 0 0 4px ${
-		theme.palette.mode === "dark" ? blue[300] : blue[200]
-	};
+    box-shadow: 0 0 0 4px ${theme.palette.mode === "dark" ? blue[300] : blue[200]};
     outline: none;
   }
   `
@@ -148,23 +143,15 @@ const AvatarWithHover = styled(Avatar)(
 );
 
 const AppBarColored = styled(AppBar)(
-	({ theme }) => `
-  background: ${
-		theme.palette.mode === "dark"
-			? "rgba(0, 0, 0, 0.25)"
-			: "rgba(255,255,255, 0.15)"
-  };
+	({theme}) => `
+  background: ${theme.palette.mode === "dark" ? "rgba(0, 0, 0, 0.25)" : "rgba(255,255,255, 0.15)"};
   color: ${theme.palette.mode === "dark" ? "white" : "black"};
-  border-bottom: 1px solid ${
-		theme.palette.mode === "dark"
-			? "rgba(255, 255, 255, 0.12)"
-			: "rgba(0, 0, 0, 0.25)"
-  };
+  border-bottom: 1px solid ${theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.25)"};
   backdrop-filter: blur(20px); 
   `
 );
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
+const StyledBadge = styled(Badge)(({theme}) => ({
 	"& .MuiBadge-badge": {
 		backgroundColor: "#44b700",
 		color: "#44b700",
@@ -193,7 +180,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 	},
 }));
 const MenuButton = styled(BaseMenuButton)(
-	({ theme }) => `
+	({theme}) => `
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 600;
   font-size: 0.875rem;
@@ -220,14 +207,12 @@ const MenuButton = styled(BaseMenuButton)(
   }
 
   &:focus-visible {
-    box-shadow: 0 0 0 4px ${
-		theme.palette.mode === "dark" ? blue[300] : blue[200]
-	};
+    box-shadow: 0 0 0 4px ${theme.palette.mode === "dark" ? blue[300] : blue[200]};
     outline: none;
   }
   `
 );
-const DrawerHeader = styled("div")(({ theme }) => ({
+const DrawerHeader = styled("div")(({theme}) => ({
 	display: "flex",
 	alignItems: "center",
 	padding: theme.spacing(0, 1),
@@ -235,15 +220,15 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 	justifyContent: "flex-end",
 }));
 
-function ResponsiveAppBar({ max_width, timeout = 0 }) {
+function ResponsiveAppBar({max_width, timeout = 0}) {
 	const navigate = useNavigate();
 	const [destination, setDestination] = useState(null);
 	const [default_language, setDefaultLanguage] = useState(i18next.language);
-	const { t, i18n } = useTranslation();
+	const {t, i18n} = useTranslation();
 
 	useEffect(() => {
 		if (destination) {
-			navigate(destination, { replace: true });
+			navigate(destination, {replace: true});
 		}
 	}, [destination]);
 
@@ -263,32 +248,22 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 		setUserOpen(newOpen);
 	};
 	const DrawerList = (
-		<Box
-			sx={{ width: 250 }}
-			role='presentation'
-			onClick={toggleDrawer(false)}>
+		<Box sx={{width: 250}} role='presentation' onClick={toggleDrawer(false)}>
 			<VerticalNav navigate={setDestination} />
 		</Box>
 	);
 	const UserDrawerList = (
-		<Box
-			sx={{ width: 320 }}
-			role='presentation'
-			onClick={toggleUserDrawer(false)}>
+		<Box sx={{width: 320}} role='presentation' onClick={toggleUserDrawer(false)}>
 			<UserVeticalNav navigate={setDestination} />
 		</Box>
 	);
-	const { colorMode, theme } = useContext(ColorModeContext);
-	const { is_authenticated, user_key_name } = useContext(UserContext);
-	const { websocket_hash } = useContext(WebSocketContext);
+	const {colorMode, theme} = useContext(ColorModeContext);
+	const {is_authenticated, user_key_name} = useContext(UserContext);
+	const {websocket_hash} = useContext(WebSocketContext);
 	return (
 		<Fade in={true} timeout={timeout}>
 			<AppBarColored position='sticky' elevation={0}>
-				<Drawer
-					size='md'
-					variant='outlined'
-					open={open}
-					onClose={toggleDrawer(false)}>
+				<Drawer size='md' variant='outlined' open={open} onClose={toggleDrawer(false)}>
 					{DrawerList}
 				</Drawer>
 				<Container maxWidth={max_width}>
@@ -315,7 +290,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 							onClick={() => {
 								navigate("/");
 							}}
-							sx={{ width: 42, height: 42 }}
+							sx={{width: 42, height: 42}}
 							variant='rounded'
 						/>
 						<Typography
@@ -346,25 +321,16 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 								}}>
 								{t("navbar.Information")}
 							</MenuButton>
-							<Menu slots={{ listbox: Listbox }}>
-								<MenuItem_DropBox>
-									{" "}
-									<NavLink to='/'>
-										{t("navbar.Introduction")}
-									</NavLink>
-								</MenuItem_DropBox>
-								<MenuItem_DropBox>
-									{" "}
-									<NavLink to='/frontend/manual/key'>
-										{t("navbar.Manual")}
-									</NavLink>
-								</MenuItem_DropBox>
-								<MenuItem_DropBox>
-									{" "}
-									<NavLink to='/frontend/model'>
-										{t("navbar.Model")}
-									</NavLink>
-								</MenuItem_DropBox>
+							<Menu slots={{listbox: Listbox}}>
+								{[
+									{path: "/", label: t("navbar.Introduction")},
+									{path: "/frontend/manual/key", label: t("navbar.Manual")},
+									{path: "/frontend/model", label: t("navbar.Model")},
+								].map((item, index) => (
+									<MenuItem_DropBox key={index}>
+										<NavLink to={item.path}>{item.label}</NavLink>
+									</MenuItem_DropBox>
+								))}
 							</Menu>
 						</Dropdown>
 						<Dropdown>
@@ -378,16 +344,12 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 								}}>
 								{t("navbar.Modes")}
 							</MenuButton>
-							<Menu slots={{ listbox: Listbox }}>
+							<Menu slots={{listbox: Listbox}}>
 								<MenuItem_DropBox>
-									<NavLink to='/frontend/hub'>
-										{t("navbar.Bots_Agents")}
-									</NavLink>
+									<NavLink to='/frontend/hub'>{t("navbar.Bots_Agents")}</NavLink>
 								</MenuItem_DropBox>
 								<MenuItem_DropBox>
-									<NavLink to='/frontend/api/docs'>
-										{t("navbar.API_Docs")}
-									</NavLink>
+									<NavLink to='/frontend/api/docs'>{t("navbar.API_Docs")}</NavLink>
 								</MenuItem_DropBox>
 							</Menu>
 						</Dropdown>
@@ -421,25 +383,19 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 						</Button>
 
 						{!is_authenticated && (
-							<Stack direction='row' sx={{ marginLeft: "auto" }}>
+							<Stack direction='row' sx={{marginLeft: "auto"}}>
 								<FormControl>
-									<InputLabel id='select-language-label'>
-										{t("navbar.Language")}
-									</InputLabel>
+									<InputLabel id='select-language-label'>{t("navbar.Language")}</InputLabel>
 									<Select
 										labelId='select-language-label'
 										id='select-language-id'
 										value={default_language}
 										label={t("navbar.Language")}
 										onChange={(e) => {
-											handleChangeLanguage(
-												e.target.value
-											);
+											handleChangeLanguage(e.target.value);
 										}}
 										size='small'>
-										<MenuItem value='vi'>
-											Tiếng Việt
-										</MenuItem>
+										<MenuItem value='vi'>Tiếng Việt</MenuItem>
 										<MenuItem value='en'>English</MenuItem>
 									</Select>
 								</FormControl>
@@ -459,42 +415,26 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 									</Button>
 								</Box>
 								<Box>
-									<IconButton
-										aria-label='color-mode'
-										onClick={colorMode.toggleColorMode}
-										color='inherit'>
-										{theme.palette.mode === "dark" ? (
-											<Brightness7Icon />
-										) : (
-											<Brightness4Icon />
-										)}
+									<IconButton aria-label='color-mode' onClick={colorMode.toggleColorMode} color='inherit'>
+										{theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
 									</IconButton>
 								</Box>
 							</Stack>
 						)}
 						{is_authenticated && (
-							<Stack
-								direction='row'
-								spacing={1}
-								sx={{ marginLeft: "auto" }}>
+							<Stack direction='row' spacing={1} sx={{marginLeft: "auto"}}>
 								<FormControl>
-									<InputLabel id='select-language-label'>
-										{t("navbar.Language")}
-									</InputLabel>
+									<InputLabel id='select-language-label'>{t("navbar.Language")}</InputLabel>
 									<Select
 										labelId='select-language-label'
 										id='select-language-id'
 										value={default_language}
 										label={t("navbar.Language")}
 										onChange={(e) => {
-											handleChangeLanguage(
-												e.target.value
-											);
+											handleChangeLanguage(e.target.value);
 										}}
 										size='small'>
-										<MenuItem value='vi'>
-											Tiếng Việt
-										</MenuItem>
+										<MenuItem value='vi'>Tiếng Việt</MenuItem>
 										<MenuItem value='en'>English</MenuItem>
 									</Select>
 								</FormControl>
@@ -515,48 +455,24 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 										style={{
 											border: "1px solid lightgray",
 										}}>
-										{websocket_hash && (
-											<Jdenticon
-												size='38'
-												value={websocket_hash}
-											/>
-										)}
+										{websocket_hash && <Jdenticon size='38' value={websocket_hash} />}
 									</AvatarWithHover>
 								</StyledBadge>
 								<Box>
-									<IconButton
-										onClick={colorMode.toggleColorMode}
-										color='inherit'>
-										{theme.palette.mode === "dark" ? (
-											<Brightness7Icon />
-										) : (
-											<Brightness4Icon />
-										)}
+									<IconButton onClick={colorMode.toggleColorMode} color='inherit'>
+										{theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
 									</IconButton>
 								</Box>
 							</Stack>
 						)}
-						<Drawer
-							size='md'
-							variant='outlined'
-							anchor='right'
-							open={useropen}
-							onClose={toggleUserDrawer(false)}>
+						<Drawer size='md' variant='outlined' anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
 							<Stack
 								direction='row'
 								sx={{
 									display: "flex",
 									justifyContent: "space-between",
 								}}>
-								<Stack
-									direction='row'
-									sx={{
-										display: "flex",
-										justifyContent: "space-between",
-									}}
-									mt={1.5}
-									ml={1.5}
-									mr={1.5}>
+								<Stack direction='row' sx={{display: "flex", justifyContent: "space-between"}} mt={1.5} ml={1.5} mr={1.5}>
 									<AvatarWithHover
 										sx={{
 											width: 38,
@@ -566,12 +482,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 										style={{
 											border: "1px solid lightgray",
 										}}>
-										{websocket_hash && (
-											<Jdenticon
-												size='38'
-												value={websocket_hash}
-											/>
-										)}
+										{websocket_hash && <Jdenticon size='38' value={websocket_hash} />}
 									</AvatarWithHover>
 									<div
 										style={{
@@ -579,18 +490,13 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 											textOverflow: "ellipsis",
 											width: "11rem",
 										}}>
-										<Typography
-											m={1.2}
-											sx={{ fontWeight: "bold" }}
-											noWrap
-											variant='body1'>
+										<Typography m={1.2} sx={{fontWeight: "bold"}} noWrap variant='body1'>
 											Key: {user_key_name}
 										</Typography>
 									</div>
 								</Stack>
 								<DrawerHeader>
-									<IconButton
-										onClick={toggleUserDrawer(false)}>
+									<IconButton onClick={toggleUserDrawer(false)}>
 										<CloseIcon />
 									</IconButton>
 								</DrawerHeader>
@@ -605,8 +511,7 @@ function ResponsiveAppBar({ max_width, timeout = 0 }) {
 	);
 }
 ResponsiveAppBar.propTypes = {
-	max_width: PropTypes.oneOfType([PropTypes.string, PropTypes.bool])
-		.isRequired,
+	max_width: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]).isRequired,
 	timeout: PropTypes.number,
 };
 export default ResponsiveAppBar;

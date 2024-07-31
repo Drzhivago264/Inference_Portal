@@ -8,12 +8,15 @@ from django.utils import timezone
 from pydantic import ValidationError
 
 from server.consumers.pydantic_validator import ChatSchema
+from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils import constant
-from server.utils.async_.async_inference import (AsyncInferenceOpenaiMixin,
-                                                 AsyncInferenceVllmMixin)
+from server.utils.async_.async_inference import (
+    AsyncInferenceOpenaiMixin,
+    AsyncInferenceVllmMixin,
+)
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.inference import inference_mode
-from server.rate_limit import rate_limit_initializer, RateLimitError
+
 
 class Consumer(
     AsyncWebsocketConsumer,
@@ -85,8 +88,16 @@ class Consumer(
         self.session_history = []
         self.user = self.scope["user"]
         self.p_type = "chatbot"
-        self.key_object, self.master_user, self.slave_key_object = await self.get_master_key_and_master_user()
-        self.rate_limiter = await rate_limit_initializer(key_object=self.key_object, strategy="moving_windown", slave_key_object=self.slave_key_object, namespace=self.p_type, timezone=self.timezone)
+        self.key_object, self.master_user, self.slave_key_object = (
+            await self.get_master_key_and_master_user()
+        )
+        self.rate_limiter = await rate_limit_initializer(
+            key_object=self.key_object,
+            strategy="moving_windown",
+            slave_key_object=self.slave_key_object,
+            namespace=self.p_type,
+            timezone=self.timezone,
+        )
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -116,15 +127,15 @@ class Consumer(
             await self.send_message_if_not_rate_limited(text_data)
         except RateLimitError as e:
             await self.send(
-                    text_data=json.dumps(
-                        {
-                            "message": e.message,
-                            "role": "Server",
-                            "time": self.time,
-                        }
-                    )
+                text_data=json.dumps(
+                    {
+                        "message": e.message,
+                        "role": "Server",
+                        "time": self.time,
+                    }
                 )
-            
+            )
+
     async def send_message_if_not_rate_limited(self, text_data):
         try:
             validated = ChatSchema.model_validate_json(text_data)

@@ -11,8 +11,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-from limits.storage import storage_from_string
+
 from decouple import config
+from limits.storage import storage_from_string
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -185,7 +186,7 @@ REST_FRAMEWORK = {
         "server.api_throttling_rates.KeyCreateRateThrottle",
         "server.api_throttling_rates.CreditCheckRateThrottle",
         "server.api_throttling_rates.XMRConfirmationRateThrottle",
-        "server.api_throttling_rates.DatasetExportRateThrottle"
+        "server.api_throttling_rates.DatasetExportRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
         "anon": "10/s",
@@ -193,7 +194,7 @@ REST_FRAMEWORK = {
         "create_key": "50/day",
         "check_key": "100/hour",
         "confirm_monero": "100/hour",
-        "dataset_export": "10/hour"
+        "dataset_export": "10/hour",
     },
 }
 DATA_UPLOAD_MAX_MEMORY_SIZE = None

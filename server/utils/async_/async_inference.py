@@ -1,13 +1,17 @@
 import json
+
 import httpx
 import openai
 import regex as re
 from decouple import config
+
 import server.utils.constant as constant
-from server.queue.log_prompt_response import celery_log_prompt_response
 from server.models import LLM
+from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils.async_.async_manage_ec2 import (
-    ManageEC2Mixin, update_server_status_in_db_async)
+    ManageEC2Mixin,
+    update_server_status_in_db_async,
+)
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.inference import action_parse_json
 
