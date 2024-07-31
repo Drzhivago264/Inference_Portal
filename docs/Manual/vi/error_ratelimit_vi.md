@@ -4,7 +4,7 @@
 
 ---
 
-## 1. Lỗi Thông Thường
+##  Lỗi Thông Thường
 
 Máy chủ phản hồi yêu cầu của người dùng bằng cách phát hành mã trạng thái khi yêu cầu được gửi đến máy chủ. Vui lòng tham khảo bảng dưới đây để hiểu rõ hơn về mã trạng thái khi chỉ ra thành công hoặc thất bại của một lời gọi API.
 
@@ -20,11 +20,11 @@ Máy chủ phản hồi yêu cầu của người dùng bằng cách phát hành
 
 ---
 
-## 2. Giới Hạn Tần Suất
+##  Giới Hạn Tần Suất
 
 Có nhiều giới hạn tần suất được áp dụng cho các điểm cuối khác nhau
 
-### 2.1 Các điểm cuối Frontend
+###  Các điểm cuối Frontend
 
 >Các điểm cuối Frontend được dự định để sử dụng qua trình duyệt web. Tuy nhiên, nếu bạn cố tình, bạn có thể cung cấp cookie lấy từ trình duyệt của bạn để tự động tạo và quản lý Khóa của bạn.
 
@@ -37,7 +37,7 @@ Có nhiều giới hạn tần suất được áp dụng cho các điểm cuố
 | /frontend-api/confirm-xmr-payment | Xác nhận thanh toán đã gửi đến ví XMR tích hợp của bạn     | 100/ngày          |
 | /frontend-api/send-mail           | Email liên hệ với chúng tôi                                | 1/ngày            |
 
-### 2.2 Các điểm cuối Suy Luận
+###  Các điểm cuối Suy Luận
 
 
 | Điểm Cuối              | Mô Tả                                                          | Giới Hạn Tần Suất |

@@ -9,7 +9,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import {CeleryAlert} from "../component/Alert/CeleryAlert.js";
+import {CeleryAlert} from "../component/alert/CeleryAlert.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
 import Container from "@mui/material/Container";
 import CsvFileInput from "../component/import_export/CsvInput.js";

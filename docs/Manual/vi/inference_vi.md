@@ -3,7 +3,7 @@
 
 ---
 
-## 1. Điểm cuối API
+##  Điểm cuối API
 
 - Truy cập [API Doc](https://professorparakeet.com/frontend/api/docs) để xem các lược đồ yêu cầu và phản hồi cụ thể của mỗi điểm cuối.
 
@@ -56,27 +56,12 @@ for chunk in response.iter_lines():
         print(chunk)
 ```
 
-- Mẫu đầu ra trực tuyến:
-
-
-```python
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1']}, 'delta': '1'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 +']}, 'delta': '1 +'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1']}, 'delta': '1 + 1'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is']}, 'delta': '1 + 1 is'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal']}, 'delta': '1 + 1 is equal'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to']}, 'delta': '1 + 1 is equal to'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to ']}, 'delta': '1 + 1 is equal to '}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to 2']}, 'delta': '1 + 1 is equal to 2'}"
-b"{'response': {'text': ['Below is an instruction that describes a task. Write a response that appropriately completes the request.\\n\\n\\n### Instruction:\\nwhat is 1 + 1?\\n\\n### Response:\\n\\n1 + 1 is equal to 2.']}, 'delta': '1 + 1 is equal to 2.'}"
-```
-
 > - Trực tuyến chỉ có sẵn trong chế độ chat.
 > - Nếu máy chủ hiện đang ngoại tuyến, bạn nên gửi một yêu cầu khởi động để khởi động nó, nếu không, bạn sẽ nhận được rất nhiều phản hồi trạng thái cho các lời nhắc của bạn.
 
 ---
 
-## 2. Chế độ Chat Bot
+##  Chế độ Chat Bot
 - Chúng tôi cung cấp chế độ chatbot tiêu chuẩn với mẫu chat tùy chỉnh. Chúng tôi sử dụng cơ sở dữ liệu vector hóa và truy vấn 3 phản hồi của mô hình trước đó là phù hợp nhất để trả lời câu hỏi của bạn.
 - Độ dài ngữ cảnh tối đa là 4096 token, vui lòng không nhập một cuốn sách dày 10000 trang vào phòng chat, mô hình sẽ không cho bạn bất cứ điều gì.
 - Truy cập [Chat & Log](https://professorparakeet.com/frontend/hub) và chọn `Chat Bots` để trò chuyện với bot của chúng tôi.
@@ -93,7 +78,7 @@ b"{'response': {'text': ['Below is an instruction that describes a task. Write a
   - Early Stopping
   - Length Penalty
 
-## 3. Chế độ Agent
+##  Chế độ Agent
 
 > Để kiểm tra cả Chatbots và Agents, người dùng có thể chọn `Hotpot Mode` trong [Bots & Agents](https://professorparakeet.com/frontend/hub)
 

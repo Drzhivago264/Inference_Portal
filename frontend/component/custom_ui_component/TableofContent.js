@@ -73,13 +73,12 @@ const Headings = ({headings, activeId, mode}) => (
 					</a>
 				)}
 				{heading.id !== activeId && (
-					<a style={{color: "gray"}} href={`#${heading.id}`}>
+					<a style={{color: mode == "dark" ? "gray" : "#383838"}} href={`#${heading.id}`}>
 						{heading.title}
 					</a>
 				)}
 				{heading.items.length > 0 && (
-					<ul>
-						{" "}
+					<ul>	
 						{heading.items.map((child) => (
 							<li key={child.id} className={child.id === activeId ? "active" : ""}>
 								{child.id === activeId && (

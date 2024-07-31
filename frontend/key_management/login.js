@@ -4,7 +4,7 @@ import React, {useContext, useState} from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
-import ErrorAlert from "../component/Alert/SuccessErrorAlert.js";
+import ErrorAlert from "../component/alert/SuccessErrorAlert.js";
 import Footer from "../component/nav/Footer.js";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";

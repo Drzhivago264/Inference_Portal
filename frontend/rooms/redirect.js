@@ -16,7 +16,7 @@ import {RedirectMediaCards} from "../component/custom_ui_component/RedirectMedia
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
-import SuccessErrorAlert from "../component/Alert/SuccessErrorAlert.js";
+import SuccessErrorAlert from "../component/alert/SuccessErrorAlert.js";
 import TextField from "@mui/material/TextField";
 import {UserContext} from "../App.js";
 import axios from "axios";

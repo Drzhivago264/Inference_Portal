@@ -11,8 +11,6 @@ import Grid from "@mui/material/Grid";
 import {Link} from "react-router-dom";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
-import Paper from "@mui/material/Paper";
-import Prism from "prismjs";
 import ResponsiveAppBar from "../component/nav/Navbar";
 import Skeleton from "@mui/material/Skeleton";
 import TableOfContents from "../component/custom_ui_component/TableofContent";
@@ -39,13 +37,10 @@ const retrieveManual = async (destination_refs, doc, default_language) => {
 };
 
 function Manual() {
-	useEffect(() => {
-		Prism.highlightAll();
-	});
+
 	const {doc} = useParams();
 	const [default_language, setDefaultLanguage] = useState(i18next.language);
 	const [displaydoc, setDisplayDoc] = useState("");
-
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const handleListItemClick = (event, index) => {
 		setSelectedIndex(index);
@@ -140,8 +135,7 @@ function Manual() {
 												component={Link}
 												to={object.link}>
 												<Typography component='span' variant='body2'>
-													{" "}
-													{t(object.tranlate)}{" "}
+													{t(object.tranlate)}
 												</Typography>
 											</ListItemButton>
 										);
@@ -160,22 +154,17 @@ function Manual() {
 						<Grid item xs={12} md={8} lg={8}>
 							<Box mt={3} sx={{display: {sm: "block ", md: "none"}}}>
 								<List dense={true}>
-									<ListItemButton component={Link} to='/frontend/manual/key'>
-										{" "}
-										<Typography>{t("manual.Setting_Up_Your_API_Key")} </Typography>{" "}
-									</ListItemButton>
-									<ListItemButton component={Link} to='/frontend/manual/authentication'>
-										<Typography> {t("manual.Authentication")} </Typography>{" "}
-									</ListItemButton>
-									<ListItemButton component={Link} to='/frontend/manual/inference'>
-										<Typography> {t("manual.Inference")} </Typography>{" "}
-									</ListItemButton>
-									<ListItemButton component={Link} to='/frontend/manual/errorlimit'>
-										<Typography> {t("manual.Common_Errors_and_Ratelimits")} </Typography>{" "}
-									</ListItemButton>
-									<ListItemButton component={Link} to='/frontend/manual/behavior'>
-										<Typography> {t("manual.The_Behaviors_of_This_Website")} </Typography>{" "}
-									</ListItemButton>
+									{[
+										{path: "/frontend/manual/key", text: "manual.Setting_Up_Your_API_Key"},
+										{path: "/frontend/manual/authentication", text: "manual.Authentication"},
+										{path: "/frontend/manual/inference", text: "manual.Inference"},
+										{path: "/frontend/manual/errorlimit", text: "manual.Common_Errors_and_Ratelimits"},
+										{path: "/frontend/manual/behavior", text: "manual.The_Behaviors_of_This_Website"},
+									].map((item, index) => (
+										<ListItemButton key={index} component={Link} to={item.path}>
+											<Typography>{t(item.text)} </Typography>{" "}
+										</ListItemButton>
+									))}
 								</List>
 							</Box>
 							<Box m={3}>
@@ -191,7 +180,9 @@ function Manual() {
 											...getOverrides({
 												Highlight,
 												themes,
-												theme: themes.okaidia,
+												theme: themes.vsDark,
+                                                hideLineNumbers: true,
+                                                
 											}),
 											h1: {
 												component: "h1",
@@ -232,22 +223,15 @@ function Manual() {
 									},
 								}}>
 								{displaydoc && (
-									<Paper
-										variant='outlined'
+									<Box
+										key={displaydoc}
 										style={{
 											position: "fixed",
 											marginTop: 7,
 											width: 270,
 										}}>
-										<Typography m={1} variant='body1'>
-											Table of Contents
-										</Typography>
-										<Divider />
-										<Box mr={2}>
-											{" "}
-											<TableOfContents mdfile={displaydoc} />{" "}
-										</Box>
-									</Paper>
+										<TableOfContents mdfile={displaydoc} />
+									</Box>
 								)}
 							</Box>
 						</Grid>

@@ -3,7 +3,7 @@ Authentication
 
 --- 
 
-## 1. Authentication
+##  Authentication
 
 >You are recommended to store the API key securely in your own backend.
 
@@ -12,7 +12,7 @@ Authentication
 
 ---
 
-## 2. API Key Usage Credits
+##  API Key Usage Credits
 
 - The number of tokens in the tokenised prompts and responses (from the choosen models) are counted.
 - The number of tokens in prompts and responses are multiply with the cost table from [Information/Model](https://professorparakeet.com/frontend/model) page to calculate the credit used.
