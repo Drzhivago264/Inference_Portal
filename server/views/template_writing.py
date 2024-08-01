@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.models import UserInstructionTree
+from server.models.instruction import UserInstructionTree
 from server.utils import constant
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
 from server.views.serializer import (
@@ -23,10 +23,10 @@ from server.views.serializer import (
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
 @permission_required("server.view_userinstructiontree", raise_exception=True)
-def user_instruction_tree_api(request):
+def user_instruction_tree_api(request) -> Response:
     current_user = request.user
     try:
-        master_key, master_user = get_master_key_and_master_user(
+        _, master_user = get_master_key_and_master_user(
             current_user=current_user
         )
         root_nodes = UserInstructionTree.objects.filter(user=master_user, level=1)
@@ -123,7 +123,7 @@ def update_user_instruction_tree_api(request):
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
 @permission_required("server.add_userinstructiontree", raise_exception=True)
-def create_user_instruction_tree_api(request):
+def create_user_instruction_tree_api(request) -> Response:
     current_user = request.user
     serializer = NestedUserInstructionCreateSerializer(data=request.data)
     if serializer.is_valid():
@@ -194,12 +194,12 @@ def create_user_instruction_tree_api(request):
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
 @permission_required("server.delete_userinstructiontree", raise_exception=True)
-def delete_user_instruction_tree_api(request):
+def delete_user_instruction_tree_api(request) -> Response:
     current_user = request.user
     serializer = UserInstructionDeleteCreateSerializer(data=request.data)
     if serializer.is_valid():
         id = serializer.data["id"]
-        master_key, master_user = get_master_key_and_master_user(
+        _, master_user = get_master_key_and_master_user(
             current_user=current_user
         )
         try:

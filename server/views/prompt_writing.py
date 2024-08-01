@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.models import Dataset, DatasetRecord
+from server.models.dataset import Dataset, DatasetRecord
 from server.utils import constant
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
 from server.views.custom_paginator import PaginatorWithPageNum
@@ -52,7 +52,7 @@ def get_default_user_dataset_api(request):
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
 @permission_required("server.view_datasetrecord", raise_exception=True)
-def get_user_records_api(request, id):
+def get_user_records_api(request, id: int):
     current_user = request.user
     _, master_user = get_master_key_and_master_user(current_user=current_user)
     if Dataset.objects.filter(user=master_user).count() == 0:

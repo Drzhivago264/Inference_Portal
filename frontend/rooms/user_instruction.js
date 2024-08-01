@@ -467,9 +467,7 @@ function UserInstruction() {
 												<Box key={index} display='flex'>
 													<Paper
 														elevation={5}
-														style={{
-															width: "100%",
-														}}>
+														style={{width: "100%",}}>
 														<Box
 															p={2}
 															style={{
@@ -499,8 +497,8 @@ function UserInstruction() {
 																<TextField
 																	label='Parent Instruction'
 																	multiline
-																	minRows={6}
-																	maxRows={8}
+																	minRows={9}
+																	maxRows={11}
 																	InputLabelProps={{
 																		shrink: true,
 																	}}

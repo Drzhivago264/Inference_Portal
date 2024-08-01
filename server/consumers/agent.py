@@ -17,7 +17,7 @@ from server.consumers.pydantic_validator import (
 from server.queue.model_inference import agent_inference
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_query_database import QueryDBMixin
-
+from server.models.log import PromptResponse
 
 class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
 
@@ -32,7 +32,7 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
         self.working_paragraph = ""
         self.is_session_start_node = None
         self.user = self.scope["user"]
-        self.p_type = "agent"
+        self.type = PromptResponse.PromptType.AGENT
 
         self.key_object, self.master_user, self.slave_key_object = (
             await self.get_master_key_and_master_user()
@@ -41,7 +41,7 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
             key_object=self.key_object,
             strategy="moving_windown",
             slave_key_object=self.slave_key_object,
-            namespace=self.p_type,
+            namespace=self.type.label,
             timezone=self.timezone,
         )
         self.choosen_model = ""
@@ -248,7 +248,7 @@ class Consumer(AsyncWebsocketConsumer, QueryDBMixin):
                     temperature = validated.temperature
                     agent_instruction += child_instruction
                     agent_inference.delay(
-                        type_=self.p_type,
+                        type_=self.type,
                         is_session_start_node=self.is_session_start_node,
                         unique=unique_response_id,
                         key=self.key_object.hashed_key,

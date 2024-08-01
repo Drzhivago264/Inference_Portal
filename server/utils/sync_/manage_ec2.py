@@ -1,9 +1,10 @@
 import boto3
+import boto3
 from celery.utils.log import get_task_logger
 from decouple import config
 from django.utils import timezone
 
-from server.models import InferenceServer
+from server.models.llm_server import InferenceServer
 from server.utils import constant
 
 logger = get_task_logger(__name__)
@@ -13,39 +14,36 @@ region = constant.REGION
 
 
 def get_EC2_status(instance_id: str, region: str) -> str:
-    """_summary_
+    """Retrieve the status of an AWS EC2 instance given its instance ID and region.
 
     Args:
-        instance_id (_type_): _description_
-        region (_type_): _description_
+        instance_id (str): The ID of the EC2 instance.
+        region (str): The AWS region where the instance is located.
 
     Returns:
-        _type_: _description_
+        str: The state of the EC2 instance as a string (e.g., 'running', 'stopped').
     """
-    ec2_resource = boto3.resource(
-        "ec2",
-        region_name=region,
-        aws_access_key_id=aws,
-        aws_secret_access_key=aws_secret,
-    )
+    ec2_resource = boto3.resource("ec2", region_name=region)
     try:
         instance = ec2_resource.Instance(instance_id)
         return instance.state["Name"]
     except Exception as e:
-        return e
+        return str(e)
 
 
 def update_server_status_in_db(instance_id: str, update_type: str) -> None:
-    """_summary_
+    """
+    Update the status or last message time of an InferenceServer instance in the database.
 
     Args:
-        instance_id (str): the string of instance id
-        update_type (str): the type of status change
+        instance_id (str): The ID of the server instance.
+        update_type (str): The type of update ("status" or "time").
     """
-    ser_obj = InferenceServer.objects.get(name=instance_id)
+    server_object = InferenceServer.objects.get(name=instance_id)
+
     if update_type == "status":
-        ser_obj.status = "pending"
-        ser_obj.save()
+        server_object.status = "pending"
     elif update_type == "time":
-        ser_obj.last_message_time = timezone.now()
-        ser_obj.save()
+        server_object.last_message_time = timezone.now()
+
+    server_object.save()

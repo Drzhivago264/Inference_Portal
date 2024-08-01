@@ -1,28 +1,32 @@
+from typing import Optional
 import tiktoken
 from django.db.utils import DataError
 from django.utils import timezone
 from transformers import AutoTokenizer
 from vectordb import vectordb
 
-from server.models import APIKEY, LLM, MemoryTree, PromptResponse
+from server.models.api_key import APIKEY
+from server.models.llm_server import LLM
+from server.models.log import MemoryTree, PromptResponse
 
 
 def log_prompt_response(
-    is_session_start_node: bool | None,
+    is_session_start_node: Optional[bool],
     key_object: APIKEY,
     llm: LLM,
     prompt: str,
     response: str,
-    type_: str,
+    type_: int,
 ) -> None:
-    """This function store log into a db then build a memory tree of chat history
+    """This function logs a prompt and its response into a database and then builds a memory tree of the chat history.
+
     Args:
-        is_session_start_node (bool | None): _description_
-        key_object (object): _description_
-        model (str): _description_
-        prompt (str): _description_
-        response (str): _description_
-        type_ (str): _description_
+        is_session_start_node (bool | None): A boolean or None indicating if this is the start of a session.
+        key_object (object): An API key object.
+        llm (LLM): An instance of the LLM (Language Learning Model).
+        prompt (str): The prompt string given to the LLM.
+        response (str): The response string from the LLM.
+        type_ (int): An integer representing the type of log.
     """
     if not llm.is_self_host:
         try:
@@ -48,7 +52,7 @@ def log_prompt_response(
             response=response,
             key=key_object,
             model=llm,
-            p_type=type_,
+            type=type_,
             number_input_tokens=number_input_token,
             number_output_tokens=number_output_token,
             input_cost=input_cost,
@@ -72,11 +76,12 @@ def build_memory_tree(
     prompt: str,
     response: str,
     llm: LLM,
-    type_: str,
-    is_session_start_node: bool,
+    type_: int,
+    is_session_start_node: Optional[bool],
 ) -> None:
-    if is_session_start_node is not None and type_ == "chatbot":
-        memory_tree_node_number = MemoryTree.objects.filter(key=key_object).count()
+    if is_session_start_node is not None and type_ == PromptResponse.PromptType.CHATBOT:
+        memory_tree_node_number = MemoryTree.objects.filter(
+            key=key_object).count()
         if memory_tree_node_number == 0:
             MemoryTree.objects.create(
                 name=key_object.hashed_key,
@@ -84,13 +89,13 @@ def build_memory_tree(
                 prompt=prompt,
                 response=response,
                 model=llm,
-                p_type=type_,
+                type=type_,
                 is_session_start_node=True,
             )
 
         elif memory_tree_node_number > 0 and is_session_start_node:
             most_similar_vector = vectordb.filter(
-                metadata__key=key_object.hashed_key, metadata__p_type=type_
+                metadata__key=key_object.hashed_key, metadata__type=type_
             ).search(prompt + response, k=2)
             if len(most_similar_vector) > 1:
                 most_similar_prompt = most_similar_vector[1].content_object.prompt
@@ -107,7 +112,7 @@ def build_memory_tree(
                     prompt=prompt,
                     response=response,
                     model=llm,
-                    p_type=type_,
+                    type=type_,
                     is_session_start_node=True,
                 )
             else:
@@ -121,7 +126,7 @@ def build_memory_tree(
                     prompt=prompt,
                     response=response,
                     model=llm,
-                    p_type=type_,
+                    type=type_,
                     is_session_start_node=True,
                 )
 
@@ -136,6 +141,6 @@ def build_memory_tree(
                 prompt=prompt,
                 response=response,
                 model=llm,
-                p_type=type_,
+                type=type_,
                 is_session_start_node=False,
             )

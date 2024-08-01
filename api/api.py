@@ -12,7 +12,7 @@ from api.chat_api import router as chat_router
 from api.completion_api import router as completion_router
 from api.llm_functions_api import router as llm_function_router
 from api.utils import check_permission, query_response_log
-from server.models import APIKEY, FineGrainAPIKEY
+from server.models.api_key import APIKEY, FineGrainAPIKEY
 
 
 class GlobalAuth(HttpBearer):
@@ -43,6 +43,7 @@ api.add_router("/", llm_function_router)
     summary="Get log",
     response={200: List[ResponseLogResponse], 401: Error, 429: Error},
 )
+
 async def log(request, data: ResponseLogRequest):
     key_object = request.auth
     user_object = await sync_to_async(lambda: key_object.user)()

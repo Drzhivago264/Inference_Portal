@@ -1,10 +1,3 @@
-import "datatables.net-buttons-dt";
-import "datatables.net-buttons/js/buttons.colVis.mjs";
-import "datatables.net-buttons/js/buttons.html5.mjs";
-import "datatables.net-buttons/js/buttons.print.mjs";
-import "../component/css/buttons.dataTables.css";
-import "../component/css/dataTables.dataTables.css";
-
 import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip} from "chart.js";
 import React, {useEffect, useState} from "react";
 
@@ -19,10 +12,11 @@ import Grid from "@mui/material/Grid";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar";
+import autocolors from "chartjs-plugin-autocolors";
 import axios from "axios";
 import dayjs from "dayjs";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, autocolors);
 
 function CostMonitoring() {
 	const format_to_hour = "YYYY-MM-DD HH:mm";
@@ -33,14 +27,7 @@ function CostMonitoring() {
 	const [startdate, setStartDate] = useState(now.subtract(7, "days").format(format_to_hour));
 	const [enddate_total, setEnddateTotal] = useState(now.format(format_to_hour));
 	const [startdate_total, setStartDateTotal] = useState(now.subtract(7, "days").format(format_to_hour));
-	function getRandomColor() {
-		var letters = "0123456789ABCDEF".split("");
-		var color = "#";
-		for (var i = 0; i < 6; i++) {
-			color += letters[Math.floor(Math.random() * 16)];
-		}
-		return color;
-	}
+
 	useEffect(() => {
 		axios
 			.all([axios.get(`/frontend-api/cost/${startdate}/${enddate}`)])
@@ -73,13 +60,11 @@ function CostMonitoring() {
 							{
 								label: `Input Tokens ${model_list[m]}`,
 								data: sum_input_tokens_list,
-								backgroundColor: getRandomColor(),
 								stack: "Stack 0",
 							},
 							{
 								label: `Output Tokens ${model_list[m]}`,
 								data: sum_output_tokens_list,
-								backgroundColor: getRandomColor(),
 								stack: "Stack 1",
 							}
 						);
@@ -125,12 +110,10 @@ function CostMonitoring() {
 							{
 								label: `Input Tokens ${model_list[m]}`,
 								data: [sum_input_tokens],
-								backgroundColor: getRandomColor(),
 							},
 							{
 								label: `Output Tokens ${model_list[m]}`,
 								data: [sum_output_tokens],
-								backgroundColor: getRandomColor(),
 							}
 						);
 					}
@@ -156,10 +139,15 @@ function CostMonitoring() {
 			y: {
 				stacked: true,
 			},
+         
 		},
+        
 		plugins: {
 			legend: {
 				position: "bottom",
+			},
+			autocolors: {
+				enabled: true,
 			},
 			title: {
 				display: true,
@@ -188,6 +176,9 @@ function CostMonitoring() {
 		plugins: {
 			legend: {
 				position: "bottom",
+			},
+            autocolors: {
+				enabled: true,
 			},
 			title: {
 				display: true,

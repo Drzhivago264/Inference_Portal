@@ -17,7 +17,7 @@ from server.utils.async_.async_manage_ec2 import (
     update_server_status_in_db_async,
 )
 from server.utils.async_.async_query_database import QueryDBMixin
-
+from server.models.log import PromptResponse
 
 class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
 
@@ -99,7 +99,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                                         response=r.json()["choices"][0]["message"][
                                             "content"
                                         ],
-                                        type_="data_synthesis",
+                                        type_=self.type,
                                     )
                                 elif r.status_code == 429:
                                     response_list.append("Too many requests, slow down")
@@ -182,7 +182,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
                                 prompt=processed_instruction_list[index][0]["content"]
                                 + processed_instruction_list[index][1]["content"],
                                 response=r.json()["choices"][0]["message"]["content"],
-                                type_="data_synthesis",
+                                type_=self.type,
                             )
                         elif r.status_code == 429:
                             response_list.append("Too many requests, slow down")
@@ -225,7 +225,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
         ).strftime("%M:%S")
         self.room_group_name = "chat_%s" % self.url
         self.user = self.scope["user"]
-        self.p_type = "data_synthesis"
+        self.type = PromptResponse.PromptType.DATA_SYNTHESIS
 
         self.key_object, self.master_user, self.slave_key_object = (
             await self.get_master_key_and_master_user()
@@ -234,7 +234,7 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
             key_object=self.key_object,
             strategy="moving_windown",
             slave_key_object=self.slave_key_object,
-            namespace=self.p_type,
+            namespace=self.type.label,
             timezone=self.timezone,
         )
 

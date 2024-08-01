@@ -1,4 +1,3 @@
-import csv
 import json
 
 from asgiref.sync import async_to_sync
@@ -8,7 +7,8 @@ from channels.layers import get_channel_layer
 from decouple import config
 from openai import OpenAI
 
-from server.models import APIKEY, LLM
+from server.models.api_key import APIKEY
+from server.models.llm_server import LLM
 from server.queue.ec2_manage import command_EC2
 from server.utils import constant
 from server.utils.sync_.inference import (
@@ -30,7 +30,7 @@ def inference(
     unique: str,
     is_session_start_node: bool | None,
     mode: str,
-    type_: str,
+    type_: int,
     key: str,
     credit: float,
     room_group_name: str,
@@ -55,7 +55,7 @@ def inference(
         unique (str): Unique identifier for the inference request.
         is_session_start_node (bool | None): Indicates if the current prompt is the start of a new session.
         mode (str): Mode of operation for the inference process.
-        type_ (str): Type of the inference request.
+        type_ (int): Type of the inference request.
         key (str): Hashed key for authentication.
         credit (float): Credit available for the inference request.
         room_group_name (str): Name of the group where the chat messages are sent.
@@ -226,7 +226,7 @@ def agent_inference(
     top_p: float,
     frequency_penalty: float,
     presence_penalty: float,
-    type_: str,
+    type_: int,
 ) -> None:
     """
     Interacts with the OpenAI API to generate responses based on the conversation turn and session history.
@@ -250,7 +250,7 @@ def agent_inference(
         top_p (float): Top-p sampling.
         frequency_penalty (float): Frequency penalty.
         presence_penalty (float): Presence penalty.
-        type_ (str): Type of the interaction.
+        type_ (int): Type of the interaction.
     """
     client = OpenAI(
         api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY

@@ -142,7 +142,7 @@ class Error(Schema):
     detail: str
 
 
-class PromptResponse(Schema):
+class PromptResponseSchema(Schema):
     response: str
     context: PromptSchema
 

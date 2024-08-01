@@ -16,7 +16,7 @@ from server.utils.async_.async_inference import (
 )
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.inference import inference_mode
-
+from server.models.log import PromptResponse
 
 class Consumer(
     AsyncWebsocketConsumer,
@@ -87,7 +87,8 @@ class Consumer(
         self.is_session_start_node = True
         self.session_history = []
         self.user = self.scope["user"]
-        self.p_type = "chatbot"
+        self.type = PromptResponse.PromptType.CHATBOT
+
         self.key_object, self.master_user, self.slave_key_object = (
             await self.get_master_key_and_master_user()
         )
@@ -95,7 +96,7 @@ class Consumer(
             key_object=self.key_object,
             strategy="moving_windown",
             slave_key_object=self.slave_key_object,
-            namespace=self.p_type,
+            namespace=self.type.label,
             timezone=self.timezone,
         )
         # Join room group

@@ -5,17 +5,12 @@ from asgiref.sync import sync_to_async
 from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
-from server.models import (
-    APIKEY,
-    LLM,
-    InferenceServer,
-    InstructionTree,
-    PromptResponse,
-    UserInstructionTree,
-)
+from server.models.llm_server import LLM, InferenceServer
+from server.models.api_key import APIKEY
+from server.models.log import PromptResponse
+from server.models.instruction import InstructionTree, UserInstructionTree
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils import constant
-
 
 async def check_permission(user_object, permission, destination):
     if not await sync_to_async(user_object.has_perm)(permission):
@@ -52,7 +47,7 @@ async def get_model_url(model: str) -> list | bool:
         return False
 
 
-async def send_request_async(url: str, context: dict):
+async def send_request_async(url: str, context: dict) -> httpx.Response:
     async with httpx.AsyncClient(
         transport=httpx.AsyncHTTPTransport(retries=constant.RETRY),
         timeout=constant.TIMEOUT,
@@ -94,7 +89,7 @@ async def send_stream_request_async(
             llm_id=model.id,
             prompt=data.prompt,
             response=response,
-            type_="chat_api",
+            type_=PromptResponse.PromptType.CHATBOT_API,
         )
 
     except httpx.ReadTimeout:
@@ -145,7 +140,7 @@ async def send_stream_request_agent_async(
             llm_id=model.id,
             prompt=data.prompt,
             response=response,
-            type_="agent_api",
+            type_=PromptResponse.PromptType.AGENT_API,
         )
     except httpx.ReadTimeout:
         raise httpx.ReadTimeout
@@ -153,9 +148,9 @@ async def send_stream_request_agent_async(
 
 async def query_response_log(
     key_object: str, order: str, quantity: int, type_: list
-) -> object:
+) -> dict:
     response = list()
-    log = PromptResponse.objects.filter(key=key_object, p_type__in=type_).order_by(
+    log = PromptResponse.objects.filter(key=key_object, type__in=type_).order_by(
         order
     )[:quantity]
     async for l in log:
@@ -164,7 +159,7 @@ async def query_response_log(
                 "prompt": l.prompt,
                 "response": l.response,
                 "created_at": l.created_at,
-                "type": l.p_type,
+                "type": l.type,
                 "model": await sync_to_async(lambda: l.model.name)(),
             }
         )

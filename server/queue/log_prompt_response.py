@@ -1,6 +1,7 @@
 from celery import shared_task
 
-from server.models import APIKEY, LLM
+from server.models.api_key import APIKEY
+from server.models.llm_server import LLM
 from server.utils.sync_.log_database import log_prompt_response
 
 
@@ -11,7 +12,7 @@ def celery_log_prompt_response(
     llm_id: int,
     prompt: str,
     response: str,
-    type_: str,
+    type_: int,
 ) -> None:
     """
     This function stores a log entry in the database and builds a memory tree of chat history.
@@ -22,7 +23,7 @@ def celery_log_prompt_response(
         llm_id (int): The ID of the language model.
         prompt (str): The prompt text.
         response (str): The response text.
-        type_ (str): The type of interaction.
+        type_ (int): The type of interaction.
     """
     llm = LLM.objects.get(id=llm_id)
     key_object = APIKEY.objects.get(id=key_object_id)

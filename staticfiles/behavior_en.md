@@ -39,7 +39,7 @@ The behaviors of this website
 | model                 | The choosen model                                       |
 | key                   | Reference to Key model                                  |
 | created_at            | Datetime of the dialog                                  |
-| p_type                | The type of inference (e.g., open_ai, chatroom, hotpot) |
+| type                  | The type of inference (e.g., agent, chatbot, toolbox)   |
 | is_session_start_node | The mark of the chat session                            |
 
 - The prompt and response are concatenated and/or trimmed to be embbeded and further store in vector database

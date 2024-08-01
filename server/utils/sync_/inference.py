@@ -10,7 +10,8 @@ from channels.layers import get_channel_layer
 from decouple import config
 from transformers import AutoTokenizer
 
-from server.models import APIKEY, LLM, InferenceServer
+from server.models.api_key import APIKEY
+from server.models.llm_server import LLM, InferenceServer
 from server.utils import constant
 from server.utils.sync_.query_database import get_chat_context
 
