@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from server.api_throttling_rates import DatasetExportRateThrottle
-from server.models import Dataset, DatasetRecord
+from server.models.dataset import Dataset, DatasetRecord
 from server.queue.export_dataset import export_large_dataset
 from server.utils import constant
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user

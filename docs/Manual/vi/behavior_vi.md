@@ -40,7 +40,7 @@
 | model                 | Mô hình được chọn                                |
 | key                   | Tham chiếu đến mô hình Khóa                      |
 | created_at            | Thời gian của cuộc hội thoại                     |
-| p_type                | Loại suy luận (ví dụ: open_ai, chatroom, hotpot) |
+| type                  | Loại suy luận (ví dụ: open_ai, chatroom, hotpot) |
 | is_session_start_node | Dấu hiệu của phiên trò chuyện                    |
 
 - Lời nhắc và phản hồi được nối và/hoặc cắt để nhúng và lưu trữ tiếp trong cơ sở dữ liệu vector

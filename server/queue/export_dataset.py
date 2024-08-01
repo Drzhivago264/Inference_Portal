@@ -9,7 +9,7 @@ from decouple import config
 from django.core.cache import cache
 from smart_open import open
 
-from server.models import Dataset, DatasetRecord
+from server.models.dataset import Dataset, DatasetRecord
 
 logger = get_task_logger(__name__)
 r2 = config("r2_access_key_id")

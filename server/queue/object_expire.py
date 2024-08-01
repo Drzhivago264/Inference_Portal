@@ -1,7 +1,7 @@
 from celery import shared_task
 from django.utils.timezone import datetime, timedelta
 
-from server.models import APIKEY
+from server.models.api_key import APIKEY
 from server.utils import constant
 
 

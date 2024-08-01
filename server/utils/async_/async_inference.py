@@ -6,7 +6,7 @@ import regex as re
 from decouple import config
 
 import server.utils.constant as constant
-from server.models import LLM
+from server.models.llm_server import LLM
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils.async_.async_manage_ec2 import (
     ManageEC2Mixin,
@@ -56,7 +56,7 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                             llm_id=llm.id,
                             prompt=self.message,
                             response=full_response,
-                            type_=self.p_type,
+                            type_=self.type,
                         )
                 except httpx.TimeoutException:
                     await self.send(
@@ -199,7 +199,7 @@ class AsyncInferenceOpenaiMixin:
                     llm_id=llm.id,
                     prompt=self.message,
                     response=clean_response,
-                    type_=self.p_type,
+                    type_=self.type,
                 )
 
     async def send_agent_request_openai_async(self, llm: LLM) -> str:
@@ -288,5 +288,5 @@ class AsyncInferenceOpenaiMixin:
                     llm_id=llm.id,
                     prompt=self.message,
                     response=clean_response,
-                    type_=self.p_type,
+                    type_=self.type,
                 )

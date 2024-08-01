@@ -23,7 +23,7 @@ from server.utils.llm_toolbox import (
     SummarizeDocument,
     TopicClassification,
 )
-
+from server.models.log import PromptResponse
 
 class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
 
@@ -37,12 +37,12 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
         self.is_session_start_node = None
         self.user = self.scope["user"]
 
-        self.p_type = "toolbox"
+        self.type = PromptResponse.PromptType.TOOLBOX
         self.rate_limiter = await rate_limit_initializer(
             key_object=self.key_object,
             strategy="moving_windown",
             slave_key_object=self.slave_key_object,
-            namespace=self.p_type,
+            namespace=self.type.label,
             timezone=self.timezone,
         )
 

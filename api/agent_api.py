@@ -23,7 +23,7 @@ from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils import constant
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
-
+from server.models.log import PromptResponse
 router = Router()
 
 
@@ -149,7 +149,7 @@ async def agentcompletion(request, data: AgentSchema):
                                     llm_id=model.id,
                                     prompt=data.prompt,
                                     response=response,
-                                    type_="agent_api",
+                                    type_=PromptResponse.PromptType.AGENT_API,
                                 )
                                 return 200, {
                                     "context": context,

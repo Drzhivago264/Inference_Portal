@@ -8,6 +8,6 @@ class ServerConfig(AppConfig):
     def ready(self):
         from vectordb.shortcuts import autosync_model_to_vectordb
 
-        from .models import PromptResponse
+        from server.models.log import PromptResponse
 
         autosync_model_to_vectordb(PromptResponse)

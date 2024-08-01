@@ -1,16 +1,10 @@
 from rest_framework import serializers
 
-from server.models import (
-    LLM,
-    Dataset,
-    DatasetRecord,
-    InferenceServer,
-    InstructionTree,
-    MemoryTree,
-    Product,
-    PromptResponse,
-    UserInstructionTree,
-)
+from server.models.llm_server import LLM, InferenceServer
+from server.models.product import Product
+from server.models.dataset import Dataset
+from server.models.log import PromptResponse, MemoryTree
+from server.models.instruction import InstructionTree, UserInstructionTree
 from server.utils import constant
 
 
@@ -24,7 +18,7 @@ class CostSerializer(serializers.ModelSerializer):
             "number_output_tokens",
             "created_at",
             "model",
-            "p_type",
+            "type",
         )
 
 
@@ -103,7 +97,7 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
             "id",
             "prompt",
             "response",
-            "p_type",
+            "type",
             "created_at",
             "level",
             "children",

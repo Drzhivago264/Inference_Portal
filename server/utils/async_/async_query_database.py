@@ -7,7 +7,8 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 
-from server.models import LLM, InferenceServer, InstructionTree, UserInstructionTree
+from server.models.llm_server import LLM, InferenceServer
+from server.models.instruction import InstructionTree, UserInstructionTree
 
 
 class QueryDBMixin:

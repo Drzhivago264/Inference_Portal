@@ -9,7 +9,7 @@ from limits.aio.strategies import (
     MovingWindowRateLimiter,
 )
 
-from server.models import APIKEY, FineGrainAPIKEY
+from server.models.api_key import APIKEY, FineGrainAPIKEY
 
 
 class RateLimitError(Exception):
@@ -65,16 +65,26 @@ async def rate_limit_initializer(
     timezone: str | None,
     strategy: str,
 ) -> RateLimiter:
-    rate = (
-        f"{key_object.ratelimit};{slave_key_object.ratelimit}"
-        if slave_key_object is not None
-        else key_object.ratelimit
-    )
+    """
+    Initializes and returns a RateLimiter object based on the provided API key objects, namespace, timezone, and strategy.
+
+    Args:
+        key_object (APIKEY): An instance of APIKEY containing rate limit information.
+        slave_key_object (FineGrainAPIKEY | None): An optional instance of FineGrainAPIKEY with additional rate limit information.
+        namespace (str): A string representing the namespace for the rate limiter.
+        timezone (str | None): An optional string representing the timezone.
+        strategy (str): A string representing the rate limiting strategy.
+
+    Returns:
+        RateLimiter: A RateLimiter object configured with the provided parameters.
+    """
+    rate = f"{key_object.ratelimit};{slave_key_object.ratelimit}" if slave_key_object else key_object.ratelimit
+    unique_key = key_object.hashed_key if not slave_key_object else slave_key_object
     rate_limiter = RateLimiter(
         rate=rate,
         strategy=strategy,
         namespace=namespace,
-        unique=key_object.hashed_key if slave_key_object is None else slave_key_object,
+        unique=unique_key,
         time_zone=timezone,
     )
     return rate_limiter

@@ -5,7 +5,7 @@ from celery.utils.log import get_task_logger
 from decouple import config
 from django.utils import timezone
 
-from server.models import InferenceServer
+from server.models.llm_server import InferenceServer
 from server.utils import constant
 
 logger = get_task_logger(__name__)

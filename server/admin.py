@@ -2,24 +2,12 @@ from django.contrib import admin
 from mptt.admin import DraggableMPTTAdmin
 from rest_framework_api_key.admin import APIKeyModelAdmin
 
-from .models import (
-    APIKEY,
-    LLM,
-    Crypto,
-    Dataset,
-    DatasetRecord,
-    FineGrainAPIKEY,
-    InferenceServer,
-    InstructionTree,
-    MemoryTree,
-    PaymentHistory,
-    Price,
-    Product,
-    ProductTag,
-    PromptResponse,
-    UserInstructionTree,
-)
-
+from server.models.llm_server import LLM, InferenceServer
+from server.models.product import Price, PaymentHistory, Product, Crypto
+from server.models.api_key import APIKEY, FineGrainAPIKEY
+from server.models.dataset import Dataset, DatasetRecord
+from server.models.log import PromptResponse, MemoryTree
+from server.models.instruction import InstructionTree, UserInstructionTree
 
 class PriceAdmin(admin.StackedInline):
     model = Price
@@ -43,15 +31,9 @@ class FineGrainAPIKEYModelAdmin(APIKeyModelAdmin):
     pass
 
 
-admin.site.register(ProductTag)
-admin.site.register(Price)
-admin.site.register(Crypto)
-admin.site.register(PaymentHistory)
-admin.site.register(LLM)
-admin.site.register(InferenceServer)
-admin.site.register(PromptResponse)
-admin.site.register(DatasetRecord)
-admin.site.register(Dataset)
+models = [Price, Crypto, PaymentHistory, LLM, InferenceServer, PromptResponse, DatasetRecord, Dataset]
+admin.site.register(models)
+
 admin.site.register(
     MemoryTree,
     DraggableMPTTAdmin,

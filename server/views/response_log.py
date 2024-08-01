@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.models import PromptResponse
+from server.models.log import PromptResponse
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
 
 
@@ -18,7 +18,7 @@ class LogListJson(BaseDatatableView):
         "response",
         "model.name",
         "created_at",
-        "p_type",
+        "type",
         "input_cost",
         "output_cost",
         "number_input_tokens",
@@ -29,7 +29,7 @@ class LogListJson(BaseDatatableView):
         "response",
         "model.name",
         "created_at",
-        "p_type",
+        "type",
         "input_cost",
         "output_cost",
         "number_input_tokens",
@@ -40,7 +40,7 @@ class LogListJson(BaseDatatableView):
     def get_initial_queryset(self):
         if self.request.user.has_perm("server.allow_view_log"):
             current_user = self.request.user
-            master_key, master_user = get_master_key_and_master_user(
+            master_key, _ = get_master_key_and_master_user(
                 current_user=current_user
             )
             return PromptResponse.objects.filter(key=master_key).order_by("-id")

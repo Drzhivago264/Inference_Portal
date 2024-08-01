@@ -4,7 +4,7 @@ import requests
 from celery import shared_task
 from decouple import config
 
-from server.models import Crypto
+from server.models.product import Crypto
 
 
 @shared_task()
