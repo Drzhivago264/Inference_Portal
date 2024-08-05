@@ -1,6 +1,9 @@
 from django.db import models
-from server.models.api_key import APIKEY
 from django.utils.translation import gettext_lazy as _
+
+from server.models.api_key import APIKEY
+
+
 class Product(models.Model):
     name = models.CharField(max_length=255)
     desc = models.TextField(_("Description"), blank=True)
@@ -23,6 +26,7 @@ class Price(models.Model):
 
     def __str__(self) -> str:
         return f"{self.product.name} {self.price}"
+
 
 class Crypto(models.Model):
     coin = models.TextField()

@@ -26,9 +26,7 @@ from server.views.serializer import (
 def user_instruction_tree_api(request) -> Response:
     current_user = request.user
     try:
-        _, master_user = get_master_key_and_master_user(
-            current_user=current_user
-        )
+        _, master_user = get_master_key_and_master_user(current_user=current_user)
         root_nodes = UserInstructionTree.objects.filter(user=master_user, level=1)
         serializer = UserInstructionGetSerializer(root_nodes, many=True)
         return Response(
@@ -101,7 +99,7 @@ def update_user_instruction_tree_api(request):
                         instruct=c["instruct"],
                         displayed_name=c["displayed_name"],
                         name=sha512(hash_key.encode("utf-8")).hexdigest()
-                        + str(uuid.uuid4()),
+                        + uuid.uuid4().hex,
                         parent=node,
                         user=master_user,
                         code=index,
@@ -162,7 +160,7 @@ def create_user_instruction_tree_api(request) -> Response:
             parent_node = UserInstructionTree.objects.create(
                 user=master_user,
                 parent=grandparent_node,
-                name=sha512(hash_key.encode("utf-8")).hexdigest() + str(uuid.uuid4()),
+                name=sha512(hash_key.encode("utf-8")).hexdigest() + uuid.uuid4().hex,
                 displayed_name=parent_instruction.data["displayed_name"],
                 instruct=parent_instruction.data["instruct"],
             )
@@ -171,7 +169,7 @@ def create_user_instruction_tree_api(request) -> Response:
                     user=master_user,
                     parent=parent_node,
                     name=sha512(hash_key.encode("utf-8")).hexdigest()
-                    + str(uuid.uuid4()),
+                    + uuid.uuid4().hex,
                     displayed_name=c["displayed_name"],
                     instruct=c["instruct"],
                     code=index,
@@ -199,9 +197,7 @@ def delete_user_instruction_tree_api(request) -> Response:
     serializer = UserInstructionDeleteCreateSerializer(data=request.data)
     if serializer.is_valid():
         id = serializer.data["id"]
-        _, master_user = get_master_key_and_master_user(
-            current_user=current_user
-        )
+        _, master_user = get_master_key_and_master_user(current_user=current_user)
         try:
             node = UserInstructionTree.objects.get(id=id, user=master_user)
             node.delete()

@@ -1,5 +1,6 @@
-import requests
 from typing import Optional
+
+import requests
 
 
 def manage_monero(command: str, params: Optional[dict] = None) -> requests.Response:

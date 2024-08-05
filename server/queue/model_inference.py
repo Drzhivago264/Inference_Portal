@@ -35,17 +35,7 @@ def inference(
     credit: float,
     room_group_name: str,
     model: str,
-    stream: bool,
-    top_k: int,
-    top_p: float,
-    best_of: int,
-    temperature: float,
-    max_tokens: int,
-    presence_penalty: float,
-    frequency_penalty: float,
-    length_penalty: float,
-    early_stopping: bool,
-    beam: bool,
+    context: dict,
     prompt: str,
     include_memory: bool,
 ) -> None:
@@ -60,17 +50,7 @@ def inference(
         credit (float): Credit available for the inference request.
         room_group_name (str): Name of the group where the chat messages are sent.
         model (str): Name of the model used for inference.
-        stream (bool): Flag indicating if streaming is enabled.
-        top_k (int): Top-k value for sampling.
-        top_p (float): Top-p value for sampling.
-        best_of (int): Number of best results to consider.
-        temperature (float): Temperature value for sampling.
-        max_tokens (int): Maximum number of tokens to generate.
-        presence_penalty (float): Presence penalty for sampling.
-        frequency_penalty (float): Frequency penalty for sampling.
-        length_penalty (float): Length penalty for sampling.
-        early_stopping (bool): Flag indicating if early stopping is enabled.
-        beam (bool): Flag indicating if beam search is used.
+        context (dict): Parameters context of the prompt.
         prompt (str): Input prompt for the inference.
         include_memory (bool): Flag indicating if memory should be included in the inference process.
     Returns:
@@ -78,10 +58,10 @@ def inference(
     """
     channel_layer = get_channel_layer()
     key_object = APIKEY.objects.get(hashed_key=key)
-    if not beam:
-        best_of = 1
-    elif beam and best_of <= 1:
-        best_of = 2
+    if not context["beam"]:
+        context["best_of"] = 1
+    elif not context["beam"] and context["best_of"] <= 1:
+        context["best_of"] = 2
 
     llm = LLM.objects.get(name=model)
     url, instance_id, server_status = get_model_url(llm)
@@ -96,21 +76,11 @@ def inference(
     )
 
     if llm.is_self_host:
-        context = {
+        extra_context = {
             "prompt": session_list_to_string,
             "n": 1,
-            "best_of": best_of,
-            "presence_penalty": float(presence_penalty),
-            "use_beam_search": beam,
-            "temperature": float(temperature) if not beam else 0,
-            "max_tokens": max_tokens,
-            "stream": stream,
-            "top_k": int(top_k),
-            "top_p": float(top_p) if not beam else 1,
-            "length_penalty": float(length_penalty),
-            "length_penalty": float(length_penalty) if beam else 1,
-            "early_stopping": early_stopping if beam else False,
         }
+        context.update(extra_context)
         """ Query a list of inference servers for a given model, pick a random one """
         if url:
             update_server_status_in_db(instance_id=instance_id, update_type="time")
@@ -180,6 +150,7 @@ def inference(
             timeout=constant.TIMEOUT,
             max_retries=constant.RETRY,
         )
+        open_ai_context = {"stream"}
         clean_response = send_chat_request_openai(
             client=client,
             session_history=session_list_to_string,
@@ -187,13 +158,13 @@ def inference(
             choosen_model=model,
             credit=credit,
             unique=unique,
-            stream=stream,
+            stream=context["stream"],
             room_group_name=room_group_name,
-            frequency_penalty=frequency_penalty,
-            top_p=top_p,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            presence_penalty=presence_penalty,
+            frequency_penalty=context["frequency_penalty"],
+            top_p=context["top_p"],
+            max_tokens=context["max_tokens"],
+            temperature=context["temperature"],
+            presence_penalty=context["presence_penalty"],
         )
         if clean_response and isinstance(clean_response, str):
             log_prompt_response(
@@ -211,7 +182,6 @@ def agent_inference(
     key: str,
     is_session_start_node: bool | None,
     current_turn_inner: int,
-    stream: bool,
     model: str,
     unique: str,
     credit: float,
@@ -221,11 +191,7 @@ def agent_inference(
     session_history: list,
     choosen_model: str,
     max_turns: int,
-    temperature: float,
-    max_tokens: int,
-    top_p: float,
-    frequency_penalty: float,
-    presence_penalty: float,
+    context: dict,
     type_: int,
 ) -> None:
     """
@@ -235,7 +201,6 @@ def agent_inference(
         key (str): API key for authentication.
         is_session_start_node (bool | None): Boolean indicating if it's the start of a session.
         current_turn_inner (int): Current turn in the conversation.
-        stream (bool): Indicates if streaming is enabled.
         model (str): Model name.
         unique (str): Unique identifier for the session.
         credit (float): Available credit.
@@ -245,12 +210,9 @@ def agent_inference(
         session_history (list): Previous conversation turns.
         choosen_model (str): Chosen model.
         max_turns (int): Maximum number of turns allowed.
-        temperature (float): Temperature setting of the model.
         max_tokens (int): Maximum number of tokens for the response.
-        top_p (float): Top-p sampling.
-        frequency_penalty (float): Frequency penalty.
-        presence_penalty (float): Presence penalty.
         type_ (int): Type of the interaction.
+        context (dict): Parameters context of the prompt.
     """
     client = OpenAI(
         api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY
@@ -284,13 +246,13 @@ def agent_inference(
             credit=credit,
             unique=unique,
             current_turn_inner=current_turn_inner,
-            stream=stream,
+            stream=context["stream"],
             room_group_name=room_group_name,
-            frequency_penalty=frequency_penalty,
-            top_p=top_p,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            presence_penalty=presence_penalty,
+            frequency_penalty=context["frequency_penalty"],
+            top_p=context["top_p"],
+            max_tokens=context["max_tokens"],
+            temperature=context["temperature"],
+            presence_penalty=context["presence_penalty"],
         )
 
         if clean_response and isinstance(clean_response, str):

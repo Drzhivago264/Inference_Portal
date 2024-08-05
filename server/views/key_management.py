@@ -24,8 +24,8 @@ from server.api_throttling_rates import (
     KeyCreateRateThrottle,
     XMRConfirmationRateThrottle,
 )
+from server.models.api_key import APIKEY
 from server.models.product import Crypto, PaymentHistory, Price, Product
-from server.models. api_key import APIKEY
 from server.utils import constant
 from server.utils.sync_.manage_monero import manage_monero
 from server.views.serializer import (

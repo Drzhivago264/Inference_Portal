@@ -5,12 +5,13 @@ from asgiref.sync import sync_to_async
 from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
-from server.models.llm_server import LLM, InferenceServer
 from server.models.api_key import APIKEY
-from server.models.log import PromptResponse
 from server.models.instruction import InstructionTree, UserInstructionTree
+from server.models.llm_server import LLM, InferenceServer
+from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils import constant
+
 
 async def check_permission(user_object, permission, destination):
     if not await sync_to_async(user_object.has_perm)(permission):
@@ -150,9 +151,9 @@ async def query_response_log(
     key_object: str, order: str, quantity: int, type_: list
 ) -> dict:
     response = list()
-    log = PromptResponse.objects.filter(key=key_object, type__in=type_).order_by(
-        order
-    )[:quantity]
+    log = PromptResponse.objects.filter(key=key_object, type__in=type_).order_by(order)[
+        :quantity
+    ]
     async for l in log:
         response.append(
             {

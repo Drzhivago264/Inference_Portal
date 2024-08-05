@@ -43,7 +43,6 @@ api.add_router("/", llm_function_router)
     summary="Get log",
     response={200: List[ResponseLogResponse], 401: Error, 429: Error},
 )
-
 async def log(request, data: ResponseLogRequest):
     key_object = request.auth
     user_object = await sync_to_async(lambda: key_object.user)()

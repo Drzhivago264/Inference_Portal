@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from transformers import AutoTokenizer
 
 from server.consumers.pydantic_validator import AgentSchemaTemplate, DataSynthesisSchema
+from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_manage_ec2 import (
@@ -17,7 +18,7 @@ from server.utils.async_.async_manage_ec2 import (
     update_server_status_in_db_async,
 )
 from server.utils.async_.async_query_database import QueryDBMixin
-from server.models.log import PromptResponse
+
 
 class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
 
