@@ -1,14 +1,14 @@
 import json
 import random
-from typing import Tuple
+from typing import Literal, Tuple
 
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 
-from server.models.llm_server import LLM, InferenceServer
 from server.models.instruction import InstructionTree, UserInstructionTree
+from server.models.llm_server import LLM, InferenceServer
 
 
 class QueryDBMixin:
@@ -23,7 +23,7 @@ class QueryDBMixin:
             master_user = await sync_to_async(lambda: key_object.user)()
             return key_object, master_user, token
 
-    async def check_permission(self, permission_code, destination):
+    async def check_permission(self, permission_code: str, destination: str):
         if await sync_to_async(self.user.has_perm)(permission_code):
             return True
         else:
@@ -55,8 +55,12 @@ class QueryDBMixin:
 
     @database_sync_to_async
     def get_child_template_list(
-        self, template: str, template_type: str = "system"
+        self,
+        template: str,
+        template_type: Literal["system", "user_template"] = "system",
     ) -> dict:
+        options = ["system", "user_template"]
+        assert template_type in options, f"'{template_type}' is not in {options}"
         try:
             if template_type == "system":
                 child_template = InstructionTree.objects.get(
@@ -92,7 +96,7 @@ class QueryDBMixin:
         except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
             return False
 
-    async def get_model(self, name=None) -> QuerySet[LLM] | bool:
+    async def get_model(self, name=None) -> LLM | bool:
         try:
             return await LLM.objects.aget(
                 name=self.choosen_model if name is None else name

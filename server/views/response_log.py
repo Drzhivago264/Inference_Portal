@@ -40,9 +40,7 @@ class LogListJson(BaseDatatableView):
     def get_initial_queryset(self):
         if self.request.user.has_perm("server.allow_view_log"):
             current_user = self.request.user
-            master_key, _ = get_master_key_and_master_user(
-                current_user=current_user
-            )
+            master_key, _ = get_master_key_and_master_user(current_user=current_user)
             return PromptResponse.objects.filter(key=master_key).order_by("-id")
 
     def filter_queryset(self, qs):

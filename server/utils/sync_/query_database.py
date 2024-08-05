@@ -1,9 +1,9 @@
-
 import random
-from typing import Tuple, Union, Callable
+from typing import Callable, Tuple, Union
+
 from django.core.cache import cache
 from vectordb import vectordb
-from typing import Callable
+
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM, InferenceServer
 from server.utils import constant
@@ -21,10 +21,14 @@ def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
     try:
         server_list = cache.get(f"{model}_link_list")
         if server_list is None:
-            server_list = list(InferenceServer.objects.filter(
-                hosted_model=model, availability="Available"))
-            cache.set(f"{model}_link_list", server_list,
-                      constant.CACHE_SERVER_LINK_RETRIVAL)
+            server_list = list(
+                InferenceServer.objects.filter(
+                    hosted_model=model, availability="Available"
+                )
+            )
+            cache.set(
+                f"{model}_link_list", server_list, constant.CACHE_SERVER_LINK_RETRIVAL
+            )
 
         if server_list:
             random_url = random.choice(server_list)
@@ -51,7 +55,13 @@ def get_model(model: str) -> Union[LLM, bool]:
         return False
 
 
-def get_chat_context(llm: LLM, key_object: APIKEY, raw_prompt: str, current_history_length: int, tokeniser: Callable) -> Union[str, list]:
+def get_chat_context(
+    llm: LLM,
+    key_object: APIKEY,
+    raw_prompt: str,
+    current_history_length: int,
+    tokeniser: Callable,
+) -> Union[str, list]:
     """
     Generate a chat context based on the provided inputs.
 

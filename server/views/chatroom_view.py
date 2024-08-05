@@ -7,10 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.models.api_key import (
-    APIKEY,
-    FineGrainAPIKEY
-)
+from server.models.api_key import APIKEY, FineGrainAPIKEY
 from server.models.instruction import InstructionTree, UserInstructionTree
 from server.models.log import MemoryTree
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user

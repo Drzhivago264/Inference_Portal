@@ -1,4 +1,5 @@
 from typing import Optional
+
 import tiktoken
 from django.db.utils import DataError
 from django.utils import timezone
@@ -80,8 +81,7 @@ def build_memory_tree(
     is_session_start_node: Optional[bool],
 ) -> None:
     if is_session_start_node is not None and type_ == PromptResponse.PromptType.CHATBOT:
-        memory_tree_node_number = MemoryTree.objects.filter(
-            key=key_object).count()
+        memory_tree_node_number = MemoryTree.objects.filter(key=key_object).count()
         if memory_tree_node_number == 0:
             MemoryTree.objects.create(
                 name=key_object.hashed_key,

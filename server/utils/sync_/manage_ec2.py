@@ -1,4 +1,5 @@
-import boto3
+from typing import Literal
+
 import boto3
 from celery.utils.log import get_task_logger
 from decouple import config
@@ -31,7 +32,9 @@ def get_EC2_status(instance_id: str, region: str) -> str:
         return str(e)
 
 
-def update_server_status_in_db(instance_id: str, update_type: str) -> None:
+def update_server_status_in_db(
+    instance_id: str, update_type: Literal["status", "time"]
+) -> None:
     """
     Update the status or last message time of an InferenceServer instance in the database.
 

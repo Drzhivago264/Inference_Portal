@@ -78,7 +78,11 @@ async def rate_limit_initializer(
     Returns:
         RateLimiter: A RateLimiter object configured with the provided parameters.
     """
-    rate = f"{key_object.ratelimit};{slave_key_object.ratelimit}" if slave_key_object else key_object.ratelimit
+    rate = (
+        f"{key_object.ratelimit};{slave_key_object.ratelimit}"
+        if slave_key_object
+        else key_object.ratelimit
+    )
     unique_key = key_object.hashed_key if not slave_key_object else slave_key_object
     rate_limiter = RateLimiter(
         rate=rate,

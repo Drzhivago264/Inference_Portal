@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.models.api_key import APIKEY, FineGrainAPIKEY 
+from server.models.api_key import APIKEY, FineGrainAPIKEY
 from server.models.llm_server import LLM, InferenceServer
 from server.views.serializer import LoginSerializer, ModelSerializer, ServerSerializer
 

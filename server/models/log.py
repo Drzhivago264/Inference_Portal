@@ -1,7 +1,9 @@
 import json
+
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
+
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM
 
@@ -23,8 +25,7 @@ class AbstractPromptResponse(models.Model):
         DATA_SYNTHESIS = 7, "data_synthesis"
 
     type = models.PositiveSmallIntegerField(
-        choices = PromptType.choices,
-        default = PromptType.CHATBOT
+        choices=PromptType.choices, default=PromptType.CHATBOT
     )
 
     class Meta:

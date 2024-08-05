@@ -1,4 +1,5 @@
 import datetime
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -7,6 +8,7 @@ from rest_framework_api_key.crypto import KeyGenerator
 from rest_framework_api_key.models import AbstractAPIKey, BaseAPIKeyManager
 
 User = settings.AUTH_USER_MODEL
+
 
 class APIKEY(AbstractAPIKey):
     user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)

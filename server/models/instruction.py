@@ -13,7 +13,6 @@ from rest_framework_api_key.crypto import KeyGenerator
 from rest_framework_api_key.models import AbstractAPIKey, BaseAPIKeyManager
 
 
-
 class AbstractInstructionTree(MPTTModel):
     name = models.CharField(max_length=255, unique=True)
     code = models.TextField()
@@ -31,10 +30,12 @@ class AbstractInstructionTree(MPTTModel):
         order_insertion_by = ["code"]
 
     class Meta:
-            abstract = True
+        abstract = True
 
-class InstructionTree(AbstractInstructionTree): 
+
+class InstructionTree(AbstractInstructionTree):
     pass
+
 
 class UserInstructionTree(AbstractInstructionTree):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

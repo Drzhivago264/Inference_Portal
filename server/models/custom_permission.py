@@ -1,8 +1,6 @@
-
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
 
 User = settings.AUTH_USER_MODEL
 
@@ -11,9 +9,9 @@ class CustomPermissionWithoutContentType(models.Model):
 
     class Meta:
 
-        managed = False  
+        managed = False
 
-        default_permissions = () 
+        default_permissions = ()
 
         permissions = (
             ("allow_chat", "Global permission for chatroom"),
@@ -27,5 +25,3 @@ class CustomPermissionWithoutContentType(models.Model):
             ("allow_data_synthesis", "Global permission for using data synthesis"),
             ("allow_create_token", "Global permission for creating token"),
         )
-
-
