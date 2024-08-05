@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
 from server.models.api_key import APIKEY, FineGrainAPIKEY
-from server.models.instruction import InstructionTree, UserInstructionTree
-from server.models.log import MemoryTree
+from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
+from server.models.log import MemoryTreeMP
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
 from server.views.serializer import (
     InstructionTreeSerializer,
@@ -75,20 +75,20 @@ def hub_redirect_api(request: HttpRequest) -> Response:
 @permission_classes([IsAuthenticated])
 def instruction_tree_api(request):
     current_user = request.user
-    master_key, master_user = get_master_key_and_master_user(current_user=current_user)
-    root_nodes = InstructionTree.objects.filter(level=0)
-    user_root_nodes = UserInstructionTree.objects.filter(level=1, user=master_user)
+    _, master_user = get_master_key_and_master_user(current_user=current_user)
+    root_nodes = InstructionTreeMP.objects.filter(depth=1)
+    user_root_nodes = UserInstructionTreeMP.objects.filter(depth=2, user=master_user)
     serializer = InstructionTreeSerializer(root_nodes, many=True)
     user_serializer = UserInstructionTreeSerializer(user_root_nodes, many=True)
     for root in root_nodes:
         if root.name == "Assignment Agent":
-            default_child_template = root.get_children()
+            default_child_template = root.get_descendants()
             serializer_children = InstructionTreeSerializer(
                 default_child_template, many=True
             )
     if user_root_nodes.count() > 0:
         user_serializer_children = UserInstructionTreeSerializer(
-            user_root_nodes[0].get_children(), many=True
+            user_root_nodes[0].get_descendants(), many=True
         )
         return Response(
             {
@@ -124,10 +124,10 @@ def memory_tree_api(request):
     else:
         paginator = PageNumberPagination()
         paginator.page_size = 1
-        master_key, master_user = get_master_key_and_master_user(
+        master_key, _ = get_master_key_and_master_user(
             current_user=current_user
         )
-        memory_object = MemoryTree.objects.filter(key=master_key).order_by("-id")
+        memory_object = MemoryTreeMP.objects.filter(key=master_key).order_by("-id")
         result_page = paginator.paginate_queryset(memory_object, request)
         try:
             result_page = result_page[0].get_ancestors(include_self=True)

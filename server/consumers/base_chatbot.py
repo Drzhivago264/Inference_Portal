@@ -11,7 +11,7 @@ from server.utils.async_.async_inference import (
     AsyncInferenceVllmMixin,
 )
 from server.utils.async_.async_query_database import QueryDBMixin
-
+from server.utils import constant
 
 class BaseChatbot(
     AsyncWebsocketConsumer,
@@ -19,6 +19,13 @@ class BaseChatbot(
     AsyncInferenceVllmMixin,
     QueryDBMixin,
 ):
+    
+    def __init__(self):
+        super().__init__()
+        self.backend = None 
+        self.session_history = []
+        self.is_session_start_node = True
+
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
@@ -27,11 +34,8 @@ class BaseChatbot(
             timezone.now(), pytz.timezone(self.timezone)
         ).strftime("%Y-%m-%d %H:%M:%S")
         self.room_group_name = "chat_%s" % self.url
-        self.is_session_start_node = True
-        self.session_history = []
         self.user = self.scope["user"]
         self.type = PromptResponse.PromptType.CHATBOT
-
         self.key_object, self.master_user, self.slave_key_object = (
             await self.get_master_key_and_master_user()
         )
@@ -52,7 +56,15 @@ class BaseChatbot(
             await self.send_connect_message()
 
     async def send_connect_message(self):
-        raise Exception("Implemented in child class!")
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "message": f"You are currently using {self.backend} backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully slow when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor",
+                    "role": "Server",
+                    "time": self.time,
+                }
+            )
+        )
 
     async def disconnect(self, close_code):
         # Leave room group

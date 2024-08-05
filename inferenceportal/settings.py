@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     "rest_framework_api_key",
     "vectordb",
     "ninja",
-    "mptt",
+    "treebeard"
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 CHANNEL_LAYERS = {

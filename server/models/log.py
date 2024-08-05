@@ -1,9 +1,9 @@
 import json
-
+import string 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from mptt.models import MPTTModel, TreeForeignKey
 
+from treebeard.mp_tree import MP_Node, get_result_class
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM
 
@@ -59,15 +59,35 @@ class PromptResponse(AbstractPromptResponse):
         }
 
 
-class MemoryTree(MPTTModel, AbstractPromptResponse):
+class MemoryTreeMP(MP_Node, AbstractPromptResponse):
     name = models.CharField(max_length=255, unique=True)
-    parent = TreeForeignKey(
-        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
-    )
+    steplen = 5
     is_session_start_node = models.BooleanField(default=False)
+    path = models.TextField(max_length= 9999999, unique=True)
+    alphabet = string.digits + string.ascii_uppercase + string.ascii_lowercase
+    def __str__(self):
+            return 'Memory Node: {}'.format(self.name)
+    
 
-    def __str__(self) -> str:
-        return f"{self.name}"
+    def get_ancestors(self, include_self: bool):
+        """
+        :returns: Override A queryset containing the current node object's ancestors,
+            starting by the root node and descending to the parent to include itself.
+        """
+        if self.is_root():
+            return get_result_class(self.__class__).objects.none()
+        
 
-    class MPTTMeta:
-        order_insertion_by = ["created_at"]
+        if include_self:
+            paths = [
+                self.path[0:pos]
+                for pos in range(0, len(self.path) + self.steplen, self.steplen)[1:]
+            ]
+        else:
+            paths = [
+                self.path[0:pos]
+                for pos in range(0, len(self.path), self.steplen)[1:]
+            ]    
+        return get_result_class(self.__class__).objects.filter(
+            path__in=paths ).order_by('depth')
+

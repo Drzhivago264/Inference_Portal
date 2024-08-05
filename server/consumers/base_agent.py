@@ -25,17 +25,21 @@ class BaseAgent(
     AsyncInferenceVllmMixin,
     QueryDBMixin,
 ):
+    def __init__(self):
+        super().__init__()
+        self.backend = None 
+        self.current_turn = 0
+        self.session_history = []
+        self.is_session_start_node = None
+        self.working_paragraph = None
+        self.use_summary = False
+
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
         self.timezone = self.scope["url_route"]["kwargs"]["tz"]
         self.time = timezone.localtime(
             timezone.now(), pytz.timezone(self.timezone)
         ).strftime("%Y-%m-%d %H:%M:%S")
-        self.current_turn = 0
-        self.session_history = []
-        self.is_session_start_node = None
-        self.working_paragraph = None
-        self.use_summary = False
         self.user = self.scope["user"]
         self.type = PromptResponse.PromptType.AGENT
         self.key_object, self.master_user, self.slave_key_object = (
@@ -69,7 +73,15 @@ class BaseAgent(
             )
 
     async def send_connect_message(self):
-        raise NotImplementedError("Implemented in child class!")
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "message": f"You are currently using {self.backend} backend. Default to GPT4 or choose model on the right.",
+                    "role": "Server",
+                    "time": self.time,
+                }
+            )
+        )
 
     async def disconnect(self, close_code):
         # Leave room group

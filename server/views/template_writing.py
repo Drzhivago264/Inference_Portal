@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.models.instruction import UserInstructionTree
+from server.models.instruction import UserInstructionTreeMP
 from server.utils import constant
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
 from server.views.serializer import (
@@ -26,8 +26,10 @@ from server.views.serializer import (
 def user_instruction_tree_api(request) -> Response:
     current_user = request.user
     try:
-        _, master_user = get_master_key_and_master_user(current_user=current_user)
-        root_nodes = UserInstructionTree.objects.filter(user=master_user, level=1)
+        _, master_user = get_master_key_and_master_user(
+            current_user=current_user)
+        root_nodes = UserInstructionTreeMP.objects.filter(
+            user=master_user, depth=2)
         serializer = UserInstructionGetSerializer(root_nodes, many=True)
         return Response(
             {
@@ -58,7 +60,8 @@ def update_user_instruction_tree_api(request):
     if serializer.is_valid():
         parent_instruction = serializer.data["parent_instruction"]
         childrens = serializer.data["childrens"]
-        parent_instruction = UserInstructionCreateSerializer(parent_instruction)
+        parent_instruction = UserInstructionCreateSerializer(
+            parent_instruction)
         childrens = UserInstructionCreateSerializer(childrens, many=True)
 
         master_key, master_user = get_master_key_and_master_user(
@@ -75,11 +78,11 @@ def update_user_instruction_tree_api(request):
             )
 
         if (
-            UserInstructionTree.objects.filter(user=master_user).count()
+            UserInstructionTreeMP.objects.filter(user=master_user).count()
             <= constant.MAX_PARENT_TEMPLATE_PER_USER
             * constant.MAX_CHILD_TEMPLATE_PER_USER
         ):
-            node = UserInstructionTree.objects.get(
+            node = UserInstructionTreeMP.objects.get(
                 id=parent_instruction.data["id"], user=master_user
             )
             node.instruct = parent_instruction.data["instruct"]
@@ -87,7 +90,7 @@ def update_user_instruction_tree_api(request):
             node.save()
             for index, c in enumerate(childrens.data):
                 if c["id"] is not None:
-                    child_node = UserInstructionTree.objects.get(
+                    child_node = UserInstructionTreeMP.objects.get(
                         id=c["id"], user=master_user
                     )
                     child_node.instruct = c["instruct"]
@@ -95,15 +98,15 @@ def update_user_instruction_tree_api(request):
                     child_node.code = index
                     child_node.save()
                 else:
-                    UserInstructionTree.objects.create(
+                    node.add_child(
                         instruct=c["instruct"],
                         displayed_name=c["displayed_name"],
                         name=sha512(hash_key.encode("utf-8")).hexdigest()
                         + uuid.uuid4().hex,
-                        parent=node,
                         user=master_user,
                         code=index,
                     )
+
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         else:
             return Response(
@@ -127,7 +130,8 @@ def create_user_instruction_tree_api(request) -> Response:
     if serializer.is_valid():
         parent_instruction = serializer.data["parent_instruction"]
         childrens = serializer.data["childrens"]
-        parent_instruction = UserInstructionCreateSerializer(parent_instruction)
+        parent_instruction = UserInstructionCreateSerializer(
+            parent_instruction)
         childrens = UserInstructionCreateSerializer(childrens, many=True)
 
         master_key, master_user = get_master_key_and_master_user(
@@ -144,35 +148,34 @@ def create_user_instruction_tree_api(request) -> Response:
             )
 
         if (
-            UserInstructionTree.objects.filter(user=master_user).count()
+            UserInstructionTreeMP.objects.filter(user=master_user).count()
             <= constant.MAX_PARENT_TEMPLATE_PER_USER
             * constant.MAX_CHILD_TEMPLATE_PER_USER
         ):
             try:
-                grandparent_node = UserInstructionTree.objects.get(
-                    user=master_user, level=0
+                grandparent_node = UserInstructionTreeMP.objects.get(
+                    user=master_user, depth=1
                 )
-            except UserInstructionTree.DoesNotExist:
-                grandparent_node = UserInstructionTree.objects.create(
+            except UserInstructionTreeMP.DoesNotExist:
+                grandparent_node = UserInstructionTreeMP.add_root(
                     user=master_user, name=hash_key
                 )
-
-            parent_node = UserInstructionTree.objects.create(
+            parent_node =  grandparent_node.add_child(
                 user=master_user,
-                parent=grandparent_node,
-                name=sha512(hash_key.encode("utf-8")).hexdigest() + uuid.uuid4().hex,
+                name=sha512(hash_key.encode("utf-8")
+                            ).hexdigest() + uuid.uuid4().hex,
                 displayed_name=parent_instruction.data["displayed_name"],
                 instruct=parent_instruction.data["instruct"],
             )
+
             for index, c in enumerate(childrens.data):
-                UserInstructionTree.objects.create(
+                parent_node.add_child(
                     user=master_user,
-                    parent=parent_node,
                     name=sha512(hash_key.encode("utf-8")).hexdigest()
                     + uuid.uuid4().hex,
                     displayed_name=c["displayed_name"],
                     instruct=c["instruct"],
-                    code=index,
+                    code=index, 
                 )
 
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
@@ -197,12 +200,13 @@ def delete_user_instruction_tree_api(request) -> Response:
     serializer = UserInstructionDeleteCreateSerializer(data=request.data)
     if serializer.is_valid():
         id = serializer.data["id"]
-        _, master_user = get_master_key_and_master_user(current_user=current_user)
+        _, master_user = get_master_key_and_master_user(
+            current_user=current_user)
         try:
-            node = UserInstructionTree.objects.get(id=id, user=master_user)
+            node = UserInstructionTreeMP.objects.get(id=id, user=master_user)
             node.delete()
             return Response({"detail": "Deleted"}, status=status.HTTP_200_OK)
-        except UserInstructionTree.DoesNotExist:
+        except UserInstructionTreeMP.DoesNotExist:
             return Response(
                 {"detail": "Instruction does not exist"},
                 status=status.HTTP_204_NO_CONTENT,

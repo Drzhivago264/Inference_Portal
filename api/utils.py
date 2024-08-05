@@ -6,7 +6,7 @@ from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
 from server.models.api_key import APIKEY
-from server.models.instruction import InstructionTree, UserInstructionTree
+from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
 from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
@@ -20,19 +20,19 @@ async def check_permission(user_object, permission, destination):
 
 async def get_system_template(name: str) -> str:
     try:
-        template = await InstructionTree.objects.aget(name=name)
+        template = await InstructionTreeMP.objects.aget(name=name)
         return template.instruct
-    except InstructionTree.DoesNotExist:
+    except InstructionTreeMP.DoesNotExist:
         raise HttpError(404, f"template: {name} is incorrect")
 
 
 async def get_user_template(name: str, user_object: object) -> str:
     try:
-        template = await UserInstructionTree.objects.aget(
+        template = await UserInstructionTreeMP.objects.aget(
             displayed_name=name, user=user_object
         )
         return template.instruct
-    except UserInstructionTree.DoesNotExist:
+    except UserInstructionTreeMP.DoesNotExist:
         raise HttpError(404, f"template: {name} is incorrect")
 
 
