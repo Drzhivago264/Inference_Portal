@@ -4,15 +4,21 @@ from rest_framework_api_key.admin import APIKeyModelAdmin
 
 from server.models.api_key import APIKEY, FineGrainAPIKEY
 from server.models.dataset import Dataset, DatasetRecord
-from server.models.instruction import InstructionTree, UserInstructionTree
+from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
-from server.models.log import MemoryTree, PromptResponse
+from server.models.log import MemoryTreeMP, PromptResponse
 from server.models.product import Crypto, PaymentHistory, Price, Product
+from treebeard.admin import TreeAdmin
+from treebeard.forms import movenodeform_factory
 
 
 class PriceAdmin(admin.StackedInline):
     model = Price
 
+class TreeView(TreeAdmin):
+    form = movenodeform_factory(MemoryTreeMP)
+
+admin.site.register(MemoryTreeMP, TreeView)
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -44,31 +50,12 @@ models = [
 ]
 admin.site.register(models)
 
-admin.site.register(
-    MemoryTree,
-    DraggableMPTTAdmin,
-    list_display=(
-        "tree_actions",
-        "indented_title",
-    ),
-    list_display_links=("indented_title",),
-)
-admin.site.register(
-    InstructionTree,
-    DraggableMPTTAdmin,
-    list_display=(
-        "tree_actions",
-        "indented_title",
-    ),
-    list_display_links=("indented_title",),
-)
+class SystemInstructionView(TreeAdmin):
+    form = movenodeform_factory(InstructionTreeMP)
 
-admin.site.register(
-    UserInstructionTree,
-    DraggableMPTTAdmin,
-    list_display=(
-        "tree_actions",
-        "indented_title",
-    ),
-    list_display_links=("indented_title",),
-)
+class UserInstructionView(TreeAdmin):
+    form = movenodeform_factory(UserInstructionTreeMP)
+
+admin.site.register(InstructionTreeMP, SystemInstructionView)
+admin.site.register(UserInstructionTreeMP, UserInstructionView)
+

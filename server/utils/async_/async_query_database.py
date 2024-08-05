@@ -7,7 +7,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 
-from server.models.instruction import InstructionTree, UserInstructionTree
+from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
 
 
@@ -40,17 +40,17 @@ class QueryDBMixin:
 
     async def get_template(
         self, name: str, template_type: str
-    ) -> InstructionTree | UserInstructionTree:
+    ) -> InstructionTreeMP | UserInstructionTreeMP:
         try:
             if template_type == "system":
-                template = await InstructionTree.objects.aget(name=name)
+                template = await InstructionTreeMP.objects.aget(name=name)
                 return template
             elif template_type == "user_template":
-                template = await UserInstructionTree.objects.aget(
+                template = await UserInstructionTreeMP.objects.aget(
                     name=name, user=self.master_user
                 )
                 return template
-        except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
+        except (InstructionTreeMP.DoesNotExist, UserInstructionTreeMP.DoesNotExist):
             return False
 
     @database_sync_to_async
@@ -63,18 +63,18 @@ class QueryDBMixin:
         assert template_type in options, f"'{template_type}' is not in {options}"
         try:
             if template_type == "system":
-                child_template = InstructionTree.objects.get(
+                child_template = InstructionTreeMP.objects.get(
                     name=template
-                ).get_leafnodes()
+                ).get_descendants()
                 return {
                     "name_list": [c.name for c in child_template],
                     "default_child": child_template[0].name,
                     "default_instruct": child_template[0].instruct,
                 }
             elif template_type == "user_template":
-                child_template = UserInstructionTree.objects.get(
+                child_template = UserInstructionTreeMP.objects.get(
                     name=template.name, user=self.master_user
-                ).get_leafnodes()
+                ).get_descendants()
                 if child_template:
                     return {
                         "displayed_name_list": [
@@ -93,7 +93,7 @@ class QueryDBMixin:
                         "default_child": "",
                         "default_instruct": "",
                     }
-        except (InstructionTree.DoesNotExist, UserInstructionTree.DoesNotExist):
+        except (InstructionTreeMP.DoesNotExist, UserInstructionTreeMP.DoesNotExist):
             return False
 
     async def get_model(self, name=None) -> LLM | bool:

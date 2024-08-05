@@ -8,7 +8,7 @@ from vectordb import vectordb
 
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM
-from server.models.log import MemoryTree, PromptResponse
+from server.models.log import MemoryTreeMP, PromptResponse
 
 
 def log_prompt_response(
@@ -81,9 +81,9 @@ def build_memory_tree(
     is_session_start_node: Optional[bool],
 ) -> None:
     if is_session_start_node is not None and type_ == PromptResponse.PromptType.CHATBOT:
-        memory_tree_node_number = MemoryTree.objects.filter(key=key_object).count()
+        memory_tree_node_number = MemoryTreeMP.objects.filter(key=key_object).count()
         if memory_tree_node_number == 0:
-            MemoryTree.objects.create(
+            MemoryTreeMP.add_root(
                 name=key_object.hashed_key,
                 key=key_object,
                 prompt=prompt,
@@ -100,43 +100,31 @@ def build_memory_tree(
             if len(most_similar_vector) > 1:
                 most_similar_prompt = most_similar_vector[1].content_object.prompt
                 most_similar_response = most_similar_vector[1].content_object.response
-                most_similar_node = MemoryTree.objects.filter(
+                most_similar_node = MemoryTreeMP.objects.filter(
                     key=key_object,
                     prompt=most_similar_prompt,
                     response=most_similar_response,
                 ).order_by("-created_at")[0]
-                MemoryTree.objects.create(
-                    name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}",
-                    parent=most_similar_node,
-                    key=key_object,
-                    prompt=prompt,
-                    response=response,
-                    model=llm,
-                    type=type_,
-                    is_session_start_node=True,
-                )
             else:
-                most_similar_node = MemoryTree.objects.filter(key=key_object).order_by(
+                most_similar_node = MemoryTreeMP.objects.filter(key=key_object).order_by(
                     "-created_at"
                 )[0]
-                MemoryTree.objects.create(
-                    name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}",
-                    parent=most_similar_node,
-                    key=key_object,
-                    prompt=prompt,
-                    response=response,
-                    model=llm,
-                    type=type_,
-                    is_session_start_node=True,
-                )
+            most_similar_node.add_child(
+                name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}",
+                key=key_object,
+                prompt=prompt,
+                response=response,
+                model=llm,
+                type=type_,
+                is_session_start_node=True,
+            )
 
         elif memory_tree_node_number > 0 and not is_session_start_node:
-            parent_node = MemoryTree.objects.filter(
+            parent_node = MemoryTreeMP.objects.filter(
                 key=key_object, is_session_start_node=True
             ).latest("created_at")
-            MemoryTree.objects.create(
+            parent_node.add_child(
                 name=f"{key_object.hashed_key} -- child_node_added_at {timezone.now()}",
-                parent=parent_node,
                 key=key_object,
                 prompt=prompt,
                 response=response,
@@ -144,3 +132,4 @@ def build_memory_tree(
                 type=type_,
                 is_session_start_node=False,
             )
+

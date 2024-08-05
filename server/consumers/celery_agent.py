@@ -13,16 +13,9 @@ from server.queue.model_inference import agent_inference
 
 class Consumer(BaseAgent):
 
-    async def send_connect_message(self):
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "message": f"You are currently using Celery backend. Default to GPT4 or choose model on the right.",
-                    "role": "Server",
-                    "time": self.time,
-                }
-            )
-        )
+    def __init__(self):
+        super().__init__()
+        self.backend = "Celery"
 
     # Receive message from WebSocket
     async def send_message_if_not_rate_limited(self, text_data):

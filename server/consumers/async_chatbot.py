@@ -14,6 +14,9 @@ from server.utils.sync_.inference import inference_mode
 
 class Consumer(BaseChatbot):
 
+    def __init__(self):
+        super().__init__()
+        self.backend = "async"
     async def inference(self):
         if not self.beam:
             self.best_of = 1
@@ -65,17 +68,6 @@ class Consumer(BaseChatbot):
                     }
                 )
             )
-
-    async def send_connect_message(self):
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "message": f"You are currently using async backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully slow when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor",
-                    "role": "Server",
-                    "time": self.time,
-                }
-            )
-        )
 
     async def send_message_if_not_rate_limited(self, text_data):
         try:

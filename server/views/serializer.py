@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
 from server.models.dataset import Dataset
-from server.models.instruction import InstructionTree, UserInstructionTree
+from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
-from server.models.log import MemoryTree, PromptResponse
+from server.models.log import MemoryTreeMP, PromptResponse
 from server.models.product import Product
 from server.utils import constant
 
@@ -24,7 +24,7 @@ class CostSerializer(serializers.ModelSerializer):
 
 class InstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = InstructionTree
+        model = InstructionTreeMP
         fields = ("instruct", "name", "code", "default_editor_template")
 
 
@@ -78,7 +78,7 @@ class DatasetDeleteRecordSerialzier(serializers.Serializer):
 
 class UserInstructionTreeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserInstructionTree
+        model = UserInstructionTreeMP
         fields = (
             "instruct",
             "displayed_name",
@@ -89,25 +89,20 @@ class UserInstructionTreeSerializer(serializers.ModelSerializer):
 
 
 class MemoryTreeSerializer(serializers.ModelSerializer):
-    children = serializers.SerializerMethodField()
-
     class Meta:
-        model = MemoryTree
+        model = MemoryTreeMP
         fields = (
             "id",
             "prompt",
             "response",
             "type",
             "created_at",
-            "level",
-            "children",
-            "parent",
+
         )
 
     # Return None for lazy loading from the frontend
 
-    def get_children(self, instance):
-        return None
+
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -117,23 +112,21 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class UserInstructionGetSerializer(serializers.ModelSerializer):
+    children = serializers.SerializerMethodField()
     class Meta:
-        model = UserInstructionTree
+        model = UserInstructionTreeMP
         fields = (
             "id",
             "name",
             "displayed_name",
             "code",
-            "parent",
-            "level",
-            "children",
+            "depth",
             "instruct",
+            "children"
         )
 
-    def get_fields(self):
-        fields = super(UserInstructionGetSerializer, self).get_fields()
-        fields["children"] = UserInstructionGetSerializer(many=True, required=False)
-        return fields
+    def get_children(self, obj):
+        return UserInstructionGetSerializer(obj.get_descendants(), many=True).data
 
 
 class LoginSerializer(serializers.Serializer):

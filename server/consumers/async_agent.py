@@ -7,21 +7,15 @@ from pydantic import ValidationError
 from transformers import AutoTokenizer
 
 from server.consumers.base_agent import BaseAgent
+from server.models.log import PromptResponse
 from server.consumers.pydantic_validator import AgentSchemaMessage
 
 
 class Consumer(BaseAgent):
 
-    async def send_connect_message(self):
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "message": f"You are currently using async backend. Default to GPT4 or choose model on the right.",
-                    "role": "Server",
-                    "time": self.time,
-                }
-            )
-        )
+    def __init__(self):
+        super().__init__()
+        self.backend = "async"
 
     async def inference(self):
         if self.current_turn >= 0 and self.current_turn <= (self.max_turns - 1):
