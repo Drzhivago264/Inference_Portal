@@ -382,28 +382,26 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 							{t("navbar.Contact")}
 						</Button>
 
-						{!is_authenticated && (
-							<Stack direction='row' sx={{marginLeft: "auto"}}>
-								<FormControl>
-									<InputLabel id='select-language-label'>{t("navbar.Language")}</InputLabel>
-									<Select
-										labelId='select-language-label'
-										id='select-language-id'
-										value={default_language}
-										label={t("navbar.Language")}
-										onChange={(e) => {
-											handleChangeLanguage(e.target.value);
-										}}
-										size='small'>
-										<MenuItem value='vi'>Tiếng Việt</MenuItem>
-										<MenuItem value='en'>English</MenuItem>
-									</Select>
-								</FormControl>
-								<Box mt={0.5} ml={1}>
+						<Stack direction='row' spacing={1} sx={{marginLeft: "auto"}} alignContent='center' alignItems='center'>
+							<FormControl>
+								<InputLabel id='select-language-label'>{t("navbar.Language")}</InputLabel>
+								<Select
+									labelId='select-language-label'
+									id='select-language-id'
+									value={default_language}
+									label={t("navbar.Language")}
+									onChange={(e) => handleChangeLanguage(e.target.value)}
+									size='small'>
+									<MenuItem value='vi'>Tiếng Việt</MenuItem>
+									<MenuItem value='en'>English</MenuItem>
+								</Select>
+							</FormControl>
+							{!is_authenticated && (
+								<Box  ml={1}>
 									<Button
 										key='login'
 										value='login'
-										onClick={(e) => redirect(e)}
+										onClick={redirect}
 										sx={{
 											textDecoration: "none",
 											display: {
@@ -414,71 +412,57 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 										{t("navbar.Login")}
 									</Button>
 								</Box>
-								<Box>
-									<IconButton aria-label='color-mode' onClick={colorMode.toggleColorMode} color='inherit'>
-										{theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-									</IconButton>
-								</Box>
-							</Stack>
-						)}
-						{is_authenticated && (
-							<Stack direction='row' spacing={1} sx={{marginLeft: "auto"}}>
-								<FormControl>
-									<InputLabel id='select-language-label'>{t("navbar.Language")}</InputLabel>
-									<Select
-										labelId='select-language-label'
-										id='select-language-id'
-										value={default_language}
-										label={t("navbar.Language")}
-										onChange={(e) => {
-											handleChangeLanguage(e.target.value);
-										}}
-										size='small'>
-										<MenuItem value='vi'>Tiếng Việt</MenuItem>
-										<MenuItem value='en'>English</MenuItem>
-									</Select>
-								</FormControl>
-								<StyledBadge
-									overlap='circular'
-									anchorOrigin={{
-										vertical: "bottom",
-										horizontal: "right",
+							)}
+							<StyledBadge
+								overlap='circular'
+								anchorOrigin={{
+									vertical: "bottom",
+									horizontal: "right",
+								}}
+								variant='dot'
+                 
+								sx={{display: is_authenticated ? "block" : "none"}}>
+								<AvatarWithHover
+									sx={{
+										width: 38,
+										height: 38,
+										cursor: "pointer",
 									}}
-									variant='dot'>
-									<AvatarWithHover
-										sx={{
-											width: 38,
-											height: 38,
-											cursor: "pointer",
-										}}
-										onClick={toggleUserDrawer(true)}
-										style={{
-											border: "1px solid lightgray",
-										}}>
-										{websocket_hash && <Jdenticon size='38' value={websocket_hash} />}
-									</AvatarWithHover>
-								</StyledBadge>
-								<Box>
-									<IconButton onClick={colorMode.toggleColorMode} color='inherit'>
-										{theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-									</IconButton>
-								</Box>
-							</Stack>
-						)}
+									onClick={toggleUserDrawer(true)}
+									style={{
+										border: "1px solid lightgray",
+									}}>
+									{websocket_hash && <Jdenticon size='38' value={websocket_hash} />}
+								</AvatarWithHover>
+							</StyledBadge>
+							<Box sx={{display: is_authenticated ? "none" : "block"}}>
+								<IconButton aria-label='color-mode' onClick={colorMode.toggleColorMode} color='inherit'>
+									{theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+								</IconButton>
+							</Box>
+							<Box sx={{display: is_authenticated ? "block" : "none"}}>
+								<IconButton onClick={colorMode.toggleColorMode} color='inherit'>
+									{theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+								</IconButton>
+							</Box>
+						</Stack>
 						<Drawer size='md' variant='outlined' anchor='right' open={useropen} onClose={toggleUserDrawer(false)}>
 							<Stack
 								direction='row'
 								sx={{
 									display: "flex",
 									justifyContent: "space-between",
-								}}>
-								<Stack direction='row' sx={{display: "flex", justifyContent: "space-between"}} mt={1.5} ml={1.5} mr={1.5}>
+								}}
+  
+                                >
+								<Stack pl={1} direction='row' spacing={1} alignContent='center' alignItems='center'>
 									<AvatarWithHover
 										sx={{
 											width: 38,
 											height: 38,
-											cursor: "pointer",
+											cursor: "pointer",                         
 										}}
+                                      
 										style={{
 											border: "1px solid lightgray",
 										}}>
@@ -489,14 +473,15 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 											overflow: "hidden",
 											textOverflow: "ellipsis",
 											width: "11rem",
+                                            paddingTop: '5px'
 										}}>
-										<Typography m={1.2} sx={{fontWeight: "bold"}} noWrap variant='body1'>
-											Key: {user_key_name}
+										<Typography  sx={{fontWeight: "bold"}} noWrap variant='body1'>
+											{user_key_name}
 										</Typography>
 									</div>
 								</Stack>
 								<DrawerHeader>
-									<IconButton onClick={toggleUserDrawer(false)}>
+									<IconButton size="small" onClick={toggleUserDrawer(false)}>
 										<CloseIcon />
 									</IconButton>
 								</DrawerHeader>

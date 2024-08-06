@@ -277,11 +277,11 @@ function Agent() {
 		<Container maxWidth={false} disableGutters>
 			<title>Agent</title>
 			<ResponsiveAppBar max_width={false} />
-			<Container maxWidth={false} disableGutters>
+			<Container maxWidth={false}>
 				<Box mt={2}>
-					<Grid container spacing={2}>
+					<Grid justifyContent='center' container spacing={2}>
 						<Grid item xs={12} md={4} xl={2}>
-							<Paper sx={{ml: 2}} variant='outlined'>
+							<Paper variant='outlined'>
 								<Box m={1}>
 									<Typography sx={{color: "text.secondary"}}>Template Structure</Typography>
 								</Box>
@@ -314,13 +314,12 @@ function Agent() {
 										  ))}
 								</List>
 							</Paper>
-                            <EditorExport editorref={editorref} />
-							<Box ml={2} >
-								<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
-							</Box>
+							<EditorExport editorref={editorref} />
+
+							<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
 						</Grid>
 						<Grid item xs={12} md={8} xl={4}>
-							<Accordion >
+							<Accordion defaultExpanded>
 								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='parent-content' id='parent-header'>
 									<Typography sx={{color: "text.secondary"}}>Parent Instruction</Typography>
 								</AccordionSummary>
@@ -334,13 +333,13 @@ function Agent() {
 										<ChatInput
 											id='parent-instruct'
 											multiline
-											maxRows={8}
+											maxRows={14}
 											value={use_user_template ? default_user_parent_instruct : default_parent_instruct}
 											onChange={(e) => {
 												use_user_template ? setUserParentInstruct(e.target.value) : setParentInstruct(e.target.value),
 													setInstructChange(true);
 											}}
-											minRows={6}
+											minRows={12}
 											variant='standard'
 											InputProps={{
 												startAdornment: <InputAdornment position='start'> </InputAdornment>,
@@ -349,7 +348,7 @@ function Agent() {
 									</Paper>
 								</AccordionDetails>
 							</Accordion>
-							<Accordion >
+							<Accordion defaultExpanded>
 								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='child-content' id='child-header'>
 									<Typography sx={{color: "text.secondary"}}>Child Instruction</Typography>
 								</AccordionSummary>
@@ -363,13 +362,13 @@ function Agent() {
 										<ChatInput
 											id='child-instruct'
 											multiline
-											maxRows={8}
+											maxRows={12}
 											value={use_user_template ? default_user_child_instruct : default_child_instruct}
 											onChange={(e) => {
 												use_user_template ? setUserChildInstruct(e.target.value) : setChildInstruct(e.target.value),
 													setInstructChange(true);
 											}}
-											minRows={6}
+											minRows={12}
 											variant='standard'
 											InputProps={{
 												startAdornment: <InputAdornment position='start'> </InputAdornment>,
@@ -378,31 +377,23 @@ function Agent() {
 									</Paper>
 								</AccordionDetails>
 							</Accordion>
-							<Accordion defaultExpanded>
-								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='editor-content' id='editor-header'>
-									<Typography sx={{color: "text.secondary"}}>Editor</Typography>
-								</AccordionSummary>
-								<AccordionDetails>
-									<div id='editorjs' />
-								</AccordionDetails>
-							</Accordion>
 						</Grid>
 						<Grid item xs={12} md={8} xl={4}>
-								<ChatBox
-									id={"chat-log-agent"}
-									inputsize={300}
-									chat_message={chat_message}
-									usermessage={usermessage}
-									usermessageError={usermessageError}
-									ChatPaper={ChatPaper}
-									ChatInput={ChatInput}
-									setUserMessage={setUserMessage}
-									submitChat={submitChat}
-									messagesEndRef={messagesEndRef}
-									shownthinking={shownthinking}
-									handleEnter={handleEnter}></ChatBox>
+							<ChatBox
+								id={"chat-log-agent"}
+								inputsize={300}
+								chat_message={chat_message}
+								usermessage={usermessage}
+								usermessageError={usermessageError}
+								ChatPaper={ChatPaper}
+								ChatInput={ChatInput}
+								setUserMessage={setUserMessage}
+								submitChat={submitChat}
+								messagesEndRef={messagesEndRef}
+								shownthinking={shownthinking}
+								handleEnter={handleEnter}></ChatBox>
 						</Grid>
-						<Grid item xs={12}  md={4} xl={2}>
+						<Grid item xs={12} md={4} xl={2}>
 							<Stack direction='column' mr={2} spacing={2}>
 								<FormControl disabled={use_user_template}>
 									<InputLabel id='agent-label'>Agents</InputLabel>
@@ -434,7 +425,7 @@ function Agent() {
 									handle_use_user_template={handle_use_user_template}
 									websocket={websocket}
 								/>
-								<Divider/>
+								<Divider />
 								<FormControl defaultValue=''>
 									<InputLabel id='model-label'>Backends</InputLabel>
 									<Select
@@ -470,6 +461,18 @@ function Agent() {
 									setMaxTurn={setMaxTurn}></OpenAPIParameter>
 								<CeleryAlert />
 							</Stack>
+						</Grid>
+
+						<Grid item md={12} xl={8} >
+                            
+							<Accordion defaultExpanded>
+								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='editor-content' id='editor-header'>
+									<Typography sx={{color: "text.secondary"}}>Editor</Typography>
+								</AccordionSummary>
+								<AccordionDetails>
+									<div id='editorjs' />
+								</AccordionDetails>
+							</Accordion>
 						</Grid>
 					</Grid>
 				</Box>
