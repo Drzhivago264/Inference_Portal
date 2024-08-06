@@ -107,22 +107,22 @@ function Chat() {
 	};
 	const MemoMemoryTree = useMemo(() => <MemoryTree></MemoryTree>, []);
 	return (
-		<Container maxWidth={false} sx={{minWidth: 1350}} disableGutters>
+		<Container maxWidth={false}  disableGutters>
 			<title>Chat</title>
 			<ResponsiveAppBar max_width={"xl"} />
-			<Container maxWidth='xl' sx={{minWidth: 1350}}>
+			<Container maxWidth='xl' disableGutters >
 				<Box m={2}>
 					<Grid container spacing={2}>
-						<Grid item xs={4}>
+						<Grid item xs={12} lg={4}>
 							{MemoMemoryTree}
-							<Stack direction= {{lg:'column', xl:'row'}} mt={1} spacing={1}>
+							<Stack direction= 'row' mt={1} spacing={1}>
 								<ChatExport chat_message={chat_message} number_of_remove_message={1} setChatMessage={setChatMessage}></ChatExport>
 								<Box mt={2}>
 									<CeleryAlert />
 								</Box>
 							</Stack>
 						</Grid>
-						<Grid item xs={5.5}>
+						<Grid item xs={12} md={8} lg={5.5}>
 							<ChatBox
 								inputsize={550}
 								chat_message={chat_message}
@@ -136,7 +136,7 @@ function Chat() {
 								shownthinking={shownthinking}
 								handleEnter={handleEnter}></ChatBox>
 						</Grid>
-						<Grid item xs={2.5}>
+						<Grid item xs={12} md={4} lg={2.5}>
 							<ChatParameter
 								socket_destination={socket_destination}
 								setSocketDestination={setSocketDestination}
