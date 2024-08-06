@@ -228,7 +228,7 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 
 	useEffect(() => {
 		if (destination) {
-			navigate(destination, {replace: true});
+			navigate(destination);
 		}
 	}, [destination]);
 
