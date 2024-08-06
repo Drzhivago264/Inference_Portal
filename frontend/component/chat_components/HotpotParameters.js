@@ -18,7 +18,6 @@ import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
-import { swap_template } from "./chatUtils";
 import { useTranslation } from "react-i18next";
 
 const SmallInput = styled(MuiInput)`
@@ -38,18 +37,12 @@ const handleBlur = (value, hook, min, max) => {
 };
 
 export const HotpotParameter = ({
-	template_list,
 	setUseMemory,
 	setUseMemoryCurrent,
 	usememory,
 	usememorycurrent,
 	setDuplicateMessage,
 	choosen_chat_model,
-	choosen_template,
-	setChoosenTemplate,
-	setChoosenChatModel,
-	choosen_agent_model,
-	setChoosenAgentModel,
 	mode,
 	setMode,
 	top_k,
@@ -78,7 +71,6 @@ export const HotpotParameter = ({
 	setSocketDestination,
 	max_turn,
 	setMaxTurn,
-	agent_websocket,
 }) => {
 	const { t } = useTranslation();
 	const toggleMemory = (value, memory_type) => {
@@ -94,7 +86,7 @@ export const HotpotParameter = ({
 		}
 	};
 	return (
-		<Stack direction='column' spacing={0}>
+		<Stack direction='column' mt={1} spacing={0}>
 			<Stack direction='column' spacing={1}>
 				<FormControl defaultValue=''>
 					<InputLabel id='model-label'>Backends</InputLabel>
@@ -113,82 +105,7 @@ export const HotpotParameter = ({
 						</MenuItem>
 					</Select>
 				</FormControl>
-				<FormControl>
-					<InputLabel id='model-label'>Chat Models</InputLabel>
-					<Select
-						labelId='model-label'
-						id='model-select'
-						onChange={(e) => setChoosenChatModel(e.target.value)}
-						value={choosen_chat_model}
-						label='Models'
-						size='small'>
-						{agent_objects.map((agent_object_) => {
-							return (
-								<MenuItem
-									key={agent_object_.name}
-									value={agent_object_.name}>
-									{agent_object_.name}
-								</MenuItem>
-							);
-						})}
-						{model_objects.map((model_object_) => {
-							return (
-								<MenuItem
-									key={model_object_.name}
-									value={model_object_.name}>
-									{model_object_.name}
-								</MenuItem>
-							);
-						})}
-					</Select>
-				</FormControl>
-				<FormControl>
-					<InputLabel id='model-label'>Agent Models</InputLabel>
-					<Select
-						labelId='model-label'
-						id='model-select'
-						onChange={(e) => setChoosenAgentModel(e.target.value)}
-						value={choosen_agent_model}
-						label='Models'
-						size='small'>
-						{agent_objects.map((agent_object_) => {
-							return (
-								<MenuItem
-									key={agent_object_.name}
-									value={agent_object_.name}>
-									{agent_object_.name}
-								</MenuItem>
-							);
-						})}
-					</Select>
-				</FormControl>
-				<FormControl>
-					<InputLabel id='agent-label'>Agents</InputLabel>
-					<Select
-						labelId='agent-label'
-						id='agent-select'
-						onChange={(e) => {
-							setChoosenTemplate(e.target.value);
-							swap_template(
-								e.target.value,
-								"system",
-								agent_websocket
-							);
-						}}
-						value={choosen_template}
-						label='Agents'
-						size='small'>
-						{template_list.map((template) => {
-							return (
-								<MenuItem
-									key={template.name}
-									value={template.name}>
-									{template.name}
-								</MenuItem>
-							);
-						})}
-					</Select>
-				</FormControl>
+				
 			</Stack>
 			<Box mt={1}>
 				<FormLabel id='demo-radio-buttons-group-label'>
@@ -848,11 +765,6 @@ HotpotParameter.propTypes = {
 	usememorycurrent: PropTypes.bool.isRequired,
 	setDuplicateMessage: PropTypes.func.isRequired,
 	choosen_chat_model: PropTypes.string.isRequired,
-	choosen_template: PropTypes.string.isRequired,
-	setChoosenTemplate: PropTypes.func.isRequired,
-	setChoosenChatModel: PropTypes.func.isRequired,
-	choosen_agent_model: PropTypes.string.isRequired,
-	setChoosenAgentModel: PropTypes.func.isRequired,
 	mode: PropTypes.string.isRequired,
 	setMode: PropTypes.func.isRequired,
 	top_k: PropTypes.number.isRequired,
@@ -879,7 +791,6 @@ HotpotParameter.propTypes = {
 	setEarlyStopping: PropTypes.func.isRequired,
 	socket_destination: PropTypes.string.isRequired,
 	setSocketDestination: PropTypes.func.isRequired,
-	agent_websocket: PropTypes.object.isRequired,
 	max_turn: PropTypes.number.isRequired,
 	setMaxTurn: PropTypes.func.isRequired,
 };

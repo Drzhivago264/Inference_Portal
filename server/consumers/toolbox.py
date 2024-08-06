@@ -37,7 +37,9 @@ class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
         self.room_group_name = "chat_%s" % self.url
         self.is_session_start_node = None
         self.user = self.scope["user"]
-
+        self.key_object, self.master_user, self.slave_key_object = (
+            await self.get_master_key_and_master_user()
+        )
         self.type = PromptResponse.PromptType.TOOLBOX
         self.rate_limiter = await rate_limit_initializer(
             key_object=self.key_object,

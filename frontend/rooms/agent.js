@@ -274,10 +274,10 @@ function Agent() {
 		};
 	}, [focus]);
 	return (
-		<Container maxWidth={false} sx={{minWidth: 1500}} disableGutters>
+		<Container maxWidth={false} sx={{minWidth: 1600}} disableGutters>
 			<title>Agent</title>
 			<ResponsiveAppBar max_width={false} />
-			<Container maxWidth={false} sx={{minWidth: 1500}} disableGutters>
+			<Container maxWidth={false} sx={{minWidth: 1600}} disableGutters>
 				<Box mt={2}>
 					<Grid container spacing={2}>
 						<Grid item xs={2}>

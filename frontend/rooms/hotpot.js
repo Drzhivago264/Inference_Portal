@@ -12,19 +12,25 @@ import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Footer from "../component/nav/Footer.js";
+import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import {HotpotParameter} from "../component/chat_components/HotpotParameters.js";
 import InputAdornment from "@mui/material/InputAdornment";
+import InputLabel from "@mui/material/InputLabel";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
+import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import {agentsocket} from "../component/websocket/AgentSocket.js";
 import {chatsocket} from "../component/websocket/ChatSocket.js";
 import {styled} from "@mui/material/styles";
+import {swap_template} from "../component/chat_components/chatUtils.js";
 import {useGetInstructionTree} from "../api_hook/useGetInstructionTree.js";
 import {useGetModel} from "../api_hook/useGetModel.js";
 import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
@@ -119,14 +125,18 @@ function Hotpot() {
 		closeAndOpenWebSockets();
 	}, [socket_destination, websocket_hash]);
 	const handleEnter = (e) => {
-		if (e.key == "Enter" && !e.shiftKey) {
+		const isEnterKey = e.key === "Enter";
+		const isChatInput = e.target.id === "chat-input";
+		const isAgentInput = e.target.id === "agent-input";
+
+		if (isEnterKey && !e.shiftKey) {
 			e.preventDefault();
 			if (duplicatemessage) {
 				submitChat();
 				submitAgent();
-			} else if (!duplicatemessage && e.target.id == "chat-input") {
+			} else if (!duplicatemessage && isChatInput) {
 				submitChat();
-			} else if (!duplicatemessage && e.target.id == "agent-input") {
+			} else if (!duplicatemessage && isAgentInput) {
 				submitAgent();
 			}
 		}
@@ -267,6 +277,33 @@ function Hotpot() {
 							</Accordion>
 						</Grid>
 						<Grid item xs={4}>
+							<Box mb={1} mt={1} sx={{width: "50%"}}>
+								<FormControl fullWidth>
+									<InputLabel id='model-label'>Chat Models</InputLabel>
+									<Select
+										labelId='model-label'
+										id='model-select'
+										onChange={(e) => setChoosenChatModel(e.target.value)}
+										value={choosen_chat_model}
+										label='Models'
+										size='small'>
+										{agent_objects.map((agent_object_) => {
+											return (
+												<MenuItem key={agent_object_.name} value={agent_object_.name}>
+													{agent_object_.name}
+												</MenuItem>
+											);
+										})}
+										{model_objects.map((model_object_) => {
+											return (
+												<MenuItem key={model_object_.name} value={model_object_.name}>
+													{model_object_.name}
+												</MenuItem>
+											);
+										})}
+									</Select>
+								</FormControl>
+							</Box>
 							<ChatBox
 								id={"chat-log"}
 								inputsize={660}
@@ -283,6 +320,47 @@ function Hotpot() {
 								check_duplicate_message={check_duplicate_message}></ChatBox>
 						</Grid>
 						<Grid item xs={4}>
+							<Stack direction='row' mb={1} mt={1} spacing={1}>
+								<FormControl fullWidth>
+									<InputLabel id='model-label'>Agent Models</InputLabel>
+									<Select
+										labelId='model-label'
+										id='model-select'
+										onChange={(e) => setChoosenAgentModel(e.target.value)}
+										value={choosen_agent_model}
+										label='Models'
+										size='small'>
+										{agent_objects.map((agent_object_) => {
+											return (
+												<MenuItem key={agent_object_.name} value={agent_object_.name}>
+													{agent_object_.name}
+												</MenuItem>
+											);
+										})}
+									</Select>
+								</FormControl>
+								<FormControl fullWidth>
+									<InputLabel id='agent-label'>Agents</InputLabel>
+									<Select
+										labelId='agent-label'
+										id='agent-select'
+										onChange={(e) => {
+											setChoosenTemplate(e.target.value);
+											swap_template(e.target.value, "system", agent_websocket);
+										}}
+										value={choosen_template}
+										label='Agents'
+										size='small'>
+										{template_list.map((template) => {
+											return (
+												<MenuItem key={template.name} value={template.name}>
+													{template.name}
+												</MenuItem>
+											);
+										})}
+									</Select>
+								</FormControl>
+							</Stack>
 							<ChatBox
 								id={"chat-log-agent"}
 								inputsize={660}
@@ -336,10 +414,8 @@ function Hotpot() {
 								usememorycurrent={usememorycurrent}
 								earlystopping={earlystopping}
 								setEarlyStopping={setEarlyStopping}
-								setChoosenAgentModel={setChoosenAgentModel}
-								setChoosenChatModel={setChoosenChatModel}
 								setDuplicateMessage={setDuplicateMessage}
-								agent_websocket={agent_websocket}></HotpotParameter>
+								></HotpotParameter>
 						</Grid>
 					</Grid>
 				</Box>
