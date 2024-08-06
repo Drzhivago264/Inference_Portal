@@ -28,7 +28,6 @@ export const MemoryTree = () => {
 				sx={{
 					maxHeight: 485,
 					flexGrow: 1,
-					maxWidth: 600,
 					overflowY: "auto",
 				}}>
 				{data.map((parent) => {

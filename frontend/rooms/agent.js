@@ -274,14 +274,14 @@ function Agent() {
 		};
 	}, [focus]);
 	return (
-		<Container maxWidth={false} sx={{minWidth: 1600}} disableGutters>
+		<Container maxWidth={false} disableGutters>
 			<title>Agent</title>
 			<ResponsiveAppBar max_width={false} />
-			<Container maxWidth={false} sx={{minWidth: 1600}} disableGutters>
+			<Container maxWidth={false} disableGutters>
 				<Box mt={2}>
 					<Grid container spacing={2}>
-						<Grid item xs={2}>
-							<Paper sx={{ml: 2, mr: 2}} variant='outlined'>
+						<Grid item xs={12} md={4} xl={2}>
+							<Paper sx={{ml: 2}} variant='outlined'>
 								<Box m={1}>
 									<Typography sx={{color: "text.secondary"}}>Template Structure</Typography>
 								</Box>
@@ -314,12 +314,13 @@ function Agent() {
 										  ))}
 								</List>
 							</Paper>
-							<EditorExport editorref={editorref} />
-							<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
+                            <EditorExport editorref={editorref} />
+							<Box ml={2} >
+								<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
+							</Box>
 						</Grid>
-						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
-						<Grid item xs={4}>
-							<Accordion defaultExpanded>
+						<Grid item xs={12} md={8} xl={4}>
+							<Accordion >
 								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='parent-content' id='parent-header'>
 									<Typography sx={{color: "text.secondary"}}>Parent Instruction</Typography>
 								</AccordionSummary>
@@ -348,7 +349,7 @@ function Agent() {
 									</Paper>
 								</AccordionDetails>
 							</Accordion>
-							<Accordion defaultExpanded>
+							<Accordion >
 								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='child-content' id='child-header'>
 									<Typography sx={{color: "text.secondary"}}>Child Instruction</Typography>
 								</AccordionSummary>
@@ -386,8 +387,7 @@ function Agent() {
 								</AccordionDetails>
 							</Accordion>
 						</Grid>
-						<Grid item xs={4}>
-							<Box mr={2}>
+						<Grid item xs={12} md={8} xl={4}>
 								<ChatBox
 									id={"chat-log-agent"}
 									inputsize={300}
@@ -401,10 +401,8 @@ function Agent() {
 									messagesEndRef={messagesEndRef}
 									shownthinking={shownthinking}
 									handleEnter={handleEnter}></ChatBox>
-							</Box>
 						</Grid>
-						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
-						<Grid item xs={2}>
+						<Grid item xs={12}  md={4} xl={2}>
 							<Stack direction='column' mr={2} spacing={2}>
 								<FormControl disabled={use_user_template}>
 									<InputLabel id='agent-label'>Agents</InputLabel>
@@ -427,7 +425,7 @@ function Agent() {
 										})}
 									</Select>
 								</FormControl>
-								<Divider></Divider>
+								<Divider />
 								<UserTemplate
 									use_user_template={use_user_template}
 									user_template_list={user_template_list}
@@ -436,7 +434,7 @@ function Agent() {
 									handle_use_user_template={handle_use_user_template}
 									websocket={websocket}
 								/>
-								<Divider></Divider>
+								<Divider/>
 								<FormControl defaultValue=''>
 									<InputLabel id='model-label'>Backends</InputLabel>
 									<Select

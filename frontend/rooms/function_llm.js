@@ -17,6 +17,7 @@ import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import {chatsocket} from "../component/websocket/ChatSocket.js";
 import {styled} from "@mui/material/styles";
@@ -107,67 +108,103 @@ function FunctionLLM() {
 		setExtraInstruction(instructions[e] || "");
 	};
 	return (
-		<Container maxWidth={false} sx={{minWidth: 1200}} disableGutters>
+		<Container maxWidth={false} disableGutters>
 			<title>Tools</title>
 			<ResponsiveAppBar max_width='xl' />
-			<Container maxWidth='xl' sx={{minWidth: 1200}}>
+			<Container maxWidth='lg' disableGutters>
 				<Box m={1}>
 					<Grid container spacing={2}>
-						<Grid item xs={4}>
-							<Paper sx={{ml: 2, mr: 2}} variant='outlined'>
-								<Box m={1}>
-									<Typography sx={{color: "text.secondary"}}>Toolbox</Typography>
-								</Box>
-								<Divider />
-								<Box m={2}>
-									<FormControl>
-										<RadioGroup
-											defaultValue='emotion'
-											name='radio-buttons-group'
-											onChange={(e) => {
-												setLLMFunction(e.target.value);
-												swap_extra_instruction(e.target.value);
-											}}
-											value={llmfunction}>
-											{[
-												{
-													label: "Summary",
-													value: "summary",
-												},
-												{
-													label: "Paraphrase",
-													value: "paraphrase",
-												},
-												{
-													label: "Predict Emotion",
-													value: "emotion",
-												},
-												{
-													label: "Predict Sentiment",
-													value: "sentiment",
-												},
-												{
-													label: "Topic Classification",
-													value: "topic",
-												},
-												{
-													label: "Restyle",
-													value: "restyle",
-												},
-											].map((func) => {
-												if (func.value == "paraphrase" || func.value == "setiment") {
-													return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
-												} else if (func.value == "summary") {
-													return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
-												} else {
-													return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
-												}
-											})}
-										</RadioGroup>
-									</FormControl>
-								</Box>
-							</Paper>
-							<Paper sx={{m: 2}} variant='outlined'>
+						<Grid item xs={12} md={3}>
+							<Stack direction={{xs: "column", sm: "row", md: "column"}} justifyContent='center' alignItems='flex-start' spacing={2}>
+								<Paper variant='outlined'>
+									<Box m={1}>
+										<Typography sx={{color: "text.secondary"}}>Toolbox</Typography>
+									</Box>
+									<Divider />
+									<Box m={2}>
+										<FormControl>
+											<RadioGroup
+												row
+												defaultValue='emotion'
+												name='radio-buttons-group'
+												onChange={(e) => {
+													setLLMFunction(e.target.value);
+													swap_extra_instruction(e.target.value);
+												}}
+												value={llmfunction}>
+												{[
+													{
+														label: "Summary",
+														value: "summary",
+													},
+
+													{
+														label: "Predict Emotion",
+														value: "emotion",
+													},
+													{
+														label: "Paraphrase",
+														value: "paraphrase",
+													},
+													{
+														label: "Predict Sentiment",
+														value: "sentiment",
+													},
+													{
+														label: "Topic Classification",
+														value: "topic",
+													},
+													{
+														label: "Restyle",
+														value: "restyle",
+													},
+												].map((func) => {
+													if (func.value == "paraphrase" || func.value == "setiment") {
+														return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
+													} else if (func.value == "summary") {
+														return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
+													} else {
+														return <FormControlLabel key={func.label} value={func.value} control={<Radio />} label={func.label} />;
+													}
+												})}
+											</RadioGroup>
+										</FormControl>
+									</Box>
+								</Paper>
+							</Stack>
+						</Grid>
+
+						<Grid item xs={12} sm={8} md={6}>
+							<ChatBox
+								inputsize={660}
+								chat_message={chat_message}
+								usermessage={usermessage}
+								usermessageError={usermessageError}
+								ChatPaper={ChatPaper}
+								ChatInput={ChatInput}
+								setUserMessage={setUserMessage}
+								submitChat={submitChat}
+								messagesEndRef={messagesEndRef}
+								shownthinking={shownthinking}
+								handleEnter={handleEnter}></ChatBox>
+						</Grid>
+
+						<Grid item xs={12} sm={4} md={3}>
+							<OpenAPIParameter
+								top_p={top_p}
+								agent_objects={agent_objects}
+								choosen_model={choosen_model}
+								setChoosenModel={setChoosenModel}
+								setTopp={setTopp}
+								temperature={temperature}
+								setTemperature={setTemperature}
+								max_tokens={max_tokens}
+								setMaxToken={setMaxToken}
+								presencepenalty={presencepenalty}
+								setPresencePenalty={setPresencePenalty}
+								frequencypenalty={frequencypenalty}
+								setFrequencyPenalty={setFrequencyPenalty}></OpenAPIParameter>
+							<Paper variant='outlined'>
 								<Box m={1}>
 									<Typography sx={{color: "text.secondary"}}>Extra Instruction</Typography>
 								</Box>
@@ -188,40 +225,6 @@ function FunctionLLM() {
 								</Box>
 							</Paper>
 							<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
-						</Grid>
-						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
-						<Grid item xs={6}>
-							<Box mr={2}>
-								<ChatBox
-									inputsize={660}
-									chat_message={chat_message}
-									usermessage={usermessage}
-									usermessageError={usermessageError}
-									ChatPaper={ChatPaper}
-									ChatInput={ChatInput}
-									setUserMessage={setUserMessage}
-									submitChat={submitChat}
-									messagesEndRef={messagesEndRef}
-									shownthinking={shownthinking}
-									handleEnter={handleEnter}></ChatBox>
-							</Box>
-						</Grid>
-						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
-						<Grid item xs={2}>
-							<OpenAPIParameter
-								top_p={top_p}
-								agent_objects={agent_objects}
-								choosen_model={choosen_model}
-								setChoosenModel={setChoosenModel}
-								setTopp={setTopp}
-								temperature={temperature}
-								setTemperature={setTemperature}
-								max_tokens={max_tokens}
-								setMaxToken={setMaxToken}
-								presencepenalty={presencepenalty}
-								setPresencePenalty={setPresencePenalty}
-								frequencypenalty={frequencypenalty}
-								setFrequencyPenalty={setFrequencyPenalty}></OpenAPIParameter>
 						</Grid>
 					</Grid>
 				</Box>
