@@ -95,9 +95,7 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
             "id",
             "prompt",
             "response",
-            "type",
             "created_at",
-
         )
 
     # Return None for lazy loading from the frontend

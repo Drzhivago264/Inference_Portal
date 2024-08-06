@@ -131,6 +131,7 @@ def memory_tree_api(request):
         result_page = paginator.paginate_queryset(memory_object, request)
         try:
             result_page = result_page[0].get_ancestors(include_self=True)
+            print(result_page)
             serializer = MemoryTreeSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)
         except IndexError:

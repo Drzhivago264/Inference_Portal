@@ -60,10 +60,21 @@ class PromptResponse(AbstractPromptResponse):
 
 
 class MemoryTreeMP(MP_Node, AbstractPromptResponse):
+
+    """
+        Steplen = 5 will increase the number of potential root node (64^5 nodes), this can be a problem when the number of key/user get larger than 64^5 which is very unlikely.
+       
+        Max_length of path = 220_000, the tree will have max depth = 220_000/5 (44_000), in order to keep the tree from growing over this depth, node with depth = 44_000 cannot be a parent and similar node with be add as siblings.
+        
+        The reason why we can get away with unique field with 220_000 characters is because Posgres compress these chars into 2700 bytes which fit into it max size for index field. Number larger than 220_000 will break!!!. 
+
+        Nevertheless, SQL will probably break if it is asked deal with the tree with 44_000 depth, therefore, graph database is potential solution in the future.
+    """
+
     name = models.CharField(max_length=255, unique=True)
     steplen = 5
     is_session_start_node = models.BooleanField(default=False)
-    path = models.TextField(max_length= 9999999, unique=True)
+    path = models.TextField(max_length= 220_000, unique=True)
     alphabet = string.digits + string.ascii_uppercase + string.ascii_lowercase
     def __str__(self):
             return 'Memory Node: {}'.format(self.name)
@@ -72,22 +83,16 @@ class MemoryTreeMP(MP_Node, AbstractPromptResponse):
     def get_ancestors(self, include_self: bool):
         """
         :returns: Override A queryset containing the current node object's ancestors,
-            starting by the root node and descending to the parent to include itself.
+            starting by the root node and descending to itself.
         """
-        if self.is_root():
-            return get_result_class(self.__class__).objects.none()
         
+        end_node_pos = len(self.path) + self.steplen if include_self else len(self.path)
 
-        if include_self:
-            paths = [
-                self.path[0:pos]
-                for pos in range(0, len(self.path) + self.steplen, self.steplen)[1:]
-            ]
-        else:
-            paths = [
-                self.path[0:pos]
-                for pos in range(0, len(self.path), self.steplen)[1:]
-            ]    
+        paths = [
+            self.path[0:pos]
+            for pos in range(0, end_node_pos, self.steplen)[1:]
+        ]
+  
         return get_result_class(self.__class__).objects.filter(
             path__in=paths ).order_by('depth')
 
