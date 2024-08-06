@@ -6,12 +6,13 @@ from django.utils import timezone
 
 from server.models.log import PromptResponse
 from server.rate_limit import RateLimitError, rate_limit_initializer
+from server.utils import constant
 from server.utils.async_.async_inference import (
     AsyncInferenceOpenaiMixin,
     AsyncInferenceVllmMixin,
 )
 from server.utils.async_.async_query_database import QueryDBMixin
-from server.utils import constant
+
 
 class BaseChatbot(
     AsyncWebsocketConsumer,
@@ -19,13 +20,12 @@ class BaseChatbot(
     AsyncInferenceVllmMixin,
     QueryDBMixin,
 ):
-    
+
     def __init__(self):
         super().__init__()
-        self.backend = None 
+        self.backend = None
         self.session_history = []
         self.is_session_start_node = True
-
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]

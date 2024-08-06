@@ -124,14 +124,11 @@ def memory_tree_api(request):
     else:
         paginator = PageNumberPagination()
         paginator.page_size = 1
-        master_key, _ = get_master_key_and_master_user(
-            current_user=current_user
-        )
+        master_key, _ = get_master_key_and_master_user(current_user=current_user)
         memory_object = MemoryTreeMP.objects.filter(key=master_key).order_by("-id")
         result_page = paginator.paginate_queryset(memory_object, request)
         try:
             result_page = result_page[0].get_ancestors(include_self=True)
-            print(result_page)
             serializer = MemoryTreeSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)
         except IndexError:

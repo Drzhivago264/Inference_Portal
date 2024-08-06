@@ -7,7 +7,6 @@ from pydantic import ValidationError
 from transformers import AutoTokenizer
 
 from server.consumers.base_agent import BaseAgent
-from server.models.log import PromptResponse
 from server.consumers.pydantic_validator import AgentSchemaMessage
 
 
