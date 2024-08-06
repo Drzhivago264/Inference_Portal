@@ -17,6 +17,7 @@ class Consumer(BaseChatbot):
     def __init__(self):
         super().__init__()
         self.backend = "async"
+
     async def inference(self):
         if not self.beam:
             self.best_of = 1

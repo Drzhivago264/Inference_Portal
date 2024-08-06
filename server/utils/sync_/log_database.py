@@ -105,22 +105,30 @@ def build_memory_tree(
                     prompt=most_similar_prompt,
                     response=most_similar_response,
                 ).order_by("-created_at")[0]
-                if most_similar_node.depth >= 44000: 
-                    #the theoretical maxium depth of a tree with steplen = 5 and max_length = 220_000 
-                    most_similar_node = most_similar_node.get_parent()
             else:
-                most_similar_node = MemoryTreeMP.objects.filter(key=key_object).order_by(
-                    "-created_at"
-                )[0]
-            most_similar_node.add_child(
-                name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}",
-                key=key_object,
-                prompt=prompt,
-                response=response,
-                model=llm,
-                type=type_,
-                is_session_start_node=True,
-            )
+                most_similar_node = MemoryTreeMP.objects.filter(
+                    key=key_object
+                ).order_by("-created_at")[0]
+            if most_similar_node.depth < 43_998:
+                most_similar_node.add_child(
+                    name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}",
+                    key=key_object,
+                    prompt=prompt,
+                    response=response,
+                    model=llm,
+                    type=type_,
+                    is_session_start_node=True,
+                )
+            else:
+                most_similar_node.add_sibling(
+                    name=f"{key_object.hashed_key} -- session_start_at {timezone.now()}",
+                    key=key_object,
+                    prompt=prompt,
+                    response=response,
+                    model=llm,
+                    type=type_,
+                    is_session_start_node=True,
+                )
 
         elif memory_tree_node_number > 0 and not is_session_start_node:
             parent_node = MemoryTreeMP.objects.filter(
@@ -135,4 +143,3 @@ def build_memory_tree(
                 type=type_,
                 is_session_start_node=False,
             )
-

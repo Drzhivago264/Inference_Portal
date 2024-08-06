@@ -27,7 +27,7 @@ class BaseAgent(
 ):
     def __init__(self):
         super().__init__()
-        self.backend = None 
+        self.backend = None
         self.current_turn = 0
         self.session_history = []
         self.is_session_start_node = None

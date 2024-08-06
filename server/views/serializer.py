@@ -101,8 +101,6 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
     # Return None for lazy loading from the frontend
 
 
-
-
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -111,6 +109,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class UserInstructionGetSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
+
     class Meta:
         model = UserInstructionTreeMP
         fields = (
@@ -120,7 +119,7 @@ class UserInstructionGetSerializer(serializers.ModelSerializer):
             "code",
             "depth",
             "instruct",
-            "children"
+            "children",
         )
 
     def get_children(self, obj):

@@ -26,10 +26,8 @@ from server.views.serializer import (
 def user_instruction_tree_api(request) -> Response:
     current_user = request.user
     try:
-        _, master_user = get_master_key_and_master_user(
-            current_user=current_user)
-        root_nodes = UserInstructionTreeMP.objects.filter(
-            user=master_user, depth=2)
+        _, master_user = get_master_key_and_master_user(current_user=current_user)
+        root_nodes = UserInstructionTreeMP.objects.filter(user=master_user, depth=2)
         serializer = UserInstructionGetSerializer(root_nodes, many=True)
         return Response(
             {
@@ -60,8 +58,7 @@ def update_user_instruction_tree_api(request):
     if serializer.is_valid():
         parent_instruction = serializer.data["parent_instruction"]
         childrens = serializer.data["childrens"]
-        parent_instruction = UserInstructionCreateSerializer(
-            parent_instruction)
+        parent_instruction = UserInstructionCreateSerializer(parent_instruction)
         childrens = UserInstructionCreateSerializer(childrens, many=True)
 
         master_key, master_user = get_master_key_and_master_user(
@@ -130,8 +127,7 @@ def create_user_instruction_tree_api(request) -> Response:
     if serializer.is_valid():
         parent_instruction = serializer.data["parent_instruction"]
         childrens = serializer.data["childrens"]
-        parent_instruction = UserInstructionCreateSerializer(
-            parent_instruction)
+        parent_instruction = UserInstructionCreateSerializer(parent_instruction)
         childrens = UserInstructionCreateSerializer(childrens, many=True)
 
         master_key, master_user = get_master_key_and_master_user(
@@ -160,10 +156,9 @@ def create_user_instruction_tree_api(request) -> Response:
                 grandparent_node = UserInstructionTreeMP.add_root(
                     user=master_user, name=hash_key
                 )
-            parent_node =  grandparent_node.add_child(
+            parent_node = grandparent_node.add_child(
                 user=master_user,
-                name=sha512(hash_key.encode("utf-8")
-                            ).hexdigest() + uuid.uuid4().hex,
+                name=sha512(hash_key.encode("utf-8")).hexdigest() + uuid.uuid4().hex,
                 displayed_name=parent_instruction.data["displayed_name"],
                 instruct=parent_instruction.data["instruct"],
             )
@@ -175,7 +170,7 @@ def create_user_instruction_tree_api(request) -> Response:
                     + uuid.uuid4().hex,
                     displayed_name=c["displayed_name"],
                     instruct=c["instruct"],
-                    code=index, 
+                    code=index,
                 )
 
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
@@ -200,8 +195,7 @@ def delete_user_instruction_tree_api(request) -> Response:
     serializer = UserInstructionDeleteCreateSerializer(data=request.data)
     if serializer.is_valid():
         id = serializer.data["id"]
-        _, master_user = get_master_key_and_master_user(
-            current_user=current_user)
+        _, master_user = get_master_key_and_master_user(current_user=current_user)
         try:
             node = UserInstructionTreeMP.objects.get(id=id, user=master_user)
             node.delete()
