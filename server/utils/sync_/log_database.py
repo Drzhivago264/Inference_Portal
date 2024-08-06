@@ -105,6 +105,9 @@ def build_memory_tree(
                     prompt=most_similar_prompt,
                     response=most_similar_response,
                 ).order_by("-created_at")[0]
+                if most_similar_node.depth >= 44000: 
+                    #the theoretical maxium depth of a tree with steplen = 5 and max_length = 220_000 
+                    most_similar_node = most_similar_node.get_parent()
             else:
                 most_similar_node = MemoryTreeMP.objects.filter(key=key_object).order_by(
                     "-created_at"
