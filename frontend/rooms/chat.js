@@ -115,7 +115,7 @@ function Chat() {
 					<Grid container spacing={2}>
 						<Grid item xs={4}>
 							{MemoMemoryTree}
-							<Stack direction='row' mt={1} spacing={1}>
+							<Stack direction= {{lg:'column', xl:'row'}} mt={1} spacing={1}>
 								<ChatExport chat_message={chat_message} number_of_remove_message={1} setChatMessage={setChatMessage}></ChatExport>
 								<Box mt={2}>
 									<CeleryAlert />
