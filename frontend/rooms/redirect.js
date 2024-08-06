@@ -145,9 +145,7 @@ function Hub() {
 					.post("/frontend-api/hub-redirect", data, config)
 					.then((response) => {
 						setIsAuthenticated(true);
-						navigate(response.data.redirect_link, {
-							replace: true,
-						});
+						navigate(response.data.redirect_link);
 					})
 					.catch((error) => {
 						setRedirectError(error.response.data.detail);
