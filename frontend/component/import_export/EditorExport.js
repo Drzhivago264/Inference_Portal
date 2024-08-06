@@ -70,7 +70,7 @@ const EditorExport = ({editorref}) => {
 			});
 	};
 	return (
-		<Paper sx={{mt: 2, mb:2, ml:2}} variant='outlined'>
+		<Paper sx={{mt: 2, mb:2}} variant='outlined'>
 			<Box m={1}>
 				<Typography sx={{color: "text.secondary"}}>Editor Export</Typography>
 			</Box>
