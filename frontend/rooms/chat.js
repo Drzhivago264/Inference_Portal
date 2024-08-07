@@ -124,6 +124,7 @@ function Chat() {
 						</Grid>
 						<Grid item xs={12} md={8} lg={5.5}>
 							<ChatBox
+                                id={"chat-log"}
 								inputsize={550}
 								chat_message={chat_message}
 								usermessage={usermessage}
@@ -152,6 +153,7 @@ function Chat() {
 								lengthpenalty={lengthpenalty}
 								presencepenalty={presencepenalty}
 								frequencypenalty={frequencypenalty}
+                                beam={beam}
 								setBeam={setBeam}
 								setMaxToken={setMaxToken}
 								setBestof={setBestof}

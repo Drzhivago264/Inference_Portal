@@ -8,7 +8,6 @@ from pydantic import ValidationError
 
 from server.consumers.base_chatbot import BaseChatbot
 from server.consumers.pydantic_validator import ChatSchema
-from server.utils import constant
 from server.utils.sync_.inference import inference_mode
 
 

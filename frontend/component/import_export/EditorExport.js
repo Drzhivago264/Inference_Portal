@@ -105,6 +105,6 @@ const EditorExport = ({editorref}) => {
 	);
 };
 EditorExport.propTypes = {
-	editorref: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({current: PropTypes.instanceOf(Element)})]),
+	editorref: PropTypes.object.isRequired,
 };
 export default EditorExport;

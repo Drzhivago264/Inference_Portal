@@ -287,8 +287,8 @@ OpenAPIParameter.propTypes = {
 	setTopp: PropTypes.func.isRequired,
 	temperature: PropTypes.number.isRequired,
 	setTemperature: PropTypes.func.isRequired,
-	max_tokens: PropTypes.number.isRequired,
+	max_tokens: PropTypes.number,
 	setMaxToken: PropTypes.func.isRequired,
-	max_turn: PropTypes.number.isRequired,
-	setMaxTurn: PropTypes.func.isRequired,
+	max_turn: PropTypes.number,
+	setMaxTurn: PropTypes.func,
 };

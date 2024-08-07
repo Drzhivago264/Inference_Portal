@@ -387,6 +387,7 @@ function TokenManagement() {
 									<TokenCreateExport
 										token_={servertokencreatedata.token}
 										token_name={servertokencreatedata.token_name}
+                                        ratelimit={servertokencreatedata.ratelimit}
 										ttl={servertokencreatedata.ttl}
 										created_at={servertokencreatedata.created_at}
 										permission={servertokencreatedata.permission}

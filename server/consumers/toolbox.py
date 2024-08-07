@@ -4,19 +4,13 @@ from urllib.parse import urlsplit
 
 import dspy
 import pytz
-from channels.generic.websocket import AsyncWebsocketConsumer
 from decouple import config
 from django.utils import timezone
 from pydantic import ValidationError
 
 from server.consumers.pydantic_validator import ToolSchema
 from server.models.log import PromptResponse
-from server.rate_limit import RateLimitError, rate_limit_initializer
-from server.utils.async_.async_manage_ec2 import (
-    ManageEC2Mixin,
-    update_server_status_in_db_async,
-)
-from server.utils.async_.async_query_database import QueryDBMixin
+from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.llm_toolbox import (
     ChangeWrittingStyle,
     Emotion,
@@ -24,73 +18,20 @@ from server.utils.llm_toolbox import (
     SummarizeDocument,
     TopicClassification,
 )
+from server.consumers.base_chatbot import BaseChatbot
 
+class Consumer(BaseChatbot):
 
-class Consumer(AsyncWebsocketConsumer, ManageEC2Mixin, QueryDBMixin):
-
-    async def connect(self):
-        self.url = self.scope["url_route"]["kwargs"]["key"]
-        self.timezone = self.scope["url_route"]["kwargs"]["tz"]
-        self.time = timezone.localtime(
-            timezone.now(), pytz.timezone(self.timezone)
-        ).strftime("%Y-%m-%d %H:%M:%S")
-        self.room_group_name = "chat_%s" % self.url
-        self.is_session_start_node = None
-        self.user = self.scope["user"]
-        self.key_object, self.master_user, self.slave_key_object = (
-            await self.get_master_key_and_master_user()
-        )
+    def __init__(self):
+        super().__init__()
+        self.backend = None
+        self.permission_code = "server.allow_toolbox"
+        self.destination= "Toolbox"
         self.type = PromptResponse.PromptType.TOOLBOX
-        self.rate_limiter = await rate_limit_initializer(
-            key_object=self.key_object,
-            strategy="moving_windown",
-            slave_key_object=self.slave_key_object,
-            namespace=self.type.label,
-            timezone=self.timezone,
-        )
-
-        # Join room group
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-        await self.accept()
-        is_authorised = await self.check_permission(
-            permission_code="server.allow_toolbox", destination="Toolbox"
-        )
-        if is_authorised:
-            await self.send(
-                text_data=json.dumps(
-                    {
-                        "message": "You are currently using Async backend. Default to GPT4 or choose model on the right.",
-                        "role": "Server",
-                        "time": self.time,
-                    }
-                )
-            )
-
-    async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-
-    # Receive message from WebSocket
-
-    async def receive(self, text_data):
-        try:
-            await self.rate_limiter.check_rate_limit()
-            await self.send_message_if_not_rate_limited(text_data)
-        except RateLimitError as e:
-            await self.send(
-                text_data=json.dumps(
-                    {
-                        "message": e.message,
-                        "role": "Server",
-                        "time": self.time,
-                    }
-                )
-            )
 
     async def send_message_if_not_rate_limited(self, text_data):
         try:
             validated = ToolSchema.model_validate_json(text_data)
-
             if not self.key_object:
                 await self.send(
                     text_data=json.dumps(

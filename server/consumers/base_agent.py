@@ -33,6 +33,9 @@ class BaseAgent(
         self.is_session_start_node = None
         self.working_paragraph = None
         self.use_summary = False
+        self.permission_code = "server.allow_agent"
+        self.destination = "Agents"
+        self.type = PromptResponse.PromptType.AGENT
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]
@@ -41,7 +44,6 @@ class BaseAgent(
             timezone.now(), pytz.timezone(self.timezone)
         ).strftime("%Y-%m-%d %H:%M:%S")
         self.user = self.scope["user"]
-        self.type = PromptResponse.PromptType.AGENT
         self.key_object, self.master_user, self.slave_key_object = (
             await self.get_master_key_and_master_user()
         )
@@ -52,15 +54,15 @@ class BaseAgent(
             namespace=self.type.label,
             timezone=self.timezone,
         )
-        self.room_group_name = "agent_%s" % self.url
+        self.room_group_name = f"{self.destination}{self.url}"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         is_authorised = await self.check_permission(
-            permission_code="server.allow_agent", destination="Agents"
+            permission_code=self.permission_code, destination=self.destination
         )
 
-        if is_authorised:
+        if is_authorised and self.backend:
             await self.send_connect_message()
             await self.send(
                 text_data=json.dumps(

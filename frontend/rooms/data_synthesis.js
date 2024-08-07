@@ -593,6 +593,7 @@ function DataSynthesis() {
 								</FormControl>
 								<Divider />
 								<UserTemplate
+                                    websocket={websocket}
 									use_user_template={use_user_template}
 									user_template_list={user_template_list}
 									setChoosenUserTemplate={setChoosenUserTemplate}

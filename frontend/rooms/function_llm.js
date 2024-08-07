@@ -176,6 +176,7 @@ function FunctionLLM() {
 
 						<Grid item xs={12} sm={8} md={6}>
 							<ChatBox
+                                id={'chat-log'}
 								inputsize={660}
 								chat_message={chat_message}
 								usermessage={usermessage}
