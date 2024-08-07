@@ -1,4 +1,5 @@
 import datetime
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -30,9 +31,7 @@ class FineGrainAPIKeyManager(BaseAPIKeyManager):
 
 class FineGrainAPIKEY(AbstractAPIKey):
     objects = FineGrainAPIKeyManager()
-    master_key = models.ForeignKey(
-        APIKEY, null=True, on_delete=models.CASCADE
-    ) 
+    master_key = models.ForeignKey(APIKEY, null=True, on_delete=models.CASCADE)
     user = models.OneToOneField(
         User, null=True, on_delete=models.CASCADE
     )  # the dummy account for the FineGrainAPIKEY

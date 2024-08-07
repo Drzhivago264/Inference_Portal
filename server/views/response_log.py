@@ -41,7 +41,8 @@ class LogListJson(BaseDatatableView):
         if self.request.user.has_perm("server.allow_view_log"):
             current_user = self.request.user
             master_key, _ = get_master_key_and_master_user(current_user=current_user)
-            return PromptResponse.objects.filter(key=master_key).order_by("-id")
+            if master_key:
+                return PromptResponse.objects.filter(key=master_key).order_by("-id")
 
     def filter_queryset(self, qs):
         if self.request.user.has_perm("server.allow_view_log"):
@@ -65,9 +66,11 @@ def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
             status=status.HTTP_401_UNAUTHORIZED,
         )
     else:
-        master_key, master_user = get_master_key_and_master_user(
-            current_user=current_user
-        )
+        master_key, _ = get_master_key_and_master_user(current_user=current_user)
+        if not master_key:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         log_by_date = (
             PromptResponse.objects.filter(
                 key=master_key, created_at__range=[startdate, enddate]

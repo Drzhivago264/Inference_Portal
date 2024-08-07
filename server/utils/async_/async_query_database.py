@@ -4,6 +4,7 @@ from typing import Literal, Tuple
 
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
+from django.utils import timezone
 
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
@@ -17,9 +18,14 @@ class QueryDBMixin:
             return key_object, self.user, None
         elif await sync_to_async(self.user.groups.filter(name="slave_user").exists)():
             token = await sync_to_async(lambda: self.user.finegrainapikey)()
-            key_object = await sync_to_async(lambda: token.master_key)()
-            master_user = await sync_to_async(lambda: key_object.user)()
-            return key_object, master_user, token
+            if token.ttl + token.created_at > timezone.now() or token.ttl is None:
+                key_object = await sync_to_async(lambda: token.master_key)()
+                master_user = await sync_to_async(lambda: key_object.user)()
+                return key_object, master_user, token
+            else:
+                return False, False, False
+        else:
+            return False, False, False
 
     async def check_permission(self, permission_code: str, destination: str):
         if await sync_to_async(self.user.has_perm)(permission_code):

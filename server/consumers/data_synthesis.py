@@ -6,11 +6,12 @@ from decouple import config
 from pydantic import ValidationError
 from transformers import AutoTokenizer
 
+from server.consumers.base_agent import BaseAgent
 from server.consumers.pydantic_validator import DataSynthesisSchema
 from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
-from server.consumers.base_agent import BaseAgent
+
 
 class Consumer(BaseAgent):
 
@@ -18,8 +19,9 @@ class Consumer(BaseAgent):
         super().__init__()
         self.backend = None
         self.permission_code = "server.allow_data_synthesis"
-        self.destination= "DataSynthesis"
+        self.destination = "DataSynthesis"
         self.type = PromptResponse.PromptType.DATA_SYNTHESIS
+
     async def inference(self) -> None:
         llm = await self.get_model()
         if llm:
@@ -216,9 +218,9 @@ class Consumer(BaseAgent):
                 )
             )
 
-    async def send_message_if_not_rate_limited(self, text_data):        
+    async def send_message_if_not_rate_limited(self, text_data):
         text_data_json = json.loads(text_data)
-        if not "swap_template" in text_data_json: 
+        if not "swap_template" in text_data_json:
             try:
                 validated = DataSynthesisSchema.model_validate_json(text_data)
                 if not self.key_object:

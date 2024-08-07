@@ -8,6 +8,7 @@ from decouple import config
 from django.utils import timezone
 from pydantic import ValidationError
 
+from server.consumers.base_chatbot import BaseChatbot
 from server.consumers.pydantic_validator import ToolSchema
 from server.models.log import PromptResponse
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
@@ -18,7 +19,7 @@ from server.utils.llm_toolbox import (
     SummarizeDocument,
     TopicClassification,
 )
-from server.consumers.base_chatbot import BaseChatbot
+
 
 class Consumer(BaseChatbot):
 
@@ -26,7 +27,7 @@ class Consumer(BaseChatbot):
         super().__init__()
         self.backend = None
         self.permission_code = "server.allow_toolbox"
-        self.destination= "Toolbox"
+        self.destination = "Toolbox"
         self.type = PromptResponse.PromptType.TOOLBOX
 
     async def send_message_if_not_rate_limited(self, text_data):

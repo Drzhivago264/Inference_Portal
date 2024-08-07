@@ -10,6 +10,7 @@ from server.consumers.base_agent import BaseAgent
 from server.consumers.pydantic_validator import AgentSchemaMessage
 from server.models.log import PromptResponse
 
+
 class Consumer(BaseAgent):
 
     def __init__(self):

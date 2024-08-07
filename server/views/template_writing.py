@@ -27,6 +27,10 @@ def user_instruction_tree_api(request) -> Response:
     current_user = request.user
     try:
         _, master_user = get_master_key_and_master_user(current_user=current_user)
+        if not master_user:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         root_nodes = UserInstructionTreeMP.objects.filter(user=master_user, depth=2)
         serializer = UserInstructionGetSerializer(root_nodes, many=True)
         return Response(
@@ -64,6 +68,10 @@ def update_user_instruction_tree_api(request):
         master_key, master_user = get_master_key_and_master_user(
             current_user=current_user
         )
+        if not master_user:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         hash_key = master_key.hashed_key
 
         if len(childrens.data) > constant.MAX_CHILD_TEMPLATE_PER_USER:
@@ -133,6 +141,10 @@ def create_user_instruction_tree_api(request) -> Response:
         master_key, master_user = get_master_key_and_master_user(
             current_user=current_user
         )
+        if not master_user:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         hash_key = master_key.hashed_key
 
         if len(childrens.data) > constant.MAX_CHILD_TEMPLATE_PER_USER:
@@ -196,6 +208,10 @@ def delete_user_instruction_tree_api(request) -> Response:
     if serializer.is_valid():
         id = serializer.data["id"]
         _, master_user = get_master_key_and_master_user(current_user=current_user)
+        if not master_user:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         try:
             node = UserInstructionTreeMP.objects.get(id=id, user=master_user)
             node.delete()

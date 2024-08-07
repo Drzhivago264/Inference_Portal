@@ -76,6 +76,10 @@ def hub_redirect_api(request: HttpRequest) -> Response:
 def instruction_tree_api(request):
     current_user = request.user
     _, master_user = get_master_key_and_master_user(current_user=current_user)
+    if not master_user:
+        return Response(
+            {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+        )
     root_nodes = InstructionTreeMP.objects.filter(depth=1)
     user_root_nodes = UserInstructionTreeMP.objects.filter(depth=2, user=master_user)
     serializer = InstructionTreeSerializer(root_nodes, many=True)
@@ -125,6 +129,10 @@ def memory_tree_api(request):
         paginator = PageNumberPagination()
         paginator.page_size = 1
         master_key, _ = get_master_key_and_master_user(current_user=current_user)
+        if not master_key:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         memory_object = MemoryTreeMP.objects.filter(key=master_key).order_by("-id")
         result_page = paginator.paginate_queryset(memory_object, request)
         try:

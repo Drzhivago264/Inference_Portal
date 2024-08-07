@@ -1,6 +1,7 @@
 from typing import List
 
 from asgiref.sync import sync_to_async
+from django.utils import timezone
 from django_ratelimit.core import is_ratelimited
 from ninja import NinjaAPI, Swagger
 from ninja.errors import HttpError
@@ -24,7 +25,13 @@ class GlobalAuth(HttpBearer):
             if key_object.user.groups.filter(name="master_user").exists():
                 return key_object, key_object.user, None
             elif key_object.user.groups.filter(name="slave_user").exists():
-                return key_object.master_key, key_object.master_key.user, key_object
+                if (
+                    key_object.ttl + key_object.created_at > timezone.now()
+                    or key_object.ttl is None
+                ):
+                    return key_object.master_key, key_object.master_key.user, key_object
+                else:
+                    pass
         except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
             pass
 

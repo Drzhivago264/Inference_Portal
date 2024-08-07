@@ -27,7 +27,11 @@ from server.views.serializer import (
 def get_default_user_dataset_api(request):
     current_user = request.user
     _, master_user = get_master_key_and_master_user(current_user=current_user)
-    if Dataset.objects.filter(user=master_user).count() == 0:
+    if not master_user:
+        return Response(
+            {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+        )
+    elif Dataset.objects.filter(user=master_user).count() == 0:
         return Response({"detail": "No Dataset"}, status=status.HTTP_404_NOT_FOUND)
     else:
         dataset_list = Dataset.objects.filter(user=master_user)
@@ -54,7 +58,11 @@ def get_default_user_dataset_api(request):
 def get_user_records_api(request, id: int):
     current_user = request.user
     _, master_user = get_master_key_and_master_user(current_user=current_user)
-    if Dataset.objects.filter(user=master_user).count() == 0:
+    if not master_user:
+        return Response(
+            {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+        )
+    elif Dataset.objects.filter(user=master_user).count() == 0:
         return Response({"detail": "No Dataset"}, status=status.HTTP_200_OK)
     else:
         try:
@@ -86,7 +94,11 @@ def create_user_dataset_api(request):
         default_evaluation = serializer.data["default_evaluation"]
         default_system_prompt = serializer.data["default_system_prompt"]
         _, master_user = get_master_key_and_master_user(current_user=current_user)
-        if (
+        if not master_user:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
+        elif (
             Dataset.objects.filter(user=master_user).count()
             <= constant.MAX_DATASET_PER_USER
         ):
@@ -123,6 +135,10 @@ def update_user_dataset_api(request):
         id = serializer.data["id"]
         new_dataset_name = serializer.data["new_name"]
         _, master_user = get_master_key_and_master_user(current_user=current_user)
+        if not master_user:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         try:
             dataset = Dataset.objects.get(id=id, user=master_user)
             dataset.name = new_dataset_name
@@ -150,6 +166,10 @@ def delete_user_dataset_api(request):
     if serializer.is_valid():
         id = serializer.data["id"]
         _, master_user = get_master_key_and_master_user(current_user=current_user)
+        if not master_user:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         try:
             dataset = Dataset.objects.get(id=id, user=master_user)
             dataset.delete()
