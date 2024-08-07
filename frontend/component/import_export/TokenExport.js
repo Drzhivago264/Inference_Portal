@@ -66,7 +66,7 @@ const TokenCreateExport = ({
 			{randomanimation && (
 				<Box textAlign='center' my={4}>
 					<Textarea
-						defaultValue={`Token: ${token_}\nToken Name: ${token_name}\nTTL: ${ttl}\nCreated at: ${created_at}\nRatelimit: ${ratelimit}\nPermission(s): ${permission}`}
+						defaultValue={`Token: ${token_}\nToken Name: ${token_name}\nTTL: ${ttl}\nCreated at: ${created_at}\nRatelimit: ${ratelimit}\nPermission(s): ${permission.join(", ")}`}
 						minRows={4}
 						maxRows={10}
 					/>

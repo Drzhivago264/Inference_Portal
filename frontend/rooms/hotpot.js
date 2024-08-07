@@ -393,6 +393,7 @@ function Hotpot() {
 								temperature={temperature}
 								mode={mode}
 								bestof={bestof}
+                                beam={beam}
 								lengthpenalty={lengthpenalty}
 								presencepenalty={presencepenalty}
 								frequencypenalty={frequencypenalty}

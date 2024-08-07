@@ -185,8 +185,8 @@ export const ChatBox = ({
 };
 
 ChatBox.propTypes = {
-	id: PropTypes.string.isRequired,
-	inputsize: PropTypes.string.isRequired,
+	id: PropTypes.string,
+	inputsize: PropTypes.number.isRequired,
 	ChatPaper: PropTypes.elementType.isRequired,
 	ChatInput: PropTypes.elementType.isRequired,
 	chat_message: PropTypes.array.isRequired,
@@ -197,5 +197,5 @@ ChatBox.propTypes = {
 	submitChat: PropTypes.func.isRequired,
 	messagesEndRef: PropTypes.object.isRequired,
 	handleEnter: PropTypes.func.isRequired,
-	check_duplicate_message: PropTypes.func.isRequired,
+	check_duplicate_message: PropTypes.func,
 };
