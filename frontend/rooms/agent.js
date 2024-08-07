@@ -13,6 +13,7 @@ import {CeleryAlert} from "../component/alert/CeleryAlert.js";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
+import { ChatPaper } from "../component/custom_ui_component/ChatPaper.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import EditorExport from "../component/import_export/EditorExport.js";
@@ -44,19 +45,10 @@ import Underline from "@editorjs/underline";
 import UserTemplate from "../component/chat_components/UserTemplate.js";
 import {agentsocket} from "../component/websocket/AgentSocket.js";
 import editorjsCodecup from "@calumk/editorjs-codecup";
-import {styled} from "@mui/material/styles";
 import {useGetInstructionTree} from "../api_hook/useGetInstructionTree.js";
 import {useGetModel} from "../api_hook/useGetModel.js";
 import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
 import {useNavigate} from "react-router-dom";
-
-const ChatPaper = styled(Paper)(({theme}) => ({
-	minWidth: 300,
-	height: 700,
-	overflow: "auto",
-	padding: theme.spacing(2),
-	...theme.typography.body2,
-}));
 
 function Agent() {
 	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
@@ -378,7 +370,7 @@ function Agent() {
 								</AccordionDetails>
 							</Accordion>
 						</Grid>
-						<Grid item xs={12} md={8} xl={4}>
+						<Grid item xs={12} sm={8} xl={4}>
 							<ChatBox
 								id={"chat-log-agent"}
 								inputsize={300}
@@ -393,7 +385,7 @@ function Agent() {
 								shownthinking={shownthinking}
 								handleEnter={handleEnter}></ChatBox>
 						</Grid>
-						<Grid item xs={12} md={4} xl={2}>
+						<Grid item xs={12} sm={4} xl={2}>
 							<Stack direction='column' mr={2} spacing={2}>
 								<FormControl disabled={use_user_template}>
 									<InputLabel id='agent-label'>Agents</InputLabel>
@@ -463,7 +455,7 @@ function Agent() {
 							</Stack>
 						</Grid>
 
-						<Grid item md={12} xl={8} >
+						<Grid item xs={12} xl={8} >
                             
 							<Accordion defaultExpanded>
 								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='editor-content' id='editor-header'>

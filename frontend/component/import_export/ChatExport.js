@@ -53,7 +53,7 @@ export const ChatExport = ({ chat_message, number_of_remove_message }) => {
 		a.click();
 	};
 	return (
-		<Paper sx={{ mt: 2, mb: 2 }} variant='outlined'>
+		<Paper sx={{ mt: 2, mb: 2, display: {xs: "none", sm: "block"} }} variant='outlined'>
 			<Box m={1}>
 				<Typography sx={{ color: "text.secondary" }}>
 					Chat Log Export

@@ -53,10 +53,10 @@ const UserTemplate = ({
 						onChange={handle_use_user_template}
 					/>
 				}
-				label='Use My Template'
+				label='My Template'
 			/>
 			{user_template_list.length == 0 && (
-				<FormHelperText>{`No Users' Agent Found`}</FormHelperText>
+				<FormHelperText>{`No Users' Template`}</FormHelperText>
 			)}
 		</FormControl>
 	);

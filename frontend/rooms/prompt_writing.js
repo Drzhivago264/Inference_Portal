@@ -1,4 +1,3 @@
-import {Divider, List, Typography} from "@mui/material";
 import React, {useContext, useState} from "react";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -17,6 +16,7 @@ import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -29,6 +29,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import {UserContext} from "../App.js";
 import {baseDelete} from "../api_hook/baseDelete.js";
 import {basePost} from "../api_hook/basePost.js";
@@ -290,7 +291,7 @@ function PromptWriting() {
 			<title>Dataset</title>
 			<ResponsiveAppBar max_width={false} />
 			<Container maxWidth='xxl'>
-				<Grid container spacing={2}>
+				<Grid container spacing={1}>
 					<Grid item xs={2}>
 						<Paper sx={{mr: 2, mt: 2}} variant='outlined'>
 							<Typography ml={2} mt={1} variant='body1' sx={{color: "text.secondary"}}>
@@ -357,10 +358,9 @@ function PromptWriting() {
 							/>
 						</Box>
 					</Grid>
-					<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
-					<Grid item disableGutters xs={6}>
+					<Grid item disableGutters xs={5}>
 						<Grid container spacing={1} disableGutters>
-							<Grid item sm={12} md={7}>
+							<Grid item xs={12} md={8}>
 								<Typography ml={1} mb={1} mt={1} variant='body1'>
 									Record
 								</Typography>
@@ -412,7 +412,7 @@ function PromptWriting() {
 									</Stack>
 								</FormControl>
 							</Grid>
-							<Grid sm={12} md={4} item>
+							<Grid sm={12} md={3} item>
 								<Typography ml={1} mb={1} mt={1} variant='body1'>
 									Evaluation
 								</Typography>
@@ -423,6 +423,7 @@ function PromptWriting() {
 												<Grid xs={6} item>
 													<TextField
 														id='eval-name'
+                                                
 														size='small'
 														fullWidth
 														label='Name'
@@ -455,6 +456,7 @@ function PromptWriting() {
 												</Grid>
 												<Grid xs={1} item>
 													<IconButton
+                                                    size="small"
 														aria-label='delete'
 														onClick={() => {
 															deleteEvaluation(index);
@@ -554,11 +556,9 @@ function PromptWriting() {
 							))}
 						</Box>
 					</Grid>
-					<Grid item xs={4}>
-						<Typography mt={1} mb={2} variant='body1'>
-							{`Dataset`}
-						</Typography>
-						<div style={{height: 637, width: "100%"}}>
+					<Grid item xs={5}>
+
+						<Box mt={2} style={{height: 637, width: "100%"}}>
 							<DataGrid
 								onRowClick={handleRowClick}
 								disableColumnSorting
@@ -571,7 +571,7 @@ function PromptWriting() {
 								}}
 								rowSelectionModel={rowSelectionModel}
 							/>
-						</div>
+						</Box>
 						<Box display='flex' justifyContent='center' alignItems='center' m={1}>
 							<Pagination count={total_node} showFirstButton showLastButton onChange={navigatePagination} variant='outlined' shape='rounded' />
 						</Box>

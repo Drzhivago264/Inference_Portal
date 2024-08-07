@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
+import { ChatPaper } from "../component/custom_ui_component/ChatPaper.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Footer from "../component/nav/Footer.js";
@@ -20,18 +21,9 @@ import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import {chatsocket} from "../component/websocket/ChatSocket.js";
-import {styled} from "@mui/material/styles";
 import {useGetModel} from "../api_hook/useGetModel.js";
 import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
 import {useNavigate} from "react-router-dom";
-
-const ChatPaper = styled(Paper)(({theme}) => ({
-	minWidth: 300,
-	height: 700,
-	overflow: "auto",
-	padding: theme.spacing(2),
-	...theme.typography.body2,
-}));
 
 function FunctionLLM() {
 	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);

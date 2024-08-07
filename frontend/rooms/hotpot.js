@@ -8,6 +8,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
+import { ChatPaper } from "../component/custom_ui_component/ChatPaper.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -29,20 +30,11 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import {agentsocket} from "../component/websocket/AgentSocket.js";
 import {chatsocket} from "../component/websocket/ChatSocket.js";
-import {styled} from "@mui/material/styles";
 import {swap_template} from "../component/chat_components/chatUtils.js";
 import {useGetInstructionTree} from "../api_hook/useGetInstructionTree.js";
 import {useGetModel} from "../api_hook/useGetModel.js";
 import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
 import {useNavigate} from "react-router-dom";
-
-const ChatPaper = styled(Paper)(({theme}) => ({
-	minWidth: 300,
-	height: 700,
-	overflow: "auto",
-	padding: theme.spacing(2),
-	...theme.typography.body2,
-}));
 
 function Hotpot() {
 	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
