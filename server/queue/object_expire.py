@@ -14,6 +14,6 @@ def periodically_delete_unused_key():
         monero_credit=0.0,
     ).delete()
 
-    for token in FineGrainAPIKEY.objects.all().iterator(chunk_size=100):
+    for token in FineGrainAPIKEY.objects.filter(ttl__isnull=False).iterator(chunk_size=100):
         if token.ttl + token.created_at <= timezone.now():
             token.delete()
