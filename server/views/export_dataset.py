@@ -29,6 +29,10 @@ def export_user_dataset_api(request):
         dataset_id = serializer.data["id"]
         extension = serializer.data["extension"]
         _, master_user = get_master_key_and_master_user(current_user=current_user)
+        if not master_user:
+            return Response(
+                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+            )
         try:
             dataset = Dataset.objects.get(user=master_user, id=dataset_id)
             result_records = DatasetRecord.objects.filter(dataset=dataset)

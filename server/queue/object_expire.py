@@ -1,6 +1,7 @@
 from celery import shared_task
-from django.utils.timezone import timedelta
 from django.utils import timezone
+from django.utils.timezone import timedelta
+
 from server.models.api_key import APIKEY, FineGrainAPIKEY
 from server.utils import constant
 
@@ -15,5 +16,4 @@ def periodically_delete_unused_key():
 
     for token in FineGrainAPIKEY.objects.all().iterator(chunk_size=100):
         if token.ttl + token.created_at <= timezone.now():
-            print(token.user)
             token.delete()

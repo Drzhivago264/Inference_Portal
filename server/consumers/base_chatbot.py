@@ -41,21 +41,33 @@ class BaseChatbot(
         self.key_object, self.master_user, self.slave_key_object = (
             await self.get_master_key_and_master_user()
         )
-        self.rate_limiter = await rate_limit_initializer(
-            key_object=self.key_object,
-            strategy="moving_windown",
-            slave_key_object=self.slave_key_object,
-            namespace=self.type.label,
-            timezone=self.timezone,
-        )
+        if self.key_object:
+            self.rate_limiter = await rate_limit_initializer(
+                key_object=self.key_object,
+                strategy="moving_windown",
+                slave_key_object=self.slave_key_object,
+                namespace=self.type.label,
+                timezone=self.timezone,
+            )
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         is_authorised = await self.check_permission(
             permission_code=self.permission_code, destination=self.destination
         )
-        if is_authorised:
+        if is_authorised and self.key_object:
             await self.send_connect_message()
+        elif not self.key_object:
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "message": f"Your token is expired, disconnecting ...",
+                        "role": "Server",
+                        "time": self.time,
+                    }
+                )
+            )
+            self.disconnect()
 
     async def send_connect_message(self):
         await self.send(
