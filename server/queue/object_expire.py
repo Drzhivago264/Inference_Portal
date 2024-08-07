@@ -8,12 +8,14 @@ from server.utils import constant
 
 @shared_task()
 def periodically_delete_unused_key():
+    # Delete APIKEY objects older than TTL with zero credit
     APIKEY.objects.filter(
         created_at__lte=timezone.now() - timedelta(days=constant.KEY_TTL),
         credit=0.0,
         monero_credit=0.0,
     ).delete()
 
-    for token in FineGrainAPIKEY.objects.filter(ttl__isnull=False).iterator(chunk_size=100):
+    # Delete FineGrainAPIKEY objects if TTL has expired
+    for token in FineGrainAPIKEY.objects.filter(ttl__isnull=False):
         if token.ttl + token.created_at <= timezone.now():
             token.delete()

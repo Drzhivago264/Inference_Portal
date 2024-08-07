@@ -8,7 +8,7 @@ from server.models.api_key import APIKEY
 
 def get_master_key_and_master_user(
     current_user: User,
-) -> Union[Tuple[APIKEY, User], Tuple[False, False]]:
+) -> Union[Tuple[APIKEY, User], Tuple[bool, bool]]:
     """
     This function checks the group membership of a given current_user and returns either the user's API key and user object
     or the master key and master user object, depending on the group. If the user is not in either group, it returns False.
