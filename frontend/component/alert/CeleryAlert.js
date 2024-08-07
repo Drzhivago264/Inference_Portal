@@ -4,7 +4,7 @@ import React from 'react';
 
 export const CeleryAlert = () => {
     return (
-        <Alert severity="info" sx={{ whiteSpace: 'pre-line' }}>
+        <Alert severity="info" sx={{ whiteSpace: 'pre-line', display: {xs: "none", sm: "block"} }} >
             <AlertTitle>Note: </AlertTitle>
             {`Celery Backend is deprecated, Async Backend supports newest features.`}
         </Alert>

@@ -203,8 +203,7 @@ function Hub() {
 											<Divider orientation={check_orientation} flexItem={true} />
 
 											<LoadingButton variant='contained' component={Link} to='/frontend/key-management'>
-												{" "}
-												Create New Key{" "}
+												Create New Key
 											</LoadingButton>
 										</Stack>
 										{loginerror && <SuccessErrorAlert detail={loginerror} type='error' />}

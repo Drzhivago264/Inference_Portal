@@ -43,14 +43,14 @@ export const RedirectMediaCards = ({image_link, t, redirect, destination, image_
 						</CardActions>
 					</Box>
 					{!image_loaded && (
-						<CardMedia sx={{width: 200, height: 200}}>
-							<Skeleton animation='wave' height={200} width={200} />
+						<CardMedia sx={{width: {xs: 100,  md: '10vw'}, height: {xs: 100,  md: '10vw'}}}>
+							<Skeleton animation='wave' height='10vw' width='10vw' />
 						</CardMedia>
 					)}
 					<CardMedia
 						component='img'
 						sx={{
-							width: 200,
+							width: {xs: 100,  md: '10vw'},
 							display: image_loaded ? "block" : "none",
 						}}
 						image={image_link}

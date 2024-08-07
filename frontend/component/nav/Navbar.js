@@ -268,6 +268,7 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 				</Drawer>
 				<Container maxWidth={max_width}>
 					<Toolbar disableGutters>
+                        
 						<IconButton
 							size='large'
 							edge='start'

@@ -7,27 +7,18 @@ import {CeleryAlert} from "../component/alert/CeleryAlert.js";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
+import { ChatPaper } from "../component/custom_ui_component/ChatPaper.js";
 import {ChatParameter} from "../component/chat_components/ChatroomParameters.js";
 import Container from "@mui/material/Container";
 import Footer from "../component/nav/Footer.js";
 import Grid from "@mui/material/Grid";
 import {MemoryTree} from "../component/chat_components/MemoryTree.js";
-import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import Stack from "@mui/material/Stack";
 import {chatsocket} from "../component/websocket/ChatSocket.js";
-import {styled} from "@mui/material/styles";
 import {useGetModel} from "../api_hook/useGetModel.js";
 import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
 import {useNavigate} from "react-router-dom";
-
-const ChatPaper = styled(Paper)(({theme}) => ({
-	minWidth: 550,
-	height: 700,
-	overflow: "auto",
-	padding: theme.spacing(2),
-	...theme.typography.body2,
-}));
 
 function Chat() {
 	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
@@ -122,7 +113,7 @@ function Chat() {
 								</Box>
 							</Stack>
 						</Grid>
-						<Grid item xs={12} md={8} lg={5.5}>
+						<Grid item xs={12} sm={8} lg={5.5}>
 							<ChatBox
                                 id={"chat-log"}
 								inputsize={550}
@@ -137,7 +128,7 @@ function Chat() {
 								shownthinking={shownthinking}
 								handleEnter={handleEnter}></ChatBox>
 						</Grid>
-						<Grid item xs={12} md={4} lg={2.5}>
+						<Grid item xs={12} sm={4} lg={2.5}>
 							<ChatParameter
 								socket_destination={socket_destination}
 								setSocketDestination={setSocketDestination}
