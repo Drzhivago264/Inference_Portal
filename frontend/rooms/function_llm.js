@@ -6,11 +6,11 @@ import Box from "@mui/material/Box";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
-import { ChatPaper } from "../component/custom_ui_component/ChatPaper.js";
+import {ChatPaper} from "../component/custom_ui_component/ChatPaper.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Footer from "../component/nav/Footer.js";
-import {FormControl} from "@mui/material";
+import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
 import {OpenAPIParameter} from "../component/chat_components/OpenaiParameters.js";
@@ -168,7 +168,7 @@ function FunctionLLM() {
 
 						<Grid item xs={12} sm={8} md={6}>
 							<ChatBox
-                                id={'chat-log'}
+								id={"chat-log"}
 								inputsize={660}
 								chat_message={chat_message}
 								usermessage={usermessage}
@@ -197,26 +197,16 @@ function FunctionLLM() {
 								setPresencePenalty={setPresencePenalty}
 								frequencypenalty={frequencypenalty}
 								setFrequencyPenalty={setFrequencyPenalty}></OpenAPIParameter>
-							<Paper variant='outlined'>
-								<Box m={1}>
-									<Typography sx={{color: "text.secondary"}}>Extra Instruction</Typography>
-								</Box>
-								<Divider />
-								<Box m={2}>
-									<ChatInput
-										multiline
-										maxRows={6}
-										value={extrainstruction}
-										sx={{
-											p: "2px 4px",
-											display: "flex",
-											minWidth: 200,
-										}}
-										onChange={(e) => setExtraInstruction(e.target.value)}
-										minRows={4}
-									/>
-								</Box>
-							</Paper>
+							<Box mt={1}>
+								<ChatInput
+									multiline
+									label='Extra Instructions'
+									maxRows={6}
+									value={extrainstruction}
+									onChange={(e) => setExtraInstruction(e.target.value)}
+									minRows={4}
+								/>
+							</Box>
 							<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
 						</Grid>
 					</Grid>

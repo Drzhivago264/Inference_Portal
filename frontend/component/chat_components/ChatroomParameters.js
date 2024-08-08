@@ -410,7 +410,7 @@ export const ChatParameter = ({
 					valueLabelDisplay='off'
 				/>
 				<Stack direction='row' spacing={1}>
-					<FormControlLabel control={<Switch onChange={(e) => setBeam(e.target.checked)} value={beam} />} label='Beam Search' />
+					<FormControlLabel control={<Switch onChange={(e) => setBeam(e.target.checked)} value={beam} />} label='Beam' />
 					<Box>
 						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.beam")}</div>} arrow placement='top'>
 							<IconButton size='small'>
@@ -420,7 +420,7 @@ export const ChatParameter = ({
 					</Box>
 				</Stack>
 				<Stack direction='row' spacing={1}>
-					<FormControlLabel control={<Switch onChange={(e) => setEarlyStopping(e.target.checked)} value={earlystopping} />} label='Early Stopping' />
+					<FormControlLabel control={<Switch onChange={(e) => setEarlyStopping(e.target.checked)} value={earlystopping} />} label='Early Stop' />
 					<Box>
 						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.early_stopping")}</div>} arrow placement='top'>
 							<IconButton size='small'>

@@ -95,3 +95,20 @@ class MemoryTreeMP(MP_Node, AbstractPromptResponse):
             .objects.filter(path__in=paths)
             .order_by("depth")
         )
+
+    def get_siblings_is_not_session_starter(self):
+        """
+        :returns: A queryset of all the node's siblings which is leaf, including the node
+            itself.
+        """
+        qset = get_result_class(self.__class__).objects.filter(
+            depth=self.depth, is_session_start_node = False
+        ).order_by(
+            'path'
+        )
+        if self.depth > 1:
+            # making sure the non-root nodes share a parent
+            parentpath = self._get_basepath(self.path, self.depth - 1)
+            qset = qset.filter(
+                path__range=self._get_children_path_interval(parentpath))
+        return qset

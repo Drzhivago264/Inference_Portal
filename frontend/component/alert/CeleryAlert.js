@@ -1,12 +1,10 @@
 import Alert from '@mui/material/Alert';
-import  AlertTitle  from '@mui/material/AlertTitle';
 import React from 'react';
 
 export const CeleryAlert = () => {
     return (
-        <Alert severity="info" sx={{ whiteSpace: 'pre-line', display: {xs: "none", sm: "block"} }} >
-            <AlertTitle>Note: </AlertTitle>
-            {`Celery Backend is deprecated, Async Backend supports newest features.`}
+        <Alert severity="info" sx={{ display: {xs: "none", sm: "block"} }} >
+            Celery Backend is deprecated, Async Backend supports newest features.
         </Alert>
     )
 }

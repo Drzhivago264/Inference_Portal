@@ -1,5 +1,3 @@
-import * as pdfMake from "pdfmake/build/pdfmake.min";
-
 import React, {useState} from "react";
 
 import Box from "@mui/material/Box";
@@ -14,10 +12,11 @@ import PropTypes from "prop-types";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import {convert} from "html-to-text";
 import edjsParser from "editorjs-parser";
+import htmlToPdfmake from "html-to-pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
-
-const {convert} = require("html-to-text");
+import pdfMake from "pdfmake/build/pdfmake.min";
 
 const EditorExport = ({editorref}) => {
 	const [choosen_export_format, setChoosenExportFormat] = useState(".json");
@@ -50,7 +49,6 @@ const EditorExport = ({editorref}) => {
 					download_content = text;
 				} else if (mimeType == "application/pdf") {
 					let html = parser.parse(download_content);
-					var htmlToPdfmake = require("html-to-pdfmake");
 					var html_to_pdf = htmlToPdfmake(html);
 					var pdf = {content: html_to_pdf};
 					pdfMake.vfs = pdfFonts.pdfMake.vfs;
