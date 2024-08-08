@@ -67,7 +67,7 @@ CHANNEL_LAYERS = {
 
 DJANGO_VECTOR_DB = {
     "DEFAULT_EMBEDDING_CLASS": "vectordb.embedding_functions.SentenceTransformerEncoder",
-    "DEFAULT_EMBEDDING_MODEL": "all-MiniLM-L6-v2",
+    "DEFAULT_EMBEDDING_MODEL": "Snowflake/snowflake-arctic-embed-xs",
     "DEFAULT_EMBEDDING_SPACE": "l2",  # Can be "cosine" or "l2"
     "DEFAULT_EMBEDDING_DIMENSION": 384,  # Default is 384 for "all-MiniLM-L6-v2"
     # Number of results to return from search maximum is default is 10
