@@ -10,7 +10,7 @@ import Container from "@mui/material/Container";
 import CreateIcon from "@mui/icons-material/Create";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Footer from "../component/nav/Footer.js";
-import {FormControl} from "@mui/material";
+import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import Grid from "@mui/material/Grid";

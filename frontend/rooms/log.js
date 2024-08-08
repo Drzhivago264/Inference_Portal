@@ -5,19 +5,19 @@ import "datatables.net-buttons/js/buttons.print.mjs";
 import "../component/css/dataTables.dataTables.css";
 import "../component/css/buttons.dataTables.css";
 
-import * as pdfMake from "pdfmake/build/pdfmake.min";
-
 import React, {useContext, useEffect, useRef} from "react";
 
 import $ from "jquery";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
+import DataTable from "datatables.net";
 import Footer from "../component/nav/Footer.js";
 import JSZip from "jszip";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import {UserContext} from "../App.js";
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import pdfMake from "pdfmake/build/pdfmake.min";
 import {useGetRedirectAnon} from "../api_hook/useGetRedirectAnon.js";
 import {useNavigate} from "react-router-dom";
 
@@ -28,7 +28,7 @@ function Log() {
 	const navigate = useNavigate();
 	const {is_authenticated} = useContext(UserContext);
 	useGetRedirectAnon(navigate, is_authenticated);
-	$.DataTable = require("datatables.net");
+	$.DataTable = DataTable;
 	const tableRef = useRef();
 	useEffect(() => {
 		$.fn.dataTable.ext.errMode = () => alert("Your key is not authorised to view log!");

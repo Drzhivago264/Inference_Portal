@@ -1,12 +1,10 @@
-import "rapidoc";
-
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Footer from "./component/nav/Footer";
 import {RandomReveal} from "react-random-reveal";
 import React from "react";
 import ResponsiveAppBar from "./component/nav/Navbar";
-import {Typography} from "@mui/material";
+import Typography from "@mui/material/Typography";
 
 function ErrorPage() {
 	window.onbeforeunload = function () {

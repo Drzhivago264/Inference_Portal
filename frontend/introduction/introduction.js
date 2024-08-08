@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import CardMedia from "@mui/material/CardMedia";
 import {ColorModeContext} from "../App";
 import Container from "@mui/material/Container";
-import {Divider} from "@mui/material";
+import Divider from "@mui/material/Divider";
 import Footer from "../component/nav/Footer";
 import Grid from "@mui/material/Grid";
 import IntroductionVerticalLinearStepper from "../component/custom_ui_component/IntroductionStepper";

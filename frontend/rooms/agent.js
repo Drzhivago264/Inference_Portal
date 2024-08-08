@@ -307,8 +307,8 @@ function Agent() {
 								</List>
 							</Paper>
 							<EditorExport editorref={editorref} />
-
 							<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
+                            <CeleryAlert />
 						</Grid>
 						<Grid item xs={12} md={8} xl={4}>
 							<Accordion defaultExpanded>
@@ -451,7 +451,7 @@ function Agent() {
 									setFrequencyPenalty={setFrequencyPenalty}
 									max_turn={max_turn}
 									setMaxTurn={setMaxTurn}></OpenAPIParameter>
-								<CeleryAlert />
+								
 							</Stack>
 						</Grid>
 
