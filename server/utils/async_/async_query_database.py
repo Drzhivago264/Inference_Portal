@@ -8,8 +8,8 @@ from django.utils import timezone
 
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
-from server.utils.async_.async_cache import get_or_set_cache
-
+from server.utils.async_.async_cache import get_or_set_cache as async_get_or_set_cache
+from server.utils.sync_.sync_cache import get_or_set_cache as sync_get_or_set_cache
 class QueryDBMixin:
 
     async def get_master_key_and_master_user(self):
@@ -48,10 +48,10 @@ class QueryDBMixin:
         try:
             if template_type == "system":
                
-                template = await get_or_set_cache(prefix = "system_template", key=name, field_to_get= "name", Model=InstructionTreeMP, timeout=84000)
+                template = await async_get_or_set_cache(prefix = "system_template", key=name, field_to_get= "name", Model=InstructionTreeMP, timeout=84000)
                 return template
             elif template_type == "user_template":
-                template = await get_or_set_cache(prefix = "user_template", key=[name, self.master_user], field_to_get= ["name", "user"], Model=UserInstructionTreeMP, timeout=60)
+                template = await async_get_or_set_cache(prefix = "user_template", key=[name, self.master_user], field_to_get= ["name", "user"], Model=UserInstructionTreeMP, timeout=84000)
                 
                 return template
         except (InstructionTreeMP.DoesNotExist, UserInstructionTreeMP.DoesNotExist):
@@ -60,25 +60,24 @@ class QueryDBMixin:
     @database_sync_to_async
     def get_child_template_list(
         self,
-        template: str,
+        template: str | UserInstructionTreeMP,
         template_type: Literal["system", "user_template"] = "system",
     ) -> dict:
         options = ["system", "user_template"]
         assert template_type in options, f"'{template_type}' is not in {options}"
         try:
             if template_type == "system":
-                child_template = InstructionTreeMP.objects.get(
-                    name=template
-                ).get_descendants()
+                parent_template = sync_get_or_set_cache(prefix = "system_template", key=template.name, field_to_get= "name", Model=InstructionTreeMP, timeout=84000)
+                child_template = parent_template.get_descendants()
                 return {
                     "name_list": [c.name for c in child_template],
                     "default_child": child_template[0].name,
                     "default_instruct": child_template[0].instruct,
                 }
             elif template_type == "user_template":
-                child_template = UserInstructionTreeMP.objects.get(
-                    name=template.name, user=self.master_user
-                ).get_descendants()
+                parent_template = sync_get_or_set_cache(prefix = "user_template", key=[template.name, self.master_user], field_to_get= ["name", "user"], Model=UserInstructionTreeMP, timeout=84000)
+                child_template = parent_template.get_descendants()
+
                 if child_template:
                     return {
                         "displayed_name_list": [
@@ -101,17 +100,17 @@ class QueryDBMixin:
             return False
 
     async def get_model(self, name=None) -> LLM | bool:
-        return await get_or_set_cache(prefix = "system_model", key=self.choosen_model if name is None else name, field_to_get= "name", Model=LLM, timeout=84000)
+        return await async_get_or_set_cache(prefix = "system_model", key=self.choosen_model if name is None else name, field_to_get= "name", Model=LLM, timeout=84000)
 
     async def get_model_url_async(
         self,
     ) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
-        model_list = []
+        
         try:
-            async for m in InferenceServer.objects.filter(
+            model_list = [m async for m in InferenceServer.objects.filter(
                 hosted_model__name=self.choosen_model, availability="Available"
-            ):
-                model_list.append(m)
+            )]
+     
             if model_list:
                 random_url = random.choice(model_list)
                 url = random_url.url

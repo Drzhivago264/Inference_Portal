@@ -4,7 +4,8 @@ from server.consumers.base import BaseBot
 from server.models.log import PromptResponse
 from server.rate_limit import RateLimitError
 from server.utils import constant
-
+import pytz
+from django.utils import timezone
 
 class BaseChatbot(BaseBot):
 
@@ -32,6 +33,9 @@ class BaseChatbot(BaseBot):
         )
 
     async def receive(self, text_data):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         try:
             await self.rate_limiter.check_rate_limit()
             await self.send_message_if_not_rate_limited(text_data)

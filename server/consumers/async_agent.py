@@ -18,6 +18,9 @@ class Consumer(BaseAgent):
         self.backend = "async"
 
     async def inference(self):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         if self.current_turn >= 0 and self.current_turn <= (self.max_turns - 1):
             if self.current_turn == 0:
                 prompt = [
@@ -25,7 +28,8 @@ class Consumer(BaseAgent):
                     {"role": "user", "content": f"{self.message}"},
                 ]
             elif self.current_turn > 0 and self.current_turn < (self.max_turns - 1):
-                prompt = [{"role": "user", "content": f"Response: {self.message}"}]
+                prompt = [
+                    {"role": "user", "content": f"Response: {self.message}"}]
 
             elif self.current_turn == (self.max_turns - 1):
                 prompt = [
@@ -87,6 +91,9 @@ class Consumer(BaseAgent):
 
     async def send_message_if_not_rate_limited(self, text_data):
         text_data_json = json.loads(text_data)
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         if "message" in text_data_json:
             try:
                 validated = AgentSchemaMessage.model_validate_json(text_data)
@@ -166,6 +173,9 @@ class Consumer(BaseAgent):
                 )
 
     async def chat_message(self, event):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         message = event["message"]
         role = event["role"]
         self.time = timezone.localtime(

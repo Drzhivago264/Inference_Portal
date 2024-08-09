@@ -93,9 +93,9 @@ def send_request(stream: bool, url: str, instance_id: str, context: dict) -> str
     except requests.exceptions.InvalidJSONError:
         response = "You messed up the parameters. Return them to the defaults."
     except requests.exceptions.ConnectionError:
-        ser_obj = InferenceServer.objects.get(name=instance_id)
-        ser_obj.status = "pending"
-        ser_obj.save()
+        server_object = InferenceServer.objects.get(name=instance_id)
+        server_object.status = "pending"
+        server_object.save()
         response = "Server is setting up, wait."
     return response
 

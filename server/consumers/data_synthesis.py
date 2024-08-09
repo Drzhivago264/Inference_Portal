@@ -1,6 +1,7 @@
 import asyncio
 import json
-
+import pytz
+from django.utils import timezone
 import httpx
 from decouple import config
 from pydantic import ValidationError
@@ -23,6 +24,9 @@ class Consumer(BaseAgent):
         self.type = PromptResponse.PromptType.DATA_SYNTHESIS
 
     async def inference(self) -> None:
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         llm = await self.get_model()
         if llm:
             processed_instruction_list = [
@@ -219,6 +223,9 @@ class Consumer(BaseAgent):
             )
 
     async def send_message_if_not_rate_limited(self, text_data):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         text_data_json = json.loads(text_data)
         if not "swap_template" in text_data_json:
             try:
@@ -270,4 +277,7 @@ class Consumer(BaseAgent):
     # Receive message from room group
 
     async def chat_message(self, event):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         await self.inference()

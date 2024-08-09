@@ -36,7 +36,7 @@ export function agentsocket(
 		const dataFromServer = JSON.parse(message.data);
 
 		if (dataFromServer) {
-			if (dataFromServer.swap_template) {
+			if (dataFromServer.swap_instruction) {
 				if (!use_user_template) {
 					const newChildTemplateList =
 						dataFromServer.child_template_name_list.map(
@@ -57,15 +57,11 @@ export function agentsocket(
 					}
 				} else {
 					const newChildTemplateList =
-						dataFromServer.child_template_name_list.map(
-							(template_name) => ({
-								displayed_name:
-									dataFromServer
-										.child_template_displayed_name_list[
-										template_name
-									],
+						dataFromServer.child_template_displayed_name_list.map(
+							(template_name, index) => ({
+								displayed_name: template_name,
 								name: dataFromServer.child_template_name_list[
-									template_name
+									index
 								],
 							})
 						);

@@ -31,6 +31,9 @@ class Consumer(BaseChatbot):
         self.type = PromptResponse.PromptType.TOOLBOX
 
     async def send_message_if_not_rate_limited(self, text_data):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         try:
             validated = ToolSchema.model_validate_json(text_data)
             if not self.key_object:
@@ -104,6 +107,9 @@ class Consumer(BaseChatbot):
     # Receive message from room group
 
     async def chat_message(self, event):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         message = event["message"]
         role = event["role"]
         credit = event["credit"]
