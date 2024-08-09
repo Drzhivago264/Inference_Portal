@@ -2,6 +2,7 @@ import json
 
 import httpx
 from asgiref.sync import sync_to_async
+from django.contrib.auth.models import User
 from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
@@ -26,7 +27,7 @@ async def get_system_template(name: str) -> str:
         raise HttpError(404, f"template: {name} is incorrect")
 
 
-async def get_user_template(name: str, user_object: object) -> str:
+async def get_user_template(name: str, user_object: User) -> str:
     try:
         template = await UserInstructionTreeMP.objects.aget(
             displayed_name=name, user=user_object

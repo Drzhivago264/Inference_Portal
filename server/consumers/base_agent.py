@@ -15,9 +15,10 @@ from server.rate_limit import RateLimitError
 class BaseAgent(BaseBot):
 
     def __new__(cls, *args, **kwargs):
-            if cls is BaseBot:
-                raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
-            return BaseBot.__new__(cls, *args, **kwargs)
+        if cls is BaseBot:
+            raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
+        return BaseBot.__new__(cls, *args, **kwargs)
+
     def __init__(self):
         super().__init__()
         self.current_turn = 0
@@ -179,5 +180,3 @@ class BaseAgent(BaseBot):
                     }
                 )
             )
-
-    

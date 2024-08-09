@@ -1,9 +1,7 @@
 import random
 
 import httpx
-from asgiref.sync import sync_to_async
 from django.http import StreamingHttpResponse
-from django_ratelimit.core import is_ratelimited
 from ninja import Router
 from ninja.errors import HttpError
 from transformers import AutoTokenizer
