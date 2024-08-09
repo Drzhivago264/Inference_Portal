@@ -64,7 +64,7 @@ class MemoryTreeMP(MP_Node, AbstractPromptResponse):
     """
     Steplen = 5 will increase the number of potential root node (64^5 nodes), this can be a problem when the number of key/user get larger than 64^5 which is very unlikely.
 
-    Max_length of path = 220_000, the tree will have max depth = 220_000/5 (44_000), in order to keep the tree from growing over this depth, node with depth = 44_000 cannot be a parent and similar node with be add as siblings.
+    Max_length of path = 220_000, the tree will have max depth = 220_000/5 (44_000), in order to keep the tree from growing over this depth, node with depth = 44_000 cannot be a parent and similar node with be added as siblings.
 
     The reason why we can get away with unique field with 220_000 characters is because Posgres compress these chars into 2700 bytes which fit into it max size for index field. Number larger than 220_000 will break!!!.
 
@@ -98,17 +98,16 @@ class MemoryTreeMP(MP_Node, AbstractPromptResponse):
 
     def get_siblings_is_not_session_starter(self):
         """
-        :returns: A queryset of all the node's siblings which is leaf, including the node
+        :returns: A queryset of all the node's siblings which is not session starting node, including the node
             itself.
         """
-        qset = get_result_class(self.__class__).objects.filter(
-            depth=self.depth, is_session_start_node = False
-        ).order_by(
-            'path'
+        qset = (
+            get_result_class(self.__class__)
+            .objects.filter(depth=self.depth, is_session_start_node=False)
+            .order_by("path")
         )
         if self.depth > 1:
             # making sure the non-root nodes share a parent
             parentpath = self._get_basepath(self.path, self.depth - 1)
-            qset = qset.filter(
-                path__range=self._get_children_path_interval(parentpath))
+            qset = qset.filter(path__range=self._get_children_path_interval(parentpath))
         return qset

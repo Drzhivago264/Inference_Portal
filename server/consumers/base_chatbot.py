@@ -9,10 +9,10 @@ from server.utils import constant
 class BaseChatbot(BaseBot):
 
     def __new__(cls, *args, **kwargs):
-            if cls is BaseBot:
-                raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
-            return BaseBot.__new__(cls, *args, **kwargs)
-    
+        if cls is BaseBot:
+            raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
+        return BaseBot.__new__(cls, *args, **kwargs)
+
     def __init__(self):
         super().__init__()
         self.permission_code = "server.allow_chat"
@@ -45,4 +45,3 @@ class BaseChatbot(BaseBot):
                     }
                 )
             )
-

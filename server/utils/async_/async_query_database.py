@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
-
+from server.utils.async_.async_cache import get_or_set_cache
 
 class QueryDBMixin:
 
@@ -47,12 +47,12 @@ class QueryDBMixin:
     ) -> InstructionTreeMP | UserInstructionTreeMP:
         try:
             if template_type == "system":
-                template = await InstructionTreeMP.objects.aget(name=name)
+               
+                template = await get_or_set_cache(prefix = "system_template", key=name, field_to_get= "name", Model=InstructionTreeMP, timeout=84000)
                 return template
             elif template_type == "user_template":
-                template = await UserInstructionTreeMP.objects.aget(
-                    name=name, user=self.master_user
-                )
+                template = await get_or_set_cache(prefix = "user_template", key=[name, self.master_user], field_to_get= ["name", "user"], Model=UserInstructionTreeMP, timeout=60)
+                
                 return template
         except (InstructionTreeMP.DoesNotExist, UserInstructionTreeMP.DoesNotExist):
             return False
@@ -101,12 +101,7 @@ class QueryDBMixin:
             return False
 
     async def get_model(self, name=None) -> LLM | bool:
-        try:
-            return await LLM.objects.aget(
-                name=self.choosen_model if name is None else name
-            )
-        except LLM.DoesNotExist:
-            return False
+        return await get_or_set_cache(prefix = "system_model", key=self.choosen_model if name is None else name, field_to_get= "name", Model=LLM, timeout=84000)
 
     async def get_model_url_async(
         self,

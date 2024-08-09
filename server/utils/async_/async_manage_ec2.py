@@ -6,7 +6,7 @@ from django.utils import timezone
 from server.models.llm_server import InferenceServer
 from server.queue.ec2_manage import command_EC2
 from server.utils.constant import REGION
-
+from server.utils.async_.async_cache import get_or_set_cache
 
 async def update_server_status_in_db_async(
     instance_id: str, update_type: Literal["status", "time"]
@@ -14,7 +14,7 @@ async def update_server_status_in_db_async(
     options = ["status", "time"]
     assert update_type in options, f"'{update_type}' is not in {options}"
 
-    server_object = await InferenceServer.objects.aget(name=instance_id)
+    server_object = await get_or_set_cache(prefix = "system_server", key=instance_id, field_to_get= "name", Model=InferenceServer, timeout=84000)
 
     if update_type == "status":
         server_object.status = "pending"

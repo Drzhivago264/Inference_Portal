@@ -37,9 +37,10 @@ class BaseBot(
     """
 
     def __new__(cls, *args, **kwargs):
-            if cls is BaseBot:
-                raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
-            return object.__new__(cls, *args, **kwargs)
+        if cls is BaseBot:
+            raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
+        return object.__new__(cls, *args, **kwargs)
+
     def __init__(self):
         super().__init__()
         self.session_history = []
@@ -100,4 +101,7 @@ class BaseBot(
         raise NotImplementedError("Implemented in child class!")
 
     async def send_message_if_not_rate_limited(self):
+        raise NotImplementedError("Implemented in child class!")
+
+    async def inference(self):
         raise NotImplementedError("Implemented in child class!")
