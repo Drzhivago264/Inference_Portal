@@ -28,8 +28,7 @@ class Consumer(BaseAgent):
                     {"role": "user", "content": f"{self.message}"},
                 ]
             elif self.current_turn > 0 and self.current_turn < (self.max_turns - 1):
-                prompt = [
-                    {"role": "user", "content": f"Response: {self.message}"}]
+                prompt = [{"role": "user", "content": f"Response: {self.message}"}]
 
             elif self.current_turn == (self.max_turns - 1):
                 prompt = [

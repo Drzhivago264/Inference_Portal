@@ -7,7 +7,7 @@ import {CeleryAlert} from "../component/alert/CeleryAlert.js";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
-import { ChatPaper } from "../component/custom_ui_component/ChatPaper.js";
+import {ChatPaper} from "../component/custom_ui_component/ChatPaper.js";
 import {ChatParameter} from "../component/chat_components/ChatroomParameters.js";
 import Container from "@mui/material/Container";
 import Footer from "../component/nav/Footer.js";
@@ -98,15 +98,15 @@ function Chat() {
 	};
 	const MemoMemoryTree = useMemo(() => <MemoryTree></MemoryTree>, []);
 	return (
-		<Container maxWidth={false}  disableGutters>
+		<Container maxWidth={false} disableGutters>
 			<title>Chat</title>
 			<ResponsiveAppBar max_width={"xl"} />
-			<Container maxWidth='xl' disableGutters >
+			<Container maxWidth='xl' disableGutters>
 				<Box m={2}>
 					<Grid container spacing={2}>
 						<Grid item xs={12} lg={4}>
 							{MemoMemoryTree}
-							<Stack direction= 'row' mt={1} spacing={1}>
+							<Stack direction='row' mt={1} spacing={1}>
 								<ChatExport chat_message={chat_message} number_of_remove_message={1} setChatMessage={setChatMessage}></ChatExport>
 								<Box mt={2}>
 									<CeleryAlert />
@@ -115,7 +115,7 @@ function Chat() {
 						</Grid>
 						<Grid item xs={12} sm={8} lg={5.5}>
 							<ChatBox
-                                id={"chat-log"}
+								id={"chat-log"}
 								inputsize={550}
 								chat_message={chat_message}
 								usermessage={usermessage}
@@ -144,7 +144,7 @@ function Chat() {
 								lengthpenalty={lengthpenalty}
 								presencepenalty={presencepenalty}
 								frequencypenalty={frequencypenalty}
-                                beam={beam}
+								beam={beam}
 								setBeam={setBeam}
 								setMaxToken={setMaxToken}
 								setBestof={setBestof}

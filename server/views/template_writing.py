@@ -8,10 +8,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.utils.sync_.sync_cache import delete_cache
 from server.models.instruction import UserInstructionTreeMP
 from server.utils import constant
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
+from server.utils.sync_.sync_cache import delete_cache
 from server.views.serializer import (
     NestedUserInstructionCreateSerializer,
     UserInstructionCreateSerializer,
@@ -93,7 +93,6 @@ def update_user_instruction_tree_api(request):
                 id=parent_instruction.data["id"], user=master_user
             )
 
-            
             node.instruct = parent_instruction.data["instruct"]
             node.displayed_name = parent_instruction.data["displayed_name"]
             node.save()
@@ -106,7 +105,9 @@ def update_user_instruction_tree_api(request):
                     child_node.displayed_name = c["displayed_name"]
                     child_node.code = index
                     child_node.save()
-                    delete_cache(prefix = "user_template", key=[child_node.name, master_user])
+                    delete_cache(
+                        prefix="user_template", key=[child_node.name, master_user]
+                    )
                 else:
                     node.add_child(
                         instruct=c["instruct"],
@@ -219,7 +220,7 @@ def delete_user_instruction_tree_api(request) -> Response:
             )
         try:
             node = UserInstructionTreeMP.objects.get(id=id, user=master_user)
-            delete_cache(prefix = "user_template", key=[node.name, master_user])
+            delete_cache(prefix="user_template", key=[node.name, master_user])
             node.delete()
             return Response({"detail": "Deleted"}, status=status.HTTP_200_OK)
         except UserInstructionTreeMP.DoesNotExist:

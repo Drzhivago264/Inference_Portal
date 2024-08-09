@@ -20,11 +20,7 @@ export function chatsocket(websocket, setChatMessage, setThinking, document) {
 	websocket.current.onmessage = (message) => {
 		const dataFromServer = JSON.parse(message.data);
 		if (dataFromServer) {
-			if (
-				dataFromServer.role === "Human" ||
-				dataFromServer.role === "Server" ||
-				dataFromServer.holder
-			) {
+			if (dataFromServer.role === "Human" || dataFromServer.role === "Server" || dataFromServer.holder) {
 				if (dataFromServer.holder) {
 					setThinking(true);
 					dataFromServer.message = "";
@@ -49,14 +45,11 @@ export function chatsocket(websocket, setChatMessage, setThinking, document) {
 					...chat_message.slice(0, -1),
 					{
 						...chat_message[chat_message.length - 1],
-						message:
-							chat_message[chat_message.length - 1].message +
-							dataFromServer.message,
+						message: chat_message[chat_message.length - 1].message + dataFromServer.message,
 					},
 				]);
 			}
-			document.getElementById("chat-log").scrollTop =
-				document.getElementById("chat-log").scrollHeight;
+			document.getElementById("chat-log").scrollTop = document.getElementById("chat-log").scrollHeight;
 		}
 	};
 }

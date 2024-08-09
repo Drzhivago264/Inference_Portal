@@ -13,7 +13,7 @@ import {CeleryAlert} from "../component/alert/CeleryAlert.js";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import {ChatExport} from "../component/import_export/ChatExport.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
-import { ChatPaper } from "../component/custom_ui_component/ChatPaper.js";
+import {ChatPaper} from "../component/custom_ui_component/ChatPaper.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import EditorExport from "../component/import_export/EditorExport.js";
@@ -308,7 +308,7 @@ function Agent() {
 							</Paper>
 							<EditorExport editorref={editorref} />
 							<ChatExport chat_message={chat_message} number_of_remove_message={2} setChatMessage={setChatMessage}></ChatExport>
-                            <CeleryAlert />
+							<CeleryAlert />
 						</Grid>
 						<Grid item xs={12} md={8} xl={4}>
 							<Accordion defaultExpanded>
@@ -451,12 +451,10 @@ function Agent() {
 									setFrequencyPenalty={setFrequencyPenalty}
 									max_turn={max_turn}
 									setMaxTurn={setMaxTurn}></OpenAPIParameter>
-								
 							</Stack>
 						</Grid>
 
-						<Grid item xs={12} xl={8} >
-                            
+						<Grid item xs={12} xl={8}>
 							<Accordion defaultExpanded>
 								<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='editor-content' id='editor-header'>
 									<Typography sx={{color: "text.secondary"}}>Editor</Typography>

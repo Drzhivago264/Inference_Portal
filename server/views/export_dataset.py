@@ -35,7 +35,13 @@ def export_user_dataset_api(request):
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
             )
         try:
-            dataset = get_or_set_cache(prefix = "user_dataset", key=[master_user, dataset_id], field_to_get= ["user", "id"], Model=Dataset, timeout=84000) 
+            dataset = get_or_set_cache(
+                prefix="user_dataset",
+                key=[master_user, dataset_id],
+                field_to_get=["user", "id"],
+                Model=Dataset,
+                timeout=84000,
+            )
             result_records = DatasetRecord.objects.filter(dataset=dataset)
 
             record_count = result_records.count()
