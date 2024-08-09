@@ -7,7 +7,7 @@ from vectordb import vectordb
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM, InferenceServer
 from server.utils import constant
-
+from server.utils.sync_.sync_cache import get_or_set_cache
 
 def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
     """Retrieve URL, name, and status of an available inference server for a given model.
@@ -49,10 +49,8 @@ def get_model(model: str) -> Union[LLM, bool]:
     Returns:
         Union[LLM, bool]: The LLM object if found, False otherwise.
     """
-    try:
-        return LLM.objects.get(name=model)
-    except LLM.DoesNotExist:
-        return False
+    
+    return get_or_set_cache(prefix = "system_model", key=model, field_to_get= "name", Model=LLM, timeout=84000)
 
 
 def get_chat_context(

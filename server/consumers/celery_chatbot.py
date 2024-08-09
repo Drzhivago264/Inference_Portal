@@ -18,6 +18,9 @@ class Consumer(BaseChatbot):
         self.backend = "Celery"
 
     async def send_message_if_not_rate_limited(self, text_data):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         try:
             validated = ChatSchema.model_validate_json(text_data)
             if not self.key_object:

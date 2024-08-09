@@ -12,6 +12,7 @@ from server.models.dataset import Dataset, DatasetRecord
 from server.queue.export_dataset import export_large_dataset
 from server.utils import constant
 from server.utils.sync_.manage_permissions import get_master_key_and_master_user
+from server.utils.sync_.sync_cache import get_or_set_cache
 from server.views.serializer import DatasetExportSerializer, DatasetRecordGetSerialzier
 
 
@@ -34,7 +35,7 @@ def export_user_dataset_api(request):
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
             )
         try:
-            dataset = Dataset.objects.get(user=master_user, id=dataset_id)
+            dataset = get_or_set_cache(prefix = "user_dataset", key=[master_user, dataset_id], field_to_get= ["user", "id"], Model=Dataset, timeout=84000) 
             result_records = DatasetRecord.objects.filter(dataset=dataset)
 
             record_count = result_records.count()

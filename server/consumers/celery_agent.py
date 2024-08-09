@@ -19,6 +19,7 @@ class Consumer(BaseAgent):
 
     # Receive message from WebSocket
     async def send_message_if_not_rate_limited(self, text_data):
+
         text_data_json = json.loads(text_data)
         if "message" in text_data_json:
             try:
@@ -107,6 +108,9 @@ class Consumer(BaseAgent):
                 )
 
     async def chat_message(self, event):
+        self.time = timezone.localtime(
+            timezone.now(), pytz.timezone(self.timezone)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         if "max_turn_reached" in event:
             await self.send(
                 text_data=json.dumps(

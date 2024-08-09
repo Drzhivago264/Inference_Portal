@@ -34,6 +34,7 @@ def get_or_set_cache(Model: TModel, prefix: str, key: str | int | list, field_to
     """
     cache_key = prepare_cache_key(prefix=prefix, key=key)
     model = cache.get(cache_key)
+
     if model is None:
         try:
             if isinstance(key, str) or isinstance(key, int):
@@ -41,7 +42,7 @@ def get_or_set_cache(Model: TModel, prefix: str, key: str | int | list, field_to
             elif isinstance(key, list):
                 model = Model.objects.get(**dict(zip(field_to_get, key)))
             cache.set(cache_key, model, timeout)
-        except model.DoesNotExist:
+        except Model.DoesNotExist:
             return False
     else:
         print("cache hit")

@@ -14,7 +14,7 @@ async def update_server_status_in_db_async(
     options = ["status", "time"]
     assert update_type in options, f"'{update_type}' is not in {options}"
 
-    server_object = await get_or_set_cache(prefix = "system_server", key=instance_id, field_to_get= "name", Model=InferenceServer, timeout=84000)
+    server_object = await InferenceServer.objects.aget(name=instance_id)
 
     if update_type == "status":
         server_object.status = "pending"

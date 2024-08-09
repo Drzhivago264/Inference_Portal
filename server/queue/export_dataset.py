@@ -10,6 +10,7 @@ from django.core.cache import cache
 from smart_open import open
 
 from server.models.dataset import Dataset, DatasetRecord
+from server.utils.sync_.sync_cache import get_or_set_cache  
 
 logger = get_task_logger(__name__)
 r2 = config("r2_access_key_id")
@@ -48,7 +49,7 @@ def export_large_dataset(
             endpoint_url=f"https://{r2_account_id}.r2.cloudflarestorage.com/professorparakeetmediafiles",
             region_name="auto",
         )
-        dataset = Dataset.objects.get(id=dataset_id)
+        dataset = get_or_set_cache(prefix = "user_dataset", key=dataset_id, field_to_get= "id", Model=Dataset, timeout=120) 
         result_records = DatasetRecord.objects.filter(dataset=dataset)
         i = 0
         with open(
