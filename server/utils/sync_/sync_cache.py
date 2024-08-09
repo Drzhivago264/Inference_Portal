@@ -1,10 +1,13 @@
-from typing import TypeVar, Tuple
-from django.utils import timezone
+from typing import Tuple, TypeVar
+
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.contrib.auth.models import User
+from django.utils import timezone
+
 from server.models.api_key import APIKEY
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
+
 TModel = TypeVar("TModel", bound=models.Model)
 
 
@@ -22,7 +25,9 @@ def prepare_cache_key(prefix: str, key: str | list) -> str:
     return cache_key
 
 
-def get_user_or_set_cache(prefix: str, key: str, timeout: int, current_user: User) -> Tuple[APIKEY, User] | Tuple[bool, bool]:
+def get_user_or_set_cache(
+    prefix: str, key: str, timeout: int, current_user: User
+) -> Tuple[APIKEY, User] | Tuple[bool, bool]:
     cache_key = prepare_cache_key(prefix=prefix, key=key)
     user_tuple = cache.get(cache_key)
     if user_tuple is None:
@@ -30,7 +35,8 @@ def get_user_or_set_cache(prefix: str, key: str, timeout: int, current_user: Use
             user_tuple = (current_user.apikey, current_user)
         elif current_user.groups.filter(name="slave_user").exists():
             if (
-                current_user.finegrainapikey.ttl + current_user.finegrainapikey.created_at
+                current_user.finegrainapikey.ttl
+                + current_user.finegrainapikey.created_at
                 > timezone.now()
                 or current_user.finegrainapikey.ttl is None
             ):
@@ -54,20 +60,7 @@ def get_or_set_cache(
     field_to_get: str | list,
     timeout: int,
 ) -> TModel:
-    """
-    Retrieves a model instance from the cache if it exists; otherwise, fetches the model instance from the database,
-    stores it in the cache, and returns it.
 
-    Args:
-        Model (TModel): The Django model class.
-        prefix (str): The cache prefix.
-        key (str): The cache key to look up.
-        field_to_get (str): The field name to retrieve from the model.
-        timeout (int, optional): The cache timeout in seconds. Defaults to 600.
-
-    Returns:
-        The value retrieved from the cache or the database.
-    """
     cache_key = prepare_cache_key(prefix=prefix, key=key)
     model = cache.get(cache_key)
 
@@ -83,7 +76,12 @@ def get_or_set_cache(
     return model
 
 
-def get_descendants_or_cache(prefix: str, key: str, parent_instance: InstructionTreeMP | UserInstructionTreeMP, timeout: int):
+def get_descendants_or_cache(
+    prefix: str,
+    key: str,
+    parent_instance: InstructionTreeMP | UserInstructionTreeMP,
+    timeout: int,
+):
     cache_key = prepare_cache_key(prefix, key)
     descendants = cache.get(cache_key)
     if descendants is None:
@@ -118,13 +116,10 @@ def filter_or_set_cache(
     if model_list is None:
         try:
             if isinstance(key, str) or isinstance(key, int):
-                model_list = [
-                    m for m in Model.objects.filter(**{field_to_get: key})
-                ]
+                model_list = [m for m in Model.objects.filter(**{field_to_get: key})]
             elif isinstance(key, list):
                 model_list = [
-                    m
-                    for m in Model.objects.filter(**dict(zip(field_to_get, key)))
+                    m for m in Model.objects.filter(**dict(zip(field_to_get, key)))
                 ]
             cache.set(cache_key, model_list, timeout)
         except Model.DoesNotExist:

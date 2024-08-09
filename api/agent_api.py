@@ -1,5 +1,3 @@
-import random
-
 import httpx
 from django.http import StreamingHttpResponse
 from ninja import Router
@@ -9,7 +7,6 @@ from transformers import AutoTokenizer
 from api.api_schema import AgentResponse, AgentSchema, Error
 from api.utils import (
     check_permission,
-    get_model_url,
     get_system_template,
     get_user_template,
     send_request_async,
@@ -22,6 +19,7 @@ from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils import constant
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
+from server.utils.sync_.inference import correct_beam_best_of
 
 router = Router()
 
@@ -58,18 +56,13 @@ async def agentcompletion(request, data: AgentSchema):
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
-            available_server_list = await get_model_url(data.model)
-            if not available_server_list:
+            url, instance_id, server_status = await query_db_mixin.get_model_url_asyncl(
+                name=data.model
+            )
+            if not url:
                 raise HttpError(442, "Server is currently offline")
             else:
-                inference_server = random.choice(available_server_list)
-                server_status = inference_server.status
-                if not data.beam:
-                    best_of = 1
-                elif data.beam and data.best_of <= 1:
-                    best_of = 2
-                else:
-                    best_of = data.best_of
+                beam, best_of = correct_beam_best_of(data.beam, data.best_of)
                 child_template_name = data.child_template_name
                 parent_template_name = data.parent_template_name
                 use_my_template = data.use_my_template
@@ -119,25 +112,23 @@ async def agentcompletion(request, data: AgentSchema):
                     "n": data.n,
                     "best_of": best_of,
                     "presence_penalty": data.presence_penalty,
-                    "temperature": data.temperature if not data.beam else 0,
+                    "temperature": data.temperature if not beam else 0,
                     "max_tokens": data.max_tokens,
                     "top_k": int(data.top_k),
-                    "top_p": data.top_p if not data.beam else 1,
-                    "length_penalty": data.length_penalty if data.beam else 1,
+                    "top_p": data.top_p if not beam else 1,
+                    "length_penalty": data.length_penalty if beam else 1,
                     "frequency_penalty": data.frequency_penalty,
-                    "early_stopping": data.early_stopping if data.beam else False,
+                    "early_stopping": data.early_stopping if beam else False,
                     "stream": data.stream,
-                    "use_beam_search": data.beam,
+                    "use_beam_search": beam,
                 }
                 await update_server_status_in_db_async(
-                    instance_id=inference_server.name, update_type="time"
+                    instance_id=instance_id, update_type="time"
                 )
                 if server_status == "running":
                     if not data.stream:
                         try:
-                            response = await send_request_async(
-                                inference_server.url, context
-                            )
+                            response = await send_request_async(url, context)
                             if not response:
                                 raise HttpError(404, "Time Out! Slow down")
                             else:
@@ -164,7 +155,7 @@ async def agentcompletion(request, data: AgentSchema):
                         try:
                             res = StreamingHttpResponse(
                                 send_stream_request_agent_async(
-                                    url=inference_server.url,
+                                    url=url,
                                     context=context,
                                     processed_prompt=processed_prompt,
                                     key_object=key_object,
@@ -183,11 +174,9 @@ async def agentcompletion(request, data: AgentSchema):
                         except:
                             raise HttpError(404, "Time Out! Slow down")
                 elif server_status == "stopped" or "stopping":
-                    command_EC2.delay(
-                        inference_server.name, region=constant.REGION, action="on"
-                    )
+                    command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(
-                        instance_id=inference_server.name, update_type="status"
+                        instance_id=instance_id, update_type="status"
                     )
                     raise HttpError(
                         442, "Server is starting up, try again in 400 seconds"

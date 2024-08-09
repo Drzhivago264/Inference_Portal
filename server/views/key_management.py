@@ -217,7 +217,7 @@ def generate_key_api(request: HttpRequest) -> Response:
         master_group.user_set.add(user)
 
         # Adding all permission for master user
-        permissions =  Permission.objects.filter(
+        permissions = Permission.objects.filter(
             codename__in=constant.DEFAULT_PERMISSION_CODENAMES
         )
         user.user_permissions.add(*permissions)

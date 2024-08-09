@@ -1,13 +1,10 @@
-import random
-
 import httpx
-from django_ratelimit.core import is_ratelimited
 from ninja import Router
 from ninja.errors import HttpError
 from transformers import AutoTokenizer
 
 from api.api_schema import Error, PromptResponseSchema, PromptSchema
-from api.utils import check_permission, get_model_url, send_request_async
+from api.utils import check_permission, send_request_async
 from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.queue.log_prompt_response import celery_log_prompt_response
@@ -15,6 +12,7 @@ from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils import constant
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
+from server.utils.sync_.inference import correct_beam_best_of
 
 router = Router()
 
@@ -55,19 +53,13 @@ async def textcompletion(request, data: PromptSchema):
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
-            available_server_list = await get_model_url(data.model)
-            if not available_server_list:
+            url, instance_id, server_status = await query_db_mixin.get_model_url_asyncl(
+                name=data.model
+            )
+            if not url:
                 raise HttpError(442, "Server is currently offline")
             else:
-                inference_server = random.choice(available_server_list)
-                server_status = inference_server.status
-                if not data.beam:
-                    best_of = 1
-                elif data.beam and data.best_of <= 1:
-                    best_of = 2
-                else:
-                    best_of = data.best_of
-
+                beam, best_of = correct_beam_best_of(data.beam, data.best_of)
                 tokeniser = AutoTokenizer.from_pretrained(model.base)
                 chat = [
                     {"role": "system", "content": "Complete the following sentence."},
@@ -78,25 +70,23 @@ async def textcompletion(request, data: PromptSchema):
                     "prompt": processed_prompt,
                     "n": data.n,
                     "best_of": best_of,
-                    "use_beam_search": data.beam,
+                    "use_beam_search": beam,
                     "stream": False,
                     "presence_penalty": data.presence_penalty,
-                    "temperature": data.temperature if not data.beam else 0,
+                    "temperature": data.temperature if not beam else 0,
                     "max_tokens": data.max_tokens,
                     "top_k": int(data.top_k),
-                    "top_p": data.top_p if not data.beam else 1,
-                    "length_penalty": data.length_penalty if data.beam else 1,
+                    "top_p": data.top_p if not beam else 1,
+                    "length_penalty": data.length_penalty if beam else 1,
                     "frequency_penalty": data.frequency_penalty,
-                    "early_stopping": data.early_stopping if data.beam else False,
+                    "early_stopping": data.early_stopping if beam else False,
                 }
                 await update_server_status_in_db_async(
-                    instance_id=inference_server.name, update_type="time"
+                    instance_id=instance_id, update_type="time"
                 )
                 if server_status == "running":
                     try:
-                        response = await send_request_async(
-                            inference_server.url, context
-                        )
+                        response = await send_request_async(url, context)
                         if not response:
                             raise HttpError(404, "Time Out!")
                         else:
@@ -113,11 +103,9 @@ async def textcompletion(request, data: PromptSchema):
                     except httpx.ReadTimeout:
                         raise HttpError(404, "Time Out! Slow down")
                 elif server_status == "stopped" or "stopping":
-                    command_EC2.delay(
-                        inference_server.name, region=constant.REGION, action="on"
-                    )
+                    command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(
-                        instance_id=inference_server.name, update_type="status"
+                        instance_id=instance_id, update_type="status"
                     )
                     raise HttpError(
                         442, "Server is starting up, try again in 400 seconds"

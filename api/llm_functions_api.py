@@ -1,6 +1,5 @@
 import dspy
 from decouple import config
-from django_ratelimit.core import is_ratelimited
 from ninja import Router
 from ninja.errors import HttpError
 

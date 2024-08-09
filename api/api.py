@@ -1,12 +1,14 @@
-from typing import List
 import hashlib
+from typing import List
+
 from asgiref.sync import sync_to_async
+from django.core.cache import cache
 from django.utils import timezone
 from django_ratelimit.core import is_ratelimited
 from ninja import NinjaAPI, Swagger
 from ninja.errors import HttpError
 from ninja.security import HttpBearer
-from django.core.cache import cache
+
 from api.agent_api import router as agent_router
 from api.api_schema import Error, ResponseLogRequest, ResponseLogResponse
 from api.chat_api import router as chat_router
@@ -21,11 +23,13 @@ class GlobalAuth(HttpBearer):
     def authenticate(self, request, token):
         model_dispatcher = {"41": APIKEY, "73": FineGrainAPIKEY}
         prefix = "api_user_tuple"
-        cache_key = hashlib.sha512(token.encode('utf-8')).hexdigest()
+        cache_key = hashlib.sha512(token.encode("utf-8")).hexdigest()
         user_tuple = cache.get(f"{prefix}_{cache_key}")
         if user_tuple is None:
             try:
-                key_object = model_dispatcher[str(len(token))].objects.get_from_key(token)
+                key_object = model_dispatcher[str(len(token))].objects.get_from_key(
+                    token
+                )
                 if key_object.user.groups.filter(name="master_user").exists():
                     user_tuple = (key_object, key_object.user, None)
                     cache.set(f"{prefix}_{cache_key}", user_tuple, timeout=10)
@@ -35,7 +39,11 @@ class GlobalAuth(HttpBearer):
                         key_object.ttl + key_object.created_at > timezone.now()
                         or key_object.ttl is None
                     ):
-                        user_tuple = (key_object.master_key, key_object.master_key.user, key_object)
+                        user_tuple = (
+                            key_object.master_key,
+                            key_object.master_key.user,
+                            key_object,
+                        )
                         return user_tuple
                     else:
                         user_tuple = (False, False, False)

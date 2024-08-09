@@ -11,7 +11,6 @@ from server.api_throttling_rates import DatasetExportRateThrottle
 from server.models.dataset import Dataset, DatasetRecord
 from server.queue.export_dataset import export_large_dataset
 from server.utils import constant
-
 from server.utils.sync_.sync_cache import get_or_set_cache, get_user_or_set_cache
 from server.views.serializer import DatasetExportSerializer, DatasetRecordGetSerialzier
 
@@ -29,7 +28,12 @@ def export_user_dataset_api(request):
     if serializer.is_valid():
         dataset_id = serializer.data["id"]
         extension = serializer.data["extension"]
-        _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
+        _, master_user = get_user_or_set_cache(
+            prefix="user_tuple",
+            key=current_user.password,
+            timeout=60,
+            current_user=current_user,
+        )
         if not master_user:
             return Response(
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND

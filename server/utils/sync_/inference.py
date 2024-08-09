@@ -21,6 +21,14 @@ aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
 
+def correct_beam_best_of(beam, best_of):
+    if not beam:
+        best_of = 1
+    elif beam and best_of <= 1:
+        best_of = 2
+    return beam, best_of
+
+
 def inference_mode(
     llm: LLM,
     key_object: APIKEY,

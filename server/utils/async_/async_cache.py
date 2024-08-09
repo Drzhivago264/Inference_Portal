@@ -1,9 +1,8 @@
-from typing import TypeVar, Tuple
-from django.utils import timezone
+from typing import TypeVar
+
 from django.core.cache import cache
 from django.db import models
-from django.contrib.auth.models import User
-from server.models.api_key import APIKEY
+
 from server.utils.sync_.sync_cache import prepare_cache_key
 
 TModel = TypeVar("TModel", bound=models.Model)
@@ -23,12 +22,12 @@ async def get_or_set_cache(
     Args:
         Model (TModel): The Django model class.
         prefix (str): The cache prefix.
-        key (str): The cache key to look up.
-        field_to_get (str): The field name to retrieve from the model.
+        key (str|int|list): The cache key to look up.
+        field_to_get (str|list): The field name to retrieve from the model.
         timeout (int, optional): The cache timeout in seconds. Defaults to 600.
 
     Returns:
-        The value retrieved from the cache or the database.
+        Django Model Instance retrieved from the cache or the database.
     """
     cache_key = prepare_cache_key(prefix=prefix, key=key)
     model = await cache.aget(cache_key)
@@ -44,6 +43,7 @@ async def get_or_set_cache(
 
     return model
 
+
 async def filter_or_set_cache(
     Model: TModel,
     prefix: str,
@@ -58,12 +58,12 @@ async def filter_or_set_cache(
     Args:
         Model (TModel): The Django model class.
         prefix (str): The cache prefix.
-        key (str): The cache key to look up.
-        field_to_get (str): The field name to retrieve from the model.
+        key (str|int|list): The cache key to look up.
+        field_to_get (str|list): The field name to retrieve from the model.
         timeout (int, optional): The cache timeout in seconds. Defaults to 600.
 
     Returns:
-        The value retrieved from the cache or the database.
+        A list of django model intances retrieved from the cache or the database.
     """
     cache_key = prepare_cache_key(prefix=prefix, key=key)
     model_list = await cache.aget(cache_key)

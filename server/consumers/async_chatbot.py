@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from server.consumers.base_chatbot import BaseChatbot
 from server.consumers.pydantic_validator import ChatSchema
-from server.utils.sync_.inference import inference_mode
+from server.utils.sync_.inference import correct_beam_best_of, inference_mode
 
 
 class Consumer(BaseChatbot):
@@ -21,11 +21,7 @@ class Consumer(BaseChatbot):
         self.time = timezone.localtime(
             timezone.now(), pytz.timezone(self.timezone)
         ).strftime("%Y-%m-%d %H:%M:%S")
-        if not self.beam:
-            self.best_of = 1
-        elif self.beam and self.best_of <= 1:
-            self.best_of = 2
-
+        self.beam, self.best_of = correct_beam_best_of(self.beam, self.best_of)
         llm = await self.get_model()
         if llm:
             session_list_to_string = await sync_to_async(
