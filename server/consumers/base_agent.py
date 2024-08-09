@@ -1,8 +1,9 @@
 import json
 
-from pydantic import ValidationError
 import pytz
 from django.utils import timezone
+from pydantic import ValidationError
+
 from server.consumers.base import BaseBot
 from server.consumers.pydantic_validator import (
     AgentSchemaInstruct,
@@ -17,8 +18,7 @@ class BaseAgent(BaseBot):
 
     def __new__(cls, *args, **kwargs):
         if cls is BaseBot:
-            raise TypeError(
-                f"only children of '{cls.__name__}' may be instantiated")
+            raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
         return BaseBot.__new__(cls, *args, **kwargs)
 
     def __init__(self):
@@ -56,8 +56,8 @@ class BaseAgent(BaseBot):
             await self.send_message_if_not_rate_limited(text_data)
             text_data_json = json.loads(text_data)
             self.time = timezone.localtime(
-            timezone.now(), pytz.timezone(self.timezone)
-        ).strftime("%Y-%m-%d %H:%M:%S")
+                timezone.now(), pytz.timezone(self.timezone)
+            ).strftime("%Y-%m-%d %H:%M:%S")
             if "paragraph" in text_data_json:
                 try:
                     paragraph = AgentSchemaParagraph.model_validate_json(
@@ -162,8 +162,7 @@ class BaseAgent(BaseBot):
                     self.current_turn = 0
                     self.session_history = []
                     await self.send(
-                        text_data=json.dumps(
-                            {"child_instruct": child_instruct})
+                        text_data=json.dumps({"child_instruct": child_instruct})
                     )
                 except ValidationError as e:
                     await self.send(

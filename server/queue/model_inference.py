@@ -19,7 +19,7 @@ from server.utils.sync_.inference import (
 )
 from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
-from server.utils.sync_.query_database import get_model_url, get_model
+from server.utils.sync_.query_database import get_model, get_model_url
 
 region = constant.REGION
 logger = get_task_logger(__name__)
@@ -63,7 +63,7 @@ def inference(
     elif not context["beam"] and context["best_of"] <= 1:
         context["best_of"] = 2
 
-    llm = get_model(model=model) 
+    llm = get_model(model=model)
     if llm:
         url, instance_id, server_status = get_model_url(llm)
         session_list_to_string = inference_mode(
@@ -217,9 +217,9 @@ def agent_inference(
     client = OpenAI(
         api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY
     )
-    key_object =  APIKEY.objects.get(hashed_key=key)
+    key_object = APIKEY.objects.get(hashed_key=key)
     llm = get_model(model=model)
-    
+
     if llm:
         if 0 <= current_turn_inner < max_turns:
             if current_turn_inner == 0:

@@ -139,9 +139,8 @@ function CostMonitoring() {
 			y: {
 				stacked: true,
 			},
-         
 		},
-        
+
 		plugins: {
 			legend: {
 				position: "bottom",
@@ -177,7 +176,7 @@ function CostMonitoring() {
 			legend: {
 				position: "bottom",
 			},
-            autocolors: {
+			autocolors: {
 				enabled: true,
 			},
 			title: {

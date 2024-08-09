@@ -5,8 +5,9 @@ from django.utils import timezone
 
 from server.models.llm_server import InferenceServer
 from server.queue.ec2_manage import command_EC2
-from server.utils.constant import REGION
 from server.utils.async_.async_cache import get_or_set_cache
+from server.utils.constant import REGION
+
 
 async def update_server_status_in_db_async(
     instance_id: str, update_type: Literal["status", "time"]

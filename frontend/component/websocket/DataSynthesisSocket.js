@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { multilineColumn } from "../custom_ui_component/MultipleLineEdittingDataGrid";
+import {multilineColumn} from "../custom_ui_component/MultipleLineEdittingDataGrid";
 
 export function datasynthesissocket(
 	websocket,
@@ -41,22 +41,11 @@ export function datasynthesissocket(
 	websocket.current.onmessage = (message) => {
 		const dataFromServer = JSON.parse(message.data);
 
-		if (
-			Object.prototype.hasOwnProperty.call(
-				dataFromServer,
-				"swap_instruction"
-			)
-		) {
-			const new_child_template_list = Object.keys(
-				dataFromServer.child_template_name_list
-			).map((template_name) => ({
-				displayed_name:
-					dataFromServer.child_template_displayed_name_list[
-						template_name
-					],
+		if (Object.prototype.hasOwnProperty.call(dataFromServer, "swap_instruction")) {
+			const new_child_template_list = Object.keys(dataFromServer.child_template_name_list).map((template_name) => ({
+				displayed_name: dataFromServer.child_template_displayed_name_list[template_name],
 				name: dataFromServer.child_template_name_list[template_name],
-				instruct:
-					dataFromServer.child_template_instruct_list[template_name],
+				instruct: dataFromServer.child_template_instruct_list[template_name],
 			}));
 
 			setUserParentInstruct(dataFromServer.swap_instruction);
@@ -75,24 +64,14 @@ export function datasynthesissocket(
 					status: dataFromServer.status,
 				},
 			]);
-		} else if (
-			Object.prototype.hasOwnProperty.call(
-				dataFromServer,
-				"response_list"
-			)
-		) {
+		} else if (Object.prototype.hasOwnProperty.call(dataFromServer, "response_list")) {
 			const response_list = {};
 			const additional_column = [];
 
 			if (dataFromServer.response_list.length > 0) {
 				dataFromServer.response_list.forEach((response, i) => {
 					const columnName = `Evolved_Prompt_No_${i}`;
-					if (
-						!Object.prototype.hasOwnProperty.call(
-							column_ref.current,
-							columnName
-						)
-					) {
+					if (!Object.prototype.hasOwnProperty.call(column_ref.current, columnName)) {
 						additional_column.push({
 							field: columnName,
 							headerName: `Evolved Prompt No.${i}`,
@@ -105,17 +84,13 @@ export function datasynthesissocket(
 					}
 				});
 
-				if (
-					JSON.stringify(response_list) !==
-						JSON.stringify(column_ref.current) &&
-					additional_column.length > 0
-				) {
+				if (JSON.stringify(response_list) !== JSON.stringify(column_ref.current) && additional_column.length > 0) {
 					setCSVColumn([...column_ref.current, ...additional_column]);
 				}
 
 				const new_csv_row = row_ref.current.map((row) => {
 					if (row.id === dataFromServer.row_no) {
-						return { ...row, ...response_list };
+						return {...row, ...response_list};
 					} else {
 						return row;
 					}
