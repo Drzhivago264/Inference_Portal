@@ -10,7 +10,8 @@ from rest_framework.throttling import AnonRateThrottle
 from server.models.api_key import APIKEY, FineGrainAPIKEY
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.log import MemoryTreeMP
-from server.utils.sync_.manage_permissions import get_master_key_and_master_user
+
+from server.utils.sync_.sync_cache import get_descendants_or_cache, filter_or_set_cache, get_user_or_set_cache
 from server.views.serializer import (
     InstructionTreeSerializer,
     MemoryTreeSerializer,
@@ -75,18 +76,18 @@ def hub_redirect_api(request: HttpRequest) -> Response:
 @permission_classes([IsAuthenticated])
 def instruction_tree_api(request):
     current_user = request.user
-    _, master_user = get_master_key_and_master_user(current_user=current_user)
+    _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
     if not master_user:
         return Response(
             {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
         )
-    root_nodes = InstructionTreeMP.objects.filter(depth=1)
+    root_nodes = filter_or_set_cache(prefix="system_instruction_root_node", key=1, field_to_get='depth', Model=InstructionTreeMP, timeout=84600)
     user_root_nodes = UserInstructionTreeMP.objects.filter(depth=2, user=master_user)
     serializer = InstructionTreeSerializer(root_nodes, many=True)
     user_serializer = UserInstructionTreeSerializer(user_root_nodes, many=True)
     for root in root_nodes:
         if root.name == "Assignment Agent":
-            default_child_template = root.get_descendants()
+            default_child_template = get_descendants_or_cache(prefix="system_template_descendant", key=root.name, parent_instance=root, timeout=84600) 
             serializer_children = InstructionTreeSerializer(
                 default_child_template, many=True
             )
@@ -128,7 +129,7 @@ def memory_tree_api(request):
     else:
         paginator = PageNumberPagination()
         paginator.page_size = 1
-        master_key, _ = get_master_key_and_master_user(current_user=current_user)
+        master_key, _ = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
         if not master_key:
             return Response(
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND

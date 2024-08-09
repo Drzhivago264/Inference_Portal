@@ -28,6 +28,7 @@ from server.models.api_key import APIKEY
 from server.models.product import Crypto, PaymentHistory, Price, Product
 from server.utils import constant
 from server.utils.sync_.manage_monero import manage_monero
+from server.utils.sync_.sync_cache import filter_or_set_cache
 from server.views.serializer import (
     CheckKeySerializer,
     CreateKeySerializer,
@@ -216,7 +217,7 @@ def generate_key_api(request: HttpRequest) -> Response:
         master_group.user_set.add(user)
 
         # Adding all permission for master user
-        permissions = Permission.objects.filter(
+        permissions =  Permission.objects.filter(
             codename__in=constant.DEFAULT_PERMISSION_CODENAMES
         )
         user.user_permissions.add(*permissions)

@@ -12,7 +12,7 @@ from server.models.llm_server import LLM, InferenceServer
 from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils import constant
-
+from server.utils.async_.async_cache import get_or_set_cache
 
 async def check_permission(user_object, permission, destination):
     if not await sync_to_async(user_object.has_perm)(permission):
@@ -21,7 +21,13 @@ async def check_permission(user_object, permission, destination):
 
 async def get_system_template(name: str) -> str:
     try:
-        template = await InstructionTreeMP.objects.aget(name=name)
+        template = await get_or_set_cache(
+                    prefix="system_template",
+                    key=name,
+                    field_to_get="name",
+                    Model=InstructionTreeMP,
+                    timeout=84000,
+                ) 
         return template.instruct
     except InstructionTreeMP.DoesNotExist:
         raise HttpError(404, f"template: {name} is incorrect")
@@ -38,14 +44,12 @@ async def get_user_template(name: str, user_object: User) -> str:
 
 
 async def get_model_url(model: str) -> list | bool:
-    model_list = []
     try:
-        async for m in InferenceServer.objects.filter(
+        model_list = [m async for m in InferenceServer.objects.filter(
             hosted_model__name=model, availability="Available"
-        ):
-            model_list.append(m)
+        )]
         return model_list
-    except:
+    except IndexError:
         return False
 
 

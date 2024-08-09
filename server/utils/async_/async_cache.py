@@ -1,8 +1,9 @@
-from typing import TypeVar
-
+from typing import TypeVar, Tuple
+from django.utils import timezone
 from django.core.cache import cache
 from django.db import models
-
+from django.contrib.auth.models import User
+from server.models.api_key import APIKEY
 from server.utils.sync_.sync_cache import prepare_cache_key
 
 TModel = TypeVar("TModel", bound=models.Model)
@@ -40,10 +41,8 @@ async def get_or_set_cache(
             await cache.aset(cache_key, model, timeout)
         except Model.DoesNotExist:
             return False
-    else:
-        print("cache hit")
-    return model
 
+    return model
 
 async def filter_or_set_cache(
     Model: TModel,
@@ -51,7 +50,7 @@ async def filter_or_set_cache(
     key: str | int | list,
     field_to_get: str | list,
     timeout: int,
-) -> TModel:
+) -> list:
     """
     Filter a list of model instances from the cache if it exists; otherwise, fetches the model instances from the database,
     stores it in the cache, and returns it.
@@ -82,6 +81,5 @@ async def filter_or_set_cache(
             await cache.aset(cache_key, model_list, timeout)
         except Model.DoesNotExist:
             return False
-    else:
-        print("cache hit")
+
     return model_list

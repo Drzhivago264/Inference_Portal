@@ -5,29 +5,38 @@ from typing import Literal, Tuple
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.utils import timezone
-
+from django.core.cache import cache
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
 from server.utils.async_.async_cache import get_or_set_cache as async_get_or_set_cache
 from server.utils.sync_.sync_cache import get_or_set_cache as sync_get_or_set_cache
-
+from server.utils.sync_.sync_cache import get_descendants_or_cache as sync_get_descendants_or_cache
+from server.utils.sync_.sync_cache import prepare_cache_key
+from server.utils import constant
 
 class QueryDBMixin:
 
     async def get_master_key_and_master_user(self):
-        if await sync_to_async(self.user.groups.filter(name="master_user").exists)():
-            key_object = await sync_to_async(lambda: self.user.apikey)()
-            return key_object, self.user, None
-        elif await sync_to_async(self.user.groups.filter(name="slave_user").exists)():
-            token = await sync_to_async(lambda: self.user.finegrainapikey)()
-            if token.ttl + token.created_at > timezone.now() or token.ttl is None:
-                key_object = await sync_to_async(lambda: token.master_key)()
-                master_user = await sync_to_async(lambda: key_object.user)()
-                return key_object, master_user, token
+        cache_key = prepare_cache_key(
+            prefix="user_and_token_tuple", key=self.user.password)
+        user_tuple = await cache.aget(cache_key)
+        if user_tuple is None:
+            if await sync_to_async(self.user.groups.filter(name="master_user").exists)():
+                key_object = await sync_to_async(lambda: self.user.apikey)()
+                user_tuple = (key_object, self.user, None)
+            elif await sync_to_async(self.user.groups.filter(name="slave_user").exists)():
+                token = await sync_to_async(lambda: self.user.finegrainapikey)()
+                if token.ttl + token.created_at > timezone.now() or token.ttl is None:
+                    key_object = await sync_to_async(lambda: token.master_key)()
+                    master_user = await sync_to_async(lambda: key_object.user)()
+                    user_tuple = (key_object, master_user, token)
+                else:
+                    user_tuple = (False, False, False)
             else:
-                return False, False, False
-        else:
-            return False, False, False
+                user_tuple = (False, False, False)
+            await cache.aset(cache_key, user_tuple, timeout=60)
+
+        return user_tuple
 
     async def check_permission(self, permission_code: str, destination: str):
         if await sync_to_async(self.user.has_perm)(permission_code):
@@ -88,7 +97,9 @@ class QueryDBMixin:
                     Model=InstructionTreeMP,
                     timeout=84000,
                 )
-                child_template = parent_template.get_descendants()
+                child_template = sync_get_descendants_or_cache(
+                    prefix="system_template_descendant", key=parent_template.name, parent_instance=parent_template, timeout=84600)
+
                 return {
                     "name_list": [c.name for c in child_template],
                     "default_child": child_template[0].name,
@@ -139,15 +150,19 @@ class QueryDBMixin:
     ) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
 
         try:
-            model_list = [
-                m
-                async for m in InferenceServer.objects.filter(
-                    hosted_model__name=self.choosen_model, availability="Available"
+            server_list = await cache.aget(f"{self.choosen_model}_link_list")
+            if server_list is None:
+                server_list = [
+                    m
+                    async for m in InferenceServer.objects.filter(
+                        hosted_model__name=self.choosen_model, availability="Available"
+                    )
+                ]
+                await cache.aset(
+                    f"{self.choosen_model}_link_list", server_list, constant.CACHE_SERVER_LINK_RETRIVAL
                 )
-            ]
-
-            if model_list:
-                random_url = random.choice(model_list)
+            if server_list:
+                random_url = random.choice(server_list)
                 url = random_url.url
                 instance_id = random_url.name
                 server_status = random_url.status

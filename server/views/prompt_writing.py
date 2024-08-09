@@ -7,7 +7,8 @@ from rest_framework.throttling import AnonRateThrottle
 
 from server.models.dataset import Dataset, DatasetRecord
 from server.utils import constant
-from server.utils.sync_.manage_permissions import get_master_key_and_master_user
+
+from server.utils.sync_.sync_cache import get_user_or_set_cache
 from server.views.custom_paginator import PaginatorWithPageNum
 from server.views.serializer import (
     DatasetCreateSerializer,
@@ -26,7 +27,7 @@ from server.views.serializer import (
 @permission_required("server.view_dataset", raise_exception=True)
 def get_default_user_dataset_api(request):
     current_user = request.user
-    _, master_user = get_master_key_and_master_user(current_user=current_user)
+    _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
     if not master_user:
         return Response(
             {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
@@ -57,7 +58,7 @@ def get_default_user_dataset_api(request):
 @permission_required("server.view_datasetrecord", raise_exception=True)
 def get_user_records_api(request, id: int):
     current_user = request.user
-    _, master_user = get_master_key_and_master_user(current_user=current_user)
+    _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
     if not master_user:
         return Response(
             {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
@@ -93,7 +94,7 @@ def create_user_dataset_api(request):
         dataset_name = serializer.data["name"]
         default_evaluation = serializer.data["default_evaluation"]
         default_system_prompt = serializer.data["default_system_prompt"]
-        _, master_user = get_master_key_and_master_user(current_user=current_user)
+        _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
         if not master_user:
             return Response(
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
@@ -134,7 +135,7 @@ def update_user_dataset_api(request):
     if serializer.is_valid():
         id = serializer.data["id"]
         new_dataset_name = serializer.data["new_name"]
-        _, master_user = get_master_key_and_master_user(current_user=current_user)
+        _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
         if not master_user:
             return Response(
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
@@ -165,7 +166,7 @@ def delete_user_dataset_api(request):
     serializer = DatasetDeleteSerializer(data=request.data)
     if serializer.is_valid():
         id = serializer.data["id"]
-        _, master_user = get_master_key_and_master_user(current_user=current_user)
+        _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
         if not master_user:
             return Response(
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
@@ -201,7 +202,7 @@ def create_user_record_api(request):
         prompt = serializer.data["prompt"]
         response = serializer.data["response"]
         evaluation = serializer.data["evaluation"]
-        _, master_user = get_master_key_and_master_user(current_user=current_user)
+        _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
         try:
             dataset = Dataset.objects.get(user=master_user, id=dataset_id)
             DatasetRecord.objects.create(
@@ -237,7 +238,7 @@ def update_user_record_api(request):
         response = serializer.data["response"]
         evaluation = serializer.data["evaluation"]
         record_id = serializer.data["record_id"]
-        _, master_user = get_master_key_and_master_user(current_user=current_user)
+        _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
         try:
             dataset = Dataset.objects.get(user=master_user, id=dataset_id)
         except Dataset.DoesNotExist:
@@ -273,7 +274,7 @@ def delete_user_record_api(request):
     if serializer.is_valid():
         record_id = serializer.data["record_id"]
         dataset_id = serializer.data["dataset_id"]
-        _, master_user = get_master_key_and_master_user(current_user=current_user)
+        _, master_user = get_user_or_set_cache(prefix="user_tuple", key=current_user.password, timeout=60, current_user=current_user )
         try:
             dataset = Dataset.objects.get(user=master_user, id=dataset_id)
         except Dataset.DoesNotExist:
