@@ -14,7 +14,6 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LogoutIcon from "@mui/icons-material/Logout";
-import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
 import PropTypes from "prop-types";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import RuleIcon from "@mui/icons-material/Rule";
@@ -119,11 +118,6 @@ export const VerticalNav = ({ navigate }) => {
 		{ redirect: "/frontend/hub", icon: ChatIcon, text: "Inference" },
 		{ redirect: "/frontend/manual/key", icon: ArticleIcon, text: "Manual" },
 		{ redirect: "/frontend/model", icon: LayersIcon, text: "Models" },
-		{
-			href: "https://construction.professorparakeet.com/",
-			icon: PrecisionManufacturingIcon,
-			text: "Construction Zone",
-		},
 		{ redirect: "/frontend/contact", icon: EmailIcon, text: "Contact Us" },
 	];
 	return (

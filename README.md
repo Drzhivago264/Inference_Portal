@@ -54,6 +54,12 @@ You also need to install NPM and Node.js for the frontend.
     
     sudo apt install nodejs
     sudo apt install npm
+    npm init -y
+    npm install
+    #for prod
+    npm run build
+    #for dev
+    npm run dev
 
 Next you must install dependencies and migrate the db to Postgresql:
 
