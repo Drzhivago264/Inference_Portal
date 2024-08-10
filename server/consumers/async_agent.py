@@ -68,24 +68,7 @@ class Consumer(BaseAgent):
         else:
             self.session_history = []
             self.current_turn = 0
-            await self.send(
-                text_data=json.dumps(
-                    {
-                        "message": "Max Turns reached",
-                        "stream_id": self.unique_response_id,
-                        "credit": self.key_object.credit,
-                    }
-                )
-            )
-            await self.send(
-                text_data=json.dumps(
-                    {
-                        "message": f"Reseting working memory",
-                        "role": "Server",
-                        "time": self.time,
-                    }
-                )
-            )
+            await self.send_message_max_turn_reach()
 
     async def send_message_if_not_rate_limited(self, text_data):
         text_data_json = json.loads(text_data)

@@ -100,15 +100,10 @@ class Consumer(BaseAgent):
             timezone.now(), pytz.timezone(self.timezone)
         ).strftime("%Y-%m-%d %H:%M:%S")
         if "max_turn_reached" in event:
-            await self.send(
-                text_data=json.dumps(
-                    {
-                        "message": f"Max Turns reached, click on the paragraphs on the left to write again",
-                        "role": "Server",
-                        "time": self.time,
-                    }
-                )
-            )
+            self.session_history = []
+            self.current_turn = 0
+            await self.send_message_max_turn_reach()
+
         if "session_history" in event:
             self.session_history = event["session_history"]
             self.current_turn = event["current_turn"]
@@ -151,33 +146,9 @@ class Consumer(BaseAgent):
                     )
                 )
 
-        if "agent_action" in event:
-            agent_action = event["agent_action"]
-            if agent_action == "STOP":
-                full_result = self.session_history[-1]["content"]
-                full_result = full_result.replace('{"Action": "STOP"}', "")
-                full_result = full_result.replace("Final Answer:", "")
-                thought_match = re.findall("Thought: (.*)\n", full_result)
-                full_result = full_result.replace(thought_match[0], "")
-                full_result = full_result.replace("Thought:", "")
-                full_result = full_result.replace("\n\n\n", "")
-                await self.send(
-                    text_data=json.dumps(
-                        {
-                            "message": f"Your request is finished, the result is moved to the textbox on the left",
-                            "role": "Server",
-                            "time": self.time,
-                        }
-                    )
-                )
-                await self.send(
-                    text_data=json.dumps(
-                        {
-                            "agent_action": agent_action,
-                            "result_id": self.working_paragraph,
-                            "full_result": full_result,
-                        }
-                    )
-                )
-                self.session_history = []
-                self.current_turn = 0
+        if "action_list" in event:
+            action_list = event['action_list']
+            full_response = event['full_response']
+            print(action_list)
+            await self.execute_action(action_list, full_response)
+

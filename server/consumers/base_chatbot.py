@@ -28,7 +28,7 @@ class BaseChatbot(BaseBot):
         await self.send(
             text_data=json.dumps(
                 {
-                    "message": f"You are currently using {self.backend} backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the right.\nWe are cheaping out on HDD for our GPU server so it will be painfully slow when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor",
+                    "message": f"You are currently using {self.backend} backend. Default to {constant.DEFAULT_SELF_HOST} or choose model on the panel.\nWe are cheaping out on HDD for our GPU server so it will be painfully slow when booting up, but the inference speed is still great.\nWe consider this inconvenience an acceptable price to pay for independence while being poor",
                     "role": "Server",
                     "time": self.time,
                 }

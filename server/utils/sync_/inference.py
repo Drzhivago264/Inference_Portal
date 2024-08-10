@@ -255,13 +255,10 @@ def send_agent_request_openai(
 
         action_list = action_parse_json(session_history[-1]["content"])
         if action_list:
-            for act in action_list:
-                action = json.loads(act)["Action"]
-                if "STOP" == action:
-                    async_to_sync(channel_layer.group_send)(
-                        room_group_name,
-                        {"type": "chat_message", "agent_action": action},
-                    )
+            async_to_sync(channel_layer.group_send)(
+                room_group_name,
+                {"type": "chat_message", "action_list": action_list, "full_response": clean_response},
+            )
         return clean_response
     except openai.APIConnectionError as e:
         async_to_sync(channel_layer.group_send)(

@@ -35,7 +35,7 @@ class BaseAgent(BaseBot):
         await self.send(
             text_data=json.dumps(
                 {
-                    "message": """Instruction to the user:\n1. Click on the paragraph that you want to work on, then give the agent instructions to write \n2. If you face any bug, refresh and retry.\n3. Shift-Enter to drop line in chatbox.\n4. You can export all paragraphs by clicking on [Export] on the left.""",
+                    "message": """Instruction to the user:\n1. Click on the paragraph that you want to work on, then give the agent instructions to write \n2. If you face any bug, refresh and retry.\n3. Shift-Enter to drop line in chatbox.\n4. You can export all paragraphs by clicking on [Export] on side panel.""",
                     "role": "Server",
                     "time": self.time,
                 }
@@ -44,12 +44,33 @@ class BaseAgent(BaseBot):
         await self.send(
             text_data=json.dumps(
                 {
-                    "message": f"You are currently using {self.backend} backend. Default to GPT4 or choose model on the right.",
+                    "message": f"You are currently using {self.backend} backend. Default to GPT4 or choose model on the panel.",
                     "role": "Server",
                     "time": self.time,
                 }
             )
         )
+
+    async def send_message_max_turn_reach(self):
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "message": "Max Turns reached",
+                    "stream_id": self.unique_response_id,
+                    "credit": self.key_object.credit,
+                }
+            )
+        )
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "message": f"Reseting working memory",
+                    "role": "Server",
+                    "time": self.time,
+                }
+            )
+        )
+
 
     def load_parameter(self, validated):
         if validated.instruct_change and self.current_turn > 0:

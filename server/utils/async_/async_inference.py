@@ -228,7 +228,7 @@ class AsyncInferenceOpenaiMixin:
                 await self.send(
                     text_data=json.dumps(
                         {
-                            "message": "Your request is finished, the result is moved to the textbox on the left",
+                            "message": "Your request is finished, the result is moved to the editor below",
                             "role": "Server",
                             "time": self.time,
                         }
