@@ -1,5 +1,3 @@
-import json
-
 import openai
 import regex as re
 import requests

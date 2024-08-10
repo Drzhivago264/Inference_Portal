@@ -7,11 +7,10 @@ export const useGetRedirectAnon = (navigate, is_authenticated) => {
         error: error,
         isLoading: isLoading,
         refetch: refetch
-    } = useQuery("LoginRedirect", () => baseGet('/frontend-api/check-login'), {
+    } = useQuery(["LoginRedirect", is_authenticated], () => baseGet('/frontend-api/check-login'), {
         retry: false,
         enabled: !is_authenticated,
-        onError: (error) => {
-            console.log(error)
+        onError: () => {
             navigate("/frontend/login")
         }
     });
