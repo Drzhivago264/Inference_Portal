@@ -8,8 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
+from server import constant
 from server.models.instruction import UserInstructionTreeMP
-from server.utils import constant
 from server.utils.sync_.sync_cache import delete_cache, get_user_or_set_cache
 from server.views.serializer import (
     NestedUserInstructionCreateSerializer,

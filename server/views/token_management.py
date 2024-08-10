@@ -8,9 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
+from server import constant
 from server.api_throttling_rates import KeyCreateRateThrottle
 from server.models.api_key import FineGrainAPIKEY
-from server.utils import constant
 from server.views.serializer import CreateTokenSerializer, ModifyTokenSerializer
 
 

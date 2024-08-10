@@ -1,14 +1,13 @@
 import json
-import uuid
 
 import pytz
 from django.utils import timezone
 from pydantic import ValidationError
 
+from server import constant
 from server.consumers.base_chatbot import BaseChatbot
 from server.consumers.pydantic_validator import ChatSchema
 from server.queue.model_inference import inference
-from server.utils import constant
 
 
 class Consumer(BaseChatbot):
@@ -45,49 +44,45 @@ class Consumer(BaseChatbot):
                     )
                 )
             elif self.key_object and validated.message.strip():
-                mode = validated.mode
-                message = validated.message
+                self.load_parameter(validated=validated)
                 context = {
-                    "top_p": validated.top_p,
-                    "best_of": validated.best_of,
-                    "top_k": validated.top_k if validated.top_k > 0 else -1,
-                    "max_tokens": validated.max_tokens,
-                    "frequency_penalty": validated.frequency_penalty,
-                    "presence_penalty": validated.presence_penalty,
-                    "temperature": validated.temperature,
-                    "beam": validated.beam,
-                    "early_stopping": validated.early_stopping,
-                    "length_penalty": validated.length_penalty,
+                    "top_p": self.top_p,
+                    "best_of": self.best_of,
+                    "top_k": self.top_k if self.top_k > 0 else -1,
+                    "max_tokens": self.max_tokens,
+                    "frequency_penalty": self.frequency_penalty,
+                    "presence_penalty": self.presence_penalty,
+                    "temperature": self.temperature,
+                    "beam": self.beam,
+                    "early_stopping": self.early_stopping,
+                    "length_penalty": self.length_penalty,
                     "stream": True,
                 }
-                choosen_model = validated.choosen_model
-                include_memory = validated.include_memory
-                role = validated.role
-                unique_response_id = uuid.uuid4().hex
+
                 # Send message to room group
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
                         "type": "chat_message",
-                        "role": role,
-                        "message": message,
+                        "role": self.role,
+                        "message": self.message,
                         "credit": self.key_object.credit,
-                        "unique": unique_response_id,
-                        "choosen_model": choosen_model,
+                        "unique": self.unique_response_id,
+                        "choosen_model": self.choosen_model,
                     },
                 )
                 inference.delay(
-                    unique=unique_response_id,
+                    unique=self.unique_response_id,
                     is_session_start_node=self.is_session_start_node,
-                    mode=mode,
+                    mode=self.mode,
                     type_=self.type,
                     key=self.key_object.hashed_key,
                     credit=self.key_object.credit,
                     room_group_name=self.room_group_name,
-                    model=choosen_model,
+                    model=self.choosen_model,
                     context=context,
-                    prompt=message,
-                    include_memory=include_memory,
+                    prompt=self.message,
+                    include_memory=self.include_memory,
                 )
         except ValidationError as e:
             await self.send(

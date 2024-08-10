@@ -4,7 +4,7 @@ from ninja import Field, Schema
 from pydantic import ValidationInfo, field_validator, model_validator
 from typing_extensions import Self
 
-from server.utils import constant
+from server import constant
 
 
 class PromptSchema(Schema):

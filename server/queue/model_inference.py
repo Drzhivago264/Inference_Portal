@@ -7,9 +7,9 @@ from channels.layers import get_channel_layer
 from decouple import config
 from openai import OpenAI
 
+from server import constant
 from server.models.api_key import APIKEY
 from server.queue.ec2_manage import command_EC2
-from server.utils import constant
 from server.utils.sync_.inference import (
     correct_beam_best_of,
     inference_mode,
@@ -198,6 +198,7 @@ def agent_inference(
     max_turns: int,
     context: dict,
     type_: int,
+    force_stop: str,
 ) -> None:
     """
     Interacts with the OpenAI API to generate responses based on the conversation turn and session history.
@@ -241,9 +242,6 @@ def agent_inference(
             elif 0 < current_turn_inner < max_turns - 1:
                 prompt = [{"role": "user", "content": f"Response: {message}"}]
             else:
-                force_stop = (
-                    "You should directly give results based on history information."
-                )
                 prompt = [
                     {"role": "user", "content": f"Response: {message}"},
                     {"role": "system", "content": f"Response: {force_stop}"},

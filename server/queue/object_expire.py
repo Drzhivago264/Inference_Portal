@@ -2,8 +2,8 @@ from celery import shared_task
 from django.utils import timezone
 from django.utils.timezone import timedelta
 
+from server import constant
 from server.models.api_key import APIKEY, FineGrainAPIKEY
-from server.utils import constant
 
 
 @shared_task()

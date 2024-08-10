@@ -1,5 +1,4 @@
 import json
-import uuid
 
 import pytz
 import regex as re
@@ -46,53 +45,42 @@ class Consumer(BaseAgent):
                         )
                     )
                 elif self.key_object and text_data_json["message"].strip():
-                    if validated.instruct_change and self.current_turn > 0:
-                        self.current_turn = 0
-                        self.session_history = []
-                    agent_instruction = validated.agent_instruction
-                    child_instruction = validated.child_instruction
-                    currentParagraph = validated.currentParagraph
-                    self.working_paragraph = currentParagraph
-                    message = validated.message
-                    self.choosen_model = validated.choosen_model
-                    choosen_template = validated.choosen_template
-                    role = validated.role
-                    unique_response_id = uuid.uuid4().hex
-                    self.max_turns = validated.max_turn
+                    self.load_parameter(validated=validated)
+
                     context = {
                         "stream": True,
-                        "top_p": validated.top_p,
-                        "max_tokens": validated.max_tokens,
-                        "frequency_penalty": validated.frequency_penalty,
-                        "presence_penalty": validated.presence_penalty,
-                        "temperature": validated.temperature,
+                        "top_p": self.top_p,
+                        "max_tokens": self.max_tokens,
+                        "frequency_penalty": self.frequency_penalty,
+                        "presence_penalty": self.presence_penalty,
+                        "temperature": self.temperature,
                     }
-                    agent_instruction += child_instruction
                     agent_inference.delay(
                         type_=self.type,
                         is_session_start_node=self.is_session_start_node,
-                        unique=unique_response_id,
+                        unique=self.unique_response_id,
                         key=self.key_object.hashed_key,
-                        message=message,
+                        message=self.message,
                         credit=self.key_object.credit,
                         room_group_name=self.room_group_name,
                         model=self.choosen_model,
                         max_turns=self.max_turns,
                         current_turn_inner=self.current_turn,
-                        agent_instruction=agent_instruction,
+                        agent_instruction=self.agent_instruction,
                         session_history=self.session_history,
                         choosen_model=self.choosen_model,
                         context=context,
+                        force_stop=self.force_stop,
                     )
                     await self.channel_layer.group_send(
                         self.room_group_name,
                         {
                             "type": "chat_message",
-                            "role": role,
-                            "message": message,
+                            "role": self.role,
+                            "message": self.message,
                             "credit": self.key_object.credit,
-                            "unique": unique_response_id,
-                            "choosen_model": choosen_template,
+                            "unique": self.unique_response_id,
+                            "choosen_model": self.choosen_template,
                             "current_turn": self.current_turn,
                         },
                     )

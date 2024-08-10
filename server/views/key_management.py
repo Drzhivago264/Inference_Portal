@@ -19,6 +19,7 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
+from server import constant
 from server.api_throttling_rates import (
     CreditCheckRateThrottle,
     KeyCreateRateThrottle,
@@ -26,7 +27,6 @@ from server.api_throttling_rates import (
 )
 from server.models.api_key import APIKEY
 from server.models.product import Crypto, PaymentHistory, Price, Product
-from server.utils import constant
 from server.utils.sync_.manage_monero import manage_monero
 from server.utils.sync_.sync_cache import filter_or_set_cache
 from server.views.serializer import (

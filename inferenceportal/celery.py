@@ -6,7 +6,7 @@ import django
 from celery import Celery
 from django.conf import settings
 
-from server.utils.constant import *
+from server import constant
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "inferenceportal.settings")
@@ -23,23 +23,23 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS, force=True)
 app.conf.beat_schedule = {
     "periodically_monitor_EC2_instance": {
         "task": "server.queue.ec2_manage.periodically_monitor_EC2_instance",
-        "schedule": MONITOR_ITERVAL,
+        "schedule": constant.MONITOR_ITERVAL,
         "options": {"queue": "periodic"},
     },
     "periodically_shutdown_EC2_instance": {
         "task": "server.queue.ec2_manage.periodically_shutdown_EC2_instance",
-        "schedule": SHUTDOWN_INTERVAL,
+        "schedule": constant.SHUTDOWN_INTERVAL,
         "options": {"queue": "periodic"},
     },
     "periodically_update_xrm_prince": {
         "task": "server.queue.update_xmr.update_crypto_rate",
-        "schedule": XMR_PRICE_INTERVAL,
+        "schedule": constant.XMR_PRICE_INTERVAL,
         "args": (["xmr"]),
         "options": {"queue": "periodic"},
     },
     "periodically_delete_unused_key": {
         "task": "server.queue.object_expire.periodically_delete_unused_key",
-        "schedule": DELETE_KEY_INTERVAL,
+        "schedule": constant.DELETE_KEY_INTERVAL,
         "options": {"queue": "periodic"},
     },
 }

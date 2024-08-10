@@ -7,9 +7,9 @@ from channels.db import database_sync_to_async
 from django.core.cache import cache
 from django.utils import timezone
 
+from server import constant
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
-from server.utils import constant
 from server.utils.async_.async_cache import get_or_set_cache as async_get_or_set_cache
 from server.utils.sync_.sync_cache import (
     get_descendants_or_cache as sync_get_descendants_or_cache,

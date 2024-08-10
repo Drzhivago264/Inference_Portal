@@ -7,10 +7,10 @@ from rest_framework.decorators import api_view, permission_classes, throttle_cla
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from server import constant
 from server.api_throttling_rates import DatasetExportRateThrottle
 from server.models.dataset import Dataset, DatasetRecord
 from server.queue.export_dataset import export_large_dataset
-from server.utils import constant
 from server.utils.sync_.sync_cache import get_or_set_cache, get_user_or_set_cache
 from server.views.serializer import DatasetExportSerializer, DatasetRecordGetSerialzier
 

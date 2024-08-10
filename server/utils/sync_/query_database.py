@@ -4,9 +4,9 @@ from typing import Callable, Tuple, Union
 from django.core.cache import cache
 from vectordb import vectordb
 
+from server import constant
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM, InferenceServer
-from server.utils import constant
 from server.utils.sync_.sync_cache import get_or_set_cache
 
 

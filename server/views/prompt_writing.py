@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
+from server import constant
 from server.models.dataset import Dataset, DatasetRecord
-from server.utils import constant
 from server.utils.sync_.sync_cache import get_user_or_set_cache
 from server.views.custom_paginator import PaginatorWithPageNum
 from server.views.serializer import (

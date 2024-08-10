@@ -7,11 +7,11 @@ from transformers import AutoTokenizer
 
 from api.api_schema import ChatResponse, ChatSchema, Error
 from api.utils import check_permission, send_request_async, send_stream_request_async
+from server import constant
 from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.rate_limit import RateLimitError, rate_limit_initializer
-from server.utils import constant
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.inference import correct_beam_best_of
@@ -68,12 +68,7 @@ async def chatcompletion(request, data: ChatSchema):
                         current_history_length=current_history_length,
                         tokeniser=tokeniser,
                     )
-                    chat = [
-                        {
-                            "role": "system",
-                            "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}",
-                        }
-                    ]
+                    chat = []
                     prompt_ = {"role": "user", "content": f"{data.prompt}"}
                     chat += chat_history
                     chat.append(prompt_)
@@ -83,10 +78,6 @@ async def chatcompletion(request, data: ChatSchema):
                 else:
                     if isinstance(data.prompt, str):
                         chat = [
-                            {
-                                "role": "system",
-                                "content": f"{constant.SYSTEM_INSTRUCT_TABLE[data.model]}",
-                            },
                             {"role": "user", "content": f"{data.prompt}"},
                         ]
                     else:

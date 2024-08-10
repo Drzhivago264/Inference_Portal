@@ -1,12 +1,13 @@
 import json
+import uuid
 
 import pytz
 from django.utils import timezone
 
+from server import constant
 from server.consumers.base import BaseBot
 from server.models.log import PromptResponse
 from server.rate_limit import RateLimitError
-from server.utils import constant
 
 
 class BaseChatbot(BaseBot):
@@ -33,6 +34,26 @@ class BaseChatbot(BaseBot):
                 }
             )
         )
+
+    def load_parameter(self, validated):
+        self.mode = validated.mode
+        self.message = validated.message
+        self.top_p = validated.top_p
+        self.best_of = validated.best_of
+        self.top_k = validated.top_k if validated.top_k > 0 else -1
+        self.max_tokens = validated.max_tokens
+        self.frequency_penalty = validated.frequency_penalty
+        self.presence_penalty = validated.presence_penalty
+        self.temperature = validated.temperature
+        self.beam = validated.beam
+        self.early_stopping = validated.early_stopping
+        self.length_penalty = validated.length_penalty
+        self.choosen_model = validated.choosen_model
+        self.include_memory = validated.include_memory
+        self.include_current_memory = validated.include_current_memory
+        self.role = validated.role
+        self.unique_response_id = uuid.uuid4().hex
+        self.session_history.append({"role": "user", "content": f"{validated.message}"})
 
     async def receive(self, text_data):
         self.time = timezone.localtime(

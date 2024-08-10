@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
+from server import constant
 from server.models.dataset import Dataset
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
 from server.models.log import MemoryTreeMP, PromptResponse
 from server.models.product import Product
-from server.utils import constant
 
 
 class CostSerializer(serializers.ModelSerializer):

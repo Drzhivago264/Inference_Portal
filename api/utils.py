@@ -6,12 +6,12 @@ from django.contrib.auth.models import User
 from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
+from server import constant
 from server.models.api_key import APIKEY
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
 from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
-from server.utils import constant
 from server.utils.async_.async_cache import get_or_set_cache
 
 

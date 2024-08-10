@@ -1,5 +1,4 @@
 import json
-import uuid
 
 import pytz
 from django.utils import timezone
@@ -118,32 +117,7 @@ class Consumer(BaseAgent):
                         )
                     )
                 elif self.key_object and text_data_json["message"].strip():
-                    # Reset the working memory if the instruction(s) change
-                    if validated.instruct_change and self.current_turn > 0:
-                        self.current_turn = 0
-                        self.session_history = []
-                    self.agent_instruction = validated.agent_instruction
-                    self.child_instruction = validated.child_instruction
-                    self.working_paragraph = validated.currentParagraph
-                    self.message = validated.message
-                    self.choosen_model = validated.choosen_model
-                    self.choosen_template = validated.choosen_template
-                    self.role = validated.role
-                    self.unique_response_id = uuid.uuid4().hex
-                    self.top_p = validated.top_p
-                    self.max_tokens = validated.max_tokens
-                    self.frequency_penalty = validated.frequency_penalty
-                    self.presence_penalty = validated.presence_penalty
-                    self.temperature = validated.temperature
-                    self.agent_instruction += self.child_instruction
-                    self.max_turns = validated.max_turn
-                    self.use_summary = (
-                        True if self.choosen_template == "Interview Agent" else False
-                    )
-                    if not self.use_summary:
-                        self.force_stop = "You should directly give results based on history information."
-                    else:
-                        self.force_stop = "You should directly give results based on history information. You must summary the interview log for the question with no more than 100 words."
+                    self.load_parameter(validated=validated)
                     await self.channel_layer.group_send(
                         self.room_group_name,
                         {

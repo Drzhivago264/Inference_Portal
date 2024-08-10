@@ -1,5 +1,4 @@
 import json
-import uuid
 
 import pytz
 from asgiref.sync import sync_to_async
@@ -95,27 +94,9 @@ class Consumer(BaseChatbot):
                         }
                     )
                 )
+
             elif self.key_object and validated.message.strip():
-                self.mode = validated.mode
-                self.message = validated.message
-                self.top_p = validated.top_p
-                self.best_of = validated.best_of
-                self.top_k = validated.top_k if validated.top_k > 0 else -1
-                self.max_tokens = validated.max_tokens
-                self.frequency_penalty = validated.frequency_penalty
-                self.presence_penalty = validated.presence_penalty
-                self.temperature = validated.temperature
-                self.beam = validated.beam
-                self.early_stopping = validated.early_stopping
-                self.length_penalty = validated.length_penalty
-                self.choosen_model = validated.choosen_model
-                self.include_memory = validated.include_memory
-                self.include_current_memory = validated.include_current_memory
-                self.role = validated.role
-                self.unique_response_id = uuid.uuid4().hex
-                self.session_history.append(
-                    {"role": "user", "content": f"{validated.message}"}
-                )
+                self.load_parameter(validated=validated)
                 # Send message to room group
                 await self.channel_layer.group_send(
                     self.room_group_name,
