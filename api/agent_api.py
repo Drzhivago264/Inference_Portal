@@ -126,53 +126,49 @@ async def agentcompletion(request, data: AgentSchema):
                     instance_id=instance_id, update_type="time"
                 )
                 if server_status == "running":
-                    if not data.stream:
-                        try:
-                            response = await send_request_async(url, context)
-                            if not response:
-                                raise HttpError(404, "Time Out! Slow down")
-                            else:
-                                response = response.replace(processed_prompt, "")
-                                celery_log_prompt_response.delay(
-                                    is_session_start_node=None,
-                                    key_object_hashed_key=key_object.hashed_key,
-                                    llm_name=model.name,
-                                    prompt=data.prompt,
-                                    response=response,
-                                    type_=PromptResponse.PromptType.AGENT_API,
-                                )
-                                return 200, {
-                                    "context": context,
-                                    "parent_template_name": parent_template_name,
-                                    "child_template_name": child_template_name,
-                                    "use_my_template": use_my_template,
-                                    "working_memory": chat
-                                    + [{"role": "assistant", "content": f"{response}"}],
-                                }
-                        except httpx.ReadTimeout:
-                            raise HttpError(404, "Time Out!")
-                    else:
-                        try:
-                            res = StreamingHttpResponse(
-                                send_stream_request_agent_async(
-                                    url=url,
-                                    context=context,
-                                    processed_prompt=processed_prompt,
-                                    key_object=key_object,
-                                    model=model,
-                                    working_nemory=chat,
-                                    parent_template_name=parent_template_name,
-                                    child_template_name=child_template_name,
-                                    use_my_template=use_my_template,
-                                    data=data,
-                                ),
-                                content_type="text/event-stream",
-                            )
-                            res["X-Accel-Buffering"] = "no"
-                            res["Cache-Control"] = "no-cache"
-                            return res
-                        except:
+                    if not data.stream:      
+                        response = await send_request_async(url, context)
+                        if not response:
                             raise HttpError(404, "Time Out! Slow down")
+                        else:
+                            response = response.replace(processed_prompt, "")
+                            celery_log_prompt_response.delay(
+                                is_session_start_node=None,
+                                key_object_hashed_key=key_object.hashed_key,
+                                llm_name=model.name,
+                                prompt=data.prompt,
+                                response=response,
+                                type_=PromptResponse.PromptType.AGENT_API,
+                            )
+                            return 200, {
+                                "context": context,
+                                "parent_template_name": parent_template_name,
+                                "child_template_name": child_template_name,
+                                "use_my_template": use_my_template,
+                                "working_memory": chat
+                                + [{"role": "assistant", "content": f"{response}"}],
+                            }
+                    else:
+                      
+                        res = StreamingHttpResponse(
+                            send_stream_request_agent_async(
+                                url=url,
+                                context=context,
+                                processed_prompt=processed_prompt,
+                                key_object=key_object,
+                                model=model,
+                                working_nemory=chat,
+                                parent_template_name=parent_template_name,
+                                child_template_name=child_template_name,
+                                use_my_template=use_my_template,
+                                data=data,
+                            ),
+                            content_type="text/event-stream",
+                        )
+                        res["X-Accel-Buffering"] = "no"
+                        res["Cache-Control"] = "no-cache"
+                        return res
+
                 elif server_status == "stopped" or "stopping":
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(

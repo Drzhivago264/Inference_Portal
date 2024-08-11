@@ -47,13 +47,16 @@ async def get_user_template(name: str, user_object: User) -> str:
 
 
 async def send_request_async(url: str, context: dict) -> httpx.Response:
-    async with httpx.AsyncClient(
-        transport=httpx.AsyncHTTPTransport(retries=constant.RETRY),
-        timeout=constant.TIMEOUT,
-    ) as client:
-        response = await client.post(url, json=context)
-        response = response.json()["text"][0] if response.status_code == 200 else None
-        return response
+    try:
+        async with httpx.AsyncClient(
+            transport=httpx.AsyncHTTPTransport(retries=constant.RETRY),
+            timeout=constant.TIMEOUT,
+        ) as client:
+            response = await client.post(url, json=context)
+            response = response.json()["text"][0] if response.status_code == 200 else None
+            return response
+    except httpx.ReadTimeout:
+        raise HttpError(404, "Time Out! Slow down")
 
 
 async def send_stream_request_async(
@@ -93,7 +96,7 @@ async def send_stream_request_async(
         )
 
     except httpx.ReadTimeout:
-        raise httpx.ReadTimeout
+        raise HttpError(404, "Time Out! Slow down")
 
 
 async def send_stream_request_agent_async(
@@ -144,7 +147,7 @@ async def send_stream_request_agent_async(
             type_=PromptResponse.PromptType.AGENT_API,
         )
     except httpx.ReadTimeout:
-        raise httpx.ReadTimeout
+        raise HttpError(404, "Time Out! Slow down")
 
 
 async def query_response_log(

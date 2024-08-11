@@ -9,7 +9,7 @@ from server.utils.sync_.sync_cache import get_or_set_cache
 @shared_task()
 def celery_log_prompt_response(
     is_session_start_node: bool | None,
-    key_object_hashed_key: int,
+    key_object_hashed_key: str,
     llm_name: str,
     prompt: str,
     response: str,

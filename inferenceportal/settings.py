@@ -86,12 +86,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 ROOT_URLCONF = "inferenceportal.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            "inferenceportal/server/templates",
             "frontend/templates",
         ],
         "APP_DIRS": True,
@@ -105,6 +105,7 @@ TEMPLATES = [
         },
     },
 ]
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",

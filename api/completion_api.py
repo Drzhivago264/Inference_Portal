@@ -85,23 +85,21 @@ async def textcompletion(request, data: PromptSchema):
                     instance_id=instance_id, update_type="time"
                 )
                 if server_status == "running":
-                    try:
-                        response = await send_request_async(url, context)
-                        if not response:
-                            raise HttpError(404, "Time Out!")
-                        else:
-                            response = response.replace(processed_prompt, "")
-                            celery_log_prompt_response.delay(
-                                is_session_start_node=None,
-                                key_object_hashed_key=key_object.hashed_key,
-                                llm_name=model.name,
-                                prompt=data.prompt,
-                                response=response,
-                                type_=PromptResponse.PromptType.CHATBOT_API,
-                            )
-                            return 200, {"response": response, "context": context}
-                    except httpx.ReadTimeout:
-                        raise HttpError(404, "Time Out! Slow down")
+                    response = await send_request_async(url, context)
+                    if not response:
+                        raise HttpError(404, "Time Out!")
+                    else:
+                        response = response.replace(processed_prompt, "")
+                        celery_log_prompt_response.delay(
+                            is_session_start_node=None,
+                            key_object_hashed_key=key_object.hashed_key,
+                            llm_name=model.name,
+                            prompt=data.prompt,
+                            response=response,
+                            type_=PromptResponse.PromptType.CHATBOT_API,
+                        )
+                        return 200, {"response": response, "context": context}
+
                 elif server_status == "stopped" or "stopping":
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(
