@@ -71,7 +71,6 @@ class BaseAgent(BaseBot):
             )
         )
 
-
     def load_parameter(self, validated):
         if validated.instruct_change and self.current_turn > 0:
             self.current_turn = 0

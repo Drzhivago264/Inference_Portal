@@ -147,8 +147,7 @@ class Consumer(BaseAgent):
                 )
 
         if "action_list" in event:
-            action_list = event['action_list']
-            full_response = event['full_response']
+            action_list = event["action_list"]
+            full_response = event["full_response"]
             print(action_list)
             await self.execute_action(action_list, full_response)
-

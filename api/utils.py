@@ -1,6 +1,7 @@
 import json
 
 import httpx
+import regex as re
 from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
 from ninja.errors import HttpError
@@ -21,17 +22,18 @@ async def check_permission(user_object, permission, destination):
 
 
 async def get_system_template(name: str) -> str:
-    try:
-        template = await get_or_set_cache(
-            prefix="system_template",
-            key=name,
-            field_to_get="name",
-            Model=InstructionTreeMP,
-            timeout=84000,
-        )
-        return template.instruct
-    except InstructionTreeMP.DoesNotExist:
+
+    template = await get_or_set_cache(
+        prefix="system_template",
+        key=name,
+        field_to_get="name",
+        Model=InstructionTreeMP,
+        timeout=84000,
+    )
+    if not template:
         raise HttpError(404, f"template: {name} is incorrect")
+    else:
+        return template.instruct
 
 
 async def get_user_template(name: str, user_object: User) -> str:
@@ -67,19 +69,20 @@ async def send_stream_request_async(
         timeout=constant.TIMEOUT,
     )
     full_response = ""
+    pattern = re.compile(r"\{(?:[^{}]|(?R))*\}")
     try:
         async with client.stream("POST", url, json=context) as response:
             async for chunk in response.aiter_text():
-                try:
-                    chunk = chunk[:-1]
+                chunk = chunk[:-1]
+                json_string_list = pattern.findall(chunk)
+                if json_string_list and json_string_list[0].startswith('{"text"'):
                     c = json.loads(chunk)
                     output = c["text"][0].replace(processed_prompt, "")
                     yield str(
                         {"response": c, "delta": output.replace(full_response, "")}
                     ) + "\n"
                     full_response = output
-                except json.decoder.JSONDecodeError:
-                    pass
+
         celery_log_prompt_response.delay(
             is_session_start_node=None,
             key_object_hashed_key=key_object.hashed_key,
@@ -110,11 +113,13 @@ async def send_stream_request_agent_async(
         timeout=constant.TIMEOUT,
     )
     full_response = ""
+    pattern = re.compile(r"\{(?:[^{}]|(?R))*\}")
     try:
         async with client.stream("POST", url, json=context) as response:
             async for chunk in response.aiter_text():
-                try:
-                    chunk = chunk[:-1]
+                chunk = chunk[:-1]
+                json_string_list = pattern.findall(chunk)
+                if json_string_list and json_string_list[0].startswith('{"text"'):
                     c = json.loads(chunk)
                     output = c["text"][0].replace(processed_prompt, "")
                     yield str(
@@ -129,8 +134,7 @@ async def send_stream_request_agent_async(
                         }
                     ) + "\n"
                     full_response = output
-                except:
-                    pass
+
         celery_log_prompt_response.delay(
             is_session_start_node=None,
             key_object_hashed_key=key_object.hashed_key,

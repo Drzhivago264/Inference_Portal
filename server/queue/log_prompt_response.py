@@ -16,7 +16,11 @@ def celery_log_prompt_response(
     type_: int,
 ) -> None:
     llm = get_or_set_cache(
-        prefix="system_model", key=llm_name, field_to_get="name", Model=LLM, timeout=84000
+        prefix="system_model",
+        key=llm_name,
+        field_to_get="name",
+        Model=LLM,
+        timeout=84000,
     )
     key_object = get_or_set_cache(
         prefix="user_key_object",

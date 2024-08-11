@@ -255,7 +255,11 @@ def send_agent_request_openai(
         if action_list:
             async_to_sync(channel_layer.group_send)(
                 room_group_name,
-                {"type": "chat_message", "action_list": action_list, "full_response": clean_response},
+                {
+                    "type": "chat_message",
+                    "action_list": action_list,
+                    "full_response": clean_response,
+                },
             )
         return clean_response
     except openai.APIConnectionError as e:

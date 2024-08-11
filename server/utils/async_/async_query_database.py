@@ -175,7 +175,7 @@ class QueryDBMixin:
                     )
                 ]
                 await cache.aset(
-                    f"{self.choosen_model}_link_list",
+                    f"{self.choosen_model if name is None else name}_link_list",
                     server_list,
                     constant.CACHE_SERVER_LINK_RETRIVAL,
                 )

@@ -50,13 +50,13 @@ async def chatcompletion(request, data: ChatSchema):
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
-            url, instance_id, server_status = await query_db_mixin.get_model_url_asyncl(
+            url, instance_id, server_status = await query_db_mixin.get_model_url_async(
                 name=data.model
             )
             if not url:
                 raise HttpError(442, "Server is currently offline")
             else:
-                beam, best_of = correct_beam_best_of(data.beam, best_of)
+                beam, best_of = correct_beam_best_of(data.beam, data.best_of)
                 tokeniser = AutoTokenizer.from_pretrained(model.base)
                 inputs = tokeniser(data.prompt)
                 current_history_length = len(inputs["input_ids"])

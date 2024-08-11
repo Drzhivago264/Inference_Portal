@@ -20,23 +20,25 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
 
     async def handle_response_vllm(self, response, context):
         full_response = str()
+        pattern = re.compile(r"\{(?:[^{}]|(?R))*\}")
         async for chunk in response.aiter_text():
-            try:
-                chunk = chunk[:-1]
+            chunk = chunk[:-1]
+            json_string_list = pattern.findall(chunk)
+            if json_string_list and json_string_list[0].startswith('{"text"'):
                 c = json.loads(chunk)
                 output = c["text"][0].replace(context["prompt"], "")
                 await self.send(
-                        text_data=json.dumps(
-                            {
-                                "message": output.replace(full_response, ""),
-                                "stream_id": self.unique_response_id,
-                                "credit": self.key_object.credit,
-                            }
-                        )
+                    text_data=json.dumps(
+                        {
+                            "message": output.replace(full_response, ""),
+                            "stream_id": self.unique_response_id,
+                            "credit": self.key_object.credit,
+                        }
                     )
+                )
                 full_response = output
-            except json.decoder.JSONDecodeError:
-                pass
+        return full_response
+
     async def send_vllm_request_async(self, llm: LLM, context: dict) -> None:
         client = httpx.AsyncClient(timeout=10)
         url, instance_id, server_status = await self.get_model_url_async()
@@ -45,9 +47,11 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                 instance_id=instance_id, update_type="time"
             )
             if server_status == "running":
-                try:              
+                try:
                     async with client.stream("POST", url, json=context) as response:
-                        full_response = await self.handle_response_vllm(response=response, context=context)
+                        full_response = await self.handle_response_vllm(
+                            response=response, context=context
+                        )
 
                     if full_response and isinstance(full_response, str):
                         celery_log_prompt_response.delay(
@@ -271,11 +275,9 @@ class AsyncInferenceOpenaiMixin:
         if raw_response:
             self.current_turn += 1
             full_response = await self.handle_response(raw_response)
-            response_json = [
-                {"role": "assistant", "content": f"{full_response}"}]
+            response_json = [{"role": "assistant", "content": f"{full_response}"}]
             self.session_history.extend(response_json)
-            action_list = action_parse_json(
-                self.session_history[-1]["content"])
+            action_list = action_parse_json(self.session_history[-1]["content"])
             if action_list:
                 await self.execute_action(action_list, full_response)
             if full_response and isinstance(full_response, str):

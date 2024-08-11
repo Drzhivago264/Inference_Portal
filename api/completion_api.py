@@ -53,7 +53,7 @@ async def textcompletion(request, data: PromptSchema):
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
-            url, instance_id, server_status = await query_db_mixin.get_model_url_asyncl(
+            url, instance_id, server_status = await query_db_mixin.get_model_url_async(
                 name=data.model
             )
             if not url:
