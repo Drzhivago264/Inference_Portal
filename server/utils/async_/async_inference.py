@@ -18,15 +18,14 @@ from server.utils.sync_.inference import action_parse_json
 
 class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
 
-    async def handle_response(self, response, context):
+    async def handle_response_vllm(self, response, context):
         full_response = str()
         async for chunk in response.aiter_text():
-            if chunk:
+            try:
                 chunk = chunk[:-1]
-                try:
-                    c = json.loads(chunk)
-                    output = c["text"][0].replace(context["prompt"], "")
-                    await self.send(
+                c = json.loads(chunk)
+                output = c["text"][0].replace(context["prompt"], "")
+                await self.send(
                         text_data=json.dumps(
                             {
                                 "message": output.replace(full_response, ""),
@@ -35,10 +34,9 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                             }
                         )
                     )
-                except json.decoder.JSONDecodeError:
-                    pass
-                return output
-
+                full_response = output
+            except json.decoder.JSONDecodeError:
+                pass
     async def send_vllm_request_async(self, llm: LLM, context: dict) -> None:
         client = httpx.AsyncClient(timeout=10)
         url, instance_id, server_status = await self.get_model_url_async()
@@ -47,16 +45,15 @@ class AsyncInferenceVllmMixin(ManageEC2Mixin, QueryDBMixin):
                 instance_id=instance_id, update_type="time"
             )
             if server_status == "running":
-                try:
+                try:              
                     async with client.stream("POST", url, json=context) as response:
-                        response.raise_for_status()
-                        full_response = await self.handle_response(response, context)
+                        full_response = await self.handle_response_vllm(response=response, context=context)
 
                     if full_response and isinstance(full_response, str):
                         celery_log_prompt_response.delay(
                             is_session_start_node=self.is_session_start_node,
-                            key_object_id=self.key_object.id,
-                            llm_id=llm.id,
+                            key_object_hashed_key=self.key_object.hashed_key,
+                            llm_name=llm.name,
                             prompt=self.message,
                             response=full_response,
                             type_=self.type,
@@ -203,8 +200,8 @@ class AsyncInferenceOpenaiMixin:
             if full_response and isinstance(full_response, str):
                 celery_log_prompt_response.delay(
                     is_session_start_node=self.is_session_start_node,
-                    key_object_id=self.key_object.id,
-                    llm_id=llm.id,
+                    key_object_hashed_key=self.key_object.hashed_key,
+                    llm_name=llm.name,
                     prompt=self.message,
                     response=full_response,
                     type_=self.type,
@@ -274,16 +271,18 @@ class AsyncInferenceOpenaiMixin:
         if raw_response:
             self.current_turn += 1
             full_response = await self.handle_response(raw_response)
-            response_json = [{"role": "assistant", "content": f"{full_response}"}]
+            response_json = [
+                {"role": "assistant", "content": f"{full_response}"}]
             self.session_history.extend(response_json)
-            action_list = action_parse_json(self.session_history[-1]["content"])
+            action_list = action_parse_json(
+                self.session_history[-1]["content"])
             if action_list:
                 await self.execute_action(action_list, full_response)
             if full_response and isinstance(full_response, str):
                 celery_log_prompt_response.delay(
                     is_session_start_node=self.is_session_start_node,
-                    key_object_id=self.key_object.id,
-                    llm_id=llm.id,
+                    key_object_hashed_key=self.key_object.hashed_key,
+                    llm_name=llm.name,
                     prompt=self.message,
                     response=full_response,
                     type_=self.type,

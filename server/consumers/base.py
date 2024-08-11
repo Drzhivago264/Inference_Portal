@@ -1,5 +1,5 @@
 import json
-
+import uuid
 import pytz
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils import timezone
@@ -31,9 +31,9 @@ class BaseBot(
 
                 BaseBot
                /       \
-        BaseAgent  BaseChatBot
+       BaseAgent       BaseChatBot
             /            \
-    Celery/AsyncAgent   Celery/AsyncChatBot  
+   Celery/AsyncAgent    Celery/AsyncChatBot  
     """
 
     def __new__(cls, *args, **kwargs):
@@ -68,7 +68,7 @@ class BaseBot(
                 namespace=self.type.label,
                 timezone=self.timezone,
             )
-        self.room_group_name = f"{self.destination}{self.url}"
+        self.room_group_name = f"{self.destination}{self.url}{uuid.uuid4().hex[:8]}"
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()

@@ -9,32 +9,21 @@ from server.utils.sync_.sync_cache import get_or_set_cache
 @shared_task()
 def celery_log_prompt_response(
     is_session_start_node: bool | None,
-    key_object_id: int,
-    llm_id: int,
+    key_object_hashed_key: int,
+    llm_name: str,
     prompt: str,
     response: str,
     type_: int,
 ) -> None:
-    """
-    This function stores a log entry in the database and builds a memory tree of chat history.
-
-    Args:
-        is_session_start_node (bool | None): Indicates if this is the start of a session.
-        key_object_id (int): The ID of the API key object.
-        llm_id (int): The ID of the language model.
-        prompt (str): The prompt text.
-        response (str): The response text.
-        type_ (int): The type of interaction.
-    """
     llm = get_or_set_cache(
-        prefix="system_model", key=llm_id, field_to_get="id", Model=LLM, timeout=84000
+        prefix="system_model", key=llm_name, field_to_get="name", Model=LLM, timeout=84000
     )
     key_object = get_or_set_cache(
-        prefix="api_key",
-        key=key_object_id,
-        field_to_get="id",
+        prefix="user_key_object",
+        field_to_get="hashed_key",
         Model=APIKEY,
-        timeout=600,
+        timeout=60,
+        key=key_object_hashed_key,
     )
     log_prompt_response(
         is_session_start_node=is_session_start_node,

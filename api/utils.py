@@ -82,8 +82,8 @@ async def send_stream_request_async(
                     pass
         celery_log_prompt_response.delay(
             is_session_start_node=None,
-            key_object_id=key_object.id,
-            llm_id=model.id,
+            key_object_hashed_key=key_object.hashed_key,
+            llm_name=model.name,
             prompt=data.prompt,
             response=response,
             type_=PromptResponse.PromptType.CHATBOT_API,
@@ -133,8 +133,8 @@ async def send_stream_request_agent_async(
                     pass
         celery_log_prompt_response.delay(
             is_session_start_node=None,
-            key_object_id=key_object.id,
-            llm_id=model.id,
+            key_object_hashed_key=key_object.hashed_key,
+            llm_name=model.name,
             prompt=data.prompt,
             response=response,
             type_=PromptResponse.PromptType.AGENT_API,

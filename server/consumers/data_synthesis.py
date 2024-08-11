@@ -99,8 +99,8 @@ class Consumer(BaseAgent):
                                     )
                                     celery_log_prompt_response.delay(
                                         is_session_start_node=None,
-                                        key_object_id=self.key_object.id,
-                                        llm_id=llm.id,
+                                        key_object_hashed_key=self.key_object.hashed_key,
+                                        llm_name=llm.name,
                                         prompt=processed_instruction_list[index],
                                         response=r.json()["choices"][0]["message"][
                                             "content"
@@ -183,8 +183,8 @@ class Consumer(BaseAgent):
                             )
                             celery_log_prompt_response.delay(
                                 is_session_start_node=None,
-                                key_object_id=self.key_object.id,
-                                llm_id=llm.id,
+                                key_object_hashed_key=self.key_object.hashed_key,
+                                llm_name=llm.name,
                                 prompt=processed_instruction_list[index][0]["content"]
                                 + processed_instruction_list[index][1]["content"],
                                 response=r.json()["choices"][0]["message"]["content"],

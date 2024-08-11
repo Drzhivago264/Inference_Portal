@@ -116,8 +116,8 @@ async def chatcompletion(request, data: ChatSchema):
                                 response = response.replace(processed_prompt, "")
                                 celery_log_prompt_response.delay(
                                     is_session_start_node=None,
-                                    key_object_id=key_object.id,
-                                    llm_id=model.id,
+                                    key_object_hashed_key=key_object.hashed_key,
+                                    llm_name=model.name,
                                     prompt=data.prompt,
                                     response=response,
                                     type_=PromptResponse.PromptType.CHATBOT_API,

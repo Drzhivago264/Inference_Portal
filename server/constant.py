@@ -43,7 +43,7 @@ RETRY = 0
 REGION = "us-east-1"
 CACHE_SERVER_LINK_RETRIVAL = 60
 
-# Inference Constant
+# Inference constant
 DEFAULT_SELF_HOST = "Llama 3 Instruct AWQ"
 OPEN_AI_MODEL_LIST = [
     "gpt-4",
