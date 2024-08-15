@@ -7,7 +7,7 @@ from celery.utils.log import get_task_logger
 from channels.layers import get_channel_layer
 from decouple import config
 from transformers import AutoTokenizer
-
+from typing import Tuple
 from server import constant
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM, InferenceServer
@@ -19,7 +19,7 @@ aws_secret = config("aws_secret_access_key")
 region = constant.REGION
 
 
-def correct_beam_best_of(beam, best_of):
+def correct_beam_best_of(beam: bool, best_of: int) -> Tuple[bool, int]:
     if not beam:
         best_of = 1
     elif beam and best_of <= 1:

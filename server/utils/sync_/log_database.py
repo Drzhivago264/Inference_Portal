@@ -3,6 +3,8 @@ from typing import Optional
 import tiktoken
 from django.db.utils import DataError
 from django.utils import timezone
+from django.db import IntegrityError, transaction
+
 from transformers import AutoTokenizer
 from vectordb import vectordb
 
@@ -47,29 +49,32 @@ def log_prompt_response(
         )
         input_cost = number_input_token * llm.input_price
         output_cost = number_output_token * llm.output_price
+
     try:
-        pair_save = PromptResponse(
-            prompt=prompt,
-            response=response,
-            key=key_object,
-            model=llm,
-            type=type_,
-            number_input_tokens=number_input_token,
-            number_output_tokens=number_output_token,
-            input_cost=input_cost,
-            output_cost=output_cost,
-        )
-        pair_save.save()
-        build_memory_tree(
-            key_object=key_object,
-            prompt=prompt,
-            response=response,
-            llm=llm,
-            type_=type_,
-            is_session_start_node=is_session_start_node,
-        )
-    except (DataError, IndexError):
+        with transaction.atomic():
+            pair_save = PromptResponse(
+                prompt=prompt,
+                response=response,
+                key=key_object,
+                model=llm,
+                type=type_,
+                number_input_tokens=number_input_token,
+                number_output_tokens=number_output_token,
+                input_cost=input_cost,
+                output_cost=output_cost,
+            )
+            pair_save.save()
+            build_memory_tree(
+                key_object=key_object,
+                prompt=prompt,
+                response=response,
+                llm=llm,
+                type_=type_,
+                is_session_start_node=is_session_start_node,
+            )
+    except (IntegrityError, IndexError, DataError):
         pass
+
 
 
 def build_memory_tree(

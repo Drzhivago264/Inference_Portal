@@ -14,6 +14,7 @@ from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
+from django.db import IntegrityError, transaction
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
@@ -208,21 +209,25 @@ def generate_key_api(request: HttpRequest) -> Response:
         except requests.exceptions.ConnectionError:
             integrated_address = ""
             payment_id = ""
-        name, key = APIKEY.objects.create_key(
-            name=key_name, integrated_address=integrated_address, payment_id=payment_id
-        )
-        created_key = APIKEY.objects.get_from_key(key)
-        hashed_key = created_key.hashed_key
-        user = User.objects.create_user(hashed_key, "", hashed_key)
-        master_group.user_set.add(user)
+        try:
+            with transaction.atomic():
+                name, key = APIKEY.objects.create_key(
+                    name=key_name, integrated_address=integrated_address, payment_id=payment_id
+                )
+                created_key = APIKEY.objects.get_from_key(key)
+                hashed_key = created_key.hashed_key
+                user = User.objects.create_user(hashed_key, "", hashed_key)
+                master_group.user_set.add(user)
 
-        # Adding all permission for master user
-        permissions = Permission.objects.filter(
-            codename__in=constant.DEFAULT_PERMISSION_CODENAMES
-        )
-        user.user_permissions.add(*permissions)
-        created_key.user = user
-        created_key.save()
+                # Adding all permission for master user
+                permissions = Permission.objects.filter(
+                    codename__in=constant.DEFAULT_PERMISSION_CODENAMES
+                )
+                user.user_permissions.add(*permissions)
+                created_key.user = user
+                created_key.save()
+        except IntegrityError:
+            return Response({"detail": "Database Intergrity Error, this should not happen, try again"}, status=status.HTTP_400_BAD_REQUEST)
         login(request, user)
         return Response(
             {
@@ -324,43 +329,43 @@ def stripe_redirect(request: HttpRequest) -> Response:
         product_id = serializer.data["product_id"]
         try:
             key = APIKEY.objects.get_from_key(key_)
-            if key.name == key_name:
-                price = Price.objects.get(id=product_id)
-                checkout_session = stripe.checkout.Session.create(
-                    payment_method_types=["card"],
-                    line_items=[
-                        {
-                            "price_data": {
-                                "currency": "usd",
-                                "unit_amount": int(price.price) * 100,
-                                "product_data": {
-                                    "name": price.product.name,
-                                    "description": price.product.desc,
-                                },
-                            },
-                            "quantity": price.product.quantity,
-                        }
-                    ],
-                    metadata={
-                        "product_id": product_id,
-                        "name": key_name,
-                        "key": key_,
-                        "price": price.price,
-                        "quantity": price.product.quantity,
-                    },
-                    mode="payment",
-                    success_url=settings.PAYMENT_SUCCESS_URL,
-                    cancel_url=settings.PAYMENT_CANCEL_URL,
-                )
-                return Response(
-                    {"stripe_checkout_url": checkout_session.url},
-                    status=status.HTTP_200_OK,
-                )
-            else:
+            if key.name != key_name:
                 return Response(
                     {"detail": "Your Key Name and/or Key is/are incorrect"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
+            price = Price.objects.get(id=product_id)
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "usd",
+                            "unit_amount": int(price.price) * 100,
+                            "product_data": {
+                                "name": price.product.name,
+                                "description": price.product.desc,
+                            },
+                        },
+                        "quantity": price.product.quantity,
+                    }
+                ],
+                metadata={
+                    "product_id": product_id,
+                    "name": key_name,
+                    "key": key_,
+                    "price": price.price,
+                    "quantity": price.product.quantity,
+                },
+                mode="payment",
+                success_url=settings.PAYMENT_SUCCESS_URL,
+                cancel_url=settings.PAYMENT_CANCEL_URL,
+            )
+            return Response(
+                {"stripe_checkout_url": checkout_session.url},
+                status=status.HTTP_200_OK,
+            )
+
         except APIKEY.DoesNotExist:
             return Response(
                 {"detail": "Your Key Name and/or Key is/are incorrect"},

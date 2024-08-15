@@ -1,6 +1,7 @@
 import uuid
 from hashlib import sha512
 
+from django.db import IntegrityError, transaction
 from django.contrib.auth.decorators import permission_required
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
@@ -96,34 +97,38 @@ def update_user_instruction_tree_api(request):
             <= constant.MAX_PARENT_TEMPLATE_PER_USER
             * constant.MAX_CHILD_TEMPLATE_PER_USER
         ):
-            node = UserInstructionTreeMP.objects.get(
-                id=parent_instruction.data["id"], user=master_user
-            )
+            try:
+                with transaction.atomic(): 
+                    node = UserInstructionTreeMP.objects.get(
+                        id=parent_instruction.data["id"], user=master_user
+                    )
 
-            node.instruct = parent_instruction.data["instruct"]
-            node.displayed_name = parent_instruction.data["displayed_name"]
-            node.save()
-            for index, c in enumerate(childrens.data):
-                if c["id"] is not None:
-                    child_node = UserInstructionTreeMP.objects.get(
-                        id=c["id"], user=master_user
-                    )
-                    child_node.instruct = c["instruct"]
-                    child_node.displayed_name = c["displayed_name"]
-                    child_node.code = index
-                    child_node.save()
-                    delete_cache(
-                        prefix="user_template", key=[child_node.name, master_user]
-                    )
-                else:
-                    node.add_child(
-                        instruct=c["instruct"],
-                        displayed_name=c["displayed_name"],
-                        name=sha512(hash_key.encode("utf-8")).hexdigest()
-                        + uuid.uuid4().hex,
-                        user=master_user,
-                        code=index,
-                    )
+                    node.instruct = parent_instruction.data["instruct"]
+                    node.displayed_name = parent_instruction.data["displayed_name"]
+                    node.save()
+                    for index, c in enumerate(childrens.data):
+                        if c["id"] is not None:
+                            child_node = UserInstructionTreeMP.objects.get(
+                                id=c["id"], user=master_user
+                            )
+                            child_node.instruct = c["instruct"]
+                            child_node.displayed_name = c["displayed_name"]
+                            child_node.code = index
+                            child_node.save()
+                            delete_cache(
+                                prefix="user_template", key=[child_node.name, master_user]
+                            )
+                        else:
+                            node.add_child(
+                                instruct=c["instruct"],
+                                displayed_name=c["displayed_name"],
+                                name=sha512(hash_key.encode("utf-8")).hexdigest()
+                                + uuid.uuid4().hex,
+                                user=master_user,
+                                code=index,
+                            )
+            except IntegrityError:
+                return Response({"detail": "Database Intergrity Error, this should not happen, try again"}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         else:
@@ -184,22 +189,26 @@ def create_user_instruction_tree_api(request) -> Response:
                 grandparent_node = UserInstructionTreeMP.add_root(
                     user=master_user, name=hash_key
                 )
-            parent_node = grandparent_node.add_child(
-                user=master_user,
-                name=sha512(hash_key.encode("utf-8")).hexdigest() + uuid.uuid4().hex,
-                displayed_name=parent_instruction.data["displayed_name"],
-                instruct=parent_instruction.data["instruct"],
-            )
+            try:
+                with transaction.atomic(): 
+                    parent_node = grandparent_node.add_child(
+                        user=master_user,
+                        name=sha512(hash_key.encode("utf-8")).hexdigest() + uuid.uuid4().hex,
+                        displayed_name=parent_instruction.data["displayed_name"],
+                        instruct=parent_instruction.data["instruct"],
+                    )
 
-            for index, c in enumerate(childrens.data):
-                parent_node.add_child(
-                    user=master_user,
-                    name=sha512(hash_key.encode("utf-8")).hexdigest()
-                    + uuid.uuid4().hex,
-                    displayed_name=c["displayed_name"],
-                    instruct=c["instruct"],
-                    code=index,
-                )
+                    for index, c in enumerate(childrens.data):
+                        parent_node.add_child(
+                            user=master_user,
+                            name=sha512(hash_key.encode("utf-8")).hexdigest()
+                            + uuid.uuid4().hex,
+                            displayed_name=c["displayed_name"],
+                            instruct=c["instruct"],
+                            code=index,
+                        )
+            except IntegrityError:
+                return Response({"detail": "Database Intergrity Error, this should not happen, try again"}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         else:

@@ -1,5 +1,5 @@
 import datetime
-
+from django.db import IntegrityError, transaction
 from django.contrib.auth.models import Group, Permission, User
 from django.http import HttpRequest
 from rest_framework import status
@@ -58,7 +58,7 @@ def generate_token_api(request: HttpRequest) -> Response:
                 value and perm != "allow_create_token"
             ):  # Only Master User is allowed to create token
                 permission_list.append(perm)
-        if len(permission_list) == 0:
+        if not permission_list:
             return Response(
                 {"detail": f"Cannot create a token with no permission!"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -77,21 +77,23 @@ def generate_token_api(request: HttpRequest) -> Response:
             ttl=ttl,
             ratelimit=f"{ratelimit}/{ratelimit_time_unit}",
         )
-
-        created_key = FineGrainAPIKEY.objects.get_from_key(token)
-        first_three_char = token[:3]
-        last_three_char = token[-3:]
-        created_key.first_three_char = first_three_char
-        created_key.last_three_char = last_three_char
-        created_key.save()
-        hashed_token = created_key.hashed_key
-        user = User.objects.create_user(hashed_token, "", hashed_token)
-        slave_group.user_set.add(user)
-        permissions = Permission.objects.filter(codename__in=permission_list)
-        user.user_permissions.add(*permissions)
-
-        created_key.user = user
-        created_key.save()
+        try:
+            with transaction.atomic(): 
+                created_key = FineGrainAPIKEY.objects.get_from_key(token)
+                first_three_char = token[:3]
+                last_three_char = token[-3:]
+                created_key.first_three_char = first_three_char
+                created_key.last_three_char = last_three_char
+                created_key.save()
+                hashed_token = created_key.hashed_key
+                user = User.objects.create_user(hashed_token, "", hashed_token)
+                slave_group.user_set.add(user)
+                permissions = Permission.objects.filter(codename__in=permission_list)
+                user.user_permissions.add(*permissions)
+                created_key.user = user
+                created_key.save()
+        except IntegrityError:
+            return Response({"detail": "Database Intergrity Error, this should not happen, try again"}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             {
                 "token_name": str(name),
