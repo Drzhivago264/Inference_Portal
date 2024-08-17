@@ -24,7 +24,7 @@ async def get_or_set_cache(
         prefix (str): The cache prefix.
         key (str|int|list): The cache key to look up.
         field_to_get (str|list): The field name to retrieve from the model.
-        timeout (int, optional): The cache timeout in seconds. Defaults to 600.
+        timeout (int): The cache timeout in seconds.
 
     Returns:
         Django Model Instance retrieved from the cache or the database.

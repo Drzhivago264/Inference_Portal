@@ -105,13 +105,13 @@ def build_memory_tree(
             if len(most_similar_vector) > 1:
                 most_similar_prompt = most_similar_vector[1].content_object.prompt
                 most_similar_response = most_similar_vector[1].content_object.response
-                most_similar_node = MemoryTreeMP.objects.filter(
+                most_similar_node = MemoryTreeMP.objects.select_for_update().filter(
                     key=key_object,
                     prompt=most_similar_prompt,
                     response=most_similar_response,
                 ).order_by("-created_at")[0]
             else:
-                most_similar_node = MemoryTreeMP.objects.filter(
+                most_similar_node = MemoryTreeMP.objects.select_for_update().filter(
                     key=key_object
                 ).order_by("-created_at")[0]
             if most_similar_node.depth < 43_998:
@@ -136,7 +136,7 @@ def build_memory_tree(
                 )
 
         elif memory_tree_node_number > 0 and not is_session_start_node:
-            parent_node = MemoryTreeMP.objects.filter(
+            parent_node = MemoryTreeMP.objects.select_for_update().filter(
                 key=key_object, is_session_start_node=True
             ).latest("created_at")
             parent_node.add_child(

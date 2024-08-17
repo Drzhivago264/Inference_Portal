@@ -153,8 +153,10 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                                     status=status.HTTP_200_OK,
                                 )
                             else:
-                                key.monero_credit += amount / 1e12
-                                key.save()
+                                with transaction.atomic():
+                                    locked_key = APIKEY.objects.select_for_update().get(hashed_key=key.hashed_key)
+                                    locked_key.monero_credit += amount / 1e12
+                                    locked_key.save()
                                 return Response(
                                     {
                                         "detail": f"Transaction is success, add {amount/1e+12} XMR to key {key_}"

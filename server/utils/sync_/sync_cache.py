@@ -104,9 +104,9 @@ def filter_or_set_cache(
     Args:
         Model (TModel): The Django model class.
         prefix (str): The cache prefix.
-        key (str): The cache key to look up.
-        field_to_get (str): The field name to retrieve from the model.
-        timeout (int, optional): The cache timeout in seconds. Defaults to 600.
+        key (str | int | list): The cache key or a list of cache key to look up.
+        field_to_get (str | list): The field name or a list of field name to retrieve from the model.
+        timeout (int): The cache timeout in seconds.
 
     Returns:
         The value retrieved from the cache or the database.

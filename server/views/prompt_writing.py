@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import permission_required
+from django.db import transaction
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
@@ -160,9 +161,11 @@ def update_user_dataset_api(request):
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
             )
         try:
-            dataset = Dataset.objects.get(id=id, user=master_user)
-            dataset.name = new_dataset_name
-            dataset.save()
+            
+            with transaction.atomic():
+                dataset = Dataset.objects.select_for_update().get(id=id, user=master_user)
+                dataset.name = new_dataset_name
+                dataset.save()
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         except Dataset.DoesNotExist:
             return Response(
@@ -196,8 +199,10 @@ def delete_user_dataset_api(request):
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
             )
         try:
-            dataset = Dataset.objects.get(id=id, user=master_user)
-            dataset.delete()
+            
+            with transaction.atomic():
+                dataset = Dataset.objects.select_for_update().get(id=id, user=master_user)
+                dataset.delete()
             return Response({"detail": "Deleted"}, status=status.HTTP_200_OK)
         except Dataset.DoesNotExist:
             return Response(
@@ -280,12 +285,14 @@ def update_user_record_api(request):
                 {"detail": "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND
             )
         try:
-            record = DatasetRecord.objects.get(dataset=dataset, id=record_id)
-            record.system_prompt = system_prompt
-            record.prompt = prompt
-            record.response = response
-            record.evaluation = evaluation
-            record.save()
+            
+            with transaction.atomic():
+                record = DatasetRecord.objects.select_for_update().get(dataset=dataset, id=record_id)
+                record.system_prompt = system_prompt
+                record.prompt = prompt
+                record.response = response
+                record.evaluation = evaluation
+                record.save()
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         except DatasetRecord.DoesNotExist:
             return Response(
@@ -320,9 +327,11 @@ def delete_user_record_api(request):
             return Response(
                 {"detail": "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND
             )
-        try:
-            record = DatasetRecord.objects.get(dataset=dataset, id=record_id)
-            record.delete()
+        try:      
+              
+            with transaction.atomic():
+                record = DatasetRecord.objects.select_for_update().get(dataset=dataset, id=record_id)  
+                record.delete()
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         except DatasetRecord.DoesNotExist:
             return Response(

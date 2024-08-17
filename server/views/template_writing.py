@@ -99,7 +99,7 @@ def update_user_instruction_tree_api(request):
         ):
             try:
                 with transaction.atomic(): 
-                    node = UserInstructionTreeMP.objects.get(
+                    node = UserInstructionTreeMP.objects.select_for_update().get(
                         id=parent_instruction.data["id"], user=master_user
                     )
 
@@ -108,7 +108,7 @@ def update_user_instruction_tree_api(request):
                     node.save()
                     for index, c in enumerate(childrens.data):
                         if c["id"] is not None:
-                            child_node = UserInstructionTreeMP.objects.get(
+                            child_node = UserInstructionTreeMP.objects.select_for_update().get(
                                 id=c["id"], user=master_user
                             )
                             child_node.instruct = c["instruct"]
@@ -122,8 +122,7 @@ def update_user_instruction_tree_api(request):
                             node.add_child(
                                 instruct=c["instruct"],
                                 displayed_name=c["displayed_name"],
-                                name=sha512(hash_key.encode("utf-8")).hexdigest()
-                                + uuid.uuid4().hex,
+                                name=sha512((hash_key + uuid.uuid4().hex).encode("utf-8")).hexdigest(),
                                 user=master_user,
                                 code=index,
                             )
@@ -193,7 +192,7 @@ def create_user_instruction_tree_api(request) -> Response:
                 with transaction.atomic(): 
                     parent_node = grandparent_node.add_child(
                         user=master_user,
-                        name=sha512(hash_key.encode("utf-8")).hexdigest() + uuid.uuid4().hex,
+                        name=sha512((hash_key + uuid.uuid4().hex).encode("utf-8")).hexdigest(),
                         displayed_name=parent_instruction.data["displayed_name"],
                         instruct=parent_instruction.data["instruct"],
                     )
@@ -201,8 +200,7 @@ def create_user_instruction_tree_api(request) -> Response:
                     for index, c in enumerate(childrens.data):
                         parent_node.add_child(
                             user=master_user,
-                            name=sha512(hash_key.encode("utf-8")).hexdigest()
-                            + uuid.uuid4().hex,
+                            name=sha512((hash_key + uuid.uuid4().hex).encode("utf-8")).hexdigest(),
                             displayed_name=c["displayed_name"],
                             instruct=c["instruct"],
                             code=index,
@@ -243,9 +241,10 @@ def delete_user_instruction_tree_api(request) -> Response:
                 {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
             )
         try:
-            node = UserInstructionTreeMP.objects.get(id=id, user=master_user)
-            delete_cache(prefix="user_template", key=[node.name, master_user])
-            node.delete()
+            with transaction.atomic():
+                node = UserInstructionTreeMP.objects.select_for_update().get(id=id, user=master_user)
+                delete_cache(prefix="user_template", key=[node.name, master_user])
+                node.delete()
             return Response({"detail": "Deleted"}, status=status.HTTP_200_OK)
         except UserInstructionTreeMP.DoesNotExist:
             return Response(
