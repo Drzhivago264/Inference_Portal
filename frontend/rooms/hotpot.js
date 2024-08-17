@@ -9,13 +9,13 @@ import Box from "@mui/material/Box";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
 import { ChatPaper } from "../component/custom_ui_component/ChatPaper.js";
+import { ChatParameter } from "../component/chat_components/ChatroomParameters.js";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Footer from "../component/nav/Footer.js";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
-import {HotpotParameter} from "../component/chat_components/HotpotParameters.js";
 import InputAdornment from "@mui/material/InputAdornment";
 import InputLabel from "@mui/material/InputLabel";
 import List from "@mui/material/List";
@@ -45,19 +45,23 @@ function Hotpot() {
 	const [agent_message, setAgentMessage] = useState([]);
 	const [choosen_agent_model, setChoosenAgentModel] = useState("gpt-4");
 	const [choosen_chat_model, setChoosenChatModel] = useState("gpt-4");
-	const [top_p, setTopp] = useState(0.72);
-	const [top_k, setTopk] = useState(-1);
-	const [mode, setMode] = useState("chat");
-	const [max_tokens, setMaxToken] = useState(null);
-	const [usememory, setUseMemory] = useState(false);
-	const [usememorycurrent, setUseMemoryCurrent] = useState(true);
-	const [temperature, setTemperature] = useState(0.73);
-	const [beam, setBeam] = useState(false);
-	const [earlystopping, setEarlyStopping] = useState(false);
-	const [bestof, setBestof] = useState(2);
-	const [presencepenalty, setPresencePenalty] = useState(0);
-	const [frequencypenalty, setFrequencyPenalty] = useState(0);
-	const [lengthpenalty, setLengthPenalty] = useState(0);
+    const [inference_parameter, setInferenceParameter] = useState(
+        {
+            mode: "chat",
+            top_p: 0.72,
+            top_k: -1,
+            usememory: false,
+            usememorycurrent: true,
+            temperature: 0.73,
+            beam: false,
+            earlystopping: false,
+            bestof: 2,
+            presencepenalty: 0,
+            frequencypenalty: 0,
+            lengthpenalty: 0,
+            max_tokens: null
+        }
+    )
 	const [userchatmessage, setUserChatMessage] = useState("");
 	const [userchatmessageError, setUserChatMessageError] = useState(false);
 	const [useragentmessage, setUserAgentMessage] = useState("");
@@ -151,11 +155,11 @@ function Hotpot() {
 				choosen_model: choosen_agent_model,
 				choosen_template: choosen_template,
 				role: "Human",
-				top_p: top_p,
-				max_tokens: max_tokens,
-				frequency_penalty: frequencypenalty,
-				presence_penalty: presencepenalty,
-				temperature: temperature,
+				top_p: inference_parameter.top_p,
+				max_tokens: inference_parameter.max_tokens,
+				frequency_penalty: inference_parameter.frequencypenalty,
+				presence_penalty: inference_parameter.presencepenalty,
+				temperature: inference_parameter.temperature,
 				agent_instruction: default_parent_instruct,
 				child_instruction: default_child_instruct,
 			};
@@ -169,23 +173,12 @@ function Hotpot() {
 			setUserChatMessageError(true);
 		} else {
 			var data = {
-				mode: mode,
+                ...inference_parameter,
 				message: userchatmessage,
 				choosen_model: choosen_chat_model,
 				role: "Human",
-				top_k: top_k,
-				top_p: top_p,
-				best_of: bestof,
-				max_tokens: max_tokens,
-				frequency_penalty: frequencypenalty,
-				presence_penalty: presencepenalty,
-				temperature: temperature,
-				beam: beam,
-				early_stopping: earlystopping,
-				length_penalty: lengthpenalty,
-				include_memory: usememory,
-				include_current_memory: usememorycurrent,
 			};
+            
 			chat_websocket.current.send(JSON.stringify(data));
 			setUserChatMessage("");
 		}
@@ -369,46 +362,19 @@ function Hotpot() {
 								check_duplicate_message={check_duplicate_message}></ChatBox>
 						</Grid>
 						<Grid item xs={2}>
-							<HotpotParameter
+							<ChatParameter
 								socket_destination={socket_destination}
 								setSocketDestination={setSocketDestination}
-								template_list={template_list}
-								choosen_template={choosen_template}
-								setChoosenTemplate={setChoosenTemplate}
 								model_objects={model_objects}
 								agent_objects={agent_objects}
-								choosen_chat_model={choosen_chat_model}
-								choosen_agent_model={choosen_agent_model}
-								top_k={top_k}
-								top_p={top_p}
-								max_tokens={max_tokens}
-								temperature={temperature}
-								mode={mode}
-								bestof={bestof}
-                                beam={beam}
-								lengthpenalty={lengthpenalty}
-								presencepenalty={presencepenalty}
-								frequencypenalty={frequencypenalty}
+								choosen_model={choosen_chat_model}
+                                inference_parameter={inference_parameter}
+                                setInferenceParameter={setInferenceParameter}
 								max_turn={max_turn}
 								setMaxTurn={setMaxTurn}
-								setBeam={setBeam}
-								setMaxToken={setMaxToken}
-								setBestof={setBestof}
-								setTemperature={setTemperature}
-								setMode={setMode}
-								setLengthPenalty={setLengthPenalty}
-								setPresencePenalty={setPresencePenalty}
-								setFrequencyPenalty={setFrequencyPenalty}
-								setTopk={setTopk}
-								setTopp={setTopp}
-								setUseMemory={setUseMemory}
-								setUseMemoryCurrent={setUseMemoryCurrent}
-								usememory={usememory}
-								usememorycurrent={usememorycurrent}
-								earlystopping={earlystopping}
-								setEarlyStopping={setEarlyStopping}
 								setDuplicateMessage={setDuplicateMessage}
-								></HotpotParameter>
+                                room_type="hotpot_room"
+								/>
 						</Grid>
 					</Grid>
 				</Box>

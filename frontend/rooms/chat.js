@@ -26,23 +26,27 @@ function Chat() {
 	const [shownthinking, setThinking] = useState(false);
 	const [chat_message, setChatMessage] = useState([]);
 	const [choosen_model, setChoosenModel] = useState("Llama 3 Instruct AWQ");
-	const [top_p, setTopp] = useState(0.72);
-	const [top_k, setTopk] = useState(-1);
-	const [mode, setMode] = useState("chat");
-	const [max_tokens, setMaxToken] = useState(null);
-	const [usememory, setUseMemory] = useState(false);
-	const [usememorycurrent, setUseMemoryCurrent] = useState(true);
-	const [temperature, setTemperature] = useState(0.73);
-	const [beam, setBeam] = useState(false);
-	const [earlystopping, setEarlyStopping] = useState(false);
-	const [bestof, setBestof] = useState(2);
-	const [presencepenalty, setPresencePenalty] = useState(0);
-	const [frequencypenalty, setFrequencyPenalty] = useState(0);
-	const [lengthpenalty, setLengthPenalty] = useState(0);
+    const [inference_parameter, setInferenceParameter] = useState(
+        {
+            mode: "chat",
+            top_p: 0.72,
+            top_k: -1,
+            usememory: false,
+            usememorycurrent: true,
+            temperature: 0.73,
+            beam: false,
+            earlystopping: false,
+            bestof: 2,
+            presencepenalty: 0,
+            frequencypenalty: 0,
+            lengthpenalty: 0,
+            max_tokens: null
+        }
+    )
+
 	const [usermessage, setUserMessage] = useState("");
 	const [usermessageError, setUserMessageError] = useState(false);
-	const [socket_destination, setSocketDestination] = useState("/ws/chat-async/");
-
+	const [socket_destination, setSocketDestination] = useState("async")
 	const navigate = useNavigate();
 	const {is_authenticated, timeZone} = useContext(UserContext);
 	const {model_objects, agent_objects} = useGetModel();
@@ -53,13 +57,14 @@ function Chat() {
 		scrollToBottom(messagesEndRef);
 	}, [chat_message]);
 	var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    const pathPrefix = socket_destination === "async" ? "-async" : "";
 	useEffect(() => {
 		closeWebSocket(websocket);
 		closeWebSocket(agent_websocket);
 		closeWebSocket(chat_websocket);
 
 		if (websocket_hash) {
-			websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}${socket_destination}${websocket_hash}/${timeZone}/`);
+			websocket.current = new WebSocket(`${ws_scheme}://${window.location.host}/ws/chat${pathPrefix}/${websocket_hash}/${timeZone}/`);
 			chatsocket(websocket, setChatMessage, setThinking, document);
 		}
 	}, [socket_destination, websocket_hash]);
@@ -75,22 +80,10 @@ function Chat() {
 			setUserMessageError(true);
 		} else {
 			var data = {
-				mode: mode,
+                ...inference_parameter,
 				message: usermessage,
 				choosen_model: choosen_model,
 				role: "Human",
-				top_k: top_k,
-				top_p: top_p,
-				best_of: bestof,
-				max_tokens: max_tokens,
-				frequency_penalty: frequencypenalty,
-				presence_penalty: presencepenalty,
-				temperature: temperature,
-				beam: beam,
-				early_stopping: earlystopping,
-				length_penalty: lengthpenalty,
-				include_memory: usememory,
-				include_current_memory: usememorycurrent,
 			};
 			websocket.current.send(JSON.stringify(data));
 			setUserMessage("");
@@ -126,7 +119,7 @@ function Chat() {
 								submitChat={submitChat}
 								messagesEndRef={messagesEndRef}
 								shownthinking={shownthinking}
-								handleEnter={handleEnter}></ChatBox>
+								handleEnter={handleEnter}/>
 						</Grid>
 						<Grid item xs={12} sm={4} lg={2.5}>
 							<ChatParameter
@@ -135,33 +128,11 @@ function Chat() {
 								model_objects={model_objects}
 								agent_objects={agent_objects}
 								choosen_model={choosen_model}
-								top_k={top_k}
-								top_p={top_p}
-								max_tokens={max_tokens}
-								temperature={temperature}
-								mode={mode}
-								bestof={bestof}
-								lengthpenalty={lengthpenalty}
-								presencepenalty={presencepenalty}
-								frequencypenalty={frequencypenalty}
-								beam={beam}
-								setBeam={setBeam}
-								setMaxToken={setMaxToken}
-								setBestof={setBestof}
 								setChoosenModel={setChoosenModel}
-								setTemperature={setTemperature}
-								setMode={setMode}
-								setLengthPenalty={setLengthPenalty}
-								setPresencePenalty={setPresencePenalty}
-								setFrequencyPenalty={setFrequencyPenalty}
-								setTopk={setTopk}
-								setTopp={setTopp}
-								setUseMemory={setUseMemory}
-								setUseMemoryCurrent={setUseMemoryCurrent}
-								usememory={usememory}
-								usememorycurrent={usememorycurrent}
-								earlystopping={earlystopping}
-								setEarlyStopping={setEarlyStopping}></ChatParameter>
+                                inference_parameter={inference_parameter}
+                                setInferenceParameter={setInferenceParameter}
+                                room_type="chat_room"
+                                />
 						</Grid>
 					</Grid>
 				</Box>

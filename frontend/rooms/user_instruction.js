@@ -63,11 +63,13 @@ function UserInstruction() {
 	const [chat_message, setChatMessage] = useState([]);
 	const [usermessage, setUserMessage] = useState("");
 	const [usermessageError, setUserMessageError] = useState(false);
-	const [top_p, setTopp] = useState(0.72);
-	const [max_tokens, setMaxToken] = useState(null);
-	const [temperature, setTemperature] = useState(0.73);
-	const [presencepenalty, setPresencePenalty] = useState(0);
-	const [frequencypenalty, setFrequencyPenalty] = useState(0);
+    const [inference_parameter, setInferenceParameter] = useState({
+		top_p: 0.72,
+		temperature: 0.73,
+		presencepenalty: 0,
+		frequencypenalty: 0,
+		max_tokens: null,
+	});
 	const [shownthinking, setThinking] = useState(false);
 	const [max_turn, setMaxTurn] = useState(4);
 	const [loading, setLoading] = useState(false);
@@ -366,18 +368,14 @@ function UserInstruction() {
 		let user_parent_instruct = template_list[selectedIndex].instruct;
 
 		const data = {
-			instruct_change,
-			max_turn,
+            ...inference_parameter,
+			instruct_change: instruct_change,
+			max_turn: max_turn,
 			currentParagraph: 1,
 			message: usermessage,
-			choosen_model,
-			choosen_template,
+			choosen_model: choosen_model,
+			choosen_template: choosen_template,
 			role: "Human",
-			top_p,
-			max_tokens,
-			frequency_penalty: frequencypenalty,
-			presence_penalty: presencepenalty,
-			temperature,
 			agent_instruction: user_parent_instruct,
 			child_instruction: user_child_instruct,
 		};
@@ -439,21 +437,14 @@ function UserInstruction() {
 							</Paper>
 							<Box sx={{mr: 2, mt: 2}}>
 								<OpenAPIParameter
-									top_p={top_p}
+                                    inference_parameter={inference_parameter}
+                                    setInferenceParameter={setInferenceParameter}
 									agent_objects={agent_objects}
 									choosen_model={choosen_model}
 									setChoosenModel={setChoosenModel}
-									setTopp={setTopp}
-									temperature={temperature}
-									setTemperature={setTemperature}
-									max_tokens={max_tokens}
-									setMaxToken={setMaxToken}
-									presencepenalty={presencepenalty}
-									setPresencePenalty={setPresencePenalty}
-									frequencypenalty={frequencypenalty}
-									setFrequencyPenalty={setFrequencyPenalty}
 									max_turn={max_turn}
-									setMaxTurn={setMaxTurn}></OpenAPIParameter>
+									setMaxTurn={setMaxTurn}
+                                    isToolBox={true}/>
 							</Box>
 						</Grid>
 						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
@@ -723,7 +714,7 @@ function UserInstruction() {
 								submitChat={submitChat}
 								messagesEndRef={messagesEndRef}
 								shownthinking={shownthinking}
-								handleEnter={handleEnter}></ChatBox>
+								handleEnter={handleEnter}/>
 						</Grid>
 					</Grid>
 				</Box>

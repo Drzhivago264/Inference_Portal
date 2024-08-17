@@ -56,11 +56,15 @@ function DataSynthesis() {
 	const messagesEndRef = useRef(null);
 	const [choosen_prompt_column, setChoosenPromptColumn] = useState("samplePrompt");
 	const [choosen_model, setChoosenModel] = useState("gpt-4");
-	const [top_p, setTopp] = useState(0.72);
-	const [max_tokens, setMaxToken] = useState(null);
-	const [temperature, setTemperature] = useState(0.73);
-	const [presencepenalty, setPresencePenalty] = useState(0);
-	const [frequencypenalty, setFrequencyPenalty] = useState(0);
+    const [inference_parameter, setInferenceParameter] = useState(
+        {
+            top_p: 0.72,
+            temperature: 0.73,
+            presencepenalty: 0,
+            frequencypenalty: 0,
+            max_tokens: null
+        }
+    )
 	const [shownthinking, setThinking] = useState(false);
 	const [max_turn, setMaxTurn] = useState(null);
 	const [socket_destination, setSocketDestination] = useState("/ws/engineer-async/");
@@ -238,17 +242,13 @@ function DataSynthesis() {
 	]);
 	const submitSeed = (seed_prompt, row_no) => {
 		var data = {
+            ...inference_parameter,
 			row_no: row_no,
 			seed_prompt: seed_prompt,
 			child_instruction_list: use_user_template ? default_user_child_template_list : default_child_instruct_list,
 			parent_instruction: use_user_template ? default_user_parent_instruct : default_parent_instruct,
 			optional_instruction: default_extra_instruct,
 			choosen_model: choosen_model,
-			top_p: top_p,
-			max_tokens: max_tokens,
-			frequency_penalty: frequencypenalty,
-			presence_penalty: presencepenalty,
-			temperature: temperature,
 		};
 		websocket.current.send(JSON.stringify(data));
 		setThinking(true);
@@ -574,24 +574,6 @@ function DataSynthesis() {
 						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
 						<Grid item xs={2}>
 							<Stack direction='column' mr={2} spacing={2}>
-								<FormControl defaultValue=''>
-									<InputLabel id='model-label'>Backends</InputLabel>
-									<Select
-										labelId='socket-label'
-										id='socket-select'
-										onChange={(e) => setSocketDestination(e.target.value)}
-										value={socket_destination}
-										label='Backends'
-										size='small'>
-										<MenuItem key={"/ws/engineer/"} value={"/ws/engineer/"}>
-											Celery Backend
-										</MenuItem>
-										<MenuItem key={"/ws/engineer-async/"} value={"/ws/engineer-async/"}>
-											Async Backend
-										</MenuItem>
-									</Select>
-								</FormControl>
-								<Divider />
 								<UserTemplate
                                     websocket={websocket}
 									use_user_template={use_user_template}
@@ -603,21 +585,15 @@ function DataSynthesis() {
 								/>
 								<Divider />
 								<OpenAPIParameter
-									top_p={top_p}
 									agent_objects={agent_objects}
+                                    socket_destination={socket_destination}
+                                    setSocketDestination={setSocketDestination}
 									choosen_model={choosen_model}
 									setChoosenModel={setChoosenModel}
-									setTopp={setTopp}
-									temperature={temperature}
-									setTemperature={setTemperature}
-									max_tokens={max_tokens}
-									setMaxToken={setMaxToken}
-									presencepenalty={presencepenalty}
-									setPresencePenalty={setPresencePenalty}
-									frequencypenalty={frequencypenalty}
-									setFrequencyPenalty={setFrequencyPenalty}
+                                    inference_parameter={inference_parameter}
+                                    setInferenceParameter={setInferenceParameter}
 									max_turn={max_turn}
-									setMaxTurn={setMaxTurn}></OpenAPIParameter>
+									setMaxTurn={setMaxTurn}/>
 								<CeleryAlert />
 							</Stack>
 						</Grid>

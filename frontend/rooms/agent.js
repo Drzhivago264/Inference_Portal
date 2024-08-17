@@ -57,11 +57,7 @@ function Agent() {
 	const [shownthinking, setThinking] = useState(false);
 	const [chat_message, setChatMessage] = useState([]);
 	const [choosen_model, setChoosenModel] = useState("gpt-4");
-	const [top_p, setTopp] = useState(0.72);
-	const [max_tokens, setMaxToken] = useState(null);
-	const [temperature, setTemperature] = useState(0.73);
-	const [presencepenalty, setPresencePenalty] = useState(0);
-	const [frequencypenalty, setFrequencyPenalty] = useState(0);
+	
 	const [usermessage, setUserMessage] = useState("");
 	const [max_turn, setMaxTurn] = useState(4);
 	const [instruct_change, setInstructChange] = useState(false);
@@ -71,6 +67,17 @@ function Agent() {
 	const [currentparagraph, setCurrentParagraph] = useState(1);
 	const [use_user_template, setUseUserTemplate] = useState(false);
 	const [selectedIndex, setSelectedIndex] = useState(0);
+
+    const [inference_parameter, setInferenceParameter] = useState(
+        {
+            top_p: 0.72,
+            temperature: 0.73,
+            presencepenalty: 0,
+            frequencypenalty: 0,
+            max_tokens: null
+        }
+    )
+    
 	const navigate = useNavigate();
 	const {is_authenticated, timeZone} = useContext(UserContext);
 	useGetRedirectAnon(navigate, is_authenticated);
@@ -224,6 +231,7 @@ function Agent() {
 			setUserMessageError(true);
 		} else {
 			var data = {
+                ...inference_parameter,
 				max_turn: max_turn,
 				instruct_change: instruct_change,
 				currentParagraph: currentparagraph,
@@ -231,11 +239,6 @@ function Agent() {
 				choosen_model: choosen_model,
 				choosen_template: use_user_template ? choosen_user_template : choosen_template,
 				role: "Human",
-				top_p: top_p,
-				max_tokens: max_tokens,
-				frequency_penalty: frequencypenalty,
-				presence_penalty: presencepenalty,
-				temperature: temperature,
 				agent_instruction: use_user_template ? default_user_parent_instruct : default_parent_instruct,
 				child_instruction: use_user_template ? default_user_child_instruct : default_child_instruct,
 			};
@@ -418,39 +421,16 @@ function Agent() {
 									websocket={websocket}
 								/>
 								<Divider />
-								<FormControl defaultValue=''>
-									<InputLabel id='model-label'>Backends</InputLabel>
-									<Select
-										labelId='socket-label'
-										id='socket-select'
-										onChange={(e) => setSocketDestination(e.target.value)}
-										value={socket_destination}
-										label='Backends'
-										size='small'>
-										<MenuItem key={"/ws/engineer/"} value={"/ws/engineer/"}>
-											Celery Backend
-										</MenuItem>
-										<MenuItem key={"/ws/engineer-async/"} value={"/ws/engineer-async/"}>
-											Async Backend
-										</MenuItem>
-									</Select>
-								</FormControl>
 								<OpenAPIParameter
-									top_p={top_p}
 									agent_objects={agent_objects}
+                                    socket_destination={socket_destination}
+                                    setSocketDestination={setSocketDestination}
 									choosen_model={choosen_model}
 									setChoosenModel={setChoosenModel}
-									setTopp={setTopp}
-									temperature={temperature}
-									setTemperature={setTemperature}
-									max_tokens={max_tokens}
-									setMaxToken={setMaxToken}
-									presencepenalty={presencepenalty}
-									setPresencePenalty={setPresencePenalty}
-									frequencypenalty={frequencypenalty}
-									setFrequencyPenalty={setFrequencyPenalty}
+                                    inference_parameter={inference_parameter}
+                                    setInferenceParameter={setInferenceParameter}
 									max_turn={max_turn}
-									setMaxTurn={setMaxTurn}></OpenAPIParameter>
+									setMaxTurn={setMaxTurn}/>
 							</Stack>
 						</Grid>
 

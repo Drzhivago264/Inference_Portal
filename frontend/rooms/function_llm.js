@@ -31,11 +31,13 @@ function FunctionLLM() {
 	const messagesEndRef = useRef(null);
 	const [chat_message, setChatMessage] = useState([]);
 	const [choosen_model, setChoosenModel] = useState("gpt-4");
-	const [top_p, setTopp] = useState(0.72);
-	const [max_tokens, setMaxToken] = useState(null);
-	const [temperature, setTemperature] = useState(0.73);
-	const [presencepenalty, setPresencePenalty] = useState(0);
-	const [frequencypenalty, setFrequencyPenalty] = useState(0);
+	const [inference_parameter, setInferenceParameter] = useState({
+		top_p: 0.72,
+		temperature: 0.73,
+		presencepenalty: 0,
+		frequencypenalty: 0,
+		max_tokens: null,
+	});
 	const [usermessage, setUserMessage] = useState("");
 	const [usermessageError, setUserMessageError] = useState(false);
 	const [extrainstruction, setExtraInstruction] = useState("sadness, joy, love, anger, fear, surprise, neutral");
@@ -70,15 +72,11 @@ function FunctionLLM() {
 			setUserMessageError(true);
 		} else {
 			var data = {
+				...inference_parameter,
 				message: usermessage,
 				tool: llmfunction,
 				choosen_model: choosen_model,
 				role: "Human",
-				top_p: top_p,
-				max_tokens: max_tokens,
-				frequency_penalty: frequencypenalty,
-				presence_penalty: presencepenalty,
-				temperature: temperature,
 				emotion_list: typeof extrainstruction === "string" ? extrainstruction : null,
 				topic_list: typeof extrainstruction === "string" ? extrainstruction : null,
 				style_list: typeof extrainstruction === "string" ? extrainstruction : null,
@@ -184,19 +182,13 @@ function FunctionLLM() {
 
 						<Grid item xs={12} sm={4} md={3}>
 							<OpenAPIParameter
-								top_p={top_p}
 								agent_objects={agent_objects}
 								choosen_model={choosen_model}
 								setChoosenModel={setChoosenModel}
-								setTopp={setTopp}
-								temperature={temperature}
-								setTemperature={setTemperature}
-								max_tokens={max_tokens}
-								setMaxToken={setMaxToken}
-								presencepenalty={presencepenalty}
-								setPresencePenalty={setPresencePenalty}
-								frequencypenalty={frequencypenalty}
-								setFrequencyPenalty={setFrequencyPenalty}></OpenAPIParameter>
+								inference_parameter={inference_parameter}
+								setInferenceParameter={setInferenceParameter}
+                                isToolBox={true}
+							/>
 							<Box mt={1}>
 								<ChatInput
 									multiline
