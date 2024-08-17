@@ -1,3 +1,4 @@
+import uuid
 from hashlib import sha256
 
 from django.contrib.auth import authenticate, login, logout
@@ -21,34 +22,13 @@ def check_login(request: HttpRequest) -> Response:
     if current_user.id == None:
         return Response({"detail": "anon user"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        if current_user.groups.filter(name="master_user").exists():
-            unique_hash_seed = (
-                current_user.apikey.id
-                + current_user.apikey.name
-                + str(current_user.apikey.created_at)
-            )
-            key_name = current_user.apikey.prefix + "..."
+        is_master = current_user.groups.filter(name="master_user").exists()
+        is_slave = current_user.groups.filter(name="slave_user").exists()
+        if is_master or is_slave:
+            key_name = f"{current_user.apikey.prefix}..." if is_master else f"{current_user.finegrainapikey.prefix}..."
             return Response(
                 {
-                    "websocket_hash": sha256(
-                        unique_hash_seed.encode("utf-8")
-                    ).hexdigest(),
-                    "key_name": key_name,
-                },
-                status=status.HTTP_200_OK,
-            )
-        elif current_user.groups.filter(name="slave_user").exists():
-            unique_hash_seed = (
-                current_user.finegrainapikey.id
-                + current_user.finegrainapikey.name
-                + str(current_user.finegrainapikey.created_at)
-            )
-            key_name = current_user.finegrainapikey.prefix + "..."
-            return Response(
-                {
-                    "websocket_hash": sha256(
-                        unique_hash_seed.encode("utf-8")
-                    ).hexdigest(),
+                    "websocket_hash": uuid.uuid4().hex,
                     "key_name": key_name,
                 },
                 status=status.HTTP_200_OK,
@@ -98,15 +78,12 @@ def log_in(request: HttpRequest) -> Response:
                 {"detail": "Your Key is incorrect"}, status=status.HTTP_401_UNAUTHORIZED
             )
     else:
-        message = str()
-        for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n"
-        return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
 @throttle_classes([AnonRateThrottle])
-@cache_page(60 * 15)
+@cache_page(60 * 60)
 def model_api(request: HttpRequest) -> Response:
     servers = InferenceServer.objects.all().defer("name").order_by("hosted_model")
     model_info = LLM.objects.filter(is_self_host=True)

@@ -34,11 +34,11 @@ def periodically_monitor_EC2_instance() -> str:
             instance = ec2_resource.Instance(server.name)
             server.status = instance.state["Name"]
             server.private_ip = instance.private_ip_address
-            server.url = "http://" + instance.private_ip_address + ":80/generate"
+            server.url = f"http://{instance.private_ip_address}:80/generate"
             if instance.public_ip_address:
                 server.public_ip = instance.public_ip_address
                 server.alternative_url = (
-                    "http://" + instance.public_ip_address + ":80/generate"
+                    f"http://{instance.public_ip_address}:80/generate"
                 )
             server.save()
             return instance.state["Name"]

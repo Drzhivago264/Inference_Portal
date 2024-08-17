@@ -30,7 +30,7 @@ The implementation of React and data flow is explained in the diagram below
 Installation
 --------------
 
-First of all, for start using django-inference-portal, you must download it using git
+First of all, for start using django-inference-portal, you must download it using git (Multiple old files are removed from the history so now git clone will be fast, sorry for my previous ignorance of git history)
 
     git clone https://github.com/Drzhivago264/Inference_Portal.git
 
@@ -51,7 +51,7 @@ Before install dependencies, you need to install Postgres, and create a table na
     sudo systemctl enable postgresql
 
 You also need to install NPM and Node.js for the frontend.
-    
+    #I do not use Node in this project, but we still need install it for npm 
     sudo apt install nodejs
     sudo apt install npm
     npm init -y

@@ -68,10 +68,7 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
     else:
-        message = str()
-        for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n"
-        return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])

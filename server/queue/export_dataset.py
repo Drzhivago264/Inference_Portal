@@ -57,20 +57,18 @@ def export_large_dataset(
             timeout=120,
         )
         result_records = DatasetRecord.objects.filter(dataset=dataset)
-        i = 0
         with open(
             f"s3://download/{url_safe_datasetname}_{unique}{extension}",
             "w",
             transport_params={"client": r2_client},
         ) as fout:
-            for r in result_records.iterator(chunk_size=2000):
+            for index, r in enumerate(result_records.iterator(chunk_size=2000)):
                 if extension == ".csv":
                     writer = csv.writer(fout)
-                    if i == 0:
+                    if index == 0:
                         writer.writerow(
                             ["system_prompt", "prompt", "response", "evaluation"]
                         )
-                        i += 1
                     writer.writerow(
                         [
                             r.system_prompt,

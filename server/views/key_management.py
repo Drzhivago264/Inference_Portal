@@ -81,10 +81,7 @@ def check_credit_api(request: HttpRequest) -> Response:
                 status=status.HTTP_401_UNAUTHORIZED,
             )
     else:
-        message = str()
-        for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n"
-        return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -191,10 +188,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
     else:
-        message = str()
-        for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n"
-        return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -241,10 +235,7 @@ def generate_key_api(request: HttpRequest) -> Response:
             status=status.HTTP_200_OK,
         )
     else:
-        message = str()
-        for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n"
-        return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -316,10 +307,7 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
     else:
-        message = str()
-        for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n"
-        return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -374,10 +362,7 @@ def stripe_redirect(request: HttpRequest) -> Response:
                 status=status.HTTP_401_UNAUTHORIZED,
             )
     else:
-        message = str()
-        for error in serializer.errors:
-            message += serializer.errors[error][0] + "\n"
-        return Response({"detail": message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SuccessView(TemplateView):
@@ -463,8 +448,10 @@ class StripeWebhookView(View):
             c = float(session["metadata"]["price"]) * float(
                 session["metadata"]["quantity"]
             )
-            k = APIKEY.objects.get_from_key(key)
-            k.credit += c
-            k.save()
+            key_ = APIKEY.objects.get_from_key(key)
+            with transaction.atomic():
+                locked_key = APIKEY.objects.select_for_update().get(hashed_key=key_.hashed_key)
+                locked_key.credit += c
+                locked_key.save()
         # Can handle other events here.
         return HttpResponse(status=200)
