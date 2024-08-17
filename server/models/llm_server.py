@@ -8,7 +8,6 @@ class LLM(models.Model):
     base = models.CharField(max_length=255, blank=True, null=True)
     size = models.IntegerField(default=1)
     desc = models.TextField()
-    chat_template = models.TextField(default="")
     input_price = models.FloatField(default=0.0)
     output_price = models.FloatField(default=0.0)
     agent_availability = models.BooleanField(default=False)

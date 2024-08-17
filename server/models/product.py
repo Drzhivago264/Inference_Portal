@@ -42,9 +42,9 @@ class PaymentHistory(models.Model):
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
     crypto = models.ForeignKey(Crypto, on_delete=models.CASCADE)
     amount = models.FloatField(default=0.0)
-    integrated_address = models.CharField(max_length=400)
-    payment_id = models.CharField(max_length=400)
-    transaction_hash = models.CharField(max_length=400)
+    integrated_address = models.CharField(max_length=106)
+    payment_id = models.CharField(max_length=32)
+    transaction_hash = models.CharField(max_length=64)
     locked = models.BooleanField()
     block_height = models.IntegerField(default=0)
 
