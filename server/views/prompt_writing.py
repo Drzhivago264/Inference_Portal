@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import permission_required
 from django.db import transaction
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -34,17 +35,13 @@ def get_default_user_dataset_api(request):
         current_user=current_user,
     )
     if not master_user:
-        return Response(
-            {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
-        )
+        raise PermissionDenied(detail="Your token is expired")
     elif Dataset.objects.filter(user=master_user).count() == 0:
-        return Response({"detail": "No Dataset"}, status=status.HTTP_404_NOT_FOUND)
+        raise NotFound(detail="No dataset")
     else:
         dataset_list = Dataset.objects.filter(user=master_user)
         if dataset_list:
-
             dataset_list_serializer = DatasetGetSerializer(dataset_list, many=True)
-
             return Response(
                 {
                     "dataset_list": dataset_list_serializer.data,
@@ -54,7 +51,7 @@ def get_default_user_dataset_api(request):
                 status=status.HTTP_200_OK,
             )
         else:
-            Response({"detail": "No dataset"}, status=status.HTTP_404_NOT_FOUND)
+            raise NotFound(detail="No dataset")
 
 
 @api_view(["GET"])
@@ -70,19 +67,14 @@ def get_user_records_api(request, id: int):
         current_user=current_user,
     )
     if not master_user:
-        return Response(
-            {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
-        )
+        raise PermissionDenied(detail="Your token is expired")
     elif Dataset.objects.filter(user=master_user).count() == 0:
-        return Response({"detail": "No Dataset"}, status=status.HTTP_200_OK)
+        raise NotFound(detail="No dataset")
     else:
         try:
             dataset = Dataset.objects.get(user=master_user, id=id)
         except Dataset.DoesNotExist:
-            return Response(
-                {"detail": "Failed, Cannot fine your dataset"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            raise NotFound(detail="No dataset")
         paginator = PaginatorWithPageNum()
         paginator.page_size = 10
         records = DatasetRecord.objects.filter(dataset=dataset).order_by("-id")
@@ -100,7 +92,7 @@ def get_user_records_api(request, id: int):
 def create_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetCreateSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         dataset_name = serializer.data["name"]
         default_evaluation = serializer.data["default_evaluation"]
         default_system_prompt = serializer.data["default_system_prompt"]
@@ -111,9 +103,7 @@ def create_user_dataset_api(request):
             current_user=current_user,
         )
         if not master_user:
-            return Response(
-                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
-            )
+            raise PermissionDenied(detail="Your token is expired")
         elif (
             Dataset.objects.filter(user=master_user).count()
             <= constant.MAX_DATASET_PER_USER
@@ -130,14 +120,9 @@ def create_user_dataset_api(request):
             )
         else:
             return Response(
-                {"detail": "Save Failed!, you have react maximun number of datasets"},
+                {"detail": "Save Failed!, you have reach maximun number of datasets"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-    else:
-        return Response(
-            {"detail": "Save Failed!, ensure that fields do not contain empty string"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
 
 
 @api_view(["PUT"])
@@ -147,7 +132,7 @@ def create_user_dataset_api(request):
 def update_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetUpdateSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         id = serializer.data["id"]
         new_dataset_name = serializer.data["new_name"]
         _, master_user = get_user_or_set_cache(
@@ -157,26 +142,18 @@ def update_user_dataset_api(request):
             current_user=current_user,
         )
         if not master_user:
-            return Response(
-                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
-            )
+            raise PermissionDenied(detail="Your token is expired")
         try:
-            
+
             with transaction.atomic():
-                dataset = Dataset.objects.select_for_update().get(id=id, user=master_user)
+                dataset = Dataset.objects.select_for_update().get(
+                    id=id, user=master_user
+                )
                 dataset.name = new_dataset_name
                 dataset.save()
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         except Dataset.DoesNotExist:
-            return Response(
-                {"detail": "Failed, Cannot fine your dataset"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-    else:
-        return Response(
-            {"detail": "Save Failed!, ensure that fields do not contain empty string"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+            raise NotFound(detail="No dataset")
 
 
 @api_view(["DELETE"])
@@ -186,7 +163,7 @@ def update_user_dataset_api(request):
 def delete_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetDeleteSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         id = serializer.data["id"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
@@ -195,26 +172,16 @@ def delete_user_dataset_api(request):
             current_user=current_user,
         )
         if not master_user:
-            return Response(
-                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
-            )
+            raise PermissionDenied(detail="Your token is expired")
         try:
-            
             with transaction.atomic():
-                dataset = Dataset.objects.select_for_update().get(id=id, user=master_user)
+                dataset = Dataset.objects.select_for_update().get(
+                    id=id, user=master_user
+                )
                 dataset.delete()
             return Response({"detail": "Deleted"}, status=status.HTTP_200_OK)
         except Dataset.DoesNotExist:
-            return Response(
-                {"detail": "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
-    else:
-        return Response(
-            {
-                "detail": "Delete Failed!, ensure that fields do not contain empty string!"
-            },
-            status=status.HTTP_404_NOT_FOUND,
-        )
+            raise NotFound(detail="No dataset")
 
 
 @api_view(["POST"])
@@ -223,9 +190,8 @@ def delete_user_dataset_api(request):
 @permission_required("server.add_datasetrecord", raise_exception=True)
 def create_user_record_api(request):
     current_user = request.user
-
     serializer = DatasetRecordSerialzier(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.data["dataset_id"]
         system_prompt = serializer.data["system_prompt"]
         prompt = serializer.data["prompt"]
@@ -248,14 +214,7 @@ def create_user_record_api(request):
             )
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         except Dataset.DoesNotExist:
-            return Response(
-                {"detail": "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
-    else:
-        return Response(
-            {"detail": "Save Failed!, ensure that fields do not contain empty string"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+            raise NotFound(detail="No dataset")
 
 
 @api_view(["PUT"])
@@ -265,7 +224,7 @@ def create_user_record_api(request):
 def update_user_record_api(request):
     current_user = request.user
     serializer = DatasetRecordSerialzier(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.data["dataset_id"]
         system_prompt = serializer.data["system_prompt"]
         prompt = serializer.data["prompt"]
@@ -281,13 +240,12 @@ def update_user_record_api(request):
         try:
             dataset = Dataset.objects.get(user=master_user, id=dataset_id)
         except Dataset.DoesNotExist:
-            return Response(
-                {"detail": "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
+            raise NotFound(detail="No dataset")
         try:
-            
             with transaction.atomic():
-                record = DatasetRecord.objects.select_for_update().get(dataset=dataset, id=record_id)
+                record = DatasetRecord.objects.select_for_update().get(
+                    dataset=dataset, id=record_id
+                )
                 record.system_prompt = system_prompt
                 record.prompt = prompt
                 record.response = response
@@ -295,14 +253,7 @@ def update_user_record_api(request):
                 record.save()
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         except DatasetRecord.DoesNotExist:
-            return Response(
-                {"detail": "Record does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
-    else:
-        return Response(
-            {"detail": "Save Failed!, ensure that fields do not contain empty string"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+            raise NotFound(detail="Record does not exist")
 
 
 @api_view(["DELETE"])
@@ -312,7 +263,7 @@ def update_user_record_api(request):
 def delete_user_record_api(request):
     current_user = request.user
     serializer = DatasetDeleteRecordSerialzier(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         record_id = serializer.data["record_id"]
         dataset_id = serializer.data["dataset_id"]
         _, master_user = get_user_or_set_cache(
@@ -324,21 +275,13 @@ def delete_user_record_api(request):
         try:
             dataset = Dataset.objects.get(user=master_user, id=dataset_id)
         except Dataset.DoesNotExist:
-            return Response(
-                {"detail": "Dataset does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
-        try:      
-              
+            raise NotFound(detail="No dataset")
+        try:
             with transaction.atomic():
-                record = DatasetRecord.objects.select_for_update().get(dataset=dataset, id=record_id)  
+                record = DatasetRecord.objects.select_for_update().get(
+                    dataset=dataset, id=record_id
+                )
                 record.delete()
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         except DatasetRecord.DoesNotExist:
-            return Response(
-                {"detail": "Record does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
-    else:
-        return Response(
-            {"detail": "Save Failed!, ensure that fields do not contain empty string"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+            raise NotFound(detail="Record does not exist")

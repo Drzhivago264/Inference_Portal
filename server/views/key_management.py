@@ -7,6 +7,7 @@ import stripe
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.models import Group, Permission, User
+from django.db import IntegrityError, transaction
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -14,9 +15,9 @@ from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
-from django.db import IntegrityError, transaction
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
@@ -29,7 +30,7 @@ from server.api_throttling_rates import (
 from server.models.api_key import APIKEY
 from server.models.product import Crypto, PaymentHistory, Price, Product
 from server.utils.sync_.manage_monero import manage_monero
-from server.utils.sync_.sync_cache import filter_or_set_cache
+from server.views.custom_exception import ServiceUnavailable
 from server.views.serializer import (
     CheckKeySerializer,
     CreateKeySerializer,
@@ -53,149 +54,139 @@ def product_list_api(request: HttpRequest) -> Response:
 @throttle_classes([CreditCheckRateThrottle])
 def check_credit_api(request: HttpRequest) -> Response:
     serializer = CheckKeySerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         key_name = serializer.data["key_name"]
         key_ = serializer.data["key"]
         try:
             key = APIKEY.objects.get_from_key(key_)
-            if key.name == key_name:
-                credit = str(key.credit)
-                monero_credit = str(key.monero_credit)
-                return Response(
-                    {
-                        "key_name": key_name,
-                        "key": key_,
-                        "fiat_balance": credit,
-                        "monero_balance": monero_credit,
-                    },
-                    status=status.HTTP_200_OK,
+            if key.name != key_name:
+                raise AuthenticationFailed(
+                    detail="Your Key Name and/or Key is/are incorrect"
                 )
-            else:
-                return Response(
-                    {"detail": "Your Key Name and/or Key is/are incorrect"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
-        except APIKEY.DoesNotExist:
+            credit = str(key.credit)
+            monero_credit = str(key.monero_credit)
             return Response(
-                {"detail": "Your Key Name and/or Key is/are incorrect"},
-                status=status.HTTP_401_UNAUTHORIZED,
+                {
+                    "key_name": key_name,
+                    "key": key_,
+                    "fiat_balance": credit,
+                    "monero_balance": monero_credit,
+                },
+                status=status.HTTP_200_OK,
             )
-    else:
-        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
+        except APIKEY.DoesNotExist:
+            raise AuthenticationFailed(
+                detail="Your Key Name and/or Key is/are incorrect"
+            )
 
 
 @api_view(["POST"])
 @throttle_classes([XMRConfirmationRateThrottle])
 def confirm_xmr_payment_api(request: HttpRequest) -> Response:
     serializer = CheckKeySerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         key_name = serializer.data["key_name"]
         key_ = serializer.data["key"]
         try:
             key = APIKEY.objects.get_from_key(key_)
-            if key.name == key_name:
-                payment_check = manage_monero(
-                    "get_payments", {"payment_id": key.payment_id}
+            if key.name != key_name:
+                raise AuthenticationFailed(
+                    detail="Your Key Name and/or Key is/are incorrect"
                 )
-                if "error" in json.loads(payment_check.text):
-                    return Response(
-                        {"detail": "Payment id is incorrect"},
-                        status=status.HTTP_404_NOT_FOUND,
-                    )
-                elif not json.loads(payment_check.text)["result"]:
-                    return Response(
-                        {"detail": "No transaction detected"},
-                        status=status.HTTP_404_NOT_FOUND,
-                    )
-                else:
-                    payment_id_response = json.loads(payment_check.text)["result"][
-                        "payments"
-                    ][0]["payment_id"]
-                    address_response = json.loads(payment_check.text)["result"][
-                        "payments"
-                    ][0]["address"]
-                    amount = json.loads(payment_check.text)["result"]["payments"][0][
-                        "amount"
-                    ]
-                    block_height = json.loads(payment_check.text)["result"]["payments"][
-                        0
-                    ]["block_height"]
-                    locked = json.loads(payment_check.text)["result"]["payments"][0][
-                        "locked"
-                    ]
-                    tx_hash = json.loads(payment_check.text)["result"]["payments"][0][
-                        "tx_hash"
-                    ]
-                    unlock_time = json.loads(payment_check.text)["result"]["payments"][
-                        0
-                    ]["unlock_time"]
-                    crypto = Crypto.objects.get(coin="xmr")
-                    if int(unlock_time) == 0 and not locked:
-                        try:
-                            _, created = PaymentHistory.objects.get_or_create(
-                                key=key,
-                                crypto=crypto,
-                                amount=amount / 1e12,
-                                integrated_address=address_response,
-                                payment_id=payment_id_response,
-                                locked=locked,
-                                transaction_hash=tx_hash,
-                                block_height=block_height,
-                            )
-                            if not created:
-                                return Response(
-                                    {
-                                        "detail": f"The lastest tx_hash is {tx_hash}, no change to xmr credit of key: {key_}"
-                                    },
-                                    status=status.HTTP_200_OK,
-                                )
-                            else:
-                                with transaction.atomic():
-                                    locked_key = APIKEY.objects.select_for_update().get(hashed_key=key.hashed_key)
-                                    locked_key.monero_credit += amount / 1e12
-                                    locked_key.save()
-                                return Response(
-                                    {
-                                        "detail": f"Transaction is success, add {amount/1e+12} XMR to key {key_}"
-                                    },
-                                    status=status.HTTP_200_OK,
-                                )
-                        except Exception:
-                            return Response(
-                                {"detail": f"An internal error has occurred!"},
-                                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                            )
-                    else:
-                        return Response(
-                            {
-                                "detail": f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations"
-                            },
-                            status=status.HTTP_200_OK,
-                        )
-            else:
+            payment_check = manage_monero(
+                "get_payments", {"payment_id": key.payment_id}
+            )
+            if "error" in json.loads(payment_check.text):
                 return Response(
-                    {"detail": "Your Key Name and/or Key is/are incorrect"},
-                    status=status.HTTP_401_UNAUTHORIZED,
+                    {"detail": "Payment id is incorrect"},
+                    status=status.HTTP_404_NOT_FOUND,
                 )
+            elif not json.loads(payment_check.text)["result"]:
+                return Response(
+                    {"detail": "No transaction detected"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            else:
+                payment_id_response = json.loads(payment_check.text)["result"][
+                    "payments"
+                ][0]["payment_id"]
+                address_response = json.loads(payment_check.text)["result"]["payments"][
+                    0
+                ]["address"]
+                amount = json.loads(payment_check.text)["result"]["payments"][0][
+                    "amount"
+                ]
+                block_height = json.loads(payment_check.text)["result"]["payments"][0][
+                    "block_height"
+                ]
+                locked = json.loads(payment_check.text)["result"]["payments"][0][
+                    "locked"
+                ]
+                tx_hash = json.loads(payment_check.text)["result"]["payments"][0][
+                    "tx_hash"
+                ]
+                unlock_time = json.loads(payment_check.text)["result"]["payments"][0][
+                    "unlock_time"
+                ]
+                crypto = Crypto.objects.get(coin="xmr")
+                if int(unlock_time) == 0 and not locked:
+                    try:
+                        _, created = PaymentHistory.objects.get_or_create(
+                            key=key,
+                            crypto=crypto,
+                            amount=amount / 1e12,
+                            integrated_address=address_response,
+                            payment_id=payment_id_response,
+                            locked=locked,
+                            transaction_hash=tx_hash,
+                            block_height=block_height,
+                        )
+                        if not created:
+                            return Response(
+                                {
+                                    "detail": f"The lastest tx_hash is {tx_hash}, no change to xmr credit of key: {key_}"
+                                },
+                                status=status.HTTP_200_OK,
+                            )
+                        else:
+                            with transaction.atomic():
+                                locked_key = APIKEY.objects.select_for_update().get(
+                                    hashed_key=key.hashed_key
+                                )
+                                locked_key.monero_credit += amount / 1e12
+                                locked_key.save()
+                            return Response(
+                                {
+                                    "detail": f"Transaction is success, add {amount/1e+12} XMR to key {key_}"
+                                },
+                                status=status.HTTP_200_OK,
+                            )
+                    except Exception:
+                        return Response(
+                            {"detail": f"An internal error has occurred!"},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        )
+                else:
+                    return Response(
+                        {
+                            "detail": f"Transaction is detected, but locked = {locked} and unlock_time = {unlock_time}. Try again with at least 10 confirmations"
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+
         except APIKEY.DoesNotExist:
-            return Response(
-                {"detail": "Your Key Name and/or Key is/are incorrect"},
-                status=status.HTTP_401_UNAUTHORIZED,
+            raise AuthenticationFailed(
+                detail="Your Key Name and/or Key is/are incorrect"
             )
         except requests.exceptions.ConnectionError:
-            return Response(
-                {"detail": "The Monero node is down, try again latter"},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-    else:
-        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
+            raise ServiceUnavailable
 
 
 @api_view(["POST"])
 @throttle_classes([KeyCreateRateThrottle])
 def generate_key_api(request: HttpRequest) -> Response:
     serializer = CreateKeySerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         key_name = serializer.data["key_name"]
         master_group, _ = Group.objects.get_or_create(name="master_user")
         try:
@@ -208,7 +199,9 @@ def generate_key_api(request: HttpRequest) -> Response:
         try:
             with transaction.atomic():
                 name, key = APIKEY.objects.create_key(
-                    name=key_name, integrated_address=integrated_address, payment_id=payment_id
+                    name=key_name,
+                    integrated_address=integrated_address,
+                    payment_id=payment_id,
                 )
                 created_key = APIKEY.objects.get_from_key(key)
                 hashed_key = created_key.hashed_key
@@ -223,7 +216,12 @@ def generate_key_api(request: HttpRequest) -> Response:
                 created_key.user = user
                 created_key.save()
         except IntegrityError:
-            return Response({"detail": "Database Intergrity Error, this should not happen, try again"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "detail": "Database Intergrity Error, this should not happen, try again"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         login(request, user)
         return Response(
             {
@@ -234,28 +232,49 @@ def generate_key_api(request: HttpRequest) -> Response:
             },
             status=status.HTTP_200_OK,
         )
-    else:
-        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
 @throttle_classes([CreditCheckRateThrottle])
 def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
     serializer = CheckKeySerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         key_name = serializer.data["key_name"]
         key_ = serializer.data["key"]
         try:
             key = APIKEY.objects.get_from_key(key_)
-            if key.name == key_name:
-                if len(key.payment_id) > 1:
-                    payment_id = key.payment_id
-                    wallet = manage_monero(
-                        "make_integrated_address", {"payment_id": payment_id}
-                    )
+            if key.name != key_name:
+                raise AuthenticationFailed(
+                    detail="Your Key Name and/or Key is/are incorrect"
+                )
+
+            if len(key.payment_id) > 1:
+                payment_id = key.payment_id
+                wallet = manage_monero(
+                    "make_integrated_address", {"payment_id": payment_id}
+                )
+                integrated_address = json.loads(wallet.text)["result"][
+                    "integrated_address"
+                ]
+                return Response(
+                    {
+                        "key_name": key_name,
+                        "key": key_,
+                        "payment_id": payment_id,
+                        "integrated_wallet": integrated_address,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                try:
+                    wallet = manage_monero("make_integrated_address")
                     integrated_address = json.loads(wallet.text)["result"][
                         "integrated_address"
                     ]
+                    payment_id = json.loads(wallet.text)["result"]["payment_id"]
+                    key.integrated_address = integrated_address
+                    key.payment_id = payment_id
+                    key.save()
                     return Response(
                         {
                             "key_name": key_name,
@@ -265,64 +284,30 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
                         },
                         status=status.HTTP_200_OK,
                     )
-                else:
-                    try:
-                        wallet = manage_monero("make_integrated_address")
-                        integrated_address = json.loads(wallet.text)["result"][
-                            "integrated_address"
-                        ]
-                        payment_id = json.loads(wallet.text)["result"]["payment_id"]
-                        key.integrated_address = integrated_address
-                        key.payment_id = payment_id
-                        key.save()
-                        return Response(
-                            {
-                                "key_name": key_name,
-                                "key": key_,
-                                "payment_id": payment_id,
-                                "integrated_wallet": integrated_address,
-                            },
-                            status=status.HTTP_200_OK,
-                        )
-                    except requests.exceptions.ConnectionError:
-                        integrated_address = ""
-                        payment_id = ""
-                    return Response(
-                        {"detail": "The Monero node is down, try again latter"},
-                        status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    )
-            else:
-                return Response(
-                    {"detail": "Your Key Name and/or Key is/are incorrect"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
+                except requests.exceptions.ConnectionError:
+                    integrated_address = ""
+                    payment_id = ""
+                return ServiceUnavailable
         except APIKEY.DoesNotExist:
-            return Response(
-                {"detail": "Your Key Name and/or Key is/are incorrect"},
-                status=status.HTTP_401_UNAUTHORIZED,
+            raise AuthenticationFailed(
+                detail="Your Key Name and/or Key is/are incorrect"
             )
         except requests.exceptions.ConnectionError:
-            return Response(
-                {"detail": "The Monero node is down, try again latter"},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-    else:
-        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
+            return ServiceUnavailable
 
 
 @api_view(["POST"])
 def stripe_redirect(request: HttpRequest) -> Response:
     serializer = StripePaymentSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         key_name = serializer.data["key_name"]
         key_ = serializer.data["key"]
         product_id = serializer.data["product_id"]
         try:
             key = APIKEY.objects.get_from_key(key_)
             if key.name != key_name:
-                return Response(
-                    {"detail": "Your Key Name and/or Key is/are incorrect"},
-                    status=status.HTTP_401_UNAUTHORIZED,
+                raise AuthenticationFailed(
+                    detail="Your Key Name and/or Key is/are incorrect"
                 )
             price = Price.objects.get(id=product_id)
             checkout_session = stripe.checkout.Session.create(
@@ -357,12 +342,9 @@ def stripe_redirect(request: HttpRequest) -> Response:
             )
 
         except APIKEY.DoesNotExist:
-            return Response(
-                {"detail": "Your Key Name and/or Key is/are incorrect"},
-                status=status.HTTP_401_UNAUTHORIZED,
+            raise AuthenticationFailed(
+                detail="Your Key Name and/or Key is/are incorrect"
             )
-    else:
-        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SuccessView(TemplateView):
@@ -429,7 +411,6 @@ class StripeWebhookView(View):
         endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
         sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
         event = None
-
         try:
             event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
         except ValueError:
@@ -450,7 +431,9 @@ class StripeWebhookView(View):
             )
             key_ = APIKEY.objects.get_from_key(key)
             with transaction.atomic():
-                locked_key = APIKEY.objects.select_for_update().get(hashed_key=key_.hashed_key)
+                locked_key = APIKEY.objects.select_for_update().get(
+                    hashed_key=key_.hashed_key
+                )
                 locked_key.credit += c
                 locked_key.save()
         # Can handle other events here.

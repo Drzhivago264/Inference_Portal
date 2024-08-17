@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import openai
 import regex as re
 import requests
@@ -7,7 +9,7 @@ from celery.utils.log import get_task_logger
 from channels.layers import get_channel_layer
 from decouple import config
 from transformers import AutoTokenizer
-from typing import Tuple
+
 from server import constant
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM, InferenceServer

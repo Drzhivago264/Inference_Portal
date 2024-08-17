@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import permission_required
 from django.core.cache import cache
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -25,7 +26,7 @@ def export_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetExportSerializer(data=request.data)
 
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.data["id"]
         extension = serializer.data["extension"]
         _, master_user = get_user_or_set_cache(
@@ -35,9 +36,7 @@ def export_user_dataset_api(request):
             current_user=current_user,
         )
         if not master_user:
-            return Response(
-                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
-            )
+            raise PermissionDenied(detail="Your token is expired")
         try:
             dataset = get_or_set_cache(
                 prefix="user_dataset",
@@ -51,10 +50,8 @@ def export_user_dataset_api(request):
             record_count = result_records.count()
             url_safe_datasetname = "".join(x for x in dataset.name if x.isalnum())
             if record_count == 0:
-                return Response(
-                    {"detail": "Failed! Dataset does not contain any records"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
+                raise NotFound(detail="Failed! Dataset does not contain any records")
+
             elif record_count <= constant.MAX_ROW_NUMBER_FOR_DIRECT_EXPORT:
                 record_serializer = DatasetRecordGetSerialzier(
                     result_records, many=True
@@ -97,12 +94,4 @@ def export_user_dataset_api(request):
                         status=status.HTTP_404_NOT_FOUND,
                     )
         except Dataset.DoesNotExist:
-            return Response(
-                {"detail": "Failed! dataset Does not exist"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-    else:
-        return Response(
-            {"detail": "Save Failed!, ensure that fields do not contain empty string"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+            raise NotFound(detail="Failed! Dataset does not exist")

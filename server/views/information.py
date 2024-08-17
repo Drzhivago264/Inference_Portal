@@ -1,5 +1,4 @@
 import uuid
-from hashlib import sha256
 
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse
@@ -7,6 +6,7 @@ from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
@@ -25,7 +25,11 @@ def check_login(request: HttpRequest) -> Response:
         is_master = current_user.groups.filter(name="master_user").exists()
         is_slave = current_user.groups.filter(name="slave_user").exists()
         if is_master or is_slave:
-            key_name = f"{current_user.apikey.prefix}..." if is_master else f"{current_user.finegrainapikey.prefix}..."
+            key_name = (
+                f"{current_user.apikey.prefix}..."
+                if is_master
+                else f"{current_user.finegrainapikey.prefix}..."
+            )
             return Response(
                 {
                     "websocket_hash": uuid.uuid4().hex,
@@ -51,7 +55,7 @@ def log_out(request: HttpRequest) -> Response:
 @throttle_classes([AnonRateThrottle])
 def log_in(request: HttpRequest) -> Response:
     serializer = LoginSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         key = serializer.data["key"]
         try:
             key_model = {
@@ -74,11 +78,7 @@ def log_in(request: HttpRequest) -> Response:
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
         except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
-            return Response(
-                {"detail": "Your Key is incorrect"}, status=status.HTTP_401_UNAUTHORIZED
-            )
-    else:
-        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
+            raise AuthenticationFailed(detail="Your Key is incorrect")
 
 
 @api_view(["GET"])

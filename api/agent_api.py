@@ -126,7 +126,7 @@ async def agentcompletion(request, data: AgentSchema):
                     instance_id=instance_id, update_type="time"
                 )
                 if server_status == "running":
-                    if not data.stream:      
+                    if not data.stream:
                         response = await send_request_async(url, context)
                         if not response:
                             raise HttpError(404, "Time Out! Slow down")
@@ -149,7 +149,7 @@ async def agentcompletion(request, data: AgentSchema):
                                 + [{"role": "assistant", "content": f"{response}"}],
                             }
                     else:
-                      
+
                         res = StreamingHttpResponse(
                             send_stream_request_agent_async(
                                 url=url,

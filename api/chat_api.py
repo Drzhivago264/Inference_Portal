@@ -137,7 +137,7 @@ async def chatcompletion(request, data: ChatSchema):
                         )
                         res["X-Accel-Buffering"] = "no"
                         res["Cache-Control"] = "no-cache"
-                        return res                     
+                        return res
                 elif server_status == "stopped" or "stopping":
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(

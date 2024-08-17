@@ -1,9 +1,11 @@
+from django.contrib.auth.decorators import permission_required
 from django.db.models import Q, Sum
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -63,33 +65,26 @@ class LogListJson(BaseDatatableView):
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
 @cache_page(60 * 15)
+@permission_required("server.allow_view_cost", raise_exception=True)
 def cost_api(request: HttpRequest, startdate: str, enddate: str) -> Response:
     current_user = request.user
-    if not current_user.has_perm("server.allow_view_cost"):
-        return Response(
-            {"detail": "Not authorised to view cost"},
-            status=status.HTTP_401_UNAUTHORIZED,
+    master_key, _ = get_user_or_set_cache(
+        prefix="user_tuple",
+        key=current_user.password,
+        timeout=60,
+        current_user=current_user,
+    )
+    if not master_key:
+        raise PermissionDenied(detail="Your token is expired")
+    log_by_date = (
+        PromptResponse.objects.filter(
+            key=master_key, created_at__range=[startdate, enddate]
         )
-    else:
-        master_key, _ = get_user_or_set_cache(
-            prefix="user_tuple",
-            key=current_user.password,
-            timeout=60,
-            current_user=current_user,
+        .values("created_at__date", "model__name")
+        .order_by("created_at__date")
+        .annotate(
+            sum_input_tokens=Sum("number_input_tokens"),
+            sum_output_tokens=Sum("number_output_tokens"),
         )
-        if not master_key:
-            return Response(
-                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
-            )
-        log_by_date = (
-            PromptResponse.objects.filter(
-                key=master_key, created_at__range=[startdate, enddate]
-            )
-            .values("created_at__date", "model__name")
-            .order_by("created_at__date")
-            .annotate(
-                sum_input_tokens=Sum("number_input_tokens"),
-                sum_output_tokens=Sum("number_output_tokens"),
-            )
-        )
-        return Response({"cost_by_model": log_by_date}, status=status.HTTP_200_OK)
+    )
+    return Response({"cost_by_model": log_by_date}, status=status.HTTP_200_OK)

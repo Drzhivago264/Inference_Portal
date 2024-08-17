@@ -53,7 +53,9 @@ async def send_request_async(url: str, context: dict) -> httpx.Response:
             timeout=constant.TIMEOUT,
         ) as client:
             response = await client.post(url, json=context)
-            response = response.json()["text"][0] if response.status_code == 200 else None
+            response = (
+                response.json()["text"][0] if response.status_code == 200 else None
+            )
             return response
     except httpx.ReadTimeout:
         raise HttpError(404, "Time Out! Slow down")

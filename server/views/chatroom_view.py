@@ -1,7 +1,9 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import permission_required
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, NotFound
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -27,7 +29,7 @@ from server.views.serializer import (
 @throttle_classes([AnonRateThrottle])
 def hub_redirect_api(request: HttpRequest) -> Response:
     serializer = RedirectSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         key = serializer.data["key"]
         destination = serializer.data["destination"]
         check_login = serializer.data["check_login"]
@@ -47,14 +49,10 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                         status=status.HTTP_200_OK,
                     )
                 else:
-                    return Response(
-                        {"detail": "Unknown Key error!, Generate a new one"},
-                        status=status.HTTP_401_UNAUTHORIZED,
-                    )
+                    raise AuthenticationFailed(detail="Unknown Key error!, Login again")
             except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
-                return Response(
-                    {"detail": "Your Key is incorrect"},
-                    status=status.HTTP_401_UNAUTHORIZED,
+                raise AuthenticationFailed(
+                    detail="Your Key Name and/or Key is/are incorrect"
                 )
         else:
             if request.user.id is not None:
@@ -63,12 +61,7 @@ def hub_redirect_api(request: HttpRequest) -> Response:
                     status=status.HTTP_200_OK,
                 )
             else:
-                return Response(
-                    {"detail": "Unknown Key error!, Login again"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
-    else:
-        return Response({"detail": "Data Validation Failed"}, status=status.HTTP_400_BAD_REQUEST)
+                raise AuthenticationFailed(detail="Unknown Key error!, Login again")
 
 
 @api_view(["GET"])
@@ -83,9 +76,7 @@ def instruction_tree_api(request):
         current_user=current_user,
     )
     if not master_user:
-        return Response(
-            {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
-        )
+        raise PermissionDenied(detail="Your token is expired")
     root_nodes = filter_or_set_cache(
         prefix="system_instruction_root_node",
         key=1,
@@ -135,36 +126,29 @@ def instruction_tree_api(request):
 @api_view(["GET"])
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
+@permission_required("server.allow_chat", raise_exception=True)
 def memory_tree_api(request):
     current_user = request.user
-    if not current_user.has_perm("server.allow_chat"):
-        return Response(
-            {"detail": "Not authorised to use chatbot"},
-            status=status.HTTP_401_UNAUTHORIZED,
-        )
-    else:
-        paginator = PageNumberPagination()
-        paginator.page_size = 1
-        master_key, _ = get_user_or_set_cache(
-            prefix="user_tuple",
-            key=current_user.password,
-            timeout=60,
-            current_user=current_user,
-        )
-        if not master_key:
-            return Response(
-                {"detail": "Your token is expired"}, status=status.HTTP_404_NOT_FOUND
+    paginator = PageNumberPagination()
+    paginator.page_size = 1
+    master_key, _ = get_user_or_set_cache(
+        prefix="user_tuple",
+        key=current_user.password,
+        timeout=60,
+        current_user=current_user,
+    )
+    if not master_key:
+        raise PermissionDenied(detail="Your token is expired")
+    memory_object = MemoryTreeMP.objects.filter(key=master_key).order_by("-id")
+    result_page = paginator.paginate_queryset(memory_object, request)
+    try:
+        result_page = list(
+            set(
+                [result_page[0]]
+                + list(result_page[0].get_siblings_is_not_session_starter())
             )
-        memory_object = MemoryTreeMP.objects.filter(key=master_key).order_by("-id")
-        result_page = paginator.paginate_queryset(memory_object, request)
-        try:
-            result_page = list(
-                set(
-                    [result_page[0]]
-                    + list(result_page[0].get_siblings_is_not_session_starter())
-                )
-            )
-            serializer = MemoryTreeSerializer(result_page, many=True)
-            return paginator.get_paginated_response(serializer.data)
-        except IndexError:
-            return Response({"detail": "no memory"}, status=status.HTTP_204_NO_CONTENT)
+        )
+        serializer = MemoryTreeSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    except IndexError:
+        raise NotFound(detail="No Memory")
