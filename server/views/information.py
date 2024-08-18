@@ -1,5 +1,5 @@
 import uuid
-
+from hashlib import sha256
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -30,9 +30,10 @@ def check_login(request: HttpRequest) -> Response:
                 if is_master
                 else f"{current_user.finegrainapikey.prefix}..."
             )
+            key_id = current_user.apikey.id if is_master else current_user.finegrainapikey.id 
             return Response(
                 {
-                    "websocket_hash": uuid.uuid4().hex,
+                    "websocket_hash": sha256(key_id.encode('utf-8')).hexdigest(),
                     "key_name": key_name,
                 },
                 status=status.HTTP_200_OK,
