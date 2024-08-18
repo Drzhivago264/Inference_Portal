@@ -17,7 +17,7 @@ def prepare_cache_key(prefix: str, key: str | list) -> str:
     elif isinstance(key, list):
         key_list_to_string = ""
         for k in key:
-            if isinstance(k, str) or isinstance(key, int):
+            if isinstance(k, str) or isinstance(k, int):
                 key_list_to_string += f"{str(k)}_"
             else:
                 key_list_to_string += f"{k.id}_"

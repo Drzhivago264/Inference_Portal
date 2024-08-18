@@ -50,8 +50,8 @@ Before install dependencies, you need to install Postgres, and create a table na
     #if you want to enable postgres on start up use this command
     sudo systemctl enable postgresql
 
-You also need to install NPM and Node.js for the frontend.
-    #I do not use Node in this project, but we still need install it for npm 
+You also need to install NPM and Node.js for the frontend
+    
     sudo apt install nodejs
     sudo apt install npm
     npm init -y

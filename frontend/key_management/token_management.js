@@ -63,7 +63,6 @@ function TokenManagement() {
 	const [tokennameError, setTokenNameError] = useState(false);
 	const [localtokencreateerror, setLocalTokenCreateError] = useState(null);
 	const [showkeycreateresponse, setShowKeyCreateResponse] = useState(false);
-
 	const initialPermissionState = {
 		allow_chat: false,
 		allow_agent: false,
@@ -87,9 +86,7 @@ function TokenManagement() {
 		delete_datasetrecord: false,
 		view_datasetrecord: false,
 	};
-
 	const [permission, setPermission] = useState(initialPermissionState);
-
 	const setAllPermission = (value) => {
 		setPermission(Object.fromEntries(Object.keys(initialPermissionState).map((key) => [key, value])));
 	};

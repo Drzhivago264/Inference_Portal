@@ -138,8 +138,8 @@ function UserInstruction() {
 					onError: (error) => {
 						setLoading(false);
 						setSaveError(true);
-						if (error.code === "ERR_BAD_RESPONSE") {
-							setSaveErrorMessage("Failed, Internal Server Error!");
+                        if (error.response.status === 400) {
+                            setSaveErrorMessage("Invalid Data"); 
 						} else {
 							setSaveErrorMessage(error.response.data.detail);
 						}
@@ -159,8 +159,8 @@ function UserInstruction() {
 					onError: (error) => {
 						setLoading(false);
 						setSaveError(true);
-						if (error.code === "ERR_BAD_RESPONSE") {
-							setSaveErrorMessage("Failed, Internal Server Error!");
+                        if (error.response.status === 400) {
+                            setSaveErrorMessage("Invalid Data");
 						} else {
 							setSaveErrorMessage(error.response.data.detail);
 						}
@@ -181,8 +181,8 @@ function UserInstruction() {
 			{
 				onSuccess: () => setDeleteSuccess(true),
 				onError: (error) => {
-					if (error.code === "ERR_BAD_RESPONSE") {
-						setSaveErrorMessage("Failed, Internal Server Error!");
+					if (error.response.status === 400) {
+						setSaveErrorMessage("Invalid Data");
 					} else {
 						setDeleteErrorMessage(error.response.data.detail);
 					}

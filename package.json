@@ -104,5 +104,8 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "remark-html": "^16.0.1"
+  },
+  "directories": {
+    "doc": "docs"
   }
 }
