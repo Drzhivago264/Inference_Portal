@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.models import Group, Permission, User
 from django.db import IntegrityError, transaction
+from django.db.models import F
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -43,7 +44,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @api_view(["GET"])
 @throttle_classes([AnonRateThrottle])
-@cache_page(60 * 15)
+
 def product_list_api(request: HttpRequest) -> Response:
     page_content = Product.objects.all()
     serializer = ProductSerializer(page_content, many=True)
@@ -153,7 +154,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                                 locked_key = APIKEY.objects.select_for_update().get(
                                     hashed_key=key.hashed_key
                                 )
-                                locked_key.monero_credit += amount / 1e12
+                                locked_key.monero_credit = F("monero_credit")  +  amount / 1e12
                                 locked_key.save()
                             return Response(
                                 {
@@ -328,7 +329,7 @@ def stripe_redirect(request: HttpRequest) -> Response:
                 metadata={
                     "product_id": product_id,
                     "name": key_name,
-                    "key": key_,
+                    "key_id": key.id,
                     "price": price.price,
                     "quantity": price.product.quantity,
                 },
@@ -370,7 +371,7 @@ class CreateStripeCheckoutSessionView(View):
         self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any
     ) -> HttpResponseRedirect:
         price = Price.objects.get(id=self.kwargs["pk"])
-        k = APIKEY.objects.get_from_key(bleach.clean(self.kwargs["key"]))
+        k = APIKEY.objects.get_from_key(self.kwargs["key"])
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[
@@ -389,7 +390,7 @@ class CreateStripeCheckoutSessionView(View):
             metadata={
                 "product_id": price.product.id,
                 "name": k.name,
-                "key": bleach.clean(self.kwargs["key"]),
+                "key_id": k.id,
                 "price": price.price,
                 "quantity": price.product.quantity,
             },
@@ -425,16 +426,15 @@ class StripeWebhookView(View):
             customer_email = session["customer_details"]["email"]
             product_id = session["metadata"]["product_id"]
             name = session["metadata"]["name"]
-            key = session["metadata"]["key"]
+            key_id = session["metadata"]["key_id"]
             c = float(session["metadata"]["price"]) * float(
                 session["metadata"]["quantity"]
             )
-            key_ = APIKEY.objects.get_from_key(key)
             with transaction.atomic():
                 locked_key = APIKEY.objects.select_for_update().get(
-                    hashed_key=key_.hashed_key
+                    id=key_id
                 )
-                locked_key.credit += c
+                locked_key.credit = F("credit") + c
                 locked_key.save()
         # Can handle other events here.
         return HttpResponse(status=200)
