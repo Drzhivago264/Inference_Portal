@@ -76,9 +76,7 @@ export default function UpdateRateLimitDialog({token_name, token_value, token_pr
 				<Box m={2}>
 					<Stack direction='column' spacing={1}>
 						<Stack
-							direction={{
-								xs: "row",
-							}}
+							direction={{xs: "row",}}
 							spacing={1}>
 							<TextField
 								id='ratelimit'

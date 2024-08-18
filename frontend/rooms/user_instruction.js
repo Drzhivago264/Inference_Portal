@@ -257,11 +257,9 @@ function UserInstruction() {
 			deleteTemplate(nodeToDelete.id);
 			setDeleteSuccess(true);
 		}
-
 		setIsSaved(true);
 		newTemplateList.splice(selectedIndex, 1);
 		setTemplateList(newTemplateList);
-
 		if (template_list.length < max_parent_num) {
 			if (newTemplateList.length > 0) {
 				setDeleteSuccess(true);
@@ -317,7 +315,6 @@ function UserInstruction() {
 		if (newChildrenInstructionList.length < max_child_num) {
 			newChildrenInstructionList.splice(index, 1);
 			setChildInstructionList(newChildrenInstructionList);
-
 			if (nodeToDelete.id !== null) {
 				deleteTemplate(nodeToDelete.id);
 				setDeleteSuccess(true);

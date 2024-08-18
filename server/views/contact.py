@@ -34,7 +34,7 @@ def contact_api(request: HttpRequest) -> Response:
             ]
             try:
                 send_email_.delay(subject, message, email_from, recipient_list)
-                return Response({"detail": "Sent!"}, status=status.HTTP_200_OK)
+                return Response({"detail": "Sent"}, status=status.HTTP_200_OK)
             except:
                 return Response(
                     {"detail": "Mail Server Error"},

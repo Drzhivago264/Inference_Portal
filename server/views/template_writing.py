@@ -163,7 +163,6 @@ def create_user_instruction_tree_api(request) -> Response:
         if not master_user:
             raise PermissionDenied(detail="Your token is expired")
         hash_key = master_key.hashed_key
-
         if len(childrens.data) > constant.MAX_CHILD_TEMPLATE_PER_USER:
             return Response(
                 {
@@ -171,7 +170,6 @@ def create_user_instruction_tree_api(request) -> Response:
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
-
         if (
             UserInstructionTreeMP.objects.filter(user=master_user).count()
             <= constant.MAX_PARENT_TEMPLATE_PER_USER

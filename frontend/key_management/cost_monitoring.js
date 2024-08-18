@@ -10,6 +10,7 @@ import {DesktopDatePicker} from "@mui/x-date-pickers/DesktopDatePicker";
 import Footer from "../component/nav/Footer";
 import Grid from "@mui/material/Grid";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
+import NoPermissionDialog from "../component/dialog/NoPermissionDialog";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar";
 import autocolors from "chartjs-plugin-autocolors";
@@ -27,7 +28,7 @@ function CostMonitoring() {
 	const [startdate, setStartDate] = useState(now.subtract(7, "days").format(format_to_hour));
 	const [enddate_total, setEnddateTotal] = useState(now.format(format_to_hour));
 	const [startdate_total, setStartDateTotal] = useState(now.subtract(7, "days").format(format_to_hour));
-
+	const [no_perm_open, setNoPermOpen] = useState(null);   
 	useEffect(() => {
 		axios
 			.all([axios.get(`/frontend-api/cost/${startdate}/${enddate}`)])
@@ -77,7 +78,9 @@ function CostMonitoring() {
 				})
 			)
 			.catch((error) => {
-				console.log(error);
+				if (error.response.status === 403) {
+					setNoPermOpen(true);
+				}
 			});
 	}, [startdate, enddate]);
 
@@ -125,7 +128,9 @@ function CostMonitoring() {
 				})
 			)
 			.catch((error) => {
-				console.log(error);
+				if (error.response.status === 403) {
+					setNoPermOpen(true);
+				}
 			});
 	}, [startdate_total, enddate_total]);
 
@@ -273,6 +278,7 @@ function CostMonitoring() {
 				</Box>
 			</Container>
 			<Footer />
+            <NoPermissionDialog setNoPermOpen={setNoPermOpen} no_perm_open={no_perm_open}/>
 		</Container>
 	);
 }

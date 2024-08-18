@@ -258,7 +258,8 @@ function PromptWriting() {
 		setCurrentEvaluation((prev) => prev.filter((_, i) => i !== index));
 	};
 
-	useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation);
+	const {isLoading: datasetIsLoading} = useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation);
+    
 	const {refetch: record_refetch} = useGetUserDatasetRecord(
 		setRecordList,
 		dataset_list,
@@ -329,7 +330,7 @@ function PromptWriting() {
 										</ListItem>
 									))}
 								<Box display='flex' justifyContent='center' alignItems='center' mt={1}>
-									{allow_add_dataset && dataset_list && dataset_list.length < max_dataset_num && max_evaluation_num && (
+									{allow_add_dataset && !datasetIsLoading && dataset_list.length < max_dataset_num && max_evaluation_num && (
 										<DatasetMutateDialog
 											setAllowAddDataset={setAllowAddDataset}
 											setDatasetList={setDatasetList}

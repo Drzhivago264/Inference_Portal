@@ -35,7 +35,7 @@ export default function DatasetMutateDialog({
 	setCurrentEvaluation,
 	setCurrentSystemPrompt,
 }) {
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(dataset_list.length === 0 ? true : false);
 	const [saveerror, setSaveError] = useState(false);
 	const [default_system_prompt, setDefaultSystemPrompt] = useState(method === "put" ? old_default_system_prompt : "");
 	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [{evaluation_name: "", score: ""}]);

@@ -287,13 +287,13 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
                 except requests.exceptions.ConnectionError:
                     integrated_address = ""
                     payment_id = ""
-                return ServiceUnavailable
+                raise ServiceUnavailable
         except APIKEY.DoesNotExist:
             raise AuthenticationFailed(
                 detail="Your Key Name and/or Key is/are incorrect"
             )
         except requests.exceptions.ConnectionError:
-            return ServiceUnavailable
+            raise ServiceUnavailable
 
 
 @api_view(["POST"])
