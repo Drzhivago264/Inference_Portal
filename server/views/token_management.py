@@ -38,13 +38,9 @@ def generate_token_api(request: HttpRequest) -> Response:
             master_key=master_key_object
         ).count()
         if number_of_current_key >= constant.MAX_TOKEN_PER_USER:
-            return Response(
-                {
-                    "detail": f"Exceeding max number of token ({constant.MAX_TOKEN_PER_USER}), cannot create more token!"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            raise PermissionDenied(
+                detail=f"Exceeding max number of token ({constant.MAX_TOKEN_PER_USER}), cannot create more token!"
             )
-
         time_dispatcher = {
             "day": datetime.timedelta(days=ttl_raw),
             "hour": datetime.timedelta(hours=ttl_raw),

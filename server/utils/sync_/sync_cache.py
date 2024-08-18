@@ -130,3 +130,8 @@ def filter_or_set_cache(
 def delete_cache(prefix: str, key: str | list):
     cache_key = prepare_cache_key(prefix=prefix, key=key)
     cache.delete(cache_key)
+
+
+def update_cache(prefix: str, key: str | list, model_instance: TModel, timeout: int):
+    cache_key = prepare_cache_key(prefix=prefix, key=key)
+    cache.set(cache_key, model_instance, timeout=timeout)

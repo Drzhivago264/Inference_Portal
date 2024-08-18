@@ -9,7 +9,12 @@ from rest_framework.throttling import AnonRateThrottle
 
 from server import constant
 from server.models.dataset import Dataset, DatasetRecord
-from server.utils.sync_.sync_cache import get_user_or_set_cache
+from server.utils.sync_.sync_cache import (
+    delete_cache,
+    get_or_set_cache,
+    get_user_or_set_cache,
+    update_cache,
+)
 from server.views.custom_paginator import PaginatorWithPageNum
 from server.views.serializer import (
     DatasetCreateSerializer,
@@ -71,9 +76,14 @@ def get_user_records_api(request, id: int):
     elif Dataset.objects.filter(user=master_user).count() == 0:
         raise NotFound(detail="No dataset")
     else:
-        try:
-            dataset = Dataset.objects.get(user=master_user, id=id)
-        except Dataset.DoesNotExist:
+        dataset = get_or_set_cache(
+            prefix="user_dataset",
+            key=id,
+            field_to_get="id",
+            Model=Dataset,
+            timeout=120,
+        )
+        if not dataset:
             raise NotFound(detail="No dataset")
         paginator = PaginatorWithPageNum()
         paginator.page_size = 10
@@ -119,9 +129,8 @@ def create_user_dataset_api(request):
                 status=status.HTTP_200_OK,
             )
         else:
-            return Response(
-                {"detail": "Save Failed!, you have reach maximun number of datasets"},
-                status=status.HTTP_404_NOT_FOUND,
+            raise PermissionDenied(
+                detail=f"Exceeding max number of datasets ({constant.MAX_DATASET_PER_USER}), cannot create more dataset!"
             )
 
 
@@ -144,13 +153,15 @@ def update_user_dataset_api(request):
         if not master_user:
             raise PermissionDenied(detail="Your token is expired")
         try:
-
             with transaction.atomic():
                 dataset = Dataset.objects.select_for_update().get(
                     id=id, user=master_user
                 )
                 dataset.name = new_dataset_name
                 dataset.save()
+                update_cache(
+                    prefix="user_dataset", key=id, model_instance=dataset, timeout=120
+                )
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
         except Dataset.DoesNotExist:
             raise NotFound(detail="No dataset")
@@ -178,6 +189,7 @@ def delete_user_dataset_api(request):
                 dataset = Dataset.objects.select_for_update().get(
                     id=id, user=master_user
                 )
+                delete_cache(prefix="user_dataset", key=[id])
                 dataset.delete()
             return Response({"detail": "Deleted"}, status=status.HTTP_200_OK)
         except Dataset.DoesNotExist:
@@ -189,7 +201,6 @@ def delete_user_dataset_api(request):
 @permission_classes([IsAuthenticated])
 @permission_required("server.add_datasetrecord", raise_exception=True)
 def create_user_record_api(request):
-    current_user = request.user
     serializer = DatasetRecordSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.data["dataset_id"]
@@ -197,24 +208,23 @@ def create_user_record_api(request):
         prompt = serializer.data["prompt"]
         response = serializer.data["response"]
         evaluation = serializer.data["evaluation"]
-        _, master_user = get_user_or_set_cache(
-            prefix="user_tuple",
-            key=current_user.password,
-            timeout=60,
-            current_user=current_user,
+        dataset = get_or_set_cache(
+            prefix="user_dataset",
+            key=dataset_id,
+            field_to_get="id",
+            Model=Dataset,
+            timeout=120,
         )
-        try:
-            dataset = Dataset.objects.get(user=master_user, id=dataset_id)
-            DatasetRecord.objects.create(
-                dataset=dataset,
-                system_prompt=system_prompt,
-                prompt=prompt,
-                response=response,
-                evaluation=evaluation,
-            )
-            return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
-        except Dataset.DoesNotExist:
+        if not dataset:
             raise NotFound(detail="No dataset")
+        DatasetRecord.objects.create(
+            dataset=dataset,
+            system_prompt=system_prompt,
+            prompt=prompt,
+            response=response,
+            evaluation=evaluation,
+        )
+        return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
 
 
 @api_view(["PUT"])
@@ -222,7 +232,6 @@ def create_user_record_api(request):
 @permission_classes([IsAuthenticated])
 @permission_required("server.change_datasetrecord", raise_exception=True)
 def update_user_record_api(request):
-    current_user = request.user
     serializer = DatasetRecordSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.data["dataset_id"]
@@ -231,15 +240,14 @@ def update_user_record_api(request):
         response = serializer.data["response"]
         evaluation = serializer.data["evaluation"]
         record_id = serializer.data["record_id"]
-        _, master_user = get_user_or_set_cache(
-            prefix="user_tuple",
-            key=current_user.password,
-            timeout=60,
-            current_user=current_user,
+        dataset = get_or_set_cache(
+            prefix="user_dataset",
+            key=dataset_id,
+            field_to_get="id",
+            Model=Dataset,
+            timeout=120,
         )
-        try:
-            dataset = Dataset.objects.get(user=master_user, id=dataset_id)
-        except Dataset.DoesNotExist:
+        if not dataset:
             raise NotFound(detail="No dataset")
         try:
             with transaction.atomic():
@@ -261,20 +269,18 @@ def update_user_record_api(request):
 @permission_classes([IsAuthenticated])
 @permission_required("server.delete_datasetrecord", raise_exception=True)
 def delete_user_record_api(request):
-    current_user = request.user
     serializer = DatasetDeleteRecordSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
         record_id = serializer.data["record_id"]
         dataset_id = serializer.data["dataset_id"]
-        _, master_user = get_user_or_set_cache(
-            prefix="user_tuple",
-            key=current_user.password,
-            timeout=60,
-            current_user=current_user,
+        dataset = get_or_set_cache(
+            prefix="user_dataset",
+            key=dataset_id,
+            field_to_get="id",
+            Model=Dataset,
+            timeout=120,
         )
-        try:
-            dataset = Dataset.objects.get(user=master_user, id=dataset_id)
-        except Dataset.DoesNotExist:
+        if not dataset:
             raise NotFound(detail="No dataset")
         try:
             with transaction.atomic():

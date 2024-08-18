@@ -43,7 +43,6 @@ def update_server_status_in_db(
         update_type (str): The type of update ("status" or "time").
     """
     server_object = InferenceServer.objects.get(name=instance_id)
-
     if update_type == "status":
         server_object.status = "pending"
     elif update_type == "time":
