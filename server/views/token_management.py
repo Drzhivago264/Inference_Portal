@@ -1,5 +1,6 @@
 import datetime
 
+from constance import config as constant
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.models import Group, Permission, User
 from django.db import IntegrityError, transaction
@@ -11,7 +12,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from server import constant
 from server.api_throttling_rates import KeyCreateRateThrottle
 from server.models.api_key import FineGrainAPIKEY
 from server.views.serializer import CreateTokenSerializer, ModifyTokenSerializer

@@ -11,7 +11,6 @@ from server.views.export_dataset import export_user_dataset_api
 from server.views.information import check_login, log_in, log_out, model_api
 from server.views.key_management import (
     CancelView,
-    CreateStripeCheckoutSessionView,
     StripeWebhookView,
     SuccessView,
     check_credit_api,
@@ -86,11 +85,6 @@ urlpatterns = [
     ),
     path("frontend-api/stripe-redirect", stripe_redirect, name="stripe-payment"),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
-    path(
-        "create-checkout-session/<int:pk>/<str:name>/<str:key>",
-        CreateStripeCheckoutSessionView.as_view(),
-        name="create-checkout-session",
-    ),
     path("success/", SuccessView.as_view(), name="success"),
     path("cancel/", CancelView.as_view(), name="cancel"),
     path("frontend-api/products", product_list_api, name="product-list"),

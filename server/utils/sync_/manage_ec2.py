@@ -2,10 +2,10 @@ from typing import Literal
 
 import boto3
 from celery.utils.log import get_task_logger
+from constance import config as constant
 from decouple import config
 from django.utils import timezone
 
-from server import constant
 from server.models.llm_server import InferenceServer
 
 logger = get_task_logger(__name__)

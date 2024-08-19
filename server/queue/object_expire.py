@@ -1,8 +1,8 @@
 from celery import shared_task
+from constance import config as constant
 from django.utils import timezone
 from django.utils.timezone import timedelta
 
-from server import constant
 from server.models.api_key import APIKEY, FineGrainAPIKEY
 
 

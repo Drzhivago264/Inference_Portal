@@ -1,9 +1,9 @@
 import json
 from typing import Literal
 
+from constance import config as constant
 from django.utils import timezone
 
-from server.constant import REGION
 from server.models.llm_server import InferenceServer
 from server.queue.ec2_manage import command_EC2
 from server.utils.async_.async_cache import get_or_set_cache
@@ -31,7 +31,7 @@ class ManageEC2Mixin:
     ) -> None:
         response = ""
         if server_status in ["stopped", "stopping"]:
-            command_EC2.delay(instance_id, region=REGION, action="on")
+            command_EC2.delay(instance_id, region=constant.REGION, action="on")
             response = "Server is starting up, try again in 400 seconds"
         elif server_status == "pending":
             response = "Server is setting up, try again in 30 seconds"

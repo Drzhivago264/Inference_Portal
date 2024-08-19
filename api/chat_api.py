@@ -1,5 +1,6 @@
 import httpx
 from asgiref.sync import sync_to_async
+from constance import config as constant
 from django.http import StreamingHttpResponse
 from ninja import Router
 from ninja.errors import HttpError
@@ -7,7 +8,6 @@ from transformers import AutoTokenizer
 
 from api.api_schema import ChatResponse, ChatSchema, Error
 from api.utils import check_permission, send_request_async, send_stream_request_async
-from server import constant
 from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.queue.log_prompt_response import celery_log_prompt_response

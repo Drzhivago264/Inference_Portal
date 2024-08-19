@@ -1,7 +1,6 @@
+from constance import config as constant
 from pydantic import BaseModel, ValidationInfo, field_validator, model_validator
 from typing_extensions import Self
-
-from server import constant
 
 
 class AgentSchemaMessage(BaseModel):

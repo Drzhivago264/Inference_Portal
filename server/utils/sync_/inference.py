@@ -7,10 +7,10 @@ import tiktoken
 from asgiref.sync import async_to_sync
 from celery.utils.log import get_task_logger
 from channels.layers import get_channel_layer
+from constance import config as constant
 from decouple import config
 from transformers import AutoTokenizer
 
-from server import constant
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM, InferenceServer
 from server.utils.sync_.query_database import get_chat_context

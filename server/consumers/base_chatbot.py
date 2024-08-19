@@ -2,9 +2,9 @@ import json
 import uuid
 
 import pytz
+from constance import config as constant
 from django.utils import timezone
 
-from server import constant
 from server.consumers.base import BaseBot
 from server.models.log import PromptResponse
 from server.rate_limit import RateLimitError

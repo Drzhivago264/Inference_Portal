@@ -1,10 +1,9 @@
 import datetime
 
+from constance import config as constant
 from ninja import Field, Schema
 from pydantic import ValidationInfo, field_validator, model_validator
 from typing_extensions import Self
-
-from server import constant
 
 
 class PromptSchema(Schema):
@@ -206,7 +205,7 @@ class BaseLLMSchema(Schema):
     @field_validator("model")
     @classmethod
     def check_model(cls, v: str, info: ValidationInfo):
-        if not v in constant.OPEN_AI_MODEL_LIST:
+        if not v in constant.OPEN_AI_MODEL_LIST.split(","):
             raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
 

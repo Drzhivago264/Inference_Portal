@@ -1,5 +1,6 @@
 import uuid
 
+from constance import config as constant
 from django.contrib.auth.decorators import permission_required
 from django.core.cache import cache
 from rest_framework import status
@@ -8,7 +9,6 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from server import constant
 from server.api_throttling_rates import DatasetExportRateThrottle
 from server.models.dataset import Dataset, DatasetRecord
 from server.queue.export_dataset import export_large_dataset

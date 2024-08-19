@@ -1,9 +1,9 @@
 import json
 import typing
 
-import bleach
 import requests
 import stripe
+from constance import config as constant
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.models import Group, Permission, User
@@ -22,7 +22,6 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server import constant
 from server.api_throttling_rates import (
     CreditCheckRateThrottle,
     KeyCreateRateThrottle,
@@ -44,7 +43,6 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @api_view(["GET"])
 @throttle_classes([AnonRateThrottle])
-
 def product_list_api(request: HttpRequest) -> Response:
     page_content = Product.objects.all()
     serializer = ProductSerializer(page_content, many=True)
@@ -154,7 +152,9 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                                 locked_key = APIKEY.objects.select_for_update().get(
                                     hashed_key=key.hashed_key
                                 )
-                                locked_key.monero_credit = F("monero_credit")  +  amount / 1e12
+                                locked_key.monero_credit = (
+                                    F("monero_credit") + amount / 1e12
+                                )
                                 locked_key.save()
                             return Response(
                                 {
@@ -211,7 +211,7 @@ def generate_key_api(request: HttpRequest) -> Response:
 
                 # Adding all permission for master user
                 permissions = Permission.objects.filter(
-                    codename__in=constant.DEFAULT_PERMISSION_CODENAMES
+                    codename__in=constant.DEFAULT_PERMISSION_CODENAMES.split(",")
                 )
                 user.user_permissions.add(*permissions)
                 created_key.user = user
@@ -365,42 +365,6 @@ class CancelView(TemplateView):
         return context
 
 
-class CreateStripeCheckoutSessionView(View):
-
-    def post(
-        self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any
-    ) -> HttpResponseRedirect:
-        price = Price.objects.get(id=self.kwargs["pk"])
-        k = APIKEY.objects.get_from_key(self.kwargs["key"])
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=[
-                {
-                    "price_data": {
-                        "currency": "usd",
-                        "unit_amount": int(price.price) * 100,
-                        "product_data": {
-                            "name": price.product.name,
-                            "description": price.product.desc,
-                        },
-                    },
-                    "quantity": price.product.quantity,
-                }
-            ],
-            metadata={
-                "product_id": price.product.id,
-                "name": k.name,
-                "key_id": k.id,
-                "price": price.price,
-                "quantity": price.product.quantity,
-            },
-            mode="payment",
-            success_url=settings.PAYMENT_SUCCESS_URL,
-            cancel_url=settings.PAYMENT_CANCEL_URL,
-        )
-        return redirect(checkout_session.url)
-
-
 @method_decorator(csrf_exempt, name="dispatch")
 class StripeWebhookView(View):
     """
@@ -431,9 +395,7 @@ class StripeWebhookView(View):
                 session["metadata"]["quantity"]
             )
             with transaction.atomic():
-                locked_key = APIKEY.objects.select_for_update().get(
-                    id=key_id
-                )
+                locked_key = APIKEY.objects.select_for_update().get(id=key_id)
                 locked_key.credit = F("credit") + c
                 locked_key.save()
         # Can handle other events here.

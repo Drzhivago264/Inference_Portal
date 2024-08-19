@@ -1,6 +1,6 @@
+from constance import config as constant
 from rest_framework import serializers
 
-from server import constant
 from server.models.dataset import Dataset
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
@@ -214,7 +214,7 @@ class ModifyTokenSerializer(serializers.Serializer):
     ratelimit_time_unit = serializers.CharField(required=False)
 
     def validate_permission(self, value):
-        if value and value not in constant.DEFAULT_PERMISSION_CODENAMES:
+        if value and value not in constant.DEFAULT_PERMISSION_CODENAMES.split(","):
             raise serializers.ValidationError("Cannot find permission")
         return value
 

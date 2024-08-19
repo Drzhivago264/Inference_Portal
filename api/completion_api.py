@@ -1,11 +1,11 @@
 import httpx
+from constance import config as constant
 from ninja import Router
 from ninja.errors import HttpError
 from transformers import AutoTokenizer
 
 from api.api_schema import Error, PromptResponseSchema, PromptSchema
 from api.utils import check_permission, send_request_async
-from server import constant
 from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.queue.log_prompt_response import celery_log_prompt_response

@@ -2,10 +2,10 @@ import boto3
 from botocore.exceptions import ClientError
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from constance import config as constant
 from decouple import config
 from django.utils import timezone
 
-from server import constant
 from server.models.llm_server import InferenceServer
 
 logger = get_task_logger(__name__)

@@ -4,10 +4,10 @@ from asgiref.sync import async_to_sync
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from channels.layers import get_channel_layer
+from constance import config as constant
 from decouple import config
 from openai import OpenAI
 
-from server import constant
 from server.models.api_key import APIKEY
 from server.queue.ec2_manage import command_EC2
 from server.utils.sync_.inference import (

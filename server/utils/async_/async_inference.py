@@ -3,9 +3,9 @@ import json
 import httpx
 import openai
 import regex as re
+from constance import config as constant
 from decouple import config
 
-import server.constant as constant
 from server.models.llm_server import LLM
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils.async_.async_manage_ec2 import (

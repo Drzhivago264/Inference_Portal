@@ -3,11 +3,11 @@ import json
 import httpx
 import regex as re
 from asgiref.sync import sync_to_async
+from constance import config as constant
 from django.contrib.auth.models import User
 from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
-from server import constant
 from server.models.api_key import APIKEY
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
