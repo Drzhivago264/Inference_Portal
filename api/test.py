@@ -37,15 +37,13 @@ def api_test():
 
 from openai import OpenAI
 client = OpenAI(
-    base_url="http://localhost:8880/v1",
-    api_key="professorparakeet"
+    base_url="http://localhost:8888/v1",
+    api_key=""
 )
-
-completion = client.chat.completions.create(
-  model="gpt2",
-  messages=[
-    {"role": "user", "content": "Hello!"}
-  ]
-)
-
-print(completion.choices[0].message)
+while True:
+    completion = client.chat.completions.create(
+    model="gpt2",
+    messages=[
+        {"role": "user", "content": "Hello!"}
+    ]
+    )

@@ -103,9 +103,9 @@ def create_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetCreateSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        dataset_name = serializer.data["name"]
-        default_evaluation = serializer.data["default_evaluation"]
-        default_system_prompt = serializer.data["default_system_prompt"]
+        dataset_name = serializer.validated_data["name"]
+        default_evaluation = serializer.validated_data["default_evaluation"]
+        default_system_prompt = serializer.validated_data["default_system_prompt"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,
@@ -142,8 +142,8 @@ def update_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetUpdateSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        id = serializer.data["id"]
-        new_dataset_name = serializer.data["new_name"]
+        id = serializer.validated_data["id"]
+        new_dataset_name = serializer.validated_data["new_name"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,
@@ -175,7 +175,7 @@ def delete_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetDeleteSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        id = serializer.data["id"]
+        id = serializer.validated_data["id"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,
@@ -203,11 +203,11 @@ def delete_user_dataset_api(request):
 def create_user_record_api(request):
     serializer = DatasetRecordSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        dataset_id = serializer.data["dataset_id"]
-        system_prompt = serializer.data["system_prompt"]
-        prompt = serializer.data["prompt"]
-        response = serializer.data["response"]
-        evaluation = serializer.data["evaluation"]
+        dataset_id = serializer.validated_data["dataset_id"]
+        system_prompt = serializer.validated_data["system_prompt"]
+        prompt = serializer.validated_data["prompt"]
+        response = serializer.validated_data["response"]
+        evaluation = serializer.validated_data["evaluation"]
         dataset = get_or_set_cache(
             prefix="user_dataset",
             key=dataset_id,
@@ -234,12 +234,12 @@ def create_user_record_api(request):
 def update_user_record_api(request):
     serializer = DatasetRecordSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        dataset_id = serializer.data["dataset_id"]
-        system_prompt = serializer.data["system_prompt"]
-        prompt = serializer.data["prompt"]
-        response = serializer.data["response"]
-        evaluation = serializer.data["evaluation"]
-        record_id = serializer.data["record_id"]
+        dataset_id = serializer.validated_data["dataset_id"]
+        system_prompt = serializer.validated_data["system_prompt"]
+        prompt = serializer.validated_data["prompt"]
+        response = serializer.validated_data["response"]
+        evaluation = serializer.validated_data["evaluation"]
+        record_id = serializer.validated_data["record_id"]
         dataset = get_or_set_cache(
             prefix="user_dataset",
             key=dataset_id,
@@ -271,8 +271,8 @@ def update_user_record_api(request):
 def delete_user_record_api(request):
     serializer = DatasetDeleteRecordSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        record_id = serializer.data["record_id"]
-        dataset_id = serializer.data["dataset_id"]
+        record_id = serializer.validated_data["record_id"]
+        dataset_id = serializer.validated_data["dataset_id"]
         dataset = get_or_set_cache(
             prefix="user_dataset",
             key=dataset_id,

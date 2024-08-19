@@ -59,7 +59,7 @@ def log_out(request: HttpRequest) -> Response:
 def log_in(request: HttpRequest) -> Response:
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        key = serializer.data["key"]
+        key = serializer.validated_data["key"]
         try:
             key_model = {
                 "41": APIKEY,  # Master Key length

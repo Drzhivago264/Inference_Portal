@@ -205,7 +205,7 @@ class BaseLLMSchema(Schema):
     @field_validator("model")
     @classmethod
     def check_model(cls, v: str, info: ValidationInfo):
-        if not v in constant.OPEN_AI_MODEL_LIST.split(","):
+        if not v in constant.OPEN_AI_MODEL_LIST.split():
             raise ValueError(f"{v} is not a valid {info.field_name}.")
         return v
 

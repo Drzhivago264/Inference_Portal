@@ -30,9 +30,9 @@ from server.views.serializer import (
 def hub_redirect_api(request: HttpRequest) -> Response:
     serializer = RedirectSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        key = serializer.data["key"]
-        destination = serializer.data["destination"]
-        check_login = serializer.data["check_login"]
+        key = serializer.validated_data["key"]
+        destination = serializer.validated_data["destination"]
+        check_login = serializer.validated_data["check_login"]
         if not check_login:
             model_dispatcher = {"41": APIKEY, "73": FineGrainAPIKEY}
             try:

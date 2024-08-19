@@ -54,8 +54,8 @@ def product_list_api(request: HttpRequest) -> Response:
 def check_credit_api(request: HttpRequest) -> Response:
     serializer = CheckKeySerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        key_name = serializer.data["key_name"]
-        key_ = serializer.data["key"]
+        key_name = serializer.validated_data["key_name"]
+        key_ = serializer.validated_data["key"]
         try:
             key = APIKEY.objects.get_from_key(key_)
             if key.name != key_name:
@@ -84,8 +84,8 @@ def check_credit_api(request: HttpRequest) -> Response:
 def confirm_xmr_payment_api(request: HttpRequest) -> Response:
     serializer = CheckKeySerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        key_name = serializer.data["key_name"]
-        key_ = serializer.data["key"]
+        key_name = serializer.validated_data["key_name"]
+        key_ = serializer.validated_data["key"]
         try:
             key = APIKEY.objects.get_from_key(key_)
             if key.name != key_name:
@@ -188,7 +188,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
 def generate_key_api(request: HttpRequest) -> Response:
     serializer = CreateKeySerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        key_name = serializer.data["key_name"]
+        key_name = serializer.validated_data["key_name"]
         master_group, _ = Group.objects.get_or_create(name="master_user")
         try:
             wallet = manage_monero("make_integrated_address")
@@ -211,8 +211,9 @@ def generate_key_api(request: HttpRequest) -> Response:
 
                 # Adding all permission for master user
                 permissions = Permission.objects.filter(
-                    codename__in=constant.DEFAULT_PERMISSION_CODENAMES.split(",")
+                    codename__in=constant.DEFAULT_PERMISSION_CODENAMES.split()
                 )
+                print(constant.DEFAULT_PERMISSION_CODENAMES.split())
                 user.user_permissions.add(*permissions)
                 created_key.user = user
                 created_key.save()
@@ -240,8 +241,8 @@ def generate_key_api(request: HttpRequest) -> Response:
 def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
     serializer = CheckKeySerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        key_name = serializer.data["key_name"]
-        key_ = serializer.data["key"]
+        key_name = serializer.validated_data["key_name"]
+        key_ = serializer.validated_data["key"]
         try:
             key = APIKEY.objects.get_from_key(key_)
             if key.name != key_name:
@@ -301,9 +302,9 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
 def stripe_redirect(request: HttpRequest) -> Response:
     serializer = StripePaymentSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        key_name = serializer.data["key_name"]
-        key_ = serializer.data["key"]
-        product_id = serializer.data["product_id"]
+        key_name = serializer.validated_data["key_name"]
+        key_ = serializer.validated_data["key"]
+        product_id = serializer.validated_data["product_id"]
         try:
             key = APIKEY.objects.get_from_key(key_)
             if key.name != key_name:

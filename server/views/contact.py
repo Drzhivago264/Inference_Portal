@@ -16,18 +16,18 @@ from server.views.serializer import SendMailSerializer
 def contact_api(request: HttpRequest) -> Response:
     serializer = SendMailSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        key_ = serializer.data["key"]
-        key_name = serializer.data["key_name"]
+        key_ = serializer.validated_data["key"]
+        key_name = serializer.validated_data["key_name"]
         try:
             key = APIKEY.objects.get_from_key(key_)
             if key.name != key_name:
                 raise AuthenticationFailed(
                     detail="Your Key Name and/or Key is/are incorrect"
                 )
-            name = serializer.data["username"]
-            sender_email = serializer.data["mail"]
+            name = serializer.validated_data["username"]
+            sender_email = serializer.validated_data["mail"]
             subject = name + " from Inference said: "
-            message = serializer.data["message"] + " " + sender_email
+            message = serializer.validated_data["message"] + " " + sender_email
             email_from = settings.EMAIL_HOST_USER
             recipient_list = [
                 settings.EMAIL_HOST_USER,

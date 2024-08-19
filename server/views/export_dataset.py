@@ -27,8 +27,8 @@ def export_user_dataset_api(request):
     serializer = DatasetExportSerializer(data=request.data)
 
     if serializer.is_valid(raise_exception=True):
-        dataset_id = serializer.data["id"]
-        extension = serializer.data["extension"]
+        dataset_id = serializer.validated_data["id"]
+        extension = serializer.validated_data["extension"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,

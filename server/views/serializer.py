@@ -214,7 +214,7 @@ class ModifyTokenSerializer(serializers.Serializer):
     ratelimit_time_unit = serializers.CharField(required=False)
 
     def validate_permission(self, value):
-        if value and value not in constant.DEFAULT_PERMISSION_CODENAMES.split(","):
+        if value and value not in constant.DEFAULT_PERMISSION_CODENAMES.split():
             raise serializers.ValidationError("Cannot find permission")
         return value
 

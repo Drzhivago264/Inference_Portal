@@ -65,8 +65,8 @@ def update_user_instruction_tree_api(request):
     current_user = request.user
     serializer = NestedUserInstructionCreateSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        parent_instruction = serializer.data["parent_instruction"]
-        childrens = serializer.data["childrens"]
+        parent_instruction = serializer.validated_data["parent_instruction"]
+        childrens = serializer.validated_data["childrens"]
         parent_instruction = UserInstructionCreateSerializer(parent_instruction)
         childrens = UserInstructionCreateSerializer(childrens, many=True)
         master_key, master_user = get_user_or_set_cache(
@@ -150,8 +150,8 @@ def create_user_instruction_tree_api(request) -> Response:
     current_user = request.user
     serializer = NestedUserInstructionCreateSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        parent_instruction = serializer.data["parent_instruction"]
-        childrens = serializer.data["childrens"]
+        parent_instruction = serializer.validated_data["parent_instruction"]
+        childrens = serializer.validated_data["childrens"]
         parent_instruction = UserInstructionCreateSerializer(parent_instruction)
         childrens = UserInstructionCreateSerializer(childrens, many=True)
         master_key, master_user = get_user_or_set_cache(
@@ -228,7 +228,7 @@ def delete_user_instruction_tree_api(request) -> Response:
     current_user = request.user
     serializer = UserInstructionDeleteCreateSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        id = serializer.data["id"]
+        id = serializer.validated_data["id"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,

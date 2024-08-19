@@ -26,13 +26,13 @@ def generate_token_api(request: HttpRequest) -> Response:
     current_user = request.user
     master_key_object = current_user.apikey
     if serializer.is_valid(raise_exception=True):
-        token_name = serializer.data["token_name"]
-        permission_dict = serializer.data["permission"]
-        ttl_raw = serializer.data["ttl"]
-        time_unit = serializer.data["time_unit"]
-        ratelimit = serializer.data["ratelimit"]
-        ratelimit_time_unit = serializer.data["ratelimit_time_unit"]
-        use_ttl = serializer.data["use_ttl"]
+        token_name = serializer.validated_data["token_name"]
+        permission_dict = serializer.validated_data["permission"]
+        ttl_raw = serializer.validated_data["ttl"]
+        time_unit = serializer.validated_data["time_unit"]
+        ratelimit = serializer.validated_data["ratelimit"]
+        ratelimit_time_unit = serializer.validated_data["ratelimit_time_unit"]
+        use_ttl = serializer.validated_data["use_ttl"]
         slave_group, _ = Group.objects.get_or_create(name="slave_user")
         number_of_current_key = FineGrainAPIKEY.objects.filter(
             master_key=master_key_object
@@ -141,14 +141,14 @@ def remove_permission(request: HttpRequest) -> Response:
     current_user = request.user
     master_key_object = current_user.apikey
     if serializer.is_valid(raise_exception=True):
-        token_name = serializer.data["token_name"]
-        permission = serializer.data["permission"]
+        token_name = serializer.validated_data["token_name"]
+        permission = serializer.validated_data["permission"]
         try:
             permission_object = Permission.objects.get(codename=permission)
         except Permission.DoesNotExist:
             raise ParseError(detail="Permission does not exist")
-        first_and_last_char = serializer.data["first_and_last_char"]
-        prefix = serializer.data["prefix"]
+        first_and_last_char = serializer.validated_data["first_and_last_char"]
+        prefix = serializer.validated_data["prefix"]
         try:
 
             token = FineGrainAPIKEY.objects.get(
@@ -179,14 +179,14 @@ def add_permission(request: HttpRequest) -> Response:
     current_user = request.user
     master_key_object = current_user.apikey
     if serializer.is_valid(raise_exception=True):
-        token_name = serializer.data["token_name"]
-        permission = serializer.data["permission"]
+        token_name = serializer.validated_data["token_name"]
+        permission = serializer.validated_data["permission"]
         try:
             permission_object = Permission.objects.get(codename=permission)
         except Permission.DoesNotExist:
             raise ParseError(detail="Permission does not exist")
-        first_and_last_char = serializer.data["first_and_last_char"]
-        prefix = serializer.data["prefix"]
+        first_and_last_char = serializer.validated_data["first_and_last_char"]
+        prefix = serializer.validated_data["prefix"]
         try:
             token = FineGrainAPIKEY.objects.get(
                 master_key=master_key_object,
@@ -215,11 +215,11 @@ def update_ratelimit(request: HttpRequest) -> Response:
     current_user = request.user
     master_key_object = current_user.apikey
     if serializer.is_valid(raise_exception=True):
-        token_name = serializer.data["token_name"]
-        ratelimit = serializer.data["ratelimit"]
-        ratelimit_time_unit = serializer.data["ratelimit_time_unit"]
-        first_and_last_char = serializer.data["first_and_last_char"]
-        prefix = serializer.data["prefix"]
+        token_name = serializer.validated_data["token_name"]
+        ratelimit = serializer.validated_data["ratelimit"]
+        ratelimit_time_unit = serializer.validated_data["ratelimit_time_unit"]
+        first_and_last_char = serializer.validated_data["first_and_last_char"]
+        prefix = serializer.validated_data["prefix"]
         try:
             token = FineGrainAPIKEY.objects.get(
                 master_key=master_key_object,
@@ -250,9 +250,9 @@ def invalidate_token(request: HttpRequest) -> Response:
     current_user = request.user
     master_key_object = current_user.apikey
     if serializer.is_valid(raise_exception=True):
-        first_and_last_char = serializer.data["first_and_last_char"]
-        token_name = serializer.data["token_name"]
-        prefix = serializer.data["prefix"]
+        first_and_last_char = serializer.validated_data["first_and_last_char"]
+        token_name = serializer.validated_data["token_name"]
+        prefix = serializer.validated_data["prefix"]
         try:
             token = FineGrainAPIKEY.objects.get(
                 name=token_name,
