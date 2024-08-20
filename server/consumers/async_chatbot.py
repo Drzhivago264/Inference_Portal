@@ -36,7 +36,9 @@ class Consumer(BaseChatbot):
             )
 
             if llm.is_self_host:
-                await self.send_chat_request_vllm_async(processed_prompt=session_list_to_string, llm=llm)
+                await self.send_chat_request_vllm_async(
+                    processed_prompt=session_list_to_string, llm=llm
+                )
             else:
                 await self.send_chat_request_openai_async(
                     processed_prompt=session_list_to_string, llm=llm

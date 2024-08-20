@@ -62,7 +62,7 @@ def inference_mode(
             chat_history.append(prompt_)
             session = chat_history
         else:
-            session= [prompt_]
+            session = [prompt_]
         return session
     elif mode == "generate":
         prompt_ = [
@@ -95,13 +95,13 @@ def send_chat_request(
     top_p: float,
     presence_penalty: float,
     vllm_model: str | None = None,
-    extra_body: dict | None = None
+    extra_body: dict | None = None,
 ) -> str:
     clean_response = ""
     channel_layer = get_channel_layer()
     try:
         raw_response = client.chat.completions.create(
-            model= model if vllm_model is None else vllm_model,
+            model=model if vllm_model is None else vllm_model,
             messages=session_history,
             stream=stream,
             max_tokens=max_tokens,
@@ -109,7 +109,7 @@ def send_chat_request(
             top_p=top_p,
             frequency_penalty=frequency_penalty,
             presence_penalty=presence_penalty,
-            extra_body=extra_body 
+            extra_body=extra_body,
         )
         for chunk in raw_response:
             if chunk:
@@ -229,7 +229,7 @@ def send_agent_request(
                     "full_response": clean_response,
                 },
             )
-        
+
     except openai.APIConnectionError as e:
         async_to_sync(channel_layer.group_send)(
             room_group_name,

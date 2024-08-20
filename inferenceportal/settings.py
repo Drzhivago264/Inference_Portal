@@ -306,7 +306,7 @@ CONSTANCE_CONFIG = {
         int,
     ),
     "DEFAULT_PERMISSION_CODENAMES": (
-        "allow_chat allow_agent allow_toolbox allow_view_log allow_chat_api allow_agent_api allow_toolbox_api allow_view_cost allow_data_synthesis allow_create_token add_userinstructiontree change_userinstructiontree delete_userinstructiontree view_userinstructiontree add_dataset change_dataset delete_dataset view_dataset add_datasetrecord change_datasetrecord delete_datasetrecord view_datasetrecord",  
+        "allow_chat allow_agent allow_toolbox allow_view_log allow_chat_api allow_agent_api allow_toolbox_api allow_view_cost allow_data_synthesis allow_create_token add_userinstructiontree change_userinstructiontree delete_userinstructiontree view_userinstructiontree add_dataset change_dataset delete_dataset view_dataset add_datasetrecord change_datasetrecord delete_datasetrecord view_datasetrecord",
         "Default permissions for master users",
         str,
     ),

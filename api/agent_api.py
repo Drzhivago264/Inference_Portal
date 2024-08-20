@@ -9,8 +9,9 @@ from api.utils import (
     get_system_template,
     get_user_template,
     send_request_async,
-    send_stream_request_agent_async,
+    send_stream_request_async,
 )
+from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
@@ -121,14 +122,14 @@ async def agentcompletion(request, data: AgentSchema):
                 if server_status == "running":
                     if not data.stream:
                         response = await send_request_async(
-                            url=url, 
-                            context=context, 
-                            llm=model, 
-                            processed_prompt=chat, 
-                            key_object=key_object, 
-                            data=data
-                            )
-  
+                            url=url,
+                            context=context,
+                            llm=model,
+                            processed_prompt=chat,
+                            key_object=key_object,
+                            data=data,
+                        )
+
                         return 200, {
                             "context": context,
                             "parent_template_name": parent_template_name,
@@ -140,7 +141,7 @@ async def agentcompletion(request, data: AgentSchema):
                     else:
 
                         res = StreamingHttpResponse(
-                            send_stream_request_agent_async(
+                            send_stream_request_async(
                                 url=url,
                                 context=context,
                                 processed_prompt=chat,
@@ -151,6 +152,7 @@ async def agentcompletion(request, data: AgentSchema):
                                 child_template_name=child_template_name,
                                 use_my_template=use_my_template,
                                 data=data,
+                                inference_type=PromptResponse.PromptType.AGENT_API,
                             ),
                             content_type="text/event-stream",
                         )

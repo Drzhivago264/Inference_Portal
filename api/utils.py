@@ -1,17 +1,14 @@
-import json
-from openai import AsyncOpenAI
-from decouple import config
-import httpx
-import regex as re
+import openai
 from asgiref.sync import sync_to_async
+from constance import config as constant
+from decouple import config
 from django.contrib.auth.models import User
 from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
-from constance import config as constant
 from server.models.api_key import APIKEY
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
-from server.models.llm_server import LLM, InferenceServer
+from server.models.llm_server import LLM
 from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils.async_.async_cache import get_or_set_cache
@@ -46,44 +43,59 @@ async def get_user_template(name: str, user_object: User) -> str:
     except UserInstructionTreeMP.DoesNotExist:
         raise HttpError(404, f"template: {name} is incorrect")
 
-    
-async def send_request_async(url: str, context: dict, llm: LLM, processed_prompt: list, key_object: APIKEY, data: ChatSchema) -> httpx.Response:
 
-    client = AsyncOpenAI(
+async def send_request_async(
+    url: str,
+    context: dict,
+    llm: LLM,
+    processed_prompt: list,
+    key_object: APIKEY,
+    data: ChatSchema,
+) -> str:
+    client = openai.AsyncOpenAI(
         api_key=config("VLLM_KEY"),
         base_url=f"{url}/v1" if url else None,
         timeout=constant.TIMEOUT,
         max_retries=constant.RETRY,
+    )
+    try:
+        raw_response = await client.chat.completions.create(
+            model=llm.base,
+            messages=processed_prompt,
+            stream=context["stream"],
+            n=context["n"],
+            frequency_penalty=context["frequency_penalty"],
+            top_p=context["top_p"],
+            max_tokens=context["max_tokens"],
+            temperature=context["temperature"],
+            presence_penalty=context["presence_penalty"],
+            extra_body={
+                "best_of": context["best_of"],
+                "use_beam_search": context["beam"],
+                "top_k": context["top_k"],
+                "length_penalty": context["length_penalty"],
+                "early_stopping": (
+                    context["early_stopping"] if context["beam"] else False
+                ),
+            },
         )
-    raw_response = await client.chat.completions.create(
-        model= llm.base,
-        messages=processed_prompt,
-        stream=context["stream"],
-        n=context['n'],
-        frequency_penalty=context["frequency_penalty"],
-        top_p=context["top_p"],
-        max_tokens=context["max_tokens"],
-        temperature=context["temperature"],
-        presence_penalty=context["presence_penalty"],
-        extra_body={
-            'best_of':context["best_of"],
-            'use_beam_search': context["beam"],
-            'top_k':context["top_k"],
-            'length_penalty': context["length_penalty"],
-            'early_stopping': context['early_stopping'] if context['beam'] else False
-        }
-    ) 
-    if raw_response:
-        full_response = raw_response.choices[0].message
-        celery_log_prompt_response.delay(
-            is_session_start_node=None,
-            key_object_hashed_key=key_object.hashed_key,
-            llm_name=llm.name,
-            prompt=data.prompt,
-            response=full_response,
-            type_=PromptResponse.PromptType.CHATBOT_API,
-        )
-    return raw_response
+        if raw_response:
+            full_response = raw_response.choices[0].message
+            celery_log_prompt_response.delay(
+                is_session_start_node=None,
+                key_object_hashed_key=key_object.hashed_key,
+                llm_name=llm.name,
+                prompt=data.prompt,
+                response=full_response,
+                type_=PromptResponse.PromptType.CHATBOT_API,
+            )
+        return raw_response
+    except openai.APIConnectionError as e:
+        raise HttpError(404, f"Failed to connect to vLLM API: {e}")
+    except openai.RateLimitError as e:
+        raise HttpError(429, f"vLLM API request exceeded rate limit: {e}")
+    except openai.APIError as e:
+        raise HttpError(503, f"vLLM API returned an API Error: {e}")
 
 
 async def send_stream_request_async(
@@ -92,116 +104,81 @@ async def send_stream_request_async(
     processed_prompt: str,
     key_object: APIKEY,
     llm: LLM,
-    data: ChatSchema,
+    data: ChatSchema | AgentSchema,
+    inference_type: PromptResponse.PromptType,
+    parent_template_name: str | None = None,
+    child_template_name: str | None = None,
+    working_nemory: list | None = None,
+    use_my_template: bool | None = None,
 ):
-    client = AsyncOpenAI(
+    client = openai.AsyncOpenAI(
         api_key=config("VLLM_KEY"),
         base_url=f"{url}/v1" if url else None,
         timeout=constant.TIMEOUT,
         max_retries=constant.RETRY,
+    )
+    try:
+        raw_response = await client.chat.completions.create(
+            model=llm.base,
+            messages=processed_prompt,
+            stream=context["stream"],
+            n=context["n"],
+            frequency_penalty=context["frequency_penalty"],
+            top_p=context["top_p"],
+            max_tokens=context["max_tokens"],
+            temperature=context["temperature"],
+            presence_penalty=context["presence_penalty"],
+            extra_body={
+                "best_of": context["best_of"],
+                "use_beam_search": context["beam"],
+                "top_k": context["top_k"],
+                "length_penalty": context["length_penalty"],
+                "early_stopping": (
+                    context["early_stopping"] if context["beam"] else False
+                ),
+            },
         )
-    raw_response = await client.chat.completions.create(
-        model= llm.base,
-        messages=processed_prompt,
-        stream=context["stream"],
-        n=context['n'],
-        frequency_penalty=context["frequency_penalty"],
-        top_p=context["top_p"],
-        max_tokens=context["max_tokens"],
-        temperature=context["temperature"],
-        presence_penalty=context["presence_penalty"],
-        extra_body={
-            'best_of':context["best_of"],
-            'use_beam_search': context["beam"],
-            'top_k':context["top_k"],
-            'length_penalty': context["length_penalty"],
-            'early_stopping': context['early_stopping'] if context['beam'] else False
-        }
-    ) 
-    if raw_response:
-        full_response = str()
-        async for chunk in raw_response:
-            if chunk:
-                data = chunk.choices[0].delta.content
-                if data is not None:
-                    full_response += data
-                    yield str(
-                        {"response": full_response, "delta": data}
-                    ) + "\n"
-        celery_log_prompt_response.delay(
-            is_session_start_node=None,
-            key_object_hashed_key=key_object.hashed_key,
-            llm_name=llm.name,
-            prompt=data.prompt,
-            response=full_response,
-            type_=PromptResponse.PromptType.CHATBOT_API,
-        )
-
-
-async def send_stream_request_agent_async(
-    url: str,
-    context: dict,
-    processed_prompt: str,
-    key_object: APIKEY,
-    llm: LLM,
-    data: AgentSchema,
-    parent_template_name: str | None,
-    child_template_name: str | None,
-    working_nemory: list,
-    use_my_template: str,
-):
-    client = AsyncOpenAI(
-        api_key=config("VLLM_KEY"),
-        base_url=f"{url}/v1" if url else None,
-        timeout=constant.TIMEOUT,
-        max_retries=constant.RETRY,
-        )
-    
-    raw_response = await client.chat.completions.create(
-        model= llm.base,
-        messages=processed_prompt,
-        stream=context["stream"],
-        n=context['n'],
-        frequency_penalty=context["frequency_penalty"],
-        top_p=context["top_p"],
-        max_tokens=context["max_tokens"],
-        temperature=context["temperature"],
-        presence_penalty=context["presence_penalty"],
-        extra_body={
-            'best_of':context["best_of"],
-            'use_beam_search': context["beam"],
-            'top_k':context["top_k"],
-            'length_penalty': context["length_penalty"],
-            'early_stopping': context['early_stopping'] if context['beam'] else False
-        }
-    ) 
-  
-    if raw_response:
-        full_response = str()
-        async for chunk in raw_response:
-            if chunk:
-                data = chunk.choices[0].delta.content
-                full_response += data
-                yield str(
-                    {
-                        "response": full_response,
-                        "delta": data,
-                        "use_my_template": use_my_template,
-                        "working_memory": working_nemory
-                        + [{"role": "assistant", "content": f"{c}"}],
-                        "parent_template_name": parent_template_name,
-                        "child_template_name": child_template_name,
-                    }
-                ) + "\n"
-
-        celery_log_prompt_response.delay(
-            is_session_start_node=None,
-            key_object_hashed_key=key_object.hashed_key,
-            llm_name=llm.name,
-            prompt=data.prompt,
-            response=full_response,
-            type_=PromptResponse.PromptType.AGENT_API,
-        )
+        if raw_response:
+            full_response = str()
+            async for chunk in raw_response:
+                if chunk:
+                    data = chunk.choices[0].delta.content
+                    if data is not None:
+                        full_response += data
+                        if inference_type == PromptResponse.PromptType.CHATBOT_API:
+                            yield str({"response": full_response, "delta": data}) + "\n"
+                        elif inference_type == PromptResponse.PromptType.AGENT_API:
+                            yield str(
+                                {
+                                    "response": full_response,
+                                    "delta": data,
+                                    "use_my_template": use_my_template,
+                                    "working_memory": working_nemory
+                                    + [
+                                        {
+                                            "role": "assistant",
+                                            "content": f"{full_response}",
+                                        }
+                                    ],
+                                    "parent_template_name": parent_template_name,
+                                    "child_template_name": child_template_name,
+                                }
+                            ) + "\n"
+            if full_response and isinstance(full_response, str):
+                celery_log_prompt_response.delay(
+                    is_session_start_node=None,
+                    key_object_hashed_key=key_object.hashed_key,
+                    llm_name=llm.name,
+                    prompt=data.prompt,
+                    response=full_response,
+                    type_=inference_type,
+                )
+    except openai.APIConnectionError as e:
+        raise HttpError(404, f"Failed to connect to vLLM API: {e}")
+    except openai.RateLimitError as e:
+        raise HttpError(429, f"vLLM API request exceeded rate limit: {e}")
+    except openai.APIError as e:
+        raise HttpError(503, f"vLLM API returned an API Error: {e}")
 
 
 async def query_response_log(

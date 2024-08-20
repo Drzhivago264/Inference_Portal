@@ -1,7 +1,6 @@
 import json
 
 import pytz
-from constance import config as constant
 from django.utils import timezone
 from pydantic import ValidationError
 

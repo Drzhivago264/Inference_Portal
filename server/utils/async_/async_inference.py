@@ -15,15 +15,18 @@ from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.inference import action_parse_json
 
 
-
 class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
     async def openai_client_async(
-        self, processed_prompt: list,  vllm_server_url: str | None = None, llm : LLM | None = None,
+        self,
+        processed_prompt: list,
+        vllm_server_url: str | None = None,
+        llm: LLM | None = None,
     ) -> None:
         try:
             client = openai.AsyncOpenAI(
-                api_key=config("GPT_KEY") if vllm_server_url is None else config(
-                    "VLLM_KEY"),
+                api_key=(
+                    config("GPT_KEY") if vllm_server_url is None else config("VLLM_KEY")
+                ),
                 base_url=f"{vllm_server_url}/v1" if vllm_server_url else None,
                 timeout=constant.TIMEOUT,
                 max_retries=constant.RETRY,
@@ -37,14 +40,18 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
                 top_p=self.top_p if not self.beam else 1,
                 frequency_penalty=self.frequency_penalty,
                 presence_penalty=self.presence_penalty,
-                extra_body={
-                    'best_of':self.best_of,
-                    'use_beam_search':self.beam,
-                    'top_k':self.top_k,
-                    'length_penalty':self.length_penalty if self.beam else 1,
-                    'early_stopping':self.early_stopping if self.beam else False
-                } if vllm_server_url else None
-            ) 
+                extra_body=(
+                    {
+                        "best_of": self.best_of,
+                        "use_beam_search": self.beam,
+                        "top_k": self.top_k,
+                        "length_penalty": self.length_penalty if self.beam else 1,
+                        "early_stopping": self.early_stopping if self.beam else False,
+                    }
+                    if vllm_server_url
+                    else None
+                ),
+            )
             return raw_response
 
         except openai.APIConnectionError as e:
@@ -106,9 +113,7 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
         self, processed_prompt: list, llm: LLM
     ) -> str:
 
-        raw_response = await self.openai_client_async(
-            processed_prompt=processed_prompt
-        )
+        raw_response = await self.openai_client_async(processed_prompt=processed_prompt)
         if raw_response:
             full_response = await self.handle_response(raw_response)
             self.session_history.append(
@@ -187,11 +192,9 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
         if raw_response:
             self.current_turn += 1
             full_response = await self.handle_response(raw_response)
-            response_json = [
-                {"role": "assistant", "content": f"{full_response}"}]
+            response_json = [{"role": "assistant", "content": f"{full_response}"}]
             self.session_history.extend(response_json)
-            action_list = action_parse_json(
-                self.session_history[-1]["content"])
+            action_list = action_parse_json(self.session_history[-1]["content"])
             if action_list:
                 await self.execute_action(action_list, full_response)
             if full_response and isinstance(full_response, str):
@@ -204,7 +207,9 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
                     type_=self.type,
                 )
 
-    async def send_chat_request_vllm_async(self, processed_prompt: list, llm: LLM) -> None:
+    async def send_chat_request_vllm_async(
+        self, processed_prompt: list, llm: LLM
+    ) -> None:
         url, instance_id, server_status = await self.get_model_url_async()
         if url:
             await update_server_status_in_db_async(
@@ -255,10 +260,10 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
                     self.current_turn += 1
                     full_response = await self.handle_response(raw_response)
                     response_json = [
-                        {"role": "assistant", "content": f"{full_response}"}]
+                        {"role": "assistant", "content": f"{full_response}"}
+                    ]
                     self.session_history.extend(response_json)
-                    action_list = action_parse_json(
-                        self.session_history[-1]["content"])
+                    action_list = action_parse_json(self.session_history[-1]["content"])
                     if action_list:
                         await self.execute_action(action_list, full_response)
                     if full_response and isinstance(full_response, str):

@@ -85,10 +85,10 @@ def inference(
                 update_server_status_in_db(instance_id=instance_id, update_type="time")
                 if server_status == "running":
                     client = OpenAI(
-                    api_key=config("VLLM_KEY"),
-                    base_url=f"{url}/v1" if url else None,
-                    timeout=constant.TIMEOUT,
-                    max_retries=constant.RETRY,
+                        api_key=config("VLLM_KEY"),
+                        base_url=f"{url}/v1" if url else None,
+                        timeout=constant.TIMEOUT,
+                        max_retries=constant.RETRY,
                     )
                     clean_response = send_chat_request(
                         client=client,
@@ -105,12 +105,14 @@ def inference(
                         temperature=context["temperature"],
                         presence_penalty=context["presence_penalty"],
                         extra_body={
-                            'best_of':context["best_of"],
-                            'use_beam_search': context["beam"],
-                            'top_k':context["top_k"],
-                            'length_penalty': context["length_penalty"],
-                            'early_stopping': context['early_stopping'] if context['beam'] else False
-                        }
+                            "best_of": context["best_of"],
+                            "use_beam_search": context["beam"],
+                            "top_k": context["top_k"],
+                            "length_penalty": context["length_penalty"],
+                            "early_stopping": (
+                                context["early_stopping"] if context["beam"] else False
+                            ),
+                        },
                     )
                     if clean_response and isinstance(clean_response, str):
                         log_prompt_response(
@@ -133,7 +135,7 @@ def inference(
                     response = "Unknown Server state, wait 5 seconds"
             else:
                 response = "Model is currently offline"
-            if 'response' in locals() and isinstance(response, str):
+            if "response" in locals() and isinstance(response, str):
                 async_to_sync(channel_layer.group_send)(
                     room_group_name,
                     {
@@ -247,7 +249,9 @@ def agent_inference(
                 update_server_status_in_db(instance_id=instance_id, update_type="time")
                 if server_status == "running":
                     client = OpenAI(
-                        api_key=config("VLLM_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY,
+                        api_key=config("VLLM_KEY"),
+                        timeout=constant.TIMEOUT,
+                        max_retries=constant.RETRY,
                         base_url=f"{url}/v1" if url else None,
                     )
                     if 0 <= current_turn_inner < max_turns:
@@ -267,12 +271,16 @@ def agent_inference(
                             temperature=context["temperature"],
                             presence_penalty=context["presence_penalty"],
                             extra_body={
-                                'best_of':context["best_of"],
-                                'use_beam_search': context["beam"],
-                                'top_k':context["top_k"],
-                                'length_penalty': context["length_penalty"],
-                                'early_stopping': context['early_stopping'] if context['beam'] else False
-                            }
+                                "best_of": context["best_of"],
+                                "use_beam_search": context["beam"],
+                                "top_k": context["top_k"],
+                                "length_penalty": context["length_penalty"],
+                                "early_stopping": (
+                                    context["early_stopping"]
+                                    if context["beam"]
+                                    else False
+                                ),
+                            },
                         )
                         if clean_response and isinstance(clean_response, str):
                             log_prompt_response(
@@ -305,7 +313,7 @@ def agent_inference(
                     response = "Unknown Server state, wait 5 seconds"
             else:
                 response = "Model is currently offline"
-            if 'response' in locals() and isinstance(response, str):
+            if "response" in locals() and isinstance(response, str):
                 async_to_sync(channel_layer.group_send)(
                     room_group_name,
                     {
@@ -318,7 +326,9 @@ def agent_inference(
                 )
         else:
             client = OpenAI(
-                api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY
+                api_key=config("GPT_KEY"),
+                timeout=constant.TIMEOUT,
+                max_retries=constant.RETRY,
             )
             if 0 <= current_turn_inner < max_turns:
                 clean_response = send_agent_request(

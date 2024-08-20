@@ -1,6 +1,8 @@
 import json
 
 import requests
+
+
 def api_test():
     res = requests.post(
         "http://127.0.0.1:8000/api/agent",
@@ -35,15 +37,11 @@ def api_test():
             decoded_line = line.decode("utf-8")
             print(decoded_line)
 
+
 from openai import OpenAI
-client = OpenAI(
-    base_url="http://localhost:8888/v1",
-    api_key=""
-)
+
+client = OpenAI(base_url="http://localhost:8888/v1", api_key="")
 while True:
     completion = client.chat.completions.create(
-    model="gpt2",
-    messages=[
-        {"role": "user", "content": "Hello!"}
-    ]
+        model="gpt2", messages=[{"role": "user", "content": "Hello!"}]
     )

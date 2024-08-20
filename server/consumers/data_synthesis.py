@@ -3,6 +3,7 @@ import json
 
 import httpx
 import pytz
+from constance import config as constant
 from decouple import config
 from django.utils import timezone
 from pydantic import ValidationError
@@ -74,7 +75,9 @@ class Consumer(BaseAgent):
                         ]
                         headers = {"Content-Type": "application/json"}
                         response_list = list()
-                        async with httpx.AsyncClient(timeout=120) as client:
+                        async with httpx.AsyncClient(
+                            timeout=constant.TIMEOUT
+                        ) as client:
                             tasks = [
                                 client.post(url, json=context, headers=headers)
                                 for context in context_list
@@ -160,7 +163,7 @@ class Consumer(BaseAgent):
                     for processed_instruction in processed_instruction_list
                 ]
                 response_list = list()
-                async with httpx.AsyncClient(timeout=120) as client:
+                async with httpx.AsyncClient(timeout=constant.TIMEOUT) as client:
                     tasks = [
                         client.post(url, json=context, headers=headers)
                         for context in context_list

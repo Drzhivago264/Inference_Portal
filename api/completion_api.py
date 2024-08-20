@@ -79,15 +79,15 @@ async def textcompletion(request, data: PromptSchema):
                 )
                 if server_status == "running":
                     response = await send_request_async(
-                        url=url, 
-                        context=context, 
-                        llm=model, 
-                        processed_prompt=chat, 
-                        key_object=key_object, 
-                        data=data
+                        url=url,
+                        context=context,
+                        llm=model,
+                        processed_prompt=chat,
+                        key_object=key_object,
+                        data=data,
                     )
                     return 200, {"response": response, "context": context}
-                
+
                 elif server_status == "stopped" or "stopping":
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(

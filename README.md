@@ -116,6 +116,7 @@ Next you need to set up .env file and setup the following key:
     POSTGRES_USER = "" (Your Postgres Username)
     POSTGRES_PASSWORD = "" (YOUR Postgres Password)
     GPT_KEY = "" (OPENAI key for the agent function)
+    VLLM_KEY = "" (The key that you set on vLLM instance (--api-key))
     CMC_API = "" (Coinmarketcap API to get the exchange rate of Monero, you may use different API but you need to rewrite the update_crypto_rate() in celery_tasks.py)
 
 *Noting that if you run your own private node and process payment via RPC, querying 3rd party exchange for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down. However, if people go that far to trace you down, you seem to have bigger problems to deal with already. Good luck with them.
@@ -143,14 +144,14 @@ Development environment setup
 After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page and remember to avoid 8000 and 6380 port that Django is running):
 
     pip install vllm
-    python -m vllm.entrypoints.api_server --model gpt2 --port 8080
+    python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8080 --dtype half --max-model-len 1024 --api-key {something hard to guess}
 
 If you have more than 1 GPU, you can serve multiple models at multiple ports (remember of use unique ports):
 
-    CUDA_VISIBLE_DEVICES = 0 python -m vllm.entrypoints.api_server --model gpt2 --port 8080
-    CUDA_VISIBLE_DEVICES = 1 python -m vllm.entrypoints.api_server --model gpt2-large --port 8888  
+    CUDA_VISIBLE_DEVICES=0 python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8080 --dtype half --max-model-len 1024 --api-key {something hard to guess}
+    CUDA_VISIBLE_DEVICES=1 python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8888 --dtype half --max-model-len 1024 --api-key {something hard to guess}
 
-If you have issue, you may need to seperate vLLM into multiple local environments.
+If you have more than 1 GPU but you want to do DP (server 1 model across all GPU), you can simply setup a NGINX and do load balancing across multiple ports at requests layer.
 
 If you want to customise frontend, you should run:
 

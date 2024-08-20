@@ -7,6 +7,7 @@ from transformers import AutoTokenizer
 
 from api.api_schema import ChatResponse, ChatSchema, Error
 from api.utils import check_permission, send_request_async, send_stream_request_async
+from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
@@ -99,13 +100,13 @@ async def chatcompletion(request, data: ChatSchema):
                 if server_status == "running":
                     if not data.stream:
                         response = await send_request_async(
-                            url=url, 
-                            context=context, 
-                            llm=model, 
-                            processed_prompt=chat, 
-                            key_object=key_object, 
-                            data=data
-                            )
+                            url=url,
+                            context=context,
+                            llm=model,
+                            processed_prompt=chat,
+                            key_object=key_object,
+                            data=data,
+                        )
                         return 200, {"response": response, "context": context}
                     else:
                         res = StreamingHttpResponse(
@@ -116,6 +117,7 @@ async def chatcompletion(request, data: ChatSchema):
                                 key_object=key_object,
                                 llm=model,
                                 data=data,
+                                inference_type=PromptResponse.PromptType.CHATBOT_API,
                             ),
                             content_type="text/event-stream",
                         )
