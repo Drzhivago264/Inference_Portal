@@ -27,11 +27,13 @@ def api_test(type, stream):
                 "child_template_name": "Conclusion",
                 "use_my_template": False,
             },
-            headers={"Authorization": "Bearer mkCwvwhK.sDpiJAghjD6GWLqyQivUJjInz7uDXW5x"},
+            headers={
+                "Authorization": "Bearer mkCwvwhK.sDpiJAghjD6GWLqyQivUJjInz7uDXW5x"
+            },
             stream=stream,
         )
-    elif type == 'chat':
-         res = requests.post(
+    elif type == "chat":
+        res = requests.post(
             "http://127.0.0.1:8000/api/chat",
             json={
                 "prompt": "string",
@@ -49,7 +51,9 @@ def api_test(type, stream):
                 "n": 1,
                 "stream": stream,
             },
-            headers={"Authorization": "Bearer mkCwvwhK.sDpiJAghjD6GWLqyQivUJjInz7uDXW5x"},
+            headers={
+                "Authorization": "Bearer mkCwvwhK.sDpiJAghjD6GWLqyQivUJjInz7uDXW5x"
+            },
             stream=stream,
         )
     if stream:
@@ -62,4 +66,4 @@ def api_test(type, stream):
         print(res.json())
 
 
-api_test('agent', False)
+api_test("agent", False)

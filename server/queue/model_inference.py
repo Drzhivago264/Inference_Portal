@@ -109,7 +109,9 @@ def inference(
                             "best_of": context["best_of"],
                             "use_beam_search": context["beam"],
                             "top_k": context["top_k"],
-                            "length_penalty": context["length_penalty"] if context['beam'] else 1.0,
+                            "length_penalty": (
+                                context["length_penalty"] if context["beam"] else 1.0
+                            ),
                             "early_stopping": (
                                 context["early_stopping"] if context["beam"] else False
                             ),

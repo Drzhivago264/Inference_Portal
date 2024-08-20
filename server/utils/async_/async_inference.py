@@ -23,7 +23,7 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
         vllm_server_url: str | None = None,
         llm: LLM | None = None,
     ) -> None:
-  
+
         client = openai.AsyncOpenAI(
             api_key=(
                 config("GPT_KEY") if vllm_server_url is None else config("VLLM_KEY")
@@ -51,7 +51,8 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
                         "length_penalty": self.length_penalty if self.beam else 1,
                         "early_stopping": self.early_stopping if self.beam else False,
                     }
-                    if vllm_server_url and self.type == PromptResponse.PromptType.CHATBOT
+                    if vllm_server_url
+                    and self.type == PromptResponse.PromptType.CHATBOT
                     else None
                 ),
             )
