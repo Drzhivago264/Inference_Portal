@@ -213,7 +213,6 @@ def generate_key_api(request: HttpRequest) -> Response:
                 permissions = Permission.objects.filter(
                     codename__in=constant.DEFAULT_PERMISSION_CODENAMES.split()
                 )
-                print(constant.DEFAULT_PERMISSION_CODENAMES.split())
                 user.user_permissions.add(*permissions)
                 created_key.user = user
                 created_key.save()

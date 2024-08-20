@@ -6,17 +6,13 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils import timezone
 
 from server.rate_limit import rate_limit_initializer
-from server.utils.async_.async_inference import (
-    AsyncInferenceOpenaiMixin,
-    AsyncInferenceVllmMixin,
-)
+from server.utils.async_.async_inference import AsyncInferenceMixin
 from server.utils.async_.async_query_database import QueryDBMixin
 
 
 class BaseBot(
     AsyncWebsocketConsumer,
-    AsyncInferenceOpenaiMixin,
-    AsyncInferenceVllmMixin,
+    AsyncInferenceMixin,
     QueryDBMixin,
 ):
     """
@@ -26,9 +22,8 @@ class BaseBot(
     It inherite from:
     Args:
         AsyncWebsocketConsumer: Async consumer provided by Django Channels to handle websockets
-        AsyncInferenceOpenaiMixin: Mixin class that contains utility functions tp inference openai models
-        AsyncInferenceVllmMixin (_type_): Mixin class that contains utility functions to inference self-hosted models
-        QueryDBMixin (_type_): Mixin class that contains utility functions to interaction with db
+        AsyncInferenceMixin: Mixin class that contains utility functions tp inference openai or self-hosted vLLM models
+        QueryDBMixin: Mixin class that contains utility functions to interaction with db
 
                 BaseBot
                /       \

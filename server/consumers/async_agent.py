@@ -40,21 +40,7 @@ class Consumer(BaseAgent):
                 if not llm.is_self_host:
                     await self.send_agent_request_openai_async(llm=llm)
                 else:
-                    tokeniser = AutoTokenizer.from_pretrained(llm.base)
-                    session_list_to_string = tokeniser.apply_chat_template(
-                        self.session_history, tokenize=False
-                    )
-                    context = {
-                        "prompt": session_list_to_string,
-                        "n": 1,
-                        "presence_penalty": float(self.presence_penalty),
-                        "temperature": float(self.temperature),
-                        "max_tokens": self.max_tokens,
-                        "stream": True,
-                        "top_p": float(self.top_p),
-                        "frequency_penalty": float(self.frequency_penalty),
-                    }
-                    await self.send_vllm_request_async(llm=llm, context=context)
+                    await self.send_agent_request_vllm_async(llm=llm)
             else:
                 await self.send(
                     text_data=json.dumps(

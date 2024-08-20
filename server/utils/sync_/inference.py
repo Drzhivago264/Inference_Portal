@@ -12,7 +12,7 @@ from decouple import config
 from transformers import AutoTokenizer
 
 from server.models.api_key import APIKEY
-from server.models.llm_server import LLM, InferenceServer
+from server.models.llm_server import LLM
 from server.utils.sync_.query_database import get_chat_context
 
 logger = get_task_logger(__name__)
@@ -49,11 +49,7 @@ def inference_mode(
     if mode == "chat":
         prompt_ = {"role": "user", "content": f"{prompt}"}
         if include_current_memory:
-            session_list_to_string = (
-                tokeniser.apply_chat_template(session_history, tokenize=False)
-                if llm.is_self_host
-                else session_history
-            )
+            session = session_history
         elif include_memory:
             current_history_length = len(tokeniser.encode(prompt))
             chat_history = get_chat_context(
@@ -64,48 +60,16 @@ def inference_mode(
                 tokeniser=tokeniser,
             )
             chat_history.append(prompt_)
-            session_list_to_string = (
-                tokeniser.apply_chat_template(chat_history, tokenize=False)
-                if llm.is_self_host
-                else chat_history
-            )
+            session = chat_history
         else:
-            session_list_to_string = (
-                tokeniser.apply_chat_template([prompt_], tokenize=False)
-                if llm.is_self_host
-                else [prompt_]
-            )
-        return session_list_to_string
+            session= [prompt_]
+        return session
     elif mode == "generate":
         prompt_ = [
             {"role": "system", "content": "Complete the following sentence"},
             {"role": "user", "content": f"{prompt}"},
         ]
-        session_list_to_string = (
-            tokeniser.apply_chat_template(prompt_, tokenize=False)
-            if llm.is_self_host
-            else prompt_
-        )
-        return session_list_to_string
-
-
-def send_request(stream: bool, url: str, instance_id: str, context: dict) -> str:
-    try:
-        response = requests.post(
-            url, json=context, stream=stream, timeout=constant.TIMEOUT
-        )
-        if not stream:
-            response = response.json()["text"][0]
-    except requests.exceptions.Timeout:
-        response = "Request Timeout. Cannot connect to the model. If you just booted the GPU server, wait for 400 seconds, and try again"
-    except requests.exceptions.InvalidJSONError:
-        response = "You messed up the parameters. Return them to the defaults."
-    except requests.exceptions.ConnectionError:
-        server_object = InferenceServer.objects.get(name=instance_id)
-        server_object.status = "pending"
-        server_object.save()
-        response = "Server is setting up, wait."
-    return response
+        return prompt_
 
 
 def action_parse_json(context: str) -> list | bool:
@@ -117,10 +81,9 @@ def action_parse_json(context: str) -> list | bool:
         return action_match
 
 
-def send_chat_request_openai(
+def send_chat_request(
     stream: bool,
     session_history: list,
-    choosen_model: str,
     model: str,
     unique: str,
     credit: float,
@@ -131,12 +94,14 @@ def send_chat_request_openai(
     temperature: float,
     top_p: float,
     presence_penalty: float,
+    vllm_model: str | None = None,
+    extra_body: dict | None = None
 ) -> str:
     clean_response = ""
     channel_layer = get_channel_layer()
     try:
         raw_response = client.chat.completions.create(
-            model=choosen_model,
+            model= model if vllm_model is None else vllm_model,
             messages=session_history,
             stream=stream,
             max_tokens=max_tokens,
@@ -144,11 +109,12 @@ def send_chat_request_openai(
             top_p=top_p,
             frequency_penalty=frequency_penalty,
             presence_penalty=presence_penalty,
+            extra_body=extra_body 
         )
         for chunk in raw_response:
             if chunk:
                 data = chunk.choices[0].delta.content
-                if data != None:
+                if data is not None:
                     clean_response += data
                     async_to_sync(channel_layer.group_send)(
                         room_group_name,
@@ -199,10 +165,9 @@ def send_chat_request_openai(
         )
 
 
-def send_agent_request_openai(
+def send_agent_request(
     stream: bool,
     session_history: list,
-    choosen_model: str,
     current_turn_inner: int,
     model: str,
     unique: str,
@@ -214,12 +179,13 @@ def send_agent_request_openai(
     temperature: float,
     top_p: float,
     presence_penalty: float,
+    vllm_model: str | None = None,
 ) -> str:
     clean_response = ""
     channel_layer = get_channel_layer()
     try:
         raw_response = client.chat.completions.create(
-            model=choosen_model,
+            model=model if vllm_model is None else vllm_model,
             messages=session_history,
             stream=stream,
             max_tokens=max_tokens,
@@ -233,7 +199,7 @@ def send_agent_request_openai(
         for chunk in raw_response:
             if chunk:
                 data = chunk.choices[0].delta.content
-                if data != None:
+                if data is not None:
                     clean_response += data
                     response_json = [
                         {"role": "assistant", "content": f"{clean_response}"}
@@ -263,7 +229,7 @@ def send_agent_request_openai(
                     "full_response": clean_response,
                 },
             )
-        return clean_response
+        
     except openai.APIConnectionError as e:
         async_to_sync(channel_layer.group_send)(
             room_group_name,

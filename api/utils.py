@@ -1,13 +1,14 @@
 import json
-
+from openai import AsyncOpenAI
+from decouple import config
 import httpx
 import regex as re
 from asgiref.sync import sync_to_async
-from constance import config as constant
 from django.contrib.auth.models import User
 from ninja.errors import HttpError
 
 from api.api_schema import AgentSchema, ChatSchema
+from constance import config as constant
 from server.models.api_key import APIKEY
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
@@ -45,20 +46,44 @@ async def get_user_template(name: str, user_object: User) -> str:
     except UserInstructionTreeMP.DoesNotExist:
         raise HttpError(404, f"template: {name} is incorrect")
 
+    
+async def send_request_async(url: str, context: dict, llm: LLM, processed_prompt: list, key_object: APIKEY, data: ChatSchema) -> httpx.Response:
 
-async def send_request_async(url: str, context: dict) -> httpx.Response:
-    try:
-        async with httpx.AsyncClient(
-            transport=httpx.AsyncHTTPTransport(retries=constant.RETRY),
-            timeout=constant.TIMEOUT,
-        ) as client:
-            response = await client.post(url, json=context)
-            response = (
-                response.json()["text"][0] if response.status_code == 200 else None
-            )
-            return response
-    except httpx.ReadTimeout:
-        raise HttpError(404, "Time Out! Slow down")
+    client = AsyncOpenAI(
+        api_key=config("VLLM_KEY"),
+        base_url=f"{url}/v1" if url else None,
+        timeout=constant.TIMEOUT,
+        max_retries=constant.RETRY,
+        )
+    raw_response = await client.chat.completions.create(
+        model= llm.base,
+        messages=processed_prompt,
+        stream=context["stream"],
+        n=context['n'],
+        frequency_penalty=context["frequency_penalty"],
+        top_p=context["top_p"],
+        max_tokens=context["max_tokens"],
+        temperature=context["temperature"],
+        presence_penalty=context["presence_penalty"],
+        extra_body={
+            'best_of':context["best_of"],
+            'use_beam_search': context["beam"],
+            'top_k':context["top_k"],
+            'length_penalty': context["length_penalty"],
+            'early_stopping': context['early_stopping'] if context['beam'] else False
+        }
+    ) 
+    if raw_response:
+        full_response = raw_response.choices[0].message
+        celery_log_prompt_response.delay(
+            is_session_start_node=None,
+            key_object_hashed_key=key_object.hashed_key,
+            llm_name=llm.name,
+            prompt=data.prompt,
+            response=full_response,
+            type_=PromptResponse.PromptType.CHATBOT_API,
+        )
+    return raw_response
 
 
 async def send_stream_request_async(
@@ -66,39 +91,51 @@ async def send_stream_request_async(
     context: dict,
     processed_prompt: str,
     key_object: APIKEY,
-    model: LLM,
+    llm: LLM,
     data: ChatSchema,
 ):
-    client = httpx.AsyncClient(
-        transport=httpx.AsyncHTTPTransport(retries=constant.RETRY),
+    client = AsyncOpenAI(
+        api_key=config("VLLM_KEY"),
+        base_url=f"{url}/v1" if url else None,
         timeout=constant.TIMEOUT,
-    )
-    full_response = ""
-    pattern = re.compile(r"\{(?:[^{}]|(?R))*\}")
-    try:
-        async with client.stream("POST", url, json=context) as response:
-            async for chunk in response.aiter_text():
-                chunk = chunk[:-1]
-                json_string_list = pattern.findall(chunk)
-                if json_string_list and json_string_list[0].startswith('{"text"'):
-                    c = json.loads(chunk)
-                    output = c["text"][0].replace(processed_prompt, "")
+        max_retries=constant.RETRY,
+        )
+    raw_response = await client.chat.completions.create(
+        model= llm.base,
+        messages=processed_prompt,
+        stream=context["stream"],
+        n=context['n'],
+        frequency_penalty=context["frequency_penalty"],
+        top_p=context["top_p"],
+        max_tokens=context["max_tokens"],
+        temperature=context["temperature"],
+        presence_penalty=context["presence_penalty"],
+        extra_body={
+            'best_of':context["best_of"],
+            'use_beam_search': context["beam"],
+            'top_k':context["top_k"],
+            'length_penalty': context["length_penalty"],
+            'early_stopping': context['early_stopping'] if context['beam'] else False
+        }
+    ) 
+    if raw_response:
+        full_response = str()
+        async for chunk in raw_response:
+            if chunk:
+                data = chunk.choices[0].delta.content
+                if data is not None:
+                    full_response += data
                     yield str(
-                        {"response": c, "delta": output.replace(full_response, "")}
+                        {"response": full_response, "delta": data}
                     ) + "\n"
-                    full_response = output
-
         celery_log_prompt_response.delay(
             is_session_start_node=None,
             key_object_hashed_key=key_object.hashed_key,
-            llm_name=model.name,
+            llm_name=llm.name,
             prompt=data.prompt,
-            response=response,
+            response=full_response,
             type_=PromptResponse.PromptType.CHATBOT_API,
         )
-
-    except httpx.ReadTimeout:
-        raise HttpError(404, "Time Out! Slow down")
 
 
 async def send_stream_request_agent_async(
@@ -106,50 +143,65 @@ async def send_stream_request_agent_async(
     context: dict,
     processed_prompt: str,
     key_object: APIKEY,
-    model: LLM,
+    llm: LLM,
     data: AgentSchema,
     parent_template_name: str | None,
     child_template_name: str | None,
     working_nemory: list,
     use_my_template: str,
 ):
-    client = httpx.AsyncClient(
-        transport=httpx.AsyncHTTPTransport(retries=constant.RETRY),
+    client = AsyncOpenAI(
+        api_key=config("VLLM_KEY"),
+        base_url=f"{url}/v1" if url else None,
         timeout=constant.TIMEOUT,
-    )
-    full_response = ""
-    pattern = re.compile(r"\{(?:[^{}]|(?R))*\}")
-    try:
-        async with client.stream("POST", url, json=context) as response:
-            async for chunk in response.aiter_text():
-                chunk = chunk[:-1]
-                json_string_list = pattern.findall(chunk)
-                if json_string_list and json_string_list[0].startswith('{"text"'):
-                    c = json.loads(chunk)
-                    output = c["text"][0].replace(processed_prompt, "")
-                    yield str(
-                        {
-                            "response": c,
-                            "delta": output.replace(full_response, ""),
-                            "use_my_template": use_my_template,
-                            "working_memory": working_nemory
-                            + [{"role": "assistant", "content": f"{c}"}],
-                            "parent_template_name": parent_template_name,
-                            "child_template_name": child_template_name,
-                        }
-                    ) + "\n"
-                    full_response = output
+        max_retries=constant.RETRY,
+        )
+    
+    raw_response = await client.chat.completions.create(
+        model= llm.base,
+        messages=processed_prompt,
+        stream=context["stream"],
+        n=context['n'],
+        frequency_penalty=context["frequency_penalty"],
+        top_p=context["top_p"],
+        max_tokens=context["max_tokens"],
+        temperature=context["temperature"],
+        presence_penalty=context["presence_penalty"],
+        extra_body={
+            'best_of':context["best_of"],
+            'use_beam_search': context["beam"],
+            'top_k':context["top_k"],
+            'length_penalty': context["length_penalty"],
+            'early_stopping': context['early_stopping'] if context['beam'] else False
+        }
+    ) 
+  
+    if raw_response:
+        full_response = str()
+        async for chunk in raw_response:
+            if chunk:
+                data = chunk.choices[0].delta.content
+                full_response += data
+                yield str(
+                    {
+                        "response": full_response,
+                        "delta": data,
+                        "use_my_template": use_my_template,
+                        "working_memory": working_nemory
+                        + [{"role": "assistant", "content": f"{c}"}],
+                        "parent_template_name": parent_template_name,
+                        "child_template_name": child_template_name,
+                    }
+                ) + "\n"
 
         celery_log_prompt_response.delay(
             is_session_start_node=None,
             key_object_hashed_key=key_object.hashed_key,
-            llm_name=model.name,
+            llm_name=llm.name,
             prompt=data.prompt,
-            response=response,
+            response=full_response,
             type_=PromptResponse.PromptType.AGENT_API,
         )
-    except httpx.ReadTimeout:
-        raise HttpError(404, "Time Out! Slow down")
 
 
 async def query_response_log(

@@ -1,14 +1,10 @@
-import httpx
 from constance import config as constant
 from ninja import Router
 from ninja.errors import HttpError
-from transformers import AutoTokenizer
 
 from api.api_schema import Error, PromptResponseSchema, PromptSchema
 from api.utils import check_permission, send_request_async
-from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
-from server.queue.log_prompt_response import celery_log_prompt_response
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
@@ -60,14 +56,11 @@ async def textcompletion(request, data: PromptSchema):
                 raise HttpError(442, "Server is currently offline")
             else:
                 beam, best_of = correct_beam_best_of(data.beam, data.best_of)
-                tokeniser = AutoTokenizer.from_pretrained(model.base)
                 chat = [
                     {"role": "system", "content": "Complete the following sentence."},
                     {"role": "user", "content": f"{data.prompt}"},
                 ]
-                processed_prompt = tokeniser.apply_chat_template(chat, tokenize=False)
                 context = {
-                    "prompt": processed_prompt,
                     "n": data.n,
                     "best_of": best_of,
                     "use_beam_search": beam,
@@ -85,21 +78,16 @@ async def textcompletion(request, data: PromptSchema):
                     instance_id=instance_id, update_type="time"
                 )
                 if server_status == "running":
-                    response = await send_request_async(url, context)
-                    if not response:
-                        raise HttpError(404, "Time Out!")
-                    else:
-                        response = response.replace(processed_prompt, "")
-                        celery_log_prompt_response.delay(
-                            is_session_start_node=None,
-                            key_object_hashed_key=key_object.hashed_key,
-                            llm_name=model.name,
-                            prompt=data.prompt,
-                            response=response,
-                            type_=PromptResponse.PromptType.CHATBOT_API,
-                        )
-                        return 200, {"response": response, "context": context}
-
+                    response = await send_request_async(
+                        url=url, 
+                        context=context, 
+                        llm=model, 
+                        processed_prompt=chat, 
+                        key_object=key_object, 
+                        data=data
+                    )
+                    return 200, {"response": response, "context": context}
+                
                 elif server_status == "stopped" or "stopping":
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(

@@ -1,4 +1,3 @@
-import httpx
 from asgiref.sync import sync_to_async
 from constance import config as constant
 from django.http import StreamingHttpResponse
@@ -8,9 +7,7 @@ from transformers import AutoTokenizer
 
 from api.api_schema import ChatResponse, ChatSchema, Error
 from api.utils import check_permission, send_request_async, send_stream_request_async
-from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
-from server.queue.log_prompt_response import celery_log_prompt_response
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
@@ -72,9 +69,6 @@ async def chatcompletion(request, data: ChatSchema):
                     prompt_ = {"role": "user", "content": f"{data.prompt}"}
                     chat += chat_history
                     chat.append(prompt_)
-                    processed_prompt = tokeniser.apply_chat_template(
-                        chat, tokenize=False
-                    )
                 else:
                     if isinstance(data.prompt, str):
                         chat = [
@@ -85,11 +79,7 @@ async def chatcompletion(request, data: ChatSchema):
                             chat = data.prompt
                         else:
                             chat = [data.prompt[0]]
-                    processed_prompt = tokeniser.apply_chat_template(
-                        chat, tokenize=False
-                    )
                 context = {
-                    "prompt": processed_prompt,
                     "n": data.n,
                     "best_of": best_of,
                     "presence_penalty": data.presence_penalty,
@@ -108,29 +98,23 @@ async def chatcompletion(request, data: ChatSchema):
                 )
                 if server_status == "running":
                     if not data.stream:
-                        response = await send_request_async(url, context)
-                        if not response:
-                            raise HttpError(404, "Time Out!")
-                        else:
-                            response = response.replace(processed_prompt, "")
-                            celery_log_prompt_response.delay(
-                                is_session_start_node=None,
-                                key_object_hashed_key=key_object.hashed_key,
-                                llm_name=model.name,
-                                prompt=data.prompt,
-                                response=response,
-                                type_=PromptResponse.PromptType.CHATBOT_API,
+                        response = await send_request_async(
+                            url=url, 
+                            context=context, 
+                            llm=model, 
+                            processed_prompt=chat, 
+                            key_object=key_object, 
+                            data=data
                             )
-
-                            return 200, {"response": response, "context": context}
+                        return 200, {"response": response, "context": context}
                     else:
                         res = StreamingHttpResponse(
                             send_stream_request_async(
                                 url=url,
                                 context=context,
-                                processed_prompt=processed_prompt,
+                                processed_prompt=chat,
                                 key_object=key_object,
-                                model=model,
+                                llm=model,
                                 data=data,
                             ),
                             content_type="text/event-stream",

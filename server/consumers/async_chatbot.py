@@ -36,22 +36,7 @@ class Consumer(BaseChatbot):
             )
 
             if llm.is_self_host:
-                context = {
-                    "prompt": session_list_to_string,
-                    "n": 1,
-                    "best_of": self.best_of,
-                    "presence_penalty": float(self.presence_penalty),
-                    "use_beam_search": self.beam,
-                    "temperature": float(self.temperature) if not self.beam else 0,
-                    "max_tokens": self.max_tokens,
-                    "stream": True,
-                    "top_k": int(self.top_k),
-                    "top_p": float(self.top_p) if not self.beam else 1,
-                    "length_penalty": float(self.length_penalty) if self.beam else 1,
-                    "frequency_penalty": float(self.frequency_penalty),
-                    "early_stopping": self.early_stopping if self.beam else False,
-                }
-                await self.send_vllm_request_async(llm=llm, context=context)
+                await self.send_chat_request_vllm_async(processed_prompt=session_list_to_string, llm=llm)
             else:
                 await self.send_chat_request_openai_async(
                     processed_prompt=session_list_to_string, llm=llm

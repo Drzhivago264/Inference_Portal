@@ -68,7 +68,6 @@ class Consumer(BaseAgent):
                         current_turn_inner=self.current_turn,
                         agent_instruction=self.agent_instruction,
                         session_history=self.session_history,
-                        choosen_model=self.choosen_model,
                         context=context,
                         force_stop=self.force_stop,
                     )

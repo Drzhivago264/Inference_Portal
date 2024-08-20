@@ -1,9 +1,7 @@
-import httpx
 from constance import config as constant
 from django.http import StreamingHttpResponse
 from ninja import Router
 from ninja.errors import HttpError
-from transformers import AutoTokenizer
 
 from api.api_schema import AgentResponse, AgentSchema, Error
 from api.utils import (
@@ -13,9 +11,7 @@ from api.utils import (
     send_request_async,
     send_stream_request_agent_async,
 )
-from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
-from server.queue.log_prompt_response import celery_log_prompt_response
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
@@ -93,7 +89,6 @@ async def agentcompletion(request, data: AgentSchema):
                         else ""
                     )
 
-                tokeniser = AutoTokenizer.from_pretrained(model.base)
                 if not data.working_memory:
                     chat = [
                         {
@@ -106,9 +101,7 @@ async def agentcompletion(request, data: AgentSchema):
                     chat = data.working_memory + [
                         {"role": "user", "content": f"{data.prompt}"}
                     ]
-                processed_prompt = tokeniser.apply_chat_template(chat, tokenize=False)
                 context = {
-                    "prompt": processed_prompt,
                     "n": data.n,
                     "best_of": best_of,
                     "presence_penalty": data.presence_penalty,
@@ -127,34 +120,30 @@ async def agentcompletion(request, data: AgentSchema):
                 )
                 if server_status == "running":
                     if not data.stream:
-                        response = await send_request_async(url, context)
-                        if not response:
-                            raise HttpError(404, "Time Out! Slow down")
-                        else:
-                            response = response.replace(processed_prompt, "")
-                            celery_log_prompt_response.delay(
-                                is_session_start_node=None,
-                                key_object_hashed_key=key_object.hashed_key,
-                                llm_name=model.name,
-                                prompt=data.prompt,
-                                response=response,
-                                type_=PromptResponse.PromptType.AGENT_API,
+                        response = await send_request_async(
+                            url=url, 
+                            context=context, 
+                            llm=model, 
+                            processed_prompt=chat, 
+                            key_object=key_object, 
+                            data=data
                             )
-                            return 200, {
-                                "context": context,
-                                "parent_template_name": parent_template_name,
-                                "child_template_name": child_template_name,
-                                "use_my_template": use_my_template,
-                                "working_memory": chat
-                                + [{"role": "assistant", "content": f"{response}"}],
-                            }
+  
+                        return 200, {
+                            "context": context,
+                            "parent_template_name": parent_template_name,
+                            "child_template_name": child_template_name,
+                            "use_my_template": use_my_template,
+                            "working_memory": chat
+                            + [{"role": "assistant", "content": f"{response}"}],
+                        }
                     else:
 
                         res = StreamingHttpResponse(
                             send_stream_request_agent_async(
                                 url=url,
                                 context=context,
-                                processed_prompt=processed_prompt,
+                                processed_prompt=chat,
                                 key_object=key_object,
                                 model=model,
                                 working_nemory=chat,

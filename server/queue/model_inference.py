@@ -13,9 +13,8 @@ from server.queue.ec2_manage import command_EC2
 from server.utils.sync_.inference import (
     correct_beam_best_of,
     inference_mode,
-    send_agent_request_openai,
-    send_chat_request_openai,
-    send_request,
+    send_agent_request,
+    send_chat_request,
 )
 from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
@@ -70,7 +69,6 @@ def inference(
     )
     llm = get_model(model=model)
     if llm:
-        url, instance_id, server_status = get_model_url(llm)
         session_list_to_string = inference_mode(
             llm=llm,
             key_object=key_object,
@@ -80,53 +78,49 @@ def inference(
             include_current_memory=False,
             session_history=None,
         )
-
         if llm.is_self_host:
-            extra_context = {
-                "prompt": session_list_to_string,
-                "n": 1,
-            }
-            context.update(extra_context)
+            url, instance_id, server_status = get_model_url(llm)
             """ Query a list of inference servers for a given model, pick a random one """
             if url:
                 update_server_status_in_db(instance_id=instance_id, update_type="time")
                 if server_status == "running":
-                    response = send_request(
-                        stream=True, url=url, instance_id=instance_id, context=context
+                    client = OpenAI(
+                    api_key=config("VLLM_KEY"),
+                    base_url=f"{url}/v1" if url else None,
+                    timeout=constant.TIMEOUT,
+                    max_retries=constant.RETRY,
                     )
-                    if not isinstance(response, str):
-                        previous_output = str()
-                        full_response = str()
-                        for chunk in response.iter_lines(
-                            chunk_size=8192, decode_unicode=False, delimiter=b"\0"
-                        ):
-                            if chunk:
-                                data = json.loads(chunk.decode("utf-8"))
-                                output = data["text"][0]
-                                output = output.replace(session_list_to_string, "")
-                                re = output.replace(previous_output, "")
-                                full_response += re
-                                previous_output = output
-                                async_to_sync(channel_layer.group_send)(
-                                    room_group_name,
-                                    {
-                                        "type": "chat_message",
-                                        "role": model,
-                                        "message": re,
-                                        "credit": credit,
-                                        "unique": unique,
-                                    },
-                                )
-                        if full_response and isinstance(full_response, str):
-                            log_prompt_response(
-                                is_session_start_node=is_session_start_node,
-                                key_object=key_object,
-                                llm=llm,
-                                prompt=prompt,
-                                response=full_response,
-                                type_=type_,
-                            )
-
+                    clean_response = send_chat_request(
+                        client=client,
+                        session_history=session_list_to_string,
+                        model=model,
+                        vllm_model=llm.base,
+                        credit=credit,
+                        unique=unique,
+                        stream=context["stream"],
+                        room_group_name=room_group_name,
+                        frequency_penalty=context["frequency_penalty"],
+                        top_p=context["top_p"],
+                        max_tokens=context["max_tokens"],
+                        temperature=context["temperature"],
+                        presence_penalty=context["presence_penalty"],
+                        extra_body={
+                            'best_of':context["best_of"],
+                            'use_beam_search': context["beam"],
+                            'top_k':context["top_k"],
+                            'length_penalty': context["length_penalty"],
+                            'early_stopping': context['early_stopping'] if context['beam'] else False
+                        }
+                    )
+                    if clean_response and isinstance(clean_response, str):
+                        log_prompt_response(
+                            is_session_start_node=is_session_start_node,
+                            key_object=key_object,
+                            llm=llm,
+                            prompt=prompt,
+                            response=clean_response,
+                            type_=type_,
+                        )
                 elif server_status == "stopped" or "stopping":
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
@@ -139,7 +133,7 @@ def inference(
                     response = "Unknown Server state, wait 5 seconds"
             else:
                 response = "Model is currently offline"
-            if isinstance(response, str):
+            if 'response' in locals() and isinstance(response, str):
                 async_to_sync(channel_layer.group_send)(
                     room_group_name,
                     {
@@ -156,11 +150,11 @@ def inference(
                 timeout=constant.TIMEOUT,
                 max_retries=constant.RETRY,
             )
-            clean_response = send_chat_request_openai(
+            clean_response = send_chat_request(
                 client=client,
                 session_history=session_list_to_string,
                 model=model,
-                choosen_model=model,
+                vllm_model=None,
                 credit=credit,
                 unique=unique,
                 stream=context["stream"],
@@ -194,7 +188,6 @@ def agent_inference(
     agent_instruction: str,
     message: str,
     session_history: list,
-    choosen_model: str,
     max_turns: int,
     context: dict,
     type_: int,
@@ -214,7 +207,6 @@ def agent_inference(
         agent_instruction (str): Instruction for the agent.
         message (str): User's message.
         session_history (list): Previous conversation turns.
-        choosen_model (str): Chosen model.
         max_turns (int): Maximum number of turns allowed.
         max_tokens (int): Maximum number of tokens for the response.
         type_ (int): Type of the interaction.
@@ -232,54 +224,135 @@ def agent_inference(
     )
     llm = get_model(model=model)
 
+    if current_turn_inner == 0:
+        prompt = [
+            {"role": "system", "content": f"{agent_instruction}"},
+            {"role": "user", "content": f"{message}"},
+        ]
+        session_history.extend(prompt)
+    elif 0 < current_turn_inner < max_turns - 1:
+        prompt = [{"role": "user", "content": f"Response: {message}"}]
+        session_history.extend(prompt)
+    elif current_turn_inner == max_turns:
+        prompt = [
+            {"role": "user", "content": f"Response: {message}"},
+            {"role": "system", "content": f"Response: {force_stop}"},
+        ]
+        session_history.extend(prompt)
+
     if llm:
-        if 0 <= current_turn_inner < max_turns:
-            if current_turn_inner == 0:
-                prompt = [
-                    {"role": "system", "content": f"{agent_instruction}"},
-                    {"role": "user", "content": f"{message}"},
-                ]
-            elif 0 < current_turn_inner < max_turns - 1:
-                prompt = [{"role": "user", "content": f"Response: {message}"}]
+        if llm.is_self_host:
+            url, instance_id, server_status = get_model_url(llm)
+            if url:
+                update_server_status_in_db(instance_id=instance_id, update_type="time")
+                if server_status == "running":
+                    client = OpenAI(
+                        api_key=config("VLLM_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY,
+                        base_url=f"{url}/v1" if url else None,
+                    )
+                    if 0 <= current_turn_inner < max_turns:
+                        clean_response = send_agent_request(
+                            client=client,
+                            session_history=session_history,
+                            model=model,
+                            vllm_model=llm.base,
+                            credit=credit,
+                            unique=unique,
+                            current_turn_inner=current_turn_inner,
+                            stream=context["stream"],
+                            room_group_name=room_group_name,
+                            frequency_penalty=context["frequency_penalty"],
+                            top_p=context["top_p"],
+                            max_tokens=context["max_tokens"],
+                            temperature=context["temperature"],
+                            presence_penalty=context["presence_penalty"],
+                            extra_body={
+                                'best_of':context["best_of"],
+                                'use_beam_search': context["beam"],
+                                'top_k':context["top_k"],
+                                'length_penalty': context["length_penalty"],
+                                'early_stopping': context['early_stopping'] if context['beam'] else False
+                            }
+                        )
+                        if clean_response and isinstance(clean_response, str):
+                            log_prompt_response(
+                                is_session_start_node=is_session_start_node,
+                                key_object=key_object,
+                                llm=llm,
+                                prompt=message,
+                                response=clean_response,
+                                type_=type_,
+                            )
+                    else:
+                        channel_layer = get_channel_layer()
+                        async_to_sync(channel_layer.group_send)(
+                            room_group_name,
+                            {
+                                "type": "chat_message",
+                                "max_turn_reached": True,
+                            },
+                        )
+
+                elif server_status == "stopped" or "stopping":
+                    command_EC2.delay(instance_id, region=region, action="on")
+                    response = "Server is starting up, try again in 400 seconds"
+                    update_server_status_in_db(
+                        instance_id=instance_id, update_type="status"
+                    )
+                elif server_status == "pending":
+                    response = "Server is setting up, try again in 30 seconds"
+                else:
+                    response = "Unknown Server state, wait 5 seconds"
             else:
-                prompt = [
-                    {"role": "user", "content": f"Response: {message}"},
-                    {"role": "system", "content": f"Response: {force_stop}"},
-                ]
-
-            session_history.extend(prompt)
-            clean_response = send_agent_request_openai(
-                client=client,
-                session_history=session_history,
-                model=model,
-                choosen_model=choosen_model,
-                credit=credit,
-                unique=unique,
-                current_turn_inner=current_turn_inner,
-                stream=context["stream"],
-                room_group_name=room_group_name,
-                frequency_penalty=context["frequency_penalty"],
-                top_p=context["top_p"],
-                max_tokens=context["max_tokens"],
-                temperature=context["temperature"],
-                presence_penalty=context["presence_penalty"],
-            )
-
-            if clean_response and isinstance(clean_response, str):
-                log_prompt_response(
-                    is_session_start_node=is_session_start_node,
-                    key_object=key_object,
-                    llm=llm,
-                    prompt=message,
-                    response=clean_response,
-                    type_=type_,
+                response = "Model is currently offline"
+            if 'response' in locals() and isinstance(response, str):
+                async_to_sync(channel_layer.group_send)(
+                    room_group_name,
+                    {
+                        "type": "chat_message",
+                        "role": model,
+                        "message": response,
+                        "credit": credit,
+                        "unique": unique,
+                    },
                 )
         else:
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                room_group_name,
-                {
-                    "type": "chat_message",
-                    "max_turn_reached": True,
-                },
+            client = OpenAI(
+                api_key=config("GPT_KEY"), timeout=constant.TIMEOUT, max_retries=constant.RETRY
             )
+            if 0 <= current_turn_inner < max_turns:
+                clean_response = send_agent_request(
+                    client=client,
+                    session_history=session_history,
+                    model=model,
+                    vllm_model=None,
+                    credit=credit,
+                    unique=unique,
+                    current_turn_inner=current_turn_inner,
+                    stream=context["stream"],
+                    room_group_name=room_group_name,
+                    frequency_penalty=context["frequency_penalty"],
+                    top_p=context["top_p"],
+                    max_tokens=context["max_tokens"],
+                    temperature=context["temperature"],
+                    presence_penalty=context["presence_penalty"],
+                )
+
+                if clean_response and isinstance(clean_response, str):
+                    log_prompt_response(
+                        is_session_start_node=is_session_start_node,
+                        key_object=key_object,
+                        llm=llm,
+                        prompt=message,
+                        response=clean_response,
+                        type_=type_,
+                    )
+    else:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                "type": "chat_message",
+                "max_turn_reached": True,
+            },
+        )
