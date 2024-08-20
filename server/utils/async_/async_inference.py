@@ -6,6 +6,7 @@ from constance import config as constant
 from decouple import config
 
 from server.models.llm_server import LLM
+from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils.async_.async_manage_ec2 import (
     ManageEC2Mixin,
@@ -22,22 +23,24 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
         vllm_server_url: str | None = None,
         llm: LLM | None = None,
     ) -> None:
+  
+        client = openai.AsyncOpenAI(
+            api_key=(
+                config("GPT_KEY") if vllm_server_url is None else config("VLLM_KEY")
+            ),
+            base_url=f"{vllm_server_url}/v1" if vllm_server_url else None,
+            timeout=constant.TIMEOUT,
+            max_retries=constant.RETRY,
+        )
+
         try:
-            client = openai.AsyncOpenAI(
-                api_key=(
-                    config("GPT_KEY") if vllm_server_url is None else config("VLLM_KEY")
-                ),
-                base_url=f"{vllm_server_url}/v1" if vllm_server_url else None,
-                timeout=constant.TIMEOUT,
-                max_retries=constant.RETRY,
-            )
             raw_response = await client.chat.completions.create(
                 model=self.choosen_model if vllm_server_url is None else llm.base,
                 messages=processed_prompt,
                 stream=True,
                 max_tokens=self.max_tokens,
-                temperature=self.temperature if not self.beam else 0,
-                top_p=self.top_p if not self.beam else 1,
+                temperature=self.temperature,
+                top_p=self.top_p,
                 frequency_penalty=self.frequency_penalty,
                 presence_penalty=self.presence_penalty,
                 extra_body=(
@@ -48,7 +51,7 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
                         "length_penalty": self.length_penalty if self.beam else 1,
                         "early_stopping": self.early_stopping if self.beam else False,
                     }
-                    if vllm_server_url
+                    if vllm_server_url and self.type == PromptResponse.PromptType.CHATBOT
                     else None
                 ),
             )

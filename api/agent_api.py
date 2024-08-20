@@ -146,7 +146,7 @@ async def agentcompletion(request, data: AgentSchema):
                                 context=context,
                                 processed_prompt=chat,
                                 key_object=key_object,
-                                model=model,
+                                llm=model,
                                 working_nemory=chat,
                                 parent_template_name=parent_template_name,
                                 child_template_name=child_template_name,

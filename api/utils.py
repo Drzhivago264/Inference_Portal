@@ -71,16 +71,16 @@ async def send_request_async(
             presence_penalty=context["presence_penalty"],
             extra_body={
                 "best_of": context["best_of"],
-                "use_beam_search": context["beam"],
+                "use_beam_search": context["use_beam_search"],
                 "top_k": context["top_k"],
                 "length_penalty": context["length_penalty"],
                 "early_stopping": (
-                    context["early_stopping"] if context["beam"] else False
+                    context["early_stopping"] if context["use_beam_search"] else False
                 ),
             },
         )
         if raw_response:
-            full_response = raw_response.choices[0].message
+            full_response = raw_response.choices[0].message.content
             celery_log_prompt_response.delay(
                 is_session_start_node=None,
                 key_object_hashed_key=key_object.hashed_key,
@@ -89,7 +89,7 @@ async def send_request_async(
                 response=full_response,
                 type_=PromptResponse.PromptType.CHATBOT_API,
             )
-        return raw_response
+        return raw_response.choices[0].message.content
     except openai.APIConnectionError as e:
         raise HttpError(404, f"Failed to connect to vLLM API: {e}")
     except openai.RateLimitError as e:
@@ -130,11 +130,11 @@ async def send_stream_request_async(
             presence_penalty=context["presence_penalty"],
             extra_body={
                 "best_of": context["best_of"],
-                "use_beam_search": context["beam"],
+                "use_beam_search": context["use_beam_search"],
                 "top_k": context["top_k"],
                 "length_penalty": context["length_penalty"],
                 "early_stopping": (
-                    context["early_stopping"] if context["beam"] else False
+                    context["early_stopping"] if context["use_beam_search"] else False
                 ),
             },
         )

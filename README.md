@@ -119,7 +119,7 @@ Next you need to set up .env file and setup the following key:
     VLLM_KEY = "" (The key that you set on vLLM instance (--api-key))
     CMC_API = "" (Coinmarketcap API to get the exchange rate of Monero, you may use different API but you need to rewrite the update_crypto_rate() in celery_tasks.py)
 
-*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchange for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down. However, if people go that far to trace you down, you seem to have bigger problems to deal with already. Good luck with them.
+*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchanges for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down. However, if people go that far to trace you down, you seem to have bigger problems to deal with already. Good luck with them.
 
 Finally you can test the server with:
 
@@ -127,13 +127,13 @@ Finally you can test the server with:
 
 In production environment, you may want to configure the server to be served by Daphne or both Daphne and Gurnicorn (refer to [Channels Docs](https://channels.readthedocs.io/en/1.x/deploying.html?highlight=django)).
 
-Contents in `staticfiles` directory are served as `/static/`. In production environment this folder need to be removed from root and served by NGINX or APACHE
+Contents in `staticfiles` directory are served as `/static/`. In production environment this folder need to be served by NGINX or APACHE
 
 About the GPU intances, you need to set up a vLLM server to serve the models listed in LLM.model:
 
     # Install vLLM with CUDA 12.1.
     pip install vllm
-    python -m vllm.entrypoints.api_server --model {your model}
+    python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8080 --dtype half --max-model-len 1024 --api-key {something hard to guess}
 
 If you expose this instance to the internet you may need Nginx or Apache server in front of it. If you route it through your subnet or have a security policy that only accept requests from your Django server then you are good to go.
 
@@ -141,17 +141,12 @@ In addition, as we need to automatically boot and shutdown your GPU intances, yo
 
 Development environment setup
 -----------------------------
-After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page and remember to avoid 8000 and 6380 port that Django is running):
-
-    pip install vllm
-    python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8080 --dtype half --max-model-len 1024 --api-key {something hard to guess}
-
-If you have more than 1 GPU, you can serve multiple models at multiple ports (remember of use unique ports):
+After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page and remember to avoid 8000, 5432 and 6380 ports that Django, Postgresql and Redis are running). If you have more than 1 GPU, you can serve multiple models at multiple ports (remember of use unique ports):
 
     CUDA_VISIBLE_DEVICES=0 python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8080 --dtype half --max-model-len 1024 --api-key {something hard to guess}
     CUDA_VISIBLE_DEVICES=1 python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8888 --dtype half --max-model-len 1024 --api-key {something hard to guess}
 
-If you have more than 1 GPU but you want to do DP (server 1 model across all GPU), you can simply setup a NGINX and do load balancing across multiple ports at requests layer.
+If you have more than 1 GPU but you want to do DP (duplicate 1 model on multiple vllm servers on one machine), you can simply setup a NGINX and do load balancing across multiple ports at requests layer. 
 
 If you want to customise frontend, you should run:
 

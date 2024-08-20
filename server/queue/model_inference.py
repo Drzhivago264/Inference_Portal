@@ -9,6 +9,7 @@ from decouple import config
 from openai import OpenAI
 
 from server.models.api_key import APIKEY
+from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.utils.sync_.inference import (
     correct_beam_best_of,
@@ -108,7 +109,7 @@ def inference(
                             "best_of": context["best_of"],
                             "use_beam_search": context["beam"],
                             "top_k": context["top_k"],
-                            "length_penalty": context["length_penalty"],
+                            "length_penalty": context["length_penalty"] if context['beam'] else 1.0,
                             "early_stopping": (
                                 context["early_stopping"] if context["beam"] else False
                             ),
@@ -270,17 +271,6 @@ def agent_inference(
                             max_tokens=context["max_tokens"],
                             temperature=context["temperature"],
                             presence_penalty=context["presence_penalty"],
-                            extra_body={
-                                "best_of": context["best_of"],
-                                "use_beam_search": context["beam"],
-                                "top_k": context["top_k"],
-                                "length_penalty": context["length_penalty"],
-                                "early_stopping": (
-                                    context["early_stopping"]
-                                    if context["beam"]
-                                    else False
-                                ),
-                            },
                         )
                         if clean_response and isinstance(clean_response, str):
                             log_prompt_response(
