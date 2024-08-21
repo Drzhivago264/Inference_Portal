@@ -33,6 +33,10 @@ Dataset Creation:
 
 ![Alt text](illustration/Data_Creation.png)
 
+Serverside Log Render + Consumption Monitoring:
+
+![Alt text](illustration/Log.png)
+![Alt text](illustration/Cost_Monitoring.png)
 Design
 -------
 - The /frontend of this website uses React.js which are packed into bundle in frontend/templates/frontend_index.html using webpack. 
