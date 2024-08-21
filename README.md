@@ -9,6 +9,30 @@ Purpose
 The purpose of this project is to offer users simple interfaces to interact with GPU servers.
 This website processses API and HTTP requests from users, forwards them to the GPU servers and forwards the responses back in a dynamic manner, this includes real-time chat rooms. In addition, this website also provides an implementation of REACT agent (refer to [Yao et al., 2022](https://arxiv.org/abs/2210.03629)).
 
+Features
+-------
+Here are some of the features of this website:
+
+Agent & ChatBot:
+
+![Alt text](illustration/Agent.png)
+
+Access Tokens Management:
+
+![Alt text](illustration/Access_Token_Management.png)
+
+Constances Configuration:
+
+![Alt text](illustration/Admin_Config.png)
+
+Data Synthesis:
+
+![Alt text](illustration/Data_Synthesis.png)
+
+Dataset Creation:
+
+![Alt text](illustration/Data_Creation.png)
+
 Design
 -------
 - The /frontend of this website uses React.js which are packed into bundle in frontend/templates/frontend_index.html using webpack. 
@@ -25,7 +49,7 @@ Design
 
 The implementation of React and data flow is explained in the diagram below
 
-![Alt text](React+Vec.drawio.png)
+![Alt text](illustration/React+Vec.drawio.png)
 
 Installation
 --------------

@@ -50,6 +50,18 @@ class Consumer(BaseAgent):
                 ]
                 for child_instruction in self.child_instruction_list
             ]
+            context_list = [
+                {
+                    "model": self.choosen_model,
+                    "messages": processed_instruction,
+                    "top_p": self.top_p,
+                    "temperature": self.temperature,
+                    "max_tokens": self.max_tokens,
+                    "presence_penalty": self.presence_penalty,
+                    "frequency_penalty": self.frequency_penalty,
+                }
+                for processed_instruction in processed_instruction_list
+            ]
             if llm.is_self_host:
                 url, instance_id, server_status = await self.get_model_url_async()
                 if url:
@@ -57,164 +69,85 @@ class Consumer(BaseAgent):
                         instance_id=instance_id, update_type="time"
                     )
                     if server_status == "running":
-                        tokeniser = AutoTokenizer.from_pretrained(llm.base)
-                        processed_instruction_list = [
-                            tokeniser.apply_chat_template(prompt_, tokenize=False)
-                            for prompt_ in processed_instruction_list
-                        ]
-                        context_list = [
-                            {
-                                "prompt": processed_instruction,
-                                "top_p": self.top_p,
-                                "temperature": self.temperature,
-                                "max_tokens": self.max_tokens,
-                                "presence_penalty": self.presence_penalty,
-                                "frequency_penalty": self.frequency_penalty,
-                            }
-                            for processed_instruction in processed_instruction_list
-                        ]
-                        headers = {"Content-Type": "application/json"}
-                        response_list = list()
-                        async with httpx.AsyncClient(
-                            timeout=constant.TIMEOUT
-                        ) as client:
-                            tasks = [
-                                client.post(url, json=context, headers=headers)
-                                for context in context_list
-                            ]
-                            result = await asyncio.gather(*tasks)
-                            for index, r in enumerate(result):
-                                if r.status_code == 200:
-                                    response_list.append(
-                                        r.json()["text"][0].replace(
-                                            processed_instruction_list[index], ""
-                                        )
-                                    )
-                                    await self.send(
-                                        text_data=json.dumps(
-                                            {
-                                                "message": f"Row-{self.row_no} Instruct-{index}",
-                                                "role": "Server",
-                                                "time": self.time,
-                                                "status": f"{r.status_code} Success",
-                                            }
-                                        )
-                                    )
-                                    celery_log_prompt_response.delay(
-                                        is_session_start_node=None,
-                                        key_object_hashed_key=self.key_object.hashed_key,
-                                        llm_name=llm.name,
-                                        prompt=processed_instruction_list[index],
-                                        response=r.json()["choices"][0]["message"][
-                                            "content"
-                                        ],
-                                        type_=self.type,
-                                    )
-                                elif r.status_code == 429:
-                                    response_list.append("Too many requests, slow down")
-                                    await self.send(
-                                        text_data=json.dumps(
-                                            {
-                                                "message": f"Row-{self.row_no} Instruct-{index}",
-                                                "role": "Server",
-                                                "time": self.time,
-                                                "status": f"{r.status_code} Failed-Too many request",
-                                            }
-                                        )
-                                    )
-                            await self.send(
-                                text_data=json.dumps(
-                                    {
-                                        "response_list": response_list,
-                                        "role": self.choosen_model,
-                                        "time": self.time,
-                                        "row_no": self.row_no,
-                                    }
-                                )
-                            )
+                        headers = {
+                            "Content-Type": "application/json",
+                            "Authorization": f'Bearer {config("VLLM_KEY")}',
+                        }
+                        url = f"{url}/v1/chat/completions"
                     else:
                         await self.manage_ec2_on_inference(server_status, instance_id)
+                        return
                 else:
                     await self.send(
                         text_data=json.dumps(
                             {
-                                "message": f"Model is currently offline",
-                                "role": "Server",
-                                "time": self.time,
+                                "message": "Model is currently offline",
+                                "stream_id": self.unique_response_id,
+                                "credit": self.key_object.credit,
                             }
                         )
                     )
+                    return
             else:
                 headers = {
                     "Content-Type": "application/json",
                     "Authorization": f'Bearer {config("GPT_KEY")}',
                 }
                 url = "https://api.openai.com/v1/chat/completions"
-                context_list = [
-                    {
-                        "model": self.choosen_model,
-                        "messages": processed_instruction,
-                        "top_p": self.top_p,
-                        "temperature": self.temperature,
-                        "max_tokens": self.max_tokens,
-                        "presence_penalty": self.presence_penalty,
-                        "frequency_penalty": self.frequency_penalty,
-                    }
-                    for processed_instruction in processed_instruction_list
+
+            response_list = list()
+            async with httpx.AsyncClient(timeout=constant.TIMEOUT) as client:
+                tasks = [
+                    client.post(url, json=context, headers=headers)
+                    for context in context_list
                 ]
-                response_list = list()
-                async with httpx.AsyncClient(timeout=constant.TIMEOUT) as client:
-                    tasks = [
-                        client.post(url, json=context, headers=headers)
-                        for context in context_list
-                    ]
-                    result = await asyncio.gather(*tasks)
-                    for index, r in enumerate(result):
-                        if r.status_code == 200:
-                            response_list.append(
-                                r.json()["choices"][0]["message"]["content"]
-                            )
-                            await self.send(
-                                text_data=json.dumps(
-                                    {
-                                        "message": f"Row-{self.row_no} Instruct-{index}",
-                                        "role": "Server",
-                                        "time": self.time,
-                                        "status": f"{r.status_code} Success",
-                                    }
-                                )
-                            )
-                            celery_log_prompt_response.delay(
-                                is_session_start_node=None,
-                                key_object_hashed_key=self.key_object.hashed_key,
-                                llm_name=llm.name,
-                                prompt=processed_instruction_list[index][0]["content"]
-                                + processed_instruction_list[index][1]["content"],
-                                response=r.json()["choices"][0]["message"]["content"],
-                                type_=self.type,
-                            )
-                        elif r.status_code == 429:
-                            response_list.append("Too many requests, slow down")
-                            await self.send(
-                                text_data=json.dumps(
-                                    {
-                                        "message": f"Row-{self.row_no} Instruct-{index}",
-                                        "role": "Server",
-                                        "time": self.time,
-                                        "status": f"{r.status_code} Failed-Too many request",
-                                    }
-                                )
-                            )
-                    await self.send(
-                        text_data=json.dumps(
-                            {
-                                "response_list": response_list,
-                                "role": self.choosen_model,
-                                "time": self.time,
-                                "row_no": self.row_no,
-                            }
+                result = await asyncio.gather(*tasks)
+                for index, r in enumerate(result):
+                    if r.status_code == 200:
+                        response_list.append(
+                            r.json()["choices"][0]["message"]["content"]
                         )
+                        await self.send(
+                            text_data=json.dumps(
+                                {
+                                    "message": f"Row-{self.row_no} Instruct-{index}",
+                                    "role": "Server",
+                                    "time": self.time,
+                                    "status": f"{r.status_code} Success",
+                                }
+                            )
+                        )
+                        celery_log_prompt_response.delay(
+                            is_session_start_node=None,
+                            key_object_hashed_key=self.key_object.hashed_key,
+                            llm_name=llm.name,
+                            prompt=processed_instruction_list[index][0]["content"]
+                            + processed_instruction_list[index][1]["content"],
+                            response=r.json()["choices"][0]["message"]["content"],
+                            type_=self.type,
+                        )
+                    elif r.status_code == 429:
+                        response_list.append("Too many requests, slow down")
+                        await self.send(
+                            text_data=json.dumps(
+                                {
+                                    "message": f"Row-{self.row_no} Instruct-{index}",
+                                    "role": "Server",
+                                    "time": self.time,
+                                    "status": f"{r.status_code} Failed-Too many request",
+                                }
+                            )
+                        )
+                await self.send(
+                    text_data=json.dumps(
+                        {
+                            "response_list": response_list,
+                            "role": self.choosen_model,
+                            "time": self.time,
+                            "row_no": self.row_no,
+                        }
                     )
+                )
         else:
             await self.send(
                 text_data=json.dumps(
