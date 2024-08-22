@@ -497,12 +497,11 @@ function PromptWriting() {
 														shrink: true,
 													}}
 												/>
-												<Rating
-													sx={{display: ev.evaluation_type === 5 ? "" : "None"}}
-													value={ev.evaluation_value}
+												{ ev.evaluation_type === 5 && <Rating
+													value={Number(ev.evaluation_value)}
 													max={Number(ev.evaluation_default_rating_scale)}
 													precision={0.5}
-												/>
+												/>}
 											</Box>
 										);
 									})}
