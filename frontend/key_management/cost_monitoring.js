@@ -200,7 +200,7 @@ function CostMonitoring() {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<title>Cost Monitoring</title>
-			<ResponsiveAppBar max_width='xl' />
+			<ResponsiveAppBar max_width='xxl' />
 			<Container maxWidth='xl'>
 				<Box mt={4} sx={{overflow: "auto"}}>
 					<Grid container spacing={1}>

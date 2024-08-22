@@ -4,8 +4,9 @@ import { useQuery } from "react-query";
 export const useGetUserDataset = (setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation) => {
 
     const {
-        error: error,
+        isSuccess: isSuccess,
         isLoading: isLoading,
+        isError: isError,
         refetch: refetch
 
     } = useQuery("DatasetList", () => baseGet("/frontend-api/get-dataset"),
@@ -25,7 +26,8 @@ export const useGetUserDataset = (setDatasetList, setMaxDatasetNum, setMaxEvalua
 
     return {
         refetch: refetch,
-        error: error,
-        isLoading: isLoading
+        isSuccess:isSuccess,
+        isError: isError,
+        isLoading: isLoading,
     }
 }

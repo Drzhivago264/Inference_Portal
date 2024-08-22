@@ -268,10 +268,7 @@ function UserInstruction() {
 	const addChild = () => {
 		if (children_instruction_list.length < max_child_num) {
 			setAddChildError(false);
-			const newChildrenInstructionList = [
-				...children_instruction_list,
-				DEFAULT_CHILDREN,
-			];
+			const newChildrenInstructionList = [...children_instruction_list, DEFAULT_CHILDREN];
 			setChildInstructionList(newChildrenInstructionList);
 		} else {
 			setAddChildError(true);
@@ -494,9 +491,7 @@ function UserInstruction() {
 																		<Box mr={2}>
 																			<Divider orientation='vertical' />
 																		</Box>
-																		<Paper
-																			elevation={2}
-																			style={{width: "100%",}}>
+																		<Paper elevation={2} style={{width: "100%"}}>
 																			<Stack
 																				direction='row'
 																				p={2}
@@ -508,9 +503,7 @@ function UserInstruction() {
 																						<DragHandleIcon />
 																					</IconButton>
 																				</Box>
-																				<Box
-																					mt={1} mb={1}
-																					style={{ width: "100%",}}>
+																				<Box mt={1} mb={1} style={{width: "100%"}}>
 																					<Stack
 																						direction='row'
 																						sx={{
@@ -664,6 +657,7 @@ function UserInstruction() {
 								Testbed
 							</Typography>
 							<ChatBox
+								id={"chat-log-agent"}
 								inputsize={300}
 								chat_message={chat_message}
 								usermessage={usermessage}

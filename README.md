@@ -25,11 +25,11 @@ Here are some features of this website:
 
 **Data Synthesis:**
 
-![Alt text](illustration/Data_Synthesis.png)
+![Alt text](illustration/Data_Creation.png)
 
 **Dataset Creation:**
 
-![Alt text](illustration/Data_Creation.png)
+![Alt text](illustration/Data_Synthesis.png)
 ![Alt text](illustration/Data_Evaluation_Criteria.png)
 
 

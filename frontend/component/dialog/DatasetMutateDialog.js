@@ -40,6 +40,7 @@ export default function DatasetMutateDialog({
 	method,
 	setCurrentEvaluation,
 	setCurrentSystemPrompt,
+    open_dialog
 }) {
 	const DEFAULT_EVALUATION = {
 		evaluation_name: null,
@@ -49,7 +50,8 @@ export default function DatasetMutateDialog({
 		evaluation_default_question: null,
 		evaluation_label: ["good", "bad", "ugly"],
 	};
-	const [open, setOpen] = useState(dataset_list.length === 0 ? true : false);
+
+	const [open, setOpen] = useState(open_dialog ? open_dialog : false);
 	const [saveerror, setSaveError] = useState(false);
 	const [default_system_prompt, setDefaultSystemPrompt] = useState(method === "put" ? old_default_system_prompt : "");
 	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [DEFAULT_EVALUATION]);
@@ -471,4 +473,6 @@ DatasetMutateDialog.propTypes = {
 	method: PropTypes.string.isRequired,
 	setCurrentEvaluation: PropTypes.func.isRequired,
 	setCurrentSystemPrompt: PropTypes.func.isRequired,
+    open_dialog: PropTypes.bool,
+
 };

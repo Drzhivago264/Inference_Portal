@@ -76,9 +76,8 @@ def log_in(request: HttpRequest) -> Response:
                     {"detail": f"Login Success!"}, status=status.HTTP_200_OK
                 )
             else:
-                return Response(
-                    {"detail": "Unknown Key error!, Generate a new one"},
-                    status=status.HTTP_401_UNAUTHORIZED,
+                raise AuthenticationFailed(
+                    detail="Unknown Key error!, Generate a new one"
                 )
         except (APIKEY.DoesNotExist, FineGrainAPIKEY.DoesNotExist, KeyError):
             raise AuthenticationFailed(detail="Your Key is incorrect")

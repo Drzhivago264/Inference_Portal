@@ -259,14 +259,11 @@ function PromptWriting() {
 		setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt);
 	};
 
-	const {isLoading: datasetIsLoading} = useGetUserDataset(
-		setDatasetList,
-		setMaxDatasetNum,
-		setMaxEvaluationNum,
-		selectedIndex,
-		setCurrentSystemPrompt,
-		setCurrentEvaluation
-	);
+	const {
+		isLoading: datasetIsLoading,
+		isSuccess: datasetIsSuccess,
+		isError: datasetIsError,
+	} = useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation);
 
 	const {refetch: record_refetch} = useGetUserDatasetRecord(
 		setRecordList,
@@ -356,18 +353,41 @@ function PromptWriting() {
 										</ListItem>
 									))}
 								<Box display='flex' justifyContent='center' alignItems='center' mt={1}>
-									{allow_add_dataset && !datasetIsLoading && dataset_list.length < max_dataset_num && max_evaluation_num && (
-										<DatasetMutateDialog
-											setAllowAddDataset={setAllowAddDataset}
-											setDatasetList={setDatasetList}
-											setSelectedIndex={setSelectedIndex}
-											dataset_list={dataset_list}
-											max_evaluation_num={max_dataset_num}
-											method='post'
-											setCurrentEvaluation={setCurrentEvaluation}
-											setCurrentSystemPrompt={setCurrentSystemPrompt}
-										/>
-									)}
+									{allow_add_dataset &&
+										datasetIsError &&
+										!datasetIsLoading &&
+										dataset_list.length < max_dataset_num &&
+										max_evaluation_num && (
+											<DatasetMutateDialog
+												setAllowAddDataset={setAllowAddDataset}
+												setDatasetList={setDatasetList}
+												setSelectedIndex={setSelectedIndex}
+												dataset_list={dataset_list}
+												max_evaluation_num={max_dataset_num}
+												method='post'
+												setCurrentEvaluation={setCurrentEvaluation}
+												setCurrentSystemPrompt={setCurrentSystemPrompt}
+												open_dialog={datasetIsError && !datasetIsLoading ? true : false}
+											/>
+										)}
+
+									{allow_add_dataset &&
+										datasetIsSuccess &&
+										!datasetIsLoading &&
+										dataset_list.length < max_dataset_num &&
+										max_evaluation_num && (
+											<DatasetMutateDialog
+												setAllowAddDataset={setAllowAddDataset}
+												setDatasetList={setDatasetList}
+												setSelectedIndex={setSelectedIndex}
+												dataset_list={dataset_list}
+												max_evaluation_num={max_dataset_num}
+												method='post'
+												setCurrentEvaluation={setCurrentEvaluation}
+												setCurrentSystemPrompt={setCurrentSystemPrompt}
+												open_dialog={false}
+											/>
+										)}
 									{dataset_list && dataset_list.length > 1 && (
 										<IconButton aria-label='delete' onClick={deleteDataset}>
 											<DeleteIcon />

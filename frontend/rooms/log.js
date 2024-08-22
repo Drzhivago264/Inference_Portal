@@ -63,7 +63,7 @@ function Log() {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<title>Log</title>
-			<ResponsiveAppBar max_width='xl' />
+			<ResponsiveAppBar max_width='xxl' />
 			<Container maxWidth='xl'>
 				<Box mt={4} sx={{overflow: "auto"}}>
 					<Paper pt={2} variant='outlined' sx={{overflow: "auto"}}>
