@@ -9,9 +9,9 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
         onSuccess: (data) => {
             setTotalNode(data.total_pages)
             const column = [
-                { field: 'system_prompt', headerName: 'System Prompt', width: 350, editable: false, disableColumnMenu: true },
-                { field: 'prompt', headerName: 'Prompt', width: 350, editable: false, disableColumnMenu: true },
-                { field: 'response', headerName: 'Response', width: 350, editable: false, disableColumnMenu: true }
+                { field: 'system_prompt', headerName: 'System Prompt', width: 200, editable: false, disableColumnMenu: true },
+                { field: 'prompt', headerName: 'Prompt', width: 200, editable: false, disableColumnMenu: true },
+                { field: 'response', headerName: 'Response', width: 200, editable: false, disableColumnMenu: true }
             ];
             const column_name = ['system_prompt', 'prompt', 'response'];
             const row = [];

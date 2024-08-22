@@ -54,6 +54,23 @@ class DatasetGetSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "default_system_prompt", "default_evaluation")
 
 
+class DatasetEvaluationSerializer(serializers.Serializer):
+
+    evaluation_name = serializers.CharField(max_length=100)
+    evaluation_description = serializers.CharField(max_length=2046, required=False, allow_null=True)
+    evaluation_default_rating_scale = serializers.IntegerField(required=False, allow_null=True)
+    evaluation_default_question = serializers.CharField(max_length=2046, required=False, allow_null=True)
+    choices = [
+        ( 1, "Multiple Labels Question" ),
+        ( 2, "Label Question" ),
+        ( 3, "Float Evaluation Question" ),
+        ( 4, "Text Question" ),
+        ( 5, "Rating Question" )
+    ]
+    evaluation_type = serializers.ChoiceField(choices)
+    evaluation_label = serializers.ListField(required=False, allow_null=True)
+
+
 class DatasetRecordGetSerialzier(serializers.Serializer):
     id = serializers.IntegerField()
     system_prompt = serializers.CharField()

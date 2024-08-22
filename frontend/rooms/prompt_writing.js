@@ -3,6 +3,7 @@ import React, {useContext, useState} from "react";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
 import {DataGrid} from "@mui/x-data-grid";
 import {DatasetExportServerSide} from "../component/import_export/DatasetExportServerSide.js";
@@ -13,6 +14,7 @@ import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import Footer from "../component/nav/Footer.js";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
+import HelpIcon from "@mui/icons-material/Help";
 import IconButton from "@mui/material/IconButton";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
@@ -24,11 +26,13 @@ import ListItemText from "@mui/material/ListItemText";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Pagination from "@mui/material/Pagination";
 import Paper from "@mui/material/Paper";
+import Rating from "@mui/material/Rating";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
 import SaveIcon from "@mui/icons-material/Save";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import {UserContext} from "../App.js";
 import {baseDelete} from "../api_hook/baseDelete.js";
@@ -48,7 +52,17 @@ function PromptWriting() {
 	const [pagnation_page, setPaginationPage] = useState(1);
 	const [rowSelectionModel, setRowSelectionModel] = useState([]);
 	const [current_system_prompt, setCurrentSystemPrompt] = useState("");
-	const [current_evaluation, setCurrentEvaluation] = useState([{evaluation_name: "", score: ""}]);
+	const [current_evaluation, setCurrentEvaluation] = useState([
+		{
+			evaluation_name: null,
+			evaluation_type: 1,
+			evaluation_description: null,
+			evaluation_default_rating_scale: 10,
+			evaluation_default_question: null,
+			evaluation_label: ["good", "bad", "ugly"],
+			evaluation_value: null,
+		},
+	]);
 	const [current_prompt, setCurrentPrompt] = useState("");
 	const [current_response, setCurrentResponse] = useState("");
 	const [current_system_prompt_error, setCurrentSystemPromptError] = useState(false);
@@ -73,7 +87,7 @@ function PromptWriting() {
 	useGetRedirectAnon(navigate, is_authenticated);
 
 	const navigatePagination = (_, value) => {
-        console.log(_, value)
+		console.log(_, value);
 		setPaginationPage(value);
 	};
 
@@ -141,7 +155,7 @@ function PromptWriting() {
 	const saveRecord = () => {
 		setLoading(true);
 		const dataset = dataset_list[selectedIndex];
-		const current_evaluation_without_null = current_evaluation.filter((item) => item.evaluation_name && item.score);
+		const current_evaluation_without_null = current_evaluation.filter((item) => item.evaluation_name);
 		const validateAndSetError = (field, setError) => {
 			if (!field) {
 				setError(true);
@@ -244,22 +258,15 @@ function PromptWriting() {
 		setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt);
 	};
 
-	const addEvaluation = () => {
-		if (current_evaluation.length < max_evaluation_num) {
-			const newEvaluation = {
-				evaluation_name: "",
-				score: "",
-			};
-			setCurrentEvaluation([...current_evaluation, newEvaluation]);
-		}
-	};
+	const {isLoading: datasetIsLoading} = useGetUserDataset(
+		setDatasetList,
+		setMaxDatasetNum,
+		setMaxEvaluationNum,
+		selectedIndex,
+		setCurrentSystemPrompt,
+		setCurrentEvaluation
+	);
 
-	const deleteEvaluation = (index) => {
-		setCurrentEvaluation((prev) => prev.filter((_, i) => i !== index));
-	};
-
-	const {isLoading: datasetIsLoading} = useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation);
-    
 	const {refetch: record_refetch} = useGetUserDatasetRecord(
 		setRecordList,
 		dataset_list,
@@ -287,6 +294,10 @@ function PromptWriting() {
 		setCurrentResponse("");
 		setCurrentRecordId(null);
 	};
+
+    const select_label = (value, index, evaluation_type) => {
+        console.log(value, index, evaluation_type)
+    }
 	return (
 		<Container maxWidth={false} sx={{minWidth: 1200}} disableGutters>
 			<title>Dataset</title>
@@ -294,7 +305,7 @@ function PromptWriting() {
 			<Container maxWidth='xxl'>
 				<Grid container spacing={1}>
 					<Grid item xs={2}>
-						<Paper sx={{mr: 2, mt: 2}} variant='outlined'>
+						<Paper sx={{mt: 2}} variant='outlined'>
 							<Typography ml={2} mt={1} variant='body1' sx={{color: "text.secondary"}}>
 								Dataset
 							</Typography>
@@ -359,13 +370,10 @@ function PromptWriting() {
 							/>
 						</Box>
 					</Grid>
-					<Grid item disableGutters xs={5}>
-						<Grid container spacing={1} disableGutters>
-							<Grid item xs={12} md={8}>
-								<Typography ml={1} mb={1} mt={1} variant='body1'>
-									Record
-								</Typography>
-								<FormControl fullWidth sx={{mt: 1, mb: 1}} variant='standard'>
+					<Grid item xs={6}>
+						<Grid container spacing={1}>
+							<Grid item xs={12} md={7}>
+								<FormControl fullWidth sx={{mt: 2, mb: 1}} variant='standard'>
 									<Stack direction='column' spacing={2}>
 										<TextField
 											label='System Prompt'
@@ -413,75 +421,92 @@ function PromptWriting() {
 									</Stack>
 								</FormControl>
 							</Grid>
-							<Grid sm={12} md={3} item>
-								<Typography ml={1} mb={1} mt={1} variant='body1'>
-									Evaluation
-								</Typography>
-								<Stack spacing={1}>
+							<Grid sm={12} md={5} item>
+								<Stack spacing={1} mt={2} direction='column'>
 									{current_evaluation.map((ev, index) => {
 										return (
-											<Grid key={index} container spacing={1}>
-												<Grid xs={6} item>
-													<TextField
-														id='eval-name'
-                                                
-														size='small'
-														fullWidth
-														label='Name'
-														onChange={(e) => {
-															updateEvaluationValue(e.target.value, "evaluation_name", index);
-															setAllowSaveRecord(true);
-														}}
-														value={ev.evaluation_name}
-														InputLabelProps={{
-															shrink: true,
-														}}
-													/>
-												</Grid>
-												<Grid xs={5} item>
-													<TextField
-														id='eval-number'
-														fullWidth
-														size='small'
-														label={ev.evaluation_name}
-														value={ev.score}
-														onChange={(e) => {
-															updateEvaluationValue(e.target.value, "score", index);
-															setAllowSaveRecord(true);
-														}}
-														type='number'
-														InputLabelProps={{
-															shrink: true,
-														}}
-													/>
-												</Grid>
-												<Grid xs={1} item>
-													<IconButton
-                                                    size="small"
-														aria-label='delete'
-														onClick={() => {
-															deleteEvaluation(index);
-															setAllowSaveRecord(true);
-														}}>
-														<DeleteIcon />
-													</IconButton>
-												</Grid>
-											</Grid>
+											<Box key={index}>
+												<Typography style={{flex: 1}} gutterBottom>
+													{ev.evaluation_name}
+													<Tooltip
+														title={
+															<div
+																style={{
+																	whiteSpace: "pre-line",
+																}}>
+																{ev.evaluation_description}
+															</div>
+														}
+														arrow
+														placement='top'>
+														<IconButton size='small'>
+															<HelpIcon fontSize='small' />
+														</IconButton>
+													</Tooltip>
+												</Typography>
+
+												<Typography>{ev.evaluation_default_question}</Typography>
+												{ev.evaluation_label && (
+													<Grid
+														sx={{display: ev.evaluation_type === 1 || ev.evaluation_type === 2 ? "" : "None"}}
+														direction='row'
+														container
+														spacing={1}>
+														{ev.evaluation_label.map((label) => (
+															<Grid key={label} item>
+																<Chip
+																	label={label}
+																	variant='outlined'
+																	onClick={() => {
+																		select_label(label, index, ev.evaluation_type);
+																	}}
+																/>
+															</Grid>
+														))}
+													</Grid>
+												)}
+												<TextField
+													sx={{display: ev.evaluation_type === 3 ? "" : "None"}}
+													id='eval-number'
+													fullWidth
+													size='small'
+													value={ev.evaluation_value}
+													onChange={(e) => {
+														updateEvaluationValue(e.target.value, "evaluation_value", index);
+														setAllowSaveRecord(true);
+													}}
+													type='number'
+													InputLabelProps={{
+														shrink: true,
+													}}
+												/>
+												<TextField
+													sx={{display: ev.evaluation_type === 4 ? "" : "None"}}
+													id='eval-question'
+													size='small'
+													fullWidth
+													multiline
+													minRows={4}
+													maxRows={6}
+													onChange={(e) => {
+														updateEvaluationValue(e.target.value, "evaluation_value", index);
+														setAllowSaveRecord(true);
+													}}
+													value={ev.evaluation_value}
+													InputLabelProps={{
+														shrink: true,
+													}}
+												/>
+												<Rating
+													sx={{display: ev.evaluation_type === 5 ? "" : "None"}}
+													value={ev.evaluation_value}
+													max={Number(ev.evaluation_default_rating_scale)}
+													precision={0.5}
+												/>
+											</Box>
 										);
 									})}
 								</Stack>
-								<Box display='flex' justifyContent='center' alignItems='center' mt={1}>
-									{current_evaluation.length < max_dataset_num && (
-										<IconButton
-											aria-label='add'
-											onClick={() => {
-												addEvaluation();
-												setAllowSaveRecord(true);
-											}}>
-											<AddCircleOutlineIcon />
-										</IconButton>
-									)}
-								</Box>
 							</Grid>
 						</Grid>
 						<Box display='flex' justifyContent='center' alignItems='center'>
@@ -557,8 +582,7 @@ function PromptWriting() {
 							))}
 						</Box>
 					</Grid>
-					<Grid item xs={5}>
-
+					<Grid item xs={4}>
 						<Box mt={2} style={{height: 637, width: "100%"}}>
 							<DataGrid
 								onRowClick={handleRowClick}

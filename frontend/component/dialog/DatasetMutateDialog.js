@@ -4,6 +4,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -11,9 +12,14 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import EditIcon from "@mui/icons-material/Edit";
+import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
 import PropTypes from "prop-types";
+import Rating from "@mui/material/Rating";
+import Select from "@mui/material/Select";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
@@ -35,10 +41,18 @@ export default function DatasetMutateDialog({
 	setCurrentEvaluation,
 	setCurrentSystemPrompt,
 }) {
+	const DEFAULT_EVALUATION = {
+		evaluation_name: null,
+		evaluation_type: 1,
+		evaluation_description: null,
+		evaluation_default_rating_scale: 10,
+		evaluation_default_question: null,
+		evaluation_label: ["good", "bad", "ugly"],
+	};
 	const [open, setOpen] = useState(dataset_list.length === 0 ? true : false);
 	const [saveerror, setSaveError] = useState(false);
 	const [default_system_prompt, setDefaultSystemPrompt] = useState(method === "put" ? old_default_system_prompt : "");
-	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [{evaluation_name: "", score: ""}]);
+	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [DEFAULT_EVALUATION]);
 	const [dataset_name, setDatasetName] = useState(method === "put" ? old_dataset_name : "");
 	const [saveerrormessage, setSaveErrorMessage] = useState("");
 	const [savesuccess, setSaveSuccess] = useState(false);
@@ -46,7 +60,7 @@ export default function DatasetMutateDialog({
 	const {mutate: postmutate} = useMutation(basePost);
 	const {mutate: putmutate} = useMutation(basePut);
 	const createDataset = () => {
-		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name);
+		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name && item.evaluation_default_question );
 		setAllowMutate(false);
 		if (dataset_name) {
 			const data = {
@@ -54,6 +68,7 @@ export default function DatasetMutateDialog({
 				default_system_prompt: default_system_prompt,
 				default_evaluation: default_evaluation_without_null,
 			};
+			console.log(default_evaluation_without_null);
 			postmutate(
 				{url: "/frontend-api/create-dataset", data: data},
 				{
@@ -85,13 +100,13 @@ export default function DatasetMutateDialog({
 			);
 		} else {
 			setSaveError(true);
-			setSaveErrorMessage("Dataset Name Cannot be Empty!");
+			setSaveErrorMessage("Dataset Name and Question(s) Cannot be Empty!");
 			setAllowMutate(true);
 		}
 	};
 
 	const updateDataset = () => {
-		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name && item.score);
+		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name && item.evaluation_default_question);
 		setAllowMutate(false);
 		if (dataset_name) {
 			const data = {
@@ -135,7 +150,7 @@ export default function DatasetMutateDialog({
 			);
 		} else {
 			setSaveError(true);
-			setSaveErrorMessage("Dataset Name Cannot be Empty!");
+			setSaveErrorMessage("Dataset Name and Questions Cannot be Empty!");
 			setAllowMutate(true);
 		}
 	};
@@ -148,7 +163,7 @@ export default function DatasetMutateDialog({
 		setOpen(false);
 		if (method === "post") {
 			setDatasetName("");
-			setDefaultEvaluation([{evaluation_name: "", score: ""}]);
+			setDefaultEvaluation([DEFAULT_EVALUATION]);
 			setDefaultSystemPrompt("");
 		}
 	};
@@ -158,24 +173,35 @@ export default function DatasetMutateDialog({
 
 	const addEvaluation = () => {
 		if (default_evaluation.length < max_evaluation_num) {
-			const newEvaluation = {
-				evaluation_name: "",
-				score: "",
-			};
-			setDefaultEvaluation([...default_evaluation, newEvaluation]);
+			setDefaultEvaluation([...default_evaluation, DEFAULT_EVALUATION]);
 		}
 	};
-	const updateEvaluationValue = (v, index) => {
+	const updateEvaluationValue = (v, index, property) => {
 		const new_evaluation_list = default_evaluation.map((item, i) => {
 			if (i === index) {
-				return {...item, ["evaluation_name"]: v};
+				return {...item, [property]: property == "evaluation_label" ? v.split(",") : v};
+			}
+			return item;
+		});
+		setDefaultEvaluation(new_evaluation_list);
+	};
+
+	const deleteLabel = (index, label_index) => {
+		const new_evaluation_list = default_evaluation.map((item, i) => {
+			if (i === index) {
+				return {
+					...item,
+					["evaluation_label"]: item["evaluation_label"].filter(function (_, idx) {
+						return idx !== label_index;
+					}),
+				};
 			}
 			return item;
 		});
 		setDefaultEvaluation(new_evaluation_list);
 	};
 	return (
-		<React.Fragment>
+		<>
 			<IconButton aria-label='add' onClick={handleClickOpen}>
 				{method === "post" ? <AddCircleOutlineIcon /> : <EditIcon />}
 			</IconButton>
@@ -186,7 +212,6 @@ export default function DatasetMutateDialog({
 						{method === "put" ? `Change your Dataset's name` : `Give a name for your Dataset`}
 					</DialogContentText>
 					<TextField
-						fullWidth
 						id='eval-name'
 						size='small'
 						label='Dataset name'
@@ -201,7 +226,7 @@ export default function DatasetMutateDialog({
 					<DialogContentText mt={1} id='alert-dialog-description'>
 						{method === "put"
 							? `Change your default system prompt and evaluation (this does not change the system prompt and evaluation in each record).`
-							: `You can provide the default system prompt and evaluation score for all records of your database. You can also leave them blank and specified them for each records.`}
+							: `You can provide the default system prompt and evaluation Default Value for all records of your database. You can also leave them blank and specified them for each records.`}
 					</DialogContentText>
 					<Box mt={2}>
 						<TextField
@@ -227,19 +252,144 @@ export default function DatasetMutateDialog({
 								return (
 									<Grid key={index} container>
 										<Grid xs={11} item>
-											<TextField
-												fullWidth
-												id='eval-name'
-												size='small'
-												label='Name'
-												onChange={(e) => {
-													updateEvaluationValue(e.target.value, index);
-												}}
-												value={ev.evaluation_name}
-												InputLabelProps={{
-													shrink: true,
-												}}
-											/>
+											<Stack mb={1} direction='row' spacing={1}>
+												<TextField
+													id='eval-name'
+													size='small'
+													label='Name'
+													fullWidth
+													onChange={(e) => {
+														updateEvaluationValue(e.target.value, index, "evaluation_name");
+													}}
+													value={ev.evaluation_name}
+													InputLabelProps={{
+														shrink: true,
+													}}
+												/>
+												<FormControl fullWidth>
+													<InputLabel id='evaluation-type-label'>Evaluation Type</InputLabel>
+													<Select
+														labelId='evaluation-type-label'
+														id='evaluation-type-label'
+														value={ev.evaluation_type}
+														label='Evaluation Type'
+														size='small'
+														onChange={(e) => {
+															updateEvaluationValue(e.target.value, index, "evaluation_type");
+														}}>
+														<MenuItem value={1}>Multiple Labels Question</MenuItem>
+														<MenuItem value={2}>Label Question</MenuItem>
+														<MenuItem value={3}>Float Evaluation Question</MenuItem>
+														<MenuItem value={4}>Text Question</MenuItem>
+														<MenuItem value={5}>Rating Question</MenuItem>
+													</Select>
+												</FormControl>
+											</Stack>
+											<Stack direction='column' spacing={1}>
+												<TextField
+													id='eval-description'
+													size='small'
+													label='Description (Optional)'
+													fullWidth
+													multiline
+													minRows={2}
+													maxRows={3}
+													onChange={(e) => {
+														updateEvaluationValue(e.target.value, index, "evaluation_description");
+													}}
+													value={ev.evaluation_description}
+													InputLabelProps={{
+														shrink: true,
+													}}
+												/>
+												<TextField
+													id='eval-question'
+													size='small'
+													label='Question (Required)'
+													fullWidth
+													multiline
+													minRows={2}
+													maxRows={3}
+													onChange={(e) => {
+														updateEvaluationValue(e.target.value, index, "evaluation_default_question");
+													}}
+													value={ev.evaluation_default_question}
+													InputLabelProps={{
+														shrink: true,
+													}}
+												/>
+											</Stack>
+											<Box mt={1} mb={1}>
+												<DialogContentText
+													sx={{display: ev.evaluation_type === 1 || ev.evaluation_type === 2 ? "block" : "None"}}
+													mb={1}
+													id='alert-label'>{`Label(s)`}</DialogContentText>
+												<TextField
+													sx={{display: ev.evaluation_type === 1 || ev.evaluation_type === 2 ? "block" : "None"}}
+													id='eval-label'
+													size='small'
+													label='Add Label'
+													fullWidth
+													onChange={(e) => {
+														updateEvaluationValue(e.target.value, index, "evaluation_label");
+													}}
+													value={ev.evaluation_label}
+													InputLabelProps={{
+														shrink: true,
+													}}
+												/>
+												{ev.evaluation_label && (
+													<Grid
+														mt={1}
+														sx={{display: ev.evaluation_type === 1 || ev.evaluation_type === 2 ? "" : "None"}}
+														direction='row'
+														container
+														spacing={1}>
+														{ev.evaluation_label.map((label, label_index) => (
+															<Grid key={label} item>
+																<Chip
+																	label={label}
+																	onDelete={() => {
+																		deleteLabel(index, label_index);
+																	}}
+																/>
+															</Grid>
+														))}
+													</Grid>
+												)}
+
+												{ev.evaluation_type === 5 && (
+													<>
+														<DialogContentText mb={1} id='alert-rating'>{`Scaling for rating is (0, 20]`}</DialogContentText>
+														<Stack direction='row' spacing={2}>
+															<TextField
+																id='rating_scale'
+																size='small'
+																fullWidth
+																label='Scale'
+																type='number'
+																onChange={(e) => {
+																	if (Number(e.target.value) <= 20 && Number(e.target.value) > 0) {
+																		console.log(Number(e.target.value));
+																		updateEvaluationValue(Number(e.target.value), index, "evaluation_default_rating_scale");
+																	}
+																}}
+																value={Number(ev.evaluation_default_rating_scale)}
+																InputLabelProps={{
+																	shrink: true,
+																}}
+															/>
+															<Box pt={1}>
+																<Rating
+																	value={Number(ev.evaluation_default_rating_scale)}
+																	max={Number(ev.evaluation_default_rating_scale)}
+																	precision={0.5}
+																/>
+															</Box>
+														</Stack>
+													</>
+												)}
+											</Box>
 										</Grid>
 										<Grid xs={1} item>
 											<IconButton
@@ -305,7 +455,7 @@ export default function DatasetMutateDialog({
 					)}
 				</DialogActions>
 			</Dialog>
-		</React.Fragment>
+		</>
 	);
 }
 DatasetMutateDialog.propTypes = {

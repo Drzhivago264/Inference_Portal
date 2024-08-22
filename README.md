@@ -1,68 +1,74 @@
-django-inference-portal
-=======================
+# django-inference-portal
 
 This is a simple dynamic django server that uses django channels, django ninja, celery, vectordb and Redis to interact with GPU servers for language model inference.
 
-Purpose
--------
+## Purpose
 
 The purpose of this project is to offer users simple interfaces to interact with GPU servers.
 This website processses API and HTTP requests from users, forwards them to the GPU servers and forwards the responses back in a dynamic manner, this includes real-time chat rooms. In addition, this website also provides an implementation of REACT agent (refer to [Yao et al., 2022](https://arxiv.org/abs/2210.03629)).
 
-Features
--------
-Here are some of the features of this website:
+## Features
 
-Agent & ChatBot:
+Here are some features of this website:
+
+**Agent & ChatBot:**
 
 ![Alt text](illustration/Agent.png)
 
-Access Tokens Management:
+**Access Tokens Management:**
 
 ![Alt text](illustration/Access_Token_Management.png)
 
-Constances Configuration:
+**Constances Configuration:**
 
 ![Alt text](illustration/Admin_Config.png)
 
-Data Synthesis:
+**Data Synthesis:**
 
 ![Alt text](illustration/Data_Synthesis.png)
 
-Dataset Creation:
+**Dataset Creation:**
 
 ![Alt text](illustration/Data_Creation.png)
 
-Serverside Log Render + Consumption Monitoring:
+**Serverside Log Render:\***
 
 ![Alt text](illustration/Log.png)
+
+**Consumption Monitoring:**
+
 ![Alt text](illustration/Cost_Monitoring.png)
-Design
--------
-- The /frontend of this website uses React.js which are packed into bundle in frontend/templates/frontend_index.html using webpack. 
-- The backend of this website can be found in /server which use Django Rest Framework to serve requests from the frontend.
-- Redis server fowards the message for the websockets that are used for real time chat.
-- Django Channel with async customers are used to serve real-time chat messages. 
-- The chat and prompt history of user is vectorised and stored for vector search.
-- Django Ninja open REST api endpoints forward the user requests to GPU servers.
-- GPU servers do inference, each GPU server holds one model and uses vLLM to open endpoints. 
-- Nginx is used as a proxy for the Django server and serve static files.
-- Celery is used to run multiple background tasks including spin up, stop, create and terminate EC GPU instances. Celery is also used to queue 
- API requests to GPU servers. Noting that Celery does not run properly on Window, so you should switch to Linux or living with with --solo pool.
-- Postgresql runs locally and can only be accessed from Django
+
+## Design
+
+-   The /frontend of this website uses React.js which are packed into bundle in frontend/templates/frontend_index.html using webpack.
+-   The backend of this website can be found in /server which use Django Rest Framework to serve requests from the frontend.
+-   Redis server fowards the message for the websockets that are used for real time chat.
+-   Django Channel with async customers (can be found in /server/consumers) are used to serve real-time chat messages.
+-   The chat and prompt history of user is vectorised and stored for vector search.
+-   Django Ninja open REST api endpoints forward the user requests to GPU servers. 
+-   GPU servers do inference, each GPU server holds one model and uses vLLM to open endpoints.
+-   Nginx is used as a proxy for the Django server and serve static files.
+-   Celery is used to run multiple background tasks including spin up, stop, create and terminate EC GPU instances. Celery is also used to queue
+    API requests to GPU servers. Noting that Celery does not run properly on Window, so you should switch to Linux or living with with --solo pool.
+-   Postgresql runs locally and can only be accessed from Django
+
+
+Django Ninja handles inference requests while DRF handles frontend requests. The reason behind this tech choice is because DRF is old school and intergrates very nicely with Django while Django Ninja is newer that offer better Async support. However, Ninja is much like a messy Flask App pluged into Django; therefore this tech selection make the most out of both solutions.
 
 The implementation of React and data flow is explained in the diagram below
 
-![Alt text](illustration/React+Vec.drawio.png)
+<p align="center">
+  <img src="illustration/React+Vec.drawio.png" alt="animated" />
+</p>
 
-Installation
---------------
+## Installation
 
 First of all, for start using django-inference-portal, you must download it using git (Multiple old files are removed from the history so now git clone will be fast, sorry for my previous ignorance of git history)
 
     git clone https://github.com/Drzhivago264/Inference_Portal.git
 
-Before install dependencies, you need to install Postgres, and create a table named professorparakeet. 
+Before install dependencies, you need to install Postgres, and create a table named professorparakeet.
 
     sudo apt install postgresql postgresql-contrib
     sudo apt-get install libpq-dev
@@ -79,7 +85,7 @@ Before install dependencies, you need to install Postgres, and create a table na
     sudo systemctl enable postgresql
 
 You also need to install NPM and Node.js for the frontend
-    
+
     sudo apt install nodejs
     sudo apt install npm
     npm init -y
@@ -92,7 +98,7 @@ You also need to install NPM and Node.js for the frontend
 Next you must install dependencies and migrate the db to Postgresql:
 
     pip install -r "requirements.txt"
-    
+
     python manage.py migrate
     python manage.py loaddata default_sql_data.json
 
@@ -124,30 +130,30 @@ Next you must setup Monero and start a rpc server, I am working on a full tutori
 
     ./monero-wallet-rpc --daemon-address {Your node address} --rpc-bind-port 18082 --wallet-file {your wallet file} --password {your password} --disable-rpc-login
 
-*Noting that in production server you must generate "View-only" wallet from your local wallet (secret key) to avoid being robbed by the society.
+\*Noting that in production server you must generate "View-only" wallet from your local wallet (secret key) to avoid being robbed by the society.
 
-Next you need to set up .env file and setup the following key:
+Next you need to set up .env file and setup the following key. Note that, if you dont want to use some services below, leave them "". There will probably some problems but I believe if you go this far, you can deal with them:
 
     STRIPE_PUBLISHABLE_KEY=""
     STRIPE_SECRET_KEY=""
     BACKEND_DOMAIN=""
     PAYMENT_SUCCESS_URL=""
     PAYMENT_CANCEL_URL=""
-    STRIPE_WEBHOOK_SECRET="" 
+    STRIPE_WEBHOOK_SECRET=""
     EMAIL_ADDRESS = "" (The EMAIL_ADDRESS that fowards contact form)
     EMAIL_PASSWORD = "" (The password for EMAIL_ADDRESS that fowards contact form)
     DJANGO_SETTINGS_MODULE="inferenceportal.settings"
     aws_access_key_id="" (The AWS key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
     aws_secret_access_key="" (The AWS secret key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
     ADMIN_PATH = "" (your admin path, keep it hard to guess)
-    DJANGO_SECRET_KEY = "" 
+    DJANGO_SECRET_KEY = ""
     POSTGRES_USER = "" (Your Postgres Username)
     POSTGRES_PASSWORD = "" (YOUR Postgres Password)
     GPT_KEY = "" (OPENAI key for the agent function)
     VLLM_KEY = "" (The key that you set on vLLM instance (--api-key))
     CMC_API = "" (Coinmarketcap API to get the exchange rate of Monero, you may use different API but you need to rewrite the update_crypto_rate() in celery_tasks.py)
 
-*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchanges for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down. However, if people go that far to trace you down, you seem to have bigger problems to deal with already. Good luck with them.
+\*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchanges for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down. However, if people go that far to trace you down, you seem to have bigger problems to deal with already. Good luck with them.
 
 Finally you can test the server with:
 
@@ -167,14 +173,14 @@ If you expose this instance to the internet you may need Nginx or Apache server 
 
 In addition, as we need to automatically boot and shutdown your GPU intances, you may consider using Supervisor or equivalent to setup the vLLM on startup.
 
-Development environment setup
------------------------------
-After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.LLM (check admin page and remember to avoid 8000, 5432 and 6380 ports that Django, Postgresql and Redis are running). If you have more than 1 GPU, you can serve multiple models at multiple ports (remember of use unique ports):
+## Development environment setup
+
+After finishing the steps above, you need to set up a vLLM server to serve the models listed in model.InferenceServer (check admin page and remember to avoid 8000, 5432 and 6380 ports that Django, Postgresql and Redis are running). If you have more than 1 GPU, you can serve multiple models at multiple ports (remember of use unique ports):
 
     CUDA_VISIBLE_DEVICES=0 python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8080 --dtype half --max-model-len 1024 --api-key {something hard to guess}
     CUDA_VISIBLE_DEVICES=1 python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8888 --dtype half --max-model-len 1024 --api-key {something hard to guess}
 
-If you have more than 1 GPU but you want to do DP (duplicate 1 model on multiple vllm servers on one machine), you can simply setup a NGINX and do load balancing across multiple ports at requests layer. 
+If you have more than 1 GPU but you want to do DP (duplicate 1 model on multiple vllm servers on one machine), you can simply setup a NGINX and do load balancing across multiple ports at requests layer.
 
 If you want to customise frontend, you should run:
 
@@ -190,9 +196,8 @@ This command will remove error traceback and pack up your code into much smaller
 
     python manage.py collectstatic
 
-Currently, this website use cloudflare CDN to serve webpack bundles. However, you can adjust the settings.py and directly use your /staticfiles 
+Currently, this website use cloudflare CDN to serve webpack bundles. However, you can adjust the settings.py and directly use your /staticfiles
 
-Final words
------------
+## Final words
 
-This project is actively developed stage if you have any suggestions you can tell me. I also need your help if you have some.
+This project is actively being developed if you have any suggestions you can tell me. I also need your helps if you have some.
