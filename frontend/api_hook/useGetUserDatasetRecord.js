@@ -27,7 +27,7 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
                 record.evaluation.forEach(evaluation => {
                     if (!column_name.includes(evaluation.evaluation_name) && evaluation.evaluation_name) {
                         column_name.push(evaluation.evaluation_name);
-                        temp_row[evaluation.evaluation_name] = evaluation.score;
+                        temp_row[evaluation.evaluation_name] = evaluation.evaluation_value;
                         column.push({
                             field: evaluation.evaluation_name,
                             headerName: evaluation.evaluation_name,
@@ -36,7 +36,7 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
                             disableColumnMenu: true,
                         });
                     } else if (column_name.includes(evaluation.evaluation_name) && evaluation.evaluation_name) {
-                        temp_row[evaluation.evaluation_name] = evaluation.score;
+                        temp_row[evaluation.evaluation_name] = evaluation.evaluation_value;
                     }
                 });
 

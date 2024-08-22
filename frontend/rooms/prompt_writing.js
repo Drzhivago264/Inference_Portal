@@ -2,6 +2,8 @@ import React, {useContext, useState} from "react";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
@@ -52,17 +54,7 @@ function PromptWriting() {
 	const [pagnation_page, setPaginationPage] = useState(1);
 	const [rowSelectionModel, setRowSelectionModel] = useState([]);
 	const [current_system_prompt, setCurrentSystemPrompt] = useState("");
-	const [current_evaluation, setCurrentEvaluation] = useState([
-		{
-			evaluation_name: null,
-			evaluation_type: 1,
-			evaluation_description: null,
-			evaluation_default_rating_scale: 10,
-			evaluation_default_question: null,
-			evaluation_label: ["good", "bad", "ugly"],
-			evaluation_value: null,
-		},
-	]);
+	const [current_evaluation, setCurrentEvaluation] = useState([]);
 	const [current_prompt, setCurrentPrompt] = useState("");
 	const [current_response, setCurrentResponse] = useState("");
 	const [current_system_prompt_error, setCurrentSystemPromptError] = useState(false);
@@ -155,7 +147,7 @@ function PromptWriting() {
 	const saveRecord = () => {
 		setLoading(true);
 		const dataset = dataset_list[selectedIndex];
-		const current_evaluation_without_null = current_evaluation.filter((item) => item.evaluation_name);
+		const current_evaluation_without_null = current_evaluation.filter((item) => item.evaluation_value);
 		const validateAndSetError = (field, setError) => {
 			if (!field) {
 				setError(true);
@@ -197,7 +189,17 @@ function PromptWriting() {
 			current_record_id ? putmutate(requestData, requestConfig) : postmutate(requestData, requestConfig);
 		} else {
 			setSaveError(true);
-			setSaveErrorMessage(!dataset ? "You need to create a dataset first!" : "Record contains empty Field(s)!");
+			if (!current_prompt) {
+				setSaveErrorMessage("Prompt Cannot be Empty!");
+			} else if (!current_response) {
+				setSaveErrorMessage("Response Cannot be Empty!");
+			} else if (!current_system_prompt) {
+				setSaveErrorMessage("System Prompt Cannot be Empty!");
+			} else if (!dataset) {
+				setSaveErrorMessage("Dataset Cannot be Empty!");
+			} else if (current_evaluation.length != current_evaluation_without_null.length) {
+				setSaveErrorMessage("Evaluation Value Cannot be Empty!");
+			}
 		}
 		setLoading(false);
 	};
@@ -295,9 +297,23 @@ function PromptWriting() {
 		setCurrentRecordId(null);
 	};
 
-    const select_label = (value, index, evaluation_type) => {
-        console.log(value, index, evaluation_type)
-    }
+	const select_label = (value, index, evaluation_type) => {
+		const new_evaluation_list = current_evaluation.map((item, i) => {
+			if (i === index) {
+				if (evaluation_type === 1) {
+					if (!item["evaluation_value"] || !item["evaluation_value"].includes(value)) {
+						return {...item, ["evaluation_value"]: item["evaluation_value"] ? item["evaluation_value"].concat(value) : [value]};
+					} else {
+						return {...item, ["evaluation_value"]: item["evaluation_value"].filter((v) => v !== value)};
+					}
+				} else if (evaluation_type === 2) {
+					return {...item, ["evaluation_value"]: [value]};
+				}
+			}
+			return item;
+		});
+		setCurrentEvaluation(new_evaluation_list);
+	};
 	return (
 		<Container maxWidth={false} sx={{minWidth: 1200}} disableGutters>
 			<title>Dataset</title>
@@ -422,11 +438,11 @@ function PromptWriting() {
 								</FormControl>
 							</Grid>
 							<Grid sm={12} md={5} item>
-								<Stack spacing={1} mt={2} direction='column'>
+								<Stack spacing={2} mt={2} direction='column'>
 									{current_evaluation.map((ev, index) => {
 										return (
 											<Box key={index}>
-												<Typography style={{flex: 1}} gutterBottom>
+												<Typography style={{flex: 1}} variant='h6' gutterBottom>
 													{ev.evaluation_name}
 													<Tooltip
 														title={
@@ -444,19 +460,23 @@ function PromptWriting() {
 														</IconButton>
 													</Tooltip>
 												</Typography>
-
-												<Typography>{ev.evaluation_default_question}</Typography>
-												{ev.evaluation_label && (
-													<Grid
-														sx={{display: ev.evaluation_type === 1 || ev.evaluation_type === 2 ? "" : "None"}}
-														direction='row'
-														container
-														spacing={1}>
+												<Box mb={2}>
+													<Typography>{ev.evaluation_default_question}</Typography>
+												</Box>
+												{(ev.evaluation_type === 1 || ev.evaluation_type === 2) && (
+													<Grid direction='row' container spacing={1}>
 														{ev.evaluation_label.map((label) => (
 															<Grid key={label} item>
 																<Chip
+																	icon={
+																		!ev.evaluation_value || !ev.evaluation_value.includes(label) ? (
+																			<BookmarkBorderIcon />
+																		) : (
+																			<BookmarkIcon />
+																		)
+																	}
 																	label={label}
-																	variant='outlined'
+																	variant={!ev.evaluation_value || !ev.evaluation_value.includes(label) ? "outlined" : "fill"}
 																	onClick={() => {
 																		select_label(label, index, ev.evaluation_type);
 																	}}
@@ -465,43 +485,49 @@ function PromptWriting() {
 														))}
 													</Grid>
 												)}
-												<TextField
-													sx={{display: ev.evaluation_type === 3 ? "" : "None"}}
-													id='eval-number'
-													fullWidth
-													size='small'
-													value={ev.evaluation_value}
-													onChange={(e) => {
-														updateEvaluationValue(e.target.value, "evaluation_value", index);
-														setAllowSaveRecord(true);
-													}}
-													type='number'
-													InputLabelProps={{
-														shrink: true,
-													}}
-												/>
-												<TextField
-													sx={{display: ev.evaluation_type === 4 ? "" : "None"}}
-													id='eval-question'
-													size='small'
-													fullWidth
-													multiline
-													minRows={4}
-													maxRows={6}
-													onChange={(e) => {
-														updateEvaluationValue(e.target.value, "evaluation_value", index);
-														setAllowSaveRecord(true);
-													}}
-													value={ev.evaluation_value}
-													InputLabelProps={{
-														shrink: true,
-													}}
-												/>
-												{ ev.evaluation_type === 5 && <Rating
-													value={Number(ev.evaluation_value)}
-													max={Number(ev.evaluation_default_rating_scale)}
-													precision={0.5}
-												/>}
+												{ev.evaluation_type === 3 && (
+													<TextField
+														id='eval-number'
+														fullWidth
+														size='small'
+														value={ev.evaluation_value}
+														onChange={(e) => {
+															updateEvaluationValue(e.target.value, "evaluation_value", index);
+															setAllowSaveRecord(true);
+														}}
+														type='number'
+														InputLabelProps={{
+															shrink: true,
+														}}
+													/>
+												)}
+												{ev.evaluation_type === 4 && (
+													<TextField
+														id='eval-question'
+														size='small'
+														fullWidth
+														multiline
+														minRows={4}
+														maxRows={6}
+														onChange={(e) => {
+															updateEvaluationValue(e.target.value, "evaluation_value", index);
+														}}
+														value={ev.evaluation_value}
+														InputLabelProps={{
+															shrink: true,
+														}}
+													/>
+												)}
+												{ev.evaluation_type === 5 && (
+													<Rating
+														value={Number(ev.evaluation_value)}
+														max={Number(ev.evaluation_default_rating_scale)}
+														precision={0.5}
+														onChange={(_, newValue) => {
+															updateEvaluationValue(newValue, "evaluation_value", index);
+														}}
+													/>
+												)}
 											</Box>
 										);
 									})}

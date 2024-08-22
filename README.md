@@ -30,8 +30,10 @@ Here are some features of this website:
 **Dataset Creation:**
 
 ![Alt text](illustration/Data_Creation.png)
+![Alt text](illustration/Data_Evaluation_Criteria.png)
 
-**Serverside Log Render:\***
+
+**Serverside Log Render:**
 
 ![Alt text](illustration/Log.png)
 

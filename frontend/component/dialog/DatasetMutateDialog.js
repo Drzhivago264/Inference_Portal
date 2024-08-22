@@ -60,7 +60,7 @@ export default function DatasetMutateDialog({
 	const {mutate: postmutate} = useMutation(basePost);
 	const {mutate: putmutate} = useMutation(basePut);
 	const createDataset = () => {
-		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name && item.evaluation_default_question );
+		const default_evaluation_without_null = default_evaluation.filter((item) => item.evaluation_name && item.evaluation_default_question);
 		setAllowMutate(false);
 		if (dataset_name) {
 			const data = {
@@ -100,7 +100,11 @@ export default function DatasetMutateDialog({
 			);
 		} else {
 			setSaveError(true);
-			setSaveErrorMessage("Dataset Name and Question(s) Cannot be Empty!");
+			if (!dataset_name) {
+				setSaveErrorMessage("Dataset Name Cannot be Empty!");
+			} else if (default_evaluation.length != default_evaluation_without_null.length) {
+				setSaveErrorMessage("Evaluation Name and Question Cannot be Empty!");
+			}
 			setAllowMutate(true);
 		}
 	};
@@ -150,7 +154,11 @@ export default function DatasetMutateDialog({
 			);
 		} else {
 			setSaveError(true);
-			setSaveErrorMessage("Dataset Name and Questions Cannot be Empty!");
+			if (!dataset_name) {
+				setSaveErrorMessage("Dataset Name Cannot be Empty!");
+			} else if (default_evaluation.length != default_evaluation_without_null.length) {
+				setSaveErrorMessage("Evaluation Name and Question Cannot be Empty!");
+			}
 			setAllowMutate(true);
 		}
 	};
@@ -320,44 +328,37 @@ export default function DatasetMutateDialog({
 												/>
 											</Stack>
 											<Box mt={1} mb={1}>
-												<DialogContentText
-													sx={{display: ev.evaluation_type === 1 || ev.evaluation_type === 2 ? "block" : "None"}}
-													mb={1}
-													id='alert-label'>{`Label(s)`}</DialogContentText>
-												<TextField
-													sx={{display: ev.evaluation_type === 1 || ev.evaluation_type === 2 ? "block" : "None"}}
-													id='eval-label'
-													size='small'
-													label='Add Label'
-													fullWidth
-													onChange={(e) => {
-														updateEvaluationValue(e.target.value, index, "evaluation_label");
-													}}
-													value={ev.evaluation_label}
-													InputLabelProps={{
-														shrink: true,
-													}}
-												/>
-												{ev.evaluation_label && (
-													<Grid
-														mt={1}
-														sx={{display: ev.evaluation_type === 1 || ev.evaluation_type === 2 ? "" : "None"}}
-														direction='row'
-														container
-														spacing={1}>
-														{ev.evaluation_label.map((label, label_index) => (
-															<Grid key={label} item>
-																<Chip
-																	label={label}
-																	onDelete={() => {
-																		deleteLabel(index, label_index);
-																	}}
-																/>
-															</Grid>
-														))}
-													</Grid>
+												{(ev.evaluation_type === 1 || ev.evaluation_type === 2) && (
+													<>
+														<DialogContentText sx={{display: "block"}} mb={1} id='alert-label'>{`Label(s)`}</DialogContentText>
+														<TextField
+															sx={{display: "block"}}
+															id='eval-label'
+															size='small'
+															label='Add Label'
+															fullWidth
+															onChange={(e) => {
+																updateEvaluationValue(e.target.value, index, "evaluation_label");
+															}}
+															value={ev.evaluation_label}
+															InputLabelProps={{
+																shrink: true,
+															}}
+														/>
+														<Grid mt={1} direction='row' container spacing={1}>
+															{ev.evaluation_label.map((label, label_index) => (
+																<Grid key={label} item>
+																	<Chip
+																		label={label}
+																		onDelete={() => {
+																			deleteLabel(index, label_index);
+																		}}
+																	/>
+																</Grid>
+															))}
+														</Grid>
+													</>
 												)}
-
 												{ev.evaluation_type === 5 && (
 													<>
 														<DialogContentText mb={1} id='alert-rating'>{`Scaling for rating is (0, 20]`}</DialogContentText>
