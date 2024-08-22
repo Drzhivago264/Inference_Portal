@@ -55,6 +55,13 @@ const ChatPaper = styled(Paper)(({theme}) => ({
 
 function UserInstruction() {
 	const navigate = useNavigate();
+	const DEFAULT_CHILDREN = {
+		id: null,
+		displayed_name: "",
+		instruct: "",
+		unique: nanoid(),
+		add: false,
+	};
 	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
 	const messagesEndRef = useRef(null);
 	const [instruct_change, setInstructChange] = useState(false);
@@ -63,7 +70,7 @@ function UserInstruction() {
 	const [chat_message, setChatMessage] = useState([]);
 	const [usermessage, setUserMessage] = useState("");
 	const [usermessageError, setUserMessageError] = useState(false);
-    const [inference_parameter, setInferenceParameter] = useState({
+	const [inference_parameter, setInferenceParameter] = useState({
 		top_p: 0.72,
 		temperature: 0.73,
 		presencepenalty: 0,
@@ -87,15 +94,7 @@ function UserInstruction() {
 	const [max_parent_num, setMaxParentNum] = useState(null);
 	const [max_child_num, setMaxChildNum] = useState(null);
 	const [disable_save, setDisableSave] = useState(true);
-	const [children_instruction_list, setChildInstructionList] = useState([
-		{
-			id: null,
-			dislayed_name: "",
-			instruct: "",
-			unique: nanoid(),
-			add: false,
-		},
-	]);
+	const [children_instruction_list, setChildInstructionList] = useState([DEFAULT_CHILDREN]);
 	const {is_authenticated, timeZone} = useContext(UserContext);
 	useGetRedirectAnon(navigate, is_authenticated);
 	const handleOnDragEnd = (result) => {
@@ -138,8 +137,8 @@ function UserInstruction() {
 					onError: (error) => {
 						setLoading(false);
 						setSaveError(true);
-                        if (error.response.status === 400) {
-                            setSaveErrorMessage("Invalid Data"); 
+						if (error.response.status === 400) {
+							setSaveErrorMessage("Invalid Data");
 						} else {
 							setSaveErrorMessage(error.response.data.detail);
 						}
@@ -159,8 +158,8 @@ function UserInstruction() {
 					onError: (error) => {
 						setLoading(false);
 						setSaveError(true);
-                        if (error.response.status === 400) {
-                            setSaveErrorMessage("Invalid Data");
+						if (error.response.status === 400) {
+							setSaveErrorMessage("Invalid Data");
 						} else {
 							setSaveErrorMessage(error.response.data.detail);
 						}
@@ -201,21 +200,13 @@ function UserInstruction() {
 		updateParentTemplate(updatedList, "children");
 	};
 
-	const handleListItemClick = (event, index) => {
+	const handleListItemClick = (_, index) => {
 		if (!disable_save) {
 			submitTemplate();
 		}
 		const defaultChildInstructions =
 			template_list[index]["children"] === null
-				? [
-						{
-							id: null,
-							displayed_name: "",
-							instruct: "",
-							unique: nanoid(),
-							add: false,
-						},
-				  ]
+				? [DEFAULT_CHILDREN]
 				: template_list[index]["children"].map((child) => ({
 						...child,
 						add: false,
@@ -232,15 +223,7 @@ function UserInstruction() {
 				id: null,
 				displayed_name: "",
 				instruct: "",
-				children: [
-					{
-						id: null,
-						displayed_name: "",
-						instruct: "",
-						unique: nanoid(),
-						add: false,
-					},
-				],
+				children: [DEFAULT_CHILDREN],
 			};
 			setTemplateList([...template_list, newTemplate]);
 			setChildInstructionList([]);
@@ -273,15 +256,7 @@ function UserInstruction() {
 					},
 				];
 				setTemplateList(newTemplateList);
-				setChildInstructionList([
-					{
-						id: null,
-						displayed_name: ``,
-						instruct: "",
-						unique: nanoid(),
-						add: false,
-					},
-				]);
+				setChildInstructionList([DEFAULT_CHILDREN]);
 			}
 			handleListItemClick(null, 0);
 		} else {
@@ -295,13 +270,7 @@ function UserInstruction() {
 			setAddChildError(false);
 			const newChildrenInstructionList = [
 				...children_instruction_list,
-				{
-					id: null,
-					displayed_name: ``,
-					instruct: "",
-					unique: nanoid(),
-					add: false,
-				},
+				DEFAULT_CHILDREN,
 			];
 			setChildInstructionList(newChildrenInstructionList);
 		} else {
@@ -365,7 +334,7 @@ function UserInstruction() {
 		let user_parent_instruct = template_list[selectedIndex].instruct;
 
 		const data = {
-            ...inference_parameter,
+			...inference_parameter,
 			instruct_change: instruct_change,
 			max_turn: max_turn,
 			currentParagraph: 1,
@@ -434,14 +403,15 @@ function UserInstruction() {
 							</Paper>
 							<Box sx={{mr: 2, mt: 2}}>
 								<OpenAPIParameter
-                                    inference_parameter={inference_parameter}
-                                    setInferenceParameter={setInferenceParameter}
+									inference_parameter={inference_parameter}
+									setInferenceParameter={setInferenceParameter}
 									agent_objects={agent_objects}
 									choosen_model={choosen_model}
 									setChoosenModel={setChoosenModel}
 									max_turn={max_turn}
 									setMaxTurn={setMaxTurn}
-                                    isToolBox={true}/>
+									isToolBox={true}
+								/>
 							</Box>
 						</Grid>
 						<Divider orientation='vertical' flexItem sx={{mr: "-1px"}} />
@@ -455,9 +425,7 @@ function UserInstruction() {
 										if (selectedIndex == index) {
 											return (
 												<Box key={index} display='flex'>
-													<Paper
-														elevation={5}
-														style={{width: "100%",}}>
+													<Paper elevation={5} style={{width: "100%"}}>
 														<Box
 															p={2}
 															style={{
@@ -528,9 +496,7 @@ function UserInstruction() {
 																		</Box>
 																		<Paper
 																			elevation={2}
-																			style={{
-																				width: "100%",
-																			}}>
+																			style={{width: "100%",}}>
 																			<Stack
 																				direction='row'
 																				p={2}
@@ -543,11 +509,8 @@ function UserInstruction() {
 																					</IconButton>
 																				</Box>
 																				<Box
-																					mt={1}
-																					mb={1}
-																					style={{
-																						width: "100%",
-																					}}>
+																					mt={1} mb={1}
+																					style={{ width: "100%",}}>
 																					<Stack
 																						direction='row'
 																						sx={{
@@ -711,7 +674,8 @@ function UserInstruction() {
 								submitChat={submitChat}
 								messagesEndRef={messagesEndRef}
 								shownthinking={shownthinking}
-								handleEnter={handleEnter}/>
+								handleEnter={handleEnter}
+							/>
 						</Grid>
 					</Grid>
 				</Box>

@@ -20,6 +20,7 @@ from server.views.serializer import (
     DatasetCreateSerializer,
     DatasetDeleteRecordSerialzier,
     DatasetDeleteSerializer,
+    DatasetEvaluationSerializer,
     DatasetGetSerializer,
     DatasetRecordGetSerialzier,
     DatasetRecordSerialzier,
@@ -102,9 +103,10 @@ def get_user_records_api(request, id: int):
 def create_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetCreateSerializer(data=request.data)
+
     if serializer.is_valid(raise_exception=True):
         dataset_name = serializer.validated_data["name"]
-        default_evaluation = serializer.validated_data["default_evaluation"]
+        default_evaluation = list()
         default_system_prompt = serializer.validated_data["default_system_prompt"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
@@ -112,6 +114,11 @@ def create_user_dataset_api(request):
             timeout=60,
             current_user=current_user,
         )
+
+        evaluation_serializer = DatasetEvaluationSerializer(data= serializer.validated_data["default_evaluation"], many=True)
+        if evaluation_serializer.is_valid(raise_exception=True):
+            default_evaluation = evaluation_serializer.validated_data
+
         if not master_user:
             raise PermissionDenied(detail="Your token is expired")
         elif (
