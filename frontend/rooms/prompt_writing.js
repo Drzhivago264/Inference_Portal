@@ -79,7 +79,6 @@ function PromptWriting() {
 	useGetRedirectAnon(navigate, is_authenticated);
 
 	const navigatePagination = (_, value) => {
-		console.log(_, value);
 		setPaginationPage(value);
 	};
 

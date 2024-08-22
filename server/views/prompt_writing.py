@@ -115,7 +115,9 @@ def create_user_dataset_api(request):
             current_user=current_user,
         )
 
-        evaluation_serializer = DatasetEvaluationSerializer(data= serializer.validated_data["default_evaluation"], many=True)
+        evaluation_serializer = DatasetEvaluationSerializer(
+            data=serializer.validated_data["default_evaluation"], many=True
+        )
         if evaluation_serializer.is_valid(raise_exception=True):
             default_evaluation = evaluation_serializer.validated_data
 
@@ -151,7 +153,9 @@ def update_user_dataset_api(request):
     if serializer.is_valid(raise_exception=True):
         id = serializer.validated_data["id"]
         new_dataset_name = serializer.validated_data["new_name"]
-        new_default_system_prompt = serializer.validated_data["new_default_system_prompt"]
+        new_default_system_prompt = serializer.validated_data[
+            "new_default_system_prompt"
+        ]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,
@@ -159,7 +163,9 @@ def update_user_dataset_api(request):
             current_user=current_user,
         )
 
-        evaluation_serializer = DatasetEvaluationSerializer(data= serializer.validated_data["new_default_evaluation"], many=True)
+        evaluation_serializer = DatasetEvaluationSerializer(
+            data=serializer.validated_data["new_default_evaluation"], many=True
+        )
         if evaluation_serializer.is_valid(raise_exception=True):
             new_default_evaluation = evaluation_serializer.validated_data
 
@@ -171,8 +177,8 @@ def update_user_dataset_api(request):
                     id=id, user=master_user
                 )
                 dataset.name = new_dataset_name
-                dataset.default_evaluation=new_default_evaluation
-                dataset.default_system_prompt=new_default_system_prompt
+                dataset.default_evaluation = new_default_evaluation
+                dataset.default_system_prompt = new_default_system_prompt
                 dataset.save()
                 update_cache(
                     prefix="user_dataset", key=id, model_instance=dataset, timeout=120

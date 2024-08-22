@@ -68,7 +68,6 @@ export default function DatasetMutateDialog({
 				default_system_prompt: default_system_prompt,
 				default_evaluation: default_evaluation_without_null,
 			};
-			console.log(default_evaluation_without_null);
 			postmutate(
 				{url: "/frontend-api/create-dataset", data: data},
 				{
