@@ -138,9 +138,6 @@ Next you need to set up .env file and setup the following key. Note that, if you
 
     STRIPE_PUBLISHABLE_KEY=""
     STRIPE_SECRET_KEY=""
-    BACKEND_DOMAIN=""
-    PAYMENT_SUCCESS_URL=""
-    PAYMENT_CANCEL_URL=""
     STRIPE_WEBHOOK_SECRET=""
     EMAIL_ADDRESS = "" (The EMAIL_ADDRESS that fowards contact form)
     EMAIL_PASSWORD = "" (The password for EMAIL_ADDRESS that fowards contact form)

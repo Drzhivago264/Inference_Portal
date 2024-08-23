@@ -160,15 +160,6 @@ else:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-# Stripe
-STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY")
-STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
-BACKEND_DOMAIN = config("BACKEND_DOMAIN")
-PAYMENT_SUCCESS_URL = config("PAYMENT_SUCCESS_URL")
-PAYMENT_CANCEL_URL = config("PAYMENT_CANCEL_URL")
-STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
@@ -202,6 +193,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = None
 CONSTANCE_REDIS_CONNECTION = "redis://127.0.0.1:6380"
 CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True
 CONSTANCE_CONFIG = {
+    "STRIPE_BACKEND_DOMAIN": ("http://127.0.0.1:8000", "Backend domain for Stripe", str),
+    "STRIPE_PAYMENT_SUCCESS_URL": ("https://professorparakeet.com/frontend/payment-success/", "The URL to redirect users when payment success", str),
+    "STRIPE_PAYMENT_FAILURE_URL": ("https://professorparakeet.com/", "The URL to redirect users when payment failed", str),
     "MAX_KEY_NAME_LENGTH": (50, "The maximum length of the name for API key", int),
     "MAX_DATASET_PER_USER": (20, "The maximum number of dataset per a user", int),
     "MAX_EVALUATION_PER_RECORD": (20, "The evaluation per dataset", int),
@@ -318,3 +312,11 @@ CONSTANCE_CONFIG = {
 }
 CONSTANCE_BACKEND = "constance.backends.redisd.CachingRedisBackend"
 CONSTANCE_REDIS_CACHE_TIMEOUT = 60
+
+# Stripe
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
+BACKEND_DOMAIN = CONSTANCE_CONFIG["STRIPE_BACKEND_DOMAIN"][0]
+PAYMENT_SUCCESS_URL = CONSTANCE_CONFIG["STRIPE_PAYMENT_SUCCESS_URL"][0]
+PAYMENT_CANCEL_URL = CONSTANCE_CONFIG["STRIPE_PAYMENT_FAILURE_URL"][0]
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")

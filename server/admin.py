@@ -162,22 +162,17 @@ class PaymentHistoryAdmin(admin.ModelAdmin):
     model = PaymentHistory
     list_display = (
         "key",
+        "type",
         "crypto",
         "amount",
         "integrated_address",
-        "payment_id",
+        "xmr_payment_id",
+        "stripe_payment_id",
         "transaction_hash",
         "locked",
         "block_height",
     )
-    list_editable = (
-        "amount",
-        "integrated_address",
-        "payment_id",
-        "transaction_hash",
-        "locked",
-        "block_height",
-    )
+
     list_display_links = ("key", "crypto")
 
 

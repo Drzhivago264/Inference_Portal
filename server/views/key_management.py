@@ -132,10 +132,11 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                     try:
                         _, created = PaymentHistory.objects.get_or_create(
                             key=key,
+                            type=PaymentHistory.PaymentType.XMR,
                             crypto=crypto,
                             amount=amount / 1e12,
                             integrated_address=address_response,
-                            payment_id=payment_id_response,
+                            xmr_payment_id=payment_id_response,
                             locked=locked,
                             transaction_hash=tx_hash,
                             block_height=block_height,
@@ -192,7 +193,8 @@ def generate_key_api(request: HttpRequest) -> Response:
         master_group, _ = Group.objects.get_or_create(name="master_user")
         try:
             wallet = manage_monero("make_integrated_address")
-            integrated_address = json.loads(wallet.text)["result"]["integrated_address"]
+            integrated_address = json.loads(
+                wallet.text)["result"]["integrated_address"]
             payment_id = json.loads(wallet.text)["result"]["payment_id"]
         except requests.exceptions.ConnectionError:
             integrated_address = ""
@@ -272,7 +274,8 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
                     integrated_address = json.loads(wallet.text)["result"][
                         "integrated_address"
                     ]
-                    payment_id = json.loads(wallet.text)["result"]["payment_id"]
+                    payment_id = json.loads(wallet.text)[
+                        "result"]["payment_id"]
                     key.integrated_address = integrated_address
                     key.payment_id = payment_id
                     key.save()
@@ -327,15 +330,13 @@ def stripe_redirect(request: HttpRequest) -> Response:
                     }
                 ],
                 metadata={
-                    "product_id": product_id,
-                    "name": key_name,
                     "key_id": key.id,
                     "price": price.price,
                     "quantity": price.product.quantity,
                 },
                 mode="payment",
-                success_url=settings.PAYMENT_SUCCESS_URL,
-                cancel_url=settings.PAYMENT_CANCEL_URL,
+                success_url=constant.STRIPE_PAYMENT_SUCCESS_URL,
+                cancel_url=constant.STRIPE_PAYMENT_FAILURE_URL,
             )
             return Response(
                 {"stripe_checkout_url": checkout_session.url},
@@ -346,23 +347,6 @@ def stripe_redirect(request: HttpRequest) -> Response:
             raise AuthenticationFailed(
                 detail="Your Key Name and/or Key is/are incorrect"
             )
-
-
-class SuccessView(TemplateView):
-    template_name = "html/success.html"
-
-    def get_context_data(self, **kwargs: typing.Any) -> object:
-        context = super(SuccessView, self).get_context_data(**kwargs)
-        context["title"] = "Payment Success"
-        return context
-
-
-class CancelView(TemplateView):
-    template_name = "html/index.html"
-
-    def get_context_data(self, **kwargs: typing.Any) -> object:
-        context = super(CancelView, self).get_context_data(**kwargs)
-        return context
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -377,7 +361,8 @@ class StripeWebhookView(View):
         sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
         event = None
         try:
-            event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret)
         except ValueError:
             # Invalid payload
             return HttpResponse(status=400)
@@ -387,9 +372,6 @@ class StripeWebhookView(View):
 
         if event["type"] == "checkout.session.completed":
             session = event["data"]["object"]
-            customer_email = session["customer_details"]["email"]
-            product_id = session["metadata"]["product_id"]
-            name = session["metadata"]["name"]
             key_id = session["metadata"]["key_id"]
             c = float(session["metadata"]["price"]) * float(
                 session["metadata"]["quantity"]
@@ -398,5 +380,24 @@ class StripeWebhookView(View):
                 locked_key = APIKEY.objects.select_for_update().get(id=key_id)
                 locked_key.credit = F("credit") + c
                 locked_key.save()
+                PaymentHistory.objects.create(
+                    key=locked_key,
+                    type=PaymentHistory.PaymentType.STRIPE,
+                    stripe_payment_id=session["id"],
+                    currency=session["currency"],
+                    payment_intent=session["payment_intent"],
+                    payment_method_type=session["payment_method_types"][0],
+                    payment_status=session["payment_status"],
+                    email=session["customer_details"]["email"],
+                    user_name=session["customer_details"]["name"],
+                    amount=session["amount_total"] / 100,
+                    amount_subtotal=session["amount_subtotal"] / 100,
+                    billing_country_code=session["customer_details"]["address"]['country'],
+                    billing_postcode=session["customer_details"]["address"]['postal_code'],
+                    billing_address_1=session["customer_details"]["address"]['line1'],
+                    billing_address_2=session["customer_details"]["address"]['line2'],
+                    billing_state=session["customer_details"]["address"]['state'],
+                    billing_city=session["customer_details"]["address"]['city'],
+                )
         # Can handle other events here.
         return HttpResponse(status=200)

@@ -10,9 +10,9 @@ from server.views.contact import contact_api
 from server.views.export_dataset import export_user_dataset_api
 from server.views.information import check_login, log_in, log_out, model_api
 from server.views.key_management import (
-    CancelView,
+
     StripeWebhookView,
-    SuccessView,
+
     check_credit_api,
     confirm_xmr_payment_api,
     generate_key_api,
@@ -85,8 +85,6 @@ urlpatterns = [
     ),
     path("frontend-api/stripe-redirect", stripe_redirect, name="stripe-payment"),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
-    path("success/", SuccessView.as_view(), name="success"),
-    path("cancel/", CancelView.as_view(), name="cancel"),
     path("frontend-api/products", product_list_api, name="product-list"),
     # ENDPOINT FOR SENDING MAIL
     path("frontend-api/send-mail", contact_api, name="contact"),
