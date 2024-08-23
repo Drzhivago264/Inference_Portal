@@ -5,6 +5,7 @@ import {closeWebSocket, scrollToBottom} from "../component/chat_components/chatU
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
+import AskAgainDialog from "../component/dialog/AskAgainDialog.js";
 import Box from "@mui/material/Box";
 import {ChatBox} from "../component/chat_components/Chatbox.js";
 import ChatInput from "../component/chat_components/ChatInput.js";
@@ -63,6 +64,7 @@ function UserInstruction() {
 		add: false,
 	};
 	const {websocket, agent_websocket, chat_websocket, websocket_hash} = useContext(WebSocketContext);
+	const [open_ask_again, setOpenAskAgain] = useState(false);
 	const messagesEndRef = useRef(null);
 	const [instruct_change, setInstructChange] = useState(false);
 	const [choosen_model, setChoosenModel] = useState("gpt-4");
@@ -391,9 +393,12 @@ function UserInstruction() {
 											</IconButton>
 										)}
 										{template_list.length > 1 && (
-											<IconButton aria-label='delete' onClick={deleteParent}>
+											<IconButton aria-label='delete' onClick={() => {setOpenAskAgain(true)}}>
 												<DeleteIcon />
 											</IconButton>
+										)}
+										{open_ask_again && (
+											<AskAgainDialog executing_function={deleteParent} delete_object_name='Template' setOpenAskAgain={setOpenAskAgain} />
 										)}
 									</Box>
 								</List>

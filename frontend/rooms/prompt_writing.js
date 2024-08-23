@@ -2,6 +2,7 @@ import React, {useContext, useState} from "react";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
+import AskAgainDialog from "../component/dialog/AskAgainDialog.js";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import Box from "@mui/material/Box";
@@ -48,6 +49,7 @@ import {useNavigate} from "react-router-dom";
 
 function PromptWriting() {
 	const navigate = useNavigate();
+	const [open_ask_again, setOpenAskAgain] = useState(false);
 	const [dataset_row, setDatasetRow] = useState([]);
 	const [dataset_column, setDatasetColumn] = useState([]);
 	const [record_list, setRecordList] = useState([]);
@@ -389,14 +391,22 @@ function PromptWriting() {
 											/>
 										)}
 									{dataset_list && dataset_list.length > 1 && (
-										<IconButton aria-label='delete' onClick={deleteDataset}>
+										<IconButton
+											aria-label='delete'
+											onClick={() => {
+												setOpenAskAgain(true);
+											}}>
 											<DeleteIcon />
 										</IconButton>
+									)}
+
+									{open_ask_again && (
+										<AskAgainDialog executing_function={deleteDataset} delete_object_name='Dataset' setOpenAskAgain={setOpenAskAgain} />
 									)}
 								</Box>
 							</List>
 						</Paper>
-						<Box sx={{mr: 2, mt: 2}}>
+						<Box sx={{ mt: 2}}>
 							<DatasetExportServerSide
 								dataset_id={dataset_list[selectedIndex] ? dataset_list[selectedIndex].id : null}
 								dataset_name={dataset_list[selectedIndex] ? dataset_list[selectedIndex].name : null}
@@ -565,7 +575,6 @@ function PromptWriting() {
 									startIcon={<KeyboardArrowLeftIcon />}>
 									Previous
 								</LoadingButton>
-
 								<IconButton
 									aria-label='add'
 									size='small'
@@ -575,7 +584,6 @@ function PromptWriting() {
 									}}>
 									<AddCircleOutlineIcon />
 								</IconButton>
-
 								<LoadingButton
 									size='small'
 									loading={loading}

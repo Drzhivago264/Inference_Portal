@@ -3,6 +3,7 @@ import React, {useState} from "react";
 import AddPermissionDialog from "../component/dialog/MorePermissionDialog.js";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import AskAgainDialog from "../component/dialog/AskAgainDialog.js";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
@@ -51,6 +52,7 @@ const StyledPaper = styled(Paper)(({theme}) => ({
 
 function TokenManagement() {
 	const {t} = useTranslation();
+	const [open_ask_again, setOpenAskAgain] = useState(false);
 	const [tokencreateloading, setTokenCreateLoading] = useState(false);
 	const [token_list, setTokenList] = useState([]);
 	const [use_ttl, setUseTTL] = useState(true);
@@ -194,27 +196,33 @@ function TokenManagement() {
 														</Grid>
 													</TableCell>
 													<TableCell>
-                                                        <Stack direction='row' alignItems="center" spacing={2}>
-                                                        {row.ratelimit}
-														<UpdateRateLimitDialog
-															token_name={row.name}
-															token_value={row.value}
-															token_prefix={row.prefix}
-															setTokenCreateError={setLocalTokenCreateError}
-															setTokenList={setTokenList}
-															token_list={token_list}
-															index={index}
-														/>
-                                                        </Stack>
-							
+														<Stack direction='row' alignItems='center' spacing={2}>
+															{row.ratelimit}
+															<UpdateRateLimitDialog
+																token_name={row.name}
+																token_value={row.value}
+																token_prefix={row.prefix}
+																setTokenCreateError={setLocalTokenCreateError}
+																setTokenList={setTokenList}
+																token_list={token_list}
+																index={index}
+															/>
+														</Stack>
 													</TableCell>
 													<TableCell>
 														<IconButton
 															aria-label='delete'
 															size='large'
-															onClick={() => deleteToken(row.prefix, row.name, row.value, index)}>
+															onClick={() => setOpenAskAgain(true)}>
 															<DeleteIcon />
 														</IconButton>
+														{open_ask_again && (
+															<AskAgainDialog
+																executing_function={() => {deleteToken(row.prefix, row.name, row.value, index)}}
+																delete_object_name='Token'
+																setOpenAskAgain={setOpenAskAgain}
+															/>
+														)}
 													</TableCell>
 												</TableRow>
 											))}
@@ -384,7 +392,7 @@ function TokenManagement() {
 									<TokenCreateExport
 										token_={servertokencreatedata.token}
 										token_name={servertokencreatedata.token_name}
-                                        ratelimit={servertokencreatedata.ratelimit}
+										ratelimit={servertokencreatedata.ratelimit}
 										ttl={servertokencreatedata.ttl}
 										created_at={servertokencreatedata.created_at}
 										permission={servertokencreatedata.permission}
