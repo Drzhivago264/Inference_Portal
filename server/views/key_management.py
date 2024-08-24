@@ -99,22 +99,22 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                 "get_transfer_by_txid", {"txid": tx_id}) if tx_id else manage_monero(
                 "get_payments", {"payment_id": key.payment_id}
             )
-
-            parsed_response = json.loads(payment_check.text)["result"]['transfer'] if tx_id else json.loads(
-                payment_check.text)["result"]["payments"][0]
-
-            if "error" in parsed_response:
+            try:
+                parsed_response = json.loads(payment_check.text)["result"]['transfer'] if tx_id else json.loads(
+                    payment_check.text)["result"]["payments"][0]
+            except KeyError:
                 return Response(
                     {
                         "detail": (
-                            "Transaction id is incorrent"
+                            "No transaction detected, check txid."
                             if tx_id
-                            else "Payment id is incorrect"
+                            else "No transaction detected"
                         )
                     },
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            elif not parsed_response:
+
+            if not parsed_response:
                 return Response(
                     {"detail": "No transaction detected"},
                     status=status.HTTP_404_NOT_FOUND,
