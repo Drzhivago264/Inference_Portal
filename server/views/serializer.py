@@ -249,6 +249,7 @@ class CheckKeySerializer(CreateKeySerializer):
 class MoneroTransactionSerializer(CheckKeySerializer):
     tx_id = serializers.CharField(required=False, allow_null=True)
 
+
 class SendMailSerializer(CheckKeySerializer):
     message = serializers.CharField()
     username = serializers.CharField()

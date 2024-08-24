@@ -1,32 +1,19 @@
 import hashlib
-from typing import List
 
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
 from django.utils import timezone
-from server.rate_limit import RateLimitError, rate_limit_initializer
 from ninja import NinjaAPI, Swagger
-from ninja.errors import HttpError
 from ninja.security import HttpBearer
 
 from api.agent_api import router as agent_router
-from api.api_schema import Error, ResponseLogRequest, ResponseLogResponse
 from api.chat_api import router as chat_router
 from api.completion_api import router as completion_router
 from api.llm_functions_api import router as llm_function_router
 from api.log import router as log_router
-from api.utils import check_permission, query_response_log
 from server.models.api_key import APIKEY, FineGrainAPIKEY
-from server.models.log import PromptResponse
-import inspect
-from functools import partial, wraps
-from typing import Any, Callable, Tuple, Type
 
-from asgiref.sync import sync_to_async
-from django.db.models import QuerySet
-from ninja.constants import NOT_SET
-from ninja.pagination import LimitOffsetPagination, PaginationBase, make_response_paginated
-from ninja.types import DictStrAny
+
 class GlobalAuth(HttpBearer):
     @sync_to_async
     def authenticate(self, request, token):

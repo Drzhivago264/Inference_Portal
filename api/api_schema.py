@@ -1,10 +1,13 @@
 import datetime
 
 from constance import config as constant
-from ninja import Field, Schema
+from ninja import Field, ModelSchema, Schema
 from pydantic import ValidationInfo, field_validator, model_validator
 from typing_extensions import Self
+
+from server.models.llm_server import LLM
 from server.models.log import PromptResponse
+
 
 class PromptSchema(Schema):
     prompt: str = ""
@@ -122,7 +125,15 @@ class AgentSchema(PromptSchema):
 
 class ResponseLogRequest(Schema):
     lastest: bool = Field(default=True, examples=[True])
-    filter_by: PromptResponse.PromptType | None | list[PromptResponse.PromptType] = Field(default=1, examples=[1])
+    filter_by: PromptResponse.PromptType | None | list[PromptResponse.PromptType] = (
+        Field(default=1, examples=[1])
+    )
+
+
+class LLMSchema(ModelSchema):
+    class Meta:
+        model = LLM
+        fields = ["name", "input_price", "output_price"]
 
 
 class ResponseLogResponse(Schema):
@@ -130,6 +141,11 @@ class ResponseLogResponse(Schema):
     response: str
     created_at: datetime.datetime
     type: int
+    input_cost: float
+    output_cost: float
+    number_input_tokens: int
+    number_output_tokens: int
+    model: LLMSchema
 
 
 class Error(Schema):

@@ -19,6 +19,11 @@ async def check_permission(user_object, permission, destination):
         raise HttpError(401, f"Your key is not authorised to use {destination} api")
 
 
+def check_permission_sync(user_object, permission, destination):
+    if not user_object.has_perm(permission):
+        raise HttpError(401, f"Your key is not authorised to use {destination} api")
+
+
 async def get_system_template(name: str) -> str:
 
     template = await get_or_set_cache(
@@ -179,23 +184,3 @@ async def send_stream_request_async(
         raise HttpError(429, f"vLLM API request exceeded rate limit: {e}")
     except openai.APIError as e:
         raise HttpError(503, f"vLLM API returned an API Error: {e}")
-
-
-async def query_response_log(
-    key_object: str, order: str, quantity: int, type_: list
-) -> dict:
-    response = list()
-    log = PromptResponse.objects.filter(key=key_object, type__in=type_).order_by(order)[
-        :quantity
-    ]
-    async for l in log:
-        response.append(
-            {
-                "prompt": l.prompt,
-                "response": l.response,
-                "created_at": l.created_at,
-                "type": l.type,
-                "model": await sync_to_async(lambda: l.model.name)(),
-            }
-        )
-    return response

@@ -95,13 +95,17 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                 raise AuthenticationFailed(
                     detail="Your Key Name and/or Key is/are incorrect"
                 )
-            payment_check = manage_monero(
-                "get_transfer_by_txid", {"txid": tx_id}) if tx_id else manage_monero(
-                "get_payments", {"payment_id": key.payment_id}
+            payment_check = (
+                manage_monero("get_transfer_by_txid", {"txid": tx_id})
+                if tx_id
+                else manage_monero("get_payments", {"payment_id": key.payment_id})
             )
             try:
-                parsed_response = json.loads(payment_check.text)["result"]['transfer'] if tx_id else json.loads(
-                    payment_check.text)["result"]["payments"][0]
+                parsed_response = (
+                    json.loads(payment_check.text)["result"]["transfer"]
+                    if tx_id
+                    else json.loads(payment_check.text)["result"]["payments"][0]
+                )
             except KeyError:
                 return Response(
                     {
@@ -130,9 +134,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                 )
                 locked = parsed_response["locked"]
                 tx_hash = (
-                    parsed_response["txid"]
-                    if tx_id
-                    else parsed_response["tx_hash"]
+                    parsed_response["txid"] if tx_id else parsed_response["tx_hash"]
                 )
                 unlock_time = parsed_response["unlock_time"]
 
@@ -169,7 +171,9 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                                     },
                                     status=status.HTTP_200_OK,
                                 )
-                            elif payment.status == PaymentHistory.PaymentStatus.PROCESSED:
+                            elif (
+                                payment.status == PaymentHistory.PaymentStatus.PROCESSED
+                            ):
                                 return Response(
                                     {
                                         "detail": f"The submited tx_hash: {tx_hash} was already recorded, no change to xmr credit of key: {key_}"
@@ -189,7 +193,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                             locked=locked,
                             unlock_time=unlock_time,
                             block_height=block_height,
-                            extra_data=parsed_response
+                            extra_data=parsed_response,
                         )
                         with transaction.atomic():
                             locked_key = APIKEY.objects.select_for_update().get(
@@ -218,7 +222,7 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                         locked=locked,
                         unlock_time=unlock_time,
                         block_height=block_height,
-                        extra_data=parsed_response
+                        extra_data=parsed_response,
                     )
                     return Response(
                         {
@@ -244,8 +248,7 @@ def generate_key_api(request: HttpRequest) -> Response:
         master_group, _ = Group.objects.get_or_create(name="master_user")
         try:
             wallet = manage_monero("make_integrated_address")
-            integrated_address = json.loads(
-                wallet.text)["result"]["integrated_address"]
+            integrated_address = json.loads(wallet.text)["result"]["integrated_address"]
             payment_id = json.loads(wallet.text)["result"]["payment_id"]
         except requests.exceptions.ConnectionError:
             integrated_address = ""
@@ -325,8 +328,7 @@ def retrive_xmr_wallet_api(request: HttpRequest) -> Response:
                     integrated_address = json.loads(wallet.text)["result"][
                         "integrated_address"
                     ]
-                    payment_id = json.loads(wallet.text)[
-                        "result"]["payment_id"]
+                    payment_id = json.loads(wallet.text)["result"]["payment_id"]
                     key.integrated_address = integrated_address
                     key.payment_id = payment_id
                     key.save()
@@ -414,8 +416,7 @@ class StripeWebhookView(View):
         sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
         event = None
         try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, endpoint_secret)
+            event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
         except ValueError:
             # Invalid payload
             return HttpResponse(status=400)
@@ -442,17 +443,21 @@ class StripeWebhookView(View):
                     payment_method_type=session["payment_method_types"][0],
                     payment_status=session["payment_status"],
                     billing_city=session["customer_details"]["address"]["city"],
-                    billing_postcode=session["customer_details"]["address"]["postal_code"],
+                    billing_postcode=session["customer_details"]["address"][
+                        "postal_code"
+                    ],
                     billing_address_1=session["customer_details"]["address"]["line1"],
                     billing_address_2=session["customer_details"]["address"]["line2"],
                     billing_state=session["customer_details"]["address"]["state"],
-                    billing_country_code=session["customer_details"]["address"]["country"],
+                    billing_country_code=session["customer_details"]["address"][
+                        "country"
+                    ],
                     email=session["customer_details"]["email"],
                     user_name=session["customer_details"]["name"],
                     amount=session["amount_total"] / 100,
                     amount_subtotal=session["amount_subtotal"] / 100,
                     extra_data=session,
-                    status=PaymentHistory.PaymentStatus.PROCESSED
+                    status=PaymentHistory.PaymentStatus.PROCESSED,
                 )
         # Can handle other events here.
         return HttpResponse(status=200)
