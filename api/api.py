@@ -4,7 +4,7 @@ from typing import List
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
 from django.utils import timezone
-from django_ratelimit.core import is_ratelimited
+from server.rate_limit import RateLimitError, rate_limit_initializer
 from ninja import NinjaAPI, Swagger
 from ninja.errors import HttpError
 from ninja.security import HttpBearer
@@ -14,10 +14,19 @@ from api.api_schema import Error, ResponseLogRequest, ResponseLogResponse
 from api.chat_api import router as chat_router
 from api.completion_api import router as completion_router
 from api.llm_functions_api import router as llm_function_router
+from api.log import router as log_router
 from api.utils import check_permission, query_response_log
 from server.models.api_key import APIKEY, FineGrainAPIKEY
+from server.models.log import PromptResponse
+import inspect
+from functools import partial, wraps
+from typing import Any, Callable, Tuple, Type
 
-
+from asgiref.sync import sync_to_async
+from django.db.models import QuerySet
+from ninja.constants import NOT_SET
+from ninja.pagination import LimitOffsetPagination, PaginationBase, make_response_paginated
+from ninja.types import DictStrAny
 class GlobalAuth(HttpBearer):
     @sync_to_async
     def authenticate(self, request, token):
@@ -64,38 +73,4 @@ api.add_router("/", completion_router)
 api.add_router("/", chat_router)
 api.add_router("/", agent_router)
 api.add_router("/", llm_function_router)
-
-
-@api.post(
-    "/responselog",
-    tags=["Log"],
-    summary="Get log",
-    response={200: List[ResponseLogResponse], 401: Error, 429: Error},
-)
-async def log(request, data: ResponseLogRequest):
-    key_object = request.auth
-    user_object = await sync_to_async(lambda: key_object.user)()
-    await check_permission(
-        user_object=user_object, permission="server.allow_view_log", destination="log"
-    )
-    if is_ratelimited(
-        request,
-        group="log",
-        key="header:X-API-KEY",
-        rate="10/m",
-        increment=True,
-    ):
-        raise HttpError(
-            429,
-            "You have exceeded your quota of requests in an interval.  Please slow down and try again soon.",
-        )
-    else:
-        quantity = 1 if data.quantity < 10 else data.quantity
-        order = "-id" if data.lastest else "id"
-        response_log = await query_response_log(
-            key_object=request.auth,
-            order=order,
-            quantity=quantity,
-            type_=data.filter_by,
-        )
-        return response_log
+api.add_router("/", log_router)

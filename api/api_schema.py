@@ -4,7 +4,7 @@ from constance import config as constant
 from ninja import Field, Schema
 from pydantic import ValidationInfo, field_validator, model_validator
 from typing_extensions import Self
-
+from server.models.log import PromptResponse
 
 class PromptSchema(Schema):
     prompt: str = ""
@@ -121,20 +121,15 @@ class AgentSchema(PromptSchema):
 
 
 class ResponseLogRequest(Schema):
-    quantity: int = Field(default=10, examples=[10])
     lastest: bool = Field(default=True, examples=[True])
-    filter_by: list = Field(
-        default=["chatroom", "prompt", "open_ai", "chat_api", "agent_api"],
-        examples=[["chatroom", "prompt", "open_ai", "chat_api", "agent_api"]],
-    )
+    filter_by: PromptResponse.PromptType | None | list[PromptResponse.PromptType] = Field(default=1, examples=[1])
 
 
 class ResponseLogResponse(Schema):
     prompt: str
     response: str
     created_at: datetime.datetime
-    type: str
-    model: str
+    type: int
 
 
 class Error(Schema):

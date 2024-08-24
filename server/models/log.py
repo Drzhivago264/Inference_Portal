@@ -87,9 +87,7 @@ class MemoryTreeMP(MP_Node, AbstractPromptResponse):
         """
 
         end_node_pos = len(self.path) + self.steplen if include_self else len(self.path)
-
         paths = [self.path[0:pos] for pos in range(0, end_node_pos, self.steplen)[1:]]
-
         return (
             get_result_class(self.__class__)
             .objects.filter(path__in=paths)
