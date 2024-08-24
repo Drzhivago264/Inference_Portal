@@ -44,6 +44,7 @@ import {useGetLogout} from "../api_hook/useGetLogout.js";
 import {useGetProduct} from "../api_hook/useGetProduct.js";
 import {usePostKeyCheck} from "../api_hook/usePostKeyCheck.js";
 import {usePostKeyCreate} from "../api_hook/usePostKeyCreate.js";
+import {usePostMoneroConfirmation} from "../api_hook/usePostMoneroConfirmation.js";
 import {usePostStripeRedirect} from "../api_hook/usePostStripeRedirect.js";
 
 function KeyManagement() {
@@ -63,7 +64,8 @@ function KeyManagement() {
 	const {product_objects} = useGetProduct();
 	const [keycreateloading, setKeyCreateLoading] = useState(false);
 	const [localkeycreateerror, setLocalKeyCreateError] = useState("");
-
+	const [transactionhash, setTransactionHash] = useState("");
+	const [transactionhasherror, setTransactionHashError] = useState(false);
 	const {refetch} = useGetLogout(setIsAuthenticated, setUserKeyName, setWebsocketHash);
 
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -98,7 +100,13 @@ function KeyManagement() {
 		isLoading: xmrconfirmisLoading,
 		error: xmrconfirmerror,
 		data: xmrconfirmdata,
-	} = usePostKeyCheck({setKeyError, setKeyNamePayError, key, keynamepay});
+	} = usePostMoneroConfirmation({setKeyError, setKeyNamePayError, setTransactionHashError: null, key, keynamepay, transactionhash: null});
+	const {
+		fetch: xmrconfirmwithhash,
+		isLoading: xmrconfirmwithhashisLoading,
+		error: xmrconfirmwithhasherror,
+		data: xmrconfirmwithhashdata,
+	} = usePostMoneroConfirmation({setKeyError, setKeyNamePayError, setTransactionHashError, key, keynamepay, transactionhash});
 	const {
 		fetch: stripepostredirect,
 		isSuccess: stripeisSuccess,
@@ -202,7 +210,6 @@ function KeyManagement() {
 									fontWeight: "700",
 									mt: 1,
 								}}>
-								{" "}
 								{t("key_management.2_Add_credit_to_your_key")}
 							</Box>
 						</Typography>
@@ -391,6 +398,49 @@ function KeyManagement() {
 										</Box>
 										{xmrconfirmdata && <XMRWConfirmationDisplay t={t} detail={xmrconfirmdata.detail} />}
 										{xmrconfirmerror && <SuccessErrorAlert detail={xmrconfirmerror.response.data.detail} type='error' />}
+									</AccordionDetails>
+								</Accordion>
+								<Accordion expanded={expanded === "panel5"} onChange={handleAccordionExpand("panel5")}>
+									<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel5-content' id='panel5-header'>
+										<Typography variant='h6'>{t("key_management.25_Confirm_XMR_Payment_with_Hash")}</Typography>
+									</AccordionSummary>
+									<AccordionDetails>
+										<Typography>{t("key_management.25_info")}</Typography>
+										<Stack mt={2} direction={{xs: "column", sm: "row"}} spacing={1}>
+											<TextField
+												margin='normal'
+												label='Transaction Hash (Transaction ID)'
+												type='text'
+												size='small'
+												onChange={(e) => setTransactionHash(e.target.value)}
+												value={transactionhash}
+												error={transactionhasherror}
+												autoComplete='off'
+												InputLabelProps={{
+													shrink: true,
+												}}
+											/>
+
+											<LoadingButton
+												loading={xmrconfirmwithhashisLoading}
+												variant='contained'
+												type='submit'
+												onClick={(e) => {
+													xmrconfirmwithhash(e, "/frontend-api/confirm-xmr-payment");
+												}}
+												endIcon={
+													<SvgIcon>
+														<svg xmlns='http://www.w3.org/2000/svg' width='226.777' height='226.777' viewBox='0 0 226.777 226.777'>
+															<path d='M39.722 149.021v-95.15l73.741 73.741 73.669-73.669v95.079h33.936a113.219 113.219 0 0 0 5.709-35.59c0-62.6-50.746-113.347-113.347-113.347C50.83.085.083 50.832.083 113.432c0 12.435 2.008 24.396 5.709 35.59h33.93z' />
+															<path d='M162.54 172.077v-60.152l-49.495 49.495-49.148-49.148v59.806h-47.48c19.864 32.786 55.879 54.7 97.013 54.7 41.135 0 77.149-21.914 97.013-54.7H162.54z' />
+														</svg>
+													</SvgIcon>
+												}>
+												Confirm Transaction Hash
+											</LoadingButton>
+										</Stack>
+										{xmrconfirmwithhashdata && <XMRWConfirmationDisplay t={t} detail={xmrconfirmwithhashdata.detail} />}
+										{xmrconfirmwithhasherror && <SuccessErrorAlert detail={xmrconfirmwithhasherror.response.data.detail} type='error' />}
 									</AccordionDetails>
 								</Accordion>
 							</form>

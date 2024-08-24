@@ -10,9 +10,7 @@ from server.views.contact import contact_api
 from server.views.export_dataset import export_user_dataset_api
 from server.views.information import check_login, log_in, log_out, model_api
 from server.views.key_management import (
-
     StripeWebhookView,
-
     check_credit_api,
     confirm_xmr_payment_api,
     generate_key_api,

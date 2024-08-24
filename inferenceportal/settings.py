@@ -193,9 +193,21 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = None
 CONSTANCE_REDIS_CONNECTION = "redis://127.0.0.1:6380"
 CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True
 CONSTANCE_CONFIG = {
-    "STRIPE_BACKEND_DOMAIN": ("http://127.0.0.1:8000", "Backend domain for Stripe", str),
-    "STRIPE_PAYMENT_SUCCESS_URL": ("https://professorparakeet.com/frontend/payment-success/", "The URL to redirect users when payment success", str),
-    "STRIPE_PAYMENT_FAILURE_URL": ("https://professorparakeet.com/", "The URL to redirect users when payment failed", str),
+    "STRIPE_BACKEND_DOMAIN": (
+        "http://127.0.0.1:8000",
+        "Backend domain for Stripe",
+        str,
+    ),
+    "STRIPE_PAYMENT_SUCCESS_URL": (
+        "https://professorparakeet.com/frontend/payment-success/",
+        "The URL to redirect users when payment success",
+        str,
+    ),
+    "STRIPE_PAYMENT_FAILURE_URL": (
+        "https://professorparakeet.com/",
+        "The URL to redirect users when payment failed",
+        str,
+    ),
     "MAX_KEY_NAME_LENGTH": (50, "The maximum length of the name for API key", int),
     "MAX_DATASET_PER_USER": (20, "The maximum number of dataset per a user", int),
     "MAX_EVALUATION_PER_RECORD": (20, "The evaluation per dataset", int),

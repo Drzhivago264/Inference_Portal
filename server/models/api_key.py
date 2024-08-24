@@ -16,8 +16,8 @@ class APIKEY(AbstractAPIKey):
     monero_credit = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    integrated_address = models.TextField(max_length=106)
-    payment_id = models.TextField(max_length=32)
+    integrated_address = models.TextField(max_length=106, null=True, blank=True)
+    payment_id = models.TextField(max_length=32, null=True, blank=True)
     ratelimit = models.TextField(default="5000/minute")
 
     class Meta:

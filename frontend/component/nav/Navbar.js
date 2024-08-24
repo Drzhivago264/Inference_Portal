@@ -25,7 +25,7 @@ import Jdenticon from "react-jdenticon";
 import {Link} from "react-router-dom";
 import {Menu} from "@mui/base/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
-import {MenuItem} from "@mui/base/MenuItem";
+import MenuItem from "@mui/material/MenuItem";
 import PropTypes from "prop-types";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
@@ -268,7 +268,6 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 				</Drawer>
 				<Container maxWidth={max_width}>
 					<Toolbar disableGutters>
-                        
 						<IconButton
 							size='large'
 							edge='start'

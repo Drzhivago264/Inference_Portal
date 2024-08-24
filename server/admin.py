@@ -165,12 +165,8 @@ class PaymentHistoryAdmin(admin.ModelAdmin):
         "type",
         "crypto",
         "amount",
-        "integrated_address",
         "xmr_payment_id",
         "stripe_payment_id",
-        "transaction_hash",
-        "locked",
-        "block_height",
     )
 
     list_display_links = ("key", "crypto")
