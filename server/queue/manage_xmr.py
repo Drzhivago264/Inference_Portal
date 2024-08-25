@@ -3,9 +3,40 @@ import json
 import requests
 from celery import shared_task
 from decouple import config
-
-from server.models.product import Crypto
-
+from server.utils.sync_.manage_monero import manage_monero
+from server.models.product import Crypto, PaymentHistory, APIKEY
+from django.db.models import F
+from django.db import transaction
+@shared_task()
+def validate_xmr_payment():
+    pending_payment = PaymentHistory.objects.filter(type=PaymentHistory.PaymentType.XMR, status=PaymentHistory.PaymentStatus.PENDING, locked=True)
+    for payment in pending_payment.iterator(chunk_size=10):
+        tx_hash = payment.transaction_hash
+        payment_check = manage_monero("get_transfer_by_txid", {"txid": tx_hash})
+        try:
+            parsed_response = json.loads(payment_check.text)["result"]["transfer"]                
+        except KeyError:
+            continue
+        payment_id_response = parsed_response["payment_id"]
+        amount = parsed_response["amount"]
+        block_height = parsed_response["height"]
+        locked = parsed_response["locked"]
+        unlock_time = parsed_response["unlock_time"]
+        if int(unlock_time) == 0 and not locked:
+            with transaction.atomic():
+                locked_key = APIKEY.objects.select_for_update().get(payment_id=payment_id_response)
+                locked_key.monero_credit = (
+                    F("monero_credit") + amount / 1e12
+                )
+                locked_key.save()
+                payment.status = PaymentHistory.PaymentStatus.PROCESSED
+                payment.locked = locked
+                payment.unlock_time = unlock_time
+                payment.block_height = block_height
+                payment.extra_data = parsed_response
+                payment.save()
+        else:
+            continue
 
 @shared_task()
 def update_crypto_rate(coin: str):

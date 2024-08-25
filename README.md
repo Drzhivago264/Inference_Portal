@@ -130,7 +130,7 @@ Next you must setup STRIPE CLI and start a webhook:
 
 Next you must setup Monero and start a rpc server, I am working on a full tutorial to deploy your own node and payment server:
 
-    ./monero-wallet-rpc --daemon-address {Your node address} --rpc-bind-port 18082 --wallet-file {your wallet file} --password {your password} --disable-rpc-login
+    ./monero-wallet-rpc --daemon-address {Your node address} --rpc-bind-port 18082 --wallet-file {your wallet file} --password {your password} --disable-rpc-login  --tx-notify '/{path to}/python3 /Inference_Portal/monero-rpc-callback.py {MONERO_WEBHOOK_SECRET} %s'
 
 \*Noting that in production server you must generate "View-only" wallet from your local wallet (secret key) to avoid being robbed by the society.
 

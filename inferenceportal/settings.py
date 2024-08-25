@@ -232,6 +232,11 @@ CONSTANCE_CONFIG = {
         "Every day a celery task is scheduled to scan and delete expired key",
         int,
     ),
+    "VALIDATE_XMR_PAYMENT": (
+        1800,
+        "Every 30 minutes a celery task is scheduled to scan and validate pending XMR payment",
+        int,
+    ),
     "KEY_TTL": (
         7,
         "if a API Key does not have any credit and exist longer than a week, then celery task will be scheduled to delete the key.",

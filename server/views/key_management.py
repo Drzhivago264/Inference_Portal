@@ -9,13 +9,12 @@ from django.contrib.auth import login
 from django.contrib.auth.models import Group, Permission, User
 from django.db import IntegrityError, transaction
 from django.db.models import F
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.http import HttpRequest, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView
+
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.exceptions import AuthenticationFailed
@@ -96,17 +95,15 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                 raise AuthenticationFailed(
                     detail="Your Key Name and/or Key is/are incorrect"
                 )
-            payment_check = (
-                manage_monero("get_transfer_by_txid", {"txid": tx_id})
-                if tx_id
-                else manage_monero("get_payments", {"payment_id": key.payment_id})
-            )
+
+            if tx_id:
+                payment_check = manage_monero("get_transfer_by_txid", {"txid": tx_id})
+            else:
+                tx_hash = json.loads(manage_monero("get_payments", {"payment_id": key.payment_id}).text)['result']["payments"][0]["tx_hash"]
+                payment_check = manage_monero("get_transfer_by_txid", {"txid": tx_hash})
+            
             try:
-                parsed_response = (
-                    json.loads(payment_check.text)["result"]["transfer"]
-                    if tx_id
-                    else json.loads(payment_check.text)["result"]["payments"][0]
-                )
+                parsed_response = json.loads(payment_check.text)["result"]["transfer"]
             except KeyError:
                 return Response(
                     {
@@ -131,19 +128,16 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                         {"detail": "Payment ID from the transaction does not match"},
                         status=status.HTTP_404_NOT_FOUND,
                     )
-                address_response = parsed_response["address"]
                 amount = parsed_response["amount"]
-                block_height = (
-                    parsed_response["height"]
-                    if tx_id
-                    else parsed_response["block_height"]
-                )
+                block_height = parsed_response["height"]
                 locked = parsed_response["locked"]
-                tx_hash = (
-                    parsed_response["txid"] if tx_id else parsed_response["tx_hash"]
-                )
+                tx_hash = parsed_response["txid"] 
                 unlock_time = parsed_response["unlock_time"]
-                confirmation = parsed_response["confirmations"] if tx_id else json.loads(manage_monero("get_transfer_by_txid", {"txid": tx_hash}).text)["result"]["transfer"]["confirmations"]
+                try:
+                    confirmation = parsed_response["confirmations"]
+                except KeyError:
+                    confirmation = 0
+                address_response =  parsed_response["address"] 
                 crypto = Crypto.objects.get(coin="xmr")
                 if int(unlock_time) == 0 and not locked:
                     try:
@@ -168,7 +162,6 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                                 payment.status = PaymentHistory.PaymentStatus.PROCESSED
                                 payment.locked = locked
                                 payment.unlock_time = unlock_time
-                                payment.block_height = block_height
                                 payment.extra_data = parsed_response
                                 payment.save()
                                 return Response(
@@ -225,10 +218,6 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                         xmr_payment_id=payment_id_response,
                         transaction_hash=tx_hash,
                         status=PaymentHistory.PaymentStatus.PENDING,
-                        locked=locked,
-                        unlock_time=unlock_time,
-                        block_height=block_height,
-                        extra_data=parsed_response,
                     )
                     return Response(
                         {
@@ -516,7 +505,6 @@ def xmr_payment_webhook(request: HttpRequest) -> Response:
                 locked = parsed_response["locked"]
                 tx_hash = parsed_response["txid"] 
                 unlock_time = parsed_response["unlock_time"]
-                confirmation = parsed_response["confirmations"]
                 crypto = Crypto.objects.get(coin="xmr")
                 if int(unlock_time) == 0 and not locked:
                     try:
@@ -571,7 +559,6 @@ def xmr_payment_webhook(request: HttpRequest) -> Response:
                             status=PaymentHistory.PaymentStatus.PROCESSED,
                             locked=locked,
                             unlock_time=unlock_time,
-                            block_height=block_height,
                             extra_data=parsed_response,
                         )
                         with transaction.atomic():
@@ -597,15 +584,11 @@ def xmr_payment_webhook(request: HttpRequest) -> Response:
                         integrated_address=address_response,
                         xmr_payment_id=payment_id_response,
                         transaction_hash=tx_hash,
-                        status=PaymentHistory.PaymentStatus.PENDING,
-                        locked=locked,
-                        unlock_time=unlock_time,
-                        block_height=block_height,
-                        extra_data=parsed_response,
+                        status=PaymentHistory.PaymentStatus.PENDING
                     )
                     return Response(
                         {
-                            "detail": f"{tx_hash} is detected, but locked={locked}, unlock_time={unlock_time}, confirmation={confirmation}/10"
+                            "detail": f"{tx_hash} is detected, but locked={locked}, unlock_time={unlock_time}"
                         },
                         status=status.HTTP_200_OK,
                     )

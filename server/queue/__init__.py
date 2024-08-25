@@ -8,4 +8,4 @@ from .log_prompt_response import celery_log_prompt_response
 from .model_inference import agent_inference, inference
 from .object_expire import periodically_delete_unused_key
 from .send_mail import send_email_
-from .update_xmr import update_crypto_rate
+from .manage_xmr import update_crypto_rate

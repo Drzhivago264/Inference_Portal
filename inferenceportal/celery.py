@@ -31,7 +31,7 @@ app.conf.beat_schedule = {
         "options": {"queue": "periodic"},
     },
     "periodically_update_xrm_prince": {
-        "task": "server.queue.update_xmr.update_crypto_rate",
+        "task": "server.queue.manage_xmr.update_crypto_rate",
         "schedule": constant.XMR_PRICE_INTERVAL,
         "args": (["xmr"]),
         "options": {"queue": "periodic"},
@@ -39,6 +39,11 @@ app.conf.beat_schedule = {
     "periodically_delete_unused_key": {
         "task": "server.queue.object_expire.periodically_delete_unused_key",
         "schedule": constant.DELETE_KEY_INTERVAL,
+        "options": {"queue": "periodic"},
+    },
+    "periodically_validate_xmr_payment": {
+        "task": "server.queue.manage_xmr.validate_xmr_payment",
+        "schedule": constant.VALIDATE_XMR_PAYMENT,
         "options": {"queue": "periodic"},
     },
 }
