@@ -139,6 +139,7 @@ Next you need to set up .env file and setup the following key. Note that, if you
     STRIPE_PUBLISHABLE_KEY=""
     STRIPE_SECRET_KEY=""
     STRIPE_WEBHOOK_SECRET=""
+    MONERO_WEBHOOK_SECRET="" (This field is provided by you, it is a password to authenticate webhook call from your own server whenever new XMR transaction detected. I add this because I am a little bit paranoid, but you should keep it hard to guess. It will be supplied in this RPC command  with --tx-notify '/{path to}/python3 /{path to}/monero-rpc-callback.py {MONERO_WEBHOOK_SECRET} %s')
     EMAIL_ADDRESS = "" (The EMAIL_ADDRESS that fowards contact form)
     EMAIL_PASSWORD = "" (The password for EMAIL_ADDRESS that fowards contact form)
     DJANGO_SETTINGS_MODULE="inferenceportal.settings"

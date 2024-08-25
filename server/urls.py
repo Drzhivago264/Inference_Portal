@@ -17,6 +17,7 @@ from server.views.key_management import (
     product_list_api,
     retrive_xmr_wallet_api,
     stripe_redirect,
+    xmr_payment_webhook
 )
 from server.views.prompt_writing import (
     create_user_dataset_api,
@@ -83,6 +84,7 @@ urlpatterns = [
     ),
     path("frontend-api/stripe-redirect", stripe_redirect, name="stripe-payment"),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
+    path("webhooks/xmr/", xmr_payment_webhook, name="xmr-webhook"),
     path("frontend-api/products", product_list_api, name="product-list"),
     # ENDPOINT FOR SENDING MAIL
     path("frontend-api/send-mail", contact_api, name="contact"),
