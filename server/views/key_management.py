@@ -1,5 +1,4 @@
 import json
-from decouple import config
 
 import requests
 import stripe
@@ -9,12 +8,8 @@ from django.contrib.auth import login
 from django.contrib.auth.models import Group, Permission, User
 from django.db import IntegrityError, transaction
 from django.db.models import F
-from django.http import HttpRequest, HttpResponse
-from django.utils.decorators import method_decorator
-from django.views import View
+from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from django.views.decorators.csrf import csrf_exempt
-
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.exceptions import AuthenticationFailed
@@ -31,7 +26,6 @@ from server.models.product import Crypto, PaymentHistory, Price, Product
 from server.utils.sync_.manage_monero import manage_monero
 from server.views.custom_exception import ServiceUnavailable
 from server.views.serializer import (
-    MoneroWebhookSerializer,
     CheckKeySerializer,
     CreateKeySerializer,
     MoneroTransactionSerializer,
@@ -99,9 +93,11 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
             if tx_id:
                 payment_check = manage_monero("get_transfer_by_txid", {"txid": tx_id})
             else:
-                tx_hash = json.loads(manage_monero("get_payments", {"payment_id": key.payment_id}).text)['result']["payments"][0]["tx_hash"]
+                tx_hash = json.loads(
+                    manage_monero("get_payments", {"payment_id": key.payment_id}).text
+                )["result"]["payments"][0]["tx_hash"]
                 payment_check = manage_monero("get_transfer_by_txid", {"txid": tx_hash})
-            
+
             try:
                 parsed_response = json.loads(payment_check.text)["result"]["transfer"]
             except KeyError:
@@ -115,7 +111,6 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                     },
                     status=status.HTTP_404_NOT_FOUND,
                 )
-
             if not parsed_response:
                 return Response(
                     {"detail": "No transaction detected"},
@@ -131,13 +126,13 @@ def confirm_xmr_payment_api(request: HttpRequest) -> Response:
                 amount = parsed_response["amount"]
                 block_height = parsed_response["height"]
                 locked = parsed_response["locked"]
-                tx_hash = parsed_response["txid"] 
+                tx_hash = parsed_response["txid"]
                 unlock_time = parsed_response["unlock_time"]
                 try:
                     confirmation = parsed_response["confirmations"]
                 except KeyError:
                     confirmation = 0
-                address_response =  parsed_response["address"] 
+                address_response = parsed_response["address"]
                 crypto = Crypto.objects.get(coin="xmr")
                 if int(unlock_time) == 0 and not locked:
                     try:
@@ -397,200 +392,3 @@ def stripe_redirect(request: HttpRequest) -> Response:
             raise AuthenticationFailed(
                 detail="Your Key Name and/or Key is/are incorrect"
             )
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class StripeWebhookView(View):
-    """
-    Stripe webhook view to handle checkout session completed event.
-    """
-
-    def post(self, request: HttpRequest, format: None = None) -> HttpResponse:
-        payload = request.body
-        endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
-        sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
-        event = None
-        try:
-            event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-        except ValueError:
-            # Invalid payload
-            return HttpResponse(status=400)
-        except stripe.error.SignatureVerificationError as e:
-            # Invalid signature
-            return HttpResponse(status=400)
-
-        if event["type"] == "checkout.session.completed":
-            session = event["data"]["object"]
-            key_id = session["metadata"]["key_id"]
-            c = float(session["metadata"]["price"]) * float(
-                session["metadata"]["quantity"]
-            )
-            with transaction.atomic():
-                locked_key = APIKEY.objects.select_for_update().get(id=key_id)
-                locked_key.credit = F("credit") + c
-                locked_key.save()
-                PaymentHistory.objects.create(
-                    key=locked_key,
-                    type=PaymentHistory.PaymentType.STRIPE,
-                    stripe_payment_id=session["id"],
-                    currency=session["currency"],
-                    payment_intent=session["payment_intent"],
-                    payment_method_type=session["payment_method_types"][0],
-                    payment_status=session["payment_status"],
-                    billing_city=session["customer_details"]["address"]["city"],
-                    billing_postcode=session["customer_details"]["address"][
-                        "postal_code"
-                    ],
-                    billing_address_1=session["customer_details"]["address"]["line1"],
-                    billing_address_2=session["customer_details"]["address"]["line2"],
-                    billing_state=session["customer_details"]["address"]["state"],
-                    billing_country_code=session["customer_details"]["address"][
-                        "country"
-                    ],
-                    email=session["customer_details"]["email"],
-                    user_name=session["customer_details"]["name"],
-                    amount=session["amount_total"] / 100,
-                    amount_subtotal=session["amount_subtotal"] / 100,
-                    extra_data=session,
-                    status=PaymentHistory.PaymentStatus.PROCESSED,
-                )
-        # Can handle other events here.
-        return HttpResponse(status=200)
-
-@api_view(["POST"])
-@csrf_exempt
-def xmr_payment_webhook(request: HttpRequest) -> Response:
-    serializer = MoneroWebhookSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        tx_id = serializer.validated_data["tx_id"]
-        monero_webhook_secret = serializer.validated_data["monero_webhook_secret"]
-        if monero_webhook_secret != config("MONERO_WEBHOOK_SECRET"):
-            raise AuthenticationFailed(
-                detail="MONERO WEBHOOK SECRET is incorrect"
-            )
-        try:
-            payment_check = manage_monero("get_transfer_by_txid", {"txid": tx_id})
-            try:
-                parsed_response = json.loads(payment_check.text)["result"]["transfer"]                
-            except KeyError:
-                return Response(
-                    {
-                        "detail": "No transaction detected, check txid."             
-                    },
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-            if not parsed_response:
-                return Response(
-                    {"detail": "No transaction detected"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-            else:
-                payment_id_response = parsed_response["payment_id"]
-                address_response = parsed_response["address"]
-                try:
-                    key = APIKEY.objects.get(payment_id=payment_id_response)
-                except APIKEY.DoesNotExist:
-                    return Response(
-                        {"detail": "Cannot find API Key of this transaction"},
-                        status=status.HTTP_404_NOT_FOUND,
-                    )
-                
-                if payment_id_response != key.payment_id:
-                    return Response(
-                        {"detail": "Payment ID from the transaction does not match"},
-                        status=status.HTTP_404_NOT_FOUND,
-                    )
-                amount = parsed_response["amount"]
-                block_height = parsed_response["height"]
-                locked = parsed_response["locked"]
-                tx_hash = parsed_response["txid"] 
-                unlock_time = parsed_response["unlock_time"]
-                crypto = Crypto.objects.get(coin="xmr")
-                if int(unlock_time) == 0 and not locked:
-                    try:
-                        with transaction.atomic():
-                            payment = PaymentHistory.objects.get(
-                                key=key,
-                                type=PaymentHistory.PaymentType.XMR,
-                                crypto=crypto,
-                                amount=amount / 1e12,
-                                integrated_address=address_response,
-                                xmr_payment_id=payment_id_response,
-                                transaction_hash=tx_hash,
-                            )
-                            if payment.status == PaymentHistory.PaymentStatus.PENDING:
-                                locked_key = APIKEY.objects.select_for_update().get(
-                                    hashed_key=key.hashed_key
-                                )
-                                locked_key.monero_credit = (
-                                    F("monero_credit") + amount / 1e12
-                                )
-                                locked_key.save()
-                                payment.status = PaymentHistory.PaymentStatus.PROCESSED
-                                payment.locked = locked
-                                payment.unlock_time = unlock_time
-                                payment.block_height = block_height
-                                payment.extra_data = parsed_response
-                                payment.save()
-                                return Response(
-                                    {
-                                        "detail": f"Transaction is success, add {amount/1e+12} XMR to key {key.name}"
-                                    },
-                                    status=status.HTTP_200_OK,
-                                )
-                            elif (
-                                payment.status == PaymentHistory.PaymentStatus.PROCESSED
-                            ):
-                                return Response(
-                                    {
-                                        "detail": f"The submited tx_hash: {tx_hash} was already recorded, no change to xmr credit of key: {key.name}"
-                                    },
-                                    status=status.HTTP_200_OK,
-                                )
-                    except PaymentHistory.DoesNotExist:
-                        PaymentHistory.objects.create(
-                            key=key,
-                            type=PaymentHistory.PaymentType.XMR,
-                            crypto=crypto,
-                            amount=amount / 1e12,
-                            integrated_address=address_response,
-                            xmr_payment_id=payment_id_response,
-                            transaction_hash=tx_hash,
-                            status=PaymentHistory.PaymentStatus.PROCESSED,
-                            locked=locked,
-                            unlock_time=unlock_time,
-                            extra_data=parsed_response,
-                        )
-                        with transaction.atomic():
-                            locked_key = APIKEY.objects.select_for_update().get(
-                                hashed_key=key.hashed_key
-                            )
-                            locked_key.monero_credit = (
-                                F("monero_credit") + amount / 1e12
-                            )
-                            locked_key.save()
-                        return Response(
-                            {
-                                "detail": f"Transaction is success, add {amount/1e+12} XMR to key {key.name}"
-                            },
-                            status=status.HTTP_200_OK,
-                        )
-                else:
-                    PaymentHistory.objects.get_or_create(
-                        key=key,
-                        type=PaymentHistory.PaymentType.XMR,
-                        crypto=crypto,
-                        amount=amount / 1e12,
-                        integrated_address=address_response,
-                        xmr_payment_id=payment_id_response,
-                        transaction_hash=tx_hash,
-                        status=PaymentHistory.PaymentStatus.PENDING
-                    )
-                    return Response(
-                        {
-                            "detail": f"{tx_hash} is detected, but locked={locked}, unlock_time={unlock_time}"
-                        },
-                        status=status.HTTP_200_OK,
-                    )
-        except requests.exceptions.ConnectionError:
-            raise ServiceUnavailable

@@ -1,6 +1,9 @@
-import sys
-import requests
 import logging
+import sys
+
+import requests
+
+
 def call_XMR_webhook_endpoint(monero_webhook_secret: str, tx_id: str):
     """
     This function will be called by Monero RPC whenever new transaction received.
@@ -15,13 +18,9 @@ def call_XMR_webhook_endpoint(monero_webhook_secret: str, tx_id: str):
     if tx_id and monero_webhook_secret:
         response = requests.post(
             "http://127.0.0.1:8000/webhooks/xmr/",
-            json={
-                "tx_id": tx_id,
-                "monero_webhook_secret": monero_webhook_secret
-            },
+            json={"tx_id": tx_id, "monero_webhook_secret": monero_webhook_secret},
         )
         logging.info(response.json())
-
 
 
 call_XMR_webhook_endpoint(sys.argv[1], sys.argv[2])

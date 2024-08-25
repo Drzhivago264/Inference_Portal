@@ -4,6 +4,7 @@
 /static
 /staticfiles
 
+celerybeat-schedule
 ### Django ###
 *.log
 *.pot

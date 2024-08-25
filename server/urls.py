@@ -10,14 +10,12 @@ from server.views.contact import contact_api
 from server.views.export_dataset import export_user_dataset_api
 from server.views.information import check_login, log_in, log_out, model_api
 from server.views.key_management import (
-    StripeWebhookView,
     check_credit_api,
     confirm_xmr_payment_api,
     generate_key_api,
     product_list_api,
     retrive_xmr_wallet_api,
     stripe_redirect,
-    xmr_payment_webhook
 )
 from server.views.prompt_writing import (
     create_user_dataset_api,
@@ -44,6 +42,8 @@ from server.views.token_management import (
     remove_permission,
     update_ratelimit,
 )
+from server.webhooks.monero_webhook import xmr_payment_webhook
+from server.webhooks.stripe_webhook import StripeWebhookView
 
 app_name = "server"
 

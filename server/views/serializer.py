@@ -121,9 +121,6 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
             "created_at",
         )
 
-    # Return None for lazy loading from the frontend
-
-
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -249,9 +246,12 @@ class CheckKeySerializer(CreateKeySerializer):
 class MoneroTransactionSerializer(CheckKeySerializer):
     tx_id = serializers.CharField(required=False, allow_null=True)
 
+
 class MoneroWebhookSerializer(serializers.Serializer):
     tx_id = serializers.CharField(required=True, allow_null=False)
     monero_webhook_secret = serializers.CharField(required=True, allow_null=False)
+
+
 class SendMailSerializer(CheckKeySerializer):
     message = serializers.CharField()
     username = serializers.CharField()

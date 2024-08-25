@@ -3,18 +3,30 @@ import json
 import requests
 from celery import shared_task
 from decouple import config
-from server.utils.sync_.manage_monero import manage_monero
-from server.models.product import Crypto, PaymentHistory, APIKEY
-from django.db.models import F
 from django.db import transaction
+from django.db.models import F
+
+from server.models.product import APIKEY, Crypto, PaymentHistory
+from server.utils.sync_.manage_monero import manage_monero
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
+
+
 @shared_task()
 def validate_xmr_payment():
-    pending_payment = PaymentHistory.objects.filter(type=PaymentHistory.PaymentType.XMR, status=PaymentHistory.PaymentStatus.PENDING, locked=True)
+    pending_payment = PaymentHistory.objects.filter(
+        type=PaymentHistory.PaymentType.XMR,
+        status=PaymentHistory.PaymentStatus.PENDING,
+        failed_validate_attempt__lt=10,
+    )
+    
     for payment in pending_payment.iterator(chunk_size=10):
+        logger.info(f"Validate transaction: {payment.id}")
         tx_hash = payment.transaction_hash
         payment_check = manage_monero("get_transfer_by_txid", {"txid": tx_hash})
         try:
-            parsed_response = json.loads(payment_check.text)["result"]["transfer"]                
+            parsed_response = json.loads(payment_check.text)["result"]["transfer"]
         except KeyError:
             continue
         payment_id_response = parsed_response["payment_id"]
@@ -24,10 +36,10 @@ def validate_xmr_payment():
         unlock_time = parsed_response["unlock_time"]
         if int(unlock_time) == 0 and not locked:
             with transaction.atomic():
-                locked_key = APIKEY.objects.select_for_update().get(payment_id=payment_id_response)
-                locked_key.monero_credit = (
-                    F("monero_credit") + amount / 1e12
+                locked_key = APIKEY.objects.select_for_update().get(
+                    payment_id=payment_id_response
                 )
+                locked_key.monero_credit = F("monero_credit") + amount / 1e12
                 locked_key.save()
                 payment.status = PaymentHistory.PaymentStatus.PROCESSED
                 payment.locked = locked
@@ -36,7 +48,9 @@ def validate_xmr_payment():
                 payment.extra_data = parsed_response
                 payment.save()
         else:
-            continue
+            payment.failed_validate_attempt = F("failed_validate_attempt") + 1
+            payment.save()
+
 
 @shared_task()
 def update_crypto_rate(coin: str):

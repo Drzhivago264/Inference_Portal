@@ -233,8 +233,8 @@ CONSTANCE_CONFIG = {
         int,
     ),
     "VALIDATE_XMR_PAYMENT": (
-        1800,
-        "Every 30 minutes a celery task is scheduled to scan and validate pending XMR payment",
+        1200,
+        "Every 20 minutes (10 blocks) a celery task is scheduled to scan and validate pending XMR payment",
         int,
     ),
     "KEY_TTL": (

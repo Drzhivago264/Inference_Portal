@@ -64,6 +64,7 @@ class PaymentHistory(models.Model):
     unlock_time = models.IntegerField(blank=True, null=True)
     block_height = models.IntegerField(default=0)
     xmr_payment_id = models.CharField(max_length=32, blank=True, null=True)
+    failed_validate_attempt = models.SmallIntegerField(default=0)
 
     # These fields are only applicable for Stripe payments
     stripe_payment_id = models.CharField(max_length=255, blank=True, null=True)

@@ -5,7 +5,7 @@ from .ec2_manage import (
 )
 from .export_dataset import export_large_dataset
 from .log_prompt_response import celery_log_prompt_response
+from .manage_xmr import update_crypto_rate
 from .model_inference import agent_inference, inference
 from .object_expire import periodically_delete_unused_key
 from .send_mail import send_email_
-from .manage_xmr import update_crypto_rate
