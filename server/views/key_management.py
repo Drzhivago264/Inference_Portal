@@ -15,6 +15,7 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework.exceptions import PermissionDenied
 
 from server.api_throttling_rates import (
     CreditCheckRateThrottle,
@@ -22,6 +23,7 @@ from server.api_throttling_rates import (
     XMRConfirmationRateThrottle,
 )
 from server.models.api_key import APIKEY
+from server.utils.sync_.sync_cache import get_user_or_set_cache
 from server.models.product import Crypto, PaymentHistory, Price, Product
 from server.utils.sync_.manage_monero import manage_monero
 from server.views.custom_exception import ServiceUnavailable
@@ -31,6 +33,7 @@ from server.views.serializer import (
     MoneroTransactionSerializer,
     ProductSerializer,
     StripePaymentSerializer,
+    PaymentHistorySerializer
 )
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -38,11 +41,29 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @api_view(["GET"])
 @throttle_classes([AnonRateThrottle])
-@cache_page(60 * 60)
 def product_list_api(request: HttpRequest) -> Response:
     page_content = Product.objects.all()
     serializer = ProductSerializer(page_content, many=True)
     return Response({"products": serializer.data})
+
+@api_view(["GET"])
+@throttle_classes([AnonRateThrottle])
+def credit_balance_api(request: HttpRequest) -> Response:
+    current_user = request.user
+    _, master_user = get_user_or_set_cache(
+        prefix="user_tuple",
+        key=current_user.password,
+        timeout=60,
+        current_user=current_user,
+    )
+    if not master_user:
+        raise PermissionDenied(detail="Your token is expired")
+    key = master_user.apikey
+    payment_history = PaymentHistory.objects.filter(key=key)
+    payment_data = PaymentHistorySerializer(payment_history, many=True)
+    fiat_balance = key.credit
+    monero_balance = key.monero_credit
+    return Response({"fiat_balance": fiat_balance, 'monero_balance': monero_balance, 'payment_history': payment_data.data})
 
 
 @api_view(["POST"])

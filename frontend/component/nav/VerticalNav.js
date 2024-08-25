@@ -15,7 +15,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PropTypes from "prop-types";
-import ReceiptIcon from "@mui/icons-material/Receipt";
 import RuleIcon from "@mui/icons-material/Rule";
 import SavingsIcon from "@mui/icons-material/Savings";
 import StorageIcon from "@mui/icons-material/Storage";
@@ -57,12 +56,6 @@ export const UserVeticalNav = ({ navigate }) => {
 			icon: <StorageIcon />,
 			text: "Your Logs",
 			disabled: false,
-		},
-		{
-			onClick: null,
-			icon: <ReceiptIcon />,
-			text: "Your Payment History",
-			disabled: true,
 		},
 		{
 			onClick: () => navigate("/frontend/cost-monitoring"),

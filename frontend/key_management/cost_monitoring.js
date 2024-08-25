@@ -1,5 +1,5 @@
 import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip} from "chart.js";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {Bar} from "react-chartjs-2";
@@ -13,10 +13,23 @@ import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import NoPermissionDialog from "../component/dialog/NoPermissionDialog";
 import Paper from "@mui/material/Paper";
 import ResponsiveAppBar from "../component/nav/Navbar";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import {Typography} from "@mui/material";
+import {UserContext} from "../App";
 import autocolors from "chartjs-plugin-autocolors";
 import axios from "axios";
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import {useGetCreditBalance} from "../api_hook/useGetCreditBalance";
+import utc from "dayjs/plugin/utc";
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, autocolors);
 
 function CostMonitoring() {
@@ -28,7 +41,11 @@ function CostMonitoring() {
 	const [startdate, setStartDate] = useState(now.subtract(7, "days").format(format_to_hour));
 	const [enddate_total, setEnddateTotal] = useState(now.format(format_to_hour));
 	const [startdate_total, setStartDateTotal] = useState(now.subtract(7, "days").format(format_to_hour));
-	const [no_perm_open, setNoPermOpen] = useState(null);   
+	const [no_perm_open, setNoPermOpen] = useState(null);
+	const [credit_balance, setCreditBalance] = useState(null);
+	const [payment_history, setPaymentHistory] = useState(null);
+	const {timeZone} = useContext(UserContext);
+	useGetCreditBalance(setCreditBalance, setPaymentHistory);
 	useEffect(() => {
 		axios
 			.all([axios.get(`/frontend-api/cost/${startdate}/${enddate}`)])
@@ -203,6 +220,69 @@ function CostMonitoring() {
 			<ResponsiveAppBar max_width='xxl' />
 			<Container maxWidth='xl'>
 				<Box mt={4} sx={{overflow: "auto"}}>
+					<Grid mb={2} container spacing={1}>
+						<Grid item sm={12} md={3} lg={2}>
+							<Typography variant='h5'>Credit Balance</Typography>
+							{credit_balance && (
+								<>
+									<Typography>Fiat Balance: {credit_balance.fiat_balance} USD</Typography>
+									<Typography>Monero Balance: {credit_balance.monero_balance} XMR</Typography>
+								</>
+							)}
+						</Grid>
+						<Grid item sm={12} md={9} lg={10}>
+							{payment_history && (
+								<TableContainer>
+									<Table
+										size='small'
+										sx={{
+											tableLayout: "fixed",
+										}}
+										aria-label='simple table'>
+										<TableHead>
+											<TableRow>
+												<TableCell>Amount</TableCell>
+												<TableCell>Type</TableCell>
+												<TableCell>Status</TableCell>
+												<TableCell sx={{width: "45%"}}>Stripe Payment ID / Transaction Hash (TxId)</TableCell>
+												<TableCell sx={{width: "20%"}}>Created at</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{payment_history.length === 0 && (
+												<TableRow>
+													<TableCell colSpan={4} align='center'>
+														No Transaction
+													</TableCell>
+												</TableRow>
+											)}
+											{payment_history.map((row, index) => (
+												<TableRow key={index}>
+													<TableCell>{row.amount}</TableCell>
+													<TableCell>{row.type}</TableCell>
+													<TableCell
+														style={{
+															whiteSpace: "normal",
+															wordWrap: "break-word",
+														}}>
+														{row.status}
+													</TableCell>
+													<TableCell
+														style={{
+															whiteSpace: "normal",
+															wordWrap: "break-word",
+														}}>
+														{row.stripe_payment_id} {row.transaction_hash}
+													</TableCell>
+													<TableCell>{dayjs(row.created_at).utc("z").local().tz(timeZone).toString()}</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</Grid>
+					</Grid>
 					<Grid container spacing={1}>
 						<Grid item sm={12} md={8}>
 							<Paper pt={2} variant='outlined' sx={{overflow: "auto"}}>
@@ -278,7 +358,7 @@ function CostMonitoring() {
 				</Box>
 			</Container>
 			<Footer />
-            <NoPermissionDialog setNoPermOpen={setNoPermOpen} no_perm_open={no_perm_open}/>
+			<NoPermissionDialog setNoPermOpen={setNoPermOpen} no_perm_open={no_perm_open} />
 		</Container>
 	);
 }

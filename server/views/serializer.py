@@ -5,7 +5,7 @@ from server.models.dataset import Dataset
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
 from server.models.log import MemoryTreeMP, PromptResponse
-from server.models.product import Product
+from server.models.product import Product, PaymentHistory
 
 
 class CostSerializer(serializers.ModelSerializer):
@@ -262,6 +262,12 @@ class StripePaymentSerializer(CheckKeySerializer):
     product_id = serializers.CharField()
 
 
+class PaymentHistorySerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source='get_type_display')
+    status = serializers.CharField(source='get_status_display')
+    class Meta:
+        model = PaymentHistory
+        fields = ("type", "status", "amount", "transaction_hash", "stripe_payment_id", "created_at")
 class ModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LLM

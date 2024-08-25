@@ -40,7 +40,8 @@ class Crypto(models.Model):
 
 
 class PaymentHistory(models.Model):
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     class PaymentType(models.IntegerChoices):
         STRIPE = 1, "Stripe"
         XMR = 2, "XMR"

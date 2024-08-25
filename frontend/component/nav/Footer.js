@@ -180,7 +180,7 @@ export default function Footer() {
 					sx={{
 						color: "text.secondary",
 					}}>
-					<IconButton color='inherit' href='https://github.com/mui' aria-label='GitHub' sx={{alignSelf: "center"}}>
+					<IconButton color='inherit' href='https://github.com/Drzhivago264/Inference_Portal' aria-label='GitHub' sx={{alignSelf: "center"}}>
 						<FacebookIcon />
 					</IconButton>
 					<IconButton color='inherit' href='https://twitter.com/MaterialUI' aria-label='X' sx={{alignSelf: "center"}}>
