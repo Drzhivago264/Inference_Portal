@@ -44,7 +44,7 @@ def update_server_status_in_db(
     """
     server_object = InferenceServer.objects.get(name=instance_id)
     if update_type == "status":
-        server_object.status = "pending"
+        server_object.status = InferenceServer.StatusType.PENDING
     elif update_type == "time":
         server_object.last_message_time = timezone.now()
 

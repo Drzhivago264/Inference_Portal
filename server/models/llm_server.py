@@ -27,9 +27,28 @@ class InferenceServer(models.Model):
     hosted_model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     public_ip = models.GenericIPAddressField()
     private_ip = models.GenericIPAddressField()
-    status = models.CharField(max_length=255, default="off")
     last_message_time = models.DateTimeField(default=now)
-    availability = models.CharField(max_length=255, default="Not Available")
+    
+    class AvailabilityType(models.IntegerChoices):
+        AVAILABLE = 1, "Available"
+        NOT_AVAILABLE = 2, "Not Available"
+        TESTING = 3, "Testing"
 
+    availability = models.PositiveSmallIntegerField(
+        choices=AvailabilityType.choices, default=AvailabilityType.NOT_AVAILABLE
+    )
+
+    class StatusType(models.IntegerChoices):
+        PENDING = 1, "Pending"
+        STOPPED = 2, "Stopped"
+        STOPPING = 3, "Stopping"
+        RUNNING = 4, "Running"
+        SHUTTING_DOWN = 5, "Shutting Down"
+        TERMINATED = 6, "Terminated"
+
+
+    status = models.PositiveSmallIntegerField(
+        choices=StatusType.choices, default=StatusType.STOPPED)
+    
     def __str__(self) -> str:
         return self.name

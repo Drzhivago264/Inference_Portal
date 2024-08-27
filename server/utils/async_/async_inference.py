@@ -14,7 +14,7 @@ from server.utils.async_.async_manage_ec2 import (
 )
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.inference import action_parse_json
-
+from server.models.llm_server import InferenceServer
 
 class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
     async def openai_client_async(
@@ -219,7 +219,7 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time"
             )
-            if server_status == "running":
+            if server_status == InferenceServer.StatusType.RUNNING:
                 raw_response = await self.openai_client_async(
                     processed_prompt=processed_prompt, vllm_server_url=url, llm=llm
                 )
@@ -256,7 +256,7 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
             await update_server_status_in_db_async(
                 instance_id=instance_id, update_type="time"
             )
-            if server_status == "running":
+            if server_status == InferenceServer.StatusType.RUNNING:
                 raw_response = await self.openai_client_async(
                     processed_prompt=self.session_history, vllm_server_url=url, llm=llm
                 )

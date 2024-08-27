@@ -21,7 +21,7 @@ from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
 from server.utils.sync_.query_database import get_model, get_model_url
 from server.utils.sync_.sync_cache import get_or_set_cache
-
+from server.models.llm_server import InferenceServer
 region = constant.REGION
 logger = get_task_logger(__name__)
 
@@ -84,7 +84,7 @@ def inference(
             """ Query a list of inference servers for a given model, pick a random one """
             if url:
                 update_server_status_in_db(instance_id=instance_id, update_type="time")
-                if server_status == "running":
+                if server_status == InferenceServer.StatusType.RUNNING:
                     client = OpenAI(
                         api_key=config("VLLM_KEY"),
                         base_url=f"{url}/v1" if url else None,
@@ -126,13 +126,13 @@ def inference(
                             response=clean_response,
                             type_=type_,
                         )
-                elif server_status == "stopped" or "stopping":
+                elif server_status == InferenceServer.StatusType.STOPPED or InferenceServer.StatusType.STOPPING:
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
                     update_server_status_in_db(
                         instance_id=instance_id, update_type="status"
                     )
-                elif server_status == "pending":
+                elif server_status == InferenceServer.StatusType.PENDING:
                     response = "Server is setting up, try again in 30 seconds"
                 else:
                     response = "Unknown Server state, wait 5 seconds"
@@ -250,7 +250,7 @@ def agent_inference(
             url, instance_id, server_status = get_model_url(llm)
             if url:
                 update_server_status_in_db(instance_id=instance_id, update_type="time")
-                if server_status == "running":
+                if server_status == InferenceServer.StatusType.RUNNING:
                     client = OpenAI(
                         api_key=config("VLLM_KEY"),
                         timeout=constant.TIMEOUT,
@@ -293,13 +293,13 @@ def agent_inference(
                             },
                         )
 
-                elif server_status == "stopped" or "stopping":
+                elif server_status == InferenceServer.StatusType.STOPPED or InferenceServer.StatusType.STOPPING:
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
                     update_server_status_in_db(
                         instance_id=instance_id, update_type="status"
                     )
-                elif server_status == "pending":
+                elif server_status == InferenceServer.StatusType.PENDING:
                     response = "Server is setting up, try again in 30 seconds"
                 else:
                     response = "Unknown Server state, wait 5 seconds"

@@ -9,6 +9,7 @@ from django.utils import timezone
 from pydantic import ValidationError
 
 from server.consumers.base_chatbot import BaseChatbot
+from server.models.llm_server import InferenceServer
 from server.consumers.pydantic_validator import ToolSchema
 from server.models.log import PromptResponse
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
@@ -145,7 +146,7 @@ class Consumer(BaseChatbot):
                     await update_server_status_in_db_async(
                         instance_id=instance_id, update_type="time"
                     )
-                    if server_status == "running":
+                    if server_status == InferenceServer.StatusType.RUNNING:
                         client = dspy.HFClientVLLM(
                             model=llm.base,
                             port=80,

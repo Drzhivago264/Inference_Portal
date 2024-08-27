@@ -49,10 +49,9 @@ function ModelInfor() {
 							{error && <div>An error occurred: {error.message}. Contact us and try again later</div>}
 							{isLoading && (
 								<Stack direction='column' spacing={1}>
-									<Skeleton animation='wave' height={60} />
-									<Skeleton animation='wave' height={60} />
-									<Skeleton animation='wave' height={200} />
-									<Skeleton animation='wave' height={60} />
+									{[60, 60, 200, 60].map((height, index) => (
+										<Skeleton key={index} animation='wave' height={height} />
+									))}
 								</Stack>
 							)}
 							{model_objects.map((model_object) => {

@@ -22,7 +22,7 @@ def periodically_monitor_EC2_instance() -> str:
     Returns:
         str : the status of the server
     """
-    available_server = InferenceServer.objects.filter(availability="Available")
+    available_server = InferenceServer.objects.filter(availability=InferenceServer.AvailabilityType.AVAILABLE)
     for server in available_server:
         ec2_resource = boto3.resource(
             "ec2",
@@ -30,9 +30,17 @@ def periodically_monitor_EC2_instance() -> str:
             aws_access_key_id=aws,
             aws_secret_access_key=aws_secret,
         )
+        status_name_dispatch = {
+            "running": InferenceServer.StatusType.RUNNING,
+            "stopping": InferenceServer.StatusType.STOPPING,
+            "stopped": InferenceServer.StatusType.STOPPED,
+            "pending": InferenceServer.StatusType.PENDING,
+            "shutting-down": InferenceServer.StatusType.SHUTTING_DOWN,
+            "terminated": InferenceServer.StatusType.TERMINATED
+        }
         try:
             instance = ec2_resource.Instance(server.name)
-            server.status = instance.state["Name"]
+            server.status = status_name_dispatch[instance.state["Name"]]
             server.private_ip = instance.private_ip_address
             server.url = f"http://{instance.private_ip_address}:80"
             if instance.public_ip_address:
@@ -47,15 +55,14 @@ def periodically_monitor_EC2_instance() -> str:
 @shared_task()
 def periodically_shutdown_EC2_instance() -> None:
     """Periodically shutdown unused EC2 GPU instances every 1200 seconds."""
-    available_servers = InferenceServer.objects.filter(availability="Available")
+    available_servers = InferenceServer.objects.filter(availability=InferenceServer.AvailabilityType.AVAILABLE)
     for server in available_servers:
         unused_time = timezone.now() - server.last_message_time
         if unused_time.total_seconds() > constant.SERVER_TTL and server.status not in [
-            "stopped",
-            "stopping",
+            InferenceServer.StatusType.STOPPED, InferenceServer.StatusType.STOPPING
         ]:
             command_EC2.delay(server.name, region=region, action="off")
-            server.status = "stopping"
+            server.status = InferenceServer.StatusType.STOPPING
             server.save()
 
 

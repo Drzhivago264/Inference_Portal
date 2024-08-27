@@ -7,8 +7,8 @@ from constance import config as constant
 from decouple import config
 from django.utils import timezone
 from pydantic import ValidationError
-from transformers import AutoTokenizer
 
+from server.models.llm_server import InferenceServer
 from server.consumers.base_agent import BaseAgent
 from server.consumers.pydantic_validator import DataSynthesisSchema
 from server.models.log import PromptResponse
@@ -68,7 +68,7 @@ class Consumer(BaseAgent):
                     await update_server_status_in_db_async(
                         instance_id=instance_id, update_type="time"
                     )
-                    if server_status == "running":
+                    if server_status == InferenceServer.StatusType.RUNNING:
                         headers = {
                             "Content-Type": "application/json",
                             "Authorization": f'Bearer {config("VLLM_KEY")}',

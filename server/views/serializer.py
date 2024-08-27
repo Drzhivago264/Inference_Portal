@@ -278,13 +278,14 @@ class ServerSerializer(serializers.ModelSerializer):
     model_name = serializers.SerializerMethodField()
     model_price_input = serializers.SerializerMethodField()
     model_price_output = serializers.SerializerMethodField()
-
+    status = serializers.CharField(source='get_status_display')
+    availability = serializers.CharField(source='get_availability_display')
     class Meta:
         model = InferenceServer
         fields = (
             "id",
-            "status",
             "availability",
+            "status",
             "model_name",
             "model_price_input",
             "model_price_output",

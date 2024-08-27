@@ -85,7 +85,7 @@ def log_in(request: HttpRequest) -> Response:
 
 @api_view(["GET"])
 @throttle_classes([AnonRateThrottle])
-@cache_page(60 * 60)
+@cache_page(60 * 5)
 def model_api(request: HttpRequest) -> Response:
     servers = InferenceServer.objects.all().defer("name").order_by("hosted_model")
     model_info = LLM.objects.filter(is_self_host=True)

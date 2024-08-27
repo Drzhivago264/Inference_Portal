@@ -12,6 +12,7 @@ from api.utils import (
     send_stream_request_async,
 )
 from server.models.log import PromptResponse
+from server.models.llm_server import InferenceServer
 from server.queue.ec2_manage import command_EC2
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
@@ -119,7 +120,7 @@ async def agentcompletion(request, data: AgentSchema):
                 await update_server_status_in_db_async(
                     instance_id=instance_id, update_type="time"
                 )
-                if server_status == "running":
+                if server_status == InferenceServer.StatusType.RUNNING:
                     if not data.stream:
                         response = await send_request_async(
                             url=url,
@@ -139,7 +140,6 @@ async def agentcompletion(request, data: AgentSchema):
                             + [{"role": "assistant", "content": f"{response}"}],
                         }
                     else:
-
                         res = StreamingHttpResponse(
                             send_stream_request_async(
                                 url=url,
@@ -160,7 +160,7 @@ async def agentcompletion(request, data: AgentSchema):
                         res["Cache-Control"] = "no-cache"
                         return res
 
-                elif server_status == "stopped" or "stopping":
+                elif server_status == InferenceServer.StatusType.STOPPED or InferenceServer.StatusType.STOPPING:
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(
                         instance_id=instance_id, update_type="status"
@@ -168,7 +168,7 @@ async def agentcompletion(request, data: AgentSchema):
                     raise HttpError(
                         442, "Server is starting up, try again in 400 seconds"
                     )
-                elif server_status == "pending":
+                elif server_status == InferenceServer.StatusType.PENDING:
                     raise HttpError(
                         442, "Server is setting up, try again in 300 seconds"
                     )

@@ -171,7 +171,7 @@ class QueryDBMixin:
                     m
                     async for m in InferenceServer.objects.filter(
                         hosted_model__name=self.choosen_model if name is None else name,
-                        availability="Available",
+                        availability=InferenceServer.AvailabilityType.AVAILABLE,
                     )
                 ]
                 await cache.aset(

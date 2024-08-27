@@ -5,6 +5,7 @@ from ninja.errors import HttpError
 from api.api_schema import Error, PromptResponseSchema, PromptSchema
 from api.utils import check_permission, send_request_async
 from server.queue.ec2_manage import command_EC2
+from server.models.llm_server import InferenceServer
 from server.rate_limit import RateLimitError, rate_limit_initializer
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async
 from server.utils.async_.async_query_database import QueryDBMixin
@@ -77,7 +78,7 @@ async def textcompletion(request, data: PromptSchema):
                 await update_server_status_in_db_async(
                     instance_id=instance_id, update_type="time"
                 )
-                if server_status == "running":
+                if server_status == InferenceServer.StatusType.RUNNING:
                     response = await send_request_async(
                         url=url,
                         context=context,
@@ -88,7 +89,7 @@ async def textcompletion(request, data: PromptSchema):
                     )
                     return 200, {"response": response, "context": context}
 
-                elif server_status == "stopped" or "stopping":
+                elif server_status == InferenceServer.StatusType.STOPPED or InferenceServer.StatusType.STOPPING:
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(
                         instance_id=instance_id, update_type="status"
@@ -96,7 +97,7 @@ async def textcompletion(request, data: PromptSchema):
                     raise HttpError(
                         442, "Server is starting up, try again in 400 seconds"
                     )
-                elif server_status == "pending":
+                elif server_status == InferenceServer.StatusType.PENDING:
                     raise HttpError(
                         442, "Server is setting up, try again in 300 seconds"
                     )
