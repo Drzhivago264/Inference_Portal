@@ -86,6 +86,23 @@ Before install dependencies, you need to install Postgres, and create a table na
     #if you want to enable postgres on start up use this command
     sudo systemctl enable postgresql
 
+You dont need this for now but, I am building a better RAG for users' memory with pgvectorscale. To begin this, you must ensure that you have Postgres 16 installed (14 or 15 can also work) and then install pgvector scale like this:
+
+    sudo apt-get install make gcc pkg-config clang postgresql-server-dev-16 libssl-dev libclang-dev
+    
+    # install prerequisites
+    ## rust
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    ## pgrx
+    sudo chown -R $(whoami) /usr/lib/postgresql
+    cargo install --locked cargo-pgrx --version 0.11.4
+    cargo pgrx init --pg16 pg_config
+
+    #download, build and install pgvectorscale
+    git clone --branch 0.3.0 https://github.com/timescale/pgvectorscale
+    cd pgvectorscale/pgvectorscale
+    RUSTFLAGS="-C target-feature=+avx2,+fma" cargo pgrx install --release
+
 You also need to install NPM and Node.js for the frontend
 
     sudo apt install nodejs
