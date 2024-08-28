@@ -7,14 +7,13 @@ from treebeard.mp_tree import MP_Node, get_result_class
 
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM
-
+from server.models.general_mixin import GeneralMixin
 
 class AbstractPromptResponse(models.Model):
     prompt = models.TextField()
     response = models.TextField()
     model = models.ForeignKey(LLM, on_delete=models.CASCADE)
     key = models.ForeignKey(APIKEY, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class PromptType(models.IntegerChoices):
         CHATBOT = 1, "chatbot"
@@ -33,7 +32,7 @@ class AbstractPromptResponse(models.Model):
         abstract = True
 
 
-class PromptResponse(AbstractPromptResponse):
+class PromptResponse(AbstractPromptResponse, GeneralMixin):
     input_cost = models.FloatField(default=0.0)
     output_cost = models.FloatField(default=0.0)
     number_input_tokens = models.IntegerField(default=0)
@@ -60,7 +59,7 @@ class PromptResponse(AbstractPromptResponse):
         }
 
 
-class MemoryTreeMP(MP_Node, AbstractPromptResponse):
+class MemoryTreeMP(MP_Node, AbstractPromptResponse, GeneralMixin):
     """
     Steplen = 5 will increase the number of potential root node (64^5 nodes), this can be a problem when the number of key/user get larger than 64^5 which is very unlikely.
 

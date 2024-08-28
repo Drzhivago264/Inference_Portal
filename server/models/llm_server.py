@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from server.models.general_mixin import GeneralMixin
 
-
-class LLM(models.Model):
+class LLM(GeneralMixin):
     name = models.CharField(max_length=255)
     base = models.CharField(max_length=255, blank=True, null=True)
     size = models.IntegerField(default=1)
@@ -19,7 +19,7 @@ class LLM(models.Model):
         return self.name
 
 
-class InferenceServer(models.Model):
+class InferenceServer(GeneralMixin):
     name = models.CharField(max_length=255)
     instance_type = models.CharField(max_length=255)
     url = models.URLField(max_length=255)

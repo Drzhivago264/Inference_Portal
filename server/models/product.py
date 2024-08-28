@@ -3,14 +3,12 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from server.models.api_key import APIKEY
+from server.models.general_mixin import GeneralMixin
 
-
-class Product(models.Model):
+class Product(GeneralMixin):
     name = models.CharField(max_length=255)
     desc = models.TextField(_("Description"), blank=True)
     quantity = models.IntegerField(default=1)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ("-created_at",)
@@ -19,17 +17,15 @@ class Product(models.Model):
         return self.name
 
 
-class Price(models.Model):
+class Price(GeneralMixin):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.DecimalField(decimal_places=2, max_digits=10)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return f"{self.product.name} {self.price}"
 
 
-class Crypto(models.Model):
+class Crypto(GeneralMixin):
     coin = models.TextField()
     address = models.TextField()
     balance = models.FloatField(default=0.0)
@@ -39,9 +35,7 @@ class Crypto(models.Model):
         return self.coin
 
 
-class PaymentHistory(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class PaymentHistory(GeneralMixin):
     class PaymentType(models.IntegerChoices):
         STRIPE = 1, "Stripe"
         XMR = 2, "XMR"

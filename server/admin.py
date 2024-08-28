@@ -4,7 +4,7 @@ from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
 from server.models.api_key import APIKEY, FineGrainAPIKEY
-from server.models.dataset import Dataset, DatasetRecord
+from server.models.dataset import Dataset, DatasetRecord, EmbeddingDatasetRecord
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
 from server.models.log import MemoryTreeMP, PromptResponse
@@ -111,6 +111,21 @@ class DatasetRecordAdmin(admin.ModelAdmin):
     list_editable = ("system_prompt", "prompt", "response", "evaluation")
     list_display_links = ("dataset",)
 
+@admin.register(EmbeddingDatasetRecord)
+class EmbeddingDatasetRecordAdmin(admin.ModelAdmin):
+    model = EmbeddingDatasetRecord
+    list_display = (
+        "dataset",
+        "system_prompt",
+        "prompt",
+        "embedding",
+        "response",
+        "evaluation",
+        "created_at",
+        "updated_at",
+    )
+    list_editable = ("system_prompt", "prompt", "response", "evaluation", "embedding")
+    list_display_links = ("dataset",)
 
 @admin.register(InferenceServer)
 class InferenceServerAdmin(admin.ModelAdmin):

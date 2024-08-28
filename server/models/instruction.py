@@ -3,7 +3,7 @@ import string
 from django.contrib.auth.models import User
 from django.db import models
 from treebeard.mp_tree import MP_Node
-
+from server.models.general_mixin import GeneralMixin
 
 class AbstractInstructionTreeMP(MP_Node):
     node_order_by = ["code"]
@@ -24,7 +24,7 @@ class AbstractInstructionTreeMP(MP_Node):
         abstract = True
 
 
-class InstructionTreeMP(AbstractInstructionTreeMP):
+class InstructionTreeMP(AbstractInstructionTreeMP, GeneralMixin):
     """
     Steplen = 4 have the number of potential root node (64^4 nodes)
     Max_length of path = 255, the tree will have max depth = 255/4 (63)
@@ -35,7 +35,7 @@ class InstructionTreeMP(AbstractInstructionTreeMP):
     pass
 
 
-class UserInstructionTreeMP(AbstractInstructionTreeMP):
+class UserInstructionTreeMP(AbstractInstructionTreeMP, GeneralMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     """
         Steplen = 10 will increase the number of potential root node (64^10 nodes)
