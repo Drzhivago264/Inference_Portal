@@ -83,16 +83,15 @@ class DatasetRecordGetSerialzier(serializers.Serializer):
     prompt = serializers.CharField()
     response = serializers.CharField()
     evaluation = serializers.JSONField()
+    embedding = serializers.ListField()
 
-
-class DatasetRecordSerialzier(serializers.Serializer):
+class DatasetRecordCreateSerialzier(serializers.Serializer):
     record_id = serializers.IntegerField(required=False)
     dataset_id = serializers.IntegerField()
     system_prompt = serializers.CharField()
     prompt = serializers.CharField()
     response = serializers.CharField()
     evaluation = serializers.JSONField()
-
 
 class DatasetDeleteRecordSerialzier(serializers.Serializer):
     record_id = serializers.IntegerField()

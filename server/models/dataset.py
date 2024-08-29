@@ -12,7 +12,7 @@ class Dataset(GeneralMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     default_system_prompt = models.TextField(max_length=128000, default="")
     default_evaluation = models.JSONField(default=list)
-
+    is_embedding_dataset = models.BooleanField(default=True)
     def __str__(self) -> str:
         return self.name
 
@@ -25,11 +25,6 @@ class AbstractDatasetRecord(models.Model):
 
     class Meta:
         abstract = True
-class DatasetRecord(AbstractDatasetRecord, GeneralMixin):
-
-    def __str__(self) -> str:
-        return self.dataset.name
-
 
 class EmbeddingDatasetRecord(AbstractDatasetRecord, GeneralMixin):
     embedding = VectorField(

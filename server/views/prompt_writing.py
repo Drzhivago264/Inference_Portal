@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from server.models.dataset import Dataset, DatasetRecord
+from server.models.dataset import Dataset, EmbeddingDatasetRecord
 from server.utils.sync_.sync_cache import (
     delete_cache,
     get_or_set_cache,
@@ -23,11 +23,11 @@ from server.views.serializer import (
     DatasetEvaluationSerializer,
     DatasetGetSerializer,
     DatasetRecordGetSerialzier,
-    DatasetRecordSerialzier,
+    DatasetRecordCreateSerialzier,
     DatasetUpdateSerializer,
 )
-
-
+from vectordb.utils import get_embedding_function
+from datasets import load_dataset
 @api_view(["GET"])
 @throttle_classes([AnonRateThrottle])
 @permission_classes([IsAuthenticated])
@@ -47,7 +47,8 @@ def get_default_user_dataset_api(request):
     else:
         dataset_list = Dataset.objects.filter(user=master_user)
         if dataset_list:
-            dataset_list_serializer = DatasetGetSerializer(dataset_list, many=True)
+            dataset_list_serializer = DatasetGetSerializer(
+                dataset_list, many=True)
             return Response(
                 {
                     "dataset_list": dataset_list_serializer.data,
@@ -88,9 +89,10 @@ def get_user_records_api(request, id: int):
             raise NotFound(detail="No dataset")
         paginator = PaginatorWithPageNum()
         paginator.page_size = 10
-        records = DatasetRecord.objects.filter(dataset=dataset).order_by("-id")
+        records = EmbeddingDatasetRecord.objects.filter(dataset=dataset).order_by("-id")
         result_records = paginator.paginate_queryset(records, request)
-        record_serializer = DatasetRecordGetSerialzier(result_records, many=True)
+        record_serializer = DatasetRecordGetSerialzier(
+            result_records, many=True)
         return paginator.get_paginated_response(
             {"record_serializer": record_serializer.data}
         )
@@ -222,13 +224,15 @@ def delete_user_dataset_api(request):
 @permission_classes([IsAuthenticated])
 @permission_required("server.add_datasetrecord", raise_exception=True)
 def create_user_record_api(request):
-    serializer = DatasetRecordSerialzier(data=request.data)
+    serializer = DatasetRecordCreateSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.validated_data["dataset_id"]
         system_prompt = serializer.validated_data["system_prompt"]
         prompt = serializer.validated_data["prompt"]
         response = serializer.validated_data["response"]
         evaluation = serializer.validated_data["evaluation"]
+        embedding_fn, _ = get_embedding_function()
+        embedding = embedding_fn(f"{system_prompt}\n{prompt}\n{response}")
         dataset = get_or_set_cache(
             prefix="user_dataset",
             key=dataset_id,
@@ -238,12 +242,13 @@ def create_user_record_api(request):
         )
         if not dataset:
             raise NotFound(detail="No dataset")
-        DatasetRecord.objects.create(
+        EmbeddingDatasetRecord.objects.create(
             dataset=dataset,
             system_prompt=system_prompt,
             prompt=prompt,
             response=response,
             evaluation=evaluation,
+            embedding=embedding
         )
         return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
 
@@ -253,7 +258,7 @@ def create_user_record_api(request):
 @permission_classes([IsAuthenticated])
 @permission_required("server.change_datasetrecord", raise_exception=True)
 def update_user_record_api(request):
-    serializer = DatasetRecordSerialzier(data=request.data)
+    serializer = DatasetRecordCreateSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.validated_data["dataset_id"]
         system_prompt = serializer.validated_data["system_prompt"]
@@ -271,17 +276,20 @@ def update_user_record_api(request):
         if not dataset:
             raise NotFound(detail="No dataset")
         try:
+            embedding_fn, _ = get_embedding_function()
+            embedding = embedding_fn(f"{system_prompt}\n{prompt}\n{response}")
             with transaction.atomic():
-                record = DatasetRecord.objects.select_for_update().get(
+                record = EmbeddingDatasetRecord.objects.select_for_update().get(
                     dataset=dataset, id=record_id
                 )
                 record.system_prompt = system_prompt
                 record.prompt = prompt
                 record.response = response
                 record.evaluation = evaluation
+                record.embedding = embedding
                 record.save()
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
-        except DatasetRecord.DoesNotExist:
+        except EmbeddingDatasetRecord.DoesNotExist:
             raise NotFound(detail="Record does not exist")
 
 
@@ -305,10 +313,10 @@ def delete_user_record_api(request):
             raise NotFound(detail="No dataset")
         try:
             with transaction.atomic():
-                record = DatasetRecord.objects.select_for_update().get(
+                record = EmbeddingDatasetRecord.objects.select_for_update().get(
                     dataset=dataset, id=record_id
                 )
                 record.delete()
             return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
-        except DatasetRecord.DoesNotExist:
+        except EmbeddingDatasetRecord.DoesNotExist:
             raise NotFound(detail="Record does not exist")

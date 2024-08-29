@@ -19,6 +19,7 @@ import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import HelpIcon from "@mui/icons-material/Help";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import List from "@mui/material/List";
@@ -34,6 +35,7 @@ import ResponsiveAppBar from "../component/nav/Navbar.js";
 import SaveIcon from "@mui/icons-material/Save";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
+import { TextCopy } from "../component/custom_ui_component/TextCopy.js";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
@@ -59,6 +61,7 @@ function PromptWriting() {
 	const [current_evaluation, setCurrentEvaluation] = useState([]);
 	const [current_prompt, setCurrentPrompt] = useState("");
 	const [current_response, setCurrentResponse] = useState("");
+	const [current_embedding, setCurrentEmbedding] = useState("");
 	const [current_system_prompt_error, setCurrentSystemPromptError] = useState(false);
 	const [current_prompt_error, setCurrentPromptError] = useState(false);
 	const [current_response_error, setCurrentResponseError] = useState(false);
@@ -106,6 +109,7 @@ function PromptWriting() {
 		setCurrentRecordId(new_row.id);
 		setCurrentPrompt(new_row.prompt);
 		setCurrentResponse(new_row.response);
+		setCurrentEmbedding(new_row.embedding);
 		setCurrentSystemPrompt(new_row.system_prompt);
 		for (let i = 0; i < record_list.results.record_serializer.length; i++) {
 			if (record_list.results.record_serializer[i].id === new_row.id) {
@@ -146,9 +150,7 @@ function PromptWriting() {
 	};
 
 	const saveRecord = () => {
-		setLoading(true);
 		const dataset = dataset_list[selectedIndex];
-		const current_evaluation_without_null = current_evaluation.filter((item) => item.evaluation_value);
 		const validateAndSetError = (field, setError) => {
 			if (!field) {
 				setError(true);
@@ -163,7 +165,7 @@ function PromptWriting() {
 				prompt: current_prompt,
 				response: current_response,
 				system_prompt: current_system_prompt,
-				evaluation: current_evaluation_without_null,
+				evaluation: current_evaluation,
 			};
 			const handleSuccess = () => {
 				record_refetch();
@@ -188,6 +190,7 @@ function PromptWriting() {
 				onError: handleError,
 			};
 			current_record_id ? putmutate(requestData, requestConfig) : postmutate(requestData, requestConfig);
+			setLoading(false);
 		} else {
 			setSaveError(true);
 			if (!current_prompt) {
@@ -198,11 +201,9 @@ function PromptWriting() {
 				setSaveErrorMessage("System Prompt Cannot be Empty!");
 			} else if (!dataset) {
 				setSaveErrorMessage("Dataset Cannot be Empty!");
-			} else if (current_evaluation.length != current_evaluation_without_null.length) {
-				setSaveErrorMessage("Evaluation Value Cannot be Empty!");
 			}
+			setLoading(false);
 		}
-		setLoading(false);
 	};
 
 	const handleListItemClick = (index) => {
@@ -277,7 +278,7 @@ function PromptWriting() {
 		setTotalNode
 	);
 	const handleRowClick = (params) => {
-		const {id, prompt, response, system_prompt} = params.row;
+		const {id, prompt, response, system_prompt, embedding} = params.row;
 		setCurrentRecordId(id);
 		setCurrentPrompt(prompt);
 		setCurrentResponse(response);
@@ -286,6 +287,7 @@ function PromptWriting() {
 		if (clickedRecord) {
 			setCurrentEvaluation(clickedRecord.evaluation);
 		}
+		setCurrentEmbedding(embedding);
 	};
 	const addRecord = () => {
 		setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt);
@@ -406,7 +408,7 @@ function PromptWriting() {
 								</Box>
 							</List>
 						</Paper>
-						<Box sx={{ mt: 2}}>
+						<Box sx={{mt: 2}}>
 							<DatasetExportServerSide
 								dataset_id={dataset_list[selectedIndex] ? dataset_list[selectedIndex].id : null}
 								dataset_name={dataset_list[selectedIndex] ? dataset_list[selectedIndex].name : null}
@@ -417,7 +419,7 @@ function PromptWriting() {
 					</Grid>
 					<Grid item xs={6}>
 						<Grid container spacing={1}>
-							<Grid item xs={12} md={7}>
+							<Grid item xs={7}>
 								<FormControl fullWidth sx={{mt: 2, mb: 1}} variant='standard'>
 									<Stack direction='column' spacing={2}>
 										<TextField
@@ -463,176 +465,216 @@ function PromptWriting() {
 												setAllowSaveRecord(true);
 											}}
 										/>
+										<TextField
+											label='Embedding'
+											multiline
+											minRows={2}
+											maxRows={2}
+											value={current_embedding}
+											InputLabelProps={{shrink: true}}
+											disabled
+											InputProps={{
+												endAdornment: (
+													<InputAdornment
+														sx={{
+															position: "absolute",
+															top: 20,
+															right: 2,
+														}}
+														position='end'>
+														<TextCopy message={`[${current_embedding}]`} />
+													</InputAdornment>
+												),
+
+												startAdornment: <InputAdornment position='start'> </InputAdornment>,
+											}}
+										/>
 									</Stack>
 								</FormControl>
+								<Box display='flex' justifyContent='center' alignItems='center'>
+									<Stack direction='row' mt={1} spacing={1}>
+										<LoadingButton
+											size='small'
+											loading={loading}
+											disabled={!dataset_row.length}
+											loadingPosition='start'
+											variant='contained'
+											onClick={() => navigateRow("previous")}
+											startIcon={<KeyboardArrowLeftIcon />}>
+											Previous
+										</LoadingButton>
+										<IconButton
+											aria-label='add'
+											size='small'
+											onClick={() => {
+												addRecord();
+												setAllowSaveRecord(true);
+											}}>
+											<AddCircleOutlineIcon />
+										</IconButton>
+										<LoadingButton
+											size='small'
+											loading={loading}
+											disabled={!allow_save_record}
+											loadingPosition='end'
+											variant='contained'
+											onClick={() => {
+												setLoading(true);
+												saveRecord();
+											}}
+											endIcon={<SaveIcon />}>
+											Save
+										</LoadingButton>
+										<IconButton aria-label='delete' size='small' onClick={deleteRecord}>
+											<DeleteIcon />
+										</IconButton>
+										<LoadingButton
+											size='small'
+											loading={loading}
+											disabled={!dataset_row.length}
+											loadingPosition='end'
+											variant='contained'
+											onClick={() => navigateRow("next")}
+											endIcon={<KeyboardArrowRightIcon />}>
+											Next
+										</LoadingButton>
+									</Stack>
+									{[
+										{
+											open: savesuccess,
+											autoHideDuration: 3000,
+											onClose: () => setSaveSuccess(false),
+											severity: "success",
+											message: "Saved!",
+										},
+										{
+											open: saveerror,
+											autoHideDuration: 6000,
+											onClose: () => setSaveError(false),
+											severity: "error",
+											message: saveerrormessage,
+										},
+										{
+											open: deletesuccess,
+											autoHideDuration: 3000,
+											onClose: () => setDeleteSuccess(false),
+											severity: "success",
+											message: "Deleted!",
+										},
+										{
+											open: deleteerror,
+											autoHideDuration: 6000,
+											onClose: () => setDeleteError(false),
+											severity: "error",
+											message: deleteerrormessage,
+										},
+									].map((item, index) => (
+										<Snackbar key={index} open={item.open} autoHideDuration={item.autoHideDuration} onClose={item.onClose}>
+											<Alert severity={item.severity} sx={{width: "100%"}}>
+												{item.message}
+											</Alert>
+										</Snackbar>
+									))}
+								</Box>
 							</Grid>
-							<Grid sm={12} md={5} item>
+							<Grid sm={5} item>
 								<Stack spacing={2} mt={2} direction='column'>
 									{current_evaluation.map((ev, index) => {
 										return (
-											<Box key={index}>
-												<Typography style={{flex: 1}} variant='h6' gutterBottom>
-													{ev.evaluation_name}
-													<Tooltip
-														title={
-															<div
-																style={{
-																	whiteSpace: "pre-line",
-																}}>
-																{ev.evaluation_description}
-															</div>
-														}
-														arrow
-														placement='top'>
-														<IconButton size='small'>
-															<HelpIcon fontSize='small' />
-														</IconButton>
-													</Tooltip>
-												</Typography>
-												<Box mb={2}>
-													<Typography>{ev.evaluation_default_question}</Typography>
+											<Paper variant='outlined' key={index}>
+												<Box m={2}>
+													<Typography style={{flex: 1}} variant='h6' gutterBottom>
+														{ev.evaluation_default_question}
+														<Tooltip
+															title={
+																<div
+																	style={{
+																		whiteSpace: "pre-line",
+																	}}>
+																	{ev.evaluation_description}
+																</div>
+															}
+															arrow
+															placement='top'>
+															<IconButton size='small'>
+																<HelpIcon fontSize='small' />
+															</IconButton>
+														</Tooltip>
+													</Typography>
+													{(ev.evaluation_type === 1 || ev.evaluation_type === 2) && (
+														<Grid direction='row' container spacing={1}>
+															{ev.evaluation_label.map((label) => (
+																<Grid key={label} item>
+																	<Chip
+																		icon={
+																			!ev.evaluation_value || !ev.evaluation_value.includes(label) ? (
+																				<BookmarkBorderIcon />
+																			) : (
+																				<BookmarkIcon />
+																			)
+																		}
+																		label={label}
+																		variant={
+																			!ev.evaluation_value || !ev.evaluation_value.includes(label) ? "outlined" : "fill"
+																		}
+																		onClick={() => {
+																			select_label(label, index, ev.evaluation_type);
+																		}}
+																	/>
+																</Grid>
+															))}
+														</Grid>
+													)}
+													{ev.evaluation_type === 3 && (
+														<TextField
+															id='eval-number'
+															fullWidth
+															size='small'
+															value={ev.evaluation_value}
+															onChange={(e) => {
+																updateEvaluationValue(e.target.value, "evaluation_value", index);
+																setAllowSaveRecord(true);
+															}}
+															type='number'
+															InputLabelProps={{
+																shrink: true,
+															}}
+														/>
+													)}
+													{ev.evaluation_type === 4 && (
+														<TextField
+															id='eval-question'
+															size='small'
+															fullWidth
+															multiline
+															minRows={4}
+															maxRows={6}
+															onChange={(e) => {
+																updateEvaluationValue(e.target.value, "evaluation_value", index);
+															}}
+															value={ev.evaluation_value}
+															InputLabelProps={{
+																shrink: true,
+															}}
+														/>
+													)}
+													{ev.evaluation_type === 5 && (
+														<Rating
+															value={Number(ev.evaluation_value)}
+															max={Number(ev.evaluation_default_rating_scale)}
+															precision={0.5}
+															onChange={(_, newValue) => {
+																updateEvaluationValue(newValue, "evaluation_value", index);
+															}}
+														/>
+													)}
 												</Box>
-												{(ev.evaluation_type === 1 || ev.evaluation_type === 2) && (
-													<Grid direction='row' container spacing={1}>
-														{ev.evaluation_label.map((label) => (
-															<Grid key={label} item>
-																<Chip
-																	icon={
-																		!ev.evaluation_value || !ev.evaluation_value.includes(label) ? (
-																			<BookmarkBorderIcon />
-																		) : (
-																			<BookmarkIcon />
-																		)
-																	}
-																	label={label}
-																	variant={!ev.evaluation_value || !ev.evaluation_value.includes(label) ? "outlined" : "fill"}
-																	onClick={() => {
-																		select_label(label, index, ev.evaluation_type);
-																	}}
-																/>
-															</Grid>
-														))}
-													</Grid>
-												)}
-												{ev.evaluation_type === 3 && (
-													<TextField
-														id='eval-number'
-														fullWidth
-														size='small'
-														value={ev.evaluation_value}
-														onChange={(e) => {
-															updateEvaluationValue(e.target.value, "evaluation_value", index);
-															setAllowSaveRecord(true);
-														}}
-														type='number'
-														InputLabelProps={{
-															shrink: true,
-														}}
-													/>
-												)}
-												{ev.evaluation_type === 4 && (
-													<TextField
-														id='eval-question'
-														size='small'
-														fullWidth
-														multiline
-														minRows={4}
-														maxRows={6}
-														onChange={(e) => {
-															updateEvaluationValue(e.target.value, "evaluation_value", index);
-														}}
-														value={ev.evaluation_value}
-														InputLabelProps={{
-															shrink: true,
-														}}
-													/>
-												)}
-												{ev.evaluation_type === 5 && (
-													<Rating
-														value={Number(ev.evaluation_value)}
-														max={Number(ev.evaluation_default_rating_scale)}
-														precision={0.5}
-														onChange={(_, newValue) => {
-															updateEvaluationValue(newValue, "evaluation_value", index);
-														}}
-													/>
-												)}
-											</Box>
+											</Paper>
 										);
 									})}
 								</Stack>
 							</Grid>
 						</Grid>
-						<Box display='flex' justifyContent='center' alignItems='center'>
-							<Stack direction='row' mt={1} spacing={1}>
-								<LoadingButton
-									size='small'
-									loading={loading}
-									disabled={!dataset_row.length}
-									loadingPosition='start'
-									variant='contained'
-									onClick={() => navigateRow("previous")}
-									startIcon={<KeyboardArrowLeftIcon />}>
-									Previous
-								</LoadingButton>
-								<IconButton
-									aria-label='add'
-									size='small'
-									onClick={() => {
-										addRecord();
-										setAllowSaveRecord(true);
-									}}>
-									<AddCircleOutlineIcon />
-								</IconButton>
-								<LoadingButton
-									size='small'
-									loading={loading}
-									disabled={!allow_save_record}
-									loadingPosition='end'
-									variant='contained'
-									onClick={saveRecord}
-									endIcon={<SaveIcon />}>
-									Save
-								</LoadingButton>
-								<IconButton aria-label='delete' size='small' onClick={deleteRecord}>
-									<DeleteIcon />
-								</IconButton>
-								<LoadingButton
-									size='small'
-									loading={loading}
-									disabled={!dataset_row.length}
-									loadingPosition='end'
-									variant='contained'
-									onClick={() => navigateRow("next")}
-									endIcon={<KeyboardArrowRightIcon />}>
-									Next
-								</LoadingButton>
-							</Stack>
-							{[
-								{open: savesuccess, autoHideDuration: 3000, onClose: () => setSaveSuccess(false), severity: "success", message: "Saved!"},
-								{open: saveerror, autoHideDuration: 6000, onClose: () => setSaveError(false), severity: "error", message: saveerrormessage},
-								{
-									open: deletesuccess,
-									autoHideDuration: 3000,
-									onClose: () => setDeleteSuccess(false),
-									severity: "success",
-									message: "Deleted!",
-								},
-								{
-									open: deleteerror,
-									autoHideDuration: 6000,
-									onClose: () => setDeleteError(false),
-									severity: "error",
-									message: deleteerrormessage,
-								},
-							].map((item, index) => (
-								<Snackbar key={index} open={item.open} autoHideDuration={item.autoHideDuration} onClose={item.onClose}>
-									<Alert severity={item.severity} sx={{width: "100%"}}>
-										{item.message}
-									</Alert>
-								</Snackbar>
-							))}
-						</Box>
 					</Grid>
 					<Grid item xs={4}>
 						<Box mt={2} style={{height: 637, width: "100%"}}>

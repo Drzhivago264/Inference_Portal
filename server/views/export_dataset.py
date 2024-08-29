@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from server.api_throttling_rates import DatasetExportRateThrottle
-from server.models.dataset import Dataset, DatasetRecord
+from server.models.dataset import Dataset, EmbeddingDatasetRecord
 from server.queue.export_dataset import export_large_dataset
 from server.utils.sync_.sync_cache import get_or_set_cache, get_user_or_set_cache
 from server.views.serializer import DatasetExportSerializer, DatasetRecordGetSerialzier
@@ -45,7 +45,7 @@ def export_user_dataset_api(request):
                 Model=Dataset,
                 timeout=84000,
             )
-            result_records = DatasetRecord.objects.filter(dataset=dataset)
+            result_records = EmbeddingDatasetRecord.objects.filter(dataset=dataset)
 
             record_count = result_records.count()
             url_safe_datasetname = "".join(x for x in dataset.name if x.isalnum())

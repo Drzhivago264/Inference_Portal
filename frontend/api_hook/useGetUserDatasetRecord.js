@@ -11,7 +11,8 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
             const column = [
                 { field: 'system_prompt', headerName: 'System Prompt', width: 200, editable: false, disableColumnMenu: true },
                 { field: 'prompt', headerName: 'Prompt', width: 200, editable: false, disableColumnMenu: true },
-                { field: 'response', headerName: 'Response', width: 200, editable: false, disableColumnMenu: true }
+                { field: 'response', headerName: 'Response', width: 200, editable: false, disableColumnMenu: true },
+                { field: 'embedding', headerName: 'Embedding', width: 200, editable: false, disableColumnMenu: true }
             ];
             const column_name = ['system_prompt', 'prompt', 'response'];
             const row = [];
@@ -22,6 +23,7 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
                     system_prompt: record.system_prompt,
                     prompt: record.prompt,
                     response: record.response,
+                    embedding: record.embedding
                 };
 
                 record.evaluation.forEach(evaluation => {

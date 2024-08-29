@@ -9,7 +9,7 @@ from decouple import config
 from django.core.cache import cache
 from smart_open import open
 
-from server.models.dataset import Dataset, DatasetRecord
+from server.models.dataset import Dataset, EmbeddingDatasetRecord
 from server.utils.sync_.sync_cache import get_or_set_cache
 
 logger = get_task_logger(__name__)
@@ -56,7 +56,7 @@ def export_large_dataset(
             Model=Dataset,
             timeout=120,
         )
-        result_records = DatasetRecord.objects.filter(dataset=dataset)
+        result_records = EmbeddingDatasetRecord.objects.filter(dataset=dataset)
         with open(
             f"s3://download/{url_safe_datasetname}_{unique}{extension}",
             "w",
@@ -67,7 +67,7 @@ def export_large_dataset(
                     writer = csv.writer(fout)
                     if index == 0:
                         writer.writerow(
-                            ["system_prompt", "prompt", "response", "evaluation"]
+                            ["system_prompt", "prompt", "response", "evaluation", "embedding"]
                         )
                     writer.writerow(
                         [
@@ -75,6 +75,7 @@ def export_large_dataset(
                             r.prompt,
                             r.response,
                             json.dumps(r.evaluation),
+                            r.embedding,
                         ]
                     )
 
@@ -84,6 +85,7 @@ def export_large_dataset(
                         "prompt": r.prompt,
                         "response": r.response,
                         "evaluation": r.evaluation,
+                        "embedding": r.embedding
                     }
                     json.dump(data, fout)
                     fout.write("\n")
