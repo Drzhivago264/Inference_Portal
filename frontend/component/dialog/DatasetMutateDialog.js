@@ -40,7 +40,8 @@ export default function DatasetMutateDialog({
 	method,
 	setCurrentEvaluation,
 	setCurrentSystemPrompt,
-    open_dialog
+	open_dialog,
+	old_field_name_list,
 }) {
 	const DEFAULT_EVALUATION = {
 		evaluation_name: null,
@@ -50,12 +51,14 @@ export default function DatasetMutateDialog({
 		evaluation_default_question: null,
 		evaluation_label: ["good", "bad", "ugly"],
 	};
-
+    
+    const old_field_name_list_ =  method === "put" ? Object.keys(old_field_name_list) : ["Prompt"]
 	const [open, setOpen] = useState(open_dialog ? open_dialog : false);
 	const [saveerror, setSaveError] = useState(false);
 	const [default_system_prompt, setDefaultSystemPrompt] = useState(method === "put" ? old_default_system_prompt : "");
 	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [DEFAULT_EVALUATION]);
 	const [dataset_name, setDatasetName] = useState(method === "put" ? old_dataset_name : "");
+	const [field_name_list, setFieldNameList] = useState(old_field_name_list_);
 	const [saveerrormessage, setSaveErrorMessage] = useState("");
 	const [savesuccess, setSaveSuccess] = useState(false);
 	const [allow_mutate, setAllowMutate] = useState(true);
@@ -69,6 +72,7 @@ export default function DatasetMutateDialog({
 				name: dataset_name,
 				default_system_prompt: default_system_prompt,
 				default_evaluation: default_evaluation_without_null,
+				field_name_list: field_name_list,
 			};
 			postmutate(
 				{url: "/frontend-api/create-dataset", data: data},
@@ -119,6 +123,7 @@ export default function DatasetMutateDialog({
 				new_name: dataset_name,
 				new_default_system_prompt: default_system_prompt,
 				new_default_evaluation: default_evaluation_without_null,
+				new_field_name_list: field_name_list,
 			};
 
 			putmutate(
@@ -176,13 +181,19 @@ export default function DatasetMutateDialog({
 			setDefaultSystemPrompt("");
 		}
 	};
-	const deleteEvaluation = (index) => {
-		setDefaultEvaluation((prev) => prev.filter((_, i) => i !== index));
+	const deleteListItem = (index, hook) => {
+		hook((prev) => prev.filter((_, i) => i !== index));
 	};
 
 	const addEvaluation = () => {
 		if (default_evaluation.length < max_evaluation_num) {
 			setDefaultEvaluation([...default_evaluation, DEFAULT_EVALUATION]);
+		}
+	};
+
+	const addFieldName = () => {
+		if (field_name_list.length < 100) {
+			setFieldNameList([...field_name_list, ""]);
 		}
 	};
 	const updateEvaluationValue = (v, index, property) => {
@@ -194,7 +205,15 @@ export default function DatasetMutateDialog({
 		});
 		setDefaultEvaluation(new_evaluation_list);
 	};
-
+	const updateFieldName = (v, index) => {
+		const new_field_name_list = field_name_list.map((item, i) => {
+			if (i === index) {
+				return v;
+			}
+			return item;
+		});
+		setFieldNameList(new_field_name_list);
+	};
 	const deleteLabel = (index, label_index) => {
 		const new_evaluation_list = default_evaluation.map((item, i) => {
 			if (i === index) {
@@ -232,7 +251,7 @@ export default function DatasetMutateDialog({
 							shrink: true,
 						}}
 					/>
-					<DialogContentText mt={1} id='alert-dialog-description'>
+					<DialogContentText mt={1} id='system-prompt-description'>
 						{method === "put"
 							? `Change your default system prompt and evaluation (this does not change the system prompt and evaluation in each record).`
 							: `You can provide the default system prompt and evaluation Default Value for all records of your database. You can also leave them blank and specified them for each records.`}
@@ -252,7 +271,53 @@ export default function DatasetMutateDialog({
 							inputProps={{maxLength: 2500}}
 						/>
 					</Box>
-					<DialogContentText mt={2} id='alert-dialog-description'>
+					<DialogContentText mt={1} id='add-fields-description'>
+						{method === "put"
+							? `Change your default fields of your dataset. If you delete a field, it will not be displayed but previous records are not affected`
+							: `Add default fields to your dataset`}
+					</DialogContentText>
+					<Stack mt={2} spacing={1}>
+						{field_name_list &&
+							field_name_list.map((field_name, index) => (
+								<Grid container key={index}>
+									<Grid xs={11} item>
+										<TextField
+											size='small'
+											fullWidth
+											label='Field Name'
+											value={field_name}
+											InputLabelProps={{shrink: true}}
+											onChange={(e) => {
+												updateFieldName(e.target.value, index);
+											}}
+											inputProps={{maxLength: 2500}}
+										/>
+									</Grid>
+									<Grid xs={1} item>
+										<IconButton
+											aria-label='delete'
+											onClick={() => {
+												deleteListItem(index, setFieldNameList);
+											}}>
+											<DeleteIcon />
+										</IconButton>
+									</Grid>
+								</Grid>
+							))}
+
+						<Box display='flex' justifyContent='center' alignItems='center'>
+							{field_name_list && field_name_list.length < 100 && (
+								<IconButton
+									aria-label='add'
+									onClick={() => {
+										addFieldName();
+									}}>
+									<AddCircleOutlineIcon />
+								</IconButton>
+							)}
+						</Box>
+					</Stack>
+					<DialogContentText mt={2} id='evaluation-description'>
 						Evaluation
 					</DialogContentText>
 					<Stack mt={1} spacing={1}>
@@ -372,7 +437,6 @@ export default function DatasetMutateDialog({
 																type='number'
 																onChange={(e) => {
 																	if (Number(e.target.value) <= 20 && Number(e.target.value) > 0) {
-																		console.log(Number(e.target.value));
 																		updateEvaluationValue(Number(e.target.value), index, "evaluation_default_rating_scale");
 																	}
 																}}
@@ -397,7 +461,7 @@ export default function DatasetMutateDialog({
 											<IconButton
 												aria-label='delete'
 												onClick={() => {
-													deleteEvaluation(index);
+													deleteListItem(index, setDefaultEvaluation);
 												}}>
 												<DeleteIcon />
 											</IconButton>
@@ -406,7 +470,7 @@ export default function DatasetMutateDialog({
 								);
 							})}
 					</Stack>
-					<Box display='flex' justifyContent='center' alignItems='center' mt={1}>
+					<Box display='flex' justifyContent='center' alignItems='center'>
 						{default_evaluation && default_evaluation.length < max_evaluation_num && (
 							<IconButton
 								aria-label='add'
@@ -470,9 +534,9 @@ DatasetMutateDialog.propTypes = {
 	old_default_system_prompt: PropTypes.string,
 	old_default_evaluation: PropTypes.array,
 	old_dataset_name: PropTypes.string,
+	old_field_name_list: PropTypes.array,
 	method: PropTypes.string.isRequired,
 	setCurrentEvaluation: PropTypes.func.isRequired,
 	setCurrentSystemPrompt: PropTypes.func.isRequired,
-    open_dialog: PropTypes.bool,
-
+	open_dialog: PropTypes.bool,
 };

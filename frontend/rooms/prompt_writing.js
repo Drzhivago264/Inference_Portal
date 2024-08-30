@@ -35,7 +35,7 @@ import ResponsiveAppBar from "../component/nav/Navbar.js";
 import SaveIcon from "@mui/icons-material/Save";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
-import { TextCopy } from "../component/custom_ui_component/TextCopy.js";
+import {TextCopy} from "../component/custom_ui_component/TextCopy.js";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
@@ -59,12 +59,10 @@ function PromptWriting() {
 	const [rowSelectionModel, setRowSelectionModel] = useState([]);
 	const [current_system_prompt, setCurrentSystemPrompt] = useState("");
 	const [current_evaluation, setCurrentEvaluation] = useState([]);
-	const [current_prompt, setCurrentPrompt] = useState("");
-	const [current_response, setCurrentResponse] = useState("");
 	const [current_embedding, setCurrentEmbedding] = useState("");
 	const [current_system_prompt_error, setCurrentSystemPromptError] = useState(false);
-	const [current_prompt_error, setCurrentPromptError] = useState(false);
-	const [current_response_error, setCurrentResponseError] = useState(false);
+	const [current_content, setCurrentContent] = useState({});
+	const [current_content_error, setCurrentContentError] = useState(false);
 	const [current_record_id, setCurrentRecordId] = useState(null);
 	const [allow_save_record, setAllowSaveRecord] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -107,13 +105,12 @@ function PromptWriting() {
 		}
 		setRowSelectionModel(new_row.id);
 		setCurrentRecordId(new_row.id);
-		setCurrentPrompt(new_row.prompt);
-		setCurrentResponse(new_row.response);
 		setCurrentEmbedding(new_row.embedding);
 		setCurrentSystemPrompt(new_row.system_prompt);
 		for (let i = 0; i < record_list.results.record_serializer.length; i++) {
 			if (record_list.results.record_serializer[i].id === new_row.id) {
 				setCurrentEvaluation(record_list.results.record_serializer[i].evaluation);
+                setCurrentContent(record_list.results.record_serializer[i].content);
 				break;
 			}
 		}
@@ -127,6 +124,12 @@ function PromptWriting() {
 		});
 		setCurrentEvaluation(new_evaluation_list);
 	};
+
+    const updateContent = (v, field_name) => {
+        const new_content = {...current_content}
+        new_content[field_name] = v
+        setCurrentContent(new_content)
+    }
 	const {mutate: postmutate} = useMutation(basePost);
 	const {mutate: putmutate} = useMutation(basePut);
 	const {mutate: deletemutate} = useMutation(baseDelete);
@@ -151,19 +154,18 @@ function PromptWriting() {
 
 	const saveRecord = () => {
 		const dataset = dataset_list[selectedIndex];
-		const validateAndSetError = (field, setError) => {
-			if (!field) {
-				setError(true);
-			}
-		};
-		validateAndSetError(current_prompt, setCurrentPromptError);
-		validateAndSetError(current_response, setCurrentResponseError);
-		validateAndSetError(current_system_prompt, setCurrentSystemPromptError);
-		if (current_prompt && current_response && current_system_prompt && dataset) {
+
+        if (!current_system_prompt) {
+            setCurrentSystemPromptError(true)
+        }
+        if (Object.keys(current_content).length === 0) {
+            setCurrentContentError(true)
+        }
+        
+		if (current_content && current_system_prompt && dataset) {
 			const data = {
 				dataset_id: dataset.id,
-				prompt: current_prompt,
-				response: current_response,
+				content: current_content,
 				system_prompt: current_system_prompt,
 				evaluation: current_evaluation,
 			};
@@ -193,10 +195,8 @@ function PromptWriting() {
 			setLoading(false);
 		} else {
 			setSaveError(true);
-			if (!current_prompt) {
-				setSaveErrorMessage("Prompt Cannot be Empty!");
-			} else if (!current_response) {
-				setSaveErrorMessage("Response Cannot be Empty!");
+			if (!current_content) {
+				setSaveErrorMessage("Fields cannot be empty");
 			} else if (!current_system_prompt) {
 				setSaveErrorMessage("System Prompt Cannot be Empty!");
 			} else if (!dataset) {
@@ -209,8 +209,7 @@ function PromptWriting() {
 	const handleListItemClick = (index) => {
 		setSelectedIndex(index);
 		setCurrentRecordId(null);
-		setCurrentPrompt("");
-		setCurrentResponse("");
+		setCurrentContent(dataset_list[index].default_content_structure);
 		setCurrentSystemPrompt(dataset_list[index].default_system_prompt);
 		setCurrentEvaluation(dataset_list[index].default_evaluation);
 	};
@@ -255,8 +254,7 @@ function PromptWriting() {
 				}
 			);
 		}
-		setCurrentPrompt("");
-		setCurrentResponse("");
+		setCurrentContent(dataset_list[selectedIndex].default_content_structure);
 		setCurrentRecordId(null);
 		setCurrentEvaluation(dataset_list[selectedIndex].default_evaluation);
 		setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt);
@@ -266,7 +264,7 @@ function PromptWriting() {
 		isLoading: datasetIsLoading,
 		isSuccess: datasetIsSuccess,
 		isError: datasetIsError,
-	} = useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation);
+	} = useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation, setCurrentContent);
 
 	const {refetch: record_refetch} = useGetUserDatasetRecord(
 		setRecordList,
@@ -278,22 +276,22 @@ function PromptWriting() {
 		setTotalNode
 	);
 	const handleRowClick = (params) => {
-		const {id, prompt, response, system_prompt, embedding} = params.row;
+		const {id, system_prompt, embedding} = params.row;
+        console.log(id)
 		setCurrentRecordId(id);
-		setCurrentPrompt(prompt);
-		setCurrentResponse(response);
 		setCurrentSystemPrompt(system_prompt);
 		const clickedRecord = record_list.results.record_serializer.find((record) => record.id === id);
 		if (clickedRecord) {
 			setCurrentEvaluation(clickedRecord.evaluation);
+            setCurrentContent(clickedRecord.content)
 		}
 		setCurrentEmbedding(embedding);
 	};
 	const addRecord = () => {
 		setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt);
 		setCurrentEvaluation(dataset_list[selectedIndex].default_evaluation);
-		setCurrentPrompt("");
-		setCurrentResponse("");
+		setCurrentContent(dataset_list[selectedIndex].default_content_structure);
+        setCurrentEmbedding([])
 		setCurrentRecordId(null);
 	};
 
@@ -339,7 +337,7 @@ function PromptWriting() {
 													}}
 													primary={dataset.name}
 												/>
-												<DatasetMutateDialog
+												{!datasetIsLoading && dataset.default_content_structure && <DatasetMutateDialog
 													setAllowAddDataset={setAllowAddDataset}
 													setDatasetList={setDatasetList}
 													setSelectedIndex={setSelectedIndex}
@@ -350,9 +348,11 @@ function PromptWriting() {
 													old_dataset_name={dataset.name}
 													old_default_evaluation={dataset.default_evaluation}
 													old_default_system_prompt={dataset.default_system_prompt}
+                                                    old_field_name_list={dataset.default_content_structure}
 													setCurrentEvaluation={setCurrentEvaluation}
 													setCurrentSystemPrompt={setCurrentSystemPrompt}
-												/>
+                                                    record_refetch={record_refetch}
+												/>}
 											</ListItemButton>
 										</ListItem>
 									))}
@@ -422,7 +422,7 @@ function PromptWriting() {
 							<Grid item xs={7}>
 								<FormControl fullWidth sx={{mt: 2, mb: 1}} variant='standard'>
 									<Stack direction='column' spacing={2}>
-										<TextField
+                                    {current_content && !Object.keys(current_content).includes("System Prompt") && <TextField
 											label='System Prompt'
 											multiline
 											error={current_system_prompt_error}
@@ -436,35 +436,26 @@ function PromptWriting() {
 											}}
 											inputProps={{maxLength: 2500}}
 										/>
-										<TextField
-											label='Prompt'
-											error={current_prompt_error}
-											multiline
-											minRows={8}
-											maxRows={10}
-											value={current_prompt}
-											InputLabelProps={{shrink: true}}
-											onChange={(e) => {
-												setCurrentPrompt(e.target.value);
-												setAllowSaveRecord(true);
-											}}
-											inputProps={{maxLength: 2500}}
-										/>
-										<TextField
-											label='Response'
-											error={current_response_error}
-											multiline
-											minRows={8}
-											value={current_response}
-											inputProps={{maxLength: 2500}}
-											InputLabelProps={{shrink: true}}
-											fullWidth
-											maxRows={10}
-											onChange={(e) => {
-												setCurrentResponse(e.target.value);
-												setAllowSaveRecord(true);
-											}}
-										/>
+                                        }
+										{current_content && Object.keys(current_content).map((field_name, index) => (
+											<TextField
+												key={field_name+index}
+												label={field_name}
+												error={current_content_error}
+												multiline
+												minRows={8}
+												maxRows={10}
+												value={current_content[field_name]}
+												InputLabelProps={{shrink: true}}
+												onChange={(e) => {
+                                                    updateContent(e.target.value, field_name);
+                                                    
+													setAllowSaveRecord(true);
+												}}
+												inputProps={{maxLength: 2500}}
+											/>
+										))}
+
 										<TextField
 											label='Embedding'
 											multiline

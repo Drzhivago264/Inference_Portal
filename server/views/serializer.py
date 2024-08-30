@@ -32,7 +32,7 @@ class DatasetCreateSerializer(serializers.Serializer):
     name = serializers.CharField()
     default_system_prompt = serializers.CharField(allow_blank=True)
     default_evaluation = serializers.JSONField()
-
+    field_name_list = serializers.ListField()
 
 class DatasetDeleteSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -46,12 +46,13 @@ class DatasetUpdateSerializer(DatasetDeleteSerializer):
     new_name = serializers.CharField()
     new_default_system_prompt = serializers.CharField(allow_blank=True)
     new_default_evaluation = serializers.JSONField()
+    new_field_name_list = serializers.ListField()
 
 
 class DatasetGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
-        fields = ("id", "name", "default_system_prompt", "default_evaluation")
+        fields = ("id", "name", "default_system_prompt", "default_evaluation", "default_content_structure")
 
 
 class DatasetEvaluationSerializer(serializers.Serializer):
@@ -79,9 +80,7 @@ class DatasetEvaluationSerializer(serializers.Serializer):
 
 class DatasetRecordGetSerialzier(serializers.Serializer):
     id = serializers.IntegerField()
-    system_prompt = serializers.CharField()
-    prompt = serializers.CharField()
-    response = serializers.CharField()
+    content = serializers.JSONField()
     evaluation = serializers.JSONField()
     embedding = serializers.ListField()
 
@@ -89,8 +88,7 @@ class DatasetRecordCreateSerialzier(serializers.Serializer):
     record_id = serializers.IntegerField(required=False)
     dataset_id = serializers.IntegerField()
     system_prompt = serializers.CharField()
-    prompt = serializers.CharField()
-    response = serializers.CharField()
+    content = serializers.JSONField()
     evaluation = serializers.JSONField()
 
 class DatasetDeleteRecordSerialzier(serializers.Serializer):

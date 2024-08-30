@@ -101,15 +101,13 @@ class EmbeddingDatasetRecordAdmin(admin.ModelAdmin):
     model = EmbeddingDatasetRecord
     list_display = (
         "dataset",
-        "system_prompt",
-        "prompt",
-        "embedding",
-        "response",
+        "content",
         "evaluation",
         "created_at",
         "updated_at",
+        "embedding"
     )
-    list_editable = ("system_prompt", "prompt", "response", "evaluation", "embedding")
+    list_editable = ("content", "evaluation")
     list_display_links = ("dataset",)
 
 @admin.register(InferenceServer)

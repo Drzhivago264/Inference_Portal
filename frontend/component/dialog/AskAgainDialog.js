@@ -10,7 +10,6 @@ import PropTypes from "prop-types";
 import React from "react";
 
 export default function AskAgainDialog({executing_function, setOpenAskAgain, delete_object_name}) {
-	console.log(executing_function)
 	const handleClose = () => {
 		setOpenAskAgain(false);
 	};
