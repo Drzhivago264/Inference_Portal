@@ -51,14 +51,13 @@ export default function DatasetMutateDialog({
 		evaluation_default_question: null,
 		evaluation_label: ["good", "bad", "ugly"],
 	};
-    
-    const old_field_name_list_ =  method === "put" ? Object.keys(old_field_name_list) : ["Prompt"]
+
 	const [open, setOpen] = useState(open_dialog ? open_dialog : false);
 	const [saveerror, setSaveError] = useState(false);
 	const [default_system_prompt, setDefaultSystemPrompt] = useState(method === "put" ? old_default_system_prompt : "");
 	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [DEFAULT_EVALUATION]);
 	const [dataset_name, setDatasetName] = useState(method === "put" ? old_dataset_name : "");
-	const [field_name_list, setFieldNameList] = useState(old_field_name_list_);
+	const [field_name_list, setFieldNameList] = useState(method === "put" ? Object.keys(old_field_name_list) : ["Prompt"]);
 	const [saveerrormessage, setSaveErrorMessage] = useState("");
 	const [savesuccess, setSaveSuccess] = useState(false);
 	const [allow_mutate, setAllowMutate] = useState(true);
@@ -80,6 +79,10 @@ export default function DatasetMutateDialog({
 					onSuccess: (data) => {
 						setSaveSuccess(true);
 						setAllowAddDataset(true);
+                        let new_content = {}
+                        for (let name in field_name_list) {
+                            new_content[field_name_list[name]] = null
+                        } 
 						setDatasetList([
 							...dataset_list,
 							{
@@ -87,10 +90,13 @@ export default function DatasetMutateDialog({
 								name: data.name,
 								default_system_prompt: default_system_prompt,
 								default_evaluation: default_evaluation_without_null,
+                                default_content_structure: new_content
 							},
 						]);
 						setSelectedIndex(dataset_list.length);
 						setCurrentEvaluation(default_evaluation_without_null), setCurrentSystemPrompt(default_system_prompt);
+                        handleClose();
+                        setAllowMutate(true);
 					},
 					onError: (error) => {
 						setSaveError(true);
@@ -132,6 +138,11 @@ export default function DatasetMutateDialog({
 					onSuccess: () => {
 						setSaveSuccess(true);
 						setAllowAddDataset(true);
+                        let new_content = {}
+                        for (let name in field_name_list) {
+                            new_content[field_name_list[name]] = null
+                        } 
+                        console.log(new_content)
 						const new_dataset_list = dataset_list.map((item) => {
 							if (item.id === dataset_id) {
 								return {
@@ -139,13 +150,16 @@ export default function DatasetMutateDialog({
 									name: dataset_name,
 									default_system_prompt: default_system_prompt,
 									default_evaluation: default_evaluation_without_null,
+                                    default_content_structure: new_content
 								};
 							}
 							return item;
 						});
+                        setAllowMutate(true);
 						setDatasetList(new_dataset_list);
 						setCurrentEvaluation(default_evaluation_without_null);
 						setCurrentSystemPrompt(default_system_prompt);
+                        
 					},
 					onError: (error) => {
 						setSaveError(true);
@@ -481,30 +495,6 @@ export default function DatasetMutateDialog({
 							</IconButton>
 						)}
 					</Box>
-					{[
-						{
-							open: savesuccess,
-							autoHideDuration: 500,
-							onClose: () => {
-								setSaveSuccess(false), handleClose(), setAllowMutate(true);
-							},
-							severity: "success",
-							message: "Saved!",
-						},
-						{
-							open: saveerror,
-							autoHideDuration: 6000,
-							onClose: () => setSaveError(false),
-							severity: "error",
-							message: saveerrormessage,
-						},
-					].map((item, index) => (
-						<Snackbar key={index} open={item.open} autoHideDuration={item.autoHideDuration} onClose={item.onClose}>
-							<Alert severity={item.severity} sx={{width: "100%"}}>
-								{item.message}
-							</Alert>
-						</Snackbar>
-					))}
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={handleClose} disabled={!allow_mutate} autoFocus>
@@ -520,6 +510,30 @@ export default function DatasetMutateDialog({
 						</Button>
 					)}
 				</DialogActions>
+				{[
+					{
+						open: savesuccess,
+						autoHideDuration: 550,
+						onClose: () => {
+							setSaveSuccess(false); handleClose();
+						},
+						severity: "success",
+						message: "Saved!",
+					},
+					{
+						open: saveerror,
+						autoHideDuration: 6000,
+						onClose: () => setSaveError(false),
+						severity: "error",
+						message: saveerrormessage,
+					},
+				].map((item, index) => (
+					<Snackbar key={"alert" + index} open={item.open} autoHideDuration={item.autoHideDuration} onClose={item.onClose}>
+						<Alert severity={item.severity} sx={{width: "100%"}}>
+							{item.message}
+						</Alert>
+					</Snackbar>
+				))}
 			</Dialog>
 		</>
 	);
@@ -534,7 +548,7 @@ DatasetMutateDialog.propTypes = {
 	old_default_system_prompt: PropTypes.string,
 	old_default_evaluation: PropTypes.array,
 	old_dataset_name: PropTypes.string,
-	old_field_name_list: PropTypes.array,
+	old_field_name_list: PropTypes.object,
 	method: PropTypes.string.isRequired,
 	setCurrentEvaluation: PropTypes.func.isRequired,
 	setCurrentSystemPrompt: PropTypes.func.isRequired,

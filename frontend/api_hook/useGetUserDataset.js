@@ -1,7 +1,7 @@
 import { baseGet } from "./baseGet";
 import { useQuery } from "react-query";
 
-export const useGetUserDataset = (setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation, setCurrentContent) => {
+export const useGetUserDataset = (setDatasetList, dataset_list, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation, setCurrentContent) => {
 
     const {
         isSuccess: isSuccess,
@@ -9,7 +9,7 @@ export const useGetUserDataset = (setDatasetList, setMaxDatasetNum, setMaxEvalua
         isError: isError,
         refetch: refetch
 
-    } = useQuery("DatasetList", () => baseGet("/frontend-api/get-dataset"),
+    } = useQuery(["DatasetList", dataset_list], () => baseGet("/frontend-api/get-dataset"),
         {
             retry: false,
             refetchOnWindowFocus: false,
@@ -19,7 +19,7 @@ export const useGetUserDataset = (setDatasetList, setMaxDatasetNum, setMaxEvalua
                 setMaxEvaluationNum(data.max_evaluation_num),
                 setCurrentEvaluation(data.dataset_list[selectedIndex].default_evaluation),
                 setCurrentSystemPrompt(data.dataset_list[selectedIndex].default_system_prompt)
-                setCurrentContent(data.dataset_list[0].default_content_structure)
+                setCurrentContent(data.dataset_list[selectedIndex].default_content_structure)
             },
         }
     );

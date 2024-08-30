@@ -12,7 +12,6 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
 				setTotalNode(data.total_pages);
 				const column = [
 					{field: "system_prompt", headerName: "System Prompt", width: 200, editable: false, disableColumnMenu: true},
-					{field: "embedding", headerName: "Embedding", width: 200, editable: false, disableColumnMenu: true},
 				];
 				const column_name = ["system_prompt"];
 				const row = [];
@@ -24,6 +23,8 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
                         column_name.push(key);
                     }
                 }
+
+                
 				data.results.record_serializer.forEach((record) => {
 					const temp_row = {
 						id: record.id,
@@ -53,7 +54,7 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
 
 					row.push(temp_row);
 				});
-
+                column.push({field: "embedding", headerName: "Embedding", width: 200, editable: false, disableColumnMenu: true},)
 				setRecordList(data);
 				setDatasetColumn(column);
 				setDatasetRow(row);

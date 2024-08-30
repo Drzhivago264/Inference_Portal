@@ -264,7 +264,7 @@ function PromptWriting() {
 		isLoading: datasetIsLoading,
 		isSuccess: datasetIsSuccess,
 		isError: datasetIsError,
-	} = useGetUserDataset(setDatasetList, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation, setCurrentContent);
+	} = useGetUserDataset(setDatasetList, dataset_list, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation, setCurrentContent);
 
 	const {refetch: record_refetch} = useGetUserDatasetRecord(
 		setRecordList,

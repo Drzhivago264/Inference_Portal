@@ -47,7 +47,7 @@ def get_default_user_dataset_api(request):
     elif Dataset.objects.filter(user=master_user).count() == 0:
         raise NotFound(detail="No dataset")
     else:
-        dataset_list = Dataset.objects.filter(user=master_user)
+        dataset_list = Dataset.objects.filter(user=master_user).order_by('-id')
         if dataset_list:
             dataset_list_serializer = DatasetGetSerializer(
                 dataset_list, many=True)
