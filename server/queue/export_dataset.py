@@ -67,13 +67,11 @@ def export_large_dataset(
                     writer = csv.writer(fout)
                     if index == 0:
                         writer.writerow(
-                            ["system_prompt", "prompt", "response", "evaluation", "embedding"]
+                            ["content", "evaluation", "embedding"]
                         )
                     writer.writerow(
                         [
-                            r.system_prompt,
-                            r.prompt,
-                            r.response,
+                            json.dumps(r.content),
                             json.dumps(r.evaluation),
                             r.embedding,
                         ]
@@ -81,9 +79,7 @@ def export_large_dataset(
 
                 elif extension == ".jsonl":
                     data = {
-                        "system_prompt": r.system_prompt,
-                        "prompt": r.prompt,
-                        "response": r.response,
+                        "content": r.content,
                         "evaluation": r.evaluation,
                         "embedding": r.embedding
                     }

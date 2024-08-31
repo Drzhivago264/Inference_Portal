@@ -30,9 +30,7 @@ export const usePostLargeDatasetExport = ({dataset_id, dataset_name, extension, 
 								a.setAttribute("download", `${dataset_name}_${now.format(format_to_hour)}.jsonl`);
 							} else if (extension === ".csv") {
 								let stringify_nested_json = data.records.map((val) => ({
-									prompt: val.prompt,
-									response: val.response,
-									system_prompt: val.system_prompt,
+									content: JSON.stringify(val.content),
 									evaluation: JSON.stringify(val.evaluation),
 								}));
 								download_content = Papa.unparse(stringify_nested_json);
