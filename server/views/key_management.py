@@ -261,7 +261,7 @@ def generate_key_api(request: HttpRequest) -> Response:
             wallet = manage_monero("make_integrated_address")
             integrated_address = json.loads(wallet.text)["result"]["integrated_address"]
             payment_id = json.loads(wallet.text)["result"]["payment_id"]
-        except requests.exceptions.ConnectionError:
+        except (requests.exceptions.ConnectionError, requests.exceptions.JSONDecodeError):
             integrated_address = ""
             payment_id = ""
         try:

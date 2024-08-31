@@ -3,7 +3,7 @@ import {useQuery} from "react-query";
 
 export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedIndex, pagnation_page, setDatasetColumn, setDatasetRow, setTotalNode) => {
 	const {error, isLoading, refetch} = useQuery(
-		["RecordList", selectedIndex, pagnation_page],
+		["RecordList", selectedIndex, pagnation_page, dataset_list],
 		() => baseGet(`/frontend-api/get-dataset-record/${dataset_list[selectedIndex].id}?page=${pagnation_page}`),
 		{
 			enabled: !!dataset_list[selectedIndex],
@@ -17,25 +17,23 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
 				const row = [];
            
                 for (var key in dataset_list[selectedIndex].default_content_structure) {
-                    let new_column = {field: key, headerName: key, width: 200, editable: false, disableColumnMenu: true};
-                    if (!column.includes(new_column) && !column_name.includes(key)) {
+                    let new_column = {field: dataset_list[selectedIndex].default_content_structure[key]["name"], headerName: dataset_list[selectedIndex].default_content_structure[key]["name"], width: 200, editable: false, disableColumnMenu: true};
+                    if (!column.includes(new_column) && !column_name.includes(dataset_list[selectedIndex].default_content_structure[key]["name"])) {
                         column.push(new_column);
-                        column_name.push(key);
+                        column_name.push(dataset_list[selectedIndex].default_content_structure[key]["name"]);
                     }
-                }
-
-                
+                }                
 				data.results.record_serializer.forEach((record) => {
 					const temp_row = {
 						id: record.id,
-						system_prompt: record.content['System Prompt'],
+						system_prompt: record.content[0]['value'],
 					};
 
                     for (var key in record.content) {
-                        temp_row[key] = record.content[key];
+                        temp_row[record.content[key]["name"]] = record.content[key]["value"];
                     }
 					temp_row["embedding"] = record.embedding;
-
+                    console.log(temp_row)
 					record.evaluation.forEach((evaluation) => {
 						if (!column_name.includes(evaluation.evaluation_name) && evaluation.evaluation_name) {
 							column_name.push(evaluation.evaluation_name);

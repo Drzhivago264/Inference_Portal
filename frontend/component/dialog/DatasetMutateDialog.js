@@ -51,13 +51,19 @@ export default function DatasetMutateDialog({
 		evaluation_default_question: null,
 		evaluation_label: ["good", "bad", "ugly"],
 	};
-
+    const get_name_list = (old_name_list) => {
+        let name_list = []
+        for (let name in old_name_list) {
+            name_list.push(old_name_list[name]["name"])
+        }
+        return name_list
+    }
 	const [open, setOpen] = useState(open_dialog ? open_dialog : false);
 	const [saveerror, setSaveError] = useState(false);
 	const [default_system_prompt, setDefaultSystemPrompt] = useState(method === "put" ? old_default_system_prompt : "");
 	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [DEFAULT_EVALUATION]);
 	const [dataset_name, setDatasetName] = useState(method === "put" ? old_dataset_name : "");
-	const [field_name_list, setFieldNameList] = useState(method === "put" ? Object.keys(old_field_name_list) : ["Prompt"]);
+	const [field_name_list, setFieldNameList] = useState(method === "put" ? get_name_list(old_field_name_list) : ["Prompt"]);
 	const [saveerrormessage, setSaveErrorMessage] = useState("");
 	const [savesuccess, setSaveSuccess] = useState(false);
 	const [allow_mutate, setAllowMutate] = useState(true);
@@ -81,7 +87,7 @@ export default function DatasetMutateDialog({
 						setAllowAddDataset(true);
                         let new_content = {}
                         for (let name in field_name_list) {
-                            new_content[field_name_list[name]] = null
+                            new_content[field_name_list[name]] = ""
                         } 
 						setDatasetList([
 							...dataset_list,
@@ -94,7 +100,8 @@ export default function DatasetMutateDialog({
 							},
 						]);
 						setSelectedIndex(dataset_list.length);
-						setCurrentEvaluation(default_evaluation_without_null), setCurrentSystemPrompt(default_system_prompt);
+						setCurrentEvaluation(default_evaluation_without_null);
+                        setCurrentSystemPrompt(default_system_prompt);
                         handleClose();
                         setAllowMutate(true);
 					},
@@ -140,9 +147,8 @@ export default function DatasetMutateDialog({
 						setAllowAddDataset(true);
                         let new_content = {}
                         for (let name in field_name_list) {
-                            new_content[field_name_list[name]] = null
+                            new_content[field_name_list[name]] = ""
                         } 
-                        console.log(new_content)
 						const new_dataset_list = dataset_list.map((item) => {
 							if (item.id === dataset_id) {
 								return {
@@ -548,7 +554,7 @@ DatasetMutateDialog.propTypes = {
 	old_default_system_prompt: PropTypes.string,
 	old_default_evaluation: PropTypes.array,
 	old_dataset_name: PropTypes.string,
-	old_field_name_list: PropTypes.object,
+	old_field_name_list: PropTypes.array,
 	method: PropTypes.string.isRequired,
 	setCurrentEvaluation: PropTypes.func.isRequired,
 	setCurrentSystemPrompt: PropTypes.func.isRequired,

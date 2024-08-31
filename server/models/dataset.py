@@ -24,7 +24,7 @@ class Dataset(GeneralMixin):
     default_system_prompt = models.TextField(max_length=128000, default="")
     default_evaluation = models.JSONField(default=list)
     is_embedding_dataset = models.BooleanField(default=True)
-    default_content_structure = models.JSONField(default=dict)
+    default_content_structure = models.JSONField(default=list)
     def __str__(self) -> str:
         return self.name
 

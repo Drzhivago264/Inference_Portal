@@ -108,7 +108,6 @@ def get_user_records_api(request, id: int):
 def create_user_dataset_api(request):
     current_user = request.user
     serializer = DatasetCreateSerializer(data=request.data)
-
     if serializer.is_valid(raise_exception=True):
         dataset_name = serializer.validated_data["name"]
         default_evaluation = list()
@@ -138,8 +137,12 @@ def create_user_dataset_api(request):
                 name=dataset_name,
                 default_evaluation=default_evaluation,
                 default_system_prompt=default_system_prompt,
-                default_content_structure={
-                    field_name_list[i]: None for i in range(len(field_name_list))}
+                default_content_structure=[
+                    {
+                        "name": field_name_list[i],
+                        "value": ""
+                    } for i in range(len(field_name_list))
+                ]
             )
             return Response(
                 {"detail": "Saved", "id": dataset.id, "name": dataset.name},
@@ -188,8 +191,12 @@ def update_user_dataset_api(request):
                 dataset.name = new_dataset_name
                 dataset.default_evaluation = new_default_evaluation
                 dataset.default_system_prompt = new_default_system_prompt
-                dataset.default_content_structure = {
-                    new_field_name_list[i]: None for i in range(len(new_field_name_list))}
+                dataset.default_content_structure = [
+                    {
+                        "name": new_field_name_list[i],
+                        "value": ""
+                    } for i in range(len(new_field_name_list))
+                ]
                 dataset.save()
                 update_cache(
                     prefix="user_dataset", key=id, model_instance=dataset, timeout=120
@@ -239,9 +246,12 @@ def create_user_record_api(request):
         system_prompt = serializer.validated_data["system_prompt"]
         evaluation = serializer.validated_data["evaluation"]
         content = serializer.validated_data["content"]
-        full_content =  {"System Prompt": system_prompt}
-        full_content.update(content)
-        text_to_embed = '\n'.join(full_content.values())
+        print(content)
+        full_content = [{"name": "System Prompt",
+                        "value": system_prompt}]
+        full_content += content
+        text_to_embed = '\n'.join(c['value'] for c in full_content)
+        print(text_to_embed, full_content)
         embedding_fn, _ = get_embedding_function()
         embedding = embedding_fn(text_to_embed)
         dataset = get_or_set_cache(
@@ -272,9 +282,10 @@ def update_user_record_api(request):
         dataset_id = serializer.validated_data["dataset_id"]
         system_prompt = serializer.validated_data["system_prompt"]
         content = serializer.validated_data["content"]
-        full_content =  {"System Prompt": system_prompt}
-        full_content.update(content)
-        text_to_embed = '\n'.join(full_content.values())
+        full_content = [{"name": "System Prompt",
+                        "value": system_prompt}]
+        full_content += content
+        text_to_embed = '\n'.join(c['value'] for c in full_content)
         evaluation = serializer.validated_data["evaluation"]
         record_id = serializer.validated_data["record_id"]
         dataset = get_or_set_cache(
@@ -287,7 +298,6 @@ def update_user_record_api(request):
         if not dataset:
             raise NotFound(detail="No dataset")
         try:
-            text_to_embed = '\n'.join(content.values())
             embedding_fn, _ = get_embedding_function()
             embedding = embedding_fn(text_to_embed)
             with transaction.atomic():

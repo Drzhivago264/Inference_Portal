@@ -61,7 +61,7 @@ function PromptWriting() {
 	const [current_evaluation, setCurrentEvaluation] = useState([]);
 	const [current_embedding, setCurrentEmbedding] = useState("");
 	const [current_system_prompt_error, setCurrentSystemPromptError] = useState(false);
-	const [current_content, setCurrentContent] = useState({});
+	const [current_content, setCurrentContent] = useState([]);
 	const [current_content_error, setCurrentContentError] = useState(false);
 	const [current_record_id, setCurrentRecordId] = useState(null);
 	const [allow_save_record, setAllowSaveRecord] = useState(false);
@@ -125,10 +125,15 @@ function PromptWriting() {
 		setCurrentEvaluation(new_evaluation_list);
 	};
 
-    const updateContent = (v, field_name) => {
-        const new_content = {...current_content}
-        new_content[field_name] = v
-        setCurrentContent(new_content)
+    const updateContent = (v, index) => {
+        const new_content_list = current_content.map((item, i) => {
+			if (i === index) {
+				return {...item, ["value"]: v};
+			}
+			return item;
+		});
+        console.log(new_content_list)
+        setCurrentContent(new_content_list)
     }
 	const {mutate: postmutate} = useMutation(basePost);
 	const {mutate: putmutate} = useMutation(basePut);
@@ -158,7 +163,7 @@ function PromptWriting() {
         if (!current_system_prompt) {
             setCurrentSystemPromptError(true)
         }
-        if (Object.keys(current_content).length === 0) {
+        if (current_content.length === 0) {
             setCurrentContentError(true)
         }
         
@@ -171,6 +176,13 @@ function PromptWriting() {
 			};
 			const handleSuccess = () => {
 				record_refetch();
+                let new_content = [...current_content]
+                for (let content in new_content) {
+                    if(new_content[content]["value"]) {
+                        new_content[content]["value"] = "";
+                    }
+                }
+                setCurrentContent(new_content)
 				setSaveSuccess(true);
 				setAllowSaveRecord(false);
 			};
@@ -209,7 +221,14 @@ function PromptWriting() {
 	const handleListItemClick = (index) => {
 		setSelectedIndex(index);
 		setCurrentRecordId(null);
-		setCurrentContent(dataset_list[index].default_content_structure);
+        setAllowSaveRecord(false)
+        let new_content = [...dataset_list[index].default_content_structure]
+        for (let content in new_content) {
+            if(new_content[content]["value"]) {
+                new_content[content]["value"] = "";
+            }
+        }
+        setCurrentContent(new_content)
 		setCurrentSystemPrompt(dataset_list[index].default_system_prompt);
 		setCurrentEvaluation(dataset_list[index].default_evaluation);
 	};
@@ -241,8 +260,8 @@ function PromptWriting() {
 				{url: "/frontend-api/delete-record", data: data},
 				{
 					onSuccess: () => {
+                        setDatasetRow((prev) => prev.filter((row) => row.id !== data.record_id));
 						setDeleteSuccess(true);
-						record_refetch();
 					},
 					onError: (error) => {
 						if (error.code === "ERR_BAD_RESPONSE") {
@@ -277,8 +296,8 @@ function PromptWriting() {
 	);
 	const handleRowClick = (params) => {
 		const {id, system_prompt, embedding} = params.row;
-        console.log(id)
 		setCurrentRecordId(id);
+        setAllowSaveRecord(false);
 		setCurrentSystemPrompt(system_prompt);
 		const clickedRecord = record_list.results.record_serializer.find((record) => record.id === id);
 		if (clickedRecord) {
@@ -422,7 +441,7 @@ function PromptWriting() {
 							<Grid item xs={7}>
 								<FormControl fullWidth sx={{mt: 2, mb: 1}} variant='standard'>
 									<Stack direction='column' spacing={2}>
-                                    {current_content && !Object.keys(current_content).includes("System Prompt") && <TextField
+                                    {current_content.length > 0 && !current_content.includes({"name":"System Prompt", "value": ""}) && <TextField
 											label='System Prompt'
 											multiline
 											error={current_system_prompt_error}
@@ -437,25 +456,24 @@ function PromptWriting() {
 											inputProps={{maxLength: 2500}}
 										/>
                                         }
-										{current_content && Object.keys(current_content).map((field_name, index) => (
+										{current_content.length>0 && current_content.map((field_name, index) => (
 											<TextField
-												key={field_name+index}
-												label={field_name}
+												key={field_name['name']+index}
+												label={field_name['name']}
 												error={current_content_error}
 												multiline
 												minRows={8}
 												maxRows={10}
-												value={current_content[field_name]}
+												value={current_content[index]["value"]}
 												InputLabelProps={{shrink: true}}
 												onChange={(e) => {
-                                                    updateContent(e.target.value, field_name);
+                                                    updateContent(e.target.value, index);
                                                     
 													setAllowSaveRecord(true);
 												}}
 												inputProps={{maxLength: 2500}}
 											/>
 										))}
-
 										<TextField
 											label='Embedding'
 											multiline
