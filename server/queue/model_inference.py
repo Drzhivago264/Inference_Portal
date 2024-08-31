@@ -127,10 +127,10 @@ def inference(
                             response=clean_response,
                             type_=type_,
                         )
-                elif (
-                    server_status == InferenceServer.StatusType.STOPPED
-                    or InferenceServer.StatusType.STOPPING
-                ):
+                elif server_status in [
+                    InferenceServer.StatusType.STOPPED,
+                    InferenceServer.StatusType.STOPPING,
+                ]:
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
                     update_server_status_in_db(
@@ -297,10 +297,10 @@ def agent_inference(
                             },
                         )
 
-                elif (
-                    server_status == InferenceServer.StatusType.STOPPED
-                    or InferenceServer.StatusType.STOPPING
-                ):
+                elif server_status in [
+                    InferenceServer.StatusType.STOPPED,
+                    InferenceServer.StatusType.STOPPING,
+                ]:
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
                     update_server_status_in_db(

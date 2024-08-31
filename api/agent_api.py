@@ -160,10 +160,10 @@ async def agentcompletion(request, data: AgentSchema):
                         res["Cache-Control"] = "no-cache"
                         return res
 
-                elif (
-                    server_status == InferenceServer.StatusType.STOPPED
-                    or InferenceServer.StatusType.STOPPING
-                ):
+                elif server_status in [
+                    InferenceServer.StatusType.STOPPED,
+                    InferenceServer.StatusType.STOPPING,
+                ]:
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(
                         instance_id=instance_id, update_type="status"
