@@ -86,7 +86,7 @@ Before install dependencies, you need to install Postgres, and create a table na
     #if you want to enable postgres on start up use this command
     sudo systemctl enable postgresql
 
-You dont need this for now but, I am building a better RAG for users' memory with pgvectorscale. To begin this, you must ensure that you have Postgres 16 installed (14 or 15 can also work) and then install pgvector scale like this:
+Next you have to install pgvectorscale. To begin this, you must ensure that you have Postgres 16 installed (14 or 15 can also work) and then install pgvector scale like this (pgvectorscale also provides a docker but it is 4GB for a postgres so we can cut cost by building from source):
 
     sudo apt-get install make gcc pkg-config clang postgresql-server-dev-16 libssl-dev libclang-dev
     
@@ -159,7 +159,6 @@ Next you need to set up .env file and setup the following key. Note that, if you
     MONERO_WEBHOOK_SECRET="" (This field is provided by you, it is a password to authenticate webhook call from your own server whenever new XMR transaction detected. I add this because I am a little bit paranoid, but you should keep it hard to guess. It will be supplied in this RPC command  with --tx-notify '/{path to}/python3 /{path to}/monero-rpc-callback.py {MONERO_WEBHOOK_SECRET} %s')
     EMAIL_ADDRESS = "" (The EMAIL_ADDRESS that fowards contact form)
     EMAIL_PASSWORD = "" (The password for EMAIL_ADDRESS that fowards contact form)
-    DJANGO_SETTINGS_MODULE="inferenceportal.settings"
     aws_access_key_id="" (The AWS key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
     aws_secret_access_key="" (The AWS secret key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
     ADMIN_PATH = "" (your admin path, keep it hard to guess)
