@@ -1,4 +1,5 @@
 from constance import config as constant
+from datasets import load_dataset
 from django.contrib.auth.decorators import permission_required
 from django.db import transaction
 from rest_framework import status
@@ -7,6 +8,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
+from vectordb.utils import get_embedding_function
 
 from server.models.dataset import Dataset, EmbeddingDatasetRecord
 from server.utils.sync_.sync_cache import (
@@ -22,12 +24,10 @@ from server.views.serializer import (
     DatasetDeleteSerializer,
     DatasetEvaluationSerializer,
     DatasetGetSerializer,
-    DatasetRecordGetSerialzier,
     DatasetRecordCreateSerialzier,
+    DatasetRecordGetSerialzier,
     DatasetUpdateSerializer,
 )
-from vectordb.utils import get_embedding_function
-from datasets import load_dataset
 
 
 @api_view(["GET"])
@@ -47,10 +47,9 @@ def get_default_user_dataset_api(request):
     elif Dataset.objects.filter(user=master_user).count() == 0:
         raise NotFound(detail="No dataset")
     else:
-        dataset_list = Dataset.objects.filter(user=master_user).order_by('-id')
+        dataset_list = Dataset.objects.filter(user=master_user).order_by("-id")
         if dataset_list:
-            dataset_list_serializer = DatasetGetSerializer(
-                dataset_list, many=True)
+            dataset_list_serializer = DatasetGetSerializer(dataset_list, many=True)
             return Response(
                 {
                     "dataset_list": dataset_list_serializer.data,
@@ -91,11 +90,9 @@ def get_user_records_api(request, id: int):
             raise NotFound(detail="No dataset")
         paginator = PaginatorWithPageNum()
         paginator.page_size = 10
-        records = EmbeddingDatasetRecord.objects.filter(
-            dataset=dataset).order_by("-id")
+        records = EmbeddingDatasetRecord.objects.filter(dataset=dataset).order_by("-id")
         result_records = paginator.paginate_queryset(records, request)
-        record_serializer = DatasetRecordGetSerialzier(
-            result_records, many=True)
+        record_serializer = DatasetRecordGetSerialzier(result_records, many=True)
         return paginator.get_paginated_response(
             {"record_serializer": record_serializer.data}
         )
@@ -138,11 +135,9 @@ def create_user_dataset_api(request):
                 default_evaluation=default_evaluation,
                 default_system_prompt=default_system_prompt,
                 default_content_structure=[
-                    {
-                        "name": field_name_list[i],
-                        "value": ""
-                    } for i in range(len(field_name_list))
-                ]
+                    {"name": field_name_list[i], "value": ""}
+                    for i in range(len(field_name_list))
+                ],
             )
             return Response(
                 {"detail": "Saved", "id": dataset.id, "name": dataset.name},
@@ -192,10 +187,8 @@ def update_user_dataset_api(request):
                 dataset.default_evaluation = new_default_evaluation
                 dataset.default_system_prompt = new_default_system_prompt
                 dataset.default_content_structure = [
-                    {
-                        "name": new_field_name_list[i],
-                        "value": ""
-                    } for i in range(len(new_field_name_list))
+                    {"name": new_field_name_list[i], "value": ""}
+                    for i in range(len(new_field_name_list))
                 ]
                 dataset.save()
                 update_cache(
@@ -247,10 +240,9 @@ def create_user_record_api(request):
         evaluation = serializer.validated_data["evaluation"]
         content = serializer.validated_data["content"]
         print(content)
-        full_content = [{"name": "System Prompt",
-                        "value": system_prompt}]
+        full_content = [{"name": "System Prompt", "value": system_prompt}]
         full_content += content
-        text_to_embed = '\n'.join(c['value'] for c in full_content)
+        text_to_embed = "\n".join(c["value"] for c in full_content)
         print(text_to_embed, full_content)
         embedding_fn, _ = get_embedding_function()
         embedding = embedding_fn(text_to_embed)
@@ -267,7 +259,7 @@ def create_user_record_api(request):
             dataset=dataset,
             content=full_content,
             evaluation=evaluation,
-            embedding=embedding
+            embedding=embedding,
         )
         return Response({"detail": "Saved"}, status=status.HTTP_200_OK)
 
@@ -282,10 +274,9 @@ def update_user_record_api(request):
         dataset_id = serializer.validated_data["dataset_id"]
         system_prompt = serializer.validated_data["system_prompt"]
         content = serializer.validated_data["content"]
-        full_content = [{"name": "System Prompt",
-                        "value": system_prompt}]
+        full_content = [{"name": "System Prompt", "value": system_prompt}]
         full_content += content
-        text_to_embed = '\n'.join(c['value'] for c in full_content)
+        text_to_embed = "\n".join(c["value"] for c in full_content)
         evaluation = serializer.validated_data["evaluation"]
         record_id = serializer.validated_data["record_id"]
         dataset = get_or_set_cache(

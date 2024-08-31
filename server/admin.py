@@ -105,10 +105,11 @@ class EmbeddingDatasetRecordAdmin(admin.ModelAdmin):
         "evaluation",
         "created_at",
         "updated_at",
-        "embedding"
+        "embedding",
     )
     list_editable = ("content", "evaluation")
     list_display_links = ("dataset",)
+
 
 @admin.register(InferenceServer)
 class InferenceServerAdmin(admin.ModelAdmin):

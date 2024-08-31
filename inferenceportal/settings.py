@@ -154,7 +154,7 @@ USE_TZ = True
 
 
 if DEBUG:
-    STATIC_URL = "static/" 
+    STATIC_URL = "static/"
 else:
     STATIC_URL = "https://static.professorparakeet.com/"
 

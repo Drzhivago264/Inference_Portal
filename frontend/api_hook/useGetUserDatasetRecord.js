@@ -33,7 +33,6 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, selectedInd
                         temp_row[record.content[key]["name"]] = record.content[key]["value"];
                     }
 					temp_row["embedding"] = record.embedding;
-                    console.log(temp_row)
 					record.evaluation.forEach((evaluation) => {
 						if (!column_name.includes(evaluation.evaluation_name) && evaluation.evaluation_name) {
 							column_name.push(evaluation.evaluation_name);

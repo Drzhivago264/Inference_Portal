@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from server.models.api_key import APIKEY
 from server.models.general_mixin import GeneralMixin
 
+
 class Product(GeneralMixin):
     name = models.CharField(max_length=255)
     desc = models.TextField(_("Description"), blank=True)

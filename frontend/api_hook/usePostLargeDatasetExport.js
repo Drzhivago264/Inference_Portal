@@ -29,10 +29,19 @@ export const usePostLargeDatasetExport = ({dataset_id, dataset_name, extension, 
 								a.setAttribute("href", url);
 								a.setAttribute("download", `${dataset_name}_${now.format(format_to_hour)}.jsonl`);
 							} else if (extension === ".csv") {
-								let stringify_nested_json = data.records.map((val) => ({
-									content: JSON.stringify(val.content),
-									evaluation: JSON.stringify(val.evaluation),
-								}));
+                                let stringify_nested_json = []
+                                for (let record in data.records) {
+                                    let temp_record = {}
+                                    for (let con in data.records[record]['content']) {
+                                        temp_record[data.records[record]['content'][con]["name"]] = data.records[record]['content'][con]["value"]
+                                    }
+                                    for (let eva in data.records[record]['evaluation']) {
+                                        temp_record[data.records[record]['evaluation'][eva]["evaluation_name"]] = data.records[record]['evaluation'][eva]["evaluation_value"]
+                                    }
+                                    temp_record["Evaluation Object"] = JSON.stringify(data.records[record]['evaluation'])
+                                    stringify_nested_json.push(temp_record)
+                                }
+                                console.log(stringify_nested_json)
 								download_content = Papa.unparse(stringify_nested_json);
 								blob = new Blob([download_content]);
 								if (window.navigator.msSaveOrOpenBlob) {

@@ -12,11 +12,11 @@ from server.views.information import check_login, log_in, log_out, model_api
 from server.views.key_management import (
     check_credit_api,
     confirm_xmr_payment_api,
+    credit_balance_api,
     generate_key_api,
     product_list_api,
     retrive_xmr_wallet_api,
     stripe_redirect,
-    credit_balance_api
 )
 from server.views.prompt_writing import (
     create_user_dataset_api,
@@ -75,7 +75,9 @@ urlpatterns = [
     path("frontend-api/add-permission", add_permission, name="add_permission"),
     path("frontend-api/invalidate-token", invalidate_token, name="invalidate-token"),
     path("frontend-api/update-ratelimit", update_ratelimit, name="update-ratelimit"),
-    path("frontend-api/credit-balance-api", credit_balance_api, name="credit-balance-api"),
+    path(
+        "frontend-api/credit-balance-api", credit_balance_api, name="credit-balance-api"
+    ),
     # ENDPOINTS FOR PAYMENTS AND WALLETS
     path("frontend-api/check-credit", check_credit_api, name="check-key"),
     path("frontend-api/get-xmr-wallet", retrive_xmr_wallet_api, name="get-xmr-wallet"),

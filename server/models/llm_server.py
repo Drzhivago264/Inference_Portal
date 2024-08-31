@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+
 from server.models.general_mixin import GeneralMixin
+
 
 class LLM(GeneralMixin):
     name = models.CharField(max_length=255)
@@ -28,7 +30,7 @@ class InferenceServer(GeneralMixin):
     public_ip = models.GenericIPAddressField()
     private_ip = models.GenericIPAddressField()
     last_message_time = models.DateTimeField(default=now)
-    
+
     class AvailabilityType(models.IntegerChoices):
         AVAILABLE = 1, "Available"
         NOT_AVAILABLE = 2, "Not Available"
@@ -46,9 +48,9 @@ class InferenceServer(GeneralMixin):
         SHUTTING_DOWN = 5, "Shutting Down"
         TERMINATED = 6, "Terminated"
 
-
     status = models.PositiveSmallIntegerField(
-        choices=StatusType.choices, default=StatusType.STOPPED)
-    
+        choices=StatusType.choices, default=StatusType.STOPPED
+    )
+
     def __str__(self) -> str:
         return self.name

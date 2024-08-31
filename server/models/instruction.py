@@ -3,7 +3,9 @@ import string
 from django.contrib.auth.models import User
 from django.db import models
 from treebeard.mp_tree import MP_Node
+
 from server.models.general_mixin import GeneralMixin
+
 
 class AbstractInstructionTreeMP(MP_Node):
     node_order_by = ["code"]

@@ -22,7 +22,9 @@ def periodically_monitor_EC2_instance() -> str:
     Returns:
         str : the status of the server
     """
-    available_server = InferenceServer.objects.filter(availability=InferenceServer.AvailabilityType.AVAILABLE)
+    available_server = InferenceServer.objects.filter(
+        availability=InferenceServer.AvailabilityType.AVAILABLE
+    )
     for server in available_server:
         ec2_resource = boto3.resource(
             "ec2",
@@ -36,7 +38,7 @@ def periodically_monitor_EC2_instance() -> str:
             "stopped": InferenceServer.StatusType.STOPPED,
             "pending": InferenceServer.StatusType.PENDING,
             "shutting-down": InferenceServer.StatusType.SHUTTING_DOWN,
-            "terminated": InferenceServer.StatusType.TERMINATED
+            "terminated": InferenceServer.StatusType.TERMINATED,
         }
         try:
             instance = ec2_resource.Instance(server.name)
@@ -55,11 +57,14 @@ def periodically_monitor_EC2_instance() -> str:
 @shared_task()
 def periodically_shutdown_EC2_instance() -> None:
     """Periodically shutdown unused EC2 GPU instances every 1200 seconds."""
-    available_servers = InferenceServer.objects.filter(availability=InferenceServer.AvailabilityType.AVAILABLE)
+    available_servers = InferenceServer.objects.filter(
+        availability=InferenceServer.AvailabilityType.AVAILABLE
+    )
     for server in available_servers:
         unused_time = timezone.now() - server.last_message_time
         if unused_time.total_seconds() > constant.SERVER_TTL and server.status not in [
-            InferenceServer.StatusType.STOPPED, InferenceServer.StatusType.STOPPING
+            InferenceServer.StatusType.STOPPED,
+            InferenceServer.StatusType.STOPPING,
         ]:
             command_EC2.delay(server.name, region=region, action="off")
             server.status = InferenceServer.StatusType.STOPPING

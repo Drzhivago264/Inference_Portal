@@ -12,10 +12,9 @@ from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
-from rest_framework.exceptions import PermissionDenied
 
 from server.api_throttling_rates import (
     CreditCheckRateThrottle,
@@ -23,17 +22,17 @@ from server.api_throttling_rates import (
     XMRConfirmationRateThrottle,
 )
 from server.models.api_key import APIKEY
-from server.utils.sync_.sync_cache import get_user_or_set_cache
 from server.models.product import Crypto, PaymentHistory, Price, Product
 from server.utils.sync_.manage_monero import manage_monero
+from server.utils.sync_.sync_cache import get_user_or_set_cache
 from server.views.custom_exception import ServiceUnavailable
 from server.views.serializer import (
     CheckKeySerializer,
     CreateKeySerializer,
     MoneroTransactionSerializer,
+    PaymentHistorySerializer,
     ProductSerializer,
     StripePaymentSerializer,
-    PaymentHistorySerializer
 )
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -45,6 +44,7 @@ def product_list_api(request: HttpRequest) -> Response:
     page_content = Product.objects.all()
     serializer = ProductSerializer(page_content, many=True)
     return Response({"products": serializer.data})
+
 
 @api_view(["GET"])
 @throttle_classes([AnonRateThrottle])
@@ -63,7 +63,13 @@ def credit_balance_api(request: HttpRequest) -> Response:
     payment_data = PaymentHistorySerializer(payment_history, many=True)
     fiat_balance = key.credit
     monero_balance = key.monero_credit
-    return Response({"fiat_balance": fiat_balance, 'monero_balance': monero_balance, 'payment_history': payment_data.data})
+    return Response(
+        {
+            "fiat_balance": fiat_balance,
+            "monero_balance": monero_balance,
+            "payment_history": payment_data.data,
+        }
+    )
 
 
 @api_view(["POST"])
@@ -261,7 +267,10 @@ def generate_key_api(request: HttpRequest) -> Response:
             wallet = manage_monero("make_integrated_address")
             integrated_address = json.loads(wallet.text)["result"]["integrated_address"]
             payment_id = json.loads(wallet.text)["result"]["payment_id"]
-        except (requests.exceptions.ConnectionError, requests.exceptions.JSONDecodeError):
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.JSONDecodeError,
+        ):
             integrated_address = ""
             payment_id = ""
         try:

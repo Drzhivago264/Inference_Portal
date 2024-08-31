@@ -6,8 +6,9 @@ from django.db import models
 from treebeard.mp_tree import MP_Node, get_result_class
 
 from server.models.api_key import APIKEY
-from server.models.llm_server import LLM
 from server.models.general_mixin import GeneralMixin
+from server.models.llm_server import LLM
+
 
 class AbstractPromptResponse(models.Model):
     prompt = models.TextField()

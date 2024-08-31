@@ -5,7 +5,7 @@ from server.models.dataset import Dataset
 from server.models.instruction import InstructionTreeMP, UserInstructionTreeMP
 from server.models.llm_server import LLM, InferenceServer
 from server.models.log import MemoryTreeMP, PromptResponse
-from server.models.product import Product, PaymentHistory
+from server.models.product import PaymentHistory, Product
 
 
 class CostSerializer(serializers.ModelSerializer):
@@ -34,6 +34,7 @@ class DatasetCreateSerializer(serializers.Serializer):
     default_evaluation = serializers.JSONField()
     field_name_list = serializers.ListField()
 
+
 class DatasetDeleteSerializer(serializers.Serializer):
     id = serializers.IntegerField()
 
@@ -52,7 +53,13 @@ class DatasetUpdateSerializer(DatasetDeleteSerializer):
 class DatasetGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
-        fields = ("id", "name", "default_system_prompt", "default_evaluation", "default_content_structure")
+        fields = (
+            "id",
+            "name",
+            "default_system_prompt",
+            "default_evaluation",
+            "default_content_structure",
+        )
 
 
 class DatasetEvaluationSerializer(serializers.Serializer):
@@ -84,12 +91,14 @@ class DatasetRecordGetSerialzier(serializers.Serializer):
     evaluation = serializers.JSONField()
     embedding = serializers.ListField()
 
+
 class DatasetRecordCreateSerialzier(serializers.Serializer):
     record_id = serializers.IntegerField(required=False)
     dataset_id = serializers.IntegerField()
     system_prompt = serializers.CharField()
     content = serializers.JSONField()
     evaluation = serializers.JSONField()
+
 
 class DatasetDeleteRecordSerialzier(serializers.Serializer):
     record_id = serializers.IntegerField()
@@ -117,6 +126,7 @@ class MemoryTreeSerializer(serializers.ModelSerializer):
             "response",
             "created_at",
         )
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -260,11 +270,21 @@ class StripePaymentSerializer(CheckKeySerializer):
 
 
 class PaymentHistorySerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source='get_type_display')
-    status = serializers.CharField(source='get_status_display')
+    type = serializers.CharField(source="get_type_display")
+    status = serializers.CharField(source="get_status_display")
+
     class Meta:
         model = PaymentHistory
-        fields = ("type", "status", "amount", "transaction_hash", "stripe_payment_id", "created_at")
+        fields = (
+            "type",
+            "status",
+            "amount",
+            "transaction_hash",
+            "stripe_payment_id",
+            "created_at",
+        )
+
+
 class ModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LLM
@@ -275,8 +295,9 @@ class ServerSerializer(serializers.ModelSerializer):
     model_name = serializers.SerializerMethodField()
     model_price_input = serializers.SerializerMethodField()
     model_price_output = serializers.SerializerMethodField()
-    status = serializers.CharField(source='get_status_display')
-    availability = serializers.CharField(source='get_availability_display')
+    status = serializers.CharField(source="get_status_display")
+    availability = serializers.CharField(source="get_availability_display")
+
     class Meta:
         model = InferenceServer
         fields = (

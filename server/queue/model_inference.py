@@ -9,6 +9,7 @@ from decouple import config
 from openai import OpenAI
 
 from server.models.api_key import APIKEY
+from server.models.llm_server import InferenceServer
 from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.utils.sync_.inference import (
@@ -21,7 +22,7 @@ from server.utils.sync_.log_database import log_prompt_response
 from server.utils.sync_.manage_ec2 import update_server_status_in_db
 from server.utils.sync_.query_database import get_model, get_model_url
 from server.utils.sync_.sync_cache import get_or_set_cache
-from server.models.llm_server import InferenceServer
+
 region = constant.REGION
 logger = get_task_logger(__name__)
 
@@ -126,7 +127,10 @@ def inference(
                             response=clean_response,
                             type_=type_,
                         )
-                elif server_status == InferenceServer.StatusType.STOPPED or InferenceServer.StatusType.STOPPING:
+                elif (
+                    server_status == InferenceServer.StatusType.STOPPED
+                    or InferenceServer.StatusType.STOPPING
+                ):
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
                     update_server_status_in_db(
@@ -293,7 +297,10 @@ def agent_inference(
                             },
                         )
 
-                elif server_status == InferenceServer.StatusType.STOPPED or InferenceServer.StatusType.STOPPING:
+                elif (
+                    server_status == InferenceServer.StatusType.STOPPED
+                    or InferenceServer.StatusType.STOPPING
+                ):
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
                     update_server_status_in_db(

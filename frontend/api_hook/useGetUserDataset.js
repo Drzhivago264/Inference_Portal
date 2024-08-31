@@ -19,7 +19,6 @@ export const useGetUserDataset = (setDatasetList, dataset_list, setMaxDatasetNum
                 setMaxEvaluationNum(data.max_evaluation_num),
                 setCurrentEvaluation(data.dataset_list[selectedIndex].default_evaluation),
                 setCurrentSystemPrompt(data.dataset_list[selectedIndex].default_system_prompt)
-                console.log(data.dataset_list[selectedIndex].default_content_structure)
                 setCurrentContent(data.dataset_list[selectedIndex].default_content_structure)
             },
         }

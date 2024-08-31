@@ -132,7 +132,6 @@ function PromptWriting() {
 			}
 			return item;
 		});
-        console.log(new_content_list)
         setCurrentContent(new_content_list)
     }
 	const {mutate: postmutate} = useMutation(basePost);

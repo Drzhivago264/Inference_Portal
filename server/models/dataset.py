@@ -1,11 +1,11 @@
+import numpy as np
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import connection, models
 from django.utils.translation import gettext_lazy as _
 from pgvector.django import VectorField
+
 from server.models.general_mixin import GeneralMixin
-import numpy as np
-from django.db import connection
 
 User = settings.AUTH_USER_MODEL
 
@@ -18,6 +18,7 @@ def dictfetchall(cursor):
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
+
 class Dataset(GeneralMixin):
     name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -25,6 +26,7 @@ class Dataset(GeneralMixin):
     default_evaluation = models.JSONField(default=list)
     is_embedding_dataset = models.BooleanField(default=True)
     default_content_structure = models.JSONField(default=list)
+
     def __str__(self) -> str:
         return self.name
 
@@ -45,10 +47,11 @@ class EmbeddingDatasetRecord(AbstractDatasetRecord, GeneralMixin):
         blank=True,
     )
 
-
-    def filter_similar_records(self, k: int, distance: float = 1.0, include_self: bool = False):
+    def filter_similar_records(
+        self, k: int, distance: float = 1.0, include_self: bool = False
+    ):
         with connection.cursor() as cursor:
-            string_array = np.array2string(self.embedding, separator=',', precision=9)
+            string_array = np.array2string(self.embedding, separator=",", precision=9)
             if include_self:
                 cursor.execute(
                     """
@@ -57,13 +60,7 @@ class EmbeddingDatasetRecord(AbstractDatasetRecord, GeneralMixin):
                     ORDER BY distance  
                     LIMIT %s;
                     """,
-                    [
-                        string_array,
-                        string_array,
-                        distance,
-                        self.dataset.id,
-                        k
-                    ] 
+                    [string_array, string_array, distance, self.dataset.id, k],
                 )
             else:
                 cursor.execute(
@@ -73,15 +70,8 @@ class EmbeddingDatasetRecord(AbstractDatasetRecord, GeneralMixin):
                     ORDER BY distance  
                     LIMIT %s;
                     """,
-                    [
-                        string_array,
-                        string_array,
-                        distance,
-                        self.id,
-                        self.dataset.id,
-                        k
-                    ] 
+                    [string_array, string_array, distance, self.id, self.dataset.id, k],
                 )
-            
+
             rows = dictfetchall(cursor)
         return rows

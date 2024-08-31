@@ -8,9 +8,9 @@ from decouple import config
 from django.utils import timezone
 from pydantic import ValidationError
 
-from server.models.llm_server import InferenceServer
 from server.consumers.base_agent import BaseAgent
 from server.consumers.pydantic_validator import DataSynthesisSchema
+from server.models.llm_server import InferenceServer
 from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils.async_.async_manage_ec2 import update_server_status_in_db_async

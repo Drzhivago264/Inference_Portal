@@ -64,24 +64,27 @@ def export_large_dataset(
         ) as fout:
             for index, r in enumerate(result_records.iterator(chunk_size=2000)):
                 if extension == ".csv":
-                    writer = csv.writer(fout)
-                    if index == 0:
-                        writer.writerow(
-                            ["content", "evaluation", "embedding"]
-                        )
-                    writer.writerow(
-                        [
-                            json.dumps(r.content),
-                            json.dumps(r.evaluation),
-                            r.embedding,
-                        ]
-                    )
+                    with open("output.csv", "w", newline="") as fout:
+                        writer = csv.writer(fout)
+                        if index == 0:
+                            header_row = (
+                                [con["name"] for con in r["content"]]
+                                + [eva["evaluation_name"] for eva in r["evaluation"]]
+                                + ["Evaluation Object", "Embedding"]
+                            )
+                            writer.writerow(header_row)
 
+                        data_row = (
+                            [con["value"] for con in r.content]
+                            + [eva["value"] for eva in r.evaluation]
+                            + [json.dumps(r.evaluation), r.embedding]
+                        )
+                        writer.writerow(data_row)
                 elif extension == ".jsonl":
                     data = {
                         "content": r.content,
                         "evaluation": r.evaluation,
-                        "embedding": r.embedding
+                        "embedding": r.embedding,
                     }
                     json.dump(data, fout)
                     fout.write("\n")

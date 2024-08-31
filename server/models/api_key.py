@@ -6,7 +6,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rest_framework_api_key.crypto import KeyGenerator
 from rest_framework_api_key.models import AbstractAPIKey, BaseAPIKeyManager
+
 from server.models.general_mixin import GeneralMixin
+
 User = settings.AUTH_USER_MODEL
 
 

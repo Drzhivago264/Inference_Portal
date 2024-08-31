@@ -5,7 +5,7 @@ import regex as re
 from constance import config as constant
 from decouple import config
 
-from server.models.llm_server import LLM
+from server.models.llm_server import LLM, InferenceServer
 from server.models.log import PromptResponse
 from server.queue.log_prompt_response import celery_log_prompt_response
 from server.utils.async_.async_manage_ec2 import (
@@ -14,7 +14,7 @@ from server.utils.async_.async_manage_ec2 import (
 )
 from server.utils.async_.async_query_database import QueryDBMixin
 from server.utils.sync_.inference import action_parse_json
-from server.models.llm_server import InferenceServer
+
 
 class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
     async def openai_client_async(

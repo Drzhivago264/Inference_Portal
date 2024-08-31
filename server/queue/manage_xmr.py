@@ -2,13 +2,13 @@ import json
 
 import requests
 from celery import shared_task
+from celery.utils.log import get_task_logger
 from decouple import config
 from django.db import transaction
 from django.db.models import F
 
 from server.models.product import APIKEY, Crypto, PaymentHistory
 from server.utils.sync_.manage_monero import manage_monero
-from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
 
@@ -20,7 +20,7 @@ def validate_xmr_payment():
         status=PaymentHistory.PaymentStatus.PENDING,
         failed_validate_attempt__lt=10,
     )
-    
+
     for payment in pending_payment.iterator(chunk_size=10):
         logger.info(f"Validate transaction: {payment.id}")
         tx_hash = payment.transaction_hash

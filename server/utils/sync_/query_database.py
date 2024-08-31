@@ -24,7 +24,8 @@ def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
         if server_list is None:
             server_list = list(
                 InferenceServer.objects.filter(
-                    hosted_model=model, availability=InferenceServer.AvailabilityType.AVAILABLE
+                    hosted_model=model,
+                    availability=InferenceServer.AvailabilityType.AVAILABLE,
                 )
             )
             cache.set(
