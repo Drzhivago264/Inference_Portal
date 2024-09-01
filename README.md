@@ -214,6 +214,13 @@ This command will remove error traceback and pack up your code into much smaller
 
 Currently, this website use cloudflare CDN to serve webpack bundles. However, you can adjust the settings.py and directly use your /staticfiles
 
+## To do:
+
+1) Write backend for MUI serverside rendering for tables to remove Datatables dependency and jQuery (old stuffs used before migrating to React)
+2) Implement "Mark Done" and "Prevent Overide" on row level for the Dataset feature to better enable collaboration.
+3) Implement customisable "Require Field" to allow and prevent dataset submissions. 
+4) Hook the Embedding Datasets to Chatbot and Agent to build a Customisable Rag. <= This one is a piority. 
+
 ## Final words
 
 This project is actively being developed if you have any suggestions you can tell me. I also need your helps if you have some.

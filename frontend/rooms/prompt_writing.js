@@ -28,7 +28,6 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LoadingButton from "@mui/lab/LoadingButton";
-import Pagination from "@mui/material/Pagination";
 import Paper from "@mui/material/Paper";
 import Rating from "@mui/material/Rating";
 import ResponsiveAppBar from "../component/nav/Navbar.js";
@@ -55,7 +54,6 @@ function PromptWriting() {
 	const [dataset_row, setDatasetRow] = useState([]);
 	const [dataset_column, setDatasetColumn] = useState([]);
 	const [record_list, setRecordList] = useState([]);
-	const [pagnation_page, setPaginationPage] = useState(1);
 	const [rowSelectionModel, setRowSelectionModel] = useState([]);
 	const [current_system_prompt, setCurrentSystemPrompt] = useState("");
 	const [current_evaluation, setCurrentEvaluation] = useState([]);
@@ -77,13 +75,13 @@ function PromptWriting() {
 	const [allow_add_dataset, setAllowAddDataset] = useState(true);
 	const [max_dataset_num, setMaxDatasetNum] = useState(10);
 	const [max_evaluation_num, setMaxEvaluationNum] = useState(10);
-	const [total_node, setTotalNode] = useState(0);
+	const [total_row, setTotalRow] = useState(0);
+	const [paginationModel, setPaginationModel] = useState({
+		pageSize: 10,
+		page: 0,
+	});
 	const {is_authenticated} = useContext(UserContext);
 	useGetRedirectAnon(navigate, is_authenticated);
-
-	const navigatePagination = (_, value) => {
-		setPaginationPage(value);
-	};
 
 	const navigateRow = (direction) => {
 		let old_row_id = rowSelectionModel;
@@ -110,7 +108,7 @@ function PromptWriting() {
 		for (let i = 0; i < record_list.results.record_serializer.length; i++) {
 			if (record_list.results.record_serializer[i].id === new_row.id) {
 				setCurrentEvaluation(record_list.results.record_serializer[i].evaluation);
-                setCurrentContent(record_list.results.record_serializer[i].content);
+				setCurrentContent(record_list.results.record_serializer[i].content);
 				break;
 			}
 		}
@@ -125,15 +123,15 @@ function PromptWriting() {
 		setCurrentEvaluation(new_evaluation_list);
 	};
 
-    const updateContent = (v, index) => {
-        const new_content_list = current_content.map((item, i) => {
+	const updateContent = (v, index) => {
+		const new_content_list = current_content.map((item, i) => {
 			if (i === index) {
 				return {...item, ["value"]: v};
 			}
 			return item;
 		});
-        setCurrentContent(new_content_list)
-    }
+		setCurrentContent(new_content_list);
+	};
 	const {mutate: postmutate} = useMutation(basePost);
 	const {mutate: putmutate} = useMutation(basePut);
 	const {mutate: deletemutate} = useMutation(baseDelete);
@@ -159,13 +157,13 @@ function PromptWriting() {
 	const saveRecord = () => {
 		const dataset = dataset_list[selectedIndex];
 
-        if (!current_system_prompt) {
-            setCurrentSystemPromptError(true)
-        }
-        if (current_content.length === 0) {
-            setCurrentContentError(true)
-        }
-        
+		if (!current_system_prompt) {
+			setCurrentSystemPromptError(true);
+		}
+		if (current_content.length === 0) {
+			setCurrentContentError(true);
+		}
+
 		if (current_content && current_system_prompt && dataset) {
 			const data = {
 				dataset_id: dataset.id,
@@ -175,13 +173,14 @@ function PromptWriting() {
 			};
 			const handleSuccess = () => {
 				record_refetch();
-                let new_content = [...current_content]
-                for (let content in new_content) {
-                    if(new_content[content]["value"]) {
-                        new_content[content]["value"] = "";
-                    }
-                }
-                setCurrentContent(new_content)
+				const new_content_list = current_content.map((item) => {
+					if (item["value"]) {
+						return {...item, ["value"]: ""};
+					}
+					return item;
+				});
+                setCurrentEmbedding("")
+				setCurrentContent(new_content_list);
 				setSaveSuccess(true);
 				setAllowSaveRecord(false);
 			};
@@ -220,14 +219,14 @@ function PromptWriting() {
 	const handleListItemClick = (index) => {
 		setSelectedIndex(index);
 		setCurrentRecordId(null);
-        setAllowSaveRecord(false)
-        let new_content = [...dataset_list[index].default_content_structure]
-        for (let content in new_content) {
-            if(new_content[content]["value"]) {
-                new_content[content]["value"] = "";
-            }
-        }
-        setCurrentContent(new_content)
+		setAllowSaveRecord(false);
+		let new_content = [...dataset_list[index].default_content_structure];
+		for (let content in new_content) {
+			if (new_content[content]["value"]) {
+				new_content[content]["value"] = "";
+			}
+		}
+		setCurrentContent(new_content);
 		setCurrentSystemPrompt(dataset_list[index].default_system_prompt);
 		setCurrentEvaluation(dataset_list[index].default_evaluation);
 	};
@@ -259,7 +258,7 @@ function PromptWriting() {
 				{url: "/frontend-api/delete-record", data: data},
 				{
 					onSuccess: () => {
-                        setDatasetRow((prev) => prev.filter((row) => row.id !== data.record_id));
+						setDatasetRow((prev) => prev.filter((row) => row.id !== data.record_id));
 						setDeleteSuccess(true);
 					},
 					onError: (error) => {
@@ -282,34 +281,55 @@ function PromptWriting() {
 		isLoading: datasetIsLoading,
 		isSuccess: datasetIsSuccess,
 		isError: datasetIsError,
-	} = useGetUserDataset(setDatasetList, dataset_list, setMaxDatasetNum, setMaxEvaluationNum, selectedIndex, setCurrentSystemPrompt, setCurrentEvaluation, setCurrentContent);
+	} = useGetUserDataset(
+		setDatasetList,
+		dataset_list,
+		setMaxDatasetNum,
+		setMaxEvaluationNum,
+		selectedIndex,
+		setCurrentSystemPrompt,
+		setCurrentEvaluation,
+		setCurrentContent
+	);
 
 	const {refetch: record_refetch} = useGetUserDatasetRecord(
 		setRecordList,
 		dataset_list,
+        dataset_row,
 		selectedIndex,
-		pagnation_page,
+		paginationModel,
 		setDatasetColumn,
 		setDatasetRow,
-		setTotalNode
+		setTotalRow
 	);
 	const handleRowClick = (params) => {
 		const {id, system_prompt, embedding} = params.row;
 		setCurrentRecordId(id);
-        setAllowSaveRecord(false);
+		setAllowSaveRecord(false);
 		setCurrentSystemPrompt(system_prompt);
 		const clickedRecord = record_list.results.record_serializer.find((record) => record.id === id);
 		if (clickedRecord) {
-			setCurrentEvaluation(clickedRecord.evaluation);
-            setCurrentContent(clickedRecord.content)
+			const new_evaluation_list = current_evaluation.map((item) => {
+				for (let clicked_eva in clickedRecord.evaluation) {
+					if (
+						clickedRecord.evaluation[clicked_eva]["evaluation_name"] === item["evaluation_name"] &&
+						clickedRecord.evaluation[clicked_eva]["evaluation_type"] === item["evaluation_type"]
+					) {
+						return {...item, ["evaluation_value"]: clickedRecord.evaluation[clicked_eva]["evaluation_value"]};
+					}
+				}
+				return item;
+			});
+			setCurrentEvaluation(new_evaluation_list);
+			setCurrentContent(clickedRecord.content);
+			setCurrentEmbedding(embedding);
 		}
-		setCurrentEmbedding(embedding);
 	};
 	const addRecord = () => {
 		setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt);
 		setCurrentEvaluation(dataset_list[selectedIndex].default_evaluation);
 		setCurrentContent(dataset_list[selectedIndex].default_content_structure);
-        setCurrentEmbedding([])
+		setCurrentEmbedding([]);
 		setCurrentRecordId(null);
 	};
 
@@ -355,22 +375,24 @@ function PromptWriting() {
 													}}
 													primary={dataset.name}
 												/>
-												{!datasetIsLoading && dataset.default_content_structure && <DatasetMutateDialog
-													setAllowAddDataset={setAllowAddDataset}
-													setDatasetList={setDatasetList}
-													setSelectedIndex={setSelectedIndex}
-													dataset_list={dataset_list}
-													max_evaluation_num={max_dataset_num}
-													method='put'
-													dataset_id={dataset.id}
-													old_dataset_name={dataset.name}
-													old_default_evaluation={dataset.default_evaluation}
-													old_default_system_prompt={dataset.default_system_prompt}
-                                                    old_field_name_list={dataset.default_content_structure}
-													setCurrentEvaluation={setCurrentEvaluation}
-													setCurrentSystemPrompt={setCurrentSystemPrompt}
-                                                    record_refetch={record_refetch}
-												/>}
+												{!datasetIsLoading && dataset.default_content_structure && (
+													<DatasetMutateDialog
+														setAllowAddDataset={setAllowAddDataset}
+														setDatasetList={setDatasetList}
+														setSelectedIndex={setSelectedIndex}
+														dataset_list={dataset_list}
+														max_evaluation_num={max_dataset_num}
+														method='put'
+														dataset_id={dataset.id}
+														old_dataset_name={dataset.name}
+														old_default_evaluation={dataset.default_evaluation}
+														old_default_system_prompt={dataset.default_system_prompt}
+														old_field_name_list={dataset.default_content_structure}
+														setCurrentEvaluation={setCurrentEvaluation}
+														setCurrentSystemPrompt={setCurrentSystemPrompt}
+														record_refetch={record_refetch}
+													/>
+												)}
 											</ListItemButton>
 										</ListItem>
 									))}
@@ -440,39 +462,44 @@ function PromptWriting() {
 							<Grid item xs={7}>
 								<FormControl fullWidth sx={{mt: 2, mb: 1}} variant='standard'>
 									<Stack direction='column' spacing={2}>
-                                    {current_content.length > 0 && !current_content.includes({"name":"System Prompt", "value": ""}) && <TextField
-											label='System Prompt'
-											multiline
-											error={current_system_prompt_error}
-											minRows={6}
-											maxRows={8}
-											value={current_system_prompt}
-											InputLabelProps={{shrink: true}}
-											onChange={(e) => {
-												setCurrentSystemPrompt(e.target.value);
-												setAllowSaveRecord(true);
-											}}
-											inputProps={{maxLength: 2500}}
-										/>
-                                        }
-										{current_content.length>0 && current_content.map((field_name, index) => (
-											<TextField
-												key={field_name['name']+index}
-												label={field_name['name']}
-												error={current_content_error}
-												multiline
-												minRows={8}
-												maxRows={10}
-												value={current_content[index]["value"]}
-												InputLabelProps={{shrink: true}}
-												onChange={(e) => {
-                                                    updateContent(e.target.value, index);
-                                                    
-													setAllowSaveRecord(true);
-												}}
-												inputProps={{maxLength: 2500}}
-											/>
-										))}
+										{current_content.length > 0 &&
+											current_content.map((field_name, index) => (
+												<>
+													{index === 0 && field_name["name"] !== "System Prompt" && (
+														<TextField
+															label='System Prompt'
+															multiline
+															error={current_system_prompt_error}
+															minRows={8}
+															maxRows={10}
+															value={current_system_prompt}
+															InputLabelProps={{shrink: true}}
+															onChange={(e) => {
+																setCurrentSystemPrompt(e.target.value);
+																setAllowSaveRecord(true);
+															}}
+															inputProps={{maxLength: 2500}}
+														/>
+													)}
+
+													<TextField
+														key={field_name["name"] + index}
+														label={field_name["name"]}
+														error={current_content_error}
+														multiline
+														minRows={8}
+														maxRows={10}
+														value={current_content[index]["value"]}
+														InputLabelProps={{shrink: true}}
+														onChange={(e) => {
+															updateContent(e.target.value, index);
+
+															setAllowSaveRecord(true);
+														}}
+														inputProps={{maxLength: 2500}}
+													/>
+												</>
+											))}
 										<TextField
 											label='Embedding'
 											multiline
@@ -587,99 +614,102 @@ function PromptWriting() {
 							</Grid>
 							<Grid sm={5} item>
 								<Stack spacing={2} mt={2} direction='column'>
-									{current_evaluation.map((ev, index) => {
-										return (
-											<Paper variant='outlined' key={index}>
-												<Box m={2}>
-													<Typography style={{flex: 1}} variant='h6' gutterBottom>
-														{ev.evaluation_default_question}
-														<Tooltip
-															title={
-																<div
-																	style={{
-																		whiteSpace: "pre-line",
-																	}}>
-																	{ev.evaluation_description}
-																</div>
-															}
-															arrow
-															placement='top'>
-															<IconButton size='small'>
-																<HelpIcon fontSize='small' />
-															</IconButton>
-														</Tooltip>
-													</Typography>
-													{(ev.evaluation_type === 1 || ev.evaluation_type === 2) && (
-														<Grid direction='row' container spacing={1}>
-															{ev.evaluation_label.map((label) => (
-																<Grid key={label} item>
-																	<Chip
-																		icon={
-																			!ev.evaluation_value || !ev.evaluation_value.includes(label) ? (
-																				<BookmarkBorderIcon />
-																			) : (
-																				<BookmarkIcon />
-																			)
-																		}
-																		label={label}
-																		variant={
-																			!ev.evaluation_value || !ev.evaluation_value.includes(label) ? "outlined" : "fill"
-																		}
-																		onClick={() => {
-																			select_label(label, index, ev.evaluation_type);
-																		}}
-																	/>
-																</Grid>
-															))}
-														</Grid>
-													)}
-													{ev.evaluation_type === 3 && (
-														<TextField
-															id='eval-number'
-															fullWidth
-															size='small'
-															value={ev.evaluation_value}
-															onChange={(e) => {
-																updateEvaluationValue(e.target.value, "evaluation_value", index);
-																setAllowSaveRecord(true);
-															}}
-															type='number'
-															InputLabelProps={{
-																shrink: true,
-															}}
-														/>
-													)}
-													{ev.evaluation_type === 4 && (
-														<TextField
-															id='eval-question'
-															size='small'
-															fullWidth
-															multiline
-															minRows={4}
-															maxRows={6}
-															onChange={(e) => {
-																updateEvaluationValue(e.target.value, "evaluation_value", index);
-															}}
-															value={ev.evaluation_value}
-															InputLabelProps={{
-																shrink: true,
-															}}
-														/>
-													)}
-													{ev.evaluation_type === 5 && (
-														<Rating
-															value={Number(ev.evaluation_value)}
-															max={Number(ev.evaluation_default_rating_scale)}
-															precision={0.5}
-															onChange={(_, newValue) => {
-																updateEvaluationValue(newValue, "evaluation_value", index);
-															}}
-														/>
-													)}
-												</Box>
-											</Paper>
-										);
-									})}
+									{current_evaluation &&
+										current_evaluation.map((ev, index) => {
+											return (
+												<Paper variant='outlined' key={index}>
+													<Box m={2}>
+														<Typography style={{flex: 1}} variant='h6' gutterBottom>
+															{ev.evaluation_default_question}
+															<Tooltip
+																title={
+																	<div
+																		style={{
+																			whiteSpace: "pre-line",
+																		}}>
+																		{ev.evaluation_description}
+																	</div>
+																}
+																arrow
+																placement='top'>
+																<IconButton size='small'>
+																	<HelpIcon fontSize='small' />
+																</IconButton>
+															</Tooltip>
+														</Typography>
+														{(ev.evaluation_type === 1 || ev.evaluation_type === 2) && (
+															<Grid direction='row' container spacing={1}>
+																{ev.evaluation_label.map((label) => (
+																	<Grid key={label} item>
+																		<Chip
+																			icon={
+																				!ev.evaluation_value || !ev.evaluation_value.includes(label) ? (
+																					<BookmarkBorderIcon />
+																				) : (
+																					<BookmarkIcon />
+																				)
+																			}
+																			label={label}
+																			variant={
+																				!ev.evaluation_value || !ev.evaluation_value.includes(label)
+																					? "outlined"
+																					: "fill"
+																			}
+																			onClick={() => {
+																				select_label(label, index, ev.evaluation_type);
+																			}}
+																		/>
+																	</Grid>
+																))}
+															</Grid>
+														)}
+														{ev.evaluation_type === 3 && (
+															<TextField
+																id='eval-number'
+																fullWidth
+																size='small'
+																value={ev.evaluation_value}
+																onChange={(e) => {
+																	updateEvaluationValue(e.target.value, "evaluation_value", index);
+																	setAllowSaveRecord(true);
+																}}
+																type='number'
+																InputLabelProps={{
+																	shrink: true,
+																}}
+															/>
+														)}
+														{ev.evaluation_type === 4 && (
+															<TextField
+																id='eval-question'
+																size='small'
+																fullWidth
+																multiline
+																minRows={4}
+																maxRows={6}
+																onChange={(e) => {
+																	updateEvaluationValue(e.target.value, "evaluation_value", index);
+																}}
+																value={ev.evaluation_value}
+																InputLabelProps={{
+																	shrink: true,
+																}}
+															/>
+														)}
+														{ev.evaluation_type === 5 && (
+															<Rating
+																value={Number(ev.evaluation_value)}
+																max={Number(ev.evaluation_default_rating_scale)}
+																precision={0.5}
+																onChange={(_, newValue) => {
+																	updateEvaluationValue(newValue, "evaluation_value", index);
+																}}
+															/>
+														)}
+													</Box>
+												</Paper>
+											);
+										})}
 								</Stack>
 							</Grid>
 						</Grid>
@@ -689,18 +719,19 @@ function PromptWriting() {
 							<DataGrid
 								onRowClick={handleRowClick}
 								disableColumnSorting
+								paginationModel={paginationModel}
+								onPaginationModelChange={setPaginationModel}
 								disableAutosize
 								rows={dataset_row}
 								columns={dataset_column}
-								hideFooter={true}
+								pageSizeOptions={[10]}
+								paginationMode='server'
+								rowCount={total_row}
 								onRowSelectionModelChange={(newRowSelectionModel) => {
 									setRowSelectionModel(newRowSelectionModel);
 								}}
 								rowSelectionModel={rowSelectionModel}
 							/>
-						</Box>
-						<Box display='flex' justifyContent='center' alignItems='center' m={1}>
-							<Pagination count={total_node} showFirstButton showLastButton onChange={navigatePagination} variant='outlined' shape='rounded' />
 						</Box>
 					</Grid>
 				</Grid>

@@ -1,5 +1,4 @@
 from constance import config as constant
-from datasets import load_dataset
 from django.contrib.auth.decorators import permission_required
 from django.db import transaction
 from rest_framework import status
@@ -239,11 +238,9 @@ def create_user_record_api(request):
         system_prompt = serializer.validated_data["system_prompt"]
         evaluation = serializer.validated_data["evaluation"]
         content = serializer.validated_data["content"]
-        print(content)
         full_content = [{"name": "System Prompt", "value": system_prompt}]
         full_content += content
         text_to_embed = "\n".join(c["value"] for c in full_content)
-        print(text_to_embed, full_content)
         embedding_fn, _ = get_embedding_function()
         embedding = embedding_fn(text_to_embed)
         dataset = get_or_set_cache(
@@ -274,9 +271,7 @@ def update_user_record_api(request):
         dataset_id = serializer.validated_data["dataset_id"]
         system_prompt = serializer.validated_data["system_prompt"]
         content = serializer.validated_data["content"]
-        full_content = [{"name": "System Prompt", "value": system_prompt}]
-        full_content += content
-        text_to_embed = "\n".join(c["value"] for c in full_content)
+        text_to_embed = "\n".join(c["value"] for c in content)
         evaluation = serializer.validated_data["evaluation"]
         record_id = serializer.validated_data["record_id"]
         dataset = get_or_set_cache(
@@ -296,7 +291,7 @@ def update_user_record_api(request):
                     dataset=dataset, id=record_id
                 )
                 record.system_prompt = system_prompt
-                record.content = full_content
+                record.content = content
                 record.evaluation = evaluation
                 record.embedding = embedding
                 record.save()
