@@ -41,7 +41,6 @@ export const usePostLargeDatasetExport = ({dataset_id, dataset_name, extension, 
                                     temp_record["Evaluation Object"] = JSON.stringify(data.records[record]['evaluation'])
                                     stringify_nested_json.push(temp_record)
                                 }
-                                console.log(stringify_nested_json)
 								download_content = Papa.unparse(stringify_nested_json);
 								blob = new Blob([download_content]);
 								if (window.navigator.msSaveOrOpenBlob) {

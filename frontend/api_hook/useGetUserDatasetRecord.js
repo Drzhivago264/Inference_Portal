@@ -17,21 +17,19 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, dataset_row
 				const row = [];
            
                 for (let key in dataset_list[selectedIndex].default_content_structure) {
-                    let new_column = {field: dataset_list[selectedIndex].default_content_structure[key]["name"], headerName: dataset_list[selectedIndex].default_content_structure[key]["name"], width: 200, editable: false, disableColumnMenu: true};
-                    if (!column.includes(new_column) && !column_name.includes(dataset_list[selectedIndex].default_content_structure[key]["name"])) {
+                    let new_column = {field: dataset_list[selectedIndex].default_content_structure[key]["unique"], headerName: dataset_list[selectedIndex].default_content_structure[key]["name"], width: 200, editable: false, disableColumnMenu: true};
+                    if (!column.includes(new_column) && !column_name.includes(dataset_list[selectedIndex].default_content_structure[key]["unique"])) {
                         column.push(new_column);
-                        column_name.push(dataset_list[selectedIndex].default_content_structure[key]["name"]);
+                        column_name.push(dataset_list[selectedIndex].default_content_structure[key]["unique"]);
                     }
                 }      
                 for (let eva in dataset_list[selectedIndex].default_evaluation) {
-                    let new_column = {field: dataset_list[selectedIndex].default_evaluation[eva]["evaluation_name"], headerName: dataset_list[selectedIndex].default_evaluation[eva]["evaluation_name"], width: 100, editable: false, disableColumnMenu: true};
-                    console.log(dataset_list[selectedIndex].default_evaluation[eva]["evaluation_name"])
-                    if (!column.includes(new_column) && !column_name.includes(dataset_list[selectedIndex].default_evaluation[eva]["evaluation_name"])) {
-                        console.log(column_name)
+                    let new_column = {field: dataset_list[selectedIndex].default_evaluation[eva]["unique"], headerName: dataset_list[selectedIndex].default_evaluation[eva]["evaluation_name"], width: 100, editable: false, disableColumnMenu: true};
+                    if (!column.includes(new_column) && !column_name.includes(dataset_list[selectedIndex].default_evaluation[eva]["unique"])) {
                         column.push(new_column);
-                        column_name.push(dataset_list[selectedIndex].default_evaluation[eva]["evaluation_name"]);
+                        column_name.push(dataset_list[selectedIndex].default_evaluation[eva]["unique"]);
                     }
-                }             
+                }          
 				data.results.record_serializer.forEach((record) => {
 					const temp_row = {
 						id: record.id,
@@ -39,16 +37,16 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, dataset_row
 					};
 
                     for (var key in record.content) {
-                        temp_row[record.content[key]["name"]] = record.content[key]["value"];
+                        temp_row[record.content[key]["unique"]] = record.content[key]["value"];
                     }
 					temp_row["embedding"] = record.embedding;
 					record.evaluation.forEach((evaluation) => {
-                        console.log(column_name.includes(evaluation.evaluation_name), evaluation.evaluation_name)
-						 if (column_name.includes(evaluation.evaluation_name) && evaluation.evaluation_name) {
-							temp_row[evaluation.evaluation_name] = evaluation.evaluation_value;
+						 if (column_name.includes(evaluation.unique) && evaluation.unique) {
+							temp_row[evaluation.unique] = evaluation.evaluation_value;
 						}
 					});
 					row.push(temp_row);
+                    
 				});
                 column.push({field: "embedding", headerName: "Embedding", width: 200, editable: false, disableColumnMenu: true},)
 				setRecordList(data);

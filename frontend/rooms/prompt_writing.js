@@ -164,7 +164,7 @@ function PromptWriting() {
 			setCurrentContentError(true);
 		}
 
-		if (current_content && current_system_prompt && dataset) {
+		if (current_content && current_system_prompt && dataset && !current_content_error) {
 			const data = {
 				dataset_id: dataset.id,
 				content: current_content,
@@ -273,6 +273,7 @@ function PromptWriting() {
 		}
 		setCurrentContent(dataset_list[selectedIndex].default_content_structure);
 		setCurrentRecordId(null);
+        setCurrentEmbedding("")
 		setCurrentEvaluation(dataset_list[selectedIndex].default_evaluation);
 		setCurrentSystemPrompt(dataset_list[selectedIndex].default_system_prompt);
 	};
@@ -363,7 +364,7 @@ function PromptWriting() {
 							</Typography>
 							<List dense>
 								{dataset_list &&
-									dataset_list.map((dataset, index) => (
+									dataset_list.map((dataset, index) =>  (
 										<ListItem key={dataset.id} disablePadding>
 											<ListItemButton sx={{height: 38}} selected={selectedIndex === index} onClick={() => handleListItemClick(index)}>
 												<ListItemIcon>{selectedIndex === index ? <FolderOpenIcon /> : <FolderIcon />}</ListItemIcon>
@@ -387,7 +388,7 @@ function PromptWriting() {
 														old_dataset_name={dataset.name}
 														old_default_evaluation={dataset.default_evaluation}
 														old_default_system_prompt={dataset.default_system_prompt}
-														old_field_name_list={dataset.default_content_structure}
+														old_default_content_structure={dataset.default_content_structure}
 														setCurrentEvaluation={setCurrentEvaluation}
 														setCurrentSystemPrompt={setCurrentSystemPrompt}
 														record_refetch={record_refetch}
@@ -398,7 +399,7 @@ function PromptWriting() {
 									))}
 								<Box display='flex' justifyContent='center' alignItems='center' mt={1}>
 									{allow_add_dataset &&
-										datasetIsError &&
+										(datasetIsError || datasetIsSuccess) &&
 										!datasetIsLoading &&
 										dataset_list.length < max_dataset_num &&
 										max_evaluation_num && (
@@ -415,23 +416,6 @@ function PromptWriting() {
 											/>
 										)}
 
-									{allow_add_dataset &&
-										datasetIsSuccess &&
-										!datasetIsLoading &&
-										dataset_list.length < max_dataset_num &&
-										max_evaluation_num && (
-											<DatasetMutateDialog
-												setAllowAddDataset={setAllowAddDataset}
-												setDatasetList={setDatasetList}
-												setSelectedIndex={setSelectedIndex}
-												dataset_list={dataset_list}
-												max_evaluation_num={max_dataset_num}
-												method='post'
-												setCurrentEvaluation={setCurrentEvaluation}
-												setCurrentSystemPrompt={setCurrentSystemPrompt}
-												open_dialog={false}
-											/>
-										)}
 									{dataset_list && dataset_list.length > 1 && (
 										<IconButton
 											aria-label='delete'
@@ -463,10 +447,11 @@ function PromptWriting() {
 								<FormControl fullWidth sx={{mt: 2, mb: 1}} variant='standard'>
 									<Stack direction='column' spacing={2}>
 										{current_content.length > 0 &&
-											current_content.map((field_name, index) => (
+											current_content.map((content, index) => (
 												<>
-													{index === 0 && field_name["name"] !== "System Prompt" && (
+													{index === 0 && content["name"] !== "System Prompt" && (
 														<TextField
+                                                            key={content["name"]}
 															label='System Prompt'
 															multiline
 															error={current_system_prompt_error}
@@ -483,9 +468,10 @@ function PromptWriting() {
 													)}
 
 													<TextField
-														key={field_name["name"] + index}
-														label={field_name["name"]}
+														key={content["unique"]}
+														label={content["name"]}
 														error={current_content_error}
+                                                        required={content["is_required"]}
 														multiline
 														minRows={8}
 														maxRows={10}
@@ -617,10 +603,10 @@ function PromptWriting() {
 									{current_evaluation &&
 										current_evaluation.map((ev, index) => {
 											return (
-												<Paper variant='outlined' key={index}>
+												<Paper variant='outlined' key={ev['unique']}>
 													<Box m={2}>
 														<Typography style={{flex: 1}} variant='h6' gutterBottom>
-															{ev.evaluation_default_question}
+															{`${ev.evaluation_default_question}${ev.is_required ? "*": ""}`}
 															<Tooltip
 																title={
 																	<div

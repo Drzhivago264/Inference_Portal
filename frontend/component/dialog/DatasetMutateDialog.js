@@ -4,6 +4,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
@@ -13,6 +14,8 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import EditIcon from "@mui/icons-material/Edit";
 import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
@@ -41,29 +44,31 @@ export default function DatasetMutateDialog({
 	setCurrentEvaluation,
 	setCurrentSystemPrompt,
 	open_dialog,
-	old_field_name_list,
+	old_default_content_structure,
 }) {
 	const DEFAULT_EVALUATION = {
+		unique: null,
 		evaluation_name: null,
 		evaluation_type: 1,
 		evaluation_description: null,
 		evaluation_default_rating_scale: 10,
 		evaluation_default_question: null,
 		evaluation_label: ["good", "bad", "ugly"],
+		is_required: false,
 	};
-    const get_name_list = (old_name_list) => {
-        let name_list = []
-        for (let name in old_name_list) {
-            name_list.push(old_name_list[name]["name"])
-        }
-        return name_list
-    }
+	const DEFAULT_CONTENT_STRUCTURE = {
+		unique: "",
+		name: "Prompt",
+		value: "",
+		is_required: false,
+	};
+
 	const [open, setOpen] = useState(open_dialog ? open_dialog : false);
 	const [saveerror, setSaveError] = useState(false);
 	const [default_system_prompt, setDefaultSystemPrompt] = useState(method === "put" ? old_default_system_prompt : "");
 	const [default_evaluation, setDefaultEvaluation] = useState(method === "put" ? old_default_evaluation : [DEFAULT_EVALUATION]);
 	const [dataset_name, setDatasetName] = useState(method === "put" ? old_dataset_name : "");
-	const [field_name_list, setFieldNameList] = useState(method === "put" ? get_name_list(old_field_name_list) : ["Prompt"]);
+	const [default_content_structure, setDefaultContentStructure] = useState(method === "put" ? old_default_content_structure : [DEFAULT_CONTENT_STRUCTURE]);
 	const [saveerrormessage, setSaveErrorMessage] = useState("");
 	const [savesuccess, setSaveSuccess] = useState(false);
 	const [allow_mutate, setAllowMutate] = useState(true);
@@ -77,7 +82,7 @@ export default function DatasetMutateDialog({
 				name: dataset_name,
 				default_system_prompt: default_system_prompt,
 				default_evaluation: default_evaluation_without_null,
-				field_name_list: field_name_list,
+				default_content_structure: default_content_structure,
 			};
 			postmutate(
 				{url: "/frontend-api/create-dataset", data: data},
@@ -85,10 +90,7 @@ export default function DatasetMutateDialog({
 					onSuccess: (data) => {
 						setSaveSuccess(true);
 						setAllowAddDataset(true);
-                        let new_content = {}
-                        for (let name in field_name_list) {
-                            new_content[field_name_list[name]] = ""
-                        } 
+
 						setDatasetList([
 							...dataset_list,
 							{
@@ -96,14 +98,14 @@ export default function DatasetMutateDialog({
 								name: data.name,
 								default_system_prompt: default_system_prompt,
 								default_evaluation: default_evaluation_without_null,
-                                default_content_structure: new_content
+								default_content_structure: default_content_structure,
 							},
 						]);
 						setSelectedIndex(dataset_list.length);
 						setCurrentEvaluation(default_evaluation_without_null);
-                        setCurrentSystemPrompt(default_system_prompt);
-                        handleClose();
-                        setAllowMutate(true);
+						setCurrentSystemPrompt(default_system_prompt);
+						handleClose();
+						setAllowMutate(true);
 					},
 					onError: (error) => {
 						setSaveError(true);
@@ -133,10 +135,10 @@ export default function DatasetMutateDialog({
 		if (dataset_name) {
 			const data = {
 				id: dataset_id,
-				new_name: dataset_name,
-				new_default_system_prompt: default_system_prompt,
-				new_default_evaluation: default_evaluation_without_null,
-				new_field_name_list: field_name_list,
+				name: dataset_name,
+				default_system_prompt: default_system_prompt,
+				default_evaluation: default_evaluation_without_null,
+				default_content_structure: default_content_structure,
 			};
 
 			putmutate(
@@ -145,10 +147,7 @@ export default function DatasetMutateDialog({
 					onSuccess: () => {
 						setSaveSuccess(true);
 						setAllowAddDataset(true);
-                        let new_content = {}
-                        for (let name in field_name_list) {
-                            new_content[field_name_list[name]] = ""
-                        } 
+
 						const new_dataset_list = dataset_list.map((item) => {
 							if (item.id === dataset_id) {
 								return {
@@ -156,16 +155,15 @@ export default function DatasetMutateDialog({
 									name: dataset_name,
 									default_system_prompt: default_system_prompt,
 									default_evaluation: default_evaluation_without_null,
-                                    default_content_structure: new_content
+									default_content_structure: default_content_structure,
 								};
 							}
 							return item;
 						});
-                        setAllowMutate(true);
+						setAllowMutate(true);
 						setDatasetList(new_dataset_list);
 						setCurrentEvaluation(default_evaluation_without_null);
 						setCurrentSystemPrompt(default_system_prompt);
-                        
 					},
 					onError: (error) => {
 						setSaveError(true);
@@ -212,28 +210,20 @@ export default function DatasetMutateDialog({
 	};
 
 	const addFieldName = () => {
-		if (field_name_list.length < 100) {
-			setFieldNameList([...field_name_list, ""]);
+		if (default_content_structure.length < 100) {
+			setDefaultContentStructure([...default_content_structure, DEFAULT_CONTENT_STRUCTURE]);
 		}
 	};
-	const updateEvaluationValue = (v, index, property) => {
-		const new_evaluation_list = default_evaluation.map((item, i) => {
+	const updateDictValue = (v, index, property, dict, hook) => {
+		const new_list = dict.map((item, i) => {
 			if (i === index) {
 				return {...item, [property]: property == "evaluation_label" ? v.split(",") : v};
 			}
 			return item;
 		});
-		setDefaultEvaluation(new_evaluation_list);
+		hook(new_list);
 	};
-	const updateFieldName = (v, index) => {
-		const new_field_name_list = field_name_list.map((item, i) => {
-			if (i === index) {
-				return v;
-			}
-			return item;
-		});
-		setFieldNameList(new_field_name_list);
-	};
+
 	const deleteLabel = (index, label_index) => {
 		const new_evaluation_list = default_evaluation.map((item, i) => {
 			if (i === index) {
@@ -297,36 +287,51 @@ export default function DatasetMutateDialog({
 							: `Add default fields to your dataset`}
 					</DialogContentText>
 					<Stack mt={2} spacing={1}>
-						{field_name_list &&
-							field_name_list.map((field_name, index) => (
-								<Grid container key={index}>
-									<Grid xs={11} item>
-										<TextField
-											size='small'
-											fullWidth
-											label='Field Name'
-											value={field_name}
-											InputLabelProps={{shrink: true}}
-											onChange={(e) => {
-												updateFieldName(e.target.value, index);
-											}}
-											inputProps={{maxLength: 2500}}
+						{default_content_structure &&
+							default_content_structure.map((content, index) => (
+								<Stack direction='row' key={content["unique"]} spacing={1}>
+									<TextField
+										size='small'
+										fullWidth
+										label='Field Name'
+										value={content["name"]}
+										InputLabelProps={{shrink: true}}
+										onChange={(e) => {
+											updateDictValue(e.target.value, index, "name", default_content_structure, setDefaultContentStructure);
+										}}
+										inputProps={{maxLength: 2500}}
+									/>
+									<FormGroup>
+										<FormControlLabel
+											control={
+												<Checkbox
+													checked={content.is_required}
+													onChange={(e) =>
+														updateDictValue(
+															e.target.checked,
+															index,
+															"is_required",
+															default_content_structure,
+															setDefaultContentStructure
+														)
+													}
+												/>
+											}
+											label='Require'
 										/>
-									</Grid>
-									<Grid xs={1} item>
-										<IconButton
-											aria-label='delete'
-											onClick={() => {
-												deleteListItem(index, setFieldNameList);
-											}}>
-											<DeleteIcon />
-										</IconButton>
-									</Grid>
-								</Grid>
+									</FormGroup>
+									<IconButton
+										aria-label='delete'
+										onClick={() => {
+											deleteListItem(index, setDefaultContentStructure);
+										}}>
+										<DeleteIcon />
+									</IconButton>
+								</Stack>
 							))}
 
 						<Box display='flex' justifyContent='center' alignItems='center'>
-							{field_name_list && field_name_list.length < 100 && (
+							{default_content_structure && default_content_structure.length < 100 && (
 								<IconButton
 									aria-label='add'
 									onClick={() => {
@@ -344,7 +349,7 @@ export default function DatasetMutateDialog({
 						{default_evaluation &&
 							default_evaluation.map((ev, index) => {
 								return (
-									<Grid key={index} container>
+									<Grid key={ev["unique"]} container>
 										<Grid xs={11} item>
 											<Stack mb={1} direction='row' spacing={1}>
 												<TextField
@@ -353,7 +358,7 @@ export default function DatasetMutateDialog({
 													label='Name'
 													fullWidth
 													onChange={(e) => {
-														updateEvaluationValue(e.target.value, index, "evaluation_name");
+														updateDictValue(e.target.value, index, "evaluation_name", default_evaluation, setDefaultEvaluation);
 													}}
 													value={ev.evaluation_name}
 													InputLabelProps={{
@@ -369,7 +374,7 @@ export default function DatasetMutateDialog({
 														label='Evaluation Type'
 														size='small'
 														onChange={(e) => {
-															updateEvaluationValue(e.target.value, index, "evaluation_type");
+															updateDictValue(e.target.value, index, "evaluation_type", default_evaluation, setDefaultEvaluation);
 														}}>
 														<MenuItem value={1}>Multiple Labels Question</MenuItem>
 														<MenuItem value={2}>Label Question</MenuItem>
@@ -378,6 +383,25 @@ export default function DatasetMutateDialog({
 														<MenuItem value={5}>Rating Question</MenuItem>
 													</Select>
 												</FormControl>
+												<FormGroup>
+													<FormControlLabel
+														control={
+															<Checkbox
+																checked={ev.is_required}
+																onChange={(e) => {
+																	updateDictValue(
+																		e.target.checked,
+																		index,
+																		"is_required",
+																		default_evaluation,
+																		setDefaultEvaluation
+																	);
+																}}
+															/>
+														}
+														label='Require'
+													/>
+												</FormGroup>
 											</Stack>
 											<Stack direction='column' spacing={1}>
 												<TextField
@@ -389,7 +413,13 @@ export default function DatasetMutateDialog({
 													minRows={2}
 													maxRows={3}
 													onChange={(e) => {
-														updateEvaluationValue(e.target.value, index, "evaluation_description");
+														updateDictValue(
+															e.target.value,
+															index,
+															"evaluation_description",
+															default_evaluation,
+															setDefaultEvaluation
+														);
 													}}
 													value={ev.evaluation_description}
 													InputLabelProps={{
@@ -405,7 +435,13 @@ export default function DatasetMutateDialog({
 													minRows={2}
 													maxRows={3}
 													onChange={(e) => {
-														updateEvaluationValue(e.target.value, index, "evaluation_default_question");
+														updateDictValue(
+															e.target.value,
+															index,
+															"evaluation_default_question",
+															default_evaluation,
+															setDefaultEvaluation
+														);
 													}}
 													value={ev.evaluation_default_question}
 													InputLabelProps={{
@@ -424,7 +460,13 @@ export default function DatasetMutateDialog({
 															label='Add Label'
 															fullWidth
 															onChange={(e) => {
-																updateEvaluationValue(e.target.value, index, "evaluation_label");
+																updateDictValue(
+																	e.target.value,
+																	index,
+																	"evaluation_label",
+																	default_evaluation,
+																	setDefaultEvaluation
+																);
 															}}
 															value={ev.evaluation_label}
 															InputLabelProps={{
@@ -457,7 +499,13 @@ export default function DatasetMutateDialog({
 																type='number'
 																onChange={(e) => {
 																	if (Number(e.target.value) <= 20 && Number(e.target.value) > 0) {
-																		updateEvaluationValue(Number(e.target.value), index, "evaluation_default_rating_scale");
+																		updateDictValue(
+																			Number(e.target.value),
+																			index,
+																			"evaluation_default_rating_scale",
+																			default_evaluation,
+																			setDefaultEvaluation
+																		);
 																	}
 																}}
 																value={Number(ev.evaluation_default_rating_scale)}
@@ -521,7 +569,8 @@ export default function DatasetMutateDialog({
 						open: savesuccess,
 						autoHideDuration: 550,
 						onClose: () => {
-							setSaveSuccess(false); handleClose();
+							setSaveSuccess(false);
+							handleClose();
 						},
 						severity: "success",
 						message: "Saved!",
@@ -554,7 +603,7 @@ DatasetMutateDialog.propTypes = {
 	old_default_system_prompt: PropTypes.string,
 	old_default_evaluation: PropTypes.array,
 	old_dataset_name: PropTypes.string,
-	old_field_name_list: PropTypes.array,
+	old_default_content_structure: PropTypes.array,
 	method: PropTypes.string.isRequired,
 	setCurrentEvaluation: PropTypes.func.isRequired,
 	setCurrentSystemPrompt: PropTypes.func.isRequired,

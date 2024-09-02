@@ -28,11 +28,12 @@ class InstructionTreeSerializer(serializers.ModelSerializer):
         fields = ("instruct", "name", "code", "default_editor_template")
 
 
-class DatasetCreateSerializer(serializers.Serializer):
+class DatasetMutateSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False, allow_null=True)
     name = serializers.CharField()
     default_system_prompt = serializers.CharField(allow_blank=True)
     default_evaluation = serializers.JSONField()
-    field_name_list = serializers.ListField()
+    default_content_structure = serializers.JSONField()
 
 
 class DatasetDeleteSerializer(serializers.Serializer):
@@ -41,13 +42,6 @@ class DatasetDeleteSerializer(serializers.Serializer):
 
 class DatasetExportSerializer(DatasetDeleteSerializer):
     extension = serializers.CharField()
-
-
-class DatasetUpdateSerializer(DatasetDeleteSerializer):
-    new_name = serializers.CharField()
-    new_default_system_prompt = serializers.CharField(allow_blank=True)
-    new_default_evaluation = serializers.JSONField()
-    new_field_name_list = serializers.ListField()
 
 
 class DatasetGetSerializer(serializers.ModelSerializer):
@@ -63,8 +57,8 @@ class DatasetGetSerializer(serializers.ModelSerializer):
 
 
 class DatasetEvaluationSerializer(serializers.Serializer):
-
-    evaluation_name = serializers.CharField(max_length=100)
+    unique = serializers.CharField(allow_null=True)
+    evaluation_name = serializers.CharField(max_length=1000)
     evaluation_description = serializers.CharField(
         max_length=2046, required=False, allow_null=True
     )
@@ -83,7 +77,7 @@ class DatasetEvaluationSerializer(serializers.Serializer):
     ]
     evaluation_type = serializers.ChoiceField(choices)
     evaluation_label = serializers.ListField(required=False, allow_null=True)
-
+    is_required = serializers.BooleanField()
 
 class DatasetRecordGetSerialzier(serializers.Serializer):
     id = serializers.IntegerField()

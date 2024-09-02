@@ -1,3 +1,4 @@
+import uuid
 from constance import config as constant
 from django.contrib.auth.decorators import permission_required
 from django.db import transaction
@@ -18,14 +19,13 @@ from server.utils.sync_.sync_cache import (
 )
 from server.views.custom_paginator import PaginatorWithPageNum
 from server.views.serializer import (
-    DatasetCreateSerializer,
+    DatasetMutateSerializer,
     DatasetDeleteRecordSerialzier,
     DatasetDeleteSerializer,
     DatasetEvaluationSerializer,
     DatasetGetSerializer,
     DatasetRecordCreateSerialzier,
-    DatasetRecordGetSerialzier,
-    DatasetUpdateSerializer,
+    DatasetRecordGetSerialzier
 )
 
 
@@ -103,12 +103,15 @@ def get_user_records_api(request, id: int):
 @permission_required("server.add_dataset", raise_exception=True)
 def create_user_dataset_api(request):
     current_user = request.user
-    serializer = DatasetCreateSerializer(data=request.data)
+    serializer = DatasetMutateSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         dataset_name = serializer.validated_data["name"]
         default_evaluation = list()
         default_system_prompt = serializer.validated_data["default_system_prompt"]
-        field_name_list = serializer.validated_data["field_name_list"]
+        default_content_structure = serializer.validated_data["default_content_structure"]
+        for c in default_content_structure:
+            c["unique"] = uuid.uuid4().hex
+        
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,
@@ -121,6 +124,8 @@ def create_user_dataset_api(request):
         )
         if evaluation_serializer.is_valid(raise_exception=True):
             default_evaluation = evaluation_serializer.validated_data
+            for e in default_evaluation:
+                e["unique"] = uuid.uuid4().hex
 
         if not master_user:
             raise PermissionDenied(detail="Your token is expired")
@@ -133,10 +138,8 @@ def create_user_dataset_api(request):
                 name=dataset_name,
                 default_evaluation=default_evaluation,
                 default_system_prompt=default_system_prompt,
-                default_content_structure=[
-                    {"name": field_name_list[i], "value": ""}
-                    for i in range(len(field_name_list))
-                ],
+                default_content_structure=default_content_structure
+                
             )
             return Response(
                 {"detail": "Saved", "id": dataset.id, "name": dataset.name},
@@ -154,14 +157,16 @@ def create_user_dataset_api(request):
 @permission_required("server.change_dataset", raise_exception=True)
 def update_user_dataset_api(request):
     current_user = request.user
-    serializer = DatasetUpdateSerializer(data=request.data)
+    serializer = DatasetMutateSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         id = serializer.validated_data["id"]
-        new_dataset_name = serializer.validated_data["new_name"]
+        new_dataset_name = serializer.validated_data["name"]
         new_default_system_prompt = serializer.validated_data[
-            "new_default_system_prompt"
+            "default_system_prompt"
         ]
-        new_field_name_list = serializer.validated_data["new_field_name_list"]
+        new_content_structure = serializer.validated_data["default_content_structure"]
+        for c in new_content_structure:
+             c["unique"] = uuid.uuid4().hex if not c["unique"] else c["unique"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,
@@ -170,10 +175,12 @@ def update_user_dataset_api(request):
         )
 
         evaluation_serializer = DatasetEvaluationSerializer(
-            data=serializer.validated_data["new_default_evaluation"], many=True
+            data=serializer.validated_data["default_evaluation"], many=True
         )
         if evaluation_serializer.is_valid(raise_exception=True):
             new_default_evaluation = evaluation_serializer.validated_data
+            for e in new_default_evaluation:
+                e["unique"] = uuid.uuid4().hex if not e["unique"] else e["unique"]
 
         if not master_user:
             raise PermissionDenied(detail="Your token is expired")
@@ -185,10 +192,7 @@ def update_user_dataset_api(request):
                 dataset.name = new_dataset_name
                 dataset.default_evaluation = new_default_evaluation
                 dataset.default_system_prompt = new_default_system_prompt
-                dataset.default_content_structure = [
-                    {"name": new_field_name_list[i], "value": ""}
-                    for i in range(len(new_field_name_list))
-                ]
+                dataset.default_content_structure = new_content_structure
                 dataset.save()
                 update_cache(
                     prefix="user_dataset", key=id, model_instance=dataset, timeout=120
@@ -232,12 +236,19 @@ def delete_user_dataset_api(request):
 @permission_classes([IsAuthenticated])
 @permission_required("server.add_datasetrecord", raise_exception=True)
 def create_user_record_api(request):
+    current_user = request.user
     serializer = DatasetRecordCreateSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.validated_data["dataset_id"]
         system_prompt = serializer.validated_data["system_prompt"]
         evaluation = serializer.validated_data["evaluation"]
         content = serializer.validated_data["content"]
+        _, master_user = get_user_or_set_cache(
+            prefix="user_tuple",
+            key=current_user.password,
+            timeout=60,
+            current_user=current_user,
+        )
         full_content = [{"name": "System Prompt", "value": system_prompt}]
         full_content += content
         text_to_embed = "\n".join(c["value"] for c in full_content)
@@ -245,8 +256,8 @@ def create_user_record_api(request):
         embedding = embedding_fn(text_to_embed)
         dataset = get_or_set_cache(
             prefix="user_dataset",
-            key=dataset_id,
-            field_to_get="id",
+            key=[master_user, dataset_id],
+            field_to_get=["user", "id"],
             Model=Dataset,
             timeout=120,
         )
@@ -266,6 +277,7 @@ def create_user_record_api(request):
 @permission_classes([IsAuthenticated])
 @permission_required("server.change_datasetrecord", raise_exception=True)
 def update_user_record_api(request):
+    current_user = request.user
     serializer = DatasetRecordCreateSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
         dataset_id = serializer.validated_data["dataset_id"]
@@ -274,10 +286,16 @@ def update_user_record_api(request):
         text_to_embed = "\n".join(c["value"] for c in content)
         evaluation = serializer.validated_data["evaluation"]
         record_id = serializer.validated_data["record_id"]
+        _, master_user = get_user_or_set_cache(
+            prefix="user_tuple",
+            key=current_user.password,
+            timeout=60,
+            current_user=current_user,
+        )
         dataset = get_or_set_cache(
             prefix="user_dataset",
-            key=dataset_id,
-            field_to_get="id",
+            key=[master_user, dataset_id],
+            field_to_get=["user", "id"],
             Model=Dataset,
             timeout=120,
         )
@@ -305,14 +323,21 @@ def update_user_record_api(request):
 @permission_classes([IsAuthenticated])
 @permission_required("server.delete_datasetrecord", raise_exception=True)
 def delete_user_record_api(request):
+    current_user = request.user
     serializer = DatasetDeleteRecordSerialzier(data=request.data)
     if serializer.is_valid(raise_exception=True):
         record_id = serializer.validated_data["record_id"]
         dataset_id = serializer.validated_data["dataset_id"]
+        _, master_user = get_user_or_set_cache(
+            prefix="user_tuple",
+            key=current_user.password,
+            timeout=60,
+            current_user=current_user,
+        )
         dataset = get_or_set_cache(
             prefix="user_dataset",
-            key=dataset_id,
-            field_to_get="id",
+            key=[master_user, dataset_id],
+            field_to_get=["user", "id"],
             Model=Dataset,
             timeout=120,
         )
