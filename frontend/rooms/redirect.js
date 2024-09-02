@@ -8,6 +8,8 @@ import Divider from "@mui/material/Divider";
 import Footer from "../component/nav/Footer.js";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
+import ImageList from "@mui/material/ImageList";
+import ImageListItem from "@mui/material/ImageListItem";
 import InputAdornment from "@mui/material/InputAdornment";
 import KeyIcon from "@mui/icons-material/Key";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -80,7 +82,7 @@ function Hub() {
 			name: "Data_Synthesis",
 		},
 	];
-	const handleCloseSnack = (event, reason) => {
+	const handleCloseSnack = (_, reason) => {
 		if (reason === "clickaway") {
 			return;
 		}
@@ -92,10 +94,10 @@ function Hub() {
 		setLoading(true);
 		setKeyError(false);
 		setLoginError(false);
-		if (key == "") {
+		if (!key) {
 			setKeyError(true);
 		}
-		if (key) {
+		else {
 			const csrftoken = getCookie("csrftoken");
 			const config = {
 				headers: {
@@ -159,8 +161,8 @@ function Hub() {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<title>Hub</title>
-			<ResponsiveAppBar max_width='xl' />
-			<Container maxWidth='lg'>
+			<ResponsiveAppBar max_width='xxl' />
+			<Container maxWidth='xl'>
 				<Snackbar open={opensnack} autoHideDuration={5000} onClose={handleCloseSnack}>
 					<Alert onClose={handleCloseSnack} severity='error' variant='filled' sx={{width: "100%"}}>
 						You need an API key!
@@ -212,19 +214,22 @@ function Hub() {
 								</form>
 							</Grid>
 						)}
-						<Grid item md={12} lg={12}>
-							{cardData.map((card) => (
-								<RedirectMediaCards
-									key={card.destination}
-									image_link={card.image_link}
-									redirect={redirect}
-									destination={card.destination}
-									image_loaded={card.image_loaded}
-									setImageLoad={card.setImageLoad}
-									t={t}
-									name={card.name}
-								/>
-							))}
+						<Grid item xs={12}>
+							<ImageList variant="masonry" cols={2} gap={24}>
+								{cardData.map((card) => (
+									<ImageListItem key={card.destination}>
+										<RedirectMediaCards
+											image_link={card.image_link}
+											redirect={redirect}
+											destination={card.destination}
+											image_loaded={card.image_loaded}
+											setImageLoad={card.setImageLoad}
+											t={t}
+											name={card.name}
+										/>
+									</ImageListItem>
+								))}
+							</ImageList>
 						</Grid>
 					</Grid>
 				</Box>

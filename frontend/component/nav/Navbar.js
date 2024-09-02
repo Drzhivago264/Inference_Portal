@@ -326,6 +326,7 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 									{path: "/", label: t("navbar.Introduction")},
 									{path: "/frontend/manual/key", label: t("navbar.Manual")},
 									{path: "/frontend/model", label: t("navbar.Model")},
+									{path: "/frontend/api/docs", label: t("navbar.API_Docs")},
 								].map((item, index) => (
 									<MenuItem_DropBox key={index}>
 										<NavLink to={item.path}>{item.label}</NavLink>
@@ -333,54 +334,26 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 								))}
 							</Menu>
 						</Dropdown>
-						<Dropdown>
-							<MenuButton
+						{[
+							{key: "inference", value: "hub", text: "Inference"},
+							{key: "key-management", value: "key-management", text: t("navbar.Manage_Key")},
+							{key: "contact", value: "contact", text: t("navbar.Contact")},
+						].map(({key, value, text}) => (
+							<Button
+								key={key}
+								value={value}
+								onClick={(e) => redirect(e)}
 								sx={{
+									textDecoration: "none",
 									display: {
 										xs: "none",
 										sm: "none",
 										md: "block",
 									},
 								}}>
-								{t("navbar.Modes")}
-							</MenuButton>
-							<Menu slots={{listbox: Listbox}}>
-								<MenuItem_DropBox>
-									<NavLink to='/frontend/hub'>{t("navbar.Bots_Agents")}</NavLink>
-								</MenuItem_DropBox>
-								<MenuItem_DropBox>
-									<NavLink to='/frontend/api/docs'>{t("navbar.API_Docs")}</NavLink>
-								</MenuItem_DropBox>
-							</Menu>
-						</Dropdown>
-						<Button
-							key='key-management'
-							value='key-management'
-							onClick={(e) => redirect(e)}
-							sx={{
-								textDecoration: "none",
-								display: {
-									xs: "none",
-									sm: "none",
-									md: "block",
-								},
-							}}>
-							{t("navbar.Manage_Key")}
-						</Button>
-						<Button
-							key='contact'
-							value='contact'
-							onClick={(e) => redirect(e)}
-							sx={{
-								textDecoration: "none",
-								display: {
-									xs: "none",
-									sm: "none",
-									md: "block",
-								},
-							}}>
-							{t("navbar.Contact")}
-						</Button>
+								{text}
+							</Button>
+						))}
 
 						<Stack direction='row' spacing={1} sx={{marginLeft: "auto"}} alignContent='center' alignItems='center'>
 							<FormControl>
@@ -397,7 +370,7 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 								</Select>
 							</FormControl>
 							{!is_authenticated && (
-								<Box  ml={1}>
+								<Box ml={1}>
 									<Button
 										key='login'
 										value='login'
@@ -420,7 +393,6 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 									horizontal: "right",
 								}}
 								variant='dot'
-                 
 								sx={{display: is_authenticated ? "block" : "none"}}>
 								<AvatarWithHover
 									sx={{
@@ -452,17 +424,14 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 								sx={{
 									display: "flex",
 									justifyContent: "space-between",
-								}}
-  
-                                >
+								}}>
 								<Stack pl={1} direction='row' spacing={1} alignContent='center' alignItems='center'>
 									<AvatarWithHover
 										sx={{
 											width: 38,
 											height: 38,
-											cursor: "pointer",                         
+											cursor: "pointer",
 										}}
-                                      
 										style={{
 											border: "1px solid lightgray",
 										}}>
@@ -473,15 +442,15 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 											overflow: "hidden",
 											textOverflow: "ellipsis",
 											width: "11rem",
-                                            paddingTop: '5px'
+											paddingTop: "5px",
 										}}>
-										<Typography  sx={{fontWeight: "bold"}} noWrap variant='body1'>
+										<Typography sx={{fontWeight: "bold"}} noWrap variant='body1'>
 											{user_key_name}
 										</Typography>
 									</div>
 								</Stack>
 								<DrawerHeader>
-									<IconButton size="small" onClick={toggleUserDrawer(false)}>
+									<IconButton size='small' onClick={toggleUserDrawer(false)}>
 										<CloseIcon />
 									</IconButton>
 								</DrawerHeader>

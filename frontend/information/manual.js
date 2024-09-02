@@ -89,7 +89,7 @@ function Manual() {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<title>Manual</title>
-			<ResponsiveAppBar max_width='xl' />
+			<ResponsiveAppBar max_width='xxl' />
 			<Container maxWidth='xl'>
 				<Box display='flex' alignItems='center'>
 					<Grid container spacing={1}>

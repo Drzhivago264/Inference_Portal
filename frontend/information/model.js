@@ -1,3 +1,5 @@
+import React, {useState} from "react";
+
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -8,14 +10,14 @@ import {DataGrid} from "@mui/x-data-grid";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Footer from "../component/nav/Footer";
 import Grid from "@mui/material/Grid";
-import React from "react";
 import ResponsiveAppBar from "../component/nav/Navbar";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import {useGetModel} from "../api_hook/useGetModel";
 
 function ModelInfor() {
-	const {model_objects, server_objects, error, isLoading} = useGetModel();
+    const [dataset_is_loading, setDatasetIsLoading] =useState(true);
+	const {model_objects, server_objects, error, isLoading} = useGetModel(setDatasetIsLoading);
 	const columns = [
 		{field: "server", headerName: "Server", width: 80},
 		{field: "model", headerName: "Model", width: 150},
@@ -41,7 +43,7 @@ function ModelInfor() {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<title>Models</title>
-			<ResponsiveAppBar max_width='xl' />
+			<ResponsiveAppBar max_width='xxl' />
 			<Container maxWidth='xl'>
 				<Box my={4} display='flex' alignItems='center' gap={4} p={2}>
 					<Grid container spacing={2}>
@@ -90,6 +92,7 @@ function ModelInfor() {
 							<Stack spacing={1}>
 								<div style={{height: 400, width: "100%"}}>
 									<DataGrid
+                                        loading={dataset_is_loading}
 										rows={rows}
 										columns={columns}
 										initialState={{

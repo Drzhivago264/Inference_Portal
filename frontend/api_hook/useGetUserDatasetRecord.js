@@ -1,7 +1,7 @@
 import {baseGet} from "./baseGet";
 import {useQuery} from "react-query";
 
-export const useGetUserDatasetRecord = (setRecordList, dataset_list, dataset_row, selectedIndex, paginationModel, setDatasetColumn, setDatasetRow, setTotalRow) => {
+export const useGetUserDatasetRecord = (setDatasetIsLoading, setRecordList, dataset_list, dataset_row, selectedIndex, paginationModel, setDatasetColumn, setDatasetRow, setTotalRow) => {
 	const {error, isLoading, refetch} = useQuery(
 		["RecordList", selectedIndex, paginationModel, dataset_list, dataset_row],
 		() => baseGet(`/frontend-api/get-dataset-record/${dataset_list[selectedIndex].id}?page=${paginationModel.page + 1}`),
@@ -52,6 +52,7 @@ export const useGetUserDatasetRecord = (setRecordList, dataset_list, dataset_row
 				setRecordList(data);
 				setDatasetColumn(column);
 				setDatasetRow(row);
+                setDatasetIsLoading(false)
 			},
 		}
 	);

@@ -17,7 +17,6 @@ export const useGetUserDataset = (setDatasetList, dataset_list, setMaxDatasetNum
                 setDatasetList(data.dataset_list),
                 setMaxDatasetNum(data.max_dataset_num),
                 setMaxEvaluationNum(data.max_evaluation_num),
-                console.log(data.dataset_list[0].default_content_structure[0]["is_required"])
                 setCurrentEvaluation(data.dataset_list[selectedIndex].default_evaluation),
                 setCurrentSystemPrompt(data.dataset_list[selectedIndex].default_system_prompt)
                 setCurrentContent(data.dataset_list[selectedIndex].default_content_structure)

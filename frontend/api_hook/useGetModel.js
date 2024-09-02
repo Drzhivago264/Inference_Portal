@@ -1,28 +1,31 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
-import { baseGet } from "./baseGet";
-import { useQuery } from "react-query";
+import {baseGet} from "./baseGet";
+import {useQuery} from "react-query";
 
-export const useGetModel = () => {
-    const [agent_objects, setAgents] = useState([]);
-    const [model_objects, setModels] = useState([]);
-    const [server_objects, setServers] = useState([]);
-    
-    const { status, data, error, isLoading } = useQuery("ModelData", () => baseGet("/frontend-api/model"), { staleTime: Infinity, retry: false });
+export const useGetModel = (setDatasetIsLoading) => {
+	const [agent_objects, setAgents] = useState([]);
+	const [model_objects, setModels] = useState([]);
+	const [server_objects, setServers] = useState([]);
 
-    useEffect(() => {
-        if (status === "success" && data) {
-            setModels(data.models_bot);
-            setAgents(data.models_agent);
-            setServers(data.servers);
-        }
-    }, [status, data]);
+	const {status, data, error, isLoading} = useQuery("ModelData", () => baseGet("/frontend-api/model"), {staleTime: Infinity, retry: false});
 
-    return {
-        agent_objects,
-        model_objects,
-        server_objects,
-        error,
-        isLoading
-    };
-}
+	useEffect(() => {
+		if (status === "success" && data) {
+			setModels(data.models_bot);
+			setAgents(data.models_agent);
+			setServers(data.servers);
+			if (setDatasetIsLoading) {
+				setDatasetIsLoading(false);
+			}
+		}
+	}, [status, data]);
+
+	return {
+		agent_objects,
+		model_objects,
+		server_objects,
+		error,
+		isLoading,
+	};
+};

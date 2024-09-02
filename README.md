@@ -15,6 +15,10 @@ Here are some features of this website:
 
 ![Alt text](illustration/Agent.png)
 
+**Agent Building**
+
+![Alt text](illustration/Agent_Building.png)
+
 **Access Tokens Management:**
 
 ![Alt text](illustration/Access_Token_Management.png)

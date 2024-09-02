@@ -51,6 +51,7 @@ import {useNavigate} from "react-router-dom";
 function PromptWriting() {
 	const navigate = useNavigate();
 	const [open_ask_again, setOpenAskAgain] = useState(false);
+    const [dataset_is_loading, setDatasetIsLoading] =useState(true);
 	const [dataset_row, setDatasetRow] = useState([]);
 	const [dataset_column, setDatasetColumn] = useState([]);
 	const [record_list, setRecordList] = useState([]);
@@ -155,6 +156,7 @@ function PromptWriting() {
 	};
 
 	const saveRecord = () => {
+        setDatasetIsLoading(true)   
 		const dataset = dataset_list[selectedIndex];
 
 		if (!current_system_prompt) {
@@ -164,6 +166,25 @@ function PromptWriting() {
 			setCurrentContentError(true);
 		}
 
+        for (let content in current_content) {
+            if (current_content[content].is_required && !current_content[content].value) {
+                setSaveError(true);
+                setSaveErrorMessage(`${current_content[content].name} is a required! field`);
+                setDatasetIsLoading(false)
+                setLoading(false);
+                return
+            }
+        }
+
+        for (let eva in current_evaluation) {
+            if (current_evaluation[eva].is_required && !current_evaluation[eva].value) {
+                setSaveError(true);
+                setSaveErrorMessage(`${current_evaluation[eva].evaluation_name} is a required evaluation`);
+                setDatasetIsLoading(false)
+                setLoading(false);
+                return
+            }
+        }
 		if (current_content && current_system_prompt && dataset && !current_content_error) {
 			const data = {
 				dataset_id: dataset.id,
@@ -248,6 +269,7 @@ function PromptWriting() {
 		}
 	};
 	const deleteRecord = () => {
+        setDatasetIsLoading(true)   
 		if (current_record_id && dataset_list[selectedIndex]) {
 			const data = {
 				record_id: current_record_id,
@@ -294,6 +316,7 @@ function PromptWriting() {
 	);
 
 	const {refetch: record_refetch} = useGetUserDatasetRecord(
+        setDatasetIsLoading,
 		setRecordList,
 		dataset_list,
         dataset_row,
@@ -351,6 +374,11 @@ function PromptWriting() {
 		});
 		setCurrentEvaluation(new_evaluation_list);
 	};
+
+    const pagination_navigation = (value) => {
+        setPaginationModel(value)
+        setDatasetIsLoading(true)     
+    }
 	return (
 		<Container maxWidth={false} sx={{minWidth: 1200}} disableGutters>
 			<title>Dataset</title>
@@ -703,10 +731,11 @@ function PromptWriting() {
 					<Grid item xs={4}>
 						<Box mt={2} style={{height: 637, width: "100%"}}>
 							<DataGrid
+                                loading={datasetIsLoading || dataset_is_loading}
 								onRowClick={handleRowClick}
 								disableColumnSorting
 								paginationModel={paginationModel}
-								onPaginationModelChange={setPaginationModel}
+								onPaginationModelChange={(e) => {pagination_navigation(e)}}
 								disableAutosize
 								rows={dataset_row}
 								columns={dataset_column}
