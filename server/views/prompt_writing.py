@@ -1,4 +1,5 @@
 import uuid
+
 from constance import config as constant
 from django.contrib.auth.decorators import permission_required
 from django.db import transaction
@@ -19,13 +20,13 @@ from server.utils.sync_.sync_cache import (
 )
 from server.views.custom_paginator import PaginatorWithPageNum
 from server.views.serializer import (
-    DatasetMutateSerializer,
     DatasetDeleteRecordSerialzier,
     DatasetDeleteSerializer,
     DatasetEvaluationSerializer,
     DatasetGetSerializer,
+    DatasetMutateSerializer,
     DatasetRecordCreateSerialzier,
-    DatasetRecordGetSerialzier
+    DatasetRecordGetSerialzier,
 )
 
 
@@ -108,10 +109,12 @@ def create_user_dataset_api(request):
         dataset_name = serializer.validated_data["name"]
         default_evaluation = list()
         default_system_prompt = serializer.validated_data["default_system_prompt"]
-        default_content_structure = serializer.validated_data["default_content_structure"]
+        default_content_structure = serializer.validated_data[
+            "default_content_structure"
+        ]
         for c in default_content_structure:
             c["unique"] = uuid.uuid4().hex
-        
+
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,
@@ -138,8 +141,7 @@ def create_user_dataset_api(request):
                 name=dataset_name,
                 default_evaluation=default_evaluation,
                 default_system_prompt=default_system_prompt,
-                default_content_structure=default_content_structure
-                
+                default_content_structure=default_content_structure,
             )
             return Response(
                 {"detail": "Saved", "id": dataset.id, "name": dataset.name},
@@ -161,12 +163,10 @@ def update_user_dataset_api(request):
     if serializer.is_valid(raise_exception=True):
         id = serializer.validated_data["id"]
         new_dataset_name = serializer.validated_data["name"]
-        new_default_system_prompt = serializer.validated_data[
-            "default_system_prompt"
-        ]
+        new_default_system_prompt = serializer.validated_data["default_system_prompt"]
         new_content_structure = serializer.validated_data["default_content_structure"]
         for c in new_content_structure:
-             c["unique"] = uuid.uuid4().hex if not c["unique"] else c["unique"]
+            c["unique"] = uuid.uuid4().hex if not c["unique"] else c["unique"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,

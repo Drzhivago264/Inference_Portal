@@ -79,6 +79,7 @@ class DatasetEvaluationSerializer(serializers.Serializer):
     evaluation_label = serializers.ListField(required=False, allow_null=True)
     is_required = serializers.BooleanField()
 
+
 class DatasetRecordGetSerialzier(serializers.Serializer):
     id = serializers.IntegerField()
     content = serializers.JSONField()
