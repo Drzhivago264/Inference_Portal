@@ -76,7 +76,10 @@ First of all, for start using django-inference-portal, you must download it usin
 
 Before install dependencies, you need to install Postgres, and create a table named professorparakeet.
 
-    sudo apt install postgresql postgresql-contrib
+    sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+    sudo apt install postgresql-16 postgresql-contrib-16
+
     sudo apt-get install libpq-dev
 
     sudo -i -u postgres #postgress is the default user when install postgres
@@ -113,10 +116,6 @@ You also need to install NPM and Node.js for the frontend
     sudo apt install npm
     npm init -y
     npm install
-    #for prod
-    npm run build
-    #for dev
-    npm run dev
 
 Next you must install dependencies and migrate the db to Postgresql:
 
@@ -134,9 +133,8 @@ Next you must install Redis and start Redis Server at port 6380:
     sudo apt-get install redis
     redis-server --port 6380
 
-Next you must install celery and celery-beat with redis support and launch a Celery Worker and a Celery Beat Worker:
+Next you must a Celery Worker and a Celery Beat Worker (refer to /deployment_config if you want to automate this with supervisor):
 
-    pip install celery[redis]
     celery -A inferenceportal worker --loglevel=info --pool threads
     celery -A inferenceportal worker --loglevel=info --pool threads -Q "periodic"
     celery -A inferenceportal beat --loglevel=info
@@ -155,7 +153,7 @@ Next you must setup Monero and start a rpc server, I am working on a full tutori
 
 \*Noting that in production server you must generate "View-only" wallet from your local wallet (secret key) to avoid being robbed by the society.
 
-Next you need to set up .env file and setup the following key. Note that, if you dont want to use some services below, leave them "". There will probably some problems but I believe if you go this far, you can deal with them:
+Next you need to set up .env file and setup the following key. Note that, if you dont want to use some services below, leave them "". There will probably be some problems but I believe if you go this far, you can deal with them:
 
     STRIPE_PUBLISHABLE_KEY=""
     STRIPE_SECRET_KEY=""
@@ -220,10 +218,9 @@ Currently, this website use cloudflare CDN to serve webpack bundles. However, yo
 
 ## To do:
 
-1) Write backend for MUI serverside rendering for tables to remove Datatables dependency and jQuery (old stuffs used before migrating to React)
+1) Write backend for MUI serverside rendering to remove Datatables dependency and jQuery (old stuffs used before migrating to React)
 2) Implement "Mark Done" and "Prevent Overide" on row level for the Dataset feature to better enable collaboration.
-3) Implement customisable "Require Field" to allow and prevent dataset submissions. 
-4) Hook the Embedding Datasets to Chatbot and Agent to build a Customisable Rag. <= This one is a piority. 
+3) Hook the Embedding Datasets to Chatbot and Agent to build a customisable Rag.  
 
 ## Final words
 

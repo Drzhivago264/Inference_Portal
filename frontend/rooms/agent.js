@@ -57,7 +57,6 @@ function Agent() {
 	const [shownthinking, setThinking] = useState(false);
 	const [chat_message, setChatMessage] = useState([]);
 	const [choosen_model, setChoosenModel] = useState("gpt-4");
-	
 	const [usermessage, setUserMessage] = useState("");
 	const [max_turn, setMaxTurn] = useState(4);
 	const [instruct_change, setInstructChange] = useState(false);
@@ -67,17 +66,14 @@ function Agent() {
 	const [currentparagraph, setCurrentParagraph] = useState(1);
 	const [use_user_template, setUseUserTemplate] = useState(false);
 	const [selectedIndex, setSelectedIndex] = useState(0);
+	const [inference_parameter, setInferenceParameter] = useState({
+		top_p: 0.72,
+		temperature: 0.73,
+		presencepenalty: 0,
+		frequencypenalty: 0,
+		max_tokens: null,
+	});
 
-    const [inference_parameter, setInferenceParameter] = useState(
-        {
-            top_p: 0.72,
-            temperature: 0.73,
-            presencepenalty: 0,
-            frequencypenalty: 0,
-            max_tokens: null
-        }
-    )
-    
 	const navigate = useNavigate();
 	const {is_authenticated, timeZone} = useContext(UserContext);
 	useGetRedirectAnon(navigate, is_authenticated);
@@ -231,7 +227,7 @@ function Agent() {
 			setUserMessageError(true);
 		} else {
 			var data = {
-                ...inference_parameter,
+				...inference_parameter,
 				max_turn: max_turn,
 				instruct_change: instruct_change,
 				currentParagraph: currentparagraph,
@@ -242,6 +238,7 @@ function Agent() {
 				agent_instruction: use_user_template ? default_user_parent_instruct : default_parent_instruct,
 				child_instruction: use_user_template ? default_user_child_instruct : default_child_instruct,
 			};
+            console.log(data)
 			websocket.current.send(JSON.stringify(data));
 			setUserMessage("");
 			setInstructChange(false);
@@ -423,14 +420,15 @@ function Agent() {
 								<Divider />
 								<OpenAPIParameter
 									agent_objects={agent_objects}
-                                    socket_destination={socket_destination}
-                                    setSocketDestination={setSocketDestination}
+									socket_destination={socket_destination}
+									setSocketDestination={setSocketDestination}
 									choosen_model={choosen_model}
 									setChoosenModel={setChoosenModel}
-                                    inference_parameter={inference_parameter}
-                                    setInferenceParameter={setInferenceParameter}
+									inference_parameter={inference_parameter}
+									setInferenceParameter={setInferenceParameter}
 									max_turn={max_turn}
-									setMaxTurn={setMaxTurn}/>
+									setMaxTurn={setMaxTurn}
+								/>
 							</Stack>
 						</Grid>
 

@@ -1,13 +1,13 @@
 import MuiInput from "@mui/material/Input";
 import {styled} from "@mui/material/styles";
 export const toggleMemory = (value, memory_type, setInferenceParameter, inference_parameter) => {
-    if (memory_type === "usememory") {
+    if (memory_type === "usememory" && value) {
         setInferenceParameter({
             ...inference_parameter,
             usememory: value,
             usememorycurrent: !value,
         });
-    } else if (memory_type === "usememorycurrent") {
+    } else if (memory_type === "usememorycurrent" && value) {
         setInferenceParameter({
             ...inference_parameter,
             usememory: !value,

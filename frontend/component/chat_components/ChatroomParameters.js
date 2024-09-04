@@ -20,6 +20,132 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import {useTranslation} from "react-i18next";
 
+export const MemorySwitch = ({explaination, checked, memoryType, parameter, setParameterHook, label}) => {
+	return (
+		<Stack direction='row' spacing={1}>
+			<FormControlLabel
+				control={<Switch checked={checked} onChange={(e) => toggleMemory(e.target.checked, memoryType, setParameterHook, parameter)} />}
+				label={label}
+			/>
+			<Box>
+				<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{explaination}</div>} arrow placement='top'>
+					<IconButton size='small'>
+						<HelpIcon fontSize='small' />
+					</IconButton>
+				</Tooltip>
+			</Box>
+		</Stack>
+	);
+};
+const SwitchParameter = ({explaination, name, display_name, value, inference_parameter, setInferenceParameter}) => {
+	return (
+		<Stack direction='row' spacing={1}>
+			<FormControlLabel
+				control={
+					<Switch
+						onChange={(e) =>
+							setInferenceParameter({
+								...inference_parameter,
+								[name]: e.target.value,
+							})
+						}
+						value={value}
+					/>
+				}
+				label={display_name}
+			/>
+			<Box>
+				<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{explaination}</div>} arrow placement='top'>
+					<IconButton size='small'>
+						<HelpIcon fontSize='small' />
+					</IconButton>
+				</Tooltip>
+			</Box>
+		</Stack>
+	);
+};
+export const Parameter = ({
+	explaination,
+	marks,
+	name,
+	display_name,
+	value,
+	inference_parameter,
+	setInferenceParameter,
+	step,
+	min,
+	max,
+	use_big_input = false,
+}) => {
+	return (
+		<>
+			<Stack direction='row' spacing={1}>
+				<Typography style={{flex: 1}} gutterBottom>
+					{display_name}
+					<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{explaination}</div>} arrow placement='top'>
+						<IconButton size='small'>
+							<HelpIcon fontSize='small' />
+						</IconButton>
+					</Tooltip>
+				</Typography>
+				{!use_big_input && (
+					<SmallInput
+						value={value}
+						size='small'
+						onChange={(e) =>
+							setInferenceParameter({
+								...inference_parameter,
+								[name]: e.target.value === "" ? 0 : Number(e.target.value),
+							})
+						}
+						onBlur={handleBlur(value, name, min, max, setInferenceParameter, inference_parameter)}
+						inputProps={{
+							step: step,
+							min: min,
+							max: max,
+							type: "number",
+							"aria-labelledby": "input-slider",
+						}}
+					/>
+				)}
+				{use_big_input && (
+					<BigInput
+						value={value}
+						size='small'
+						onChange={(e) =>
+							setInferenceParameter({
+								...inference_parameter,
+								[name]: e.target.value === "" ? 0 : Number(e.target.value),
+							})
+						}
+						onBlur={handleBlur(value, name, min, max, setInferenceParameter, inference_parameter)}
+						inputProps={{
+							step: step,
+							min: min,
+							max: max,
+							type: "number",
+							"aria-labelledby": "input-slider",
+						}}
+					/>
+				)}
+			</Stack>
+			<Slider
+				step={step}
+				marks={marks}
+				min={min}
+				max={max}
+				valueLabelDisplay='off'
+				onChange={(e) =>
+					setInferenceParameter({
+						...inference_parameter,
+						[name]: e.target.value,
+					})
+				}
+				value={value}
+			/>
+		</>
+	);
+};
 export const ChatParameter = ({
 	setSocketDestination,
 	socket_destination,
@@ -32,7 +158,7 @@ export const ChatParameter = ({
 	room_type,
 	max_turn,
 	setMaxTurn,
-    setDuplicateMessage,
+	setDuplicateMessage,
 }) => {
 	const {t} = useTranslation();
 	return (
@@ -88,57 +214,31 @@ export const ChatParameter = ({
 				<Box mt={1}>
 					<FormLabel id='demo-radio-buttons-group-label'>Parameters</FormLabel>
 				</Box>
-                {room_type == "hotpot_room" && (
-                <Box ml={1}>
-				<FormControlLabel
-					control={
-						<Switch
-							defaultChecked
-							onChange={(e) =>
-								setDuplicateMessage(e.target.checked)
-							}
+				{room_type == "hotpot_room" && (
+					<Box ml={1}>
+						<FormControlLabel
+							control={<Switch defaultChecked onChange={(e) => setDuplicateMessage(e.target.checked)} />}
+							label='Duplicate Message'
 						/>
-					}
-					label='Duplicate Message'
+					</Box>
+				)}
+				<MemorySwitch
+					checked={inference_parameter.usememory}
+					explaination={t("parameter_explain.use_memory")}
+					parameter={inference_parameter}
+					setParameterHook={setInferenceParameter}
+					memoryType='usememory'
+					label='Use Memory (All)'
 				/>
-			    </Box>
-                )}
-				<Stack direction='row' spacing={1}>
-					<FormControlLabel
-						control={
-							<Switch
-								checked={inference_parameter.usememory}
-								onChange={(e) => toggleMemory(e.target.checked, "usememory", setInferenceParameter, inference_parameter)}
-							/>
-						}
-						label='Use Memory (All)'
-					/>
-					<Box>
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.use_memory")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Box>
-				</Stack>
-				<Stack direction='row' spacing={1}>
-					<FormControlLabel
-						control={
-							<Switch
-								checked={inference_parameter.usememorycurrent}
-								onChange={(e) => toggleMemory(e.target.checked, "usememorycurrent", setInferenceParameter, inference_parameter)}
-							/>
-						}
-						label='Use Memory (Current)'
-					/>
-					<Box>
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.use_memory_current")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Box>
-				</Stack>
+				<MemorySwitch
+					checked={inference_parameter.usememorycurrent}
+					explaination={t("parameter_explain.use_memory_current")}
+					parameter={inference_parameter}
+					setParameterHook={setInferenceParameter}
+					memoryType='usememorycurrent'
+					label='Use Memory (Current)'
+				/>
+
 				<RadioGroup
 					defaultValue='chat'
 					name='radio-buttons-group'
@@ -180,151 +280,46 @@ export const ChatParameter = ({
 						<Slider step={1} min={1} max={10} marks valueLabelDisplay='off' onChange={(e) => setMaxTurn(e.target.value)} value={max_turn} />
 					</>
 				)}
-
-				<Stack direction='row' spacing={1}>
-					<Typography style={{flex: 1}} gutterBottom>
-						Top_p
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.top_p")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Typography>
-					<SmallInput
-						value={inference_parameter.top_p}
-						size='small'
-						onChange={(e) =>
-							setInferenceParameter({
-								...inference_parameter,
-								top_p: e.target.value === "" ? 0 : Number(e.target.value),
-							})
-						}
-						onBlur={handleBlur(inference_parameter.top_p, "top_p", 0, 1, setInferenceParameter, inference_parameter)}
-						inputProps={{
-							step: 0.01,
-							min: 0,
-							max: 1,
-							type: "number",
-							"aria-labelledby": "input-slider",
-						}}
-					/>
-				</Stack>
-				<Slider
-					step={0.01}
-					min={0}
+				<Parameter
+					display_name='Top_p'
+					name='top_p'
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
 					max={1}
-					valueLabelDisplay='off'
-					onChange={(e) =>
-						setInferenceParameter({
-							...inference_parameter,
-							top_p: e.target.value,
-						})
-					}
+					min={0}
+					step={0.01}
 					value={inference_parameter.top_p}
+					explaination={t("parameter_explain.top_p")}
+					marks={false}
 				/>
-				<Stack direction='row' spacing={1}>
-					<Typography style={{flex: 1}} gutterBottom>
-						Top_k
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.top_k")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Typography>
-					<SmallInput
-						value={inference_parameter.top_k}
-						size='small'
-						onChange={(e) =>
-							setInferenceParameter({
-								...inference_parameter,
-								top_k: e.target.value === "" ? 0 : Number(e.target.value),
-							})
-						}
-						onBlur={handleBlur(inference_parameter.top_k, "top_k", -1, 100, setInferenceParameter, inference_parameter)}
-						inputProps={{
-							step: 1,
-							min: -1,
-							max: 100,
-							type: "number",
-							"aria-labelledby": "input-slider",
-						}}
-					/>
-				</Stack>
-				<Slider
-					defaultValue={-1}
-					step={1}
-					min={-1}
+				<Parameter
+					display_name='Top_k'
+					name='top_k'
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
 					max={100}
-					valueLabelDisplay='off'
-					onChange={(e) =>
-						setInferenceParameter({
-							...inference_parameter,
-							top_k: e.target.value,
-						})
-					}
+					min={-1}
+					step={1}
 					value={inference_parameter.top_k}
+					explaination={t("parameter_explain.top_k")}
+					marks={false}
 				/>
+
 				{agent_objects.map((agent_object_) => {
 					if (agent_object_.name == choosen_model) {
 						return (
 							<Box key={agent_object_.name}>
-								<Stack direction='row' spacing={1}>
-									<Typography style={{flex: 1}} gutterBottom>
-										Max_tokens
-										<Tooltip
-											title={
-												<div
-													style={{
-														whiteSpace: "pre-line",
-													}}>
-													{t("parameter_explain.max_token")}
-												</div>
-											}
-											arrow
-											placement='top'>
-											<IconButton size='small'>
-												<HelpIcon fontSize='small' />
-											</IconButton>
-										</Tooltip>
-									</Typography>
-									<BigInput
-										value={!inference_parameter.max_tokens ? agent_object_.context_length : inference_parameter.max_tokens}
-										size='small'
-										onChange={(e) =>
-											setInferenceParameter({
-												...inference_parameter,
-												max_tokens: e.target.value === "" ? 0 : Number(e.target.value),
-											})
-										}
-										onBlur={handleBlur(
-											inference_parameter.max_tokens,
-											"max_tokens",
-											1,
-											agent_object_.context_length,
-											setInferenceParameter,
-											inference_parameter
-										)}
-										inputProps={{
-											step: 1,
-											min: 1,
-											max: agent_object_.context_length,
-											type: "number",
-											"aria-labelledby": "input-slider",
-										}}
-									/>
-								</Stack>
-								<Slider
-									step={1}
-									min={1}
+								<Parameter
+									display_name='Max_tokens'
+									name='max_tokens'
+									setInferenceParameter={setInferenceParameter}
+									inference_parameter={inference_parameter}
 									max={agent_object_.context_length}
-									onChange={(e) =>
-										setInferenceParameter({
-											...inference_parameter,
-											max_tokens: e.target.value,
-										})
-									}
-									value={inference_parameter.max_tokens}
-									valueLabelDisplay='off'
+									min={1}
+									step={1}
+									value={!inference_parameter.max_tokens ? agent_object_.context_length : inference_parameter.max_tokens}
+									explaination={t("parameter_explain.max_token")}
+									marks={false}
 								/>
 							</Box>
 						);
@@ -334,337 +329,107 @@ export const ChatParameter = ({
 					if (model_object_.name == choosen_model) {
 						return (
 							<Box key={model_object_.name}>
-								<Stack direction='row' spacing={1}>
-									<Typography style={{flex: 1}} gutterBottom>
-										Max_tokens
-										<Tooltip
-											title={
-												<div
-													style={{
-														whiteSpace: "pre-line",
-													}}>
-													{t("parameter_explain.max_token")}
-												</div>
-											}
-											arrow
-											placement='top'>
-											<IconButton size='small'>
-												<HelpIcon fontSize='small' />
-											</IconButton>
-										</Tooltip>
-									</Typography>
-									<SmallInput
-										value={inference_parameter.max_tokens}
-										size='small'
-										onChange={(e) =>
-											setInferenceParameter({
-												...inference_parameter,
-												max_tokens: e.target.value === "" ? 0 : Number(e.target.value),
-											})
-										}
-										onBlur={handleBlur(
-											inference_parameter.max_tokens,
-											"max_token",
-											1,
-											model_object_.context_length,
-											setInferenceParameter,
-											inference_parameter
-										)}
-										inputProps={{
-											step: 1,
-											min: 1,
-											max: model_object_.context_length,
-											type: "number",
-											"aria-labelledby": "input-slider",
-										}}
-									/>
-								</Stack>
-								<Slider
-									defaultValue={1024}
-									step={1}
-									min={1}
+								<Parameter
+									display_name='Max_tokens'
+									name='max_tokens'
+									setInferenceParameter={setInferenceParameter}
+									inference_parameter={inference_parameter}
 									max={model_object_.context_length}
-									onChange={(e) =>
-										setInferenceParameter({
-											...inference_parameter,
-											max_tokens: e.target.value,
-										})
-									}
+									min={1}
+									step={1}
 									value={inference_parameter.max_tokens}
-									valueLabelDisplay='off'
+									explaination={t("parameter_explain.max_token")}
+									marks={false}
 								/>
 							</Box>
 						);
 					}
 				})}
-				<Stack direction='row' spacing={1}>
-					<Typography style={{flex: 1}} gutterBottom>
-						Temperature
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.temperature")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>{" "}
-					</Typography>
-					<SmallInput
-						value={inference_parameter.temperature}
-						size='small'
-						onChange={(e) =>
-							setInferenceParameter({
-								...inference_parameter,
-								temperature: e.target.value === "" ? 0 : Number(e.target.value),
-							})
-						}
-						onBlur={handleBlur(inference_parameter.temperature, "temperature", 0, 1, setInferenceParameter, inference_parameter)}
-						inputProps={{
-							step: 0.01,
-							min: 0,
-							max: 1,
-							type: "number",
-							"aria-labelledby": "input-slider",
-						}}
-					/>
-				</Stack>
-				<Slider
-					defaultValue={0.73}
-					step={0.01}
-					min={0}
+				<Parameter
+					display_name='Temperature'
+					name='temperature'
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
 					max={1}
-					onChange={(e) =>
-						setInferenceParameter({
-							...inference_parameter,
-							temperature: e.target.value,
-						})
-					}
+					min={0}
+					step={0.01}
 					value={inference_parameter.temperature}
-					valueLabelDisplay='off'
+					explaination={t("parameter_explain.temperature")}
+					marks={false}
 				/>
-				<Stack direction='row' spacing={1}>
-					<Typography style={{flex: 1}} gutterBottom>
-						Presence penalty
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.presence_penalty")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Typography>
-					<SmallInput
-						value={inference_parameter.presencepenalty}
-						size='small'
-						onChange={(e) =>
-							setInferenceParameter({
-								...inference_parameter,
-								presencepenalty: e.target.value === "" ? 0 : Number(e.target.value),
-							})
-						}
-						onBlur={handleBlur(inference_parameter.presencepenalty, "presencepenalty", -2, 2, setInferenceParameter, inference_parameter)}
-						inputProps={{
-							step: 0.01,
-							min: -2,
-							max: 2,
-							type: "number",
-							"aria-labelledby": "input-slider",
-						}}
-					/>
-				</Stack>
-				<Slider
-					aria-label='Small steps'
-					defaultValue={0}
-					step={0.01}
-					min={-2}
+				<Parameter
+					display_name='Presence Penalty'
+					name='presencepenalty'
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
 					max={2}
-					onChange={(e) =>
-						setInferenceParameter({
-							...inference_parameter,
-							presencepenalty: e.target.value,
-						})
-					}
+					min={-2}
+					step={0.01}
 					value={inference_parameter.presencepenalty}
-					valueLabelDisplay='off'
+					explaination={t("parameter_explain.presence_penalty")}
+					marks={false}
 				/>
-				<Stack direction='row' spacing={1}>
-					<Typography style={{flex: 1}} gutterBottom>
-						Frequency penalty
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.frequency_penalty")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Typography>
-					<SmallInput
-						value={inference_parameter.frequencypenalty}
-						size='small'
-						onChange={(e) =>
-							setInferenceParameter({
-								...inference_parameter,
-								frequencypenalty: e.target.value === "" ? 0 : Number(e.target.value),
-							})
-						}
-						onBlur={handleBlur(inference_parameter.frequencypenalty, "frequencypenalty", -2, 2, setInferenceParameter, inference_parameter)}
-						inputProps={{
-							step: 0.01,
-							min: -2,
-							max: 2,
-							type: "number",
-							"aria-labelledby": "input-slider",
-						}}
-					/>
-				</Stack>
-				<Slider
-					aria-label='Small steps'
-					defaultValue={0}
-					step={0.01}
-					min={-2}
+				<Parameter
+					display_name='Frequency Penalty'
+					name='frequencypenalty'
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
 					max={2}
-					onChange={(e) =>
-						setInferenceParameter({
-							...inference_parameter,
-							frequencypenalty: e.target.value === "" ? 0 : Number(e.target.value),
-						})
-					}
+					min={-2}
+					step={0.01}
 					value={inference_parameter.frequencypenalty}
-					valueLabelDisplay='off'
+					explaination={t("parameter_explain.frequency_penalty")}
+					marks={false}
 				/>
-				<Stack direction='row' spacing={1}>
-					<FormControlLabel
-						control={
-							<Switch
-								onChange={(e) =>
-									setInferenceParameter({
-										...inference_parameter,
-										beam: e.target.value,
-									})
-								}
-								value={inference_parameter.beam}
-							/>
-						}
-						label='Beam'
-					/>
-					<Box>
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.beam")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Box>
-				</Stack>
-				<Stack direction='row' spacing={1}>
-					<FormControlLabel
-						control={
-							<Switch
-								onChange={(e) =>
-									setInferenceParameter({
-										...inference_parameter,
-										earlystopping: e.target.value,
-									})
-								}
-								value={inference_parameter.earlystopping}
-							/>
-						}
-						label='Early Stop'
-					/>
-					<Box>
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.early_stopping")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Box>
-				</Stack>
-				<Stack direction='row' spacing={1}>
-					<Typography style={{flex: 1}} gutterBottom>
-						Best_of
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.best_of")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Typography>
-					<SmallInput
-						value={inference_parameter.bestof}
-						size='small'
-						onChange={(e) =>
-							setInferenceParameter({
-								...inference_parameter,
-								bestof: e.target.value === "" ? 0 : Number(e.target.value),
-							})
-						}
-						onBlur={handleBlur(inference_parameter.bestof, "bestof", 1, 5, setInferenceParameter, inference_parameter)}
-						inputProps={{
-							step: 1,
-							min: 1,
-							max: 5,
-							type: "number",
-							"aria-labelledby": "input-slider",
-						}}
-					/>
-				</Stack>
+				<SwitchParameter
+					explaination={t("parameter_explain.beam")}
+					display_name='Beam'
+					name='beam'
+					value={inference_parameter.beam}
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
+				/>
+				<SwitchParameter
+					explaination={t("parameter_explain.early_stopping")}
+					display_name='Early Stop'
+					name='earlystopping'
+					value={inference_parameter.earlystopping}
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
+				/>
 
-				<Slider
-					onChange={(e) =>
-						setInferenceParameter({
-							...inference_parameter,
-							bestof: e.target.value,
-						})
-					}
-					value={inference_parameter.bestof}
-					marks
-					defaultValue={2}
-					step={1}
-					min={1}
+				<Parameter
+					display_name='Best_of'
+					name='bestof'
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
 					max={5}
-					valueLabelDisplay='off'
+					min={1}
+					step={1}
+					value={inference_parameter.bestof}
+					explaination={t("parameter_explain.best_of")}
+					marks={true}
 				/>
-				<Stack direction='row' spacing={1}>
-					<Typography style={{flex: 1}} gutterBottom>
-						Length penalty
-						<Tooltip title={<div style={{whiteSpace: "pre-line"}}>{t("parameter_explain.length_penalty")}</div>} arrow placement='top'>
-							<IconButton size='small'>
-								<HelpIcon fontSize='small' />
-							</IconButton>
-						</Tooltip>
-					</Typography>
-					<SmallInput
-						value={inference_parameter.lengthpenalty}
-						size='small'
-						onChange={(e) =>
-							setInferenceParameter({
-								...inference_parameter,
-								lengthpenalty: e.target.value === "" ? 0 : Number(e.target.value),
-							})
-						}
-						onBlur={handleBlur(inference_parameter.lengthpenalty, "lengthpenalty", -2, 2, setInferenceParameter, inference_parameter)}
-						inputProps={{
-							step: 0.01,
-							min: -2,
-							max: 2,
-							type: "number",
-							"aria-labelledby": "input-slider",
-						}}
-					/>
-				</Stack>
-				<Slider
-					onChange={(e) =>
-						setInferenceParameter({
-							...inference_parameter,
-							lengthpenalty: e.target.value,
-						})
-					}
-					value={inference_parameter.lengthpenalty}
-					defaultValue={0}
-					step={0.01}
-					min={-2}
+				<Parameter
+					display_name='Length Penalty'
+					name='lengthpenalty'
+					setInferenceParameter={setInferenceParameter}
+					inference_parameter={inference_parameter}
 					max={2}
-					valueLabelDisplay='off'
+					min={-2}
+					step={0.01}
+					value={inference_parameter.lengthpenalty}
+					explaination={t("parameter_explain.length_penalty")}
+					marks={false}
 				/>
 			</Box>
 		</Stack>
 	);
 };
 ChatParameter.propTypes = {
-    room_type: PropTypes.string.isRequired,
-    max_turn: PropTypes.number,
-    setMaxTurn: PropTypes.func,
+	room_type: PropTypes.string.isRequired,
+	max_turn: PropTypes.number,
+	setMaxTurn: PropTypes.func,
 	setSocketDestination: PropTypes.func.isRequired,
 	socket_destination: PropTypes.string.isRequired,
 	choosen_model: PropTypes.string.isRequired,
@@ -673,5 +438,37 @@ ChatParameter.propTypes = {
 	agent_objects: PropTypes.array.isRequired,
 	inference_parameter: PropTypes.object.isRequired,
 	setInferenceParameter: PropTypes.func.isRequired,
-    setDuplicateMessage: PropTypes.func
+	setDuplicateMessage: PropTypes.func,
+};
+
+MemorySwitch.propTypes = {
+	explaination: PropTypes.string.isRequired,
+	checked: PropTypes.bool.isRequired,
+	memoryType: PropTypes.string.isRequired,
+	parameter: PropTypes.object.isRequired,
+	setParameterHook: PropTypes.func.isRequired,
+	label: PropTypes.string.isRequired,
+};
+
+Parameter.propTypes = {
+	use_big_input: PropTypes.bool,
+	marks: PropTypes.bool.isRequired,
+	explaination: PropTypes.string.isRequired,
+	name: PropTypes.string.isRequired,
+	display_name: PropTypes.string.isRequired,
+	value: PropTypes.number.isRequired,
+	min: PropTypes.number.isRequired,
+	max: PropTypes.number.isRequired,
+	step: PropTypes.number.isRequired,
+	inference_parameter: PropTypes.object.isRequired,
+	setInferenceParameter: PropTypes.func.isRequired,
+};
+
+SwitchParameter.propTypes = {
+	explaination: PropTypes.string.isRequired,
+	name: PropTypes.string.isRequired,
+	display_name: PropTypes.string.isRequired,
+	value: PropTypes.number.isRequired,
+	inference_parameter: PropTypes.object.isRequired,
+	setInferenceParameter: PropTypes.func.isRequired,
 };
