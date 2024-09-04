@@ -82,6 +82,10 @@ class Consumer(BaseChatbot):
                     context=context,
                     prompt=self.message,
                     include_memory=self.include_memory,
+                    include_current_memory = self.include_current_memory,
+                    include_dataset_memory = self.include_dataset_memory,
+                    session_history = self.session_history,
+                    dataset = self.dataset
                 )
         except ValidationError as e:
             await self.send(
@@ -97,6 +101,8 @@ class Consumer(BaseChatbot):
     # Receive message from room group
 
     async def chat_message(self, event):
+        if "session_history" in event:
+            self.session_history = event["session_history"]
         message = event["message"]
         role = event["role"]
         credit = event["credit"]

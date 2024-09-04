@@ -40,6 +40,10 @@ def inference(
     context: dict,
     prompt: str,
     include_memory: bool,
+    include_current_memory: bool,
+    include_dataset_memory: bool,
+    session_history: list,
+    dataset: str | None
 ) -> None:
     """
     Perform inference using a specified model and generate a response based on the given prompt and context.
@@ -77,8 +81,10 @@ def inference(
             mode=mode,
             prompt=prompt,
             include_memory=include_memory,
-            include_current_memory=False,
-            session_history=None,
+            include_current_memory=include_current_memory,
+            include_dataset_memory=include_dataset_memory,
+            session_history=session_history,
+            dataset=dataset
         )
         if llm.is_self_host:
             url, instance_id, server_status = get_model_url(llm)
@@ -232,7 +238,6 @@ def agent_inference(
         timeout=60,
     )
     llm = get_model(model=model)
-
     if current_turn_inner == 0:
         prompt = [
             {"role": "system", "content": f"{agent_instruction}"},

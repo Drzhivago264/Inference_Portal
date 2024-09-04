@@ -6,18 +6,29 @@ export const toggleMemory = (value, memory_type, setInferenceParameter, inferenc
             ...inference_parameter,
             usememory: value,
             usememorycurrent: !value,
+            usememorydataset: !value
         });
     } else if (memory_type === "usememorycurrent" && value) {
         setInferenceParameter({
             ...inference_parameter,
             usememory: !value,
             usememorycurrent: value,
+            usememorydataset: !value
         });
-    } else {
+    } else if (memory_type === "usememorydataset" && value) {
+        setInferenceParameter({
+            ...inference_parameter,
+            usememory: !value,
+            usememorycurrent: !value,
+            usememorydataset: value
+        });
+    }
+    else {
         setInferenceParameter({
             ...inference_parameter,
             usememory: false,
             usememorycurrent: false,
+            usememorydataset: false
         });
     }
 };

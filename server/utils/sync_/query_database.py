@@ -4,9 +4,10 @@ from typing import Callable, Tuple, Union
 from constance import config as constant
 from django.core.cache import cache
 from vectordb import vectordb
-
+from vectordb.utils import get_embedding_function
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM, InferenceServer
+from server.models.dataset import Dataset, EmbeddingDatasetRecord
 from server.utils.sync_.sync_cache import get_or_set_cache
 
 
@@ -97,3 +98,18 @@ def get_chat_context(
             if current_history_length > int(max_history_length):
                 full_instruct_list = full_instruct_list[: -2 or None]
     return full_instruct_list
+
+
+def get_data_record_by_embedding(
+    dataset: str,    
+    llm: LLM,
+    key_object: APIKEY,
+    raw_prompt: str,
+    current_history_length: int,
+    tokeniser: Callable):
+    max_history_length = llm.max_history_length
+    full_instruct_list = []
+    dataset = Dataset.objects.get(name=dataset, user=key_object.user)
+    embedding_fn, _ = get_embedding_function()
+    embedding = embedding_fn(raw_prompt)
+    pass

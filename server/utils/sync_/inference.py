@@ -13,7 +13,7 @@ from transformers import AutoTokenizer
 
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM
-from server.utils.sync_.query_database import get_chat_context
+from server.utils.sync_.query_database import get_chat_context, get_data_record_by_embedding
 
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
@@ -36,7 +36,9 @@ def inference_mode(
     prompt: str,
     include_memory: bool,
     include_current_memory: bool,
+    include_dataset_memory: bool,
     session_history: list | None,
+    dataset: str | None = None,
 ) -> str | list:
     try:
         tokeniser = (
@@ -61,6 +63,18 @@ def inference_mode(
             )
             chat_history.append(prompt_)
             session = chat_history
+        elif include_dataset_memory:
+            ###THIS NEED IMPLEMENT!!!!!###
+            current_history_length = len(tokeniser.encode(prompt))
+            chat_history = get_data_record_by_embedding(
+                llm=llm,
+                key_object=key_object,
+                raw_prompt=prompt,
+                current_history_length=current_history_length,
+                tokeniser=tokeniser,
+                dataset=dataset
+            )
+            session = [prompt_]
         else:
             session = [prompt_]
         return session
@@ -116,6 +130,11 @@ def send_chat_request(
                 data = chunk.choices[0].delta.content
                 if data is not None:
                     clean_response += data
+                    response_json = [
+                        {"role": "assistant", "content": f"{clean_response}"}
+                    ]
+                    session_history.pop()
+                    session_history.extend(response_json)
                     async_to_sync(channel_layer.group_send)(
                         room_group_name,
                         {
@@ -124,6 +143,7 @@ def send_chat_request(
                             "message": data,
                             "credit": credit,
                             "unique": unique,
+                            "session_history": session_history,
                         },
                     )
         return clean_response

@@ -238,7 +238,14 @@ export const ChatParameter = ({
 					memoryType='usememorycurrent'
 					label='Use Memory (Current)'
 				/>
-
+				<MemorySwitch
+					checked={inference_parameter.usememorydataset}
+					explaination={"Use memory from embedding dataset"}
+					parameter={inference_parameter}
+					setParameterHook={setInferenceParameter}
+					memoryType='usememorydataset'
+					label='Use Memory (Dataset)'
+				/>
 				<RadioGroup
 					defaultValue='chat'
 					name='radio-buttons-group'

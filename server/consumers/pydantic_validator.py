@@ -76,15 +76,16 @@ class ChatSchema(BaseModel):
     length_penalty: float = constant.DEFAULT_LENGTH_PENALTY
     temperature: float = constant.DEFAULT_TEMPERATURE
     max_tokens: int | None
-    include_memory: bool = False
-    include_current_memory: bool = True
+    usememory: bool = False
+    usememorycurrent: bool = True
+    usememorydataset: bool = False,
+    dataset: str | None = None,
     role: str
 
     @model_validator(mode="after")
     def only_one_memory_type(self) -> Self:
-        include_memory = self.include_memory
-        include_current_memory = self.include_current_memory
-        if include_current_memory and include_memory:
+        memory_options = [self.usememory, self.usememorycurrent, self.usememorydataset]
+        if memory_options.count(True) > 1:
             raise ValueError(
                 "Only use one type of memory at a time, set include_memory or include_current_memory or both False"
             )

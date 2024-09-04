@@ -731,7 +731,7 @@ function PromptWriting() {
 					<Grid item xs={4}>
 						<Box mt={2} style={{height: 637, width: "100%"}}>
 							<DataGrid
-                                loading={datasetIsLoading || dataset_is_loading}
+                                loading={dataset_list.length > 0 ? datasetIsLoading || dataset_is_loading : false}
 								onRowClick={handleRowClick}
 								disableColumnSorting
 								paginationModel={paginationModel}

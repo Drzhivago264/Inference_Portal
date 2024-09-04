@@ -49,8 +49,10 @@ class BaseChatbot(BaseBot):
         self.early_stopping = validated.early_stopping
         self.length_penalty = validated.length_penalty
         self.choosen_model = validated.choosen_model
-        self.include_memory = validated.include_memory
-        self.include_current_memory = validated.include_current_memory
+        self.include_memory = validated.usememory
+        self.include_current_memory = validated.usememorycurrent
+        self.include_dataset_memory = validated.usememorydataset
+        self.dataset = validated.dataset
         self.role = validated.role
         self.unique_response_id = uuid.uuid4().hex
         self.session_history.append({"role": "user", "content": f"{validated.message}"})
