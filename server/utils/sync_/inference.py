@@ -64,7 +64,6 @@ def inference_mode(
             chat_history.append(prompt_)
             session = chat_history
         elif include_dataset_memory:
-            ###THIS NEED IMPLEMENT!!!!!###
             current_history_length = len(tokeniser.encode(prompt))
             chat_history = get_data_record_by_embedding(
                 llm=llm,
@@ -74,7 +73,8 @@ def inference_mode(
                 tokeniser=tokeniser,
                 dataset=dataset
             )
-            session = [prompt_]
+            chat_history.append(prompt_)
+            session = chat_history
         else:
             session = [prompt_]
         return session
