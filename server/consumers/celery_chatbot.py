@@ -82,10 +82,10 @@ class Consumer(BaseChatbot):
                     context=context,
                     prompt=self.message,
                     include_memory=self.include_memory,
-                    include_current_memory = self.include_current_memory,
-                    include_dataset_memory = self.include_dataset_memory,
-                    session_history = self.session_history,
-                    dataset = self.dataset
+                    include_current_memory=self.include_current_memory,
+                    include_dataset_memory=self.include_dataset_memory,
+                    session_history=self.session_history,
+                    dataset=self.dataset,
                 )
         except ValidationError as e:
             await self.send(

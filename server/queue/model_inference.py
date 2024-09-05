@@ -43,7 +43,7 @@ def inference(
     include_current_memory: bool,
     include_dataset_memory: bool,
     session_history: list,
-    dataset: str | None
+    dataset: str | None,
 ) -> None:
     """
     Perform inference using a specified model and generate a response based on the given prompt and context.
@@ -84,7 +84,7 @@ def inference(
             include_current_memory=include_current_memory,
             include_dataset_memory=include_dataset_memory,
             session_history=session_history,
-            dataset=dataset
+            dataset=dataset,
         )
         if llm.is_self_host:
             url, instance_id, server_status = get_model_url(llm)

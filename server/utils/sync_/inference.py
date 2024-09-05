@@ -13,7 +13,10 @@ from transformers import AutoTokenizer
 
 from server.models.api_key import APIKEY
 from server.models.llm_server import LLM
-from server.utils.sync_.query_database import get_chat_context, get_data_record_by_embedding
+from server.utils.sync_.query_database import (
+    get_chat_context,
+    get_data_record_by_embedding,
+)
 
 logger = get_task_logger(__name__)
 aws = config("aws_access_key_id")
@@ -71,7 +74,7 @@ def inference_mode(
                 raw_prompt=prompt,
                 current_history_length=current_history_length,
                 tokeniser=tokeniser,
-                dataset=dataset
+                dataset=dataset,
             )
             chat_history.append(prompt_)
             session = chat_history

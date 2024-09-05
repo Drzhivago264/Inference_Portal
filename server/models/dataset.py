@@ -39,8 +39,11 @@ class AbstractDatasetRecord(models.Model):
     class Meta:
         abstract = True
 
+
 class EmbeddingSearchManager(models.Manager):
-    def filter_from_embedding(self, emebedding: str, dataset_id: int, k: int = 10,  distance: float = 1.0):
+    def filter_from_embedding(
+        self, emebedding: str, dataset_id: int, k: int = 10, distance: float = 1.0
+    ):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -55,6 +58,7 @@ class EmbeddingSearchManager(models.Manager):
             rows = dictfetchall(cursor)
         return rows
 
+
 class EmbeddingDatasetRecord(AbstractDatasetRecord, GeneralMixin):
     embedding = VectorField(
         dimensions=384,
@@ -62,6 +66,7 @@ class EmbeddingDatasetRecord(AbstractDatasetRecord, GeneralMixin):
         blank=True,
     )
     objects = EmbeddingSearchManager()
+
     def filter_similar_records(
         self, k: int, distance: float = 1.0, include_self: bool = False
     ):

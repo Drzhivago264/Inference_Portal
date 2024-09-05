@@ -78,8 +78,8 @@ class ChatSchema(BaseModel):
     max_tokens: int | None
     usememory: bool = False
     usememorycurrent: bool = True
-    usememorydataset: bool = False,
-    dataset: str | None = None,
+    usememorydataset: bool = (False,)
+    dataset: str | None = (None,)
     role: str
 
     @model_validator(mode="after")

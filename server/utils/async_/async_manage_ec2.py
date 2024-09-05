@@ -30,7 +30,10 @@ class ManageEC2Mixin:
         self, server_status: str, instance_id: str
     ) -> None:
         response = ""
-        if server_status == InferenceServer.StatusType.STOPPED or server_status == InferenceServer.StatusType.STOPPING:
+        if (
+            server_status == InferenceServer.StatusType.STOPPED
+            or server_status == InferenceServer.StatusType.STOPPING
+        ):
             command_EC2.delay(instance_id, region=constant.REGION, action="on")
             response = "Server is starting up, try again in 400 seconds"
         elif server_status == InferenceServer.StatusType.PENDING:

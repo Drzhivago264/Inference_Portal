@@ -1,15 +1,16 @@
-import random
 import json
-import numpy as np
+import random
 from typing import Callable, Tuple, Union
 
+import numpy as np
 from constance import config as constant
 from django.core.cache import cache
 from vectordb import vectordb
 from vectordb.utils import get_embedding_function
+
 from server.models.api_key import APIKEY
-from server.models.llm_server import LLM, InferenceServer
 from server.models.dataset import Dataset, EmbeddingDatasetRecord
+from server.models.llm_server import LLM, InferenceServer
 from server.utils.sync_.sync_cache import get_or_set_cache
 
 
@@ -103,12 +104,13 @@ def get_chat_context(
 
 
 def get_data_record_by_embedding(
-        dataset: str,
-        llm: LLM,
-        key_object: APIKEY,
-        raw_prompt: str,
-        current_history_length: int,
-        tokeniser: Callable):
+    dataset: str,
+    llm: LLM,
+    key_object: APIKEY,
+    raw_prompt: str,
+    current_history_length: int,
+    tokeniser: Callable,
+):
     max_history_length = llm.max_history_length
     full_instruct_list = []
     dataset = Dataset.objects.get(name=dataset, user=key_object.user)
@@ -116,17 +118,19 @@ def get_data_record_by_embedding(
     embedding = embedding_fn(raw_prompt)
     string_array = np.array2string(embedding, separator=",", precision=9)
     similar_records = EmbeddingDatasetRecord.objects.filter_from_embedding(
-        emebedding=string_array, dataset_id=dataset.id, k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT,  distance=constant.DEFAULT_MAX_DISTANCE)
+        emebedding=string_array,
+        dataset_id=dataset.id,
+        k=constant.DEFAULT_CHAT_HISTORY_VECTOR_OBJECT,
+        distance=constant.DEFAULT_MAX_DISTANCE,
+    )
     for mess in similar_records:
-        system_prompt = '\n'.join(content['value'] for content in json.loads(mess['content']))
+        system_prompt = "\n".join(
+            content["value"] for content in json.loads(mess["content"])
+        )
         full_instruct_list += [
             {"role": "system", "content": system_prompt},
         ]
-        current_history_length += len(
-            tokeniser.encode(
-                system_prompt
-            )
-        )
+        current_history_length += len(tokeniser.encode(system_prompt))
         if current_history_length > int(max_history_length):
             full_instruct_list = full_instruct_list[: -1 or None]
 
