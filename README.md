@@ -170,6 +170,9 @@ Next you need to set up .env file and setup the following key. Note that, if you
     GPT_KEY = "" (OPENAI key for the agent function)
     VLLM_KEY = "" (The key that you set on vLLM instance (--api-key))
     CMC_API = "" (Coinmarketcap API to get the exchange rate of Monero, you may use different API but you need to rewrite the update_crypto_rate() in celery_tasks.py)
+    LARK_APP_ID = "" (if you want to deploy bot to lark)
+    LARK_APP_SECRET = "" (if you want to deploy bot to lark)
+    NGROX_TUNNEL = "" (if you want to listen to events from local dev server)
 
 \*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchanges for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down. However, if people go that far to trace you down, you seem to have bigger problems to deal with already. Good luck with them.
 

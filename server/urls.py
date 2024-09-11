@@ -45,7 +45,7 @@ from server.views.token_management import (
 )
 from server.webhooks.monero_webhook import xmr_payment_webhook
 from server.webhooks.stripe_webhook import StripeWebhookView
-
+from server.webhooks.lark_webhook import lark_webhook
 app_name = "server"
 
 urlpatterns = [
@@ -124,4 +124,6 @@ urlpatterns = [
     # ENDPOINT FOR LOG AND TOKEN USAGE
     path("log/", LogListJson.as_view()),
     path("frontend-api/cost/<str:startdate>/<str:enddate>/", cost_api, name="cost"),
+    # ENDPOINT FOR LARK
+    path("webhooks/lark/", lark_webhook, name="lark-webhook"),
 ]
