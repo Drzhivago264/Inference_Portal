@@ -22,7 +22,7 @@ def reply(message_id, access_token, content):
     )
     try:
         raw_response = client.chat.completions.create(
-            model="gpt-3.5-turbo-0125",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": content},
@@ -77,7 +77,7 @@ def get_access_token():
 @throttle_classes([AnonRateThrottle])
 def lark_webhook(request: HttpRequest) -> Response:
     post_data = json.loads(request.body.decode())
-
+    bot_is_mention = False
     access_token = cache.get(key="larksuite_access_token")
     if access_token is None:
         access_token = get_access_token()
@@ -91,7 +91,13 @@ def lark_webhook(request: HttpRequest) -> Response:
                 mentions = post_data["event"]["message"]["mentions"]
                 for mention in mentions:
                     content = content.replace(mention["key"], "")
+                    if mention["name"] == "professorparakeet":
+                        bot_is_mention = True
             message_id = post_data["event"]["message"]["message_id"]
-            reply.delay(message_id=message_id,
-                        access_token=access_token, content=content)
+            if chat_type == "group" and bot_is_mention:
+                reply.delay(message_id=message_id,
+                            access_token=access_token, content=content)
+            elif chat_type == "p2p":
+                reply.delay(message_id=message_id,
+                            access_token=access_token, content=content)  
         return Response(status=status.HTTP_200_OK)
