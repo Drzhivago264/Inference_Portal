@@ -43,10 +43,11 @@ from server.views.token_management import (
     remove_permission,
     update_ratelimit,
 )
+from server.webhooks.lark_base_button_webhook import lark_base_button_webhook
+from server.webhooks.lark_webhook import lark_webhook
 from server.webhooks.monero_webhook import xmr_payment_webhook
 from server.webhooks.stripe_webhook import StripeWebhookView
-from server.webhooks.lark_webhook import lark_webhook
-from server.webhooks.lark_base_button_webhook import lark_base_button_webhook
+
 app_name = "server"
 
 urlpatterns = [
@@ -127,5 +128,9 @@ urlpatterns = [
     path("frontend-api/cost/<str:startdate>/<str:enddate>/", cost_api, name="cost"),
     # ENDPOINT FOR LARK
     path("webhooks/lark/", lark_webhook, name="lark-webhook"),
-    path("webhooks/lark-base-button/", lark_base_button_webhook, name="lark-base-button-webhook"),
+    path(
+        "webhooks/lark-base-button/",
+        lark_base_button_webhook,
+        name="lark-base-button-webhook",
+    ),
 ]

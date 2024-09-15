@@ -1,13 +1,14 @@
+from constance import config as constant
+from django.contrib.auth.models import Group, Permission, User
+from django.contrib.contenttypes.models import ContentType
+from django.db import connection
 from django.test import TestCase
 from ninja.testing import TestAsyncClient
-from api.chat_api import router as ChatRounter
+
 from api.agent_api import router as AgentRounter
+from api.chat_api import router as ChatRounter
 from server.models.api_key import APIKEY
-from django.contrib.auth.models import Group, Permission, User
-from constance import config as constant
-from django.contrib.contenttypes.models import ContentType
 from server.models.custom_permission import CustomPermissionWithoutContentType
-from django.db import connection
 from server.models.llm_server import LLM, InferenceServer
 
 """
