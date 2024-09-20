@@ -13,8 +13,7 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-
-@shared_task()
+@shared_task
 def reply(message_id, access_token, content):
     client = openai.OpenAI(
         api_key=config("GPT_KEY"),
@@ -49,19 +48,19 @@ def reply(message_id, access_token, content):
         "Authorization": f"Bearer {access_token}",  # your access token
         "Content-Type": "application/json",
     }
-    requests.request("POST", url, headers=headers, data=payload)
-    # print(response.headers['X-Tt-Logid'])  # for debug or oncall
-    # print(response.content)  # Print Response
+    response = requests.request("POST", url, headers=headers, data=payload)
+    print(response.headers['X-Tt-Logid'])  # for debug or oncall
+    print(response.content)  # Print Response
 
 
-def get_access_token():
+def get_tenant_access_token():
     url = "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal"
     headers = {"Content-Type": "application/json; charset=utf-8"}
     req = {"app_id": config("LARK_APP_ID"), "app_secret": config("LARK_APP_SECRET")}
     payload = json.dumps(req)
     response = requests.request("POST", url, headers=headers, data=payload)
     access_token = response.json()["tenant_access_token"]
-    cache.set(key="larksuite_access_token", value=access_token, timeout=7000)
+    cache.set(key="larksuite_tenant_access_token", value=access_token, timeout=7000)
     return access_token
 
 
@@ -71,9 +70,9 @@ def get_access_token():
 def lark_webhook(request: HttpRequest) -> Response:
     post_data = json.loads(request.body.decode())
     bot_is_mention = False
-    access_token = cache.get(key="larksuite_access_token")
+    access_token = cache.get(key="larksuite_tenant_access_token")
     if access_token is None:
-        access_token = get_access_token()
+        access_token = get_tenant_access_token()
     if "type" in post_data and post_data["type"] == "url_verification":
         return Response(
             {"challenge": post_data["challenge"]}, status=status.HTTP_200_OK
@@ -89,7 +88,7 @@ def lark_webhook(request: HttpRequest) -> Response:
                 mentions = post_data["event"]["message"]["mentions"]
                 for mention in mentions:
                     content = content.replace(mention["key"], "")
-                    if mention["name"] == "professorparakeet":
+                    if mention["name"] == "Doc Bot":
                         bot_is_mention = True
             message_id = post_data["event"]["message"]["message_id"]
             if chat_type == "group" and bot_is_mention:
