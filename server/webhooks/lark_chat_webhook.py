@@ -12,7 +12,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
-
+from server.webhooks.lark_utils.lark_token import get_tenant_access_token
 @shared_task
 def reply(message_id, access_token, content):
     client = openai.OpenAI(
@@ -53,15 +53,7 @@ def reply(message_id, access_token, content):
     print(response.content)  # Print Response
 
 
-def get_tenant_access_token():
-    url = "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal"
-    headers = {"Content-Type": "application/json; charset=utf-8"}
-    req = {"app_id": config("LARK_APP_ID"), "app_secret": config("LARK_APP_SECRET")}
-    payload = json.dumps(req)
-    response = requests.request("POST", url, headers=headers, data=payload)
-    access_token = response.json()["tenant_access_token"]
-    cache.set(key="larksuite_tenant_access_token", value=access_token, timeout=120)
-    return access_token
+
 
 
 @api_view(["POST"])

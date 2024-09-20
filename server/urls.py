@@ -43,8 +43,8 @@ from server.views.token_management import (
     remove_permission,
     update_ratelimit,
 )
-from server.webhooks.lark_base_button_webhook import lark_base_button_webhook
-from server.webhooks.lark_webhook import lark_webhook
+from server.webhooks.lark_button_webhook import lark_base_button_webhook
+from server.webhooks.lark_chat_webhook import lark_webhook
 from server.webhooks.monero_webhook import xmr_payment_webhook
 from server.webhooks.stripe_webhook import StripeWebhookView
 
