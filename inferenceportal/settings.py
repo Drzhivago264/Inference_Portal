@@ -160,7 +160,7 @@ USE_TZ = True
 if DEBUG:
     STATIC_URL = "static/"
 else:
-    STATIC_URL = "http://localhost:80/static/"
+    STATIC_URL = config("STATIC_URL_FE")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

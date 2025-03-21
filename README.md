@@ -81,7 +81,8 @@ First of all, for start using django-inference-portal, you must download it usin
 Next you need to set up .env file and setup the following key. Note that, if you dont want to use some services below, leave them "". There will probably be some problems but I believe if you go this far, you can deal with them:
 
     EMAIL_ADDRESS=""
-    STATIC_URL="staticfiles/"
+    STATIC_URL="staticfiles/" (STATIC folder for nginx)
+    STATIC_URL_FE="http:localhost:80/static/" (Frontend static url)
     EMAIL_PASSWORD=""
     STRIPE_PUBLISHABLE_KEY = ""
     STRIPE_SECRET_KEY = ""
