@@ -29,9 +29,11 @@ ALLOWED_HOSTS = [
     "static.professorparakeet.com",
     config("NGROX_TUNNEL"),
     "54.172.11.9",
+    "192.168.2.225"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
+    "http://192.168.2.225:80",
     "https://professorparakeet.com",
     "https://www.professorparakeet.com",
 ]

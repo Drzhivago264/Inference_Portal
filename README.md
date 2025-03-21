@@ -73,6 +73,54 @@ The implementation of React and data flow is explained in the diagram below
 First of all, for start using django-inference-portal, you must download it using git (Multiple old files are removed from the history so now git clone will be fast, sorry for my previous ignorance of git history)
 
     git clone https://github.com/Drzhivago264/Inference_Portal.git
+    cd Inference_Portal
+    mkdir static
+    mkdir staticfiles
+    npm run build
+
+Next you need to set up .env file and setup the following key. Note that, if you dont want to use some services below, leave them "". There will probably be some problems but I believe if you go this far, you can deal with them:
+
+    EMAIL_ADDRESS=""
+    STATIC_URL="staticfiles/"
+    EMAIL_PASSWORD=""
+    STRIPE_PUBLISHABLE_KEY = ""
+    STRIPE_SECRET_KEY = ""
+    STRIPE_BACKEND_DOMAIN=[""]
+    STRIPE_PAYMENT_SUCCESS_URL=[""]
+    STRIPE_PAYMENT_FAILURE_URL=[""]
+    STRIPE_WEBHOOK_SECRET=""
+    GPT_KEY=""
+    aws_access_key_id=""
+    aws_secret_access_key=""
+    VLLM_KEY=""
+    r2_access_key_id=""
+    r2_account_id=""
+    r2_secret_access_key=""
+    DATABASE_NAME="professorparakeet"
+    POSTGRES_USER=""
+    POSTGRES_PASSWORD=""
+    LARK_APP_ID=""
+    LARK_APP_SECRET=""
+    DJANGO_SECRET_KEY=""
+    ADMIN_PATH="/admin"
+    MONERO_WEBHOOK_SECRET=""
+    DEBUG=False
+    CMC_API="" (coin market cap api)
+    NGROX_TUNNEL=""
+
+Now you can try manually install the stuff or using docker:
+
+### Docker:
+
+- docker compose up
+- psql -d "postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@127.0.0.1:5432/{DATABASE_NAME}"
+- CREATE EXTENSION IF NOT EXISTS vectorscale CASCADE;
+- docker compose down
+- docker compose up
+- get inside django-web container
+- python manage.py loaddata --exclude admin.logentry --exclude vectordb --ignorenonexistent ./latest_dump.json
+
+### Manual Installation
 
 Before install dependencies, you need to install Postgres, and create a table named professorparakeet.
 
@@ -93,7 +141,7 @@ Before install dependencies, you need to install Postgres, and create a table na
     #if you want to enable postgres on start up use this command
     sudo systemctl enable postgresql
 
-Next you have to install pgvectorscale. To begin this, you must ensure that you have Postgres 16 installed (14 or 15 can also work) and then install pgvector scale like this (pgvectorscale also provides a docker but it is 4GB for a postgres so we can cut cost by building from source):
+Next you have to install pgvectorscale:
 
     sudo apt-get install make gcc pkg-config clang postgresql-server-dev-16 libssl-dev libclang-dev
     
@@ -124,14 +172,14 @@ Next you must install dependencies and migrate the db to Postgresql:
     python manage.py migrate
     python manage.py loaddata --exclude admin.logentry --exclude vectordb --ignorenonexistent ./latest_dump.json
 
-Next you must install Redis and start Redis Server at port 6380:
+Next you must install Redis and start Redis Server at port 6379:
 
     sudo apt install lsb-release curl gpg
     curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
     echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
     sudo apt-get update
     sudo apt-get install redis
-    redis-server --port 6380
+    redis-server --port 6379
 
 Next you must a Celery Worker and a Celery Beat Worker (refer to /deployment_config if you want to automate this with supervisor):
 
@@ -152,28 +200,6 @@ Next you must setup Monero and start a rpc server, I am working on a full tutori
     ./monero-wallet-rpc --daemon-address {Your node address} --rpc-bind-port 18082 --wallet-file {your wallet file} --password {your password} --disable-rpc-login  --tx-notify '/{path to}/python3 /Inference_Portal/monero-rpc-callback.py {MONERO_WEBHOOK_SECRET} %s'
 
 \*Noting that in production server you must generate "View-only" wallet from your local wallet (secret key) to avoid being robbed by the society.
-
-Next you need to set up .env file and setup the following key. Note that, if you dont want to use some services below, leave them "". There will probably be some problems but I believe if you go this far, you can deal with them:
-
-    STRIPE_PUBLISHABLE_KEY=""
-    STRIPE_SECRET_KEY=""
-    STRIPE_WEBHOOK_SECRET=""
-    MONERO_WEBHOOK_SECRET="" (This field is provided by you, it is a password to authenticate webhook call from your own server whenever new XMR transaction detected. I add this because I am a little bit paranoid, but you should keep it hard to guess. It will be supplied in this RPC command  with --tx-notify '/{path to}/python3 /{path to}/monero-rpc-callback.py {MONERO_WEBHOOK_SECRET} %s')
-    EMAIL_ADDRESS = "" (The EMAIL_ADDRESS that fowards contact form)
-    EMAIL_PASSWORD = "" (The password for EMAIL_ADDRESS that fowards contact form)
-    aws_access_key_id="" (The AWS key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
-    aws_secret_access_key="" (The AWS secret key that can perform boot/stop/reboot/terminiate operation on your GPU instances)
-    ADMIN_PATH = "" (your admin path, keep it hard to guess)
-    DJANGO_SECRET_KEY = ""
-    POSTGRES_USER = "" (Your Postgres Username)
-    POSTGRES_PASSWORD = "" (YOUR Postgres Password)
-    GPT_KEY = "" (OPENAI key for the agent function)
-    VLLM_KEY = "" (The key that you set on vLLM instance (--api-key))
-    CMC_API = "" (Coinmarketcap API to get the exchange rate of Monero, you may use different API but you need to rewrite the update_crypto_rate() in celery_tasks.py)
-    LARK_APP_ID = "" (if you want to deploy bot to lark)
-    LARK_APP_SECRET = "" (if you want to deploy bot to lark)
-    NGROX_TUNNEL = "" (if you want to listen to events from local dev server)
-
 \*Noting that if you run your own private node and process payment via RPC, querying 3rd party exchanges for conversion rate does not affect your privacy, unless, you give them a request pattern along with payment pattern to trace you down. However, if people go that far to trace you down, you seem to have bigger problems to deal with already. Good luck with them.
 
 Finally you can test the server with:
