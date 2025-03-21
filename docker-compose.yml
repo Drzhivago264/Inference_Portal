@@ -1,0 +1,115 @@
+services:
+   postgres:
+     image: timescale/timescaledb-ha:pg17
+     environment:
+       POSTGRES_DB: ${DATABASE_NAME}
+       POSTGRES_USER: ${POSTGRES_USER}
+       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+     ports:
+       - "5432:5432"
+     volumes:
+       - postgres:/home/postgres/pgdata/data
+     env_file:
+       - .env
+
+   nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - django-web
+      - django-migration
+      - postgres
+      - redis
+    volumes:
+      - /etc/ssl:/etc/nginx/ssl:ro
+      - .:/Inference_Portal
+    restart: always
+
+   redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+   django-migration:
+     build: .
+     command: bash -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput"
+     volumes:
+       - .:/Inference_Portal
+     env_file: ".env"
+     environment:
+       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+       DEBUG: ${DEBUG}
+     depends_on:
+       - postgres
+
+   django-web:
+     build: .
+     container_name: django-docker
+     ports:
+       - "8000:8000"
+     depends_on:
+       - postgres
+       - redis
+       - django-migration
+     environment:
+       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+       DEBUG: ${DEBUG}
+     env_file: ".env"
+     volumes:
+       - .:/Inference_Portal
+
+   celery_worker:
+    build: .
+    command: celery -A inferenceportal worker --loglevel=info --pool threads
+
+    env_file: ".env"
+    environment:
+      - environment_type=prod
+    restart: unless-stopped
+    depends_on:
+      - django-web
+      - postgres
+      - redis
+    volumes:
+      - .:/Inference_Portal
+
+   celery_worker_periodic:
+    build: .
+    command: celery -A inferenceportal worker --loglevel=info --pool threads -Q "periodic"
+    env_file: ".env"
+    environment:
+      - environment_type=prod
+    restart: unless-stopped
+    depends_on:
+      - django-web
+      - postgres
+      - redis
+    volumes:
+      - .:/Inference_Portal
+
+   celery_beat:
+    build: .
+    command: celery -A inferenceportal beat --loglevel=info
+    env_file: ".env"
+    environment:
+    - environment_type=prod
+    restart: unless-stopped
+    depends_on:
+      - django-web
+      - postgres
+      - redis
+      - celery_worker
+    volumes:
+      - .:/Inference_Portal
+
+
+volumes:
+   postgres:
+   redis_data:

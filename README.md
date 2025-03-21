@@ -122,7 +122,7 @@ Next you must install dependencies and migrate the db to Postgresql:
     pip install -r "requirements.txt"
 
     python manage.py migrate
-    python manage.py loaddata default_sql_data.json
+    python manage.py loaddata --exclude admin.logentry --exclude vectordb --ignorenonexistent ./latest_dump.json
 
 Next you must install Redis and start Redis Server at port 6380:
 

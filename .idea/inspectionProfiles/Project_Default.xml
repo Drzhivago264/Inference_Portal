@@ -1,0 +1,72 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="58">
+            <item index="0" class="java.lang.String" itemvalue="httpx" />
+            <item index="1" class="java.lang.String" itemvalue="chromadb" />
+            <item index="2" class="java.lang.String" itemvalue="protobuf" />
+            <item index="3" class="java.lang.String" itemvalue="pydot" />
+            <item index="4" class="java.lang.String" itemvalue="langchain-openai" />
+            <item index="5" class="java.lang.String" itemvalue="alembic" />
+            <item index="6" class="java.lang.String" itemvalue="langfuse" />
+            <item index="7" class="java.lang.String" itemvalue="huggingface-hub" />
+            <item index="8" class="java.lang.String" itemvalue="SQLAlchemy" />
+            <item index="9" class="java.lang.String" itemvalue="psycopg2-binary" />
+            <item index="10" class="java.lang.String" itemvalue="python-dotenv" />
+            <item index="11" class="java.lang.String" itemvalue="starlette-admin" />
+            <item index="12" class="java.lang.String" itemvalue="crawl4ai" />
+            <item index="13" class="java.lang.String" itemvalue="firecrawl-py" />
+            <item index="14" class="java.lang.String" itemvalue="redis" />
+            <item index="15" class="java.lang.String" itemvalue="google-analytics-data" />
+            <item index="16" class="java.lang.String" itemvalue="langchain-community" />
+            <item index="17" class="java.lang.String" itemvalue="chromedriver-binary" />
+            <item index="18" class="java.lang.String" itemvalue="celery" />
+            <item index="19" class="java.lang.String" itemvalue="selenium" />
+            <item index="20" class="java.lang.String" itemvalue="langchain" />
+            <item index="21" class="java.lang.String" itemvalue="llama-index-retrievers-bm25" />
+            <item index="22" class="java.lang.String" itemvalue="uvicorn" />
+            <item index="23" class="java.lang.String" itemvalue="PyPDF2" />
+            <item index="24" class="java.lang.String" itemvalue="google_api_core" />
+            <item index="25" class="java.lang.String" itemvalue="langchain-unstructured" />
+            <item index="26" class="java.lang.String" itemvalue="beautifulsoup4" />
+            <item index="27" class="java.lang.String" itemvalue="langchain_chroma" />
+            <item index="28" class="java.lang.String" itemvalue="langgraph" />
+            <item index="29" class="java.lang.String" itemvalue="pydantic" />
+            <item index="30" class="java.lang.String" itemvalue="llama-index-core" />
+            <item index="31" class="java.lang.String" itemvalue="google-auth-oauthlib" />
+            <item index="32" class="java.lang.String" itemvalue="opentelemetry-exporter-otlp-proto-grpc" />
+            <item index="33" class="java.lang.String" itemvalue="black" />
+            <item index="34" class="java.lang.String" itemvalue="loguru" />
+            <item index="35" class="java.lang.String" itemvalue="gunicorn" />
+            <item index="36" class="java.lang.String" itemvalue="llama-index-vector-stores-chroma" />
+            <item index="37" class="java.lang.String" itemvalue="schedule" />
+            <item index="38" class="java.lang.String" itemvalue="openai" />
+            <item index="39" class="java.lang.String" itemvalue="google-ads" />
+            <item index="40" class="java.lang.String" itemvalue="fastapi" />
+            <item index="41" class="java.lang.String" itemvalue="langchain-core" />
+            <item index="42" class="java.lang.String" itemvalue="langchain-text-splitters" />
+            <item index="43" class="java.lang.String" itemvalue="isort" />
+            <item index="44" class="java.lang.String" itemvalue="pytz" />
+            <item index="45" class="java.lang.String" itemvalue="pyjwt" />
+            <item index="46" class="java.lang.String" itemvalue="llama-index" />
+            <item index="47" class="java.lang.String" itemvalue="requests-toolbelt" />
+            <item index="48" class="java.lang.String" itemvalue="sentry-sdk" />
+            <item index="49" class="java.lang.String" itemvalue="graphviz" />
+            <item index="50" class="java.lang.String" itemvalue="gevent" />
+            <item index="51" class="java.lang.String" itemvalue="ratelimit" />
+            <item index="52" class="java.lang.String" itemvalue="prometheus-fastapi-instrumentator" />
+            <item index="53" class="java.lang.String" itemvalue="SQLAlchemy-Utils" />
+            <item index="54" class="java.lang.String" itemvalue="tenacity" />
+            <item index="55" class="java.lang.String" itemvalue="langchain-google-genai" />
+            <item index="56" class="java.lang.String" itemvalue="pydantic-settings" />
+            <item index="57" class="java.lang.String" itemvalue="alembic-postgresql-enum" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

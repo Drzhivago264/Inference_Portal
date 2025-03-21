@@ -60,7 +60,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6380)],
+            "hosts": [("redis", 6379)],
             "capacity": 1500,  # default 100
             "expiry": 10,  # default 60
         },
@@ -111,11 +111,11 @@ TEMPLATES = [
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6380",
+        "LOCATION": "redis://redis:6379",
     }
 }
 
-RATE_LIMIT_STORAGE = storage_from_string("async+redis://localhost:6380")
+RATE_LIMIT_STORAGE = storage_from_string("async+redis://redis:6379")
 
 ASGI_APPLICATION = "inferenceportal.asgi.application"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -126,10 +126,10 @@ STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesSto
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "professorparakeet",
+        "NAME": config("DATABASE_NAME"),
         "USER": config("POSTGRES_USER"),
         "PASSWORD": config("POSTGRES_PASSWORD"),
-        "HOST": "127.0.0.1",
+        "HOST": "postgres",
         "PORT": "5432",
     }
 }
@@ -158,7 +158,7 @@ USE_TZ = True
 if DEBUG:
     STATIC_URL = "static/"
 else:
-    STATIC_URL = "https://static.professorparakeet.com/"
+    STATIC_URL = "http://localhost:80/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -171,7 +171,7 @@ EMAIL_HOST_PASSWORD = config("EMAIL_PASSWORD")
 
 STATIC_ROOT = "staticfiles"
 
-CELERY_BROKER_URL = "redis://127.0.0.1:6380"
+CELERY_BROKER_URL = "redis://redis:6379"
 
 REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": [
@@ -192,7 +192,7 @@ REST_FRAMEWORK = {
     },
 }
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
-CONSTANCE_REDIS_CONNECTION = "redis://127.0.0.1:6380"
+CONSTANCE_REDIS_CONNECTION = "redis://redis:6379"
 CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True
 CONSTANCE_CONFIG = {
     "STRIPE_BACKEND_DOMAIN": (

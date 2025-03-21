@@ -7,7 +7,7 @@ from server.views.information import handler_404
 
 urlpatterns = [
     path("", include("server.urls")),
-    path(f"{config('ADMIN_PATH')}/", admin.site.urls),
+    path(f"{config('ADMIN_PATH')}", admin.site.urls),
     path("api/", api.urls),
 ]
 

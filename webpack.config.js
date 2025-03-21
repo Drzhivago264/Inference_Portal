@@ -1,12 +1,11 @@
 const path = require('path');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
   entry: './frontend/index.js',  
   output: {
     filename: 'index-bundle.js',  
     chunkFilename: "[id]-[chunkhash].js",
-    path: path.resolve(__dirname, './static'),  
+    path: path.resolve(__dirname, './static'),
   },
   module: {
     rules: [
@@ -32,9 +31,6 @@ module.exports = {
       },
     ]
   },
-  plugins: [
-    new BundleAnalyzerPlugin()
-  ]
 
 };
 
