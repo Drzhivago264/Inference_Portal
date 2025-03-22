@@ -286,7 +286,7 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 						</IconButton>
 						<Avatar
 							alt='logo'
-							src='https://static.professorparakeet.com/image/android-chrome-192x192.png'
+							src='/static/image/android-chrome-192x192.png'
 							onClick={() => {
 								navigate("/");
 							}}

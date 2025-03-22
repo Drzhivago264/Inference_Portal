@@ -47,28 +47,28 @@ function Hub() {
 	const [image_5_loaded, setImage5Load] = useState(false);
 	const cardData = [
 		{
-			image_link: "https://static.professorparakeet.com/image/robot_line.jpg",
+			image_link: "/static/image/robot_line.jpg",
 			destination: "chat",
 			image_loaded: image_1_loaded,
 			setImageLoad: setImage1Load,
 			name: "Chatbot_Mode",
 		},
 		{
-			image_link: "https://static.professorparakeet.com/image/Robot_folow_instruct.jpg",
+			image_link: "/static/image/Robot_folow_instruct.jpg",
 			destination: "engineer",
 			image_loaded: image_2_loaded,
 			setImageLoad: setImage2Load,
 			name: "Agent_Mode",
 		},
 		{
-			image_link: "https://static.professorparakeet.com/image/Robot_label.jpg",
+			image_link: "/static/image/Robot_label.jpg",
 			destination: "toolbox",
 			image_loaded: image_3_loaded,
 			setImageLoad: setImage3Load,
 			name: "LLM_Functions",
 		},
 		{
-			image_link: "https://static.professorparakeet.com/image/face_to_face.jpeg",
+			image_link: "/static/image/face_to_face.jpeg",
 			destination: "hotpot",
 			image_loaded: image_4_loaded,
 			setImageLoad: setImage4Load,
@@ -126,7 +126,7 @@ function Hub() {
 	const redirect = (destination) => {
 		setKeyError(false);
 		setLoginError(false);
-		if (!is_authenticated && key == "") {
+		if (!is_authenticated && key === "") {
 			setKeyError(true);
 			setOpenSnack(true);
 		} else {
@@ -151,7 +151,7 @@ function Hub() {
 					})
 					.catch((error) => {
 						setRedirectError(error.response.data.detail);
-						if (error.response.status == "400") {
+						if (error.response.status === "400") {
 							setRedirectError("Your key is incorrect");
 						}
 					});

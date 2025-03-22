@@ -61,7 +61,7 @@ export default function Footer() {
 									navigate("/");
 								}}
 								alt='Big Logo.'
-								src='https://static.professorparakeet.com/image/apple-touch-icon.png'
+								src='/static/image/apple-touch-icon.png'
 							/>
 
 							<Typography

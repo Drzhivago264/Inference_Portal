@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -19,11 +19,24 @@ import {Stack} from "@mui/material";
 import {TypeWriterText} from "../component/custom_ui_component/AnimatedText";
 import Typography from "@mui/material/Typography";
 import {useTranslation} from "react-i18next";
+import lightbackground from "../../static/image/introduction_background_light.svg";
+import darkbackground from "../../static/image/introduction_background_dark.svg";
+
 
 function Information() {
 	const {t} = useTranslation();
 	const isChrome = !!window.chrome;
 	const {mode, theme} = useContext(ColorModeContext);
+	const [backgroundimage, setBackgroundimage] = useState(darkbackground)
+	useEffect(() => {
+		if (mode === "dark") {
+			setBackgroundimage(darkbackground)
+		}
+		else {
+			setBackgroundimage(lightbackground)
+		}
+	}, [mode]);
+
 	return (
 		<Container maxWidth={false} disableGutters>
 			<title>Introduction</title>
@@ -32,7 +45,7 @@ function Information() {
 				<Box
 					p={5}
 					style={{
-						backgroundImage: `url(https://static.professorparakeet.com/image/introduction_background_${mode}.svg)`,
+						backgroundImage: `url(${backgroundimage})` ,
 						boxShadow: `0px 0px 36px 36px inset ${theme.palette.background.default}`,
 					}}>
 					<Grid container spacing={1} justify='flex-end' alignItems='center' mt={{xs: 5, xl: 0}}>
@@ -98,7 +111,7 @@ function Information() {
 									<Paper square={false}>
 										<CardMedia
 											component='img'
-											image='https://static.professorparakeet.com/image/show_case.png'
+											image='/static/image/show_case.png'
 											sx={{
 												objectFit: "contain",
 												borderRadius: "3px",
