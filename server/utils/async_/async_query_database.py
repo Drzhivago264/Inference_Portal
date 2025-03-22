@@ -160,7 +160,7 @@ class QueryDBMixin:
 
     async def get_model_url_async(
         self, name: str = None
-    ) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
+    ) -> Tuple[str, str, str, str] | Tuple[bool, bool, bool, bool]:
 
         try:
             server_list = await cache.aget(
@@ -184,8 +184,9 @@ class QueryDBMixin:
                 url = random_url.url
                 instance_id = random_url.name
                 server_status = random_url.status
-                return url, instance_id, server_status
+                host_mode = random_url.host_mode
+                return url, instance_id, server_status, host_mode
             else:
-                return False, False, False
+                return False, False, False, False
         except IndexError:
-            return False, False, False
+            return False, False, False, False

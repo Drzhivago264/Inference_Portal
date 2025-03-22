@@ -214,7 +214,7 @@ export const ChatParameter = ({
 				<Box mt={1}>
 					<FormLabel id='demo-radio-buttons-group-label'>Parameters</FormLabel>
 				</Box>
-				{room_type == "hotpot_room" && (
+				{room_type === "hotpot_room" && (
 					<Box ml={1}>
 						<FormControlLabel
 							control={<Switch defaultChecked onChange={(e) => setDuplicateMessage(e.target.checked)} />}

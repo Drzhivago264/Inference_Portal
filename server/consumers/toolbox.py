@@ -141,10 +141,10 @@ class Consumer(BaseChatbot):
             try:
                 llm = await self.get_model()
                 if llm.is_self_host:
-                    url, instance_id, server_status = await self.get_model_url_async()
+                    url, instance_id, server_status, host_mode = await self.get_model_url_async()
                     split_url = urlsplit(url)
                     await update_server_status_in_db_async(
-                        instance_id=instance_id, update_type="time"
+                        instance_id=instance_id, update_type="time", host_mode=host_mode
                     )
                     if server_status == InferenceServer.StatusType.RUNNING:
                         client = dspy.HFClientVLLM(
@@ -153,7 +153,7 @@ class Consumer(BaseChatbot):
                             url=split_url.scheme + "://" + split_url.hostname,
                         )
                     else:
-                        await self.manage_ec2_on_inference(server_status, instance_id)
+                        await self.manage_ec2_on_inference(server_status, instance_id, host_mode)
                     await self.send(
                         text_data=json.dumps(
                             {

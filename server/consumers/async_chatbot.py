@@ -22,6 +22,7 @@ class Consumer(BaseChatbot):
         ).strftime("%Y-%m-%d %H:%M:%S")
         self.beam, self.best_of = correct_beam_best_of(self.beam, self.best_of)
         llm = await self.get_model()
+        self.extra_body_availability = await sync_to_async(lambda: llm.extra_body_availability)()
         if llm:
             session_list_to_string = await sync_to_async(
                 inference_mode, thread_sensitive=True

@@ -45,6 +45,7 @@ class BaseBot(
         self.permission_code = None
         self.destination = None
         self.type = None
+        self.extra_body_availability = False
 
     async def connect(self):
         self.url = self.scope["url_route"]["kwargs"]["key"]

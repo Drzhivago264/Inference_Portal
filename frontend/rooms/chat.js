@@ -60,7 +60,7 @@ function Chat() {
 	const messagesEndRef = useRef(null);
 	const [shownthinking, setThinking] = useState(false);
 	const [chat_message, setChatMessage] = useState([]);
-	const [choosen_model, setChoosenModel] = useState("Llama 3 Instruct AWQ");
+	const [choosen_model, setChoosenModel] = useState("gpt-4");
 	const [inference_parameter, setInferenceParameter] = useState({
 		mode: "chat",
 		top_p: 0.72,
@@ -116,16 +116,16 @@ function Chat() {
 	}, [socket_destination, websocket_hash]);
 
 	const handleEnter = (e) => {
-		if (e.key == "Enter" && !e.shiftKey) {
+		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
 			submitChat();
 		}
 	};
 	const submitChat = () => {
-		if (usermessage == "") {
+		if (usermessage === "") {
 			setUserMessageError(true);
 		} else {
-			var data = {
+			let data = {
 				...inference_parameter,
 				message: usermessage,
 				choosen_model: choosen_model,

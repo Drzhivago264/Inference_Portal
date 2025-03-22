@@ -14,7 +14,7 @@ from server.models.llm_server import LLM, InferenceServer
 from server.utils.sync_.sync_cache import get_or_set_cache
 
 
-def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
+def get_model_url(model: LLM) -> Tuple[str, str, str, str] | Tuple[bool, bool, bool, bool]:
     """Retrieve URL, name, and status of an available inference server for a given model.
 
     Args:
@@ -38,11 +38,11 @@ def get_model_url(model: LLM) -> Tuple[str, str, str] | Tuple[bool, bool, bool]:
 
         if server_list:
             random_url = random.choice(server_list)
-            return random_url.url, random_url.name, random_url.status
+            return random_url.url, random_url.name, random_url.status, random_url.host_mode
         else:
-            return False, False, False
+            return False, False, False, False
     except (IndexError, AttributeError):
-        return False, False, False
+        return False, False, False, False
 
 
 def get_model(model: str) -> Union[LLM, bool]:

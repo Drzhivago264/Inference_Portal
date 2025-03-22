@@ -1,5 +1,3 @@
-import json
-
 from asgiref.sync import async_to_sync
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -10,7 +8,6 @@ from openai import OpenAI
 
 from server.models.api_key import APIKEY
 from server.models.llm_server import InferenceServer
-from server.models.log import PromptResponse
 from server.queue.ec2_manage import command_EC2
 from server.utils.sync_.inference import (
     correct_beam_best_of,
@@ -62,6 +59,7 @@ def inference(
     Returns:
         None
     """
+    response = str()
     channel_layer = get_channel_layer()
     key_object = get_or_set_cache(
         prefix="user_key_object",
@@ -87,10 +85,10 @@ def inference(
             dataset=dataset,
         )
         if llm.is_self_host:
-            url, instance_id, server_status = get_model_url(llm)
+            url, instance_id, server_status, host_mode = get_model_url(llm)
             """ Query a list of inference servers for a given model, pick a random one """
             if url:
-                update_server_status_in_db(instance_id=instance_id, update_type="time")
+                update_server_status_in_db(instance_id=instance_id, update_type="time", host_mode=host_mode)
                 if server_status == InferenceServer.StatusType.RUNNING:
                     client = OpenAI(
                         api_key=config("VLLM_KEY"),
@@ -122,7 +120,7 @@ def inference(
                             "early_stopping": (
                                 context["early_stopping"] if context["beam"] else False
                             ),
-                        },
+                        } if llm.extra_body_availability else None,
                     )
                     if clean_response and isinstance(clean_response, str):
                         log_prompt_response(
@@ -136,14 +134,20 @@ def inference(
                 elif server_status in [
                     InferenceServer.StatusType.STOPPED,
                     InferenceServer.StatusType.STOPPING,
-                ]:
+                ] and host_mode == InferenceServer.HostModeType.AWS:
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
                     update_server_status_in_db(
-                        instance_id=instance_id, update_type="status"
+                        instance_id=instance_id, update_type="status", host_mode=host_mode
                     )
-                elif server_status == InferenceServer.StatusType.PENDING:
+                elif server_status == InferenceServer.StatusType.PENDING and host_mode == InferenceServer.HostModeType.AWS:
                     response = "Server is setting up, try again in 30 seconds"
+                elif server_status in [
+                        InferenceServer.StatusType.STOPPED,
+                        InferenceServer.StatusType.STOPPING,
+                        InferenceServer.StatusType.PENDING,
+                    ] and host_mode == InferenceServer.HostModeType.LOCAL:
+                    response = "Local server is down"
                 else:
                     response = "Unknown Server state, wait 5 seconds"
             else:
@@ -199,7 +203,7 @@ def agent_inference(
     model: str,
     unique: str,
     credit: float,
-    room_group_name: int,
+    room_group_name: str,
     agent_instruction: str,
     message: str,
     session_history: list,
@@ -223,7 +227,6 @@ def agent_inference(
         message (str): User's message.
         session_history (list): Previous conversation turns.
         max_turns (int): Maximum number of turns allowed.
-        max_tokens (int): Maximum number of tokens for the response.
         type_ (int): Type of the interaction.
         context (dict): Parameters context of the prompt.
     """
@@ -256,9 +259,9 @@ def agent_inference(
 
     if llm:
         if llm.is_self_host:
-            url, instance_id, server_status = get_model_url(llm)
+            url, instance_id, server_status, host_mode = get_model_url(llm)
             if url:
-                update_server_status_in_db(instance_id=instance_id, update_type="time")
+                update_server_status_in_db(instance_id=instance_id, update_type="time", host_mode=host_mode)
                 if server_status == InferenceServer.StatusType.RUNNING:
                     client = OpenAI(
                         api_key=config("VLLM_KEY"),
@@ -305,14 +308,20 @@ def agent_inference(
                 elif server_status in [
                     InferenceServer.StatusType.STOPPED,
                     InferenceServer.StatusType.STOPPING,
-                ]:
+                ] and host_mode == InferenceServer.HostModeType.AWS:
                     command_EC2.delay(instance_id, region=region, action="on")
                     response = "Server is starting up, try again in 400 seconds"
                     update_server_status_in_db(
-                        instance_id=instance_id, update_type="status"
+                        instance_id=instance_id, update_type="status", host_mode=host_mode
                     )
-                elif server_status == InferenceServer.StatusType.PENDING:
+                elif server_status == InferenceServer.StatusType.PENDING and host_mode == InferenceServer.HostModeType.AWS:
                     response = "Server is setting up, try again in 30 seconds"
+                elif server_status in [
+                    InferenceServer.StatusType.STOPPED,
+                    InferenceServer.StatusType.STOPPING,
+                    InferenceServer.StatusType.PENDING
+                ] and host_mode == InferenceServer.HostModeType.LOCAL:
+                    response = "Local server is down"
                 else:
                     response = "Unknown Server state, wait 5 seconds"
             else:

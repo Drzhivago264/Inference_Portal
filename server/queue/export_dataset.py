@@ -25,7 +25,7 @@ def export_large_dataset(
     unique: str,
     extension: str,
     hashed_key: str,
-) -> str:
+) -> None:
     """
     Export a dataset from a database to either a CSV or JSONL file stored in an S3-compatible storage service.
 
@@ -37,7 +37,7 @@ def export_large_dataset(
         hashed_key (str): Hashed key for caching purposes.
 
     Returns:
-        str: String indicating the success or failure of the export operation.
+        None
     """
     try:
         session = boto3.Session(

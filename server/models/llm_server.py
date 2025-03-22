@@ -6,7 +6,7 @@ from server.models.general_mixin import GeneralMixin
 
 
 class LLM(GeneralMixin):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     base = models.CharField(max_length=255, blank=True, null=True)
     size = models.IntegerField(default=1)
     desc = models.TextField()
@@ -16,13 +16,13 @@ class LLM(GeneralMixin):
     is_self_host = models.BooleanField(default=True)
     context_length = models.IntegerField(default=8192)
     max_history_length = models.IntegerField(default=0)
-
+    extra_body_availability = models.BooleanField(default=False)
     def __str__(self) -> str:
         return self.name
 
 
 class InferenceServer(GeneralMixin):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     instance_type = models.CharField(max_length=255)
     url = models.URLField(max_length=255)
     alternative_url = models.URLField(max_length=255)
@@ -30,6 +30,12 @@ class InferenceServer(GeneralMixin):
     public_ip = models.GenericIPAddressField()
     private_ip = models.GenericIPAddressField()
     last_message_time = models.DateTimeField(default=now)
+
+    class HostModeType(models.IntegerChoices):
+        LOCAL = 1, "Local"
+        AWS = 2, "AWS"
+
+    host_mode = models.IntegerField(choices=HostModeType.choices, default=HostModeType.AWS)
 
     class AvailabilityType(models.IntegerChoices):
         AVAILABLE = 1, "Available"

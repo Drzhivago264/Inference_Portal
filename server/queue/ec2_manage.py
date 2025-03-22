@@ -23,7 +23,8 @@ def periodically_monitor_EC2_instance() -> str:
         str : the status of the server
     """
     available_server = InferenceServer.objects.filter(
-        availability=InferenceServer.AvailabilityType.AVAILABLE
+        availability=InferenceServer.AvailabilityType.AVAILABLE,
+        host_mode=InferenceServer.HostModeType.AWS
     )
     for server in available_server:
         ec2_resource = boto3.resource(
@@ -58,7 +59,8 @@ def periodically_monitor_EC2_instance() -> str:
 def periodically_shutdown_EC2_instance() -> None:
     """Periodically shutdown unused EC2 GPU instances every 1200 seconds."""
     available_servers = InferenceServer.objects.filter(
-        availability=InferenceServer.AvailabilityType.AVAILABLE
+        availability=InferenceServer.AvailabilityType.AVAILABLE,
+        host_mode=InferenceServer.HostModeType.AWS
     )
     for server in available_servers:
         unused_time = timezone.now() - server.last_message_time

@@ -228,7 +228,7 @@ def delete_user_instruction_tree_api(request) -> Response:
     current_user = request.user
     serializer = UserInstructionDeleteCreateSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        id = serializer.validated_data["id"]
+        node_id = serializer.validated_data["id"]
         _, master_user = get_user_or_set_cache(
             prefix="user_tuple",
             key=current_user.password,
@@ -240,7 +240,7 @@ def delete_user_instruction_tree_api(request) -> Response:
         try:
             with transaction.atomic():
                 node = UserInstructionTreeMP.objects.select_for_update().get(
-                    id=id, user=master_user
+                    id=node_id, user=master_user
                 )
                 delete_cache(prefix="user_template", key=[node.name, master_user])
                 node.delete()

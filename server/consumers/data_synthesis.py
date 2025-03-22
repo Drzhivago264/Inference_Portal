@@ -63,10 +63,10 @@ class Consumer(BaseAgent):
                 for processed_instruction in processed_instruction_list
             ]
             if llm.is_self_host:
-                url, instance_id, server_status = await self.get_model_url_async()
+                url, instance_id, server_status, host_mode = await self.get_model_url_async()
                 if url:
                     await update_server_status_in_db_async(
-                        instance_id=instance_id, update_type="time"
+                        instance_id=instance_id, update_type="time", host_mode=host_mode
                     )
                     if server_status == InferenceServer.StatusType.RUNNING:
                         headers = {
@@ -75,7 +75,7 @@ class Consumer(BaseAgent):
                         }
                         url = f"{url}/v1/chat/completions"
                     else:
-                        await self.manage_ec2_on_inference(server_status, instance_id)
+                        await self.manage_ec2_on_inference(server_status, instance_id, host_mode)
                         return
                 else:
                     await self.send(

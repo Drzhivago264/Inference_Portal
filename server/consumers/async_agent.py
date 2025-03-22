@@ -3,11 +3,10 @@ import json
 import pytz
 from django.utils import timezone
 from pydantic import ValidationError
-from transformers import AutoTokenizer
+from asgiref.sync import sync_to_async
 
 from server.consumers.base_agent import BaseAgent
 from server.consumers.pydantic_validator import AgentSchemaMessage
-from server.models.log import PromptResponse
 
 
 class Consumer(BaseAgent):
@@ -36,6 +35,7 @@ class Consumer(BaseAgent):
                 ]
             self.session_history.extend(prompt)
             llm = await self.get_model()
+            self.extra_body_availability = await sync_to_async(lambda: llm.extra_body_availability)()
             if llm:
                 if not llm.is_self_host:
                     await self.send_agent_request_openai_async(llm=llm)

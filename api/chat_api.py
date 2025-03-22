@@ -49,7 +49,7 @@ async def chatcompletion(request, data: ChatSchema):
         if not model:
             raise HttpError(404, "Unknown Model Error. Check your model name.")
         else:
-            url, instance_id, server_status = await query_db_mixin.get_model_url_async(
+            url, instance_id, server_status, host_mode = await query_db_mixin.get_model_url_async(
                 name=data.model
             )
             if not url:
@@ -128,17 +128,29 @@ async def chatcompletion(request, data: ChatSchema):
                 elif server_status in [
                     InferenceServer.StatusType.STOPPED,
                     InferenceServer.StatusType.STOPPING,
-                ]:
+                ] and host_mode == InferenceServer.HostModeType.AWS:
                     command_EC2.delay(instance_id, region=constant.REGION, action="on")
                     await update_server_status_in_db_async(
-                        instance_id=instance_id, update_type="status"
+                        instance_id=instance_id, update_type="status", host_mode=host_mode
                     )
                     raise HttpError(
                         442, "Server is starting up, try again in 400 seconds"
                     )
-                elif server_status == InferenceServer.StatusType.PENDING:
+                elif server_status == InferenceServer.StatusType.PENDING and host_mode == InferenceServer.HostModeType.AWS:
                     raise HttpError(
                         442, "Server is setting up, try again in 300 seconds"
+                    )
+                elif server_status in [
+                    InferenceServer.StatusType.STOPPED,
+                    InferenceServer.StatusType.STOPPING,
+                    InferenceServer.StatusType.PENDING
+                ] and host_mode == InferenceServer.HostModeType.LOCAL:
+                    raise HttpError(
+                        442, "Local server is down"
+                    )
+                else:
+                    raise HttpError(
+                        442, "Unknown server status"
                     )
 
     except RateLimitError as e:

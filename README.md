@@ -76,7 +76,7 @@ First of all, for start using django-inference-portal, you must download it usin
     cd Inference_Portal
     mkdir static
     mkdir staticfiles
-    cp -R /illustration/image /static/image
+    cp -R illustration/image static/image
     npm run build
 
 Next you need to set up .env file and setup the following key. Note that, if you dont want to use some services below, leave them "". There will probably be some problems but I believe if you go this far, you can deal with them:

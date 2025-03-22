@@ -9,7 +9,6 @@ from django.contrib.auth.models import Group, Permission, User
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied

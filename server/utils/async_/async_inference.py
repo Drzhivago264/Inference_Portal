@@ -51,7 +51,7 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
                         "length_penalty": self.length_penalty if self.beam else 1,
                         "early_stopping": self.early_stopping if self.beam else False,
                     }
-                    if vllm_server_url
+                    if vllm_server_url and self.extra_body_availability
                     and self.type == PromptResponse.PromptType.CHATBOT
                     else None
                 ),
@@ -214,10 +214,10 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
     async def send_chat_request_vllm_async(
         self, processed_prompt: list, llm: LLM
     ) -> None:
-        url, instance_id, server_status = await self.get_model_url_async()
+        url, instance_id, server_status, host_mode = await self.get_model_url_async()
         if url:
             await update_server_status_in_db_async(
-                instance_id=instance_id, update_type="time"
+                instance_id=instance_id, update_type="time", host_mode=host_mode
             )
             if server_status == InferenceServer.StatusType.RUNNING:
                 raw_response = await self.openai_client_async(
@@ -238,7 +238,7 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
                             type_=self.type,
                         )
             else:
-                await self.manage_ec2_on_inference(server_status, instance_id)
+                await self.manage_ec2_on_inference(server_status, instance_id, host_mode)
         else:
             await self.send(
                 text_data=json.dumps(
@@ -251,10 +251,10 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
             )
 
     async def send_agent_request_vllm_async(self, llm: LLM) -> str:
-        url, instance_id, server_status = await self.get_model_url_async()
+        url, instance_id, server_status, host_mode = await self.get_model_url_async()
         if url:
             await update_server_status_in_db_async(
-                instance_id=instance_id, update_type="time"
+                instance_id=instance_id, update_type="time", host_mode=host_mode
             )
             if server_status == InferenceServer.StatusType.RUNNING:
                 raw_response = await self.openai_client_async(
@@ -280,7 +280,7 @@ class AsyncInferenceMixin(ManageEC2Mixin, QueryDBMixin):
                             type_=self.type,
                         )
             else:
-                await self.manage_ec2_on_inference(server_status, instance_id)
+                await self.manage_ec2_on_inference(server_status, instance_id, host_mode)
         else:
             await self.send(
                 text_data=json.dumps(

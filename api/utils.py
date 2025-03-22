@@ -82,7 +82,7 @@ async def send_request_async(
                 "early_stopping": (
                     context["early_stopping"] if context["use_beam_search"] else False
                 ),
-            },
+            } if await sync_to_async(lambda: llm.extra_body_availability)() else None,
         )
         if raw_response:
             full_response = raw_response.choices[0].message.content
@@ -141,7 +141,7 @@ async def send_stream_request_async(
                 "early_stopping": (
                     context["early_stopping"] if context["use_beam_search"] else False
                 ),
-            },
+            } if await sync_to_async(lambda: llm.extra_body_availability)() else None,
         )
         if raw_response:
             full_response = str()
