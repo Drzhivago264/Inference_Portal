@@ -19,9 +19,9 @@ export const DatasetExport = ({filename, data}) => {
 	const handleExportChatLog = (event) => {
 		event.preventDefault();
 
-		var data_clone = [...data];
-		var a = document.createElement("a");
-		if (choosen_export_format == ".json") {
+		let data_clone = [...data];
+		let a = document.createElement("a");
+		if (choosen_export_format === ".json") {
 			let download_content = JSON.stringify(data_clone);
 			let blob = new Blob([download_content], {
 				type: "application/json",
@@ -30,7 +30,7 @@ export const DatasetExport = ({filename, data}) => {
 			a.setAttribute("href", url);
 			a.setAttribute("download", `${filename}.json`);
 			a.click();
-		} else if (choosen_export_format == ".csv") {
+		} else if (choosen_export_format === ".csv") {
 			let download_content = Papa.unparse(data);
 			let blob = new Blob([download_content]);
 			if (window.navigator.msSaveOrOpenBlob) window.navigator.msSaveBlob(blob, `${filename}.csv`);

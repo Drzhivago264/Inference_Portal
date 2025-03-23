@@ -9,7 +9,7 @@ import Textarea from "../custom_ui_component/CustomTextArea";
 import {saveAs} from "file-saver";
 
 function exportKey(keyfile) {
-	var blob = new Blob([keyfile], {type: "text/plain;charset=utf-8"});
+	let blob = new Blob([keyfile], {type: "text/plain;charset=utf-8"});
 	saveAs(blob, "Master_Key_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
 }
 const KeyCreateExport = ({key_, key_name, integrated_wallet, payment_id, setIsAuthenticated, setKeyCreateLoading, setRandomAnimation, randomanimation, t}) => {

@@ -18,9 +18,9 @@ export const ChatExport = ({ chat_message, number_of_remove_message }) => {
 		useState(".json");
 	const handleExportChatLog = (event) => {
 		event.preventDefault();
-		var chat_message_clone = [...chat_message];
-		var a = document.createElement("a");
-		if (choosen_export_format_chatlog == ".json") {
+		let chat_message_clone = [...chat_message];
+		let a = document.createElement("a");
+		if (choosen_export_format_chatlog === ".json") {
 			let download_content = JSON.stringify(
 				chat_message_clone.splice(number_of_remove_message),
 				null,
@@ -32,8 +32,8 @@ export const ChatExport = ({ chat_message, number_of_remove_message }) => {
 			let url = URL.createObjectURL(blob);
 			a.setAttribute("href", url);
 			a.setAttribute("download", "Chat_log_from_Professor_Parakeet.json");
-		} else if (choosen_export_format_chatlog == ".txt") {
-			var json = chat_message_clone.splice(number_of_remove_message);
+		} else if (choosen_export_format_chatlog === ".txt") {
+			let json = chat_message_clone.splice(number_of_remove_message);
 			let download_content = "";
 			for (const k in json) {
 				download_content +=

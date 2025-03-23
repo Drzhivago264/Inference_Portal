@@ -49,15 +49,15 @@ const EditorExport = ({editorref}) => {
 					download_content = text;
 				} else if (mimeType == "application/pdf") {
 					let html = parser.parse(download_content);
-					var html_to_pdf = htmlToPdfmake(html);
-					var pdf = {content: html_to_pdf};
+					let html_to_pdf = htmlToPdfmake(html);
+					let pdf = {content: html_to_pdf};
 					pdfMake.vfs = pdfFonts.pdfMake.vfs;
 					pdfMake.createPdf(pdf).download("Written_By_Professor_Parakeet.pdf");
 				}
 				if (mimeType != "application/pdf") {
-					var a = document.createElement("a");
-					var blob = new Blob([download_content], {type: mimeType});
-					var url = URL.createObjectURL(blob);
+					let a = document.createElement("a");
+					let blob = new Blob([download_content], {type: mimeType});
+					let url = URL.createObjectURL(blob);
 					a.setAttribute("href", url);
 					a.setAttribute("download", filename);
 					a.click();

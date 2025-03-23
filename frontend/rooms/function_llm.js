@@ -50,7 +50,7 @@ function FunctionLLM() {
 		scrollToBottom(messagesEndRef);
 	}, [chat_message]);
 
-	var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+	let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
 	useEffect(() => {
 		closeWebSocket(websocket);
 		closeWebSocket(agent_websocket);

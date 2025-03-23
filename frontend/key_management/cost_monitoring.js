@@ -66,8 +66,8 @@ function CostMonitoring() {
 						let sum_input_tokens_list = [];
 						let sum_output_tokens_list = [];
 						for (let l in labels) {
-							var result = log_object.data.cost_by_model.filter(function (data) {
-								return data.model__name == model_list[m] && data.created_at__date == labels[l];
+							let result = log_object.data.cost_by_model.filter(function (data) {
+								return data.model__name === model_list[m] && data.created_at__date === labels[l];
 							});
 							if (result.length > 0) {
 								sum_input_tokens_list.push(result[0].sum_input_tokens);
@@ -118,8 +118,8 @@ function CostMonitoring() {
 						let sum_input_tokens = 0;
 						let sum_output_tokens = 0;
 						for (let l = 0; l < labels.length; l++) {
-							var result = log_object.data.cost_by_model.filter(function (data) {
-								return data.model__name == model_list[m];
+							let result = log_object.data.cost_by_model.filter(function (data) {
+								return data.model__name === model_list[m];
 							});
 							if (result.length > 0) {
 								sum_input_tokens += result[0].sum_input_tokens;

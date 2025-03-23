@@ -117,7 +117,7 @@ export default function AddPermissionDialog({
 	const [notchoosenpermissionlist, setNotChoosenPermissionList] = useState([]);
 	const handleClickOpen = () => {
 		setOpen(true);
-		var not_choosen_permission_list = [];
+		let not_choosen_permission_list = [];
 		for (let i in full_permission_dict) {
 			if (!current_permission_list.includes(i)) {
 				not_choosen_permission_list.push(i);

@@ -8,7 +8,7 @@ import Textarea from "../custom_ui_component/CustomTextArea";
 import {saveAs} from "file-saver";
 
 function exporttoken(tokenfile) {
-	var blob = new Blob([tokenfile], {type: "text/plain;charset=utf-8"});
+	let blob = new Blob([tokenfile], {type: "text/plain;charset=utf-8"});
 	saveAs(blob, "Token_of_ProffesorParakeet_KEEP_IT_SECURE.txt");
 }
 const TokenCreateExport = ({

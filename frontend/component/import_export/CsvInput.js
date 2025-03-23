@@ -37,8 +37,8 @@ const CsvFileInput = ({
 		} else {
 			file = inputFile.current.files[0];
 		}
-		var preview_list = [];
-		var current_row = 0;
+		let preview_list = [];
+		let current_row = 0;
 
 		if (file) {
 			Papa.parse(file, {

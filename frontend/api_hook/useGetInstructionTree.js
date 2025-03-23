@@ -37,7 +37,7 @@ export const useGetInstructionTree = (editorref, setEditor) => {
             if (editorref) {
                 editorref.current.isReady
                     .then(() => {
-                        for (var node in data.root_nodes) {
+                        for (let node in data.root_nodes) {
                             if (data.root_nodes[node].name == choosen_template) {
                                 setParentInstruct(data.root_nodes[node].instruct)
                                 setEditor(JSON.parse(data.root_nodes[node].default_editor_template))
@@ -50,7 +50,7 @@ export const useGetInstructionTree = (editorref, setEditor) => {
                     });
             }
             else {
-                for (var node in data.root_nodes) {
+                for (let node in data.root_nodes) {
                     if (data.root_nodes[node].name == choosen_template) {
                         setParentInstruct(data.root_nodes[node].instruct)
                     }

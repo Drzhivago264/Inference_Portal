@@ -92,7 +92,7 @@ function Hotpot() {
 		scrollToBottom(messagesEndRef);
 	}, [chat_message, agent_message]);
 
-	var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+	let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
 
 	useEffect(() => {
 		const closeAndOpenWebSockets = async () => {
