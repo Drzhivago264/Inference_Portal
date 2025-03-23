@@ -159,8 +159,8 @@ function DataSynthesis() {
 	const handleFileLoad = (csvData) => {
 		setCSVRow(csvData);
 		if (csvData[0]) {
-			var keys = Object.keys(csvData[0]);
-			var column = [];
+			let keys = Object.keys(csvData[0]);
+			let column = [];
 			for (let k in keys) {
 				column.push({
 					field: keys[k],
@@ -188,7 +188,7 @@ function DataSynthesis() {
 		setChoosenUserTemplate: setChoosenUserTemplate,
 	} = useGetInstructionTree();
 
-	var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+	var ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
 	useEffect(() => {
 		closeWebSocket(websocket);
 		closeWebSocket(agent_websocket);
@@ -241,7 +241,7 @@ function DataSynthesis() {
 		default_user_parent_instruct,
 	]);
 	const submitSeed = (seed_prompt, row_no) => {
-		var data = {
+		let data = {
             ...inference_parameter,
 			row_no: row_no,
 			seed_prompt: seed_prompt,
@@ -283,7 +283,7 @@ function DataSynthesis() {
 	}
 	const genSubmit = useRef(submitLoop());
 	const startSubmit = () => {
-		var next_value = genSubmit.current.next();
+		let next_value = genSubmit.current.next();
 		submitSeed(next_value.value[0], next_value.value[1]);
 	};
 	return (
@@ -347,7 +347,7 @@ function DataSynthesis() {
 												startSubmit(), setIsRunning(true);
 											}}
 											startIcon={<PlayCircleOutlineIcon />}
-											disabled={is_running ? true : false}>
+											disabled={!!is_running}>
 											Run
 										</LoadingButton>
 										<Button
@@ -358,7 +358,7 @@ function DataSynthesis() {
 												setIsRunning(false);
 											}}
 											startIcon={<PauseCircleOutlineIcon />}
-											disabled={!is_running ? true : false}>
+											disabled={!is_running}>
 											Pause
 										</Button>
 									</Stack>

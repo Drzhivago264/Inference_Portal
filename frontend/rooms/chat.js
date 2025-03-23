@@ -102,7 +102,7 @@ function Chat() {
 	useEffect(() => {
 		scrollToBottom(messagesEndRef);
 	}, [chat_message]);
-	var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+	let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
 	const pathPrefix = socket_destination === "async" ? "-async" : "";
 	useEffect(() => {
 		closeWebSocket(websocket);
@@ -122,7 +122,7 @@ function Chat() {
 		}
 	};
 	const submitChat = () => {
-		if (usermessage === "") {
+		if (!usermessage) {
 			setUserMessageError(true);
 		} else {
 			let data = {

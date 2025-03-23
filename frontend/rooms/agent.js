@@ -217,16 +217,16 @@ function Agent() {
 	}, [use_user_template, default_user_child_instruct, default_user_parent_instruct, default_user_child_template_list, editorref, websocket.current]);
 
 	const handleEnter = (e) => {
-		if (e.key == "Enter" && !e.shiftKey) {
+		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
 			submitChat();
 		}
 	};
 	const submitChat = () => {
-		if (usermessage == "") {
+		if (!usermessage) {
 			setUserMessageError(true);
 		} else {
-			var data = {
+			let data = {
 				...inference_parameter,
 				max_turn: max_turn,
 				instruct_change: instruct_change,

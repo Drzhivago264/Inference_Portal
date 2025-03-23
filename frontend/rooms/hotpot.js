@@ -144,10 +144,10 @@ function Hotpot() {
 		}
 	};
 	const submitAgent = () => {
-		if (useragentmessage == "") {
+		if (!useragentmessage) {
 			setUserAgentMessageError(true);
 		} else {
-			var data = {
+			let data = {
 				max_turn: max_turn,
 				instruct_change: instruct_change,
 				currentParagraph: 1,
@@ -169,10 +169,10 @@ function Hotpot() {
 		}
 	};
 	const submitChat = () => {
-		if (userchatmessage == "") {
+		if (!userchatmessage) {
 			setUserChatMessageError(true);
 		} else {
-			var data = {
+			let data = {
                 ...inference_parameter,
 				message: userchatmessage,
 				choosen_model: choosen_chat_model,

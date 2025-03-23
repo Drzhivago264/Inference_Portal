@@ -62,16 +62,16 @@ function FunctionLLM() {
 	}, [websocket_hash]);
 
 	const handleEnter = (e) => {
-		if (e.key == "Enter" && !e.shiftKey) {
+		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
 			submitChat();
 		}
 	};
 	const submitChat = () => {
-		if (usermessage == "") {
+		if (!usermessage) {
 			setUserMessageError(true);
 		} else {
-			var data = {
+			let data = {
 				...inference_parameter,
 				message: usermessage,
 				tool: llmfunction,

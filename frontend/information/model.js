@@ -57,7 +57,7 @@ function ModelInfor() {
 								</Stack>
 							)}
 							{model_objects.map((model_object) => {
-								if (model_object.name == "Reddit Helper 2.7B") {
+								if (model_object.name === "Reddit Helper 2.7B") {
 									return (
 										<Accordion key={model_object.id} defaultExpanded>
 											<AccordionSummary expandIcon={<ExpandMoreIcon />} id={model_object.id}>

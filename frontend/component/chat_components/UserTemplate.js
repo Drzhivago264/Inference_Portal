@@ -55,7 +55,7 @@ const UserTemplate = ({
 				}
 				label='My Template'
 			/>
-			{user_template_list.length == 0 && (
+			{user_template_list.length === 0 && (
 				<FormHelperText>{`No Users' Template`}</FormHelperText>
 			)}
 		</FormControl>

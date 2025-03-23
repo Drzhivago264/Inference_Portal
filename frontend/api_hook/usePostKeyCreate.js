@@ -8,7 +8,7 @@ export const usePostKeyCreate = ({ setKeyNameError, setKeyCreateLoading, setRand
         setKeyCreateLoading(true);
         setRandomAnimation(false);
         setLocalKeyCreateError("");
-        if (keyname === '') {
+        if (!keyname) {
             setKeyNameError(true);
             setKeyCreateLoading(false);
         } else if (keyname.length > 50) {

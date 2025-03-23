@@ -20,8 +20,7 @@ import Typography from "@mui/material/Typography";
 import {UserContext} from "../App.js";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import {basePost} from "../api_hook/basePost.js";
-import {useMutation} from "react-query";
+import {usePostLogin} from "../api_hook/usePostLogin";
 
 function Contact() {
 	const [showPassword, setShowPassword] = useState(false);
@@ -31,36 +30,17 @@ function Contact() {
 	const handleMouseDownPassword = (event) => {
 		event.preventDefault();
 	};
-	const [loading, setLoading] = useState(false);
+
 	const [key, setKey] = useState("");
 	const [keyError, setKeyError] = useState(false);
 	const [loginerror, setLoginError] = useState(false);
 
-	const {mutate: loginmutate} = useMutation(basePost);
-	const handleLogin = (event) => {
-		event.preventDefault();
-		setLoading(true);
-		if (key == "") {
-			setKeyError(true);
-		} else if (key) {
-			const data = {
-				key: key,
-			};
-			loginmutate(
-				{url: "/frontend-api/login", data: data},
-				{
-					onSuccess: () => {
-						setIsAuthenticated(true);
-						navigate("/frontend/hub");
-					},
-					onError: (error) => {
-						setLoginError(error.response.data.detail);
-					},
-				}
-			);
-		}
-		setLoading(false);
-	};
+	const {
+		fetch: postLogin,
+		isLoading: loginisLoading,
+	} = usePostLogin({
+		setKeyError: setKeyError, key: key, setIsAuthenticated: setIsAuthenticated, navigate: navigate, setLoginError: setLoginError, setRedirectError: null
+	});
 
 	return (
 		<Container maxWidth={false} disableGutters>
@@ -74,7 +54,7 @@ function Contact() {
 								<Box sx={{mb: 1, fontWeight: "bold"}}>Login</Box>
 							</Typography>
 							<Box sx={{p: 2}}>
-								<form autoComplete='off' onSubmit={handleLogin}>
+								<form autoComplete='off' onSubmit={postLogin}>
 									<FormControl defaultValue='' margin='normal' required>
 										<Stack direction={{xs: "column"}} spacing={1}>
 											<TextField
@@ -106,7 +86,7 @@ function Contact() {
 													),
 												}}
 											/>
-											<LoadingButton loading={loading} variant='contained' type='submit' endIcon={<LoginIcon />}>
+											<LoadingButton loading={loginisLoading} variant='contained' type='submit' endIcon={<LoginIcon />}>
 												Login
 											</LoadingButton>
 										</Stack>

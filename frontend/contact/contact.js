@@ -50,19 +50,19 @@ function Contact() {
 		event.preventDefault();
 		setKeyNameError(false);
 		setSendLoading(true);
-		if (keyname == "") {
+		if (!keyname) {
 			setKeyNameError(true);
 		}
-		if (username == "") {
+		if (!username) {
 			setUserNameError(true);
 		}
-		if (message == "") {
+		if (!message) {
 			setMessageError(true);
 		}
-		if (key == "") {
+		if (!key) {
 			setKeyError(true);
 		}
-		if (mail == "") {
+		if (!mail) {
 			setMailFieldError(true);
 		}
 		if (keyname && key && username && message && mail) {

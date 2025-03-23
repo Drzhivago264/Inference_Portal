@@ -36,7 +36,7 @@ export const useGetUserInstruction = (selectedIndex,  setMaxChildNum, setMaxPare
                     }
                     else {
                         for (let template in data.root_nodes) {
-                            if (template == selectedIndex) {
+                            if (template === selectedIndex) {
                                 let default_child_instruction = []
                                 for (let c in data.root_nodes[template].children) {
                                     default_child_instruction.push({

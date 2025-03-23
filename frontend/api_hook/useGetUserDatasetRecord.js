@@ -55,7 +55,7 @@ export const useGetUserDatasetRecord = (
 						system_prompt: record.content[0]["value"],
 					};
 
-					for (var key in record.content) {
+					for (let key in record.content) {
 						temp_row[record.content[key]["unique"]] = record.content[key]["value"];
 					}
 					temp_row["embedding"] = record.embedding;

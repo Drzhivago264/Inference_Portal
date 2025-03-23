@@ -25,7 +25,7 @@ export const usePostTokenCreate = ({
 
 		const perm_count = Object.values(permission).filter((val) => val).length;
 
-		if (tokenname === "") {
+		if (!tokenname) {
 			setTokenCreateLoading(false);
 			setTokenNameError(true);
 		} else if (perm_count === 0) {

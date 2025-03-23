@@ -302,7 +302,7 @@ function UserInstruction() {
 		scrollToBottom(messagesEndRef);
 	}, [chat_message]);
 
-	var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+	let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
 
 	useEffect(() => {
 		closeWebSocket(websocket);
@@ -315,13 +315,13 @@ function UserInstruction() {
 	}, [websocket_hash]);
 
 	const handleEnter = (e) => {
-		if (e.key == "Enter" && !e.shiftKey) {
+		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
 			submitChat();
 		}
 	};
 	const submitChat = () => {
-		if (usermessage === "") {
+		if (!usermessage) {
 			setUserMessageError(true);
 			return;
 		}
@@ -424,7 +424,7 @@ function UserInstruction() {
 								</Typography>
 								<FormControl fullWidth sx={{m: 1}} variant='standard'>
 									{template_list.map((t, index) => {
-										if (selectedIndex == index) {
+										if (selectedIndex === index) {
 											return (
 												<Box key={index} display='flex'>
 													<Paper elevation={5} style={{width: "100%"}}>

@@ -102,12 +102,12 @@ function PromptWriting() {
 				}
 			}
 		}
-		setRowSelectionModel(new_row.id);
-		setCurrentRecordId(new_row.id);
-		setCurrentEmbedding(new_row.embedding);
-		setCurrentSystemPrompt(new_row.system_prompt);
+		setRowSelectionModel(new_row?.id);
+		setCurrentRecordId(new_row?.id);
+		setCurrentEmbedding(new_row?.embedding);
+		setCurrentSystemPrompt(new_row?.system_prompt);
 		for (let i = 0; i < record_list.results.record_serializer.length; i++) {
-			if (record_list.results.record_serializer[i].id === new_row.id) {
+			if (record_list.results.record_serializer[i].id === new_row?.id) {
 				setCurrentEvaluation(record_list.results.record_serializer[i].evaluation);
 				setCurrentContent(record_list.results.record_serializer[i].content);
 				break;
@@ -440,7 +440,7 @@ function PromptWriting() {
 												method='post'
 												setCurrentEvaluation={setCurrentEvaluation}
 												setCurrentSystemPrompt={setCurrentSystemPrompt}
-												open_dialog={datasetIsError && !datasetIsLoading ? true : false}
+												open_dialog={datasetIsError && !datasetIsLoading}
 											/>
 										)}
 

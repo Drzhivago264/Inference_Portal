@@ -26,6 +26,7 @@ import {getCookie} from "../component/getCookie.js";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import {useTheme} from "@mui/material";
 import {useTranslation} from "react-i18next";
+import {usePostLogin} from "../api_hook/usePostLogin";
 
 function Hub() {
 	const {is_authenticated, setIsAuthenticated} = useContext(UserContext);
@@ -34,7 +35,6 @@ function Hub() {
 	const {t} = useTranslation();
 
 	const navigate = useNavigate();
-	const [loading, setLoading] = useState(false);
 	const [key, setKey] = useState("");
 	const [keyError, setKeyError] = useState(false);
 	const [loginerror, setLoginError] = useState(false);
@@ -88,45 +88,17 @@ function Hub() {
 		}
 		setOpenSnack(false);
 	};
-
-	const handleLogin = (event) => {
-		event.preventDefault();
-		setLoading(true);
-		setKeyError(false);
-		setLoginError(false);
-		if (!key) {
-			setKeyError(true);
-		}
-		else {
-			const csrftoken = getCookie("csrftoken");
-			const config = {
-				headers: {
-					"content-type": "application/json",
-					"X-CSRFToken": csrftoken,
-				},
-			};
-			const data = {
-				key: key,
-			};
-			axios
-				.post("/frontend-api/login", data, config)
-				.then(() => {
-					setIsAuthenticated(true);
-					navigate("/frontend/hub");
-				})
-				.catch((error) => {
-					setLoginError(error.response.data.detail);
-					setKeyError(false);
-					setRedirectError(false);
-				});
-		}
-		setLoading(false);
-	};
+	const {
+		fetch: postLogin,
+		isLoading: loginisLoading,
+	} = usePostLogin({
+		setKeyError: setKeyError, key: key, setIsAuthenticated: setIsAuthenticated, navigate: navigate, setLoginError: setLoginError, setRedirectError: null
+	});
 
 	const redirect = (destination) => {
 		setKeyError(false);
 		setLoginError(false);
-		if (!is_authenticated && key === "") {
+		if (!is_authenticated && !key) {
 			setKeyError(true);
 			setOpenSnack(true);
 		} else {
@@ -172,7 +144,7 @@ function Hub() {
 					<Grid container alignItems='center' justify='center' direction='column' spacing={2}>
 						{!is_authenticated && (
 							<Grid item md={12} lg={12}>
-								<form autoComplete='off' onSubmit={handleLogin}>
+								<form autoComplete='off' onSubmit={postLogin}>
 									<FormControl defaultValue='' required>
 										<Stack
 											ml={1}
@@ -199,7 +171,7 @@ function Hub() {
 													),
 												}}
 											/>
-											<LoadingButton loading={loading} variant='contained' type='submit' endIcon={<LoginIcon />}>
+											<LoadingButton loading={loginisLoading} variant='contained' type='submit' endIcon={<LoginIcon />}>
 												Login
 											</LoadingButton>
 											<Divider orientation={check_orientation} flexItem={true} />

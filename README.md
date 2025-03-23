@@ -229,7 +229,7 @@ After finishing the steps above, you need to set up a vLLM server to serve the m
     CUDA_VISIBLE_DEVICES=0 python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8080 --dtype half --max-model-len 1024 --api-key {something hard to guess}
     CUDA_VISIBLE_DEVICES=1 python3 -m vllm.entrypoints.openai.api_server --model gpt2 --port 8888 --dtype half --max-model-len 1024 --api-key {something hard to guess}
 
-If you have more than 1 GPU but you want to do DP (duplicate 1 model on multiple vllm servers on one machine), you can simply setup a NGINX and do load balancing across multiple ports at requests layer.
+If you have more than 1 GPU and you want to do DP (duplicate 1 model on multiple vllm servers on one machine), you can simply setup a NGINX and do load balancing across multiple ports at requests layer.
 
 If you want to customise frontend, you should run:
 
@@ -250,9 +250,9 @@ Currently, this website use cloudflare CDN to serve webpack bundles. However, yo
 ## To do:
 
 1) Write backend for MUI serverside rendering to remove Datatables dependency and jQuery (old stuffs used before migrating to React)
-2) Implement "Mark Done" and "Prevent Overide" on row level for the Dataset feature to better enable collaboration.
+2) Implement "Mark Done" and "Prevent Overwrite" on row level for the Dataset feature to better enable collaboration.
 3) Hook the Embedding Datasets to Chatbot and Agent to build a customisable Rag.  
 
 ## Final words
 
-This project is actively being developed if you have any suggestions you can tell me. I also need your helps if you have some.
+This project is actively being developed if you have any suggestions you can tell me. I also need your help if you have some.

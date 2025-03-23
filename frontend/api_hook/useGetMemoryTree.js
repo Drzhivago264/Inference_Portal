@@ -6,9 +6,9 @@ const treeify = (list, idAttr, parentAttr, childrenAttr) => {
     if (!idAttr) idAttr = 'id';
     if (!parentAttr) parentAttr = 'parent';
     if (!childrenAttr) childrenAttr = 'children';
-    var treeList = [];
-    var nodeidList = []
-    var lookup = {};
+    let treeList = [];
+    let nodeidList = []
+    let lookup = {};
     list.forEach(function (obj) {
         lookup[obj[idAttr]] = obj;
         obj[childrenAttr] = [];
@@ -39,7 +39,7 @@ export const useGetMemoryTree = (value) => {
         refetchOnWindowFocus: false,
         onSuccess: (data) => {
             if (data) {
-                var make_tree = treeify(data.results)
+                let make_tree = treeify(data.results)
                 setRootNode(make_tree[0])
                 setDefaultExpandNode(make_tree[1])
                 if (data.count) {
