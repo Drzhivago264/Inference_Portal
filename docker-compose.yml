@@ -65,6 +65,15 @@ services:
      volumes:
        - .:/Inference_Portal
 
+   documentation:
+     build:
+       context: documentation
+       target: serve
+     ports:
+       - "3002:3002"
+     environment:
+       - NODE_ENV=production
+
    celery_worker:
     build: .
     command: celery -A inferenceportal worker --loglevel=info --pool threads
