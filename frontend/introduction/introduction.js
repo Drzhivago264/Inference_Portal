@@ -79,7 +79,7 @@ function Information() {
 											<Button
 												variant='outlined'
 												size='large'
-												href='/frontend/manual/key'
+												href='/frontend/manual/'
 												sx={{borderRadius: 28}}
 												endIcon={<NavigateNextIcon />}>
 												<span

@@ -35,7 +35,7 @@ import i18next from "i18next";
 import {styled} from "@mui/system";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-
+import {default as HardLink} from "@mui/material/Link";
 const blue = Constant_Colours.blue;
 const grey = Constant_Colours.grey;
 
@@ -94,6 +94,20 @@ const NavLink = styled(Link)(
     }
 `
 );
+const NavLinkHard = styled(HardLink)(
+		({theme}) => `
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 10;
+    width:100%;
+    cursor: pointer;
+    color: ${theme.palette.mode === "dark" ? grey[200] : grey[900]};
+    &.active {
+        color: #4d4dff;
+    }
+`
+)
 const Button = styled(BaseButton)(
 	({theme}) => `
   font-size: 14px;
@@ -324,12 +338,15 @@ function ResponsiveAppBar({max_width, timeout = 0}) {
 							<Menu slots={{listbox: Listbox}}>
 								{[
 									{path: "/", label: t("navbar.Introduction")},
-									{path: "/frontend/manual/key", label: t("navbar.Manual")},
+									{path: "/frontend/manual/", label: t("navbar.Manual")},
 									{path: "/frontend/model", label: t("navbar.Model")},
 									{path: "/frontend/api/docs", label: t("navbar.API_Docs")},
 								].map((item, index) => (
 									<MenuItem_DropBox key={index}>
-										<NavLink to={item.path}>{item.label}</NavLink>
+										{item.path !== "/frontend/manual/" ?
+											<NavLink to={item.path}>{item.label}</NavLink>
+										:
+										<NavLinkHard href={item.path}>{item.label}</NavLinkHard>}
 									</MenuItem_DropBox>
 								))}
 							</Menu>

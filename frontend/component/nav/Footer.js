@@ -98,7 +98,7 @@ export default function Footer() {
 					<Link color='text.secondary' href='/frontend/model'>
 						{t("navbar.Model")}
 					</Link>
-					<Link color='text.secondary' href='/frontend/manual/key'>
+					<Link color='text.secondary' href='/frontend/manual/'>
 						{t("navbar.Manual")}
 					</Link>
 				</Box>

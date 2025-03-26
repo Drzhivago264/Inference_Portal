@@ -300,7 +300,7 @@ function KeyManagement() {
 								i18nKey='key_management.3_infor'
 								t={t}
 								components={{
-									Link: <Link href='/frontend/manual/key' />,
+									Link: <Link href='/frontend/manual/' />,
 								}}></Trans>
 						</Typography>
 					</StyledPaper>

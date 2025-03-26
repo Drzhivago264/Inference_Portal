@@ -19,7 +19,6 @@ const KeyManagement = lazy(() => import("./key_management/key_management.js"));
 const TokenManagement = lazy(() => import("./key_management/token_management.js"));
 const Hotpot = lazy(() => import("./rooms/hotpot.js"));
 const FunctionLLM = lazy(() => import("./rooms/function_llm.js"));
-const Manual = lazy(() => import("./information/manual.js"));
 const APIDoc = lazy(() => import("./information/api_doc.js"));
 const Log = lazy(() => import("./rooms/log.js"));
 const PaymentSuccess = lazy(() => import("./key_management/payment_success.js"));
@@ -118,11 +117,12 @@ export default function App() {
 						<Router>
 							<Routes>
 								<Route exact path='/' element={<InformationPage />} />
-								<Route path='/frontend/manual' element={<ManualPage />} />
 								<Route path='/frontend/cost-monitoring' element={<CostMonitoringPage />} />
 								<Route path='/frontend/user-instruction' element={<UserInstructionPage />} />
 								<Route path='/frontend/data-synthesis' element={<DataSynthesisPage />} />
-								<Route path='/frontend/manual/:doc' element={<ManualPage />} />
+								<Route path='/frontend/manual/' component={() => {
+																window.location.replace(`http://${location.hostname}/frontend/manual/`);
+																return null;}} />
 								<Route path='/frontend/api/docs' element={<APIDocPage />} />
 								<Route path='/frontend/model' element={<ModelInforPage />} />
 								<Route path='/frontend/key-management' element={<KeyManagementPage />} />
@@ -156,7 +156,6 @@ const withSuspense = (Component) => () =>
 
 const AgentPage = withSuspense(Agent);
 const PromptWritingPage = withSuspense(PromptWriting);
-const ManualPage = withSuspense(Manual);
 const APIDocPage = withSuspense(APIDoc);
 const LogPage = withSuspense(Log);
 const ChatPage = withSuspense(Chat);

@@ -109,7 +109,7 @@ export const VerticalNav = ({ navigate }) => {
 		},
 		{ redirect: "/frontend/api/docs", icon: ApiIcon, text: "APIs" },
 		{ redirect: "/frontend/hub", icon: ChatIcon, text: "Inference" },
-		{ redirect: "/frontend/manual/key", icon: ArticleIcon, text: "Manual" },
+		{ redirect: "/frontend/manual/", icon: ArticleIcon, text: "Manual" },
 		{ redirect: "/frontend/model", icon: LayersIcon, text: "Models" },
 		{ redirect: "/frontend/contact", icon: EmailIcon, text: "Contact Us" },
 	];

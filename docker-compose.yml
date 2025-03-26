@@ -69,6 +69,7 @@ services:
      build:
        context: documentation
        target: serve
+     command: ["npm", "run", "serve", "--" ,"--host", "0.0.0.0", "--port", "3002" ,"--no-open"]
      ports:
        - "3002:3002"
      environment:
